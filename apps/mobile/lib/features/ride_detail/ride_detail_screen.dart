@@ -97,172 +97,190 @@ class _RideDashboardState extends State<_RideDashboard>
     final scrubPoint = hasSamples ? a.samples[_scrubIndex] : null;
     final scrubLean = hasSamples ? a.relativeLeanAt(_scrubIndex) : 0.0;
 
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        /* sticky scrubber at bottom via separate overlay - keep in scroll for MVP */
-        SliverAppBar(
-          pinned: true,
-          backgroundColor: AppTheme.asphalt,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-          ),
-          title: Text(
-            'Ride lab',
-            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+    return Column(
+      children: [
+        Expanded(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                pinned: true,
+                backgroundColor: AppTheme.asphalt,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                ),
+                title: Text(
+                  'Ride lab',
+                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: FadeTransition(
+                  opacity:
+                      CurvedAnimation(parent: _intro, curve: Curves.easeOut),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CornerIQ',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 2.4,
+                            color: AppTheme.line,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          DateFormat('EEE · MMM d · HH:mm')
+                              .format(ride.startedAt),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Scrub any moment. Map and graphs stay locked together.',
+                          style: GoogleFonts.outfit(
+                            color: AppTheme.steel,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        _ScoreHero(
+                          score: a.lineScore,
+                          label: a.lineScoreLabel,
+                          animation: _intro,
+                        ),
+                        const SizedBox(height: 20),
+                        _MetricGrid(analytics: a),
+                        const SizedBox(height: 28),
+                        if (a.leanSides.sampleCount > 0) ...[
+                          MotorcycleLeanGauge(
+                            leanDegrees: scrubLean,
+                            maxLeftDegrees: a.maxLeanLeft,
+                            maxRightDegrees: a.maxLeanRight,
+                            neutralLabel:
+                                'At playhead · neutral offset ${a.neutralLeanDegrees.toStringAsFixed(0)}°',
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            '0° is inferred upright (works with phone in pocket). '
+                            'Teal = left bank · orange = right bank.',
+                            style: GoogleFonts.outfit(
+                              color: AppTheme.steel,
+                              fontSize: 13,
+                              height: 1.35,
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+                        ],
+                        Text(
+                          'The line you took',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Teal slower · amber mid · orange faster. Amber marker = scrubbed moment.',
+                          style: GoogleFonts.outfit(
+                            color: AppTheme.steel,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          height: 280,
+                          child: PilotLineMap(
+                            points: a.samples,
+                            scrubIndex: hasSamples ? _scrubIndex : null,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        RideProfileChart(
+                          title: 'Speed profile',
+                          subtitle:
+                              'Tap or drag the chart — playhead syncs map + lean',
+                          series: a.speedSeries,
+                          lineColor: AppTheme.lineHot,
+                          unit: 'km/h',
+                          baselineZero: true,
+                          minY: 0,
+                          selectedSeconds: scrubSeconds,
+                          onSelectSeconds: _setScrubSeconds,
+                        ),
+                        const SizedBox(height: 32),
+                        if (a.leanSeries.isNotEmpty) ...[
+                          RideProfileChart(
+                            title: 'Lean left / right',
+                            subtitle:
+                                'Relative bike lean vs inferred 0°. Negative = left · positive = right',
+                            series: a.leanSeries,
+                            lineColor: AppTheme.line,
+                            unit: '°',
+                            baselineZero: true,
+                            selectedSeconds: scrubSeconds,
+                            onSelectSeconds: _setScrubSeconds,
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                        if (a.accuracySeries.isNotEmpty) ...[
+                          RideProfileChart(
+                            title: 'GPS precision',
+                            subtitle:
+                                'Horizontal accuracy in meters (lower is better)',
+                            series: a.accuracySeries,
+                            lineColor: AppTheme.signal,
+                            unit: 'm',
+                            baselineZero: true,
+                            minY: 0,
+                            selectedSeconds: scrubSeconds,
+                            onSelectSeconds: _setScrubSeconds,
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                        _PrecisionPanel(analytics: a),
+                        const SizedBox(height: 28),
+                        _InsightStrip(analytics: a),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        SliverToBoxAdapter(
-          child: FadeTransition(
-            opacity: CurvedAnimation(parent: _intro, curve: Curves.easeOut),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'CornerIQ',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2.4,
-                      color: AppTheme.line,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    DateFormat('EEE · MMM d · HH:mm').format(ride.startedAt),
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      height: 1.15,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Scrub any moment. Map and graphs stay locked together.',
-                    style: GoogleFonts.outfit(
-                      color: AppTheme.steel,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _ScoreHero(
-                    score: a.lineScore,
-                    label: a.lineScoreLabel,
-                    animation: _intro,
-                  ),
-                  const SizedBox(height: 20),
-                  _MetricGrid(analytics: a),
-                  const SizedBox(height: 28),
-                  if (hasSamples) ...[
-                    _TimeScrubber(
-                      seconds: scrubSeconds,
-                      totalSeconds: a.totalSeconds,
-                      point: scrubPoint!,
-                      leanDegrees: scrubLean,
-                      index: _scrubIndex,
-                      totalPoints: a.samples.length,
-                      onChanged: _setScrubSeconds,
-                    ),
-                    const SizedBox(height: 28),
-                  ],
-                  if (a.leanSides.sampleCount > 0) ...[
-                    MotorcycleLeanGauge(
-                      leanDegrees: scrubLean,
-                      maxLeftDegrees: a.maxLeanLeft,
-                      maxRightDegrees: a.maxLeanRight,
-                      neutralLabel:
-                          'At playhead · neutral offset ${a.neutralLeanDegrees.toStringAsFixed(0)}°',
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '0° is inferred upright (works with phone in pocket). '
-                      'Teal = left bank · orange = right bank.',
-                      style: GoogleFonts.outfit(
-                        color: AppTheme.steel,
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                  ],
-                  Text(
-                    'The line you took',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Teal slower · amber mid · orange faster. Amber marker = scrubbed moment.',
-                    style: GoogleFonts.outfit(
-                      color: AppTheme.steel,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    height: 280,
-                    child: PilotLineMap(
-                      points: a.samples,
-                      scrubIndex: hasSamples ? _scrubIndex : null,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  RideProfileChart(
-                    title: 'Speed profile',
-                    subtitle: 'Tap or drag the chart — playhead syncs map + lean',
-                    series: a.speedSeries,
-                    lineColor: AppTheme.lineHot,
-                    unit: 'km/h',
-                    baselineZero: true,
-                    minY: 0,
-                    selectedSeconds: scrubSeconds,
-                    onSelectSeconds: _setScrubSeconds,
-                  ),
-                  const SizedBox(height: 32),
-                  if (a.leanSeries.isNotEmpty) ...[
-                    RideProfileChart(
-                      title: 'Lean left / right',
-                      subtitle:
-                          'Relative bike lean vs inferred 0°. Negative = left · positive = right',
-                      series: a.leanSeries,
-                      lineColor: AppTheme.line,
-                      unit: '°',
-                      baselineZero: true,
-                      selectedSeconds: scrubSeconds,
-                      onSelectSeconds: _setScrubSeconds,
-                    ),
-                    const SizedBox(height: 32),
-                  ],
-                  if (a.accuracySeries.isNotEmpty) ...[
-                    RideProfileChart(
-                      title: 'GPS precision',
-                      subtitle: 'Horizontal accuracy in meters (lower is better)',
-                      series: a.accuracySeries,
-                      lineColor: AppTheme.signal,
-                      unit: 'm',
-                      baselineZero: true,
-                      minY: 0,
-                      selectedSeconds: scrubSeconds,
-                      onSelectSeconds: _setScrubSeconds,
-                    ),
-                    const SizedBox(height: 32),
-                  ],
-                  _PrecisionPanel(analytics: a),
-                  const SizedBox(height: 28),
-                  _InsightStrip(analytics: a),
-                  const SizedBox(height: 40),
-                ],
+        if (hasSamples)
+          Material(
+            color: AppTheme.asphalt,
+            elevation: 12,
+            shadowColor: Colors.black54,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: _TimeScrubber(
+                  seconds: scrubSeconds,
+                  totalSeconds: a.totalSeconds,
+                  point: scrubPoint!,
+                  leanDegrees: scrubLean,
+                  index: _scrubIndex,
+                  totalPoints: a.samples.length,
+                  onChanged: _setScrubSeconds,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

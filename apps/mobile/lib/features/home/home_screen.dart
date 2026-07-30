@@ -7,9 +7,11 @@ import '../../core/analytics/ride_analytics.dart';
 import '../../core/models/ride.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../providers/ride_providers.dart';
+import '../../providers/update_providers.dart';
 import '../../theme/app_theme.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
+import 'update_widgets.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -18,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ridesAsync = ref.watch(ridesListProvider);
     final incompleteAsync = ref.watch(incompleteRideProvider);
+    final updateAsync = ref.watch(appUpdateCheckProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -26,29 +29,54 @@ class HomeScreen extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'CornerIQ',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w700,
-                      height: 1.05,
-                      color: AppTheme.mist,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CornerIQ',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w700,
+                            height: 1.05,
+                            color: AppTheme.mist,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Record the line you rode. Scrub it. Improve every corner.',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            color: AppTheme.steel,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Record the line you rode. Scrub it. Improve every corner.',
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
-                      color: AppTheme.steel,
-                      height: 1.35,
-                    ),
+                  IconButton(
+                    tooltip: 'Check for updates',
+                    onPressed: () => promptManualUpdateCheck(context, ref),
+                    icon: const Icon(Icons.system_update_alt_outlined),
+                    color: AppTheme.steel,
                   ),
                 ],
               ),
+            ),
+            updateAsync.when(
+              data: (update) {
+                if (update == null) return const SizedBox.shrink();
+                final dismissed = ref.watch(dismissedUpdateTagProvider);
+                if (dismissed == update.tagName) {
+                  return const SizedBox.shrink();
+                }
+                return UpdateAvailableBanner(update: update);
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             incompleteAsync.when(
               data: (ride) {
