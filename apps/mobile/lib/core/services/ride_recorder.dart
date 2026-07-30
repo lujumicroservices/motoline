@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,11 +17,19 @@ class ActiveRideSnapshot {
     required this.ride,
     required this.points,
     required this.lastPoint,
+    this.relativeLeanDegrees,
+    this.maxLeanLeftDegrees,
+    this.maxLeanRightDegrees,
+    this.leanCalibrated = false,
   });
 
   final Ride ride;
   final List<TrackPoint> points;
   final TrackPoint? lastPoint;
+  final double? relativeLeanDegrees;
+  final double? maxLeanLeftDegrees;
+  final double? maxLeanRightDegrees;
+  final bool leanCalibrated;
 }
 
 /// Offline-first recorder: GPS + lean IMU, flushed to SQLite in batches.
@@ -50,6 +60,8 @@ class RideRecorder {
   double _speedSum = 0;
   int _speedSamples = 0;
   double? _maxLeanAbs;
+  double _maxLeanLeft = 0;
+  double _maxLeanRight = 0;
 
   Stream<ActiveRideSnapshot> get snapshots => _controller.stream;
   Ride? get activeRide => _ride;
@@ -67,6 +79,9 @@ class RideRecorder {
       throw StateError(permission.message ?? 'Location permission denied');
     }
 
+    // Lock onto GNSS before the first stored point (S25 Ultra settles fast outdoors).
+    await _location.warmUpGnss();
+
     final ride = Ride(
       id: _uuid.v4(),
       startedAt: DateTime.now(),
@@ -82,11 +97,13 @@ class RideRecorder {
     _speedSum = 0;
     _speedSamples = 0;
     _maxLeanAbs = null;
+    _maxLeanLeft = 0;
+    _maxLeanRight = 0;
 
     _lean.start();
 
     _flushTimer = Timer.periodic(
-      const Duration(seconds: 2),
+      const Duration(seconds: 1),
       (_) => _flushPending(),
     );
 
@@ -180,11 +197,22 @@ class RideRecorder {
     final ride = _ride;
     if (ride == null) return;
 
-    // Keep weaker fixes if needed for continuity around urban canyons;
-    // still reject garbage that would invent a false line.
-    if (position.accuracy > 55) return;
+    // Keep weaker urban fixes for continuity; drop only bad locks.
+    if (position.accuracy > LocationService.maxAcceptAccuracyMeters) {
+      debugPrint(
+        'CornerIQ GPS skip accuracy=${position.accuracy.toStringAsFixed(1)}m',
+      );
+      return;
+    }
 
-    final lean = _lean.leanDegrees;
+    final speedKmh = position.speed.isNaN || position.speed < 0
+        ? null
+        : position.speed * 3.6;
+    _lean.observeForNeutral(speedKmh: speedKmh);
+
+    // Persist raw lean; UI uses relative lean from the sensor.
+    final rawLean = _lean.rawLeanDegrees;
+    final relativeLean = _lean.leanDegrees;
     final point = TrackPoint(
       id: null,
       rideId: ride.id,
@@ -196,7 +224,7 @@ class RideRecorder {
           : position.speed,
       accuracyMeters: position.accuracy,
       heading: position.heading.isNaN ? null : position.heading,
-      leanDegrees: lean,
+      leanDegrees: rawLean,
       timestamp: position.timestamp,
     );
 
@@ -217,7 +245,13 @@ class RideRecorder {
         previousAccuracyMeters: previous.accuracyMeters ?? 10,
       );
       // Only drop true teleports — do NOT drop fast moto hops / roundabout arcs.
-      if (jump > maxJump) return;
+      if (jump > maxJump) {
+        debugPrint(
+          'CornerIQ GPS skip teleport jump=${jump.toStringAsFixed(1)}m '
+          'dt=${dtSec.toStringAsFixed(2)}s max=${maxJump.toStringAsFixed(1)}m',
+        );
+        return;
+      }
       _distanceMeters += jump;
     }
 
@@ -229,10 +263,15 @@ class RideRecorder {
       _speedSamples++;
     }
 
-    if (lean != null) {
-      final absLean = lean.abs();
+    if (relativeLean != null) {
+      final absLean = relativeLean.abs();
       _maxLeanAbs =
           _maxLeanAbs == null ? absLean : (_maxLeanAbs! > absLean ? _maxLeanAbs : absLean);
+      if (relativeLean < -2) {
+        _maxLeanLeft = math.max(_maxLeanLeft, -relativeLean);
+      } else if (relativeLean > 2) {
+        _maxLeanRight = math.max(_maxLeanRight, relativeLean);
+      }
     }
 
     _lastPoint = point;
@@ -247,6 +286,16 @@ class RideRecorder {
       maxLeanDegrees: _maxLeanAbs,
     );
     _emit();
+
+    debugPrint(
+      'CornerIQ OK #${_sessionPoints.length} '
+      'acc=${position.accuracy.toStringAsFixed(1)}m '
+      'spd=${speedKmh == null ? "--" : speedKmh.toStringAsFixed(1)} '
+      'lean=${relativeLean == null ? "--" : relativeLean.toStringAsFixed(1)}° '
+      'raw=${rawLean == null ? "--" : rawLean.toStringAsFixed(1)}° '
+      'n=${_lean.neutralDegrees?.toStringAsFixed(1) ?? "--"} '
+      'dist=${(_distanceMeters / 1000).toStringAsFixed(3)}km',
+    );
 
     if (_pending.length >= 5) {
       unawaited(_flushPending());
@@ -276,6 +325,10 @@ class RideRecorder {
         ride: ride,
         points: List.unmodifiable(_sessionPoints),
         lastPoint: _lastPoint,
+        relativeLeanDegrees: _lean.leanDegrees,
+        maxLeanLeftDegrees: _maxLeanLeft,
+        maxLeanRightDegrees: _maxLeanRight,
+        leanCalibrated: _lean.isCalibrated,
       ),
     );
   }
@@ -286,6 +339,10 @@ class RideRecorder {
         ride: ride,
         points: List.unmodifiable(_sessionPoints),
         lastPoint: _lastPoint,
+        relativeLeanDegrees: _lean.leanDegrees,
+        maxLeanLeftDegrees: _maxLeanLeft,
+        maxLeanRightDegrees: _maxLeanRight,
+        leanCalibrated: _lean.isCalibrated,
       ),
     );
   }

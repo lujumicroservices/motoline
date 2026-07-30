@@ -93,7 +93,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             pointCount: ride?.pointCount ?? 0,
             speedKmh: null,
             leanDegrees: null,
-            maxLeanDegrees: ride?.maxLeanDegrees,
+            maxLeanLeft: 0,
+            maxLeanRight: 0,
+            leanCalibrated: false,
           ),
           error: (e, _) => Center(child: Text('$e')),
           data: (snap) {
@@ -105,8 +107,10 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               points: snap?.points ?? const <TrackPoint>[],
               pointCount: r?.pointCount ?? 0,
               speedKmh: snap?.lastPoint?.speedKmh,
-              leanDegrees: snap?.lastPoint?.leanDegrees,
-              maxLeanDegrees: r?.maxLeanDegrees,
+              leanDegrees: snap?.relativeLeanDegrees,
+              maxLeanLeft: snap?.maxLeanLeftDegrees ?? 0,
+              maxLeanRight: snap?.maxLeanRightDegrees ?? 0,
+              leanCalibrated: snap?.leanCalibrated ?? false,
             );
           },
         ),
@@ -122,16 +126,19 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     required int pointCount,
     required double? speedKmh,
     required double? leanDegrees,
-    required double? maxLeanDegrees,
+    required double maxLeanLeft,
+    required double maxLeanRight,
+    required bool leanCalibrated,
   }) {
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
           child: Text(
-            'Mount the phone firmly (portrait, screen toward you). '
-            'Leave MotoLine open — a recording notification keeps GPS alive. '
-            'Do not interact while riding.',
+            'Mount firmly (portrait, screen toward you). '
+            'High-precision mode: wait for GPS lock, leave the '
+            'recording notification on, screen can lock. '
+            'Settings → Location → Improve accuracy (Wi‑Fi/Bluetooth) helps.',
             style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
           ),
         ),
@@ -174,13 +181,15 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
-                  label: 'Lean',
+                  label: leanCalibrated ? 'Bike lean' : 'Calibrating…',
                   value: leanDegrees == null
                       ? '--'
                       : leanDegrees.abs().toStringAsFixed(0),
                   unit: leanDegrees == null
                       ? '°'
-                      : (leanDegrees >= 0 ? '° R' : '° L'),
+                      : (leanDegrees.abs() < 2
+                          ? '°'
+                          : (leanDegrees >= 0 ? '° R' : '° L')),
                 ),
               ),
             ],
@@ -201,10 +210,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
-                  label: 'Max lean',
-                  value: maxLeanDegrees == null
-                      ? '--'
-                      : maxLeanDegrees.toStringAsFixed(0),
+                  label: 'Max L / R',
+                  value:
+                      '${maxLeanLeft.toStringAsFixed(0)}/${maxLeanRight.toStringAsFixed(0)}',
                   unit: '°',
                 ),
               ),

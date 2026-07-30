@@ -6,16 +6,16 @@ import 'theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: MotoLineApp()));
+  runApp(const ProviderScope(child: CornerIqApp()));
 }
 
-class MotoLineApp extends StatelessWidget {
-  const MotoLineApp({super.key});
+class CornerIqApp extends StatelessWidget {
+  const CornerIqApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MotoLine',
+      title: 'CornerIQ',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       home: const HomeScreen(),

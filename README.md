@@ -1,6 +1,6 @@
-# MotoLine
+# CornerIQ
 
-Motorcycle riding companion: record your ride, draw the **pilot line** on the map, review it after.
+Motorcycle riding companion: record your ride, draw the **pilot line**, scrub any moment, improve corners.
 
 ## MVP (this repo)
 

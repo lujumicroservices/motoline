@@ -7,13 +7,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>MotoLine</string>
+	<string>CornerIQ</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>MotoLine uses your location to record the line you ride on the street and show it on the map after your ride.</string>
+	<string>CornerIQ uses your location to record the line you ride on the street and show it on the map after your ride.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>MotoLine needs background location so your pilot line keeps recording if the screen locks while you ride.</string>
+	<string>CornerIQ needs background location so your pilot line keeps recording if the screen locks while you ride.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>MotoLine needs background location so your pilot line keeps recording if the screen locks while you ride.</string>
+	<string>CornerIQ needs background location so your pilot line keeps recording if the screen locks while you ride.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

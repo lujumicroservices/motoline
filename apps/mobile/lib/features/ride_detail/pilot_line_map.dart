@@ -13,12 +13,16 @@ class PilotLineMap extends StatelessWidget {
     this.height,
     this.interactive = true,
     this.showStartEnd = true,
+    this.scrubIndex,
   });
 
   final List<TrackPoint> points;
   final double? height;
   final bool interactive;
   final bool showStartEnd;
+
+  /// When set, a playhead marker is drawn at this sample index.
+  final int? scrubIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +89,32 @@ class PilotLineMap extends StatelessWidget {
       );
     }
 
+    final scrub = scrubIndex;
+    if (scrub != null && scrub >= 0 && scrub < points.length) {
+      final p = points[scrub];
+      markers.add(
+        Marker(
+          point: LatLng(p.latitude, p.longitude),
+          width: 28,
+          height: 28,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppTheme.mist,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.lineHot, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.lineHot.withValues(alpha: 0.45),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.navigation, size: 14, color: AppTheme.asphalt),
+          ),
+        ),
+      );
+    }
+
     final map = FlutterMap(
       options: MapOptions(
         initialCenter: center,
@@ -119,7 +149,6 @@ class PilotLineMap extends StatelessWidget {
     return SizedBox(height: height, child: child);
   }
 
-  /// Color the pilot line by speed: teal → amber → signal red.
   List<Polyline> _coloredSegments(List<TrackPoint> segment) {
     final result = <Polyline>[];
     for (var i = 1; i < segment.length; i++) {

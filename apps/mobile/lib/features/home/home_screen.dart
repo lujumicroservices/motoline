@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/analytics/ride_analytics.dart';
 import '../../core/models/ride.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../providers/ride_providers.dart';
@@ -29,7 +30,7 @@ class HomeScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'MotoLine',
+                    'CornerIQ',
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 40,
                       fontWeight: FontWeight.w700,
@@ -39,7 +40,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Record the line you rode. Review it. Improve.',
+                    'Record the line you rode. Scrub it. Improve every corner.',
                     style: GoogleFonts.outfit(
                       fontSize: 16,
                       color: AppTheme.steel,
@@ -63,6 +64,18 @@ class HomeScreen extends ConsumerWidget {
                 onPressed: () => _startRide(context, ref),
                 child: const Text('Start ride'),
               ),
+            ),
+            ridesAsync.when(
+              data: (rides) {
+                final summary = FleetSummary.fromRides(rides);
+                if (summary.rideCount == 0) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                  child: _SeasonStrip(summary: summary),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
@@ -294,12 +307,110 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Start a ride and MotoLine will draw the exact line you took on the street.',
+            'Start a ride and CornerIQ will draw the exact line you took on the street.',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppTheme.steel, height: 1.4),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SeasonStrip extends StatelessWidget {
+  const _SeasonStrip({required this.summary});
+
+  final FleetSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF262B30), Color(0xFF1B1F23)],
+        ),
+        border: Border.all(color: AppTheme.line.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'YOUR GARAGE',
+            style: GoogleFonts.outfit(
+              fontSize: 11,
+              letterSpacing: 1.3,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.line,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _GarageStat(
+                  label: 'Rides',
+                  value: '${summary.rideCount}',
+                ),
+              ),
+              Expanded(
+                child: _GarageStat(
+                  label: 'Distance',
+                  value: '${summary.totalDistanceKm.toStringAsFixed(1)} km',
+                ),
+              ),
+              Expanded(
+                child: _GarageStat(
+                  label: 'Top speed',
+                  value: summary.bestMaxSpeedKmh == null
+                      ? '--'
+                      : summary.bestMaxSpeedKmh!.toStringAsFixed(0),
+                ),
+              ),
+              Expanded(
+                child: _GarageStat(
+                  label: 'Peak lean',
+                  value: summary.bestMaxLean == null
+                      ? '--'
+                      : '${summary.bestMaxLean!.toStringAsFixed(0)}°',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GarageStat extends StatelessWidget {
+  const _GarageStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.steel),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

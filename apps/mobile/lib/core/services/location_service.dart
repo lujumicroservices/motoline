@@ -15,7 +15,21 @@ class LocationPermissionResult {
   final String? message;
 }
 
+/// High-precision profile tuned for flagship Android (Galaxy S25 Ultra).
+///
+/// S25 Ultra has multi-band GNSS; we ask Fused Location for the fastest
+/// high-accuracy stream Android will deliver (often ~1 Hz raw GNSS, with
+/// denser fused updates when motion/sensors allow).
 class LocationService {
+  /// Target GPS/fused interval. Lower = denser pilot line (more battery).
+  static const Duration sampleInterval = Duration(milliseconds: 100);
+
+  /// Reject only garbage fixes; keep urban canyon continuity.
+  static const double maxAcceptAccuracyMeters = 40;
+
+  /// Prefer starting once horizontal accuracy is at least this good.
+  static const double warmTargetAccuracyMeters = 10;
+
   Future<LocationPermissionResult> ensurePermission() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -46,68 +60,100 @@ class LocationService {
     }
 
     if (!kIsWeb && Platform.isAndroid) {
-      final notif = await Permission.notification.request();
-      if (!notif.isGranted) {
-        // Still allow recording; FGS notification may be limited on some OEMs.
-      }
+      await Permission.notification.request();
     }
 
-    // Best-effort: request "always" so glorieta loops survive screen-off.
+    // Always / background — required for glorieta loops with screen off.
     await Permission.locationAlways.request();
 
     return const LocationPermissionResult(granted: true);
   }
 
-  /// ~1 Hz navigation stream with Android foreground service + wake lock.
+  /// Warm the GNSS receiver so the first recorded points are accurate.
+  ///
+  /// On S25 Ultra this typically settles to ~3–10 m outdoors within a few
+  /// seconds when sky view is open.
+  Future<Position?> warmUpGnss({
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    Position? best;
+    while (DateTime.now().isBefore(deadline)) {
+      try {
+        final position = await Geolocator.getCurrentPosition(
+          locationSettings: _highPrecisionSettings(forSingleShot: true),
+        );
+        best = position;
+        if (position.accuracy > 0 &&
+            position.accuracy <= warmTargetAccuracyMeters) {
+          return position;
+        }
+      } catch (_) {
+        // Keep trying until timeout.
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    }
+    return best;
+  }
+
+  /// Max-rate navigation stream with Android foreground service + wake lock.
   Stream<Position> watchPositions() {
-    if (!kIsWeb && Platform.isAndroid) {
-      return Geolocator.getPositionStream(
-        locationSettings: AndroidSettings(
-          accuracy: LocationAccuracy.bestForNavigation,
-          distanceFilter: 0,
-          intervalDuration: const Duration(seconds: 1),
-          foregroundNotificationConfig: const ForegroundNotificationConfig(
-            notificationTitle: 'MotoLine',
-            notificationText: 'Recording your pilot line…',
-            notificationChannelName: 'Ride recording',
-            enableWakeLock: true,
-            setOngoing: true,
-          ),
-        ),
-      );
-    }
-
-    if (!kIsWeb && Platform.isIOS) {
-      return Geolocator.getPositionStream(
-        locationSettings: AppleSettings(
-          accuracy: LocationAccuracy.bestForNavigation,
-          activityType: ActivityType.automotiveNavigation,
-          distanceFilter: 0,
-          pauseLocationUpdatesAutomatically: false,
-          showBackgroundLocationIndicator: true,
-          allowBackgroundLocationUpdates: true,
-        ),
-      );
-    }
-
     return Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.bestForNavigation,
-        distanceFilter: 0,
-      ),
+      locationSettings: _highPrecisionSettings(forSingleShot: false),
     );
   }
 
   Future<Position?> currentPosition() async {
     try {
       return await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.bestForNavigation,
-        ),
+        locationSettings: _highPrecisionSettings(forSingleShot: true),
       );
     } catch (_) {
       return null;
     }
+  }
+
+  LocationSettings _highPrecisionSettings({required bool forSingleShot}) {
+    if (!kIsWeb && Platform.isAndroid) {
+      return AndroidSettings(
+        // Highest priority available in geolocator.
+        accuracy: LocationAccuracy.bestForNavigation,
+        // Never skip fixes by distance — capture every glorieta sample.
+        distanceFilter: 0,
+        // Ask for ~10 Hz; chip/OS may deliver ~1–5 Hz outdoors.
+        intervalDuration: forSingleShot ? null : sampleInterval,
+        // Fused Location (Google) — better than raw LocationManager on Samsung.
+        // Changelog: forceLocationManager:true caused very inaccurate readings.
+        forceLocationManager: false,
+        // Mean sea level altitude when available.
+        useMSLAltitude: true,
+        foregroundNotificationConfig: forSingleShot
+            ? null
+            : const ForegroundNotificationConfig(
+                notificationTitle: 'CornerIQ',
+                notificationText: 'High-precision recording…',
+                notificationChannelName: 'Ride recording',
+                enableWakeLock: true,
+                setOngoing: true,
+              ),
+      );
+    }
+
+    if (!kIsWeb && Platform.isIOS) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.bestForNavigation,
+        activityType: ActivityType.automotiveNavigation,
+        distanceFilter: 0,
+        pauseLocationUpdatesAutomatically: false,
+        showBackgroundLocationIndicator: true,
+        allowBackgroundLocationUpdates: true,
+      );
+    }
+
+    return const LocationSettings(
+      accuracy: LocationAccuracy.bestForNavigation,
+      distanceFilter: 0,
+    );
   }
 }
 
