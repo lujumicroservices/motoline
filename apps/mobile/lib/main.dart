@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/supabase/supabase_bootstrap.dart';
 import 'features/home/home_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseBootstrap.init();
+  // Anonymous session so shared-route sync/compare can use RLS later.
+  try {
+    await SupabaseBootstrap.ensureSession();
+  } catch (_) {
+    // Auth provider may be off; app still works offline.
+  }
   runApp(const ProviderScope(child: CornerIqApp()));
 }
 

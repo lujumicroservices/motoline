@@ -107,9 +107,43 @@ Avoid for lean: traffic green, and the speed red ramp (so speed vs lean stay dis
 
 ---
 
-## 4. Compare rides on the same route
+## 4. Compare rides on the same route (incl. other riders)
 
-**Goal:** Compare metrics across different rides (or laps) that share the **same route**.
+**Goal:** Compare metrics across different rides (or laps) that share the **same route** — your own history first, then **other users** when cloud sync is on.
+
+### Where data lives today (MVP)
+
+| Layer | Location | Scope |
+|---|---|---|
+| Local DB | SQLite file `motoline.db` on the phone (`path_provider` app documents dir) | **This device only** |
+| Tables | `rides`, `track_points` | GPS + lean samples for rides you recorded |
+| Cloud | None yet | No accounts, no shared routes |
+
+So right now you **cannot** see another rider’s data — it never leaves their phone.
+
+### Target architecture (multi-user compare)
+
+```mermaid
+flowchart LR
+  phoneA[Phone_A_SQLite] -->|sync outbox| cloud[(Supabase)]
+  phoneB[Phone_B_SQLite] -->|sync outbox| cloud
+  cloud -->|same route peers| phoneA
+  cloud -->|same route peers| phoneB
+  phoneA --> compareUI[Compare_UI]
+```
+
+| Layer | Choice | Role |
+|---|---|---|
+| Device | Keep SQLite offline-first | Record outdoors with no signal |
+| Cloud | **Supabase** (Auth + Postgres + Storage) — already in architecture plan | Store rides/routes from many users; RLS for private vs shared |
+| Route | Named route / loop definition (+ optional spatial match later) | Decide “same route” |
+| Compare UI | Side-by-side metrics + optional line overlay | Your ride vs peers (or vs your own best) |
+
+### Privacy / sharing (product rules)
+
+- Default: rides are **private** to the owner.
+- Rider opts in to share a ride or a whole **route** for comparison (anonymous nickname or display name).
+- Compare only shows peers who shared that same route (never dump everyone’s GPS publicly without consent).
 
 ### Route identity (MVP approach)
 
@@ -118,7 +152,7 @@ Avoid for lean: traffic green, and the speed red ramp (so speed vs lean stay dis
 
 ### Compare experience
 
-- Pick a **baseline** ride/lap and one or more **challengers** on the same route.
+- Pick a **baseline** ride/lap and one or more **challengers** on the same route (self or shared peers).
 - Side-by-side (or overlay) metrics:
   - Total / sector time (full lap first; sectors later)
   - Max / avg speed
@@ -129,9 +163,17 @@ Avoid for lean: traffic green, and the speed red ramp (so speed vs lean stay dis
 
 ### Acceptance criteria
 
-- [ ] User can select ≥2 rides/laps that share a route and open Compare.
+- [ ] User can select ≥2 rides/laps that share a route and open Compare (local first).
 - [ ] Key metrics shown in one comparison view.
 - [ ] Clear empty states when no same-route peers exist.
+- [ ] Cloud: authenticated sync of ride summaries + track (chunked).
+- [ ] Cloud: fetch shared peers for a route and compare against them.
+
+### Build order for this requirement
+
+1. **Local same-route compare** (your rides only) — needs route/loop tagging (§3).
+2. **Supabase Auth + ride sync** — upload after ride ends; pull your history to a new phone.
+3. **Shared routes + peer compare** — opt-in share flag; compare UI loads peer summaries.
 
 ---
 
@@ -161,7 +203,8 @@ Avoid for lean: traffic green, and the speed red ramp (so speed vs lean stay dis
 | REQ-SPEED-COLOR | Unified speed color scale (pale→dark red by speed) | In progress (map + speed chart + legend) |
 | REQ-LEAN-COLOR | Lean L/R colors (not green/red) | In progress (gauge + lean chart) |
 | REQ-LOOP | Loop mode init/end + auto laps | Planned |
-| REQ-COMPARE | Compare metrics on same route | Planned |
+| REQ-COMPARE | Compare metrics on same route (local then multi-user via Supabase) | Planned |
+| REQ-SYNC | Supabase CornerIQ project + schema + Flutter client bootstrap | In progress |
 
 ### Brand typography
 

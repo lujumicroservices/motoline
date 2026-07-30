@@ -20,8 +20,13 @@ Thumbs.db
 # Secrets / local
 .env
 .env.*
+!.env.example
 **/GoogleService-Info.plist
 **/google-services.json
+
+# Supabase CLI local
+supabase/.temp/
+supabase/.branches/
 
 # Coverage
 coverage/

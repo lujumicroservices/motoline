@@ -37,7 +37,9 @@ See **[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)** for planned work:
 - Unified **speed color** scale (pale red → dark red by speed, to 300 km/h) on map + charts
 - Fixed **lean L/R** colors (not green/red)
 - **Loop mode** (init + end, then auto lap recording)
-- **Compare** metrics across rides on the same route
+- **Compare** metrics across rides on the same route (local → multi-user)
+
+Cloud backend: **[docs/SUPABASE.md](docs/SUPABASE.md)** — separate **CornerIQ** project under luju.nieves (not POS).
 
 ## Next (from architecture plan)
 
