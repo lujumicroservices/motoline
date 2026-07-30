@@ -92,6 +92,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             points: const <TrackPoint>[],
             pointCount: ride?.pointCount ?? 0,
             speedKmh: null,
+            leanDegrees: null,
+            maxLeanDegrees: ride?.maxLeanDegrees,
           ),
           error: (e, _) => Center(child: Text('$e')),
           data: (snap) {
@@ -103,6 +105,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               points: snap?.points ?? const <TrackPoint>[],
               pointCount: r?.pointCount ?? 0,
               speedKmh: snap?.lastPoint?.speedKmh,
+              leanDegrees: snap?.lastPoint?.leanDegrees,
+              maxLeanDegrees: r?.maxLeanDegrees,
             );
           },
         ),
@@ -117,13 +121,17 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     required List<TrackPoint> points,
     required int pointCount,
     required double? speedKmh,
+    required double? leanDegrees,
+    required double? maxLeanDegrees,
   }) {
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
           child: Text(
-            'Keep the phone mounted. Do not interact while riding.',
+            'Mount the phone firmly (portrait, screen toward you). '
+            'Leave MotoLine open — a recording notification keeps GPS alive. '
+            'Do not interact while riding.',
             style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
           ),
         ),
@@ -166,9 +174,38 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
+                  label: 'Lean',
+                  value: leanDegrees == null
+                      ? '--'
+                      : leanDegrees.abs().toStringAsFixed(0),
+                  unit: leanDegrees == null
+                      ? '°'
+                      : (leanDegrees >= 0 ? '° R' : '° L'),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Expanded(
+                child: _StatCard(
                   label: 'Points',
                   value: '$pointCount',
                   unit: '',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatCard(
+                  label: 'Max lean',
+                  value: maxLeanDegrees == null
+                      ? '--'
+                      : maxLeanDegrees.toStringAsFixed(0),
+                  unit: '°',
                 ),
               ),
             ],

@@ -10,6 +10,7 @@ class Ride {
     this.pointCount = 0,
     this.maxSpeedMps,
     this.avgSpeedMps,
+    this.maxLeanDegrees,
   });
 
   final String id;
@@ -20,6 +21,9 @@ class Ride {
   final int pointCount;
   final double? maxSpeedMps;
   final double? avgSpeedMps;
+
+  /// Peak absolute lean (degrees) seen on this ride.
+  final double? maxLeanDegrees;
 
   Duration get duration {
     final end = endedAt ?? DateTime.now();
@@ -43,6 +47,7 @@ class Ride {
         'point_count': pointCount,
         'max_speed_mps': maxSpeedMps,
         'avg_speed_mps': avgSpeedMps,
+        'max_lean_degrees': maxLeanDegrees,
       };
 
   factory Ride.fromMap(Map<String, Object?> map) => Ride(
@@ -58,6 +63,7 @@ class Ride {
         pointCount: (map['point_count'] as int?) ?? 0,
         maxSpeedMps: (map['max_speed_mps'] as num?)?.toDouble(),
         avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
+        maxLeanDegrees: (map['max_lean_degrees'] as num?)?.toDouble(),
       );
 
   Ride copyWith({
@@ -67,6 +73,7 @@ class Ride {
     int? pointCount,
     double? maxSpeedMps,
     double? avgSpeedMps,
+    double? maxLeanDegrees,
   }) =>
       Ride(
         id: id,
@@ -77,5 +84,6 @@ class Ride {
         pointCount: pointCount ?? this.pointCount,
         maxSpeedMps: maxSpeedMps ?? this.maxSpeedMps,
         avgSpeedMps: avgSpeedMps ?? this.avgSpeedMps,
+        maxLeanDegrees: maxLeanDegrees ?? this.maxLeanDegrees,
       );
 }

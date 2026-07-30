@@ -253,7 +253,8 @@ class _RideTile extends StatelessWidget {
                           ? 'Discarded'
                           : '${ride.distanceKm.toStringAsFixed(2)} km · '
                               '${formatDuration(ride.duration)}'
-                              '${ride.maxSpeedKmh == null ? '' : ' · max ${ride.maxSpeedKmh!.toStringAsFixed(0)} km/h'}',
+                              '${ride.maxSpeedKmh == null ? '' : ' · max ${ride.maxSpeedKmh!.toStringAsFixed(0)} km/h'}'
+                              '${ride.maxLeanDegrees == null ? '' : ' · lean ${ride.maxLeanDegrees!.toStringAsFixed(0)}°'}',
                       style: const TextStyle(
                         color: AppTheme.steel,
                         fontSize: 13,

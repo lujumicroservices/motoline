@@ -7,6 +7,7 @@ import '../db/ride_database.dart';
 import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
+import 'lean_sensor.dart';
 import 'location_service.dart';
 
 class ActiveRideSnapshot {
@@ -21,16 +22,19 @@ class ActiveRideSnapshot {
   final TrackPoint? lastPoint;
 }
 
-/// Offline-first recorder: GPS points flush to SQLite in small batches.
+/// Offline-first recorder: GPS + lean IMU, flushed to SQLite in batches.
 class RideRecorder {
   RideRecorder({
     RideDatabase? database,
     LocationService? locationService,
+    LeanSensor? leanSensor,
   })  : _db = database ?? RideDatabase.instance,
-        _location = locationService ?? LocationService();
+        _location = locationService ?? LocationService(),
+        _lean = leanSensor ?? LeanSensor();
 
   final RideDatabase _db;
   final LocationService _location;
+  final LeanSensor _lean;
   final _uuid = const Uuid();
 
   final _pending = <TrackPoint>[];
@@ -45,6 +49,7 @@ class RideRecorder {
   double? _maxSpeedMps;
   double _speedSum = 0;
   int _speedSamples = 0;
+  double? _maxLeanAbs;
 
   Stream<ActiveRideSnapshot> get snapshots => _controller.stream;
   Ride? get activeRide => _ride;
@@ -76,9 +81,12 @@ class RideRecorder {
     _maxSpeedMps = null;
     _speedSum = 0;
     _speedSamples = 0;
+    _maxLeanAbs = null;
+
+    _lean.start();
 
     _flushTimer = Timer.periodic(
-      const Duration(seconds: 3),
+      const Duration(seconds: 2),
       (_) => _flushPending(),
     );
 
@@ -103,6 +111,7 @@ class RideRecorder {
     _sub = null;
     _flushTimer?.cancel();
     _flushTimer = null;
+    _lean.stop();
     await _flushPending();
 
     final completed = ride.copyWith(
@@ -112,6 +121,7 @@ class RideRecorder {
       pointCount: _sessionPoints.length,
       maxSpeedMps: _maxSpeedMps,
       avgSpeedMps: _speedSamples == 0 ? null : _speedSum / _speedSamples,
+      maxLeanDegrees: _maxLeanAbs,
     );
     await _db.upsertRide(completed);
     _ride = null;
@@ -127,6 +137,7 @@ class RideRecorder {
     final points = await _db.getPoints(rideId);
     final distance = pathDistanceMeters(points);
     double? maxSpeed;
+    double? maxLean;
     var speedSum = 0.0;
     var speedSamples = 0;
     for (final p in points) {
@@ -136,6 +147,10 @@ class RideRecorder {
         speedSum += s;
         speedSamples++;
       }
+      final lean = p.absLeanDegrees;
+      if (lean != null) {
+        maxLean = maxLean == null ? lean : (lean > maxLean ? lean : maxLean);
+      }
     }
     final completed = ride.copyWith(
       endedAt: points.isEmpty ? DateTime.now() : points.last.timestamp,
@@ -144,6 +159,7 @@ class RideRecorder {
       pointCount: points.length,
       maxSpeedMps: maxSpeed,
       avgSpeedMps: speedSamples == 0 ? null : speedSum / speedSamples,
+      maxLeanDegrees: maxLean,
     );
     await _db.upsertRide(completed);
     return completed;
@@ -164,9 +180,11 @@ class RideRecorder {
     final ride = _ride;
     if (ride == null) return;
 
-    // Drop very poor fixes so the pilot line stays trustworthy.
-    if (position.accuracy > 40) return;
+    // Keep weaker fixes if needed for continuity around urban canyons;
+    // still reject garbage that would invent a false line.
+    if (position.accuracy > 55) return;
 
+    final lean = _lean.leanDegrees;
     final point = TrackPoint(
       id: null,
       rideId: ride.id,
@@ -178,6 +196,7 @@ class RideRecorder {
           : position.speed,
       accuracyMeters: position.accuracy,
       heading: position.heading.isNaN ? null : position.heading,
+      leanDegrees: lean,
       timestamp: position.timestamp,
     );
 
@@ -189,8 +208,16 @@ class RideRecorder {
         point.latitude,
         point.longitude,
       );
-      // Ignore teleport spikes from bad GPS locks.
-      if (jump > 80) return;
+      final dtSec =
+          point.timestamp.difference(previous.timestamp).inMilliseconds /
+              1000.0;
+      final maxJump = maxPlausibleJumpMeters(
+        dtSeconds: dtSec,
+        accuracyMeters: position.accuracy,
+        previousAccuracyMeters: previous.accuracyMeters ?? 10,
+      );
+      // Only drop true teleports — do NOT drop fast moto hops / roundabout arcs.
+      if (jump > maxJump) return;
       _distanceMeters += jump;
     }
 
@@ -202,6 +229,12 @@ class RideRecorder {
       _speedSamples++;
     }
 
+    if (lean != null) {
+      final absLean = lean.abs();
+      _maxLeanAbs =
+          _maxLeanAbs == null ? absLean : (_maxLeanAbs! > absLean ? _maxLeanAbs : absLean);
+    }
+
     _lastPoint = point;
     _sessionPoints.add(point);
     _pending.add(point);
@@ -211,10 +244,11 @@ class RideRecorder {
       pointCount: _sessionPoints.length,
       maxSpeedMps: _maxSpeedMps,
       avgSpeedMps: _speedSamples == 0 ? null : _speedSum / _speedSamples,
+      maxLeanDegrees: _maxLeanAbs,
     );
     _emit();
 
-    if (_pending.length >= 8) {
+    if (_pending.length >= 5) {
       unawaited(_flushPending());
     }
   }
@@ -230,7 +264,6 @@ class RideRecorder {
         await _db.upsertRide(ride);
       }
     } catch (_) {
-      // Put points back so we do not lose track data.
       _pending.insertAll(0, batch);
     }
   }
@@ -260,6 +293,7 @@ class RideRecorder {
   Future<void> dispose() async {
     await _sub?.cancel();
     _flushTimer?.cancel();
+    _lean.stop();
     await _flushPending();
     await _controller.close();
   }

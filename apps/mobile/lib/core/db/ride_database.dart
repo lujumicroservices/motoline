@@ -23,7 +23,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -34,7 +34,8 @@ class RideDatabase {
             distance_meters REAL NOT NULL DEFAULT 0,
             point_count INTEGER NOT NULL DEFAULT 0,
             max_speed_mps REAL,
-            avg_speed_mps REAL
+            avg_speed_mps REAL,
+            max_lean_degrees REAL
           )
         ''');
         await db.execute('''
@@ -47,6 +48,7 @@ class RideDatabase {
             speed_mps REAL,
             accuracy_meters REAL,
             heading REAL,
+            lean_degrees REAL,
             timestamp_ms INTEGER NOT NULL,
             FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
           )
@@ -54,6 +56,16 @@ class RideDatabase {
         await db.execute(
           'CREATE INDEX idx_points_ride ON track_points(ride_id, timestamp_ms)',
         );
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE rides ADD COLUMN max_lean_degrees REAL',
+          );
+          await db.execute(
+            'ALTER TABLE track_points ADD COLUMN lean_degrees REAL',
+          );
+        }
       },
     );
   }

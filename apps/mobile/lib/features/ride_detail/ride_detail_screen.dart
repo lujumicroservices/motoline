@@ -79,12 +79,19 @@ class RideDetailScreen extends ConsumerWidget {
                           label: 'Points',
                           value: '${ride.pointCount}',
                         ),
+                        _ChipStat(
+                          label: 'Max lean',
+                          value: ride.maxLeanDegrees == null
+                              ? '--'
+                              : '${ride.maxLeanDegrees!.toStringAsFixed(0)}°',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
                     Text(
                       'Teal = slower · Amber = mid · Orange = faster. '
-                      'Gaps in GPS show as breaks in the line.',
+                      'Gaps in GPS show as breaks in the line. '
+                      'Lean is a phone-IMU proxy — mount firmly for best results.',
                       style: GoogleFonts.outfit(
                         color: AppTheme.steel,
                         fontSize: 12,

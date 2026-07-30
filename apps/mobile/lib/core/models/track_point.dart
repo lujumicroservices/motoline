@@ -9,6 +9,7 @@ class TrackPoint {
     this.speedMps,
     this.accuracyMeters,
     this.heading,
+    this.leanDegrees,
   });
 
   final int? id;
@@ -21,11 +22,16 @@ class TrackPoint {
   final double? accuracyMeters;
   final double? heading;
 
+  /// Signed lean proxy from phone IMU (degrees). Positive = lean right.
+  final double? leanDegrees;
+
   double? get speedKmh {
     final speed = speedMps;
     if (speed == null || speed < 0) return null;
     return speed * 3.6;
   }
+
+  double? get absLeanDegrees => leanDegrees?.abs();
 
   bool get isLowAccuracy =>
       accuracyMeters != null && accuracyMeters! > 25;
@@ -39,6 +45,7 @@ class TrackPoint {
         'speed_mps': speedMps,
         'accuracy_meters': accuracyMeters,
         'heading': heading,
+        'lean_degrees': leanDegrees,
         'timestamp_ms': timestamp.millisecondsSinceEpoch,
       };
 
@@ -51,12 +58,13 @@ class TrackPoint {
         speedMps: (map['speed_mps'] as num?)?.toDouble(),
         accuracyMeters: (map['accuracy_meters'] as num?)?.toDouble(),
         heading: (map['heading'] as num?)?.toDouble(),
+        leanDegrees: (map['lean_degrees'] as num?)?.toDouble(),
         timestamp: DateTime.fromMillisecondsSinceEpoch(
           map['timestamp_ms'] as int,
         ),
       );
 
-  TrackPoint copyWith({int? id}) => TrackPoint(
+  TrackPoint copyWith({int? id, double? leanDegrees}) => TrackPoint(
         id: id ?? this.id,
         rideId: rideId,
         latitude: latitude,
@@ -66,5 +74,6 @@ class TrackPoint {
         speedMps: speedMps,
         accuracyMeters: accuracyMeters,
         heading: heading,
+        leanDegrees: leanDegrees ?? this.leanDegrees,
       );
 }
