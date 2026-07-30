@@ -7,6 +7,8 @@ import '../../core/analytics/ride_analytics.dart';
 import '../../core/models/track_point.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/brand_mark.dart';
+import '../../theme/ride_viz_palette.dart';
 import 'pilot_line_map.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
 import 'widgets/ride_profile_chart.dart';
@@ -126,15 +128,7 @@ class _RideDashboardState extends State<_RideDashboard>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'CornerIQ',
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 2.4,
-                            color: AppTheme.line,
-                          ),
-                        ),
+                        const CornerIqMark(size: BrandMarkSize.eyebrow),
                         const SizedBox(height: 8),
                         Text(
                           DateFormat('EEE · MMM d · HH:mm')
@@ -173,7 +167,7 @@ class _RideDashboardState extends State<_RideDashboard>
                           const SizedBox(height: 12),
                           Text(
                             '0° is inferred upright (works with phone in pocket). '
-                            'Teal = left bank · orange = right bank.',
+                            'Cyan = left bank · amber = right bank.',
                             style: GoogleFonts.outfit(
                               color: AppTheme.steel,
                               fontSize: 13,
@@ -191,7 +185,8 @@ class _RideDashboardState extends State<_RideDashboard>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Teal slower · amber mid · orange faster. Amber marker = scrubbed moment.',
+                          'Blue = slower → brighter blue to 300 km/h · red above. '
+                          'Amber marker = scrubbed moment.',
                           style: GoogleFonts.outfit(
                             color: AppTheme.steel,
                             fontSize: 13,
@@ -206,28 +201,15 @@ class _RideDashboardState extends State<_RideDashboard>
                           ),
                         ),
                         const SizedBox(height: 32),
-                        RideProfileChart(
-                          title: 'Speed profile',
-                          subtitle:
-                              'Tap or drag the chart — playhead syncs map + lean',
+                        SpeedProfileChart(
                           series: a.speedSeries,
-                          lineColor: AppTheme.lineHot,
-                          unit: 'km/h',
-                          baselineZero: true,
-                          minY: 0,
                           selectedSeconds: scrubSeconds,
                           onSelectSeconds: _setScrubSeconds,
                         ),
                         const SizedBox(height: 32),
                         if (a.leanSeries.isNotEmpty) ...[
-                          RideProfileChart(
-                            title: 'Lean left / right',
-                            subtitle:
-                                'Relative bike lean vs inferred 0°. Negative = left · positive = right',
+                          LeanProfileChart(
                             series: a.leanSeries,
-                            lineColor: AppTheme.line,
-                            unit: '°',
-                            baselineZero: true,
                             selectedSeconds: scrubSeconds,
                             onSelectSeconds: _setScrubSeconds,
                           ),
@@ -347,12 +329,29 @@ class _TimeScrubber extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
-            'Point ${index + 1}/$totalPoints  ·  '
-            '${speed == null ? "--" : "${speed.toStringAsFixed(0)} km/h"}  ·  '
-            'lean ${leanDegrees.abs().toStringAsFixed(0)}° $side  ·  '
-            'GPS ${point.accuracyMeters?.toStringAsFixed(1) ?? "--"} m',
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+          Text.rich(
+            TextSpan(
+              style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+              children: [
+                TextSpan(
+                  text:
+                      'Point ${index + 1}/$totalPoints  ·  '
+                      '${speed == null ? "--" : "${speed.toStringAsFixed(0)} km/h"}  ·  lean ',
+                ),
+                TextSpan(
+                  text:
+                      '${leanDegrees.abs().toStringAsFixed(0)}° $side',
+                  style: TextStyle(
+                    color: RideVizPalette.leanColor(leanDegrees),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                      '  ·  GPS ${point.accuracyMeters?.toStringAsFixed(1) ?? "--"} m',
+                ),
+              ],
+            ),
           ),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -522,7 +521,9 @@ class _MetricGrid extends StatelessWidget {
                     ? '--'
                     : a.maxSpeedKmh!.toStringAsFixed(0),
                 unit: 'km/h',
-                accent: AppTheme.lineHot,
+                accent: a.maxSpeedKmh == null
+                    ? AppTheme.steel
+                    : RideVizPalette.speedColor(a.maxSpeedKmh!),
               ),
             ),
             const SizedBox(width: 10),
@@ -533,7 +534,7 @@ class _MetricGrid extends StatelessWidget {
                     ? '--'
                     : '${a.maxLeanLeft.toStringAsFixed(0)}/${a.maxLeanRight.toStringAsFixed(0)}',
                 unit: '°',
-                accent: AppTheme.signal,
+                accent: RideVizPalette.leanLeft,
               ),
             ),
           ],

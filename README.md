@@ -30,6 +30,15 @@ apps/mobile/lib/
   theme/
 ```
 
+## Product requirements (next features)
+
+See **[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)** for planned work:
+
+- Unified **speed color** scale (blue 0→300 km/h, then red) on map + charts
+- Fixed **lean L/R** colors (not green/red)
+- **Loop mode** (init + end, then auto lap recording)
+- **Compare** metrics across rides on the same route
+
 ## Next (from architecture plan)
 
 - Mapbox upgrade for polished tiles / offline maps

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../theme/app_theme.dart';
+import '../../../theme/ride_viz_palette.dart';
 
 /// Motorcycle lean gauge: 0° upright, left / right bank.
 class MotorcycleLeanGauge extends StatelessWidget {
@@ -42,7 +43,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [Color(0xFF2A3036), Color(0xFF171A1D)],
         ),
-        border: Border.all(color: AppTheme.line.withValues(alpha: 0.22)),
+        border: Border.all(color: RideVizPalette.leanLeft.withValues(alpha: 0.22)),
       ),
       child: Column(
         children: [
@@ -86,11 +87,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: side == 'LEFT'
-                  ? AppTheme.line
-                  : side == 'RIGHT'
-                      ? AppTheme.signal
-                      : AppTheme.mist,
+              color: RideVizPalette.leanColor(leanDegrees),
             ),
           ),
           const SizedBox(height: 12),
@@ -100,7 +97,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
                 child: _SidePeak(
                   label: 'MAX LEFT',
                   value: '${maxLeftDegrees.toStringAsFixed(0)}°',
-                  color: AppTheme.line,
+                  color: RideVizPalette.leanLeft,
                   alignEnd: false,
                 ),
               ),
@@ -108,7 +105,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
                 child: _SidePeak(
                   label: 'MAX RIGHT',
                   value: '${maxRightDegrees.toStringAsFixed(0)}°',
-                  color: AppTheme.signal,
+                  color: RideVizPalette.leanRight,
                   alignEnd: true,
                 ),
               ),
@@ -216,8 +213,8 @@ class _LeanGaugePainter extends CustomPainter {
       );
     }
 
-    paintPeak(maxLeft, AppTheme.line, true);
-    paintPeak(maxRight, AppTheme.signal, false);
+    paintPeak(maxLeft, RideVizPalette.leanLeft, true);
+    paintPeak(maxRight, RideVizPalette.leanRight, false);
 
     // Zero tick.
     final zeroAng = start + 0.5 * sweep;
@@ -241,11 +238,7 @@ class _LeanGaugePainter extends CustomPainter {
     final leanT = (leanDegrees / 70).clamp(-1.0, 1.0);
     final bikeAng = -math.pi / 2 + leanT * (math.pi * 0.42);
     final bikePaint = Paint()
-      ..color = leanDegrees < -1
-          ? AppTheme.line
-          : leanDegrees > 1
-              ? AppTheme.signal
-              : AppTheme.mist
+      ..color = RideVizPalette.leanColor(leanDegrees)
       ..strokeWidth = 5
       ..strokeCap = StrokeCap.round;
 
@@ -279,12 +272,12 @@ class _LeanGaugePainter extends CustomPainter {
     label(
       'L',
       Offset(center.dx - radius * 0.85, center.dy - radius * 0.15),
-      AppTheme.line,
+      RideVizPalette.leanLeft,
     );
     label(
       'R',
       Offset(center.dx + radius * 0.85, center.dy - radius * 0.15),
-      AppTheme.signal,
+      RideVizPalette.leanRight,
     );
     label(
       '0°',

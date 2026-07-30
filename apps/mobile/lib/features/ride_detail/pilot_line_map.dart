@@ -5,6 +5,8 @@ import 'package:latlong2/latlong.dart';
 import '../../core/models/track_point.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/ride_viz_palette.dart';
+import 'widgets/speed_legend.dart';
 
 class PilotLineMap extends StatelessWidget {
   const PilotLineMap({
@@ -140,9 +142,30 @@ class PilotLineMap extends StatelessWidget {
       ],
     );
 
+    final stacked = Stack(
+      children: [
+        Positioned.fill(child: map),
+        const Positioned(
+          left: 12,
+          right: 12,
+          bottom: 12,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Color(0xCC1A1C1E),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(10, 8, 10, 8),
+              child: SpeedColorLegend(),
+            ),
+          ),
+        ),
+      ],
+    );
+
     final child = ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: map,
+      child: stacked,
     );
 
     if (height == null) return child;
@@ -161,17 +184,11 @@ class PilotLineMap extends StatelessWidget {
             LatLng(a.latitude, a.longitude),
             LatLng(b.latitude, b.longitude),
           ],
-          color: _speedColor(speed),
+          color: RideVizPalette.speedColor(speed),
           strokeWidth: 5,
         ),
       );
     }
     return result;
-  }
-
-  Color _speedColor(double speedKmh) {
-    if (speedKmh < 30) return AppTheme.line;
-    if (speedKmh < 70) return AppTheme.lineHot;
-    return AppTheme.signal;
   }
 }

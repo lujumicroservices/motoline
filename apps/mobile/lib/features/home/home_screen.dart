@@ -9,6 +9,7 @@ import '../../core/utils/geo_utils.dart';
 import '../../providers/ride_providers.dart';
 import '../../providers/update_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/brand_mark.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import 'update_widgets.dart';
@@ -36,15 +37,7 @@ class HomeScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'CornerIQ',
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w700,
-                            height: 1.05,
-                            color: AppTheme.mist,
-                          ),
-                        ),
+                        const CornerIqMark(size: BrandMarkSize.hero),
                         const SizedBox(height: 8),
                         Text(
                           'Record the line you rode. Scrub it. Improve every corner.',

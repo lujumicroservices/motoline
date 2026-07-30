@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/analytics/ride_analytics.dart';
 import '../../../theme/app_theme.dart';
+import '../../../theme/ride_viz_palette.dart';
 
 class RideProfileChart extends StatelessWidget {
   const RideProfileChart({
@@ -18,6 +19,7 @@ class RideProfileChart extends StatelessWidget {
     this.maxY,
     this.selectedSeconds,
     this.onSelectSeconds,
+    this.colorForValue,
   });
 
   final String title;
@@ -34,6 +36,9 @@ class RideProfileChart extends StatelessWidget {
 
   /// Called when user taps/drags the chart to pick a time.
   final ValueChanged<double>? onSelectSeconds;
+
+  /// When set, each segment is colored from this mapping (speed / lean scales).
+  final Color Function(double value)? colorForValue;
 
   @override
   Widget build(BuildContext context) {
@@ -170,32 +175,7 @@ class RideProfileChart extends StatelessWidget {
                       ],
                     ),
               lineBarsData: [
-                LineChartBarData(
-                  spots: spots,
-                  isCurved: true,
-                  curveSmoothness: 0.25,
-                  color: lineColor,
-                  barWidth: 2.5,
-                  isStrokeCapRound: true,
-                  dotData: FlDotData(
-                    show: scrubX != null,
-                    checkToShowDot: (spot, bar) {
-                      if (scrubX == null) return false;
-                      return (spot.x - scrubX).abs() < 0.35;
-                    },
-                    getDotPainter: (spot, percent, bar, index) =>
-                        FlDotCirclePainter(
-                      radius: 5,
-                      color: AppTheme.mist,
-                      strokeWidth: 2,
-                      strokeColor: AppTheme.lineHot,
-                    ),
-                  ),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    color: lineColor.withValues(alpha: 0.14),
-                  ),
-                ),
+                ..._lineBars(spots, scrubX),
                 if (baselineZero)
                   LineChartBarData(
                     spots: [
@@ -214,6 +194,67 @@ class RideProfileChart extends StatelessWidget {
     );
   }
 
+  List<LineChartBarData> _lineBars(List<FlSpot> spots, double? scrubX) {
+    final colorFn = colorForValue;
+    if (colorFn == null) {
+      return [
+        LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          curveSmoothness: 0.25,
+          color: lineColor,
+          barWidth: 2.5,
+          isStrokeCapRound: true,
+          dotData: _dotData(scrubX, lineColor),
+          belowBarData: BarAreaData(
+            show: true,
+            color: lineColor.withValues(alpha: 0.14),
+          ),
+        ),
+      ];
+    }
+
+    // Segment so each stretch uses the value→color scale (speed / lean).
+    final bars = <LineChartBarData>[];
+    for (var i = 1; i < spots.length; i++) {
+      final a = spots[i - 1];
+      final b = spots[i];
+      final mid = (a.y + b.y) / 2;
+      final color = colorFn(mid);
+      bars.add(
+        LineChartBarData(
+          spots: [a, b],
+          isCurved: false,
+          color: color,
+          barWidth: 2.5,
+          isStrokeCapRound: true,
+          dotData: _dotData(scrubX, color),
+          belowBarData: BarAreaData(
+            show: true,
+            color: color.withValues(alpha: 0.12),
+          ),
+        ),
+      );
+    }
+    return bars;
+  }
+
+  FlDotData _dotData(double? scrubX, Color stroke) {
+    return FlDotData(
+      show: scrubX != null,
+      checkToShowDot: (spot, bar) {
+        if (scrubX == null) return false;
+        return (spot.x - scrubX).abs() < 0.35;
+      },
+      getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+        radius: 5,
+        color: AppTheme.mist,
+        strokeWidth: 2,
+        strokeColor: stroke,
+      ),
+    );
+  }
+
   double _bottomInterval(double totalSeconds) {
     if (totalSeconds <= 60) return 15;
     if (totalSeconds <= 300) return 60;
@@ -227,5 +268,70 @@ class RideProfileChart extends StatelessWidget {
     final r = s % 60;
     if (m == 0) return '${r}s';
     return '$m:${r.toString().padLeft(2, '0')}';
+  }
+}
+
+/// Convenience: speed series with shared blue→red scale.
+class SpeedProfileChart extends StatelessWidget {
+  const SpeedProfileChart({
+    super.key,
+    required this.series,
+    this.selectedSeconds,
+    this.onSelectSeconds,
+    this.subtitle =
+        'Blue 0→300 km/h · red above 300. Tap to scrub map + lean.',
+  });
+
+  final List<TimedValue> series;
+  final double? selectedSeconds;
+  final ValueChanged<double>? onSelectSeconds;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return RideProfileChart(
+      title: 'Speed profile',
+      subtitle: subtitle,
+      series: series,
+      lineColor: RideVizPalette.speedBlueHigh,
+      unit: 'km/h',
+      baselineZero: true,
+      minY: 0,
+      selectedSeconds: selectedSeconds,
+      onSelectSeconds: onSelectSeconds,
+      colorForValue: RideVizPalette.speedColor,
+    );
+  }
+}
+
+/// Convenience: lean series with cyan left / amber right.
+class LeanProfileChart extends StatelessWidget {
+  const LeanProfileChart({
+    super.key,
+    required this.series,
+    this.selectedSeconds,
+    this.onSelectSeconds,
+    this.subtitle =
+        'Cyan = left · amber = right. Relative lean vs inferred 0°.',
+  });
+
+  final List<TimedValue> series;
+  final double? selectedSeconds;
+  final ValueChanged<double>? onSelectSeconds;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return RideProfileChart(
+      title: 'Lean left / right',
+      subtitle: subtitle,
+      series: series,
+      lineColor: RideVizPalette.leanLeft,
+      unit: '°',
+      baselineZero: true,
+      selectedSeconds: selectedSeconds,
+      onSelectSeconds: onSelectSeconds,
+      colorForValue: RideVizPalette.leanColor,
+    );
   }
 }
