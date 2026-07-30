@@ -17,27 +17,17 @@ class SpeedColorLegend extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: SizedBox(
             height: 8,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 12,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          RideVizPalette.speedColor(0),
-                          RideVizPalette.speedColor(150),
-                          RideVizPalette.speedColor(300),
-                        ],
-                      ),
-                    ),
-                  ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    RideVizPalette.speedColor(0),
+                    RideVizPalette.speedColor(100),
+                    RideVizPalette.speedColor(200),
+                    RideVizPalette.speedColor(300),
+                  ],
                 ),
-                Expanded(
-                  flex: 2,
-                  child: ColoredBox(color: RideVizPalette.speedOverRed),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -45,20 +35,15 @@ class SpeedColorLegend extends StatelessWidget {
         Row(
           children: [
             Text(
-              '0',
+              'slow',
               style: GoogleFonts.outfit(fontSize: 10, color: AppTheme.steel),
             ),
             const Spacer(),
             Text(
-              '300 km/h',
-              style: GoogleFonts.outfit(fontSize: 10, color: AppTheme.steel),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'red →',
+              'fast · 300 km/h',
               style: GoogleFonts.outfit(
                 fontSize: 10,
-                color: RideVizPalette.speedOverRed,
+                color: RideVizPalette.speedDark,
                 fontWeight: FontWeight.w600,
               ),
             ),

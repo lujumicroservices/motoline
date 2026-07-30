@@ -185,7 +185,7 @@ class _RideDashboardState extends State<_RideDashboard>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Blue = slower → brighter blue to 300 km/h · red above. '
+                          'Pale red = slower · darker red = faster (to 300 km/h). '
                           'Amber marker = scrubbed moment.',
                           style: GoogleFonts.outfit(
                             color: AppTheme.steel,

@@ -15,6 +15,40 @@ class LocationPermissionResult {
   final String? message;
 }
 
+enum GpsWarmupPhase {
+  permissions,
+  searching,
+  locking,
+  ready,
+  timeout,
+}
+
+/// Progress while GNSS settles before the first recorded point.
+class GnssWarmupStatus {
+  const GnssWarmupStatus({
+    required this.phase,
+    this.accuracyMeters,
+    this.message,
+  });
+
+  final GpsWarmupPhase phase;
+  final double? accuracyMeters;
+  final String? message;
+
+  bool get isReady => phase == GpsWarmupPhase.ready;
+
+  /// 0–1 toward the warm target accuracy (higher = better lock).
+  double get lockProgress {
+    final acc = accuracyMeters;
+    if (acc == null || acc <= 0) return 0;
+    if (acc <= LocationService.warmTargetAccuracyMeters) return 1;
+    final t = (LocationService.maxAcceptAccuracyMeters - acc) /
+        (LocationService.maxAcceptAccuracyMeters -
+            LocationService.warmTargetAccuracyMeters);
+    return t.clamp(0.0, 0.95);
+  }
+}
+
 /// High-precision profile tuned for flagship Android (Galaxy S25 Ultra).
 ///
 /// S25 Ultra has multi-band GNSS; we ask Fused Location for the fastest
@@ -71,11 +105,15 @@ class LocationService {
 
   /// Warm the GNSS receiver so the first recorded points are accurate.
   ///
-  /// On S25 Ultra this typically settles to ~3–10 m outdoors within a few
-  /// seconds when sky view is open.
-  Future<Position?> warmUpGnss({
+  /// Yields live accuracy so the UI can show lock progress instead of freezing.
+  Stream<GnssWarmupStatus> warmUpGnss({
     Duration timeout = const Duration(seconds: 8),
-  }) async {
+  }) async* {
+    yield const GnssWarmupStatus(
+      phase: GpsWarmupPhase.searching,
+      message: 'Looking for satellites…',
+    );
+
     final deadline = DateTime.now().add(timeout);
     Position? best;
     while (DateTime.now().isBefore(deadline)) {
@@ -84,16 +122,39 @@ class LocationService {
           locationSettings: _highPrecisionSettings(forSingleShot: true),
         );
         best = position;
-        if (position.accuracy > 0 &&
-            position.accuracy <= warmTargetAccuracyMeters) {
-          return position;
+        final acc = position.accuracy;
+        if (acc > 0 && acc <= warmTargetAccuracyMeters) {
+          yield GnssWarmupStatus(
+            phase: GpsWarmupPhase.ready,
+            accuracyMeters: acc,
+            message: 'GPS ready (±${acc.toStringAsFixed(0)} m)',
+          );
+          return;
         }
+        yield GnssWarmupStatus(
+          phase: GpsWarmupPhase.locking,
+          accuracyMeters: acc > 0 ? acc : null,
+          message: acc > 0
+              ? 'Warming GPS (±${acc.toStringAsFixed(0)} m)…'
+              : 'Warming GPS…',
+        );
       } catch (_) {
-        // Keep trying until timeout.
+        yield const GnssWarmupStatus(
+          phase: GpsWarmupPhase.searching,
+          message: 'Looking for satellites…',
+        );
       }
       await Future<void>.delayed(const Duration(milliseconds: 250));
     }
-    return best;
+
+    final bestAcc = best?.accuracy;
+    yield GnssWarmupStatus(
+      phase: GpsWarmupPhase.timeout,
+      accuracyMeters: (bestAcc != null && bestAcc > 0) ? bestAcc : null,
+      message: bestAcc != null && bestAcc > 0
+          ? 'Starting with ±${bestAcc.toStringAsFixed(0)} m — keep sky view open'
+          : 'Starting — keep sky view open for a better lock',
+    );
   }
 
   /// Max-rate navigation stream with Android foreground service + wake lock.

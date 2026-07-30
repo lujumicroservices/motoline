@@ -279,7 +279,7 @@ class SpeedProfileChart extends StatelessWidget {
     this.selectedSeconds,
     this.onSelectSeconds,
     this.subtitle =
-        'Blue 0→300 km/h · red above 300. Tap to scrub map + lean.',
+        'Pale red = slow · dark red = fast (to 300 km/h). Tap to scrub.',
   });
 
   final List<TimedValue> series;
@@ -293,7 +293,7 @@ class SpeedProfileChart extends StatelessWidget {
       title: 'Speed profile',
       subtitle: subtitle,
       series: series,
-      lineColor: RideVizPalette.speedBlueHigh,
+      lineColor: RideVizPalette.speedMid,
       unit: 'km/h',
       baselineZero: true,
       minY: 0,

@@ -14,18 +14,17 @@ Related shipped MVP: GPS ride recorder, Ride Lab (map + scrubber + charts), in-a
 
 | Speed (km/h) | Color |
 |---|---|
-| **0** | One extreme of a **blue** ramp (cool / dark blue) |
-| **0 → 300** | Continuous interpolation along that **blue** family (lightness / saturation shift) |
-| **300** | Opposite extreme of the blue ramp (hot / bright blue) |
-| **> 300** | Switch to **red** (and stay in the red family as speed climbs further) |
+| **0 (slow)** | Pale / clear red |
+| **0 → 300** | Continuous **red intensity** ramp (clear → mid → dark) |
+| **300+ (fast)** | Darkest red |
 
-- Cap for the blue ramp: **300 km/h** (hard product constant unless we later make it configurable).
-- Interpolation must be continuous (no hard bands at 30/70 like today’s map).
+- Cap for darkest red: **300 km/h** (hard product constant unless we later make it configurable).
+- Interpolation must be continuous (one red family — not blue bands).
 - Same mapping function for **all** speed representations:
   - Pilot-line map polyline segments
   - Speed profile chart (line and/or gradient fill)
   - Any future HUD, legend, or comparison overlays that encode speed by color
-- Show a small **legend** on Ride Lab (0 · blue ramp · 300 · red) wherever the map uses speed color.
+- Show a small **legend** on Ride Lab (slow · pale → dark · fast) wherever the map uses speed color.
 
 ### Out of scope (for this requirement)
 
@@ -35,8 +34,8 @@ Related shipped MVP: GPS ride recorder, Ride Lab (map + scrubber + charts), in-a
 ### Acceptance criteria
 
 - [ ] One shared helper (e.g. `speedColor(kmh)`) used by map + speed chart.
-- [ ] At 0 km/h → blue start; at 300 km/h → blue end; above 300 → red.
-- [ ] Intermediate speeds look like a smooth blue gradient, not discrete green/amber/red bands.
+- [ ] At 0 km/h → pale/clear red; at 300 km/h → dark red.
+- [ ] Intermediate speeds are a smooth red intensity gradient (slow = light, fast = dark).
 - [ ] Legend visible on the pilot-line map screen.
 
 ---
@@ -58,7 +57,7 @@ Suggested tokens (implement in `AppTheme` or a viz palette):
 - `leanLeft` ≈ `#4CC9F0` (cyan)
 - `leanRight` ≈ `#F4A261` (amber)
 
-Avoid for lean: brand `signal` red, traffic green, and the speed blue ramp (so speed vs lean stay distinguishable).
+Avoid for lean: traffic green, and the speed red ramp (so speed vs lean stay distinguishable).
 
 ### Apply everywhere inclination is shown
 
@@ -159,12 +158,12 @@ Avoid for lean: brand `signal` red, traffic green, and the speed blue ramp (so s
 
 | ID | Title | Status |
 |---|---|---|
-| REQ-SPEED-COLOR | Unified speed color scale (blue→300, then red) | In progress (map + speed chart + legend) |
+| REQ-SPEED-COLOR | Unified speed color scale (pale→dark red by speed) | In progress (map + speed chart + legend) |
 | REQ-LEAN-COLOR | Lean L/R colors (not green/red) | In progress (gauge + lean chart) |
 | REQ-LOOP | Loop mode init/end + auto laps | Planned |
 | REQ-COMPARE | Compare metrics on same route | Planned |
 
 ### Brand typography
 
-- Wordmark: `CornerIqMark` — **Syne** lockup, `Corner` + `IQ` with distinct tracking; `IQ` tinted with speed-blue (hero) or lean cyan (eyebrow).
+- Wordmark: `CornerIqMark` — **Syne** lockup, `Corner` + `IQ` with distinct tracking; `IQ` tinted cyan (lean accent, not speed red).
 - UI chrome remains Outfit + Space Grotesk.

@@ -82,8 +82,8 @@ class CornerIqMark extends StatelessWidget {
 
   Color _defaultIqColor(BrandMarkSize size) {
     return switch (size) {
-      BrandMarkSize.hero => RideVizPalette.speedBlueHigh,
-      BrandMarkSize.title => RideVizPalette.speedBlueHigh,
+      BrandMarkSize.hero => RideVizPalette.leanLeft,
+      BrandMarkSize.title => RideVizPalette.leanLeft,
       BrandMarkSize.eyebrow => RideVizPalette.leanLeft,
     };
   }

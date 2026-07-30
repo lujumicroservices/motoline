@@ -82,7 +82,16 @@ class HomeScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: FilledButton(
-                onPressed: () => _startRide(context, ref),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ActiveRideScreen(),
+                    ),
+                  ).then((_) {
+                    ref.invalidate(ridesListProvider);
+                    ref.invalidate(incompleteRideProvider);
+                  });
+                },
                 child: const Text('Start ride'),
               ),
             ),
@@ -135,24 +144,6 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _startRide(BuildContext context, WidgetRef ref) async {
-    final recorder = ref.read(rideRecorderProvider);
-    try {
-      await recorder.start();
-      if (!context.mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const ActiveRideScreen()),
-      );
-      ref.invalidate(ridesListProvider);
-      ref.invalidate(incompleteRideProvider);
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
-    }
   }
 }
 

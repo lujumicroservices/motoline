@@ -34,7 +34,7 @@ apps/mobile/lib/
 
 See **[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)** for planned work:
 
-- Unified **speed color** scale (blue 0→300 km/h, then red) on map + charts
+- Unified **speed color** scale (pale red → dark red by speed, to 300 km/h) on map + charts
 - Fixed **lean L/R** colors (not green/red)
 - **Loop mode** (init + end, then auto lap recording)
 - **Compare** metrics across rides on the same route

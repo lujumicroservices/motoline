@@ -5,14 +5,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/track_point.dart';
+import '../../core/services/location_service.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../ride_detail/ride_detail_screen.dart';
+import 'widgets/gps_status_widgets.dart';
 
 class ActiveRideScreen extends ConsumerStatefulWidget {
-  const ActiveRideScreen({super.key});
+  const ActiveRideScreen({super.key, this.autoStart = true});
+
+  /// When true, starts the recorder (with GPS warm-up UI) on open.
+  final bool autoStart;
 
   @override
   ConsumerState<ActiveRideScreen> createState() => _ActiveRideScreenState();
@@ -20,6 +25,9 @@ class ActiveRideScreen extends ConsumerStatefulWidget {
 
 class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   Timer? _tick;
+  bool _starting = false;
+  GnssWarmupStatus? _warmup;
+  Object? _startError;
 
   @override
   void initState() {
@@ -27,6 +35,44 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
+    if (widget.autoStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+    }
+  }
+
+  Future<void> _bootstrap() async {
+    final recorder = ref.read(rideRecorderProvider);
+    if (recorder.isRecording) return;
+
+    setState(() {
+      _starting = true;
+      _startError = null;
+      _warmup = const GnssWarmupStatus(
+        phase: GpsWarmupPhase.permissions,
+        message: 'Checking location permission…',
+      );
+    });
+
+    try {
+      await recorder.start(
+        onWarmup: (status) {
+          if (!mounted) return;
+          setState(() => _warmup = status);
+        },
+      );
+      if (!mounted) return;
+      setState(() {
+        _starting = false;
+        _warmup = null;
+      });
+      ref.invalidate(activeRideProvider);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _starting = false;
+        _startError = e;
+      });
+    }
   }
 
   @override
@@ -42,78 +88,106 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final ride = recorder.activeRide;
 
     return PopScope(
-      canPop: false,
+      canPop: !_starting && !recorder.isRecording,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_starting) return;
+        // Recording: use End ride.
+      },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Recording'),
+          title: Text(_starting ? 'Starting…' : 'Recording'),
           automaticallyImplyLeading: false,
+          leading: (_starting || recorder.isRecording)
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppTheme.signal.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.signal,
-                          shape: BoxShape.circle,
+            if (!_starting && recorder.isRecording)
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Center(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppTheme.signal.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.signal,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'LIVE',
-                        style: GoogleFonts.spaceGrotesk(
-                          color: AppTheme.signal,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                        const SizedBox(width: 6),
+                        Text(
+                          'LIVE',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: AppTheme.signal,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
-        body: snapshotAsync.when(
-          loading: () => _body(
-            context,
-            distanceKm: ride?.distanceKm ?? 0,
-            duration: ride?.duration ?? Duration.zero,
-            points: const <TrackPoint>[],
-            pointCount: ride?.pointCount ?? 0,
-            speedKmh: null,
-            leanDegrees: null,
-            maxLeanLeft: 0,
-            maxLeanRight: 0,
-            leanCalibrated: false,
-          ),
-          error: (e, _) => Center(child: Text('$e')),
-          data: (snap) {
-            final r = snap?.ride ?? ride;
-            return _body(
-              context,
-              distanceKm: r?.distanceKm ?? 0,
-              duration: r?.duration ?? Duration.zero,
-              points: snap?.points ?? const <TrackPoint>[],
-              pointCount: r?.pointCount ?? 0,
-              speedKmh: snap?.lastPoint?.speedKmh,
-              leanDegrees: snap?.relativeLeanDegrees,
-              maxLeanLeft: snap?.maxLeanLeftDegrees ?? 0,
-              maxLeanRight: snap?.maxLeanRightDegrees ?? 0,
-              leanCalibrated: snap?.leanCalibrated ?? false,
-            );
-          },
-        ),
+        body: _starting
+            ? GpsWarmupPanel(
+                status: _warmup ??
+                    const GnssWarmupStatus(
+                      phase: GpsWarmupPhase.searching,
+                      message: 'Preparing high-precision GPS…',
+                    ),
+              )
+            : _startError != null
+                ? _StartErrorBody(
+                    error: '$_startError',
+                    onRetry: _bootstrap,
+                    onBack: () => Navigator.of(context).pop(),
+                  )
+                : snapshotAsync.when(
+                    loading: () => _body(
+                      context,
+                      distanceKm: ride?.distanceKm ?? 0,
+                      duration: ride?.duration ?? Duration.zero,
+                      points: const <TrackPoint>[],
+                      pointCount: ride?.pointCount ?? 0,
+                      speedKmh: null,
+                      leanDegrees: null,
+                      maxLeanLeft: 0,
+                      maxLeanRight: 0,
+                      leanCalibrated: false,
+                      accuracyMeters: null,
+                    ),
+                    error: (e, _) => Center(child: Text('$e')),
+                    data: (snap) {
+                      final r = snap?.ride ?? ride;
+                      return _body(
+                        context,
+                        distanceKm: r?.distanceKm ?? 0,
+                        duration: r?.duration ?? Duration.zero,
+                        points: snap?.points ?? const <TrackPoint>[],
+                        pointCount: r?.pointCount ?? 0,
+                        speedKmh: snap?.lastPoint?.speedKmh,
+                        leanDegrees: snap?.relativeLeanDegrees,
+                        maxLeanLeft: snap?.maxLeanLeftDegrees ?? 0,
+                        maxLeanRight: snap?.maxLeanRightDegrees ?? 0,
+                        leanCalibrated: snap?.leanCalibrated ?? false,
+                        accuracyMeters: snap?.lastPoint?.accuracyMeters,
+                      );
+                    },
+                  ),
       ),
     );
   }
@@ -129,16 +203,25 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     required double maxLeanLeft,
     required double maxLeanRight,
     required bool leanCalibrated,
+    required double? accuracyMeters,
   }) {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+          child: Row(
+            children: [
+              GpsLockBadge(accuracyMeters: accuracyMeters),
+              const Spacer(),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
           child: Text(
             'Mount firmly (portrait, screen toward you). '
-            'High-precision mode: wait for GPS lock, leave the '
-            'recording notification on, screen can lock. '
-            'Settings → Location → Improve accuracy (Wi‑Fi/Bluetooth) helps.',
+            'Leave the recording notification on — screen can lock. '
+            'Settings → Location → Improve accuracy helps.',
             style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
           ),
         ),
@@ -260,6 +343,57 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         SnackBar(content: Text('$e')),
       );
     }
+  }
+}
+
+class _StartErrorBody extends StatelessWidget {
+  const _StartErrorBody({
+    required this.error,
+    required this.onRetry,
+    required this.onBack,
+  });
+
+  final String error;
+  final VoidCallback onRetry;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Spacer(),
+          const Icon(Icons.gps_off, size: 48, color: AppTheme.signal),
+          const SizedBox(height: 16),
+          Text(
+            'Couldn’t start ride',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            error,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 15),
+          ),
+          const Spacer(),
+          FilledButton(
+            onPressed: onRetry,
+            child: const Text('Try again'),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton(
+            onPressed: onBack,
+            child: const Text('Back'),
+          ),
+        ],
+      ),
+    );
   }
 }
 

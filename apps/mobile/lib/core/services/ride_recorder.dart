@@ -69,18 +69,29 @@ class RideRecorder {
 
   Future<Ride?> recoverIncompleteRide() => _db.getActiveRide();
 
-  Future<Ride> start() async {
+  Future<Ride> start({
+    void Function(GnssWarmupStatus status)? onWarmup,
+  }) async {
     if (_ride != null) {
       throw StateError('A ride is already recording');
     }
+
+    onWarmup?.call(
+      const GnssWarmupStatus(
+        phase: GpsWarmupPhase.permissions,
+        message: 'Checking location permission…',
+      ),
+    );
 
     final permission = await _location.ensurePermission();
     if (!permission.granted) {
       throw StateError(permission.message ?? 'Location permission denied');
     }
 
-    // Lock onto GNSS before the first stored point (S25 Ultra settles fast outdoors).
-    await _location.warmUpGnss();
+    // Lock onto GNSS before the first stored point (shows live accuracy in UI).
+    await for (final status in _location.warmUpGnss()) {
+      onWarmup?.call(status);
+    }
 
     final ride = Ride(
       id: _uuid.v4(),
