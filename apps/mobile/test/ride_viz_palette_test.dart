@@ -6,15 +6,27 @@ import 'package:motoline/theme/ride_viz_palette.dart';
 void main() {
   test('speedColor uses distinct hues across the ramp', () {
     final slow = RideVizPalette.speedColor(10);
-    final mid = RideVizPalette.speedColor(100);
-    final fast = RideVizPalette.speedColor(250);
+    final mid = RideVizPalette.speedColor(70);
+    final fast = RideVizPalette.speedColor(200);
 
     expect(slow.toARGB32(), isNot(mid.toARGB32()));
     expect(mid.toARGB32(), isNot(fast.toARGB32()));
     // Slow is blue-ish (more blue than red).
     expect(slow.b, greaterThan(slow.r));
+    // Street brisk (~65) already in warm yellow territory (R+G high).
+    expect(mid.r + mid.g, greaterThan(mid.b));
     // Fast end is more red/magenta than blue.
     expect(fast.r + fast.b, greaterThan(fast.g));
+  });
+
+  test('warm colors arrive at street speeds', () {
+    final city = RideVizPalette.speedColor(65);
+    final highway = RideVizPalette.speedColor(90);
+    // Yellow-ish at city brisk: more red+green than blue.
+    expect(city.r, greaterThan(city.b));
+    expect(city.g, greaterThan(city.b));
+    // Orange at highway: red dominates green a bit more than at yellow.
+    expect(highway.r, greaterThan(highway.g));
   });
 
   test('leanColor uses cyan left and amber right', () {

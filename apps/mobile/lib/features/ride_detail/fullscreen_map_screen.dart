@@ -10,6 +10,7 @@ import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import 'map_polyline_builder.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/speed_legend.dart';
 
@@ -52,12 +53,19 @@ class FullscreenMapScreen extends StatefulWidget {
 class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
   final MapController _map = MapController();
 
+  /// Selection-rect drag only — avoids rebuilding the track on every pan frame.
+  final ValueNotifier<(Offset?, Offset?)> _dragRect =
+      ValueNotifier<(Offset?, Offset?)>((null, null));
+
   bool _selectMode = false;
-  Offset? _dragStart;
-  Offset? _dragCurrent;
   LatLngBounds? _areaBounds;
   ({int start, int end, int insideCount})? _selection;
   late MapLayerOptions _layers;
+
+  LatLngBounds? _rideBounds;
+  LatLng? _rideCenter;
+  List<Polyline> _polylines = const [];
+  List<Marker> _markers = const [];
 
   @override
   void initState() {
@@ -78,6 +86,41 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
         ]);
       }
     }
+    _rebuildTrackLayers();
+  }
+
+  @override
+  void dispose() {
+    _dragRect.dispose();
+    super.dispose();
+  }
+
+  void _rebuildTrackLayers() {
+    final points = widget.points;
+    if (points.isEmpty) {
+      _rideBounds = null;
+      _rideCenter = null;
+      _polylines = const [];
+      _markers = const [];
+      return;
+    }
+    _rideBounds = LatLngBounds.fromPoints([
+      for (final p in points) LatLng(p.latitude, p.longitude),
+    ]);
+    _rideCenter = LatLng(
+      points[points.length ~/ 2].latitude,
+      points[points.length ~/ 2].longitude,
+    );
+    _polylines = _buildPolylines(
+      points,
+      focusLo: _selection?.start,
+      focusHi: _selection?.end,
+    );
+    _markers = _buildMarkers(
+      points,
+      focusLo: _selection?.start,
+      focusHi: _selection?.end,
+    );
   }
 
   void _fitRide() {
@@ -135,11 +178,11 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       preferLat: center.latitude,
       preferLng: center.longitude,
     );
+    _dragRect.value = (null, null);
     setState(() {
       _areaBounds = bounds;
       _selection = hit;
-      _dragStart = null;
-      _dragCurrent = null;
+      _rebuildTrackLayers();
     });
     if (hit != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -165,25 +208,20 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
   }
 
   void _onSelectPanStart(DragStartDetails details) {
-    setState(() {
-      _dragStart = details.localPosition;
-      _dragCurrent = details.localPosition;
-    });
+    _dragRect.value = (details.localPosition, details.localPosition);
   }
 
   void _onSelectPanUpdate(DragUpdateDetails details) {
-    setState(() => _dragCurrent = details.localPosition);
+    final start = _dragRect.value.$1;
+    _dragRect.value = (start, details.localPosition);
   }
 
   void _onSelectPanEnd(DragEndDetails details) {
-    final a = _dragStart;
-    final b = _dragCurrent;
+    final a = _dragRect.value.$1;
+    final b = _dragRect.value.$2;
     if (a == null || b == null) return;
     if ((a - b).distance < 24) {
-      setState(() {
-        _dragStart = null;
-        _dragCurrent = null;
-      });
+      _dragRect.value = (null, null);
       return;
     }
     final cam = _map.camera;
@@ -193,11 +231,11 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
   }
 
   void _clearSelection() {
+    _dragRect.value = (null, null);
     setState(() {
       _areaBounds = null;
       _selection = null;
-      _dragStart = null;
-      _dragCurrent = null;
+      _rebuildTrackLayers();
     });
   }
 
@@ -221,17 +259,11 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       );
     }
 
-    final bounds = LatLngBounds.fromPoints([
-      for (final p in points) LatLng(p.latitude, p.longitude),
-    ]);
-    final center = LatLng(
-      points[points.length ~/ 2].latitude,
-      points[points.length ~/ 2].longitude,
-    );
-
     final focusLo = _selection?.start;
     final focusHi = _selection?.end;
     final hasFocus = focusLo != null && focusHi != null;
+    final bounds = _rideBounds!;
+    final center = _rideCenter!;
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
@@ -250,7 +282,8 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                 ),
                 interactionOptions: InteractionOptions(
                   flags: _selectMode
-                      ? InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom
+                      ? InteractiveFlag.pinchZoom |
+                          InteractiveFlag.doubleTapZoom
                       : InteractiveFlag.all,
                 ),
               ),
@@ -259,20 +292,8 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.motoline.motoline',
                 ),
-                PolylineLayer(
-                  polylines: _buildPolylines(
-                    points,
-                    focusLo: focusLo,
-                    focusHi: focusHi,
-                  ),
-                ),
-                MarkerLayer(
-                  markers: _buildMarkers(
-                    points,
-                    focusLo: focusLo,
-                    focusHi: focusHi,
-                  ),
-                ),
+                PolylineLayer(polylines: _polylines),
+                MarkerLayer(markers: _markers),
                 if (_areaBounds != null)
                   PolygonLayer(
                     polygons: [
@@ -304,11 +325,16 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                 onPanStart: _onSelectPanStart,
                 onPanUpdate: _onSelectPanUpdate,
                 onPanEnd: _onSelectPanEnd,
-                child: CustomPaint(
-                  painter: _SelectionRectPainter(
-                    start: _dragStart,
-                    current: _dragCurrent,
-                  ),
+                child: ValueListenableBuilder<(Offset?, Offset?)>(
+                  valueListenable: _dragRect,
+                  builder: (context, drag, _) {
+                    return CustomPaint(
+                      painter: _SelectionRectPainter(
+                        start: drag.$1,
+                        current: drag.$2,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -322,10 +348,9 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                     selecting: _selectMode,
                     onBack: () => Navigator.of(context).pop(),
                     onToggleSelect: () {
+                      _dragRect.value = (null, null);
                       setState(() {
                         _selectMode = !_selectMode;
-                        _dragStart = null;
-                        _dragCurrent = null;
                       });
                     },
                   ),
@@ -337,7 +362,10 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                       padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
                       child: MapLayerToggles(
                         options: _layers,
-                        onChanged: (v) => setState(() => _layers = v),
+                        onChanged: (v) => setState(() {
+                          _layers = v;
+                          _rebuildTrackLayers();
+                        }),
                       ),
                     ),
                   ),
@@ -393,7 +421,10 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     int? focusLo,
     int? focusHi,
   }) {
-    final kindByIndex = _kindByIndex(points.length);
+    final kindByIndex = kindByIndexFromStretches(
+      length: points.length,
+      stretches: widget.roadStretches,
+    );
     final hasFocus = focusLo != null && focusHi != null;
     if (!hasFocus) {
       final out = <Polyline>[];
@@ -401,10 +432,12 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       for (final segment in splitByGpsGaps(points)) {
         if (segment.length >= 2) {
           out.addAll(
-            _styledSegments(
-              segment,
+            buildMergedStyledPolylines(
+              segment: segment,
               indexOffset: cursor,
               kindByIndex: kindByIndex,
+              showRoadKindContrast: _layers.showRoadKindContrast,
+              showSpeedColors: _layers.showSpeedColors,
             ),
           );
         }
@@ -417,28 +450,18 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       out.addAll(_plainSegments(points.sublist(0, focusLo + 1), dimmed: true));
     }
     out.addAll(
-      _styledSegments(
-        points.sublist(focusLo, focusHi + 1),
+      buildMergedStyledPolylines(
+        segment: points.sublist(focusLo, focusHi + 1),
         indexOffset: focusLo,
         kindByIndex: kindByIndex,
+        showRoadKindContrast: _layers.showRoadKindContrast,
+        showSpeedColors: _layers.showSpeedColors,
       ),
     );
     if (focusHi < points.length - 1) {
       out.addAll(
         _plainSegments(points.sublist(focusHi, points.length), dimmed: true),
       );
-    }
-    return out;
-  }
-
-  List<(RoadKind, TurnSide)?> _kindByIndex(int length) {
-    final out = List<(RoadKind, TurnSide)?>.filled(length, null);
-    for (final s in widget.roadStretches) {
-      final lo = s.startIndex.clamp(0, length - 1);
-      final hi = s.endIndex.clamp(lo, length - 1);
-      for (var i = lo; i <= hi; i++) {
-        out[i] = (s.kind, s.side);
-      }
     }
     return out;
   }
@@ -530,58 +553,6 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       );
     }
     return markers;
-  }
-
-  List<Polyline> _styledSegments(
-    List<TrackPoint> segment, {
-    required int indexOffset,
-    required List<(RoadKind, TurnSide)?> kindByIndex,
-  }) {
-    final result = <Polyline>[];
-    for (var i = 1; i < segment.length; i++) {
-      final a = segment[i - 1];
-      final b = segment[i];
-      final absIndex = indexOffset + i;
-      final style = _strokeForIndex(absIndex, b, kindByIndex);
-      result.add(
-        Polyline(
-          points: [
-            LatLng(a.latitude, a.longitude),
-            LatLng(b.latitude, b.longitude),
-          ],
-          color: style.$1,
-          strokeWidth: style.$2,
-        ),
-      );
-    }
-    return result;
-  }
-
-  (Color, double) _strokeForIndex(
-    int absIndex,
-    TrackPoint b,
-    List<(RoadKind, TurnSide)?> kindByIndex,
-  ) {
-    if (_layers.showRoadKindContrast &&
-        absIndex >= 0 &&
-        absIndex < kindByIndex.length) {
-      final kind = kindByIndex[absIndex];
-      if (kind != null) {
-        if (kind.$1 == RoadKind.recta) {
-          return (RideVizPalette.roadRecta.withValues(alpha: 0.75), 3.5);
-        }
-        final color = switch (kind.$2) {
-          TurnSide.izquierda => RideVizPalette.roadCurvaLeft,
-          TurnSide.derecha => RideVizPalette.roadCurvaRight,
-          TurnSide.none => RideVizPalette.roadCurva,
-        };
-        return (color, 7);
-      }
-    }
-    if (_layers.showSpeedColors) {
-      return (RideVizPalette.speedColor(b.speedKmh ?? 0), 5);
-    }
-    return (AppTheme.mist.withValues(alpha: 0.85), 4);
   }
 
   List<Polyline> _plainSegments(

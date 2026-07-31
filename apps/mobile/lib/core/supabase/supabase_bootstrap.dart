@@ -50,7 +50,7 @@ class SupabaseBootstrap {
     final auth = client.auth;
     final existing = auth.currentSession;
     if (existing != null) {
-      await _ensureProfileRow(existing.user.id);
+      await ensureProfileForUser(existing.user.id);
       return existing;
     }
 
@@ -61,7 +61,7 @@ class SupabaseBootstrap {
         lastAuthError = 'Anonymous sign-in returned no session';
         return null;
       }
-      await _ensureProfileRow(session.user.id);
+      await ensureProfileForUser(session.user.id);
       return session;
     } on AuthException catch (e) {
       lastAuthError = e.message;
@@ -76,7 +76,7 @@ class SupabaseBootstrap {
 
   /// Trigger should create the row; upsert covers older projects / races.
   /// Never send null display_name — that would wipe the rider alias.
-  static Future<void> _ensureProfileRow(String userId) async {
+  static Future<void> ensureProfileForUser(String userId) async {
     try {
       final existing = await client
           .from('profiles')

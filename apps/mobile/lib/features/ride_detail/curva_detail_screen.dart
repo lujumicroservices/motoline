@@ -13,6 +13,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../pro/pro_upsell.dart';
 import 'fullscreen_map_screen.dart';
+import 'map_polyline_builder.dart';
 
 /// Swipeable curva coach: metrics + map zoomed to the active turn.
 class CurvaDetailScreen extends ConsumerStatefulWidget {
@@ -597,21 +598,15 @@ class _CurvaMapState extends State<_CurvaMap> {
         ),
       );
     }
-    for (var i = analysis.entryIndex + 1; i <= analysis.exitIndex; i++) {
-      final a = samples[i - 1];
-      final b = samples[i];
-      final speed = b.speedKmh ?? a.speedKmh ?? 0;
-      polylines.add(
-        Polyline(
-          points: [
-            LatLng(a.latitude, a.longitude),
-            LatLng(b.latitude, b.longitude),
-          ],
-          color: RideVizPalette.speedColor(speed),
-          strokeWidth: 6,
-        ),
-      );
-    }
+    polylines.addAll(
+      buildMergedStyledPolylines(
+        segment: samples.sublist(analysis.entryIndex, analysis.exitIndex + 1),
+        indexOffset: analysis.entryIndex,
+        kindByIndex: List.filled(samples.length, null),
+        showRoadKindContrast: false,
+        showSpeedColors: true,
+      ),
+    );
     if (analysis.exitIndex < hi) {
       polylines.add(
         Polyline(

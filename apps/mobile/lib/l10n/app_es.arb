@@ -377,5 +377,14 @@
   "rideLoopDetectedEmpty": "No hay vuelta cerrada en este ride. Prueba Marcar A / B en el mapa.",
   "rideLoopNeedPoints": "No hay suficientes puntos GPS para marcar un loop.",
   "rideLoopSaveFirst": "Guarda un loop primero — eso crea la ruta.",
-  "rideLoopOpenRoute": "Abrir ruta (vueltas + loops)"
+  "rideLoopOpenRoute": "Abrir ruta (vueltas + loops)",
+  "syncCloudRides": "Subir rides a la nube",
+  "syncCloudRidesHelp": "Guarda métricas (velocidad, lean, line score, GPS) de todos los rides terminados en tu cuenta.",
+  "syncCloudRidesDone": "Nube: {ok} ok, {fail} fallaron",
+  "@syncCloudRidesDone": {
+    "placeholders": {
+      "ok": { "type": "int" },
+      "fail": { "type": "int" }
+    }
+  }
 }

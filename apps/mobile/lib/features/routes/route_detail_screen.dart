@@ -163,6 +163,27 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
           route.name,
           style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (v) async {
+              if (v == 'clear_loops') await _confirmClearLoops();
+              if (v == 'delete_route') await _confirmDeleteRoute();
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'clear_loops',
+                child: Text(l10n.deleteAllLoops),
+              ),
+              PopupMenuItem(
+                value: 'delete_route',
+                child: Text(
+                  l10n.deleteRoute,
+                  style: const TextStyle(color: AppTheme.signal),
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabs,
           tabs: [
@@ -192,13 +213,86 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
               ref.invalidate(routesListProvider);
             },
             onDelete: (id) async {
+              final ok = await _confirm(
+                title: l10n.deleteLoop,
+                body: l10n.deleteLoopBody,
+              );
+              if (ok != true || !mounted) return;
               await ref.read(routeLoopServiceProvider).deleteLoop(id);
               ref.invalidate(routeLoopsProvider(route.id));
               ref.invalidate(routesListProvider);
+              if (!mounted) return;
+              final messenger = ScaffoldMessenger.of(context);
+              messenger.showSnackBar(
+                SnackBar(content: Text(l10n.loopDeleted)),
+              );
             },
           ),
         ],
       ),
+    );
+  }
+
+  Future<bool?> _confirm({required String title, required String body}) {
+    final l10n = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.asphaltElevated,
+        title: Text(
+          title,
+          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          body,
+          style: GoogleFonts.outfit(color: AppTheme.steel, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.close),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.deleteConfirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmClearLoops() async {
+    final l10n = context.l10n;
+    final ok = await _confirm(
+      title: l10n.deleteAllLoops,
+      body: l10n.deleteAllLoopsBody,
+    );
+    if (ok != true || !mounted) return;
+    await ref.read(routeLoopServiceProvider).deleteAllLoops(route.id);
+    ref.invalidate(routeLoopsProvider(route.id));
+    ref.invalidate(routesListProvider);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.loopsCleared)),
+    );
+  }
+
+  Future<void> _confirmDeleteRoute() async {
+    final l10n = context.l10n;
+    final ok = await _confirm(
+      title: l10n.deleteRoute,
+      body: l10n.deleteRouteBody,
+    );
+    if (ok != true || !mounted) return;
+    await ref.read(routeServiceProvider).deleteRoute(route.id);
+    ref.invalidate(routesListProvider);
+    ref.invalidate(sharedPeerRoutesProvider);
+    ref.invalidate(ridesListProvider);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.routeDeleted)),
     );
   }
 }
@@ -480,7 +574,10 @@ class _SavedLoopTile extends StatelessWidget {
                       ),
                     PopupMenuItem(
                       value: 'delete',
-                      child: Text(l10n.discard),
+                      child: Text(
+                        l10n.deleteLoop,
+                        style: const TextStyle(color: AppTheme.signal),
+                      ),
                     ),
                   ],
                 ),

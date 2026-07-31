@@ -5,17 +5,44 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/pro_entitlement_provider.dart';
+import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../../widgets/account_auth_section.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _syncing = false;
+
+  Future<void> _syncCloud() async {
+    final l10n = context.l10n;
+    setState(() => _syncing = true);
+    try {
+      final result =
+          await ref.read(rideSyncServiceProvider).syncAllCompletedRides();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.syncCloudRidesDone(result.ok, result.fail)),
+        ),
+      );
+      ref.invalidate(ridesListProvider);
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isPro = ref.watch(isProProvider);
     final locale = ref.watch(localeProvider);
@@ -43,6 +70,37 @@ class SettingsScreen extends ConsumerWidget {
           const Align(
             alignment: Alignment.centerLeft,
             child: RiderAliasChip(),
+          ),
+          const SizedBox(height: 28),
+          const AccountAuthSection(),
+          const SizedBox(height: 28),
+          Text(
+            l10n.syncCloudRides,
+            style: GoogleFonts.syne(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.syncCloudRidesHelp,
+            style: GoogleFonts.outfit(
+              color: AppTheme.steel,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _syncing ? null : _syncCloud,
+            icon: _syncing
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.cloud_upload_outlined),
+            label: Text(_syncing ? '…' : l10n.syncCloudRides),
           ),
           const SizedBox(height: 28),
           Text(

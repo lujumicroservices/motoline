@@ -15,15 +15,16 @@ Related shipped MVP: GPS ride recorder, Ride Lab (map + scrubber + charts), in-a
 | Speed (km/h) | Color |
 |---|---|
 | **0** | Electric blue |
-| **~40** | Mint |
-| **~80** | Lime |
-| **~120** | Yellow |
-| **~160** | Orange |
-| **~220** | Hot red |
-| **300** | Magenta |
+| **~25** | Mint |
+| **~45** | Lime |
+| **~65** | Yellow |
+| **~90** | Orange |
+| **~130** | Hot red |
+| **250** | Magenta |
 
 - High-contrast **multi-hue** ramp (not a single red family) so slow vs fast is obvious on the map and charts.
-- Cap: **300 km/h**.
+- **Street-biased:** yellow/orange/red arrive at everyday speeds so regular riders already look “a little quick.”
+- Cap: **250 km/h**.
 - Same mapping for map polyline, speed chart, legend.
 
 ### Brake inference (from speed)
@@ -40,8 +41,8 @@ Related shipped MVP: GPS ride recorder, Ride Lab (map + scrubber + charts), in-a
 ### Acceptance criteria
 
 - [ ] One shared helper (e.g. `speedColor(kmh)`) used by map + speed chart.
-- [ ] At 0 km/h → pale/clear red; at 300 km/h → dark red.
-- [ ] Intermediate speeds are a smooth red intensity gradient (slow = light, fast = dark).
+- [ ] Warm hues by street speeds: yellow ~65, orange ~90, red ~130.
+- [ ] Smooth multi-hue gradient across the ramp; cap at 250 km/h (magenta).
 - [ ] Legend visible on the pilot-line map screen.
 
 ---
@@ -249,8 +250,8 @@ flowchart LR
 
 | Topic | Default for now | Revisit when |
 |---|---|---|
-| Blue ramp exact stops (hue/lightness) | One blue family, document hex in theme when implemented | User feedback outdoors |
-| Behavior exactly at 300.0 | Blue end inclusive; `> 300` → red | Edge cases |
+| Speed ramp stops (street-biased) | Yellow ~65 / orange ~90 / red ~130 / magenta 250 | Outdoor feedback |
+| Behavior at / above speedCapKmh | Clamp to magenta end stop | Edge cases |
 | Lap storage model | Segments under one session vs separate rides | Loop mode design spike |
 | Route matching without loops | Deferred | After loop tagging ships |
 

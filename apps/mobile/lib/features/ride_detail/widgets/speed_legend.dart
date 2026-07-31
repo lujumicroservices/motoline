@@ -42,7 +42,7 @@ class SpeedColorLegend extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              '300',
+              RideVizPalette.speedCapKmh.toStringAsFixed(0),
               style: GoogleFonts.outfit(
                 fontSize: 10,
                 color: AppTheme.mist,

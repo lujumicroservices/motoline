@@ -37,6 +37,24 @@ class RideSyncService {
     return s.isEmpty ? null : s;
   }
 
+  /// Push every completed local ride (summary metrics + full GPS/lean track).
+  Future<({int ok, int fail})> syncAllCompletedRides() async {
+    var ok = 0;
+    var fail = 0;
+    final rides = await _db.listRides();
+    for (final ride in rides) {
+      if (ride.status != RideStatus.completed) continue;
+      final cloudId = await syncRide(ride.id);
+      if (cloudId != null) {
+        ok++;
+      } else {
+        fail++;
+      }
+    }
+    debugPrint('CornerIQ syncAll: $ok ok, $fail failed');
+    return (ok: ok, fail: fail);
+  }
+
   /// Upsert ride summary + replace track points. Soft-fails when offline / no auth.
   Future<String?> syncRide(String localRideId) async {
     try {

@@ -35,14 +35,51 @@ Tables: `profiles`, `routes`, `rides`, `track_points` with RLS:
 
 ## Auth
 
-Enable **Anonymous** sign-ins in Dashboard → Authentication → Providers (required for Friends + ride sync on device).
+### Anonymous (guest)
+
+Enable **Anonymous** sign-ins in Dashboard → Authentication → Providers (still used for first-run guest + Friends / ride sync before Google).
 
 Direct link (CornerIQ project):  
 https://supabase.com/dashboard/project/eabhnmlfsfibgwkspqwa/auth/providers
 
 Without Anonymous, the Amigos screen shows “nube no disponible” / a prompt to enable it.
 
-Email / magic-link can be added later for named riders.
+### Google Sign-In
+
+Settings → **Account** offers **Sign in with Google**. Anonymous guests are **linked** to Google when possible (`linkIdentityWithIdToken`) so the same `auth.users` / ride IDs are kept.
+
+**Dashboard**
+
+1. Authentication → Providers → **Google** → Enable  
+2. Enable **Manual linking** (Authentication → Providers / Auth settings) so anonymous → Google works  
+3. Paste Google **Web client ID** + **Client secret** (and list Android/iOS client IDs if prompted)
+
+**Google Cloud Console**
+
+1. Create a project (or reuse one) → [Clients](https://console.cloud.google.com/auth/clients)  
+2. **Web application** OAuth client — copy Client ID → `GOOGLE_WEB_CLIENT_ID` in `apps/mobile/.env`  
+3. **Android** OAuth client — package `com.motoline.motoline` + SHA-1 of your debug/release keystore  
+4. **iOS** OAuth client (when shipping iOS) — bundle id + `GOOGLE_IOS_CLIENT_ID` + `CFBundleURLTypes` reversed client id in `Info.plist`
+
+**App `.env`**
+
+```env
+GOOGLE_WEB_CLIENT_ID=….apps.googleusercontent.com
+# GOOGLE_IOS_CLIENT_ID=….apps.googleusercontent.com
+```
+
+Get Android debug SHA-1:
+
+```bash
+cd apps/mobile/android
+./gradlew signingReport
+```
+
+### Future providers
+
+Auth is routed through `AuthProviderKind` + `AuthService.signInWith(...)` (`lib/core/auth/`). Add Apple / email as new enum cases and handlers; Settings already loops `availableProviders`.
+
+Email / magic-link can be added the same way for named riders.
 
 ## CLI
 

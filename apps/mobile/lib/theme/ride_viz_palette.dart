@@ -7,17 +7,18 @@ class RideVizPalette {
   RideVizPalette._();
 
   /// Top of the speed color ramp (km/h).
-  static const speedCapKmh = 300.0;
+  static const speedCapKmh = 250.0;
 
-  /// High-contrast stops (hue changes, not one red family).
+  /// Street-biased stops: warm hues arrive early so normal riders feel quick.
+  /// High-contrast hues (not one red family). Cap still covers track speeds.
   static const speedStops = <(double kmh, Color color)>[
-    (0, Color(0xFF1B4DFF)), // electric blue — crawl
-    (40, Color(0xFF00E5A8)), // mint — slow street
-    (80, Color(0xFFC6FF00)), // lime — brisk
-    (120, Color(0xFFFFD600)), // yellow — fast
-    (160, Color(0xFFFF6D00)), // orange — very fast
-    (220, Color(0xFFFF1744)), // hot red
-    (300, Color(0xFFD500F9)), // magenta — top end
+    (0, Color(0xFF1B4DFF)), // electric blue — crawl / stopped
+    (25, Color(0xFF00E5A8)), // mint — neighborhood
+    (45, Color(0xFFC6FF00)), // lime — city cruise
+    (65, Color(0xFFFFD600)), // yellow — brisk street (feels quick)
+    (90, Color(0xFFFF6D00)), // orange — highway / spirited
+    (130, Color(0xFFFF1744)), // hot red — properly fast
+    (250, Color(0xFFD500F9)), // magenta — top end
   ];
 
   static const speedMid = Color(0xFFFFD600);

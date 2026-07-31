@@ -300,5 +300,14 @@
   "rideLoopDetectedEmpty": "No closed loop found on this ride. Try Mark A / B on the map.",
   "rideLoopNeedPoints": "Not enough GPS points to mark a loop.",
   "rideLoopSaveFirst": "Save a loop first — that creates the route.",
-  "rideLoopOpenRoute": "Open route (laps + loops)"
+  "rideLoopOpenRoute": "Open route (laps + loops)",
+  "syncCloudRides": "Upload rides to cloud",
+  "syncCloudRidesHelp": "Persists metrics (speed, lean, line score, GPS) for every completed ride on your account.",
+  "syncCloudRidesDone": "Cloud: {ok} ok, {fail} failed",
+  "@syncCloudRidesDone": {
+    "placeholders": {
+      "ok": { "type": "int" },
+      "fail": { "type": "int" }
+    }
+  }
 }

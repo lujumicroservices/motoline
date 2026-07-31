@@ -1837,6 +1837,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Abrir ruta (vueltas + loops)'**
   String get rideLoopOpenRoute;
+
+  /// No description provided for @syncCloudRides.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir rides a la nube'**
+  String get syncCloudRides;
+
+  /// No description provided for @syncCloudRidesHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda métricas (velocidad, lean, line score, GPS) de todos los rides terminados en tu cuenta.'**
+  String get syncCloudRidesHelp;
+
+  /// No description provided for @syncCloudRidesDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Nube: {ok} ok, {fail} fallaron'**
+  String syncCloudRidesDone(int ok, int fail);
 }
 
 class _AppLocalizationsDelegate
