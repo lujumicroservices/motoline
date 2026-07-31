@@ -9,6 +9,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/rider_alias_chip.dart';
 import '../compare/route_compare_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 
@@ -29,6 +30,10 @@ class RoutesScreen extends ConsumerWidget {
           style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
         ),
         actions: [
+          const Padding(
+            padding: EdgeInsets.only(right: 4),
+            child: Center(child: RiderAliasChip(compact: true)),
+          ),
           IconButton(
             tooltip: l10n.createRoute,
             onPressed: () => _showCreateDialog(context, ref),
@@ -45,12 +50,35 @@ class RoutesScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
           children: [
-            Text(
-              l10n.routesHelp,
-              style: GoogleFonts.outfit(
-                color: AppTheme.steel,
-                fontSize: 14,
-                height: 1.4,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.asphaltElevated,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.mist.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.routesHowTitle,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    l10n.routesHowBody,
+                    style: GoogleFonts.outfit(
+                      color: AppTheme.steel,
+                      fontSize: 14,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
@@ -252,7 +280,11 @@ class _MyRouteTile extends ConsumerWidget {
           ],
         ),
         subtitle: Text(
-          route.isShared ? l10n.sharedRoute : l10n.privateRoute,
+          [
+            if (route.isLoopReady) l10n.routesLoopReady,
+            route.isShared ? l10n.sharedRoute : l10n.privateRoute,
+            l10n.routesTapHint,
+          ].join(' · '),
           style: const TextStyle(color: AppTheme.steel, fontSize: 12),
         ),
         trailing: Switch(

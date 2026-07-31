@@ -5,8 +5,10 @@ import '../../../core/utils/geo_utils.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
+import '../../../widgets/pro_upsell.dart';
 
 /// Range picker to select a road segment for zoom + metrics.
+/// Locked for Free — Pro unlocks selecting a sub-portion of the ride.
 class SegmentRangePanel extends StatelessWidget {
   const SegmentRangePanel({
     super.key,
@@ -16,9 +18,11 @@ class SegmentRangePanel extends StatelessWidget {
     required this.startSeconds,
     required this.endSeconds,
     required this.zoomed,
+    required this.isPro,
     required this.onRangeChanged,
     required this.onZoom,
     required this.onClear,
+    this.onUpgrade,
   });
 
   final int totalPoints;
@@ -27,9 +31,11 @@ class SegmentRangePanel extends StatelessWidget {
   final double startSeconds;
   final double endSeconds;
   final bool zoomed;
+  final bool isPro;
   final void Function(int start, int end) onRangeChanged;
   final VoidCallback onZoom;
   final VoidCallback onClear;
+  final VoidCallback? onUpgrade;
 
   @override
   Widget build(BuildContext context) {
@@ -65,44 +71,58 @@ class SegmentRangePanel extends StatelessWidget {
                   color: zoomed ? RideVizPalette.leanLeft : AppTheme.steel,
                 ),
               ),
+              if (!isPro) ...[
+                const SizedBox(width: 8),
+                const ProBadge(),
+              ],
               const Spacer(),
               Text(
                 '${_fmt(startSeconds)} → ${_fmt(endSeconds)}',
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
+                  color: isPro ? null : AppTheme.steel,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            zoomed ? l10n.segmentHintZoomed : l10n.segmentHint,
+            isPro
+                ? (zoomed ? l10n.segmentHintZoomed : l10n.segmentHint)
+                : l10n.segmentProLocked,
             style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 8),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: RideVizPalette.leanLeft,
-              inactiveTrackColor: AppTheme.mist.withValues(alpha: 0.12),
-              rangeThumbShape: const RoundRangeSliderThumbShape(
-                enabledThumbRadius: 8,
+          IgnorePointer(
+            ignoring: !isPro,
+            child: Opacity(
+              opacity: isPro ? 1 : 0.45,
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: RideVizPalette.leanLeft,
+                  inactiveTrackColor: AppTheme.mist.withValues(alpha: 0.12),
+                  rangeThumbShape: const RoundRangeSliderThumbShape(
+                    enabledThumbRadius: 8,
+                  ),
+                  overlayColor:
+                      RideVizPalette.leanLeft.withValues(alpha: 0.15),
+                  trackHeight: 3,
+                ),
+                child: RangeSlider(
+                  values: RangeValues(start, end),
+                  min: 0,
+                  max: maxIndex,
+                  divisions: totalPoints > 2 ? totalPoints - 1 : null,
+                  labels: RangeLabels(
+                    'A ${startIndex + 1}',
+                    'B ${endIndex + 1}',
+                  ),
+                  onChanged: (v) {
+                    onRangeChanged(v.start.round(), v.end.round());
+                  },
+                ),
               ),
-              overlayColor: RideVizPalette.leanLeft.withValues(alpha: 0.15),
-              trackHeight: 3,
-            ),
-            child: RangeSlider(
-              values: RangeValues(start, end),
-              min: 0,
-              max: maxIndex,
-              divisions: totalPoints > 2 ? totalPoints - 1 : null,
-              labels: RangeLabels(
-                'A ${startIndex + 1}',
-                'B ${endIndex + 1}',
-              ),
-              onChanged: (v) {
-                onRangeChanged(v.start.round(), v.end.round());
-              },
             ),
           ),
           Row(
@@ -112,7 +132,12 @@ class SegmentRangePanel extends StatelessWidget {
                 style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.steel),
               ),
               const Spacer(),
-              if (zoomed)
+              if (!isPro)
+                FilledButton.tonal(
+                  onPressed: onUpgrade,
+                  child: Text(l10n.upgradeToPro),
+                )
+              else if (zoomed)
                 TextButton(
                   onPressed: onClear,
                   child: Text(l10n.fullRide),

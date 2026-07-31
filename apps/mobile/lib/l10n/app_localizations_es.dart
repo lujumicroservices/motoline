@@ -254,7 +254,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanHelp =>
-      '0° es vertical inferida (sirve con el teléfono en el bolsillo).';
+      '0° es vertical inferida. Para inclinación precisa, monta el teléfono firme en vertical (pantalla hacia ti) en el tanque o manillar — evita bolsillo suelto o apaisado.';
+
+  @override
+  String get leanPhoneDisclaimer =>
+      'La posición del celular importa: vertical, pantalla hacia ti, montaje fijo. Un bolsillo suelto sesga la inclinación.';
 
   @override
   String get mapHint =>
@@ -571,6 +575,45 @@ class AppLocalizationsEs extends AppLocalizations {
       'Nombra un circuito, compártelo y etiqueta rides para que amigos comparen en la misma ruta.';
 
   @override
+  String get routesHowTitle => '¿Cómo se usan las Rutas?';
+
+  @override
+  String get routesHowBody =>
+      '1) Crea una ruta con + (ej. «Glorieta norte»).\n2) En Ride Lab → Comparte, etiqueta la grabación con esa ruta.\n3) O usa Modo Loop: marca A/B y cada vuelta se guarda en la misma ruta.\n4) Toca una ruta aquí para ver vueltas, compararlas o abrir Ride Lab.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.';
+
+  @override
+  String get routesTapHint => 'Toca para ver vueltas';
+
+  @override
+  String get routesLoopReady => 'Loop listo';
+
+  @override
+  String get setYourAlias => 'Pon tu alias';
+
+  @override
+  String get sectionNotesProOnly => 'Solo Pro — precisión GPS y notas';
+
+  @override
+  String get proCurvaBannerTitle => 'Detalle de curva · Pro';
+
+  @override
+  String get proCurvaBannerBody =>
+      'Vista previa de 0,5 s. Con Pro ves entrada, ápice, salida y mapa sin bloqueo.';
+
+  @override
+  String get proNotesBannerTitle => 'Precisión + notas · Pro';
+
+  @override
+  String get proNotesBannerBody =>
+      'Calidad GPS y tips del coach están en CornerIQ Pro.';
+
+  @override
+  String get proFeatureCurva => 'Detalle completo de curvas (sin banner)';
+
+  @override
+  String get proFeatureNotes => 'Precisión GPS + notas de coach';
+
+  @override
   String get myRoutes => 'Tus rutas';
 
   @override
@@ -720,4 +763,61 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get endSession => 'Terminar sesión';
+
+  @override
+  String get byRawThrottle => 'by Raw Throttle';
+
+  @override
+  String get pro => 'PRO';
+
+  @override
+  String get free => 'Gratis';
+
+  @override
+  String get settings => 'Ajustes';
+
+  @override
+  String get proUnlock => 'RiderLab Pro';
+
+  @override
+  String get proUnlockBody =>
+      'Segmenta cualquier tramo, detalle completo de curvas, precisión + notas, frenadas completas y sin anuncios.';
+
+  @override
+  String get proFeatureSegment =>
+      'Zoom de segmento — elige cualquier tramo del ride';
+
+  @override
+  String get proFeatureBrakes =>
+      'Detalle completo de frenadas (no solo una vista previa)';
+
+  @override
+  String get proFeatureNoAds => 'Sin banners publicitarios';
+
+  @override
+  String get upgradeToPro => 'Pasar a Pro';
+
+  @override
+  String get proUnlocked => 'Pro activo';
+
+  @override
+  String get proToggleDev => 'Pro desbloqueado';
+
+  @override
+  String get proToggleHelp =>
+      'Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión Gratis.';
+
+  @override
+  String brakesProTeaser(int shown, int total) {
+    return 'Mostrando $shown de $total. Desbloquea Pro para el historial completo de frenadas.';
+  }
+
+  @override
+  String get segmentProLocked => 'Elegir un tramo del ride es una función Pro.';
+
+  @override
+  String get adPlaceholder => 'Anuncio';
+
+  @override
+  String get removeAdsWithPro => 'Pasa a Pro para quitar anuncios';
 }

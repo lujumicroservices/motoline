@@ -13,11 +13,17 @@ class RiderLabMark extends StatelessWidget {
     this.size = BrandMarkSize.hero,
     this.color,
     this.labColor,
+    this.showAttribution = false,
+    this.attribution,
   });
 
   final BrandMarkSize size;
   final Color? color;
   final Color? labColor;
+
+  /// When true, shows [attribution] under the wordmark (e.g. "by Raw Throttle").
+  final bool showAttribution;
+  final String? attribution;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +72,7 @@ class RiderLabMark extends StatelessWidget {
       color: lab,
     );
 
-    return Text.rich(
+    final mark = Text.rich(
       TextSpan(
         children: [
           TextSpan(text: 'Rider', style: riderStyle),
@@ -77,6 +83,34 @@ class RiderLabMark extends StatelessWidget {
         applyHeightToFirstAscent: false,
         applyHeightToLastDescent: false,
       ),
+    );
+
+    if (!showAttribution || attribution == null || attribution!.isEmpty) {
+      return mark;
+    }
+
+    final attrSize = switch (size) {
+      BrandMarkSize.hero => 13.0,
+      BrandMarkSize.title => 11.0,
+      BrandMarkSize.eyebrow => 9.0,
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        mark,
+        SizedBox(height: size == BrandMarkSize.hero ? 6 : 4),
+        Text(
+          attribution!,
+          style: GoogleFonts.outfit(
+            fontSize: attrSize,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+            color: AppTheme.steel,
+          ),
+        ),
+      ],
     );
   }
 

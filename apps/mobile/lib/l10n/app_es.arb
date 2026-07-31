@@ -97,7 +97,8 @@
   "gpsPrecisionSub": "Precisión horizontal en metros (menor es mejor)",
   "chartSpeedSub": "Colores de alto contraste. Toca para scrub.",
   "chartSpeedSubZoom": "Solo velocidad del segmento. Toca para scrub.",
-  "leanHelp": "0° es vertical inferida (sirve con el teléfono en el bolsillo).",
+  "leanHelp": "0° es vertical inferida. Para inclinación precisa, monta el teléfono firme en vertical (pantalla hacia ti) en el tanque o manillar — evita bolsillo suelto o apaisado.",
+  "leanPhoneDisclaimer": "La posición del celular importa: vertical, pantalla hacia ti, montaje fijo. Un bolsillo suelto sesga la inclinación.",
   "mapHint": "Azul→magenta según velocidad. Puntos = frenos inferidos.",
   "mapHintZoom": "Brillante = tramo elegido · tenue = resto. Puntos = frenos.",
   "startingRide": "Iniciando ruta",
@@ -241,6 +242,18 @@
   "cloudAnonymousOff": "Amigos necesita Anonymous activado en la nube de RiderLab (proyecto Supabase CornerIQ):\nDashboard → Authentication → Providers → Anonymous → Enable.\nLuego vuelve a abrir Amigos y desliza para refrescar.",
   "routesTitle": "Rutas",
   "routesHelp": "Nombra un circuito, compártelo y etiqueta rides para que amigos comparen en la misma ruta.",
+  "routesHowTitle": "¿Cómo se usan las Rutas?",
+  "routesHowBody": "1) Crea una ruta con + (ej. «Glorieta norte»).\n2) En Ride Lab → Comparte, etiqueta la grabación con esa ruta.\n3) O usa Modo Loop: marca A/B y cada vuelta se guarda en la misma ruta.\n4) Toca una ruta aquí para ver vueltas, compararlas o abrir Ride Lab.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.",
+  "routesTapHint": "Toca para ver vueltas",
+  "routesLoopReady": "Loop listo",
+  "setYourAlias": "Pon tu alias",
+  "sectionNotesProOnly": "Solo Pro — precisión GPS y notas",
+  "proCurvaBannerTitle": "Detalle de curva · Pro",
+  "proCurvaBannerBody": "Vista previa de 0,5 s. Con Pro ves entrada, ápice, salida y mapa sin bloqueo.",
+  "proNotesBannerTitle": "Precisión + notas · Pro",
+  "proNotesBannerBody": "Calidad GPS y tips del coach están en CornerIQ Pro.",
+  "proFeatureCurva": "Detalle completo de curvas (sin banner)",
+  "proFeatureNotes": "Precisión GPS + notas de coach",
   "myRoutes": "Tus rutas",
   "routesEmpty": "Aún no hay rutas — crea una para etiquetar y compartir rides.",
   "friendRoutes": "Rutas compartidas de amigos",
@@ -291,5 +304,28 @@
       "count": { "type": "int" }
     }
   },
-  "endSession": "Terminar sesión"
+  "endSession": "Terminar sesión",
+  "byRawThrottle": "by Raw Throttle",
+  "pro": "PRO",
+  "free": "Gratis",
+  "settings": "Ajustes",
+  "proUnlock": "RiderLab Pro",
+  "proUnlockBody": "Segmenta cualquier tramo, detalle completo de curvas, precisión + notas, frenadas completas y sin anuncios.",
+  "proFeatureSegment": "Zoom de segmento — elige cualquier tramo del ride",
+  "proFeatureBrakes": "Detalle completo de frenadas (no solo una vista previa)",
+  "proFeatureNoAds": "Sin banners publicitarios",
+  "upgradeToPro": "Pasar a Pro",
+  "proUnlocked": "Pro activo",
+  "proToggleDev": "Pro desbloqueado",
+  "proToggleHelp": "Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión Gratis.",
+  "brakesProTeaser": "Mostrando {shown} de {total}. Desbloquea Pro para el historial completo de frenadas.",
+  "@brakesProTeaser": {
+    "placeholders": {
+      "shown": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "segmentProLocked": "Elegir un tramo del ride es una función Pro.",
+  "adPlaceholder": "Anuncio",
+  "removeAdsWithPro": "Pasa a Pro para quitar anuncios"
 }

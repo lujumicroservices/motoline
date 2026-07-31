@@ -76,17 +76,17 @@ String formatDuration(Duration d) {
   return '$m:$s';
 }
 
-/// Duration / elapsed with centiseconds (2 decimal places on seconds).
-/// Examples: `01:23.45`, `1:02:03.07`.
+/// Duration / elapsed with millisecond precision (3 decimal places).
+/// Examples: `01:23.456`, `1:02:03.070`.
 String formatElapsedPrecise(double seconds) {
-  if (seconds.isNaN || seconds.isInfinite) return '00:00.00';
-  final totalCs = (seconds.abs() * 100).round();
-  final cs = totalCs % 100;
-  final totalSec = totalCs ~/ 100;
+  if (seconds.isNaN || seconds.isInfinite) return '00:00.000';
+  final totalMs = (seconds.abs() * 1000).round();
+  final ms = totalMs % 1000;
+  final totalSec = totalMs ~/ 1000;
   final s = totalSec % 60;
   final m = (totalSec ~/ 60) % 60;
   final h = totalSec ~/ 3600;
-  final frac = cs.toString().padLeft(2, '0');
+  final frac = ms.toString().padLeft(3, '0');
   if (h > 0) {
     return '$h:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}.$frac';
   }

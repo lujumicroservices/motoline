@@ -557,8 +557,14 @@ abstract class AppLocalizations {
   /// No description provided for @leanHelp.
   ///
   /// In es, this message translates to:
-  /// **'0° es vertical inferida (sirve con el teléfono en el bolsillo).'**
+  /// **'0° es vertical inferida. Para inclinación precisa, monta el teléfono firme en vertical (pantalla hacia ti) en el tanque o manillar — evita bolsillo suelto o apaisado.'**
   String get leanHelp;
+
+  /// No description provided for @leanPhoneDisclaimer.
+  ///
+  /// In es, this message translates to:
+  /// **'La posición del celular importa: vertical, pantalla hacia ti, montaje fijo. Un bolsillo suelto sesga la inclinación.'**
+  String get leanPhoneDisclaimer;
 
   /// No description provided for @mapHint.
   ///
@@ -1112,6 +1118,78 @@ abstract class AppLocalizations {
   /// **'Nombra un circuito, compártelo y etiqueta rides para que amigos comparen en la misma ruta.'**
   String get routesHelp;
 
+  /// No description provided for @routesHowTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo se usan las Rutas?'**
+  String get routesHowTitle;
+
+  /// No description provided for @routesHowBody.
+  ///
+  /// In es, this message translates to:
+  /// **'1) Crea una ruta con + (ej. «Glorieta norte»).\n2) En Ride Lab → Comparte, etiqueta la grabación con esa ruta.\n3) O usa Modo Loop: marca A/B y cada vuelta se guarda en la misma ruta.\n4) Toca una ruta aquí para ver vueltas, compararlas o abrir Ride Lab.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.'**
+  String get routesHowBody;
+
+  /// No description provided for @routesTapHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para ver vueltas'**
+  String get routesTapHint;
+
+  /// No description provided for @routesLoopReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Loop listo'**
+  String get routesLoopReady;
+
+  /// No description provided for @setYourAlias.
+  ///
+  /// In es, this message translates to:
+  /// **'Pon tu alias'**
+  String get setYourAlias;
+
+  /// No description provided for @sectionNotesProOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo Pro — precisión GPS y notas'**
+  String get sectionNotesProOnly;
+
+  /// No description provided for @proCurvaBannerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle de curva · Pro'**
+  String get proCurvaBannerTitle;
+
+  /// No description provided for @proCurvaBannerBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Vista previa de 0,5 s. Con Pro ves entrada, ápice, salida y mapa sin bloqueo.'**
+  String get proCurvaBannerBody;
+
+  /// No description provided for @proNotesBannerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Precisión + notas · Pro'**
+  String get proNotesBannerTitle;
+
+  /// No description provided for @proNotesBannerBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Calidad GPS y tips del coach están en CornerIQ Pro.'**
+  String get proNotesBannerBody;
+
+  /// No description provided for @proFeatureCurva.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle completo de curvas (sin banner)'**
+  String get proFeatureCurva;
+
+  /// No description provided for @proFeatureNotes.
+  ///
+  /// In es, this message translates to:
+  /// **'Precisión GPS + notas de coach'**
+  String get proFeatureNotes;
+
   /// No description provided for @myRoutes.
   ///
   /// In es, this message translates to:
@@ -1387,6 +1465,108 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Terminar sesión'**
   String get endSession;
+
+  /// No description provided for @byRawThrottle.
+  ///
+  /// In es, this message translates to:
+  /// **'by Raw Throttle'**
+  String get byRawThrottle;
+
+  /// No description provided for @pro.
+  ///
+  /// In es, this message translates to:
+  /// **'PRO'**
+  String get pro;
+
+  /// No description provided for @free.
+  ///
+  /// In es, this message translates to:
+  /// **'Gratis'**
+  String get free;
+
+  /// No description provided for @settings.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get settings;
+
+  /// No description provided for @proUnlock.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab Pro'**
+  String get proUnlock;
+
+  /// No description provided for @proUnlockBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Segmenta cualquier tramo, detalle completo de curvas, precisión + notas, frenadas completas y sin anuncios.'**
+  String get proUnlockBody;
+
+  /// No description provided for @proFeatureSegment.
+  ///
+  /// In es, this message translates to:
+  /// **'Zoom de segmento — elige cualquier tramo del ride'**
+  String get proFeatureSegment;
+
+  /// No description provided for @proFeatureBrakes.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle completo de frenadas (no solo una vista previa)'**
+  String get proFeatureBrakes;
+
+  /// No description provided for @proFeatureNoAds.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin banners publicitarios'**
+  String get proFeatureNoAds;
+
+  /// No description provided for @upgradeToPro.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasar a Pro'**
+  String get upgradeToPro;
+
+  /// No description provided for @proUnlocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Pro activo'**
+  String get proUnlocked;
+
+  /// No description provided for @proToggleDev.
+  ///
+  /// In es, this message translates to:
+  /// **'Pro desbloqueado'**
+  String get proToggleDev;
+
+  /// No description provided for @proToggleHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión Gratis.'**
+  String get proToggleHelp;
+
+  /// No description provided for @brakesProTeaser.
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrando {shown} de {total}. Desbloquea Pro para el historial completo de frenadas.'**
+  String brakesProTeaser(int shown, int total);
+
+  /// No description provided for @segmentProLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir un tramo del ride es una función Pro.'**
+  String get segmentProLocked;
+
+  /// No description provided for @adPlaceholder.
+  ///
+  /// In es, this message translates to:
+  /// **'Anuncio'**
+  String get adPlaceholder;
+
+  /// No description provided for @removeAdsWithPro.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasa a Pro para quitar anuncios'**
+  String get removeAdsWithPro;
 }
 
 class _AppLocalizationsDelegate

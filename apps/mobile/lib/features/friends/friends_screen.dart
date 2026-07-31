@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/models/cloud_models.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/alias_provider.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 
@@ -173,9 +174,9 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
   Future<void> _saveName() async {
     setState(() => _saving = true);
     try {
-      await ref
-          .read(socialRepositoryProvider)
-          .updateDisplayName(_nameController.text);
+      final name = _nameController.text.trim();
+      await ref.read(riderAliasProvider.notifier).setAlias(name);
+      await ref.read(socialRepositoryProvider).updateDisplayName(name);
       ref.invalidate(myProfileProvider);
       ref.invalidate(friendsListProvider);
       if (!mounted) return;
@@ -183,6 +184,10 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
         SnackBar(content: Text(context.l10n.nameSaved)),
       );
     } catch (e) {
+      // Still keep local alias if cloud fails.
+      await ref
+          .read(riderAliasProvider.notifier)
+          .setAlias(_nameController.text);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('$e')),

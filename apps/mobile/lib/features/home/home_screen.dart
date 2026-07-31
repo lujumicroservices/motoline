@@ -15,10 +15,14 @@ import '../../providers/social_providers.dart';
 import '../../providers/update_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
+import '../../widgets/ad_banner.dart';
+import '../../widgets/pro_upsell.dart';
+import '../../widgets/rider_alias_chip.dart';
 import '../friends/friends_screen.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../routes/routes_screen.dart';
+import '../settings/settings_screen.dart';
 import 'update_widgets.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -60,7 +64,13 @@ class HomeScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const RiderLabMark(size: BrandMarkSize.hero),
+                        RiderLabMark(
+                          size: BrandMarkSize.hero,
+                          showAttribution: true,
+                          attribution: l10n.byRawThrottle,
+                        ),
+                        const SizedBox(height: 10),
+                        const RiderAliasChip(),
                         const SizedBox(height: 8),
                         Text(
                           l10n.tagline,
@@ -72,6 +82,18 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    tooltip: l10n.settings,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const SettingsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.settings_outlined),
+                    color: AppTheme.mist,
                   ),
                   IconButton(
                     tooltip: l10n.routesTitle,
@@ -252,6 +274,9 @@ class HomeScreen extends ConsumerWidget {
                   );
                 },
               ),
+            ),
+            FreeAdBanner(
+              onUpgrade: () => showProUpsellSheet(context, ref),
             ),
           ],
         ),

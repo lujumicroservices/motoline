@@ -9,12 +9,17 @@ import '../../core/analytics/ride_analytics.dart';
 import '../../core/analytics/road_kind_detection.dart';
 import '../../core/models/track_point.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/pro_entitlement_provider.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../../widgets/ad_banner.dart';
+import '../../widgets/pro_upsell.dart';
+import '../../widgets/rider_alias_chip.dart';
 import '../compare/ride_compare_screen.dart';
 import '../compare/route_compare_screen.dart';
+import '../pro/pro_upsell.dart';
 import 'curva_detail_screen.dart';
 import 'fullscreen_map_screen.dart';
 import 'pilot_line_map.dart';
@@ -60,7 +65,7 @@ class RideDetailScreen extends ConsumerWidget {
   }
 }
 
-class _RideDashboard extends StatefulWidget {
+class _RideDashboard extends ConsumerStatefulWidget {
   const _RideDashboard({
     required this.rideId,
     required this.analytics,
@@ -70,10 +75,10 @@ class _RideDashboard extends StatefulWidget {
   final RideAnalytics analytics;
 
   @override
-  State<_RideDashboard> createState() => _RideDashboardState();
+  ConsumerState<_RideDashboard> createState() => _RideDashboardState();
 }
 
-class _RideDashboardState extends State<_RideDashboard>
+class _RideDashboardState extends ConsumerState<_RideDashboard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _intro;
   late int _scrubIndex;
@@ -143,6 +148,10 @@ class _RideDashboardState extends State<_RideDashboard>
 
   /// Zoom map + metrics window onto a brake pulse (indices are view-local).
   void _zoomToBrake(BrakeEvent event) {
+    if (!ref.read(isProProvider)) {
+      showProUpsellSheet(context, ref);
+      return;
+    }
     final full = _full;
     if (full.samples.length < 2) return;
     final view = _view;
@@ -178,6 +187,10 @@ class _RideDashboardState extends State<_RideDashboard>
   }
 
   void _zoomToSegment() {
+    if (!ref.read(isProProvider)) {
+      showProUpsellSheet(context, ref);
+      return;
+    }
     if (_segEnd <= _segStart) return;
     setState(() {
       _zoomed = true;
@@ -218,6 +231,10 @@ class _RideDashboardState extends State<_RideDashboard>
     // Keep toggles in sync if fullscreen mutated them via shared pattern —
     // fullscreen owns a copy; parent keeps its own until we return.
     if (result == null) return;
+    if (!ref.read(isProProvider)) {
+      showProUpsellSheet(context, ref);
+      return;
+    }
     setState(() {
       _segStart = result.startIndex;
       _segEnd = result.endIndex;
@@ -234,7 +251,11 @@ class _RideDashboardState extends State<_RideDashboard>
     final stretch = a.roadStretches[stretchIndex];
 
     if (stretch.kind == RoadKind.recta) {
-      // Focus Ride Lab on this straight.
+      // Focus Ride Lab on this straight (Pro).
+      if (!ref.read(isProProvider)) {
+        showProUpsellSheet(context, ref);
+        return;
+      }
       setState(() {
         _segStart = stretch.startIndex;
         _segEnd = stretch.endIndex;
@@ -279,6 +300,10 @@ class _RideDashboardState extends State<_RideDashboard>
       ),
     );
     if (!mounted || result == null) return;
+    if (!ref.read(isProProvider)) {
+      showProUpsellSheet(context, ref);
+      return;
+    }
     setState(() {
       _segStart = result.startIndex;
       _segEnd = result.endIndex;
@@ -292,6 +317,12 @@ class _RideDashboardState extends State<_RideDashboard>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isPro = ref.watch(isProProvider);
+    ref.listen<bool>(isProProvider, (prev, next) {
+      if (!next && _zoomed) {
+        _clearSegmentZoom();
+      }
+    });
     final full = _full;
     final a = _view;
     final ride = full.ride;
@@ -320,6 +351,12 @@ class _RideDashboardState extends State<_RideDashboard>
                   _zoomed ? l10n.rideLabSegment : l10n.rideLab,
                   style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
                 ),
+                actions: const [
+                  Padding(
+                    padding: EdgeInsets.only(right: 12),
+                    child: Center(child: RiderAliasChip(compact: true)),
+                  ),
+                ],
               ),
               SliverToBoxAdapter(
                 child: FadeTransition(
@@ -374,9 +411,11 @@ class _RideDashboardState extends State<_RideDashboard>
                               startSeconds: full.secondsForIndex(_segStart),
                               endSeconds: full.secondsForIndex(_segEnd),
                               zoomed: _zoomed,
+                              isPro: isPro,
                               onRangeChanged: _setSegmentRange,
                               onZoom: _zoomToSegment,
                               onClear: _clearSegmentZoom,
+                              onUpgrade: () => showProUpsellSheet(context, ref),
                             ),
                           ),
                         LabSection(
@@ -424,6 +463,16 @@ class _RideDashboardState extends State<_RideDashboard>
                                     color: AppTheme.steel,
                                     fontSize: 13,
                                     height: 1.35,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.leanPhoneDisclaimer,
+                                  style: GoogleFonts.outfit(
+                                    color: AppTheme.mist.withValues(alpha: 0.85),
+                                    fontSize: 12,
+                                    height: 1.4,
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ],
@@ -522,8 +571,10 @@ class _RideDashboardState extends State<_RideDashboard>
                           child: BrakeEventsPanel(
                             events: a.brakeEvents,
                             secondsForIndex: a.secondsForIndex,
+                            isPro: isPro,
                             onSelectIndex: _setScrubIndex,
-                            onZoomToBrake: _zoomToBrake,
+                            onZoomToBrake: isPro ? _zoomToBrake : null,
+                            onUpgrade: () => showProUpsellSheet(context, ref),
                           ),
                         ),
                         LabSection(
@@ -568,16 +619,24 @@ class _RideDashboardState extends State<_RideDashboard>
                         ),
                         LabSection(
                           title: l10n.sectionNotes,
-                          subtitle: l10n.sectionNotesSub,
+                          subtitle: isPro
+                              ? l10n.sectionNotesSub
+                              : l10n.sectionNotesProOnly,
+                          badge: isPro ? null : l10n.pro,
                           expanded: _isOpen('notes'),
                           onToggle: () => _toggle('notes'),
-                          child: Column(
-                            children: [
-                              _PrecisionPanel(analytics: a),
-                              const SizedBox(height: 16),
-                              _InsightStrip(analytics: a),
-                            ],
-                          ),
+                          child: isPro
+                              ? Column(
+                                  children: [
+                                    _PrecisionPanel(analytics: a),
+                                    const SizedBox(height: 16),
+                                    _InsightStrip(analytics: a),
+                                  ],
+                                )
+                              : ProUpsellBanner(
+                                  title: l10n.proNotesBannerTitle,
+                                  body: l10n.proNotesBannerBody,
+                                ),
                         ),
                       ],
                     ),
@@ -586,6 +645,9 @@ class _RideDashboardState extends State<_RideDashboard>
               ),
             ],
           ),
+        ),
+        FreeAdBanner(
+          onUpgrade: () => showProUpsellSheet(context, ref),
         ),
         if (hasSamples)
           Material(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -10,10 +11,11 @@ import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../pro/pro_upsell.dart';
 import 'fullscreen_map_screen.dart';
 
 /// Swipeable curva coach: metrics + map zoomed to the active turn.
-class CurvaDetailScreen extends StatefulWidget {
+class CurvaDetailScreen extends ConsumerStatefulWidget {
   const CurvaDetailScreen({
     super.key,
     required this.samples,
@@ -26,10 +28,10 @@ class CurvaDetailScreen extends StatefulWidget {
   final int initialIndex;
 
   @override
-  State<CurvaDetailScreen> createState() => _CurvaDetailScreenState();
+  ConsumerState<CurvaDetailScreen> createState() => _CurvaDetailScreenState();
 }
 
-class _CurvaDetailScreenState extends State<CurvaDetailScreen> {
+class _CurvaDetailScreenState extends ConsumerState<CurvaDetailScreen> {
   late final PageController _pages;
   late int _index;
 
@@ -98,56 +100,62 @@ class _CurvaDetailScreenState extends State<CurvaDetailScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          if (total > 1)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-              child: Text(
-                l10n.curvaSwipeHint,
-                style: GoogleFonts.outfit(
-                  color: AppTheme.steel,
-                  fontSize: 12,
+      body: ProTeaserGate(
+        bannerTitle: l10n.proCurvaBannerTitle,
+        bannerBody: l10n.proCurvaBannerBody,
+        teaserMs: 500,
+        child: Column(
+          children: [
+            if (total > 1)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+                child: Text(
+                  l10n.curvaSwipeHint,
+                  style: GoogleFonts.outfit(
+                    color: AppTheme.steel,
+                    fontSize: 12,
+                  ),
                 ),
               ),
-            ),
-          Expanded(
-            child: PageView.builder(
-              controller: _pages,
-              itemCount: total,
-              onPageChanged: (i) => setState(() => _index = i),
-              itemBuilder: (context, i) {
-                return _CurvaPage(
-                  samples: widget.samples,
-                  analysis: widget.analyses[i],
-                  curvaNumber: i + 1,
-                  onZoomLab: () {
-                    final a = widget.analyses[i];
-                    Navigator.of(context).pop(
-                      FullscreenMapSelection(
-                        startIndex: a.entryIndex,
-                        endIndex: a.exitIndex,
-                      ),
-                    );
-                  },
-                  onOpenMap: () async {
-                    final a = widget.analyses[i];
-                    await Navigator.of(context).push<FullscreenMapSelection>(
-                      MaterialPageRoute(
-                        builder: (_) => FullscreenMapScreen(
-                          points: widget.samples,
-                          scrubIndex: a.apexIndex,
-                          initialFocusStart: a.mapStartIndex,
-                          initialFocusEnd: a.mapEndIndex,
+            Expanded(
+              child: PageView.builder(
+                controller: _pages,
+                itemCount: total,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (context, i) {
+                  return _CurvaPage(
+                    samples: widget.samples,
+                    analysis: widget.analyses[i],
+                    curvaNumber: i + 1,
+                    onZoomLab: () {
+                      final a = widget.analyses[i];
+                      Navigator.of(context).pop(
+                        FullscreenMapSelection(
+                          startIndex: a.entryIndex,
+                          endIndex: a.exitIndex,
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                      );
+                    },
+                    onOpenMap: () async {
+                      final a = widget.analyses[i];
+                      await Navigator.of(context)
+                          .push<FullscreenMapSelection>(
+                        MaterialPageRoute(
+                          builder: (_) => FullscreenMapScreen(
+                            points: widget.samples,
+                            scrubIndex: a.apexIndex,
+                            initialFocusStart: a.mapStartIndex,
+                            initialFocusEnd: a.mapEndIndex,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

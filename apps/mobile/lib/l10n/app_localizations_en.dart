@@ -252,7 +252,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chartSpeedSubZoom => 'Segment speed only. Tap to scrub.';
 
   @override
-  String get leanHelp => '0° is inferred upright (works with phone in pocket).';
+  String get leanHelp =>
+      '0° is inferred upright. For accurate lean, mount the phone firmly in portrait (screen toward you) on the tank or bars — avoid a loose pocket or landscape.';
+
+  @override
+  String get leanPhoneDisclaimer =>
+      'Phone position matters: portrait, screen facing you, fixed mount. A loose pocket skews incline readings.';
 
   @override
   String get mapHint => 'Blue→magenta by speed. Dots = inferred brakes.';
@@ -568,6 +573,45 @@ class AppLocalizationsEn extends AppLocalizations {
       'Name a circuit, share it, and tag rides so friends can compare on the same route.';
 
   @override
+  String get routesHowTitle => 'How do Routes work?';
+
+  @override
+  String get routesHowBody =>
+      '1) Create a route with + (e.g. “North roundabout”).\n2) In Ride Lab → Share, tag the ride with that route.\n3) Or use Loop mode: mark A/B and each lap is saved on the same route.\n4) Tap a route here to see laps, compare them, or open Ride Lab.\n5) Turn sharing on if friends should compare on this circuit.';
+
+  @override
+  String get routesTapHint => 'Tap to see laps';
+
+  @override
+  String get routesLoopReady => 'Loop ready';
+
+  @override
+  String get setYourAlias => 'Set your alias';
+
+  @override
+  String get sectionNotesProOnly => 'Pro only — GPS precision and notes';
+
+  @override
+  String get proCurvaBannerTitle => 'Corner detail · Pro';
+
+  @override
+  String get proCurvaBannerBody =>
+      '0.5 s preview. Pro unlocks entry, apex, exit, and map with no lock.';
+
+  @override
+  String get proNotesBannerTitle => 'Precision + notes · Pro';
+
+  @override
+  String get proNotesBannerBody =>
+      'GPS quality and coach tips stay in CornerIQ Pro.';
+
+  @override
+  String get proFeatureCurva => 'Full corner detail (no banner)';
+
+  @override
+  String get proFeatureNotes => 'GPS precision + coach notes';
+
+  @override
   String get myRoutes => 'Your routes';
 
   @override
@@ -714,4 +758,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get endSession => 'End session';
+
+  @override
+  String get byRawThrottle => 'by Raw Throttle';
+
+  @override
+  String get pro => 'PRO';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get proUnlock => 'RiderLab Pro';
+
+  @override
+  String get proUnlockBody =>
+      'Segment any stretch, full corner detail, precision notes, full brakes, and no ads.';
+
+  @override
+  String get proFeatureSegment =>
+      'Segment zoom — select any sub-portion of the ride';
+
+  @override
+  String get proFeatureBrakes => 'Full braking details (not just a preview)';
+
+  @override
+  String get proFeatureNoAds => 'No advertising banners';
+
+  @override
+  String get upgradeToPro => 'Upgrade to Pro';
+
+  @override
+  String get proUnlocked => 'Pro is active';
+
+  @override
+  String get proToggleDev => 'Pro unlocked';
+
+  @override
+  String get proToggleHelp =>
+      'Temporary unlock until store billing is wired. Turn off to preview Free.';
+
+  @override
+  String brakesProTeaser(int shown, int total) {
+    return 'Showing $shown of $total. Unlock Pro for the full braking list.';
+  }
+
+  @override
+  String get segmentProLocked =>
+      'Selecting a sub-portion of the ride is a Pro feature.';
+
+  @override
+  String get adPlaceholder => 'Ad';
+
+  @override
+  String get removeAdsWithPro => 'Upgrade to Pro to remove ads';
 }
