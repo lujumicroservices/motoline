@@ -1310,6 +1310,66 @@ abstract class AppLocalizations {
   /// **'Marcar fin de loop'**
   String get markLoopEnd;
 
+  /// No description provided for @markLoopInitHere.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar A en mi GPS'**
+  String get markLoopInitHere;
+
+  /// No description provided for @markLoopEndHere.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar B en mi GPS'**
+  String get markLoopEndHere;
+
+  /// No description provided for @loopOpenMarkMap.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa: marcar A y B'**
+  String get loopOpenMarkMap;
+
+  /// No description provided for @loopMarkMapHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre el mapa a pantalla completa, desplázate y toca el punto A (inicio) y el B (fin) de la ruta.'**
+  String get loopMarkMapHint;
+
+  /// No description provided for @loopTapPointA.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el mapa para marcar el punto A (inicio)'**
+  String get loopTapPointA;
+
+  /// No description provided for @loopTapPointB.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el mapa para marcar el punto B (fin)'**
+  String get loopTapPointB;
+
+  /// No description provided for @loopPointsReady.
+  ///
+  /// In es, this message translates to:
+  /// **'A y B listos — confirma para armar auto-vuelta'**
+  String get loopPointsReady;
+
+  /// No description provided for @loopMarkMapHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Pan y zoom libres. Primer toque = A, segundo = B. El círculo es la zona de detección de vueltas.'**
+  String get loopMarkMapHelp;
+
+  /// No description provided for @loopRemapA.
+  ///
+  /// In es, this message translates to:
+  /// **'Rehacer A'**
+  String get loopRemapA;
+
+  /// No description provided for @loopConfirmAb.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar A y B'**
+  String get loopConfirmAb;
+
   /// No description provided for @loopArmed.
   ///
   /// In es, this message translates to:

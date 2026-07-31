@@ -673,6 +673,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markLoopEnd => 'Mark loop end';
 
   @override
+  String get markLoopInitHere => 'Mark A at my GPS';
+
+  @override
+  String get markLoopEndHere => 'Mark B at my GPS';
+
+  @override
+  String get loopOpenMarkMap => 'Map: mark A and B';
+
+  @override
+  String get loopMarkMapHint =>
+      'Open the fullscreen map, pan freely, then tap point A (start) and B (end) of the route.';
+
+  @override
+  String get loopTapPointA => 'Tap the map to mark point A (start)';
+
+  @override
+  String get loopTapPointB => 'Tap the map to mark point B (end)';
+
+  @override
+  String get loopPointsReady => 'A and B ready — confirm to arm auto-lap';
+
+  @override
+  String get loopMarkMapHelp =>
+      'Free pan and zoom. First tap = A, second = B. The circle is the lap detection zone.';
+
+  @override
+  String get loopRemapA => 'Redo A';
+
+  @override
+  String get loopConfirmAb => 'Confirm A and B';
+
+  @override
   String get loopArmed => 'Auto-lap armed';
 
   @override

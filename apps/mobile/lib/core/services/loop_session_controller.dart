@@ -87,12 +87,17 @@ class LoopSessionController {
 
   void _emit() => _stateController.add(_snapshot);
 
-  /// Marks the loop-init point at the rider's current live position. Creates
-  /// a new [RouteCircuit] on first call (auto-named), and tags the currently
-  /// recording ride with its id.
-  Future<void> markInit({String? routeName}) async {
-    final point = _recorder.lastLivePoint;
-    if (point == null) return;
+  /// Marks the loop-init point (A). Uses [lat]/[lng] when provided; otherwise
+  /// the rider's current live GPS fix.
+  Future<void> markInit({
+    String? routeName,
+    double? lat,
+    double? lng,
+  }) async {
+    final live = _recorder.lastLivePoint;
+    final latitude = lat ?? live?.latitude;
+    final longitude = lng ?? live?.longitude;
+    if (latitude == null || longitude == null) return;
 
     var route = _route;
     if (route == null) {
@@ -103,7 +108,7 @@ class LoopSessionController {
       route = created;
     }
 
-    route = route.copyWith(initLat: point.latitude, initLng: point.longitude);
+    route = route.copyWith(initLat: latitude, initLng: longitude);
     await _db.upsertRoute(route);
     _route = route;
 
@@ -111,16 +116,20 @@ class LoopSessionController {
     _emit();
   }
 
-  /// Marks the loop-end point and arms auto-lap detection. Requires
-  /// [markInit] to have been called first.
-  Future<void> markEnd() async {
+  /// Marks the loop-end point (B) and arms auto-lap detection. Requires
+  /// [markInit] first. Uses [lat]/[lng] when provided; otherwise live GPS.
+  Future<void> markEnd({double? lat, double? lng}) async {
     final route = _route;
-    final point = _recorder.lastLivePoint;
-    if (route == null || !route.hasLoopInit || point == null) return;
+    final live = _recorder.lastLivePoint;
+    final latitude = lat ?? live?.latitude;
+    final longitude = lng ?? live?.longitude;
+    if (route == null || !route.hasLoopInit || latitude == null || longitude == null) {
+      return;
+    }
 
     final updated = route.copyWith(
-      endLat: point.latitude,
-      endLng: point.longitude,
+      endLat: latitude,
+      endLng: longitude,
       geofenceRadiusM: kLoopGeofenceRadiusMeters,
     );
     await _db.upsertRoute(updated);

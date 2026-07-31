@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../core/models/track_point.dart';
 import '../../core/services/location_service.dart';
@@ -12,8 +13,10 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/ride_viz_palette.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../ride_detail/ride_detail_screen.dart';
+import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 
 /// Normal = single ride, manual/auto end. Loop = teaching lap + auto-lap
@@ -345,14 +348,40 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: PilotLineMap(
-              points: points,
-              interactive: false,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: PilotLineMap(
+                    points: points,
+                    interactive: true,
+                    showStartEnd: !_isLoop,
+                  ),
+                ),
+                if (_isLoop)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Material(
+                      color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
+                      borderRadius: BorderRadius.circular(12),
+                      child: IconButton(
+                        tooltip: l10n.loopOpenMarkMap,
+                        onPressed: () => _openLoopMarkMap(points, loopState),
+                        icon: const Icon(Icons.fullscreen),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
         if (_isLoop)
-          _LoopHud(loopState: loopState, onEndSession: () => _endLoopSession(context))
+          _LoopHud(
+            loopState: loopState,
+            points: points,
+            onOpenMarkMap: () => _openLoopMarkMap(points, loopState),
+            onEndSession: () => _endLoopSession(context),
+          )
         else
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
@@ -367,6 +396,37 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           ),
       ],
     );
+  }
+
+  Future<void> _openLoopMarkMap(
+    List<TrackPoint> points,
+    LoopSessionState? loopState,
+  ) async {
+    final route = loopState?.route;
+    final result = await Navigator.of(context).push<LoopMarkResult>(
+      MaterialPageRoute(
+        builder: (_) => LoopMarkMapScreen(
+          points: points,
+          initialInit: route?.hasLoopInit == true
+              ? LatLng(route!.initLat!, route.initLng!)
+              : null,
+          initialEnd: route?.hasLoopEnd == true
+              ? LatLng(route!.endLat!, route.endLng!)
+              : null,
+        ),
+      ),
+    );
+    if (!mounted || result == null) return;
+    try {
+      final loop = ref.read(loopSessionControllerProvider);
+      await loop.markInit(lat: result.init.latitude, lng: result.init.longitude);
+      await loop.markEnd(lat: result.end.latitude, lng: result.end.longitude);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
   }
 
   Future<void> _stop(BuildContext context) async {
@@ -517,9 +577,16 @@ class _SuggestEndBanner extends StatelessWidget {
 }
 
 class _LoopHud extends StatelessWidget {
-  const _LoopHud({required this.loopState, required this.onEndSession});
+  const _LoopHud({
+    required this.loopState,
+    required this.points,
+    required this.onOpenMarkMap,
+    required this.onEndSession,
+  });
 
   final LoopSessionState? loopState;
+  final List<TrackPoint> points;
+  final VoidCallback onOpenMarkMap;
   final VoidCallback onEndSession;
 
   static Future<void> _runLoopAction(
@@ -549,7 +616,7 @@ class _LoopHud extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (hasEnd)
+          if (hasEnd) ...[
             Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
@@ -577,52 +644,65 @@ class _LoopHud extends StatelessWidget {
                   ),
                 ],
               ),
-            )
-          else ...[
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: points.isEmpty ? null : onOpenMarkMap,
+              icon: const Icon(Icons.edit_location_alt_outlined),
+              label: Text(l10n.loopOpenMarkMap),
+            ),
+          ] else ...[
+            FilledButton.icon(
+              onPressed: points.isEmpty ? null : onOpenMarkMap,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(56),
+                backgroundColor: RideVizPalette.leanLeft,
+                foregroundColor: AppTheme.asphalt,
+              ),
+              icon: const Icon(Icons.map_outlined),
+              label: Text(
+                l10n.loopOpenMarkMap,
+                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.loopMarkMapHint,
+              style: GoogleFonts.outfit(
+                color: AppTheme.steel,
+                fontSize: 12,
+                height: 1.3,
+              ),
+            ),
+            const SizedBox(height: 10),
             Consumer(
               builder: (context, ref, _) {
-                return FilledButton.icon(
+                return OutlinedButton.icon(
                   onPressed: hasInit
                       ? null
                       : () => _runLoopAction(
                           context,
                           ref.read(loopSessionControllerProvider).markInit(),
                         ),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(64),
-                    backgroundColor:
-                        hasInit ? AppTheme.asphaltElevated : AppTheme.line,
-                    foregroundColor:
-                        hasInit ? AppTheme.steel : AppTheme.asphalt,
-                  ),
-                  icon: Icon(hasInit ? Icons.check_circle : Icons.flag_outlined),
+                  icon: Icon(hasInit ? Icons.check_circle : Icons.my_location),
                   label: Text(
-                    hasInit ? l10n.loopInitSet : l10n.markLoopInit,
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                    hasInit ? l10n.loopInitSet : l10n.markLoopInitHere,
                   ),
                 );
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Consumer(
               builder: (context, ref, _) {
-                return FilledButton.icon(
-                  onPressed: hasInit
+                return OutlinedButton.icon(
+                  onPressed: hasInit && !hasEnd
                       ? () => _runLoopAction(
                           context,
                           ref.read(loopSessionControllerProvider).markEnd(),
                         )
                       : null,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(64),
-                    backgroundColor: AppTheme.lineHot,
-                    foregroundColor: AppTheme.asphalt,
-                  ),
                   icon: const Icon(Icons.sports_score),
-                  label: Text(
-                    l10n.markLoopEnd,
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
-                  ),
+                  label: Text(l10n.markLoopEndHere),
                 );
               },
             ),
