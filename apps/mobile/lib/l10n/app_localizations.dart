@@ -386,6 +386,18 @@ abstract class AppLocalizations {
   /// **'Por cambio de rumbo'**
   String get sectionRoadSub;
 
+  /// No description provided for @sectionLoop.
+  ///
+  /// In es, this message translates to:
+  /// **'Loop'**
+  String get sectionLoop;
+
+  /// No description provided for @sectionLoopSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Detecta o marca A/B en este ride'**
+  String get sectionLoopSub;
+
   /// No description provided for @sectionBrakes.
   ///
   /// In es, this message translates to:
@@ -1675,6 +1687,156 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Detectado'**
   String get routeLoopSourceDetected;
+
+  /// No description provided for @deleteRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar ruta'**
+  String get deleteRoute;
+
+  /// No description provided for @deleteRouteBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrará esta ruta, sus loops y se desvincularán los rides. Si está compartida, desaparece para todos.'**
+  String get deleteRouteBody;
+
+  /// No description provided for @routeDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Ruta eliminada'**
+  String get routeDeleted;
+
+  /// No description provided for @deleteLoop.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar loop'**
+  String get deleteLoop;
+
+  /// No description provided for @deleteLoopBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se elimina este loop. Si era el principal, se quitan también los puntos A/B de la ruta (incl. amigos al sincronizar).'**
+  String get deleteLoopBody;
+
+  /// No description provided for @loopDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Loop eliminado'**
+  String get loopDeleted;
+
+  /// No description provided for @deleteAllLoops.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar todos los loops'**
+  String get deleteAllLoops;
+
+  /// No description provided for @deleteAllLoopsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borran todos los loops de esta ruta y los puntos A/B. Los amigos verán la ruta sin loop al sincronizar.'**
+  String get deleteAllLoopsBody;
+
+  /// No description provided for @loopsCleared.
+  ///
+  /// In es, this message translates to:
+  /// **'Loops eliminados'**
+  String get loopsCleared;
+
+  /// No description provided for @deleteConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get deleteConfirm;
+
+  /// No description provided for @accountSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta'**
+  String get accountSection;
+
+  /// No description provided for @accountGuest.
+  ///
+  /// In es, this message translates to:
+  /// **'Rider invitado'**
+  String get accountGuest;
+
+  /// No description provided for @accountGuestBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Estás en sesión de invitado. Inicia sesión para conservar tu perfil entre dispositivos — tus rides actuales se vinculan cuando es posible.'**
+  String get accountGuestBody;
+
+  /// No description provided for @accountSignedIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión iniciada'**
+  String get accountSignedIn;
+
+  /// No description provided for @accountSignedInBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu cuenta de Google está vinculada. Cerrar sesión vuelve a modo invitado en este teléfono.'**
+  String get accountSignedInBody;
+
+  /// No description provided for @signInWith.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrar con {provider}'**
+  String signInWith(String provider);
+
+  /// No description provided for @signOut.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar sesión'**
+  String get signOut;
+
+  /// No description provided for @accountSignedInSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión iniciada — perfil sincronizado'**
+  String get accountSignedInSnack;
+
+  /// No description provided for @accountSignedOutSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión cerrada — modo invitado'**
+  String get accountSignedOutSnack;
+
+  /// No description provided for @rideLoopHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Encuentra vueltas cerradas en el GPS de este ride, o marca inicio (A) y fin (B) en el mapa. Al guardar se crea/usa una ruta para auto-vuelta después.'**
+  String get rideLoopHelp;
+
+  /// No description provided for @rideLoopEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay loops guardados en la ruta de este ride.'**
+  String get rideLoopEmpty;
+
+  /// No description provided for @rideLoopDetectedEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay vuelta cerrada en este ride. Prueba Marcar A / B en el mapa.'**
+  String get rideLoopDetectedEmpty;
+
+  /// No description provided for @rideLoopNeedPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay suficientes puntos GPS para marcar un loop.'**
+  String get rideLoopNeedPoints;
+
+  /// No description provided for @rideLoopSaveFirst.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda un loop primero — eso crea la ruta.'**
+  String get rideLoopSaveFirst;
+
+  /// No description provided for @rideLoopOpenRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir ruta (vueltas + loops)'**
+  String get rideLoopOpenRoute;
 }
 
 class _AppLocalizationsDelegate

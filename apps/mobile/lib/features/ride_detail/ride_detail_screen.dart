@@ -27,6 +27,7 @@ import 'widgets/brake_events_panel.dart';
 import 'widgets/lab_section.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
+import 'widgets/ride_loop_panel.dart';
 import 'widgets/ride_profile_chart.dart';
 import 'widgets/ride_share_panel.dart';
 import 'widgets/road_stretches_panel.dart';
@@ -90,6 +91,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
   final Set<String> _expanded = {
     'overview',
     'map',
+    'loop',
   };
 
   RideAnalytics get _full => widget.analytics;
@@ -549,6 +551,16 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                        LabSection(
+                          title: l10n.sectionLoop,
+                          subtitle: l10n.sectionLoopSub,
+                          expanded: _isOpen('loop'),
+                          onToggle: () => _toggle('loop'),
+                          child: RideLoopPanel(
+                            ride: ride,
+                            points: full.samples,
                           ),
                         ),
                         LabSection(

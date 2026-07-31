@@ -48,6 +48,8 @@
   "sectionMapSub": "Speed colors · brake dots",
   "sectionRoad": "Straights & turns",
   "sectionRoadSub": "From heading change",
+  "sectionLoop": "Loop",
+  "sectionLoopSub": "Detect or mark A/B on this ride",
   "sectionBrakes": "Braking",
   "sectionBrakesSub": "Inferred from speed drop",
   "sectionCharts": "Charts",
@@ -268,5 +270,35 @@
   "routeLoopSetPrimary": "Set as primary",
   "routeLoopStartRide": "Start loop ride",
   "routeLoopSourceManual": "Manual",
-  "routeLoopSourceDetected": "Detected"
+  "routeLoopSourceDetected": "Detected",
+  "deleteRoute": "Delete route",
+  "deleteRouteBody": "This removes the route, its loops, and untags rides. If shared, it disappears for everyone.",
+  "routeDeleted": "Route deleted",
+  "deleteLoop": "Delete loop",
+  "deleteLoopBody": "Removes this loop. If it was primary, A/B markers on the route are cleared too (friends see that on sync).",
+  "loopDeleted": "Loop deleted",
+  "deleteAllLoops": "Remove all loops",
+  "deleteAllLoopsBody": "Deletes every loop on this route and clears A/B markers. Friends get a loop-free route on sync.",
+  "loopsCleared": "Loops cleared",
+  "deleteConfirm": "Delete",
+  "accountSection": "Account",
+  "accountGuest": "Guest rider",
+  "accountGuestBody": "You're on a guest session. Sign in to keep your profile across devices — your current rides stay linked when possible.",
+  "accountSignedIn": "Signed in",
+  "accountSignedInBody": "Your Google account is linked. Sign out returns you to a guest session on this phone.",
+  "signInWith": "Sign in with {provider}",
+  "@signInWith": {
+    "placeholders": {
+      "provider": { "type": "String" }
+    }
+  },
+  "signOut": "Sign out",
+  "accountSignedInSnack": "Signed in — profile synced",
+  "accountSignedOutSnack": "Signed out — back to guest mode",
+  "rideLoopHelp": "Find closed loops on this ride’s GPS, or mark start (A) and end (B) on the map. Saving creates/uses a route so you can run auto-lap later.",
+  "rideLoopEmpty": "No loops saved for this ride’s route yet.",
+  "rideLoopDetectedEmpty": "No closed loop found on this ride. Try Mark A / B on the map.",
+  "rideLoopNeedPoints": "Not enough GPS points to mark a loop.",
+  "rideLoopSaveFirst": "Save a loop first — that creates the route.",
+  "rideLoopOpenRoute": "Open route (laps + loops)"
 }

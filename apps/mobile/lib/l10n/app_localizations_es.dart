@@ -164,6 +164,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sectionRoadSub => 'Por cambio de rumbo';
 
   @override
+  String get sectionLoop => 'Loop';
+
+  @override
+  String get sectionLoopSub => 'Detecta o marca A/B en este ride';
+
+  @override
   String get sectionBrakes => 'Frenado';
 
   @override
@@ -877,4 +883,90 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get routeLoopSourceDetected => 'Detectado';
+
+  @override
+  String get deleteRoute => 'Eliminar ruta';
+
+  @override
+  String get deleteRouteBody =>
+      'Se borrará esta ruta, sus loops y se desvincularán los rides. Si está compartida, desaparece para todos.';
+
+  @override
+  String get routeDeleted => 'Ruta eliminada';
+
+  @override
+  String get deleteLoop => 'Eliminar loop';
+
+  @override
+  String get deleteLoopBody =>
+      'Se elimina este loop. Si era el principal, se quitan también los puntos A/B de la ruta (incl. amigos al sincronizar).';
+
+  @override
+  String get loopDeleted => 'Loop eliminado';
+
+  @override
+  String get deleteAllLoops => 'Quitar todos los loops';
+
+  @override
+  String get deleteAllLoopsBody =>
+      'Se borran todos los loops de esta ruta y los puntos A/B. Los amigos verán la ruta sin loop al sincronizar.';
+
+  @override
+  String get loopsCleared => 'Loops eliminados';
+
+  @override
+  String get deleteConfirm => 'Eliminar';
+
+  @override
+  String get accountSection => 'Cuenta';
+
+  @override
+  String get accountGuest => 'Rider invitado';
+
+  @override
+  String get accountGuestBody =>
+      'Estás en sesión de invitado. Inicia sesión para conservar tu perfil entre dispositivos — tus rides actuales se vinculan cuando es posible.';
+
+  @override
+  String get accountSignedIn => 'Sesión iniciada';
+
+  @override
+  String get accountSignedInBody =>
+      'Tu cuenta de Google está vinculada. Cerrar sesión vuelve a modo invitado en este teléfono.';
+
+  @override
+  String signInWith(String provider) {
+    return 'Entrar con $provider';
+  }
+
+  @override
+  String get signOut => 'Cerrar sesión';
+
+  @override
+  String get accountSignedInSnack => 'Sesión iniciada — perfil sincronizado';
+
+  @override
+  String get accountSignedOutSnack => 'Sesión cerrada — modo invitado';
+
+  @override
+  String get rideLoopHelp =>
+      'Encuentra vueltas cerradas en el GPS de este ride, o marca inicio (A) y fin (B) en el mapa. Al guardar se crea/usa una ruta para auto-vuelta después.';
+
+  @override
+  String get rideLoopEmpty =>
+      'Aún no hay loops guardados en la ruta de este ride.';
+
+  @override
+  String get rideLoopDetectedEmpty =>
+      'No hay vuelta cerrada en este ride. Prueba Marcar A / B en el mapa.';
+
+  @override
+  String get rideLoopNeedPoints =>
+      'No hay suficientes puntos GPS para marcar un loop.';
+
+  @override
+  String get rideLoopSaveFirst => 'Guarda un loop primero — eso crea la ruta.';
+
+  @override
+  String get rideLoopOpenRoute => 'Abrir ruta (vueltas + loops)';
 }

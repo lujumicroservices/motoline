@@ -164,6 +164,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionRoadSub => 'From heading change';
 
   @override
+  String get sectionLoop => 'Loop';
+
+  @override
+  String get sectionLoopSub => 'Detect or mark A/B on this ride';
+
+  @override
   String get sectionBrakes => 'Braking';
 
   @override
@@ -872,4 +878,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routeLoopSourceDetected => 'Detected';
+
+  @override
+  String get deleteRoute => 'Delete route';
+
+  @override
+  String get deleteRouteBody =>
+      'This removes the route, its loops, and untags rides. If shared, it disappears for everyone.';
+
+  @override
+  String get routeDeleted => 'Route deleted';
+
+  @override
+  String get deleteLoop => 'Delete loop';
+
+  @override
+  String get deleteLoopBody =>
+      'Removes this loop. If it was primary, A/B markers on the route are cleared too (friends see that on sync).';
+
+  @override
+  String get loopDeleted => 'Loop deleted';
+
+  @override
+  String get deleteAllLoops => 'Remove all loops';
+
+  @override
+  String get deleteAllLoopsBody =>
+      'Deletes every loop on this route and clears A/B markers. Friends get a loop-free route on sync.';
+
+  @override
+  String get loopsCleared => 'Loops cleared';
+
+  @override
+  String get deleteConfirm => 'Delete';
+
+  @override
+  String get accountSection => 'Account';
+
+  @override
+  String get accountGuest => 'Guest rider';
+
+  @override
+  String get accountGuestBody =>
+      'You\'re on a guest session. Sign in to keep your profile across devices — your current rides stay linked when possible.';
+
+  @override
+  String get accountSignedIn => 'Signed in';
+
+  @override
+  String get accountSignedInBody =>
+      'Your Google account is linked. Sign out returns you to a guest session on this phone.';
+
+  @override
+  String signInWith(String provider) {
+    return 'Sign in with $provider';
+  }
+
+  @override
+  String get signOut => 'Sign out';
+
+  @override
+  String get accountSignedInSnack => 'Signed in — profile synced';
+
+  @override
+  String get accountSignedOutSnack => 'Signed out — back to guest mode';
+
+  @override
+  String get rideLoopHelp =>
+      'Find closed loops on this ride’s GPS, or mark start (A) and end (B) on the map. Saving creates/uses a route so you can run auto-lap later.';
+
+  @override
+  String get rideLoopEmpty => 'No loops saved for this ride’s route yet.';
+
+  @override
+  String get rideLoopDetectedEmpty =>
+      'No closed loop found on this ride. Try Mark A / B on the map.';
+
+  @override
+  String get rideLoopNeedPoints => 'Not enough GPS points to mark a loop.';
+
+  @override
+  String get rideLoopSaveFirst => 'Save a loop first — that creates the route.';
+
+  @override
+  String get rideLoopOpenRoute => 'Open route (laps + loops)';
 }

@@ -69,6 +69,8 @@
   "sectionMapSub": "Colores de velocidad · frenos",
   "sectionRoad": "Rectas y curvas",
   "sectionRoadSub": "Por cambio de rumbo",
+  "sectionLoop": "Loop",
+  "sectionLoopSub": "Detecta o marca A/B en este ride",
   "sectionBrakes": "Frenado",
   "sectionBrakesSub": "Inferido por caída de velocidad",
   "sectionCharts": "Gráficas",
@@ -345,5 +347,35 @@
   "routeLoopSetPrimary": "Usar como principal",
   "routeLoopStartRide": "Iniciar ride en loop",
   "routeLoopSourceManual": "Manual",
-  "routeLoopSourceDetected": "Detectado"
+  "routeLoopSourceDetected": "Detectado",
+  "deleteRoute": "Eliminar ruta",
+  "deleteRouteBody": "Se borrará esta ruta, sus loops y se desvincularán los rides. Si está compartida, desaparece para todos.",
+  "routeDeleted": "Ruta eliminada",
+  "deleteLoop": "Eliminar loop",
+  "deleteLoopBody": "Se elimina este loop. Si era el principal, se quitan también los puntos A/B de la ruta (incl. amigos al sincronizar).",
+  "loopDeleted": "Loop eliminado",
+  "deleteAllLoops": "Quitar todos los loops",
+  "deleteAllLoopsBody": "Se borran todos los loops de esta ruta y los puntos A/B. Los amigos verán la ruta sin loop al sincronizar.",
+  "loopsCleared": "Loops eliminados",
+  "deleteConfirm": "Eliminar",
+  "accountSection": "Cuenta",
+  "accountGuest": "Rider invitado",
+  "accountGuestBody": "Estás en sesión de invitado. Inicia sesión para conservar tu perfil entre dispositivos — tus rides actuales se vinculan cuando es posible.",
+  "accountSignedIn": "Sesión iniciada",
+  "accountSignedInBody": "Tu cuenta de Google está vinculada. Cerrar sesión vuelve a modo invitado en este teléfono.",
+  "signInWith": "Entrar con {provider}",
+  "@signInWith": {
+    "placeholders": {
+      "provider": { "type": "String" }
+    }
+  },
+  "signOut": "Cerrar sesión",
+  "accountSignedInSnack": "Sesión iniciada — perfil sincronizado",
+  "accountSignedOutSnack": "Sesión cerrada — modo invitado",
+  "rideLoopHelp": "Encuentra vueltas cerradas en el GPS de este ride, o marca inicio (A) y fin (B) en el mapa. Al guardar se crea/usa una ruta para auto-vuelta después.",
+  "rideLoopEmpty": "Aún no hay loops guardados en la ruta de este ride.",
+  "rideLoopDetectedEmpty": "No hay vuelta cerrada en este ride. Prueba Marcar A / B en el mapa.",
+  "rideLoopNeedPoints": "No hay suficientes puntos GPS para marcar un loop.",
+  "rideLoopSaveFirst": "Guarda un loop primero — eso crea la ruta.",
+  "rideLoopOpenRoute": "Abrir ruta (vueltas + loops)"
 }
