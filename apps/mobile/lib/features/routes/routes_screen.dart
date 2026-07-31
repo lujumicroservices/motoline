@@ -86,6 +86,33 @@ class RoutesScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 10),
+            Builder(
+              builder: (context) {
+                final err = ref.watch(routesRefreshErrorProvider);
+                if (err == null || err.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.lineHot.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${l10n.cloudUnavailable}: $err',
+                      style: GoogleFonts.outfit(
+                        color: AppTheme.mist,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
             mineAsync.when(
               loading: () => const Padding(
                 padding: EdgeInsets.all(24),

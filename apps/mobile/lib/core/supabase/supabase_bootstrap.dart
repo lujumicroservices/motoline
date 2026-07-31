@@ -75,12 +75,24 @@ class SupabaseBootstrap {
   }
 
   /// Trigger should create the row; upsert covers older projects / races.
+  /// Never send null display_name — that would wipe the rider alias.
   static Future<void> _ensureProfileRow(String userId) async {
     try {
-      await client.from('profiles').upsert({
-        'id': userId,
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
-      });
+      final existing = await client
+          .from('profiles')
+          .select('id')
+          .eq('id', userId)
+          .maybeSingle();
+      if (existing == null) {
+        await client.from('profiles').insert({
+          'id': userId,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        });
+      } else {
+        await client.from('profiles').update({
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        }).eq('id', userId);
+      }
     } catch (e) {
       debugPrint('CornerIQ profile upsert: $e');
     }

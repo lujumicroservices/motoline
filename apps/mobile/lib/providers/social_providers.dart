@@ -36,8 +36,12 @@ final socialRepositoryProvider = Provider<SocialRepository>((ref) {
 final routesListProvider =
     FutureProvider.autoDispose<List<RouteCircuit>>((ref) async {
   final service = ref.watch(routeServiceProvider);
-  await service.refreshFromCloud();
-  return service.listLocal();
+  return service.refreshFromCloud();
+});
+
+final routesRefreshErrorProvider = Provider.autoDispose<String?>((ref) {
+  ref.watch(routesListProvider);
+  return ref.watch(routeServiceProvider).lastRefreshError;
 });
 
 final sharedPeerRoutesProvider =

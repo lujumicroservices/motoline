@@ -10,6 +10,7 @@ class RouteCircuit {
     this.description,
     this.isShared = false,
     required this.createdAt,
+    this.ownerId,
     this.initLat,
     this.initLng,
     this.endLat,
@@ -22,6 +23,9 @@ class RouteCircuit {
   final String? description;
   final bool isShared;
   final DateTime createdAt;
+
+  /// Cloud owner (`profiles.id`). Null = created offline / legacy local row.
+  final String? ownerId;
 
   /// Loop init marker (lat/lng), set from the active-ride HUD.
   final double? initLat;
@@ -47,6 +51,7 @@ class RouteCircuit {
         'description': description,
         'is_shared': isShared ? 1 : 0,
         'created_at_ms': createdAt.millisecondsSinceEpoch,
+        'owner_id': ownerId,
         'init_lat': initLat,
         'init_lng': initLng,
         'end_lat': endLat,
@@ -62,6 +67,7 @@ class RouteCircuit {
         createdAt: DateTime.fromMillisecondsSinceEpoch(
           map['created_at_ms'] as int,
         ),
+        ownerId: map['owner_id'] as String?,
         initLat: (map['init_lat'] as num?)?.toDouble(),
         initLng: (map['init_lng'] as num?)?.toDouble(),
         endLat: (map['end_lat'] as num?)?.toDouble(),
@@ -76,6 +82,7 @@ class RouteCircuit {
         isShared: map['is_shared'] as bool? ?? false,
         createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ??
             DateTime.now(),
+        ownerId: map['owner_id'] as String?,
         initLat: (map['init_lat'] as num?)?.toDouble(),
         initLng: (map['init_lng'] as num?)?.toDouble(),
         endLat: (map['end_lat'] as num?)?.toDouble(),
@@ -87,6 +94,7 @@ class RouteCircuit {
     String? name,
     String? description,
     bool? isShared,
+    String? ownerId,
     double? initLat,
     double? initLng,
     double? endLat,
@@ -99,6 +107,7 @@ class RouteCircuit {
         description: description ?? this.description,
         isShared: isShared ?? this.isShared,
         createdAt: createdAt,
+        ownerId: ownerId ?? this.ownerId,
         initLat: initLat ?? this.initLat,
         initLng: initLng ?? this.initLng,
         endLat: endLat ?? this.endLat,

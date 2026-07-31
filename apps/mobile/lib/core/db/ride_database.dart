@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 5,
+      version: 7,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -86,8 +86,40 @@ class RideDatabase {
           await _createRouteLoopsTable(db);
           await _migrateRouteAnchorsToLoops(db);
         }
+        if (oldVersion < 6) {
+          // Product reset: drop saved loops + A/B anchors on every device.
+          await _clearAllLoopData(db);
+        }
+        if (oldVersion < 7) {
+          await _addOwnerIdColumnIfMissing(db);
+        }
       },
     );
+  }
+
+  Future<void> _addOwnerIdColumnIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(routes)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    if (!existing.contains('owner_id')) {
+      await db.execute('ALTER TABLE routes ADD COLUMN owner_id TEXT');
+    }
+  }
+
+  Future<void> _clearAllLoopData(Database db) async {
+    await _createRouteLoopsTable(db);
+    await db.delete('route_loops');
+    await db.update('routes', {
+      'init_lat': null,
+      'init_lng': null,
+      'end_lat': null,
+      'end_lng': null,
+      'geofence_radius_m': null,
+    });
+  }
+
+  Future<void> deleteLoopsForRoute(String routeId) async {
+    final db = await database;
+    await db.delete('route_loops', where: 'route_id = ?', whereArgs: [routeId]);
   }
 
   Future<void> _createRouteLoopsTable(Database db) async {
@@ -161,6 +193,7 @@ class RideDatabase {
         description TEXT,
         is_shared INTEGER NOT NULL DEFAULT 0,
         created_at_ms INTEGER NOT NULL,
+        owner_id TEXT,
         init_lat REAL,
         init_lng REAL,
         end_lat REAL,
@@ -288,6 +321,15 @@ class RideDatabase {
     final db = await database;
     final rows = await db.query('routes', orderBy: 'created_at_ms DESC');
     return rows.map(RouteCircuit.fromMap).toList();
+  }
+
+  /// Routes owned by [ownerId], plus legacy local rows with no owner.
+  Future<List<RouteCircuit>> listMyRoutes(String? ownerId) async {
+    final all = await listRoutes();
+    if (ownerId == null || ownerId.isEmpty) return all;
+    return all
+        .where((r) => r.ownerId == null || r.ownerId == ownerId)
+        .toList();
   }
 
   Future<RouteCircuit?> getRoute(String id) async {
