@@ -1,8 +1,8 @@
 /// Named circuit / route for tagging rides and peer compare.
 ///
-/// Loop-mode fields (`init*` / `end*` / `geofenceRadiusM`) are set once the
-/// rider marks the loop init/end points on the active-ride HUD; a route
-/// with both init and end set can arm auto-lap detection.
+/// Loop A/B anchors on the route are a denormalized mirror of the primary
+/// [RouteLoop] (see `route_loops`). Prefer creating / editing loops via the
+/// route Loop module; session auto-lap reads these fields when armed.
 class RouteCircuit {
   const RouteCircuit({
     required this.id,

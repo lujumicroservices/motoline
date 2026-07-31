@@ -33,15 +33,11 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         children: [
-          const RiderLabMark(size: BrandMarkSize.title),
-          const SizedBox(height: 6),
-          Text(
-            l10n.byRawThrottle,
-            style: GoogleFonts.outfit(
-              color: AppTheme.steel,
-              fontSize: 13,
-              letterSpacing: 0.4,
-            ),
+          RiderLabMark(
+            size: BrandMarkSize.title,
+            showAccentBar: true,
+            showAttribution: true,
+            attribution: l10n.byRawThrottle,
           ),
           const SizedBox(height: 16),
           const Align(

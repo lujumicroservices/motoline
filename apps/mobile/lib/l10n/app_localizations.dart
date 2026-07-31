@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @tagline.
   ///
   /// In es, this message translates to:
-  /// **'Graba la línea que rodaste. Revísala. Mejora cada curva.'**
+  /// **'Entrada. Ápice. Salida. Domina cada curva.'**
   String get tagline;
 
   /// No description provided for @startRide.
@@ -1127,13 +1127,13 @@ abstract class AppLocalizations {
   /// No description provided for @routesHowBody.
   ///
   /// In es, this message translates to:
-  /// **'1) Crea una ruta con + (ej. «Glorieta norte»).\n2) En Ride Lab → Comparte, etiqueta la grabación con esa ruta.\n3) O usa Modo Loop: marca A/B y cada vuelta se guarda en la misma ruta.\n4) Toca una ruta aquí para ver vueltas, compararlas o abrir Ride Lab.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.'**
+  /// **'1) Crea una ruta con + (ej. «Glorieta norte»).\n2) Abre la ruta → pestaña Loop: detecta vueltas cerradas en rides etiquetados, o marca A/B tú mismo.\n3) Inicia un ride en loop desde un loop guardado — cada vuelta se etiqueta a esta ruta.\n4) O en Ride Lab → Comparte, etiqueta cualquier ride con esta ruta.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.'**
   String get routesHowBody;
 
   /// No description provided for @routesTapHint.
   ///
   /// In es, this message translates to:
-  /// **'Toca para ver vueltas'**
+  /// **'Toca para vueltas + módulo Loop'**
   String get routesTapHint;
 
   /// No description provided for @routesLoopReady.
@@ -1567,6 +1567,114 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pasa a Pro para quitar anuncios'**
   String get removeAdsWithPro;
+
+  /// No description provided for @routeTabLaps.
+  ///
+  /// In es, this message translates to:
+  /// **'Vueltas'**
+  String get routeTabLaps;
+
+  /// No description provided for @routeTabLoop.
+  ///
+  /// In es, this message translates to:
+  /// **'Loop'**
+  String get routeTabLoop;
+
+  /// No description provided for @routeLoopModuleHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Los loops pertenecen a esta ruta. Detecta vueltas cerradas en rides etiquetados, o marca tú el inicio (A) y el fin (B) en el mapa.'**
+  String get routeLoopModuleHelp;
+
+  /// No description provided for @routeLoopDefine.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar A / B'**
+  String get routeLoopDefine;
+
+  /// No description provided for @routeLoopDetect.
+  ///
+  /// In es, this message translates to:
+  /// **'Detectar'**
+  String get routeLoopDetect;
+
+  /// No description provided for @routeLoopSavedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Loops guardados'**
+  String get routeLoopSavedTitle;
+
+  /// No description provided for @routeLoopEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay loops — detecta desde rides o marca A y B en el mapa.'**
+  String get routeLoopEmpty;
+
+  /// No description provided for @routeLoopDetectedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Candidatos detectados'**
+  String get routeLoopDetectedTitle;
+
+  /// No description provided for @routeLoopDetectedEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay vueltas cerradas en los rides etiquetados. Rueda el circuito e intenta de nuevo.'**
+  String get routeLoopDetectedEmpty;
+
+  /// No description provided for @routeLoopDetectedHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Trayecto cerrado inferido por GPS — guárdalo para auto-vuelta.'**
+  String get routeLoopDetectedHint;
+
+  /// No description provided for @routeLoopSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get routeLoopSave;
+
+  /// No description provided for @routeLoopSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Loop guardado en esta ruta'**
+  String get routeLoopSaved;
+
+  /// No description provided for @routeLoopManualName.
+  ///
+  /// In es, this message translates to:
+  /// **'Loop manual'**
+  String get routeLoopManualName;
+
+  /// No description provided for @routeLoopPrimary.
+  ///
+  /// In es, this message translates to:
+  /// **'PRINCIPAL'**
+  String get routeLoopPrimary;
+
+  /// No description provided for @routeLoopSetPrimary.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar como principal'**
+  String get routeLoopSetPrimary;
+
+  /// No description provided for @routeLoopStartRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar ride en loop'**
+  String get routeLoopStartRide;
+
+  /// No description provided for @routeLoopSourceManual.
+  ///
+  /// In es, this message translates to:
+  /// **'Manual'**
+  String get routeLoopSourceManual;
+
+  /// No description provided for @routeLoopSourceDetected.
+  ///
+  /// In es, this message translates to:
+  /// **'Detectado'**
+  String get routeLoopSourceDetected;
 }
 
 class _AppLocalizationsDelegate

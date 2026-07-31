@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../core/models/route_circuit.dart';
+import '../../core/models/route_loop.dart';
 import '../../core/models/track_point.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/loop_session_controller.dart';
@@ -19,8 +21,7 @@ import '../ride_detail/ride_detail_screen.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 
-/// Normal = single ride, manual/auto end. Loop = teaching lap + auto-lap
-/// session driven by [LoopSessionController]. See docs/REQUIREMENTS.md §3.
+/// Normal = single ride. Loop = auto-lap session bound to a route loop.
 enum ActiveRideMode { normal, loop }
 
 class ActiveRideScreen extends ConsumerStatefulWidget {
@@ -28,12 +29,20 @@ class ActiveRideScreen extends ConsumerStatefulWidget {
     super.key,
     this.autoStart = true,
     this.mode = ActiveRideMode.normal,
+    this.route,
+    this.loop,
   });
 
   /// When true, starts the recorder (with GPS warm-up UI) on open.
   final bool autoStart;
 
   final ActiveRideMode mode;
+
+  /// When set with [mode] = loop, tags laps to this route.
+  final RouteCircuit? route;
+
+  /// Optional saved loop — arms auto-lap as soon as recording starts.
+  final RouteLoop? loop;
 
   @override
   ConsumerState<ActiveRideScreen> createState() => _ActiveRideScreenState();
@@ -78,7 +87,15 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           if (!mounted) return;
           setState(() => _warmup = status);
         },
+        routeId: widget.route?.id,
       );
+      if (!mounted) return;
+
+      if (_isLoop && widget.route != null) {
+        final loopCtrl = ref.read(loopSessionControllerProvider);
+        await loopCtrl.bindRoute(widget.route!, loop: widget.loop);
+      }
+
       if (!mounted) return;
       setState(() {
         _starting = false;

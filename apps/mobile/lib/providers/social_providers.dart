@@ -5,7 +5,9 @@ import '../core/analytics/bbox_utils.dart';
 import '../core/db/ride_database.dart';
 import '../core/models/cloud_models.dart';
 import '../core/models/route_circuit.dart';
+import '../core/models/route_loop.dart';
 import '../core/services/ride_sync_service.dart';
+import '../core/services/route_loop_service.dart';
 import '../core/services/route_service.dart';
 import '../core/supabase/social_repository.dart';
 import '../core/supabase/supabase_bootstrap.dart';
@@ -16,6 +18,15 @@ final rideSyncServiceProvider = Provider<RideSyncService>((ref) {
 
 final routeServiceProvider = Provider<RouteService>((ref) {
   return RouteService(database: RideDatabase.instance);
+});
+
+final routeLoopServiceProvider = Provider<RouteLoopService>((ref) {
+  return RouteLoopService(database: RideDatabase.instance);
+});
+
+final routeLoopsProvider =
+    FutureProvider.autoDispose.family<List<RouteLoop>, String>((ref, routeId) {
+  return ref.watch(routeLoopServiceProvider).listForRoute(routeId);
 });
 
 final socialRepositoryProvider = Provider<SocialRepository>((ref) {

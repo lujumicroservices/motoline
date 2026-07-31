@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../db/ride_database.dart';
 import '../models/route_circuit.dart';
+import '../models/route_loop.dart';
 import 'loop_lap_detector.dart';
 import 'ride_recorder.dart';
 import 'route_service.dart';
@@ -21,36 +22,43 @@ const Duration kLoopMinLapDuration = Duration(seconds: 30);
 class LoopSessionState {
   const LoopSessionState({
     this.route,
+    this.loop,
     this.lapCount = 0,
     this.armed = false,
     this.ended = false,
   });
 
   final RouteCircuit? route;
+  final RouteLoop? loop;
   final int lapCount;
   final bool armed;
   final bool ended;
 
-  bool get hasInit => route?.hasLoopInit ?? false;
-  bool get hasEnd => route?.hasLoopEnd ?? false;
+  bool get hasInit =>
+      loop != null || (route?.hasLoopInit ?? false);
+  bool get hasEnd =>
+      loop != null || (route?.hasLoopEnd ?? false);
 
   LoopSessionState copyWith({
     RouteCircuit? route,
+    RouteLoop? loop,
     int? lapCount,
     bool? armed,
     bool? ended,
   }) =>
       LoopSessionState(
         route: route ?? this.route,
+        loop: loop ?? this.loop,
         lapCount: lapCount ?? this.lapCount,
         armed: armed ?? this.armed,
         ended: ended ?? this.ended,
       );
 }
 
-/// Drives the Loop mode flow on top of an already-recording [RideRecorder]:
-/// mark init/end, arm auto-lap detection, and roll one Ride per lap while
-/// tagging every lap with the same [RouteCircuit.id].
+/// Drives Loop mode on top of an already-recording [RideRecorder].
+///
+/// Prefer binding an existing [RouteCircuit] + [RouteLoop] from the route
+/// module. Legacy markInit/markEnd still work for in-ride adjustments.
 class LoopSessionController {
   LoopSessionController({
     required RideRecorder recorder,
@@ -71,6 +79,7 @@ class LoopSessionController {
   StreamSubscription<ActiveRideSnapshot>? _lapSub;
 
   RouteCircuit? _route;
+  RouteLoop? _loop;
   LoopLapDetector? _lapDetector;
   int _lapCount = 0;
   bool _busy = false;
@@ -80,12 +89,58 @@ class LoopSessionController {
 
   LoopSessionState get _snapshot => LoopSessionState(
         route: _route,
+        loop: _loop,
         lapCount: _lapCount,
         armed: _lapDetector != null,
         ended: _ended,
       );
 
   void _emit() => _stateController.add(_snapshot);
+
+  /// Attach this session to an existing route (and optional saved loop).
+  Future<void> bindRoute(
+    RouteCircuit route, {
+    RouteLoop? loop,
+  }) async {
+    _route = route;
+    _loop = loop;
+    await _recorder.setActiveRideRouteId(route.id);
+    if (loop != null) {
+      await armFromLoop(loop);
+    } else {
+      _emit();
+    }
+  }
+
+  /// Arm auto-lap from a saved [RouteLoop] belonging to the bound route.
+  Future<void> armFromLoop(RouteLoop loop) async {
+    final route = _route ?? await _db.getRoute(loop.routeId);
+    if (route == null) return;
+
+    final mirrored = route.copyWith(
+      initLat: loop.initLat,
+      initLng: loop.initLng,
+      endLat: loop.endLat,
+      endLng: loop.endLng,
+      geofenceRadiusM: loop.geofenceRadiusM,
+    );
+    await _db.upsertRoute(mirrored);
+    _route = mirrored;
+    _loop = loop;
+
+    await _recorder.setActiveRideRouteId(mirrored.id);
+
+    _lapDetector = LoopLapDetector(
+      initLat: loop.initLat,
+      initLng: loop.initLng,
+      geofenceRadiusM: loop.geofenceRadiusM,
+      minLapDistanceMeters: kLoopMinLapDistanceMeters,
+      minLapDuration: kLoopMinLapDuration,
+    )..startLap(DateTime.now());
+
+    _lapSub ??= _recorder.snapshots.listen(_onSnapshot);
+    _emit();
+  }
 
   /// Marks the loop-init point (A). Uses [lat]/[lng] when provided; otherwise
   /// the rider's current live GPS fix.

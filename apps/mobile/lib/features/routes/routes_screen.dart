@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
-import '../../core/models/ride.dart';
 import '../../core/models/route_circuit.dart';
 import '../../l10n/l10n_ext.dart';
-import '../../providers/ride_providers.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/rider_alias_chip.dart';
-import '../compare/route_compare_screen.dart';
-import '../ride_detail/ride_detail_screen.dart';
+import 'route_detail_screen.dart';
 
 /// Manage named routes / circuits and share them with friends.
 class RoutesScreen extends ConsumerWidget {
@@ -198,15 +194,15 @@ class RoutesScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                   TextField(
                     controller: descCtrl,
-                    decoration:
-                        InputDecoration(hintText: l10n.routeDescHint),
+                    decoration: InputDecoration(hintText: l10n.routeDescHint),
                   ),
+                  const SizedBox(height: 8),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(l10n.shareRoute),
                     subtitle: Text(
                       l10n.shareRouteHelp,
-                      style: const TextStyle(fontSize: 12, color: AppTheme.steel),
+                      style: const TextStyle(fontSize: 12),
                     ),
                     value: shared,
                     onChanged: (v) => setLocal(() => shared = v),
@@ -216,7 +212,7 @@ class RoutesScreen extends ConsumerWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  child: Text(l10n.close),
+                  child: Text(l10n.notNow),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(ctx, true),
@@ -263,7 +259,13 @@ class _MyRouteTile extends ConsumerWidget {
       color: AppTheme.asphaltElevated,
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        onTap: () => _showLaps(context),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => RouteDetailScreen(route: route),
+            ),
+          );
+        },
         title: Row(
           children: [
             Expanded(
@@ -293,146 +295,6 @@ class _MyRouteTile extends ConsumerWidget {
             await ref.read(routeServiceProvider).setShared(route.id, v);
             ref.invalidate(routesListProvider);
           },
-        ),
-      ),
-    );
-  }
-
-  void _showLaps(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppTheme.asphaltElevated,
-      isScrollControlled: true,
-      builder: (ctx) => _RouteLapsSheet(route: route),
-    );
-  }
-}
-
-class _RouteLapsSheet extends ConsumerWidget {
-  const _RouteLapsSheet({required this.route});
-
-  final RouteCircuit route;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final ridesAsync = ref.watch(ridesForRouteProvider(route.id));
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              route.name,
-              style: GoogleFonts.spaceGrotesk(
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Flexible(
-              child: ridesAsync.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (e, _) => Text('$e'),
-                data: (rides) {
-                  final completed = rides
-                      .where((r) => r.status == RideStatus.completed)
-                      .toList();
-                  if (completed.isEmpty) {
-                    return Text(
-                      l10n.routesEmpty,
-                      style: const TextStyle(color: AppTheme.steel),
-                    );
-                  }
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (completed.length >= 2)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.tonalIcon(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => RouteCompareScreen(
-                                      routeId: route.id,
-                                      routeName: route.name,
-                                    ),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.timeline),
-                              label: Text(l10n.compareLaps),
-                            ),
-                          ),
-                        )
-                      else
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            l10n.compareNeedTwoLaps,
-                            style: const TextStyle(
-                              color: AppTheme.steel,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      Flexible(
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: completed.length,
-                          separatorBuilder: (_, _) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final ride = completed[index];
-                            return ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: Text(
-                                DateFormat.MMMd()
-                                    .add_jm()
-                                    .format(ride.startedAt),
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              subtitle: Text(
-                                '${ride.distanceKm.toStringAsFixed(2)} km'
-                                '${ride.maxSpeedKmh == null ? '' : ' · max ${ride.maxSpeedKmh!.toStringAsFixed(0)} km/h'}',
-                                style: const TextStyle(
-                                  color: AppTheme.steel,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              trailing: const Icon(
-                                Icons.chevron_right,
-                                color: AppTheme.steel,
-                              ),
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        RideDetailScreen(rideId: ride.id),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
         ),
       ),
     );

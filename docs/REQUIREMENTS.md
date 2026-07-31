@@ -268,7 +268,9 @@ flowchart LR
 | REQ-SEGMENT | Select/zoom road segment + segment metrics | In progress |
 | REQ-ROAD-KIND | Recta vs curva from heading (+ lean side) | In progress |
 
-### Brand typography
+### Brand typography & chrome
 
-- Wordmark: `RiderLabMark` — **Syne** lockup, `Rider` + `Lab` with distinct tracking; `Lab` tinted cyan (lean accent, not speed red).
-- UI chrome remains Outfit + Space Grotesk.
+- Wordmark: `RiderLabMark` — **Syne** single-line lockup, `Rider` + `Lab`; `Lab` uses throttle brand orange (`AppTheme.brand`), not lean cyan.
+- Accent bar: signal → amber → mint gradient under hero/title marks.
+- Chrome palette: carbon asphalt, hot signal CTA, electric mint telemetry, race amber peaks.
+- UI type remains Outfit + Space Grotesk.

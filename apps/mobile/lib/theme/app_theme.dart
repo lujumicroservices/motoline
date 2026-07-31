@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// RiderLab chrome — carbon asphalt + throttle signal + race telemetry.
 class AppTheme {
-  static const asphalt = Color(0xFF1A1C1E);
-  static const asphaltElevated = Color(0xFF24272B);
-  static const steel = Color(0xFF9AA3AD);
-  static const mist = Color(0xFFE8EEF2);
-  static const signal = Color(0xFFE4572E);
-  static const line = Color(0xFF2EC4B6);
-  static const lineHot = Color(0xFFFFB703);
+  /// Deep carbon — night track / fairing black.
+  static const asphalt = Color(0xFF0E1013);
+
+  /// Raised panel over asphalt.
+  static const asphaltElevated = Color(0xFF1A1E24);
+
+  /// Secondary copy / chrome.
+  static const steel = Color(0xFF9BA4AE);
+
+  /// Primary text / light fairing.
+  static const mist = Color(0xFFF1F5F8);
+
+  /// Throttle / CTA — hot signal orange-red.
+  static const signal = Color(0xFFFF3D1F);
+
+  /// Telemetry / live line — electric mint.
+  static const line = Color(0xFF00D4AA);
+
+  /// Peak / warning — race amber.
+  static const lineHot = Color(0xFFFFC107);
+
+  /// Brand accent on the wordmark (`Lab`) — same family as throttle signal.
+  static const brand = Color(0xFFFF5A2A);
 
   static ThemeData dark() {
     final base = ThemeData(

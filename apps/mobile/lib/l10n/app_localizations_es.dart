@@ -12,8 +12,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appTitle => 'RiderLab';
 
   @override
-  String get tagline =>
-      'Graba la línea que rodaste. Revísala. Mejora cada curva.';
+  String get tagline => 'Entrada. Ápice. Salida. Domina cada curva.';
 
   @override
   String get startRide => 'Iniciar ruta';
@@ -579,10 +578,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get routesHowBody =>
-      '1) Crea una ruta con + (ej. «Glorieta norte»).\n2) En Ride Lab → Comparte, etiqueta la grabación con esa ruta.\n3) O usa Modo Loop: marca A/B y cada vuelta se guarda en la misma ruta.\n4) Toca una ruta aquí para ver vueltas, compararlas o abrir Ride Lab.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.';
+      '1) Crea una ruta con + (ej. «Glorieta norte»).\n2) Abre la ruta → pestaña Loop: detecta vueltas cerradas en rides etiquetados, o marca A/B tú mismo.\n3) Inicia un ride en loop desde un loop guardado — cada vuelta se etiqueta a esta ruta.\n4) O en Ride Lab → Comparte, etiqueta cualquier ride con esta ruta.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.';
 
   @override
-  String get routesTapHint => 'Toca para ver vueltas';
+  String get routesTapHint => 'Toca para vueltas + módulo Loop';
 
   @override
   String get routesLoopReady => 'Loop listo';
@@ -820,4 +819,62 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get removeAdsWithPro => 'Pasa a Pro para quitar anuncios';
+
+  @override
+  String get routeTabLaps => 'Vueltas';
+
+  @override
+  String get routeTabLoop => 'Loop';
+
+  @override
+  String get routeLoopModuleHelp =>
+      'Los loops pertenecen a esta ruta. Detecta vueltas cerradas en rides etiquetados, o marca tú el inicio (A) y el fin (B) en el mapa.';
+
+  @override
+  String get routeLoopDefine => 'Marcar A / B';
+
+  @override
+  String get routeLoopDetect => 'Detectar';
+
+  @override
+  String get routeLoopSavedTitle => 'Loops guardados';
+
+  @override
+  String get routeLoopEmpty =>
+      'Aún no hay loops — detecta desde rides o marca A y B en el mapa.';
+
+  @override
+  String get routeLoopDetectedTitle => 'Candidatos detectados';
+
+  @override
+  String get routeLoopDetectedEmpty =>
+      'No hay vueltas cerradas en los rides etiquetados. Rueda el circuito e intenta de nuevo.';
+
+  @override
+  String get routeLoopDetectedHint =>
+      'Trayecto cerrado inferido por GPS — guárdalo para auto-vuelta.';
+
+  @override
+  String get routeLoopSave => 'Guardar';
+
+  @override
+  String get routeLoopSaved => 'Loop guardado en esta ruta';
+
+  @override
+  String get routeLoopManualName => 'Loop manual';
+
+  @override
+  String get routeLoopPrimary => 'PRINCIPAL';
+
+  @override
+  String get routeLoopSetPrimary => 'Usar como principal';
+
+  @override
+  String get routeLoopStartRide => 'Iniciar ride en loop';
+
+  @override
+  String get routeLoopSourceManual => 'Manual';
+
+  @override
+  String get routeLoopSourceDetected => 'Detectado';
 }

@@ -12,8 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'RiderLab';
 
   @override
-  String get tagline =>
-      'Record the line you rode. Scrub it. Improve every corner.';
+  String get tagline => 'Entry. Apex. Exit. Own every corner.';
 
   @override
   String get startRide => 'Start ride';
@@ -577,10 +576,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routesHowBody =>
-      '1) Create a route with + (e.g. “North roundabout”).\n2) In Ride Lab → Share, tag the ride with that route.\n3) Or use Loop mode: mark A/B and each lap is saved on the same route.\n4) Tap a route here to see laps, compare them, or open Ride Lab.\n5) Turn sharing on if friends should compare on this circuit.';
+      '1) Create a route with + (e.g. “North roundabout”).\n2) Open the route → Loop tab: detect closed loops from tagged rides, or mark A/B yourself.\n3) Start a loop ride from a saved loop — each lap is tagged to this route.\n4) Or in Ride Lab → Share, tag any ride with this route.\n5) Turn sharing on if friends should compare on this circuit.';
 
   @override
-  String get routesTapHint => 'Tap to see laps';
+  String get routesTapHint => 'Tap for laps + Loop module';
 
   @override
   String get routesLoopReady => 'Loop ready';
@@ -815,4 +814,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeAdsWithPro => 'Upgrade to Pro to remove ads';
+
+  @override
+  String get routeTabLaps => 'Laps';
+
+  @override
+  String get routeTabLoop => 'Loop';
+
+  @override
+  String get routeLoopModuleHelp =>
+      'Loops belong to this route. Detect closed loops from tagged rides, or mark start (A) and end (B) yourself on the map.';
+
+  @override
+  String get routeLoopDefine => 'Mark A / B';
+
+  @override
+  String get routeLoopDetect => 'Detect';
+
+  @override
+  String get routeLoopSavedTitle => 'Saved loops';
+
+  @override
+  String get routeLoopEmpty =>
+      'No loops yet — detect from rides or mark A and B on the map.';
+
+  @override
+  String get routeLoopDetectedTitle => 'Detected candidates';
+
+  @override
+  String get routeLoopDetectedEmpty =>
+      'No closed loops found on tagged rides yet. Ride the circuit and try again.';
+
+  @override
+  String get routeLoopDetectedHint =>
+      'Closed path inferred from GPS — save to use for auto-lap.';
+
+  @override
+  String get routeLoopSave => 'Save';
+
+  @override
+  String get routeLoopSaved => 'Loop saved on this route';
+
+  @override
+  String get routeLoopManualName => 'Manual loop';
+
+  @override
+  String get routeLoopPrimary => 'PRIMARY';
+
+  @override
+  String get routeLoopSetPrimary => 'Set as primary';
+
+  @override
+  String get routeLoopStartRide => 'Start loop ride';
+
+  @override
+  String get routeLoopSourceManual => 'Manual';
+
+  @override
+  String get routeLoopSourceDetected => 'Detected';
 }

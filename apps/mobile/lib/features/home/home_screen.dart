@@ -57,85 +57,119 @@ class HomeScreen extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RiderLabMark(
-                          size: BrandMarkSize.hero,
-                          showAttribution: true,
-                          attribution: l10n.byRawThrottle,
+                  RiderLabMark(
+                    size: BrandMarkSize.hero,
+                    showAccentBar: true,
+                    showAttribution: true,
+                    attribution: l10n.byRawThrottle,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const RiderAliasChip(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
                         ),
-                        const SizedBox(height: 10),
-                        const RiderAliasChip(),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.tagline,
-                          style: GoogleFonts.outfit(
-                            fontSize: 16,
-                            color: AppTheme.steel,
-                            height: 1.35,
+                        decoration: BoxDecoration(
+                          color: AppTheme.signal.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppTheme.signal.withValues(alpha: 0.45),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: l10n.settings,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const SettingsScreen(),
+                        child: Text(
+                          '${l10n.entry.toUpperCase()} · ${l10n.apex.toUpperCase()} · ${l10n.exit.toUpperCase()}',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.9,
+                            color: AppTheme.signal,
+                          ),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.settings_outlined),
-                    color: AppTheme.mist,
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    tooltip: l10n.routesTitle,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const RoutesScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.route_outlined),
-                    color: AppTheme.mist,
-                  ),
-                  IconButton(
-                    tooltip: l10n.friends,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const FriendsScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.group_outlined),
-                    color: AppTheme.mist,
-                  ),
-                  IconButton(
-                    tooltip: l10n.language,
-                    onPressed: () => ref.read(localeProvider.notifier).toggle(),
-                    icon: Text(
-                      locale.languageCode.toUpperCase(),
-                      style: GoogleFonts.spaceGrotesk(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        tooltip: l10n.settings,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.settings_outlined),
                         color: AppTheme.mist,
                       ),
-                    ),
+                      IconButton(
+                        tooltip: l10n.routesTitle,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const RoutesScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.route_outlined),
+                        color: AppTheme.mist,
+                      ),
+                      IconButton(
+                        tooltip: l10n.friends,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const FriendsScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.group_outlined),
+                        color: AppTheme.mist,
+                      ),
+                      IconButton(
+                        tooltip: l10n.language,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () =>
+                            ref.read(localeProvider.notifier).toggle(),
+                        icon: Text(
+                          locale.languageCode.toUpperCase(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                            color: AppTheme.mist,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: l10n.checkUpdates,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => promptManualUpdateCheck(context, ref),
+                        icon: const Icon(Icons.system_update_alt_outlined),
+                        color: AppTheme.steel,
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    tooltip: l10n.checkUpdates,
-                    onPressed: () => promptManualUpdateCheck(context, ref),
-                    icon: const Icon(Icons.system_update_alt_outlined),
-                    color: AppTheme.steel,
+                  Text(
+                    l10n.tagline,
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      color: AppTheme.steel,
+                      height: 1.35,
+                    ),
                   ),
                 ],
               ),
@@ -179,55 +213,34 @@ class HomeScreen extends ConsumerWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        final notifier = ref.read(armedStateProvider.notifier);
-                        if (armed) {
-                          notifier.disarm();
-                        } else {
-                          try {
-                            await notifier.arm();
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('$e')),
-                            );
-                          }
-                        }
-                      },
-                      style: armed
-                          ? OutlinedButton.styleFrom(
-                              foregroundColor: AppTheme.lineHot,
-                              side: const BorderSide(color: AppTheme.lineHot),
-                            )
-                          : null,
-                      child: Text(
-                        armed ? l10n.disarmAutoRide : l10n.armAutoRide,
-                      ),
-                    ),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    final notifier = ref.read(armedStateProvider.notifier);
+                    if (armed) {
+                      notifier.disarm();
+                    } else {
+                      try {
+                        await notifier.arm();
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('$e')),
+                        );
+                      }
+                    }
+                  },
+                  style: armed
+                      ? OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.lineHot,
+                          side: const BorderSide(color: AppTheme.lineHot),
+                        )
+                      : null,
+                  child: Text(
+                    armed ? l10n.disarmAutoRide : l10n.armAutoRide,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const ActiveRideScreen(
-                              mode: ActiveRideMode.loop,
-                            ),
-                          ),
-                        ).then((_) {
-                          ref.invalidate(ridesListProvider);
-                          ref.invalidate(incompleteRideProvider);
-                        });
-                      },
-                      child: Text(l10n.loopMode),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             ridesAsync.when(
@@ -527,23 +540,27 @@ class _SeasonStrip extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF262B30), Color(0xFF1B1F23)],
+          colors: [
+            AppTheme.asphaltElevated,
+            Color.lerp(AppTheme.asphalt, AppTheme.signal, 0.12)!,
+            Color.lerp(AppTheme.asphaltElevated, AppTheme.line, 0.08)!,
+          ],
         ),
-        border: Border.all(color: AppTheme.line.withValues(alpha: 0.2)),
+        border: Border.all(color: AppTheme.signal.withValues(alpha: 0.28)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'YOUR GARAGE',
-            style: GoogleFonts.outfit(
+            'PERFORMANCE',
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 11,
-              letterSpacing: 1.3,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.line,
+              letterSpacing: 1.6,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.signal,
             ),
           ),
           const SizedBox(height: 10),
@@ -606,6 +623,7 @@ class _GarageStat extends StatelessWidget {
           style: GoogleFonts.spaceGrotesk(
             fontSize: 16,
             fontWeight: FontWeight.w700,
+            color: AppTheme.mist,
           ),
         ),
       ],
