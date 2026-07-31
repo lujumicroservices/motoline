@@ -35,9 +35,17 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
     final meAsync = ref.watch(myProfileProvider);
 
     meAsync.whenData((profile) {
-      if (!_nameSeeded && profile != null) {
+      final cloudName = profile?.displayName?.trim() ?? '';
+      if (!_nameSeeded) {
         _nameSeeded = true;
-        _nameController.text = profile.displayName ?? '';
+        if (cloudName.isNotEmpty) {
+          _nameController.text = cloudName;
+        }
+      } else if (cloudName.isNotEmpty &&
+          _nameController.text.trim() != cloudName &&
+          !_saving) {
+        // Keep field in sync when Google link updates profiles.display_name.
+        _nameController.text = cloudName;
       }
     });
 

@@ -51,6 +51,7 @@ class SupabaseBootstrap {
     final existing = auth.currentSession;
     if (existing != null) {
       await ensureProfileForUser(existing.user.id);
+      await _syncLinkedNameIfNeeded(existing.user);
       return existing;
     }
 
@@ -71,6 +72,56 @@ class SupabaseBootstrap {
       lastAuthError = '$e';
       debugPrint('CornerIQ auth: $e');
       rethrow;
+    }
+  }
+
+  /// If already linked to Google, push name into profiles (fixes pre-sync users).
+  static Future<void> _syncLinkedNameIfNeeded(User user) async {
+    if (user.isAnonymous) return;
+    try {
+      final meta = user.userMetadata;
+      String? name;
+      for (final key in ['full_name', 'name', 'user_name', 'preferred_username']) {
+        final v = meta?[key];
+        if (v is String && v.trim().isNotEmpty) {
+          name = v.trim();
+          break;
+        }
+      }
+      if (name == null) {
+        for (final identity in user.identities ?? const <UserIdentity>[]) {
+          if (identity.provider == 'anonymous') continue;
+          final data = identity.identityData;
+          for (final key in [
+            'full_name',
+            'name',
+            'user_name',
+            'preferred_username',
+          ]) {
+            final v = data?[key];
+            if (v is String && v.trim().isNotEmpty) {
+              name = v.trim();
+              break;
+            }
+          }
+          if (name != null) break;
+          final identityEmail = (data?['email'] as String?)?.trim();
+          if (identityEmail != null && identityEmail.isNotEmpty) {
+            name = identityEmail;
+            break;
+          }
+        }
+      }
+      name ??= user.email?.trim();
+      if (name == null || name.isEmpty) return;
+
+      await client.from('profiles').update({
+        'display_name': name,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', user.id);
+      debugPrint('CornerIQ synced linked profile name: $name');
+    } catch (e) {
+      debugPrint('CornerIQ linked profile sync: $e');
     }
   }
 

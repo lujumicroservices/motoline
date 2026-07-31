@@ -11,10 +11,15 @@ class NativeIdTokens {
   const NativeIdTokens({
     required this.idToken,
     this.accessToken,
+    this.displayName,
+    this.email,
   });
 
   final String idToken;
   final String? accessToken;
+  /// From the native SDK (more reliable than waiting for Supabase metadata).
+  final String? displayName;
+  final String? email;
 }
 
 /// Extensible auth facade over Supabase.
@@ -43,16 +48,53 @@ class AuthService {
         (user.email != null && user.email!.isNotEmpty);
   }
 
-  String? get displayLabel {
-    final user = currentUser;
+  String? get displayLabel => preferredDisplayName(currentUser);
+
+  /// Best public name for a linked Google (or other) account.
+  String? preferredDisplayName(User? user, {String? googleDisplayName}) {
+    if (user == null &&
+        (googleDisplayName == null || googleDisplayName.trim().isEmpty)) {
+      return null;
+    }
+    final fromGoogle = googleDisplayName?.trim();
+    if (fromGoogle != null && fromGoogle.isNotEmpty) return fromGoogle;
+
     if (user == null) return null;
+
     final meta = user.userMetadata;
-    final name = meta?['full_name'] as String? ??
-        meta?['name'] as String? ??
-        meta?['user_name'] as String?;
-    if (name != null && name.trim().isNotEmpty) return name.trim();
+    final fromMeta = _firstNonEmpty([
+      meta?['full_name'],
+      meta?['name'],
+      meta?['user_name'],
+      meta?['preferred_username'],
+    ]);
+    if (fromMeta != null) return fromMeta;
+
+    for (final identity in user.identities ?? const <UserIdentity>[]) {
+      if (identity.provider == 'anonymous') continue;
+      final data = identity.identityData;
+      final fromIdentity = _firstNonEmpty([
+        data?['full_name'],
+        data?['name'],
+        data?['user_name'],
+        data?['preferred_username'],
+      ]);
+      if (fromIdentity != null) return fromIdentity;
+      final identityEmail = (data?['email'] as String?)?.trim();
+      if (identityEmail != null && identityEmail.isNotEmpty) {
+        return identityEmail;
+      }
+    }
+
     final email = user.email?.trim();
     if (email != null && email.isNotEmpty) return email;
+    return null;
+  }
+
+  static String? _firstNonEmpty(List<dynamic> values) {
+    for (final value in values) {
+      if (value is String && value.trim().isNotEmpty) return value.trim();
+    }
     return null;
   }
 
@@ -80,7 +122,11 @@ class AuthService {
           idToken: tokens.idToken,
           accessToken: tokens.accessToken,
         );
-        await _afterIdentity(linked.user ?? auth.currentUser);
+        await _afterIdentity(
+          linked.user ?? auth.currentUser,
+          googleDisplayName: tokens.displayName,
+          googleEmail: tokens.email,
+        );
         return linked;
       } on AuthException catch (e) {
         // Identity already belongs to another account → fall through to sign-in.
@@ -93,7 +139,11 @@ class AuthService {
       idToken: tokens.idToken,
       accessToken: tokens.accessToken,
     );
-    await _afterIdentity(signedIn.user ?? auth.currentUser);
+    await _afterIdentity(
+      signedIn.user ?? auth.currentUser,
+      googleDisplayName: tokens.displayName,
+      googleEmail: tokens.email,
+    );
     return signedIn;
   }
 
@@ -125,6 +175,8 @@ class AuthService {
     return NativeIdTokens(
       idToken: idToken,
       accessToken: authorization.accessToken,
+      displayName: googleUser.displayName,
+      email: googleUser.email,
     );
   }
 
@@ -165,29 +217,64 @@ class AuthService {
     }
   }
 
-  Future<void> _afterIdentity(User? user) async {
+  Future<void> _afterIdentity(
+    User? user, {
+    String? googleDisplayName,
+    String? googleEmail,
+  }) async {
     if (user == null) return;
-    await SupabaseBootstrap.ensureProfileForUser(user.id);
-    await _seedDisplayName(user);
+    // Refresh so email / identities land on currentUser after link.
+    try {
+      await SupabaseBootstrap.client.auth.refreshSession();
+    } catch (e) {
+      debugPrint('Auth refresh after identity: $e');
+    }
+    final refreshed =
+        SupabaseBootstrap.client.auth.currentUser ?? user;
+    await SupabaseBootstrap.ensureProfileForUser(refreshed.id);
+    await syncLinkedProfile(
+      user: refreshed,
+      googleDisplayName: googleDisplayName,
+      googleEmail: googleEmail,
+      force: true,
+    );
   }
 
-  Future<void> _seedDisplayName(User user) async {
-    final name = displayLabel;
-    if (name == null || name.isEmpty) return;
+  /// Writes Google (or other linked) name into `profiles.display_name` so
+  /// Amigos / alias chip / ride share all show the email account name.
+  Future<String?> syncLinkedProfile({
+    User? user,
+    String? googleDisplayName,
+    String? googleEmail,
+    bool force = false,
+  }) async {
+    final u = user ?? currentUser;
+    if (u == null) return null;
+    if (u.isAnonymous && !force) return null;
+
+    final name = preferredDisplayName(
+      u,
+      googleDisplayName: googleDisplayName,
+    );
+    final email = (googleEmail?.trim().isNotEmpty ?? false)
+        ? googleEmail!.trim()
+        : u.email?.trim();
+
+    // Prefer Google name; fall back to email so members always see the account.
+    final display = (name != null && name.isNotEmpty)
+        ? name
+        : (email != null && email.isNotEmpty ? email : null);
+    if (display == null) return null;
+
     try {
-      final row = await SupabaseBootstrap.client
-          .from('profiles')
-          .select('display_name')
-          .eq('id', user.id)
-          .maybeSingle();
-      final existing = row?['display_name'] as String?;
-      if (existing != null && existing.trim().isNotEmpty) return;
       await SupabaseBootstrap.client.from('profiles').update({
-        'display_name': name,
+        'display_name': display,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', user.id);
+      }).eq('id', u.id);
+      return display;
     } catch (e) {
-      debugPrint('Auth seed display_name: $e');
+      debugPrint('Auth sync display_name: $e');
+      return null;
     }
   }
 }

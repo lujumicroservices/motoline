@@ -45,7 +45,8 @@ class AuthActions {
     ref.read(authErrorProvider.notifier).state = null;
     try {
       await _auth.signInWith(provider);
-      final label = _auth.displayLabel;
+      final label = await _auth.syncLinkedProfile(force: true) ??
+          _auth.displayLabel;
       if (label != null && label.isNotEmpty) {
         await ref.read(riderAliasProvider.notifier).setAlias(label);
       }
