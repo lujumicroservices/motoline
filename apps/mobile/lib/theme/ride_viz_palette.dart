@@ -33,6 +33,12 @@ class RideVizPalette {
   /// Right bank — amber.
   static const leanRight = Color(0xFFF4A261);
 
+  /// Road-kind map contrast: muted straight vs hot turn.
+  static const roadRecta = Color(0xFF7A8799);
+  static const roadCurva = Color(0xFFFF2D95);
+  static const roadCurvaLeft = leanLeft;
+  static const roadCurvaRight = leanRight;
+
   /// High-contrast multi-hue speed color (easy to see slow vs fast).
   static Color speedColor(double speedKmh) {
     final v = speedKmh.clamp(0.0, speedCapKmh);

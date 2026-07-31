@@ -3,10 +3,13 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/brake_detection.dart';
+import '../../core/analytics/road_kind_detection.dart';
 import '../../core/models/track_point.dart';
 import '../../core/utils/geo_utils.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import 'widgets/map_layer_toggles.dart';
 import 'widgets/speed_legend.dart';
 
 class PilotLineMap extends StatelessWidget {
@@ -21,6 +24,8 @@ class PilotLineMap extends StatelessWidget {
     this.focusEndIndex,
     this.dimOutsideFocus = true,
     this.brakeEvents = const [],
+    this.roadStretches = const [],
+    this.layers = const MapLayerOptions(),
   });
 
   final List<TrackPoint> points;
@@ -41,8 +46,14 @@ class PilotLineMap extends StatelessWidget {
   /// Brake hits inferred from speed — drawn as map pins.
   final List<BrakeEvent> brakeEvents;
 
+  /// Recta/curva stretches for high-contrast road-kind coloring.
+  final List<RoadStretch> roadStretches;
+
+  final MapLayerOptions layers;
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (points.isEmpty) {
       return Container(
         height: height ?? 280,
@@ -51,10 +62,10 @@ class PilotLineMap extends StatelessWidget {
           color: AppTheme.asphaltElevated,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Text(
-          'No GPS points yet — your line will appear here.',
+        child: Text(
+          l10n.noGpsPoints,
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppTheme.steel),
+          style: const TextStyle(color: AppTheme.steel),
         ),
       );
     }
@@ -62,16 +73,14 @@ class PilotLineMap extends StatelessWidget {
     final hasFocus = focusStartIndex != null &&
         focusEndIndex != null &&
         points.length >= 2;
-    final focusLo = hasFocus
-        ? focusStartIndex!.clamp(0, points.length - 1)
-        : 0;
+    final focusLo =
+        hasFocus ? focusStartIndex!.clamp(0, points.length - 1) : 0;
     final focusHi = hasFocus
         ? focusEndIndex!.clamp(focusLo, points.length - 1)
         : points.length - 1;
 
-    final fitPoints = hasFocus
-        ? points.sublist(focusLo, focusHi + 1)
-        : points;
+    final fitPoints =
+        hasFocus ? points.sublist(focusLo, focusHi + 1) : points;
     final bounds = LatLngBounds.fromPoints(
       fitPoints.map((p) => LatLng(p.latitude, p.longitude)).toList(),
     );
@@ -79,6 +88,8 @@ class PilotLineMap extends StatelessWidget {
       fitPoints[fitPoints.length ~/ 2].latitude,
       fitPoints[fitPoints.length ~/ 2].longitude,
     );
+
+    final kindByIndex = _kindByIndex(points.length, roadStretches);
 
     final polylines = <Polyline>[];
     if (hasFocus && dimOutsideFocus) {
@@ -88,7 +99,11 @@ class PilotLineMap extends StatelessWidget {
         );
       }
       polylines.addAll(
-        _coloredSegments(points.sublist(focusLo, focusHi + 1)),
+        _lineSegments(
+          points.sublist(focusLo, focusHi + 1),
+          indexOffset: focusLo,
+          kindByIndex: kindByIndex,
+        ),
       );
       if (focusHi < points.length - 1) {
         polylines.addAll(
@@ -97,41 +112,58 @@ class PilotLineMap extends StatelessWidget {
       }
     } else if (hasFocus) {
       polylines.addAll(
-        _coloredSegments(points.sublist(focusLo, focusHi + 1)),
+        _lineSegments(
+          points.sublist(focusLo, focusHi + 1),
+          indexOffset: focusLo,
+          kindByIndex: kindByIndex,
+        ),
       );
     } else {
       final segments = splitByGpsGaps(points);
+      var cursor = 0;
       for (final segment in segments) {
-        if (segment.length < 2) continue;
-        polylines.addAll(_coloredSegments(segment));
+        if (segment.length >= 2) {
+          polylines.addAll(
+            _lineSegments(
+              segment,
+              indexOffset: cursor,
+              kindByIndex: kindByIndex,
+            ),
+          );
+        }
+        cursor += segment.length;
       }
     }
 
     final markers = <Marker>[];
-    for (final brake in brakeEvents) {
-      final mid = ((brake.startIndex + brake.endIndex) / 2).round();
-      if (mid < 0 || mid >= points.length) continue;
-      if (hasFocus && (mid < focusLo || mid > focusHi)) continue;
-      final p = points[mid];
-      final color = RideVizPalette.brakeColor(brake.hardness);
-      markers.add(
-        Marker(
-          point: LatLng(p.latitude, p.longitude),
-          width: 22,
-          height: 22,
-          child: Container(
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.asphalt, width: 2),
+    if (layers.showBrakes) {
+      for (final brake in brakeEvents) {
+        final mid = ((brake.startIndex + brake.endIndex) / 2).round();
+        if (mid < 0 || mid >= points.length) continue;
+        if (hasFocus && (mid < focusLo || mid > focusHi)) continue;
+        final p = points[mid];
+        final color = RideVizPalette.brakeColor(brake.hardness);
+        markers.add(
+          Marker(
+            point: LatLng(p.latitude, p.longitude),
+            width: 22,
+            height: 22,
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.asphalt, width: 2),
+              ),
+              child:
+                  const Icon(Icons.south, size: 12, color: AppTheme.asphalt),
             ),
-            child: const Icon(Icons.south, size: 12, color: AppTheme.asphalt),
           ),
-        ),
-      );
+        );
+      }
     }
 
-    if (showStartEnd && fitPoints.isNotEmpty) {
+    final showEnds = layers.showStartEnd && showStartEnd;
+    if (showEnds && fitPoints.isNotEmpty) {
       markers.add(
         Marker(
           point: LatLng(fitPoints.first.latitude, fitPoints.first.longitude),
@@ -163,7 +195,10 @@ class PilotLineMap extends StatelessWidget {
     }
 
     final scrub = scrubIndex;
-    if (scrub != null && scrub >= 0 && scrub < points.length) {
+    if (layers.showPlayhead &&
+        scrub != null &&
+        scrub >= 0 &&
+        scrub < points.length) {
       final p = points[scrub];
       markers.add(
         Marker(
@@ -215,21 +250,24 @@ class PilotLineMap extends StatelessWidget {
     final stacked = Stack(
       children: [
         Positioned.fill(child: map),
-        const Positioned(
-          left: 12,
-          right: 12,
-          bottom: 12,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Color(0xCC1A1C1E),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(10, 8, 10, 8),
-              child: SpeedColorLegend(),
+        if (layers.showLegend)
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                color: Color(0xCC1A1C1E),
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: layers.showRoadKindContrast
+                    ? _RoadKindLegend(l10nRecta: l10n.recta, l10nCurva: l10n.curva)
+                    : const SpeedColorLegend(),
+              ),
             ),
           ),
-        ),
       ],
     );
 
@@ -242,27 +280,81 @@ class PilotLineMap extends StatelessWidget {
     return SizedBox(height: height, child: child);
   }
 
-  List<Polyline> _coloredSegments(List<TrackPoint> segment) {
+  List<(RoadKind kind, TurnSide side)?> _kindByIndex(
+    int length,
+    List<RoadStretch> stretches,
+  ) {
+    final out = List<(RoadKind, TurnSide)?>.filled(length, null);
+    for (final s in stretches) {
+      final lo = s.startIndex.clamp(0, length - 1);
+      final hi = s.endIndex.clamp(lo, length - 1);
+      for (var i = lo; i <= hi; i++) {
+        out[i] = (s.kind, s.side);
+      }
+    }
+    return out;
+  }
+
+  List<Polyline> _lineSegments(
+    List<TrackPoint> segment, {
+    required int indexOffset,
+    required List<(RoadKind kind, TurnSide side)?> kindByIndex,
+  }) {
     final result = <Polyline>[];
     for (var i = 1; i < segment.length; i++) {
       final a = segment[i - 1];
       final b = segment[i];
-      final speed = b.speedKmh ?? a.speedKmh ?? 0;
+      final absIndex = indexOffset + i;
+      final style = _strokeForIndex(absIndex, b, kindByIndex);
       result.add(
         Polyline(
           points: [
             LatLng(a.latitude, a.longitude),
             LatLng(b.latitude, b.longitude),
           ],
-          color: RideVizPalette.speedColor(speed),
-          strokeWidth: 5,
+          color: style.$1,
+          strokeWidth: style.$2,
         ),
       );
     }
     return result;
   }
 
-  List<Polyline> _plainSegments(List<TrackPoint> segment, {required bool dimmed}) {
+  (Color, double) _strokeForIndex(
+    int absIndex,
+    TrackPoint b,
+    List<(RoadKind kind, TurnSide side)?> kindByIndex,
+  ) {
+    // Road-kind contrast wins when on — stronger curves vs muted straights.
+    if (layers.showRoadKindContrast &&
+        absIndex >= 0 &&
+        absIndex < kindByIndex.length) {
+      final kind = kindByIndex[absIndex];
+      if (kind != null) {
+        if (kind.$1 == RoadKind.recta) {
+          return (RideVizPalette.roadRecta.withValues(alpha: 0.75), 3.5);
+        }
+        final color = switch (kind.$2) {
+          TurnSide.izquierda => RideVizPalette.roadCurvaLeft,
+          TurnSide.derecha => RideVizPalette.roadCurvaRight,
+          TurnSide.none => RideVizPalette.roadCurva,
+        };
+        return (color, 7);
+      }
+    }
+
+    if (layers.showSpeedColors) {
+      final speed = b.speedKmh ?? 0;
+      return (RideVizPalette.speedColor(speed), 5);
+    }
+
+    return (AppTheme.mist.withValues(alpha: 0.85), 4);
+  }
+
+  List<Polyline> _plainSegments(
+    List<TrackPoint> segment, {
+    required bool dimmed,
+  }) {
     if (segment.length < 2) return const [];
     return [
       Polyline(
@@ -273,5 +365,48 @@ class PilotLineMap extends StatelessWidget {
         strokeWidth: dimmed ? 3 : 4,
       ),
     ];
+  }
+}
+
+class _RoadKindLegend extends StatelessWidget {
+  const _RoadKindLegend({
+    required this.l10nRecta,
+    required this.l10nCurva,
+  });
+
+  final String l10nRecta;
+  final String l10nCurva;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget item(Color c, String label) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 14,
+              height: 4,
+              decoration: BoxDecoration(
+                color: c,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(color: AppTheme.steel, fontSize: 11),
+            ),
+          ],
+        );
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 6,
+      children: [
+        item(RideVizPalette.roadRecta, l10nRecta),
+        item(RideVizPalette.roadCurva, l10nCurva),
+        item(RideVizPalette.roadCurvaLeft, '←'),
+        item(RideVizPalette.roadCurvaRight, '→'),
+      ],
+    );
   }
 }

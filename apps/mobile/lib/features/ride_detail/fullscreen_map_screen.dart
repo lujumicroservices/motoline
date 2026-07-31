@@ -4,11 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/brake_detection.dart';
+import '../../core/analytics/road_kind_detection.dart';
 import '../../core/models/track_point.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import 'widgets/map_layer_toggles.dart';
 import 'widgets/speed_legend.dart';
 
 /// Result returned when the rider loads metrics for a map area.
@@ -29,6 +31,8 @@ class FullscreenMapScreen extends StatefulWidget {
     required this.points,
     this.scrubIndex,
     this.brakeEvents = const [],
+    this.roadStretches = const [],
+    this.initialLayers = const MapLayerOptions(),
     this.initialFocusStart,
     this.initialFocusEnd,
   });
@@ -36,6 +40,8 @@ class FullscreenMapScreen extends StatefulWidget {
   final List<TrackPoint> points;
   final int? scrubIndex;
   final List<BrakeEvent> brakeEvents;
+  final List<RoadStretch> roadStretches;
+  final MapLayerOptions initialLayers;
   final int? initialFocusStart;
   final int? initialFocusEnd;
 
@@ -51,10 +57,12 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
   Offset? _dragCurrent;
   LatLngBounds? _areaBounds;
   ({int start, int end, int insideCount})? _selection;
+  late MapLayerOptions _layers;
 
   @override
   void initState() {
     super.initState();
+    _layers = widget.initialLayers;
     final lo = widget.initialFocusStart;
     final hi = widget.initialFocusEnd;
     if (lo != null &&
@@ -321,6 +329,18 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                       });
                     },
                   ),
+                  const SizedBox(height: 8),
+                  Material(
+                    color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
+                      child: MapLayerToggles(
+                        options: _layers,
+                        onChanged: (v) => setState(() => _layers = v),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerRight,
@@ -331,17 +351,26 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                     ),
                   ),
                   const Spacer(),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Color(0xCC1A1C1E),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                  if (_layers.showLegend)
+                    DecoratedBox(
+                      decoration: const BoxDecoration(
+                        color: Color(0xCC1A1C1E),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                        child: _layers.showRoadKindContrast
+                            ? Text(
+                                '${l10n.recta} · ${l10n.curva}',
+                                style: GoogleFonts.outfit(
+                                  color: AppTheme.steel,
+                                  fontSize: 12,
+                                ),
+                              )
+                            : const SpeedColorLegend(),
+                      ),
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(10, 8, 10, 8),
-                      child: SpeedColorLegend(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  if (_layers.showLegend) const SizedBox(height: 10),
                   _BottomPanel(
                     selectMode: _selectMode,
                     hasSelection: hasFocus,
@@ -364,12 +393,22 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     int? focusLo,
     int? focusHi,
   }) {
+    final kindByIndex = _kindByIndex(points.length);
     final hasFocus = focusLo != null && focusHi != null;
     if (!hasFocus) {
       final out = <Polyline>[];
+      var cursor = 0;
       for (final segment in splitByGpsGaps(points)) {
-        if (segment.length < 2) continue;
-        out.addAll(_coloredSegments(segment));
+        if (segment.length >= 2) {
+          out.addAll(
+            _styledSegments(
+              segment,
+              indexOffset: cursor,
+              kindByIndex: kindByIndex,
+            ),
+          );
+        }
+        cursor += segment.length;
       }
       return out;
     }
@@ -378,7 +417,11 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       out.addAll(_plainSegments(points.sublist(0, focusLo + 1), dimmed: true));
     }
     out.addAll(
-      _coloredSegmentsGapAware(points.sublist(focusLo, focusHi + 1)),
+      _styledSegments(
+        points.sublist(focusLo, focusHi + 1),
+        indexOffset: focusLo,
+        kindByIndex: kindByIndex,
+      ),
     );
     if (focusHi < points.length - 1) {
       out.addAll(
@@ -388,11 +431,14 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     return out;
   }
 
-  List<Polyline> _coloredSegmentsGapAware(List<TrackPoint> segment) {
-    final out = <Polyline>[];
-    for (final gapSeg in splitByGpsGaps(segment)) {
-      if (gapSeg.length < 2) continue;
-      out.addAll(_coloredSegments(gapSeg));
+  List<(RoadKind, TurnSide)?> _kindByIndex(int length) {
+    final out = List<(RoadKind, TurnSide)?>.filled(length, null);
+    for (final s in widget.roadStretches) {
+      final lo = s.startIndex.clamp(0, length - 1);
+      final hi = s.endIndex.clamp(lo, length - 1);
+      for (var i = lo; i <= hi; i++) {
+        out[i] = (s.kind, s.side);
+      }
     }
     return out;
   }
@@ -405,59 +451,66 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     final markers = <Marker>[];
     final hasFocus = focusLo != null && focusHi != null;
 
-    for (final brake in widget.brakeEvents) {
-      final mid = ((brake.startIndex + brake.endIndex) / 2).round();
-      if (mid < 0 || mid >= points.length) continue;
-      if (hasFocus && (mid < focusLo || mid > focusHi)) continue;
-      final p = points[mid];
+    if (_layers.showBrakes) {
+      for (final brake in widget.brakeEvents) {
+        final mid = ((brake.startIndex + brake.endIndex) / 2).round();
+        if (mid < 0 || mid >= points.length) continue;
+        if (hasFocus && (mid < focusLo || mid > focusHi)) continue;
+        final p = points[mid];
+        markers.add(
+          Marker(
+            point: LatLng(p.latitude, p.longitude),
+            width: 22,
+            height: 22,
+            child: Container(
+              decoration: BoxDecoration(
+                color: RideVizPalette.brakeColor(brake.hardness),
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.asphalt, width: 2),
+              ),
+              child: const Icon(Icons.south, size: 12, color: AppTheme.asphalt),
+            ),
+          ),
+        );
+      }
+    }
+
+    if (_layers.showStartEnd) {
       markers.add(
         Marker(
-          point: LatLng(p.latitude, p.longitude),
-          width: 22,
-          height: 22,
+          point: LatLng(points.first.latitude, points.first.longitude),
+          width: 18,
+          height: 18,
           child: Container(
             decoration: BoxDecoration(
-              color: RideVizPalette.brakeColor(brake.hardness),
+              color: AppTheme.line,
               shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.asphalt, width: 2),
+              border: Border.all(color: AppTheme.mist, width: 2),
             ),
-            child: const Icon(Icons.south, size: 12, color: AppTheme.asphalt),
+          ),
+        ),
+      );
+      markers.add(
+        Marker(
+          point: LatLng(points.last.latitude, points.last.longitude),
+          width: 18,
+          height: 18,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppTheme.signal,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.mist, width: 2),
+            ),
           ),
         ),
       );
     }
 
-    markers.add(
-      Marker(
-        point: LatLng(points.first.latitude, points.first.longitude),
-        width: 18,
-        height: 18,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppTheme.line,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.mist, width: 2),
-          ),
-        ),
-      ),
-    );
-    markers.add(
-      Marker(
-        point: LatLng(points.last.latitude, points.last.longitude),
-        width: 18,
-        height: 18,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppTheme.signal,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.mist, width: 2),
-          ),
-        ),
-      ),
-    );
-
     final scrub = widget.scrubIndex;
-    if (scrub != null && scrub >= 0 && scrub < points.length) {
+    if (_layers.showPlayhead &&
+        scrub != null &&
+        scrub >= 0 &&
+        scrub < points.length) {
       final p = points[scrub];
       markers.add(
         Marker(
@@ -479,24 +532,56 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     return markers;
   }
 
-  List<Polyline> _coloredSegments(List<TrackPoint> segment) {
+  List<Polyline> _styledSegments(
+    List<TrackPoint> segment, {
+    required int indexOffset,
+    required List<(RoadKind, TurnSide)?> kindByIndex,
+  }) {
     final result = <Polyline>[];
     for (var i = 1; i < segment.length; i++) {
       final a = segment[i - 1];
       final b = segment[i];
-      final speed = b.speedKmh ?? a.speedKmh ?? 0;
+      final absIndex = indexOffset + i;
+      final style = _strokeForIndex(absIndex, b, kindByIndex);
       result.add(
         Polyline(
           points: [
             LatLng(a.latitude, a.longitude),
             LatLng(b.latitude, b.longitude),
           ],
-          color: RideVizPalette.speedColor(speed),
-          strokeWidth: 5,
+          color: style.$1,
+          strokeWidth: style.$2,
         ),
       );
     }
     return result;
+  }
+
+  (Color, double) _strokeForIndex(
+    int absIndex,
+    TrackPoint b,
+    List<(RoadKind, TurnSide)?> kindByIndex,
+  ) {
+    if (_layers.showRoadKindContrast &&
+        absIndex >= 0 &&
+        absIndex < kindByIndex.length) {
+      final kind = kindByIndex[absIndex];
+      if (kind != null) {
+        if (kind.$1 == RoadKind.recta) {
+          return (RideVizPalette.roadRecta.withValues(alpha: 0.75), 3.5);
+        }
+        final color = switch (kind.$2) {
+          TurnSide.izquierda => RideVizPalette.roadCurvaLeft,
+          TurnSide.derecha => RideVizPalette.roadCurvaRight,
+          TurnSide.none => RideVizPalette.roadCurva,
+        };
+        return (color, 7);
+      }
+    }
+    if (_layers.showSpeedColors) {
+      return (RideVizPalette.speedColor(b.speedKmh ?? 0), 5);
+    }
+    return (AppTheme.mist.withValues(alpha: 0.85), 4);
   }
 
   List<Polyline> _plainSegments(

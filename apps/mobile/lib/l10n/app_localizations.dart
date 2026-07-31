@@ -878,6 +878,42 @@ abstract class AppLocalizations {
   /// **'Abrir mapa completo'**
   String get openFullscreenMap;
 
+  /// No description provided for @mapLayerSpeed.
+  ///
+  /// In es, this message translates to:
+  /// **'Velocidad'**
+  String get mapLayerSpeed;
+
+  /// No description provided for @mapLayerRoadKind.
+  ///
+  /// In es, this message translates to:
+  /// **'Curvas'**
+  String get mapLayerRoadKind;
+
+  /// No description provided for @mapLayerBrakes.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenos'**
+  String get mapLayerBrakes;
+
+  /// No description provided for @mapLayerStartEnd.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio/fin'**
+  String get mapLayerStartEnd;
+
+  /// No description provided for @mapLayerPlayhead.
+  ///
+  /// In es, this message translates to:
+  /// **'Playhead'**
+  String get mapLayerPlayhead;
+
+  /// No description provided for @mapLayerLegend.
+  ///
+  /// In es, this message translates to:
+  /// **'Leyenda'**
+  String get mapLayerLegend;
+
   /// No description provided for @friends.
   ///
   /// In es, this message translates to:

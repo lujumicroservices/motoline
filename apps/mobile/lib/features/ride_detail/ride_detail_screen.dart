@@ -20,6 +20,7 @@ import 'fullscreen_map_screen.dart';
 import 'pilot_line_map.dart';
 import 'widgets/brake_events_panel.dart';
 import 'widgets/lab_section.dart';
+import 'widgets/map_layer_toggles.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
 import 'widgets/ride_profile_chart.dart';
 import 'widgets/ride_share_panel.dart';
@@ -79,6 +80,7 @@ class _RideDashboardState extends State<_RideDashboard>
   late int _segStart;
   late int _segEnd;
   bool _zoomed = false;
+  MapLayerOptions _mapLayers = const MapLayerOptions();
 
   final Set<String> _expanded = {
     'overview',
@@ -205,12 +207,17 @@ class _RideDashboardState extends State<_RideDashboard>
           points: full.samples,
           scrubIndex: absoluteScrub,
           brakeEvents: full.brakeEvents,
+          roadStretches: full.roadStretches,
+          initialLayers: _mapLayers,
           initialFocusStart: _zoomed ? _segStart : null,
           initialFocusEnd: _zoomed ? _segEnd : null,
         ),
       ),
     );
-    if (!mounted || result == null) return;
+    if (!mounted) return;
+    // Keep toggles in sync if fullscreen mutated them via shared pattern —
+    // fullscreen owns a copy; parent keeps its own until we return.
+    if (result == null) return;
     setState(() {
       _segStart = result.startIndex;
       _segEnd = result.endIndex;
@@ -453,6 +460,12 @@ class _RideDashboardState extends State<_RideDashboard>
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 10),
+                              MapLayerToggles(
+                                options: _mapLayers,
+                                onChanged: (v) =>
+                                    setState(() => _mapLayers = v),
+                              ),
                               const SizedBox(height: 12),
                               Material(
                                 color: Colors.transparent,
@@ -466,7 +479,10 @@ class _RideDashboardState extends State<_RideDashboard>
                                     child: IgnorePointer(
                                       child: PilotLineMap(
                                         key: ValueKey(
-                                          'map-$_zoomed-$_segStart-$_segEnd',
+                                          'map-$_zoomed-$_segStart-$_segEnd-'
+                                          '${_mapLayers.showSpeedColors}-'
+                                          '${_mapLayers.showRoadKindContrast}-'
+                                          '${_mapLayers.showBrakes}',
                                         ),
                                         points: full.samples,
                                         interactive: false,
@@ -476,6 +492,8 @@ class _RideDashboardState extends State<_RideDashboard>
                                         focusEndIndex:
                                             _zoomed ? _segEnd : null,
                                         brakeEvents: full.brakeEvents,
+                                        roadStretches: full.roadStretches,
+                                        layers: _mapLayers,
                                       ),
                                     ),
                                   ),

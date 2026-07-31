@@ -435,6 +435,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openFullscreenMap => 'Open full map';
 
   @override
+  String get mapLayerSpeed => 'Speed';
+
+  @override
+  String get mapLayerRoadKind => 'Turns';
+
+  @override
+  String get mapLayerBrakes => 'Brakes';
+
+  @override
+  String get mapLayerStartEnd => 'Start/end';
+
+  @override
+  String get mapLayerPlayhead => 'Playhead';
+
+  @override
+  String get mapLayerLegend => 'Legend';
+
+  @override
   String get friends => 'Friends';
 
   @override
