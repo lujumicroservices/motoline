@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../core/analytics/brake_detection.dart';
 import '../../core/models/track_point.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../theme/app_theme.dart';
@@ -16,6 +17,10 @@ class PilotLineMap extends StatelessWidget {
     this.interactive = true,
     this.showStartEnd = true,
     this.scrubIndex,
+    this.focusStartIndex,
+    this.focusEndIndex,
+    this.dimOutsideFocus = true,
+    this.brakeEvents = const [],
   });
 
   final List<TrackPoint> points;
@@ -23,8 +28,18 @@ class PilotLineMap extends StatelessWidget {
   final bool interactive;
   final bool showStartEnd;
 
-  /// When set, a playhead marker is drawn at this sample index.
+  /// When set, a playhead marker is drawn at this sample index (into [points]).
   final int? scrubIndex;
+
+  /// Inclusive focus window into [points] for segment zoom.
+  final int? focusStartIndex;
+  final int? focusEndIndex;
+
+  /// When focusing, draw the rest of the line dimmed.
+  final bool dimOutsideFocus;
+
+  /// Brake hits inferred from speed — drawn as map pins.
+  final List<BrakeEvent> brakeEvents;
 
   @override
   Widget build(BuildContext context) {
@@ -44,26 +59,82 @@ class PilotLineMap extends StatelessWidget {
       );
     }
 
-    final segments = splitByGpsGaps(points);
+    final hasFocus = focusStartIndex != null &&
+        focusEndIndex != null &&
+        points.length >= 2;
+    final focusLo = hasFocus
+        ? focusStartIndex!.clamp(0, points.length - 1)
+        : 0;
+    final focusHi = hasFocus
+        ? focusEndIndex!.clamp(focusLo, points.length - 1)
+        : points.length - 1;
+
+    final fitPoints = hasFocus
+        ? points.sublist(focusLo, focusHi + 1)
+        : points;
     final bounds = LatLngBounds.fromPoints(
-      points.map((p) => LatLng(p.latitude, p.longitude)).toList(),
+      fitPoints.map((p) => LatLng(p.latitude, p.longitude)).toList(),
     );
     final center = LatLng(
-      points[points.length ~/ 2].latitude,
-      points[points.length ~/ 2].longitude,
+      fitPoints[fitPoints.length ~/ 2].latitude,
+      fitPoints[fitPoints.length ~/ 2].longitude,
     );
 
     final polylines = <Polyline>[];
-    for (final segment in segments) {
-      if (segment.length < 2) continue;
-      polylines.addAll(_coloredSegments(segment));
+    if (hasFocus && dimOutsideFocus) {
+      if (focusLo > 0) {
+        polylines.addAll(
+          _plainSegments(points.sublist(0, focusLo + 1), dimmed: true),
+        );
+      }
+      polylines.addAll(
+        _coloredSegments(points.sublist(focusLo, focusHi + 1)),
+      );
+      if (focusHi < points.length - 1) {
+        polylines.addAll(
+          _plainSegments(points.sublist(focusHi, points.length), dimmed: true),
+        );
+      }
+    } else if (hasFocus) {
+      polylines.addAll(
+        _coloredSegments(points.sublist(focusLo, focusHi + 1)),
+      );
+    } else {
+      final segments = splitByGpsGaps(points);
+      for (final segment in segments) {
+        if (segment.length < 2) continue;
+        polylines.addAll(_coloredSegments(segment));
+      }
     }
 
     final markers = <Marker>[];
-    if (showStartEnd && points.isNotEmpty) {
+    for (final brake in brakeEvents) {
+      final mid = ((brake.startIndex + brake.endIndex) / 2).round();
+      if (mid < 0 || mid >= points.length) continue;
+      if (hasFocus && (mid < focusLo || mid > focusHi)) continue;
+      final p = points[mid];
+      final color = RideVizPalette.brakeColor(brake.hardness);
       markers.add(
         Marker(
-          point: LatLng(points.first.latitude, points.first.longitude),
+          point: LatLng(p.latitude, p.longitude),
+          width: 22,
+          height: 22,
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.asphalt, width: 2),
+            ),
+            child: const Icon(Icons.south, size: 12, color: AppTheme.asphalt),
+          ),
+        ),
+      );
+    }
+
+    if (showStartEnd && fitPoints.isNotEmpty) {
+      markers.add(
+        Marker(
+          point: LatLng(fitPoints.first.latitude, fitPoints.first.longitude),
           width: 18,
           height: 18,
           child: Container(
@@ -77,7 +148,7 @@ class PilotLineMap extends StatelessWidget {
       );
       markers.add(
         Marker(
-          point: LatLng(points.last.latitude, points.last.longitude),
+          point: LatLng(fitPoints.last.latitude, fitPoints.last.longitude),
           width: 18,
           height: 18,
           child: Container(
@@ -111,7 +182,8 @@ class PilotLineMap extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(Icons.navigation, size: 14, color: AppTheme.asphalt),
+            child:
+                const Icon(Icons.navigation, size: 14, color: AppTheme.asphalt),
           ),
         ),
       );
@@ -120,16 +192,14 @@ class PilotLineMap extends StatelessWidget {
     final map = FlutterMap(
       options: MapOptions(
         initialCenter: center,
-        initialZoom: 15,
+        initialZoom: hasFocus ? 16 : 15,
         interactionOptions: InteractionOptions(
-          flags: interactive
-              ? InteractiveFlag.all
-              : InteractiveFlag.none,
+          flags: interactive ? InteractiveFlag.all : InteractiveFlag.none,
         ),
         initialCameraFit: CameraFit.bounds(
           bounds: bounds,
           padding: const EdgeInsets.all(36),
-          maxZoom: 17,
+          maxZoom: hasFocus ? 18 : 17,
         ),
       ),
       children: [
@@ -190,5 +260,18 @@ class PilotLineMap extends StatelessWidget {
       );
     }
     return result;
+  }
+
+  List<Polyline> _plainSegments(List<TrackPoint> segment, {required bool dimmed}) {
+    if (segment.length < 2) return const [];
+    return [
+      Polyline(
+        points: [
+          for (final p in segment) LatLng(p.latitude, p.longitude),
+        ],
+        color: AppTheme.steel.withValues(alpha: dimmed ? 0.35 : 0.7),
+        strokeWidth: dimmed ? 3 : 4,
+      ),
+    ];
   }
 }

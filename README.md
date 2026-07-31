@@ -34,10 +34,12 @@ apps/mobile/lib/
 
 See **[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)** for planned work:
 
-- Unified **speed color** scale (pale red → dark red by speed, to 300 km/h) on map + charts
-- Fixed **lean L/R** colors (not green/red)
+- Unified **speed color** scale (high-contrast blue→magenta by speed) on map + charts
+- Fixed **lean L/R** colors (cyan / amber)
+- **Brake inference** from GPS speed drop (light / medium / hard)
 - **Loop mode** (init + end, then auto lap recording)
 - **Compare** metrics across rides on the same route (local → multi-user)
+- **Segment zoom** — select a stretch of road and see metrics for that piece only
 
 Cloud backend: **[docs/SUPABASE.md](docs/SUPABASE.md)** — separate **CornerIQ** project under luju.nieves (not POS).
 

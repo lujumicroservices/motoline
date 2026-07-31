@@ -3,18 +3,27 @@ import 'dart:math' as math;
 import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
+import 'brake_detection.dart';
 import 'lean_neutral.dart';
 
 class RideAnalytics {
   RideAnalytics({
     required this.ride,
     required this.points,
-  }) : samples = _dedupe(points) {
-    neutralLeanDegrees = inferNeutralLeanDegrees(samples);
+    double? distanceMetersOverride,
+    double? neutralLeanOverride,
+    DateTime? seriesOrigin,
+    this.mapIndexOffset = 0,
+  })  : samples = _dedupe(points),
+        _distanceMetersOverride = distanceMetersOverride,
+        _seriesOrigin = seriesOrigin {
+    neutralLeanDegrees =
+        neutralLeanOverride ?? inferNeutralLeanDegrees(samples);
     leanSides = leanSideStats(
       samples: samples,
       neutralDegrees: neutralLeanDegrees,
     );
+    brakeEvents = detectBrakeEvents(samples);
   }
 
   final Ride ride;
@@ -23,19 +32,39 @@ class RideAnalytics {
   /// One sample per unique timestamp (GPS sometimes emits duplicates).
   final List<TrackPoint> samples;
 
+  /// Index of [samples].first in the parent full-ride list (0 if full ride).
+  final int mapIndexOffset;
+
+  final double? _distanceMetersOverride;
+  final DateTime? _seriesOrigin;
+
   /// Inferred pocket/mount upright offset (raw − neutral = bike lean).
   late final double neutralLeanDegrees;
 
   late final LeanSideStats leanSides;
 
+  /// Brake applications inferred from GPS speed drop.
+  late final List<BrakeEvent> brakeEvents;
+
   bool get hasData => samples.isNotEmpty;
 
+  bool get isSegment => mapIndexOffset > 0 || _distanceMetersOverride != null;
+
   Duration get duration {
-    if (samples.length < 2) return ride.duration;
+    if (samples.length < 2) {
+      return isSegment ? Duration.zero : ride.duration;
+    }
     return samples.last.timestamp.difference(samples.first.timestamp);
   }
 
-  double get distanceKm => ride.distanceKm;
+  double get distanceKm {
+    final override = _distanceMetersOverride;
+    if (override != null) return override / 1000.0;
+    if (samples.length >= 2) {
+      return pathDistanceMeters(samples) / 1000.0;
+    }
+    return ride.distanceKm;
+  }
 
   double? get maxSpeedKmh {
     double? max;
@@ -44,7 +73,8 @@ class RideAnalytics {
       if (s == null) continue;
       max = max == null ? s : math.max(max, s);
     }
-    return max ?? ride.maxSpeedKmh;
+    if (max != null) return max;
+    return isSegment ? null : ride.maxSpeedKmh;
   }
 
   double? get avgMovingSpeedKmh {
@@ -53,12 +83,16 @@ class RideAnalytics {
       final s = p.speedKmh;
       if (s != null && s >= 3) moving.add(s);
     }
-    if (moving.isEmpty) return ride.avgSpeedKmh;
+    if (moving.isEmpty) {
+      return isSegment ? null : ride.avgSpeedKmh;
+    }
     return moving.reduce((a, b) => a + b) / moving.length;
   }
 
   double? get maxLeanAbs {
-    if (leanSides.sampleCount == 0) return ride.maxLeanDegrees;
+    if (leanSides.sampleCount == 0) {
+      return isSegment ? null : ride.maxLeanDegrees;
+    }
     return leanSides.peakAbs;
   }
 
@@ -138,14 +172,16 @@ class RideAnalytics {
     return 'Weak lock';
   }
 
+  DateTime get _origin =>
+      _seriesOrigin ??
+      (samples.isEmpty ? DateTime.fromMillisecondsSinceEpoch(0) : samples.first.timestamp);
+
   List<TimedValue> get speedSeries => [
         for (final p in samples)
           if (p.speedKmh != null)
             TimedValue(
-              seconds: p.timestamp
-                      .difference(samples.first.timestamp)
-                      .inMilliseconds /
-                  1000.0,
+              seconds:
+                  p.timestamp.difference(_origin).inMilliseconds / 1000.0,
               value: p.speedKmh!,
             ),
       ];
@@ -155,10 +191,8 @@ class RideAnalytics {
         for (final p in samples)
           if (p.leanDegrees != null)
             TimedValue(
-              seconds: p.timestamp
-                      .difference(samples.first.timestamp)
-                      .inMilliseconds /
-                  1000.0,
+              seconds:
+                  p.timestamp.difference(_origin).inMilliseconds / 1000.0,
               value: relativeLeanDegrees(
                 rawLeanDegrees: p.leanDegrees!,
                 neutralDegrees: neutralLeanDegrees,
@@ -170,10 +204,8 @@ class RideAnalytics {
         for (final p in samples)
           if (p.accuracyMeters != null)
             TimedValue(
-              seconds: p.timestamp
-                      .difference(samples.first.timestamp)
-                      .inMilliseconds /
-                  1000.0,
+              seconds:
+                  p.timestamp.difference(_origin).inMilliseconds / 1000.0,
               value: p.accuracyMeters!,
             ),
       ];
@@ -186,11 +218,21 @@ class RideAnalytics {
         1000.0;
   }
 
-  /// Nearest sample index for a scrub time in seconds from ride start.
+  double get windowStartSeconds {
+    if (samples.isEmpty) return 0;
+    return samples.first.timestamp.difference(_origin).inMilliseconds / 1000.0;
+  }
+
+  double get windowEndSeconds {
+    if (samples.isEmpty) return 0;
+    return samples.last.timestamp.difference(_origin).inMilliseconds / 1000.0;
+  }
+
+  /// Nearest sample index (local to this analytics view) for a scrub time.
   int indexForSeconds(double seconds) {
     if (samples.isEmpty) return 0;
-    final t0 = samples.first.timestamp;
-    final targetMs = t0.millisecondsSinceEpoch + (seconds * 1000).round();
+    final targetMs =
+        _origin.millisecondsSinceEpoch + (seconds * 1000).round();
     var best = 0;
     var bestDelta = 1 << 62;
     for (var i = 0; i < samples.length; i++) {
@@ -206,11 +248,7 @@ class RideAnalytics {
   double secondsForIndex(int index) {
     if (samples.isEmpty) return 0;
     final i = index.clamp(0, samples.length - 1);
-    return samples[i]
-            .timestamp
-            .difference(samples.first.timestamp)
-            .inMilliseconds /
-        1000.0;
+    return samples[i].timestamp.difference(_origin).inMilliseconds / 1000.0;
   }
 
   double relativeLeanAt(int index) {
@@ -221,6 +259,22 @@ class RideAnalytics {
     return relativeLeanDegrees(
       rawLeanDegrees: raw,
       neutralDegrees: neutralLeanDegrees,
+    );
+  }
+
+  /// Contiguous window of this ride for segment zoom + metrics.
+  RideAnalytics segment(int startInclusive, int endInclusive) {
+    if (samples.isEmpty) return this;
+    final lo = startInclusive.clamp(0, samples.length - 1);
+    final hi = endInclusive.clamp(lo, samples.length - 1);
+    final slice = samples.sublist(lo, hi + 1);
+    return RideAnalytics(
+      ride: ride,
+      points: slice,
+      distanceMetersOverride: pathDistanceMeters(slice),
+      neutralLeanOverride: neutralLeanDegrees,
+      seriesOrigin: _origin,
+      mapIndexOffset: mapIndexOffset + lo,
     );
   }
 

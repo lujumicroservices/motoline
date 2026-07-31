@@ -10,8 +10,10 @@ import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
 import 'pilot_line_map.dart';
+import 'widgets/brake_events_panel.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
 import 'widgets/ride_profile_chart.dart';
+import 'widgets/segment_range_panel.dart';
 
 class RideDetailScreen extends ConsumerWidget {
   const RideDetailScreen({super.key, required this.rideId});
@@ -62,6 +64,11 @@ class _RideDashboardState extends State<_RideDashboard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _intro;
   late int _scrubIndex;
+  late int _segStart;
+  late int _segEnd;
+  bool _zoomed = false;
+
+  RideAnalytics get _full => widget.analytics;
 
   @override
   void initState() {
@@ -70,8 +77,15 @@ class _RideDashboardState extends State<_RideDashboard>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..forward();
-    final samples = widget.analytics.samples;
+    final samples = _full.samples;
     _scrubIndex = samples.isEmpty ? 0 : samples.length ~/ 2;
+    if (samples.length < 2) {
+      _segStart = 0;
+      _segEnd = 0;
+    } else {
+      _segStart = (samples.length * 0.2).floor().clamp(0, samples.length - 2);
+      _segEnd = (samples.length * 0.8).ceil().clamp(_segStart + 1, samples.length - 1);
+    }
   }
 
   @override
@@ -80,24 +94,64 @@ class _RideDashboardState extends State<_RideDashboard>
     super.dispose();
   }
 
+  RideAnalytics get _view {
+    if (!_zoomed || _full.samples.length < 2) return _full;
+    return _full.segment(_segStart, _segEnd);
+  }
+
   void _setScrubIndex(int index) {
-    final max = widget.analytics.samples.length - 1;
+    final view = _view;
+    final max = view.samples.length - 1;
     if (max < 0) return;
     setState(() => _scrubIndex = index.clamp(0, max));
   }
 
   void _setScrubSeconds(double seconds) {
-    _setScrubIndex(widget.analytics.indexForSeconds(seconds));
+    _setScrubIndex(_view.indexForSeconds(seconds));
+  }
+
+  void _setSegmentRange(int start, int end) {
+    final max = _full.samples.length - 1;
+    if (max < 1) return;
+    final lo = start.clamp(0, max - 1);
+    final hi = end.clamp(lo + 1, max);
+    setState(() {
+      _segStart = lo;
+      _segEnd = hi;
+      if (_zoomed) {
+        final view = _full.segment(lo, hi);
+        _scrubIndex = (_scrubIndex).clamp(0, view.samples.length - 1);
+      }
+    });
+  }
+
+  void _zoomToSegment() {
+    if (_segEnd <= _segStart) return;
+    setState(() {
+      _zoomed = true;
+      final len = _segEnd - _segStart + 1;
+      _scrubIndex = (len ~/ 2).clamp(0, len - 1);
+    });
+  }
+
+  void _clearSegmentZoom() {
+    setState(() {
+      _zoomed = false;
+      _scrubIndex =
+          ((_segStart + _segEnd) ~/ 2).clamp(0, _full.samples.length - 1);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final a = widget.analytics;
-    final ride = a.ride;
+    final full = _full;
+    final a = _view;
+    final ride = full.ride;
     final hasSamples = a.samples.isNotEmpty;
     final scrubSeconds = hasSamples ? a.secondsForIndex(_scrubIndex) : 0.0;
     final scrubPoint = hasSamples ? a.samples[_scrubIndex] : null;
     final scrubLean = hasSamples ? a.relativeLeanAt(_scrubIndex) : 0.0;
+    final mapScrub = hasSamples ? a.mapIndexOffset + _scrubIndex : null;
 
     return Column(
       children: [
@@ -115,7 +169,7 @@ class _RideDashboardState extends State<_RideDashboard>
                   },
                 ),
                 title: Text(
-                  'Ride lab',
+                  _zoomed ? 'Ride lab · segment' : 'Ride lab',
                   style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
                 ),
               ),
@@ -141,16 +195,34 @@ class _RideDashboardState extends State<_RideDashboard>
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Scrub any moment. Map and graphs stay locked together.',
+                          _zoomed
+                              ? 'Segment zoom — metrics and charts are for this stretch only.'
+                              : 'Scrub any moment. Select a segment to zoom a piece of road.',
                           style: GoogleFonts.outfit(
                             color: AppTheme.steel,
                             fontSize: 15,
                           ),
                         ),
+                        if (full.samples.length >= 2) ...[
+                          const SizedBox(height: 20),
+                          SegmentRangePanel(
+                            totalPoints: full.samples.length,
+                            startIndex: _segStart,
+                            endIndex: _segEnd,
+                            startSeconds: full.secondsForIndex(_segStart),
+                            endSeconds: full.secondsForIndex(_segEnd),
+                            zoomed: _zoomed,
+                            onRangeChanged: _setSegmentRange,
+                            onZoom: _zoomToSegment,
+                            onClear: _clearSegmentZoom,
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         _ScoreHero(
                           score: a.lineScore,
-                          label: a.lineScoreLabel,
+                          label: _zoomed
+                              ? '${a.lineScoreLabel} · segment'
+                              : a.lineScoreLabel,
                           animation: _intro,
                         ),
                         const SizedBox(height: 20),
@@ -177,7 +249,7 @@ class _RideDashboardState extends State<_RideDashboard>
                           const SizedBox(height: 28),
                         ],
                         Text(
-                          'The line you took',
+                          _zoomed ? 'Segment line' : 'The line you took',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -185,8 +257,11 @@ class _RideDashboardState extends State<_RideDashboard>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Pale red = slower · darker red = faster (to 300 km/h). '
-                          'Amber marker = scrubbed moment.',
+                          _zoomed
+                              ? 'Bright = selected stretch · dim = rest of ride. '
+                                  'Dots = inferred brakes. Amber marker = scrub.'
+                              : 'Blue→lime→yellow→orange→red→magenta by speed. '
+                                  'Dots = inferred brakes. Amber = scrub.',
                           style: GoogleFonts.outfit(
                             color: AppTheme.steel,
                             fontSize: 13,
@@ -196,15 +271,31 @@ class _RideDashboardState extends State<_RideDashboard>
                         SizedBox(
                           height: 280,
                           child: PilotLineMap(
-                            points: a.samples,
-                            scrubIndex: hasSamples ? _scrubIndex : null,
+                            key: ValueKey(
+                              'map-$_zoomed-$_segStart-$_segEnd',
+                            ),
+                            points: full.samples,
+                            scrubIndex: mapScrub,
+                            focusStartIndex: _zoomed ? _segStart : null,
+                            focusEndIndex: _zoomed ? _segEnd : null,
+                            brakeEvents: full.brakeEvents,
                           ),
+                        ),
+                        const SizedBox(height: 28),
+                        BrakeEventsPanel(
+                          events: a.brakeEvents,
+                          onSelectIndex: (localIndex) {
+                            _setScrubIndex(localIndex);
+                          },
                         ),
                         const SizedBox(height: 32),
                         SpeedProfileChart(
                           series: a.speedSeries,
                           selectedSeconds: scrubSeconds,
                           onSelectSeconds: _setScrubSeconds,
+                          subtitle: _zoomed
+                              ? 'Segment speed only. Tap to scrub.'
+                              : 'High-contrast speed colors. Tap to scrub.',
                         ),
                         const SizedBox(height: 32),
                         if (a.leanSeries.isNotEmpty) ...[
@@ -253,7 +344,10 @@ class _RideDashboardState extends State<_RideDashboard>
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: _TimeScrubber(
                   seconds: scrubSeconds,
-                  totalSeconds: a.totalSeconds,
+                  minSeconds: a.windowStartSeconds,
+                  maxSeconds: a.windowEndSeconds <= a.windowStartSeconds
+                      ? a.windowStartSeconds + 1
+                      : a.windowEndSeconds,
                   point: scrubPoint!,
                   leanDegrees: scrubLean,
                   index: _scrubIndex,
@@ -271,7 +365,8 @@ class _RideDashboardState extends State<_RideDashboard>
 class _TimeScrubber extends StatelessWidget {
   const _TimeScrubber({
     required this.seconds,
-    required this.totalSeconds,
+    required this.minSeconds,
+    required this.maxSeconds,
     required this.point,
     required this.leanDegrees,
     required this.index,
@@ -280,7 +375,8 @@ class _TimeScrubber extends StatelessWidget {
   });
 
   final double seconds;
-  final double totalSeconds;
+  final double minSeconds;
+  final double maxSeconds;
   final TrackPoint point;
   final double leanDegrees;
   final int index;
@@ -295,6 +391,8 @@ class _TimeScrubber extends StatelessWidget {
         : leanDegrees > 1
             ? 'R'
             : '·';
+    final min = minSeconds;
+    final max = maxSeconds <= min ? min + 1 : maxSeconds;
 
     return Container(
       width: double.infinity,
@@ -339,8 +437,7 @@ class _TimeScrubber extends StatelessWidget {
                       '${speed == null ? "--" : "${speed.toStringAsFixed(0)} km/h"}  ·  lean ',
                 ),
                 TextSpan(
-                  text:
-                      '${leanDegrees.abs().toStringAsFixed(0)}° $side',
+                  text: '${leanDegrees.abs().toStringAsFixed(0)}° $side',
                   style: TextStyle(
                     color: RideVizPalette.leanColor(leanDegrees),
                     fontWeight: FontWeight.w600,
@@ -362,10 +459,10 @@ class _TimeScrubber extends StatelessWidget {
               trackHeight: 3,
             ),
             child: Slider(
-              value: seconds.clamp(0, totalSeconds <= 0 ? 0 : totalSeconds),
-              min: 0,
-              max: totalSeconds <= 0 ? 1 : totalSeconds,
-              onChanged: totalSeconds <= 0 ? null : onChanged,
+              value: seconds.clamp(min, max),
+              min: min,
+              max: max,
+              onChanged: onChanged,
             ),
           ),
         ],

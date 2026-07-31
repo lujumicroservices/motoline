@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
-/// Compact legend for the shared speed color scale.
+/// Compact legend for the high-contrast speed color scale.
 class SpeedColorLegend extends StatelessWidget {
   const SpeedColorLegend({super.key});
 
@@ -21,10 +21,7 @@ class SpeedColorLegend extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    RideVizPalette.speedColor(0),
-                    RideVizPalette.speedColor(100),
-                    RideVizPalette.speedColor(200),
-                    RideVizPalette.speedColor(300),
+                    for (final stop in RideVizPalette.speedStops) stop.$2,
                   ],
                 ),
               ),
@@ -35,15 +32,20 @@ class SpeedColorLegend extends StatelessWidget {
         Row(
           children: [
             Text(
-              'slow',
+              '0',
               style: GoogleFonts.outfit(fontSize: 10, color: AppTheme.steel),
             ),
             const Spacer(),
             Text(
-              'fast · 300 km/h',
+              'blue→lime→yellow→red→magenta',
+              style: GoogleFonts.outfit(fontSize: 9, color: AppTheme.steel),
+            ),
+            const Spacer(),
+            Text(
+              '300',
               style: GoogleFonts.outfit(
                 fontSize: 10,
-                color: RideVizPalette.speedDark,
+                color: AppTheme.mist,
                 fontWeight: FontWeight.w600,
               ),
             ),

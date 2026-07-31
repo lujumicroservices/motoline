@@ -6,33 +6,56 @@ import 'app_theme.dart';
 class RideVizPalette {
   RideVizPalette._();
 
-  /// Top of the speed intensity ramp (km/h) → darkest red.
+  /// Top of the speed color ramp (km/h).
   static const speedCapKmh = 300.0;
 
-  /// Slow — pale / clear red (easy to read as “not fast”).
-  static const speedClear = Color(0xFFFFD6CE);
+  /// High-contrast stops (hue changes, not one red family).
+  static const speedStops = <(double kmh, Color color)>[
+    (0, Color(0xFF1B4DFF)), // electric blue — crawl
+    (40, Color(0xFF00E5A8)), // mint — slow street
+    (80, Color(0xFFC6FF00)), // lime — brisk
+    (120, Color(0xFFFFD600)), // yellow — fast
+    (160, Color(0xFFFF6D00)), // orange — very fast
+    (220, Color(0xFFFF1744)), // hot red
+    (300, Color(0xFFD500F9)), // magenta — top end
+  ];
 
-  /// Mid red for legends / brand-adjacent accents.
-  static const speedMid = Color(0xFFE85A4F);
+  static const speedMid = Color(0xFFFFD600);
 
-  /// Fast — deep dark red.
-  static const speedDark = Color(0xFF5C0008);
+  /// Brake hardness accents (distinct from lean cyan/amber).
+  static const brakeLight = Color(0xFFFFF59D);
+  static const brakeMedium = Color(0xFFFFAB40);
+  static const brakeHard = Color(0xFFFF1744);
 
-  /// Left bank — cyan (not green; not the speed reds).
+  /// Left bank — cyan (not green; not the speed ramp).
   static const leanLeft = Color(0xFF4CC9F0);
 
-  /// Right bank — amber (not green; not the speed reds).
+  /// Right bank — amber.
   static const leanRight = Color(0xFFF4A261);
 
-  /// One red intensity ramp: clear/pale at 0 → dark red at [speedCapKmh]+.
+  /// High-contrast multi-hue speed color (easy to see slow vs fast).
   static Color speedColor(double speedKmh) {
-    final t = (speedKmh / speedCapKmh).clamp(0.0, 1.0);
-    // Ease so mid speeds still feel “warmer” than crawl.
-    final eased = Curves.easeIn.transform(t);
-    if (eased <= 0.55) {
-      return Color.lerp(speedClear, speedMid, eased / 0.55)!;
+    final v = speedKmh.clamp(0.0, speedCapKmh);
+    final stops = speedStops;
+    if (v <= stops.first.$1) return stops.first.$2;
+    if (v >= stops.last.$1) return stops.last.$2;
+    for (var i = 1; i < stops.length; i++) {
+      final (k0, c0) = stops[i - 1];
+      final (k1, c1) = stops[i];
+      if (v <= k1) {
+        final t = ((v - k0) / (k1 - k0)).clamp(0.0, 1.0);
+        return Color.lerp(c0, c1, t)!;
+      }
     }
-    return Color.lerp(speedMid, speedDark, (eased - 0.55) / 0.45)!;
+    return stops.last.$2;
+  }
+
+  static Color brakeColor(BrakeHardness hardness) {
+    return switch (hardness) {
+      BrakeHardness.light => brakeLight,
+      BrakeHardness.medium => brakeMedium,
+      BrakeHardness.hard => brakeHard,
+    };
   }
 
   /// Lean degrees: negative = left, positive = right.
@@ -42,3 +65,5 @@ class RideVizPalette {
     return AppTheme.mist;
   }
 }
+
+enum BrakeHardness { light, medium, hard }

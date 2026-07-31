@@ -14,17 +14,23 @@ Related shipped MVP: GPS ride recorder, Ride Lab (map + scrubber + charts), in-a
 
 | Speed (km/h) | Color |
 |---|---|
-| **0 (slow)** | Pale / clear red |
-| **0 → 300** | Continuous **red intensity** ramp (clear → mid → dark) |
-| **300+ (fast)** | Darkest red |
+| **0** | Electric blue |
+| **~40** | Mint |
+| **~80** | Lime |
+| **~120** | Yellow |
+| **~160** | Orange |
+| **~220** | Hot red |
+| **300** | Magenta |
 
-- Cap for darkest red: **300 km/h** (hard product constant unless we later make it configurable).
-- Interpolation must be continuous (one red family — not blue bands).
-- Same mapping function for **all** speed representations:
-  - Pilot-line map polyline segments
-  - Speed profile chart (line and/or gradient fill)
-  - Any future HUD, legend, or comparison overlays that encode speed by color
-- Show a small **legend** on Ride Lab (slow · pale → dark · fast) wherever the map uses speed color.
+- High-contrast **multi-hue** ramp (not a single red family) so slow vs fast is obvious on the map and charts.
+- Cap: **300 km/h**.
+- Same mapping for map polyline, speed chart, legend.
+
+### Brake inference (from speed)
+
+- Detect brake pulses from GPS Δv/Δt (no brake sensor).
+- Hardness bands: light / medium / hard from peak deceleration (m/s²).
+- Show map markers + Ride Lab list with speed drop and peak m/s².
 
 ### Out of scope (for this requirement)
 
@@ -177,7 +183,36 @@ flowchart LR
 
 ---
 
+## 5. Segment select / zoom (road piece)
+
+**Goal:** Pick a contiguous stretch of the pilot line, zoom the map into it, and see metrics for **only that piece**.
+
+### Rider flow
+
+1. In Ride Lab, open **Segment**.
+2. Drag start / end on a range slider (time along the ride).
+3. **Zoom to segment** — map fits that stretch; charts + stats recompute for the window.
+4. Scrub playhead inside the segment only.
+5. **Full ride** clears the window.
+
+### Metrics (segment-scoped)
+
+- Duration, distance, max / avg moving speed
+- Max lean L / R (same cyan/amber language)
+- Point count / GPS quality summary
+- Line score for the window (optional; same formula on window samples)
+
+### Acceptance criteria
+
+- [ ] Range start/end selectable on completed rides with ≥2 points
+- [ ] Map zooms / focuses on the selected stretch (outside dimmed or hidden)
+- [ ] Metric cards + speed/lean charts reflect the segment only
+- [ ] Clear returns to full-ride view
+
+---
+
 ## Implementation order (suggested)
+
 
 1. **Speed + lean color systems** — shared viz palette; retrofit map + charts + gauge (small, high polish).
 2. **Loop mode** — recording model + HUD markers + lap list.
@@ -205,6 +240,7 @@ flowchart LR
 | REQ-LOOP | Loop mode init/end + auto laps | Planned |
 | REQ-COMPARE | Compare metrics on same route (local then multi-user via Supabase) | Planned |
 | REQ-SYNC | Supabase CornerIQ project + schema + Flutter client bootstrap | In progress |
+| REQ-SEGMENT | Select/zoom road segment + segment metrics | In progress |
 
 ### Brand typography
 

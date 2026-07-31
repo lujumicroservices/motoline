@@ -279,7 +279,7 @@ class SpeedProfileChart extends StatelessWidget {
     this.selectedSeconds,
     this.onSelectSeconds,
     this.subtitle =
-        'Pale red = slow · dark red = fast (to 300 km/h). Tap to scrub.',
+        'High-contrast speed colors. Tap to scrub map + lean.',
   });
 
   final List<TimedValue> series;
