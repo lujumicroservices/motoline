@@ -25,4 +25,6 @@ flutter run
 
 See [INSTALL.md](INSTALL.md) for Android APK sideload steps.
 
+**Google Play:** see **[docs/PLAY_STORE.md](docs/PLAY_STORE.md)** for signed App Bundle + Console checklist.
+
 Cloud backend: **[docs/SUPABASE.md](docs/SUPABASE.md)** — Supabase project under luju.nieves (dashboard still named CornerIQ; app is RiderLab).

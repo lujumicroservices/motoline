@@ -8,6 +8,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../distribution.dart';
+
 class AppUpdateInfo {
   const AppUpdateInfo({
     required this.tagName,
@@ -49,6 +51,8 @@ class AppUpdateService {
 
   Future<AppUpdateInfo?> checkForUpdate() async {
     if (!Platform.isAndroid) return null;
+    // Play builds update only via Google Play — never sideload APKs.
+    if (!AppDistribution.allowsSideloadUpdates) return null;
 
     final package = await PackageInfo.fromPlatform();
     final response = await _client.get(
@@ -109,6 +113,11 @@ class AppUpdateService {
   }) async {
     if (!Platform.isAndroid) {
       throw StateError('Updates are only supported on Android');
+    }
+    if (!AppDistribution.allowsSideloadUpdates) {
+      throw StateError(
+        'This Play Store build updates through Google Play only.',
+      );
     }
 
     final installPerm = await Permission.requestInstallPackages.request();

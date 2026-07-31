@@ -33,3 +33,12 @@ coverage/
 
 # Local release artifacts (upload via GitHub Releases)
 dist/
+*.apk
+!docs/**
+
+# Android upload signing (never commit)
+apps/mobile/android/key.properties
+apps/mobile/android/*.jks
+apps/mobile/android/*.keystore
+apps/mobile/android/upload-keystore.jks
+

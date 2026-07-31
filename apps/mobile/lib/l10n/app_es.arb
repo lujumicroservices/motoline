@@ -1,7 +1,9 @@
 {
   "@@locale": "es",
   "appTitle": "RiderLab",
-  "tagline": "Entrada. Ápice. Salida. Domina cada curva.",
+  "tagline": "Domina cada curva.",
+  "autoPauseToggle": "Pausa auto",
+  "autoPauseToggleHint": "Pausa y reanuda la grabación al detenerte o moverte",
   "startRide": "Iniciar ruta",
   "endRide": "Terminar ruta",
   "recording": "Grabando",
@@ -389,5 +391,6 @@
       "ok": { "type": "int" },
       "fail": { "type": "int" }
     }
-  }
+  },
+  "playStoreUpdatesOnly": "En esta versión las actualizaciones llegan por Google Play."
 }

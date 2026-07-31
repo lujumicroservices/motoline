@@ -12,7 +12,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'RiderLab';
 
   @override
-  String get tagline => 'Entry. Apex. Exit. Own every corner.';
+  String get tagline => 'Own every corner.';
+
+  @override
+  String get autoPauseToggle => 'Auto pause';
+
+  @override
+  String get autoPauseToggleHint =>
+      'Pause and resume recording when you stop or roll again';
 
   @override
   String get startRide => 'Start ride';
@@ -984,4 +991,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncCloudRidesDone(int ok, int fail) {
     return 'Cloud: $ok ok, $fail failed';
   }
+
+  @override
+  String get playStoreUpdatesOnly =>
+      'Updates install from Google Play for this build.';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/distribution.dart';
 import '../../core/services/app_update_service.dart';
 import '../../providers/update_providers.dart';
 import '../../l10n/l10n_ext.dart';
@@ -168,6 +169,14 @@ Future<void> promptManualUpdateCheck(
   WidgetRef ref,
 ) async {
   final l10n = context.l10n;
+
+  if (AppDistribution.isPlayStore) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.playStoreUpdatesOnly)),
+    );
+    return;
+  }
+
   showDialog<void>(
     context: context,
     barrierDismissible: false,

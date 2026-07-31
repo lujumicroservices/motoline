@@ -255,5 +255,42 @@ void main() {
       // distance from, so this single sample cannot trigger yet.
       expect(triggered, isFalse);
     });
+    test('skips pause when autoPauseEnabled is false', () {
+      final detector = MotionPatternDetector()..autoPauseEnabled = false;
+      final base = DateTime(2026, 1, 1);
+
+      for (var t = 0; t <= 20; t += 2) {
+        detector.feedRideSample(
+          speedMps: 0.0,
+          latitude: 10,
+          longitude: 10,
+          timestamp: base.add(Duration(seconds: t)),
+        );
+      }
+      expect(detector.isPaused, isFalse);
+    });
+
+    test('clearPause resumes when disabling mid-pause', () {
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base,
+      );
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 13)),
+      );
+      expect(detector.isPaused, isTrue);
+
+      detector.autoPauseEnabled = false;
+      detector.clearPause();
+      expect(detector.isPaused, isFalse);
+    });
   });
 }

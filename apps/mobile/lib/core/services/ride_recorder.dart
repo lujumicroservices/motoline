@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../db/ride_database.dart';
@@ -25,6 +26,7 @@ class ActiveRideSnapshot {
     this.isPaused = false,
     this.suggestEnd = false,
     this.pausedFor,
+    this.autoPauseEnabled = true,
   });
 
   final Ride ride;
@@ -44,6 +46,9 @@ class ActiveRideSnapshot {
 
   /// How long the ride has been auto-paused, when [isPaused] is true.
   final Duration? pausedFor;
+
+  /// Whether automatic pause/resume is armed for this session.
+  final bool autoPauseEnabled;
 }
 
 /// Offline-first recorder: GPS + lean IMU, flushed to SQLite in batches.
@@ -95,6 +100,10 @@ class RideRecorder {
   double _maxLeanLeft = 0;
   double _maxLeanRight = 0;
   bool _armed = false;
+  bool _autoPauseEnabled = true;
+  bool _autoPausePrefLoaded = false;
+
+  static const _autoPausePrefKey = 'corneriq_auto_pause';
 
   Stream<ActiveRideSnapshot> get snapshots => _controller.stream;
 
@@ -108,6 +117,30 @@ class RideRecorder {
   bool get isRecording => _ride?.status == RideStatus.recording;
   bool get isArmed => _armed;
   bool get isPaused => isRecording && _motion.isPaused;
+
+  /// Automatic pause/resume while recording (persisted).
+  bool get autoPauseEnabled => _autoPauseEnabled;
+
+  Future<void> setAutoPauseEnabled(bool enabled) async {
+    await _ensureAutoPausePref();
+    if (_autoPauseEnabled == enabled) return;
+    _autoPauseEnabled = enabled;
+    _motion.autoPauseEnabled = enabled;
+    if (!enabled) {
+      _motion.clearPause();
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_autoPausePrefKey, enabled);
+    if (isRecording) _emit();
+  }
+
+  Future<void> _ensureAutoPausePref() async {
+    if (_autoPausePrefLoaded) return;
+    final prefs = await SharedPreferences.getInstance();
+    _autoPauseEnabled = prefs.getBool(_autoPausePrefKey) ?? true;
+    _motion.autoPauseEnabled = _autoPauseEnabled;
+    _autoPausePrefLoaded = true;
+  }
 
   /// Last live GPS fix (updated even while paused) — used by callers (e.g.
   /// Loop mode HUD) that need "current position" without waiting on stored
@@ -126,6 +159,7 @@ class RideRecorder {
     }
     // Auto-start and manual start are mutually exclusive.
     disarm();
+    await _ensureAutoPausePref();
 
     onWarmup?.call(
       const GnssWarmupStatus(
@@ -500,6 +534,7 @@ class RideRecorder {
         isPaused: _motion.isPaused,
         suggestEnd: _motion.suggestEnd,
         pausedFor: _motion.pausedFor(),
+        autoPauseEnabled: _autoPauseEnabled,
       ),
     );
   }

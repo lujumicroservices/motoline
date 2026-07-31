@@ -13,7 +13,6 @@ import '../../core/services/loop_session_controller.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
-import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../ride_detail/pilot_line_map.dart';
@@ -179,7 +178,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                     dotted: true,
                   ),
                 ),
-              const SizedBox(width: 4),
             ],
           ],
         ),
@@ -392,23 +390,51 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             ),
           ),
         ),
-        if (_isLoop)
+        if (_isLoop) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+            child: _AutoPauseToggleRow(
+              enabled: ref.watch(rideRecorderProvider).autoPauseEnabled,
+              isPaused: ref.watch(activeRideProvider).valueOrNull?.isPaused ??
+                  false,
+              onChanged: (value) async {
+                await ref.read(rideRecorderProvider).setAutoPauseEnabled(value);
+                if (context.mounted) setState(() {});
+              },
+            ),
+          ),
           _LoopHud(
             loopState: loopState,
             points: points,
             onOpenMarkMap: () => _openLoopMarkMap(points, loopState),
             onEndSession: () => _endLoopSession(context),
-          )
-        else
+          ),
+        ] else
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.signal,
-                minimumSize: const Size.fromHeight(56),
-              ),
-              onPressed: () => _stop(context),
-              child: Text(l10n.endRide),
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+            child: Column(
+              children: [
+                _AutoPauseToggleRow(
+                  enabled: ref.watch(rideRecorderProvider).autoPauseEnabled,
+                  isPaused: ref.watch(activeRideProvider).valueOrNull?.isPaused ??
+                      false,
+                  onChanged: (value) async {
+                    await ref
+                        .read(rideRecorderProvider)
+                        .setAutoPauseEnabled(value);
+                    if (context.mounted) setState(() {});
+                  },
+                ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.signal,
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  onPressed: () => _stop(context),
+                  child: Text(l10n.endRide),
+                ),
+              ],
             ),
           ),
       ],
@@ -523,6 +549,71 @@ class _StatusChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AutoPauseToggleRow extends StatelessWidget {
+  const _AutoPauseToggleRow({
+    required this.enabled,
+    required this.isPaused,
+    required this.onChanged,
+  });
+
+  final bool enabled;
+  final bool isPaused;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Material(
+      color: AppTheme.asphaltElevated,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          children: [
+            Icon(
+              enabled
+                  ? (isPaused
+                      ? Icons.pause_circle_filled
+                      : Icons.pause_circle_outline)
+                  : Icons.play_circle_outline,
+              size: 20,
+              color: enabled ? AppTheme.lineHot : AppTheme.steel,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.autoPauseToggle,
+                    style: GoogleFonts.exo2(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Text(
+                    l10n.autoPauseToggleHint,
+                    style: const TextStyle(
+                      color: AppTheme.steel,
+                      fontSize: 11,
+                      height: 1.25,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: enabled,
+              onChanged: onChanged,
+              activeThumbColor: AppTheme.lineHot,
+            ),
+          ],
+        ),
       ),
     );
   }

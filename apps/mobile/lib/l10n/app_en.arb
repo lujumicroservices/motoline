@@ -1,7 +1,9 @@
 {
   "@@locale": "en",
   "appTitle": "RiderLab",
-  "tagline": "Entry. Apex. Exit. Own every corner.",
+  "tagline": "Own every corner.",
+  "autoPauseToggle": "Auto pause",
+  "autoPauseToggleHint": "Pause and resume recording when you stop or roll again",
   "startRide": "Start ride",
   "endRide": "End ride",
   "recording": "Recording",
@@ -312,5 +314,6 @@
       "ok": { "type": "int" },
       "fail": { "type": "int" }
     }
-  }
+  },
+  "playStoreUpdatesOnly": "Updates install from Google Play for this build."
 }

@@ -46,6 +46,9 @@ class MotionPatternDetector {
   final Duration autoStartAfter;
   final double autoStartDistanceMeters;
 
+  /// When false, ride samples never auto-pause / auto-resume (manual recording).
+  bool autoPauseEnabled = true;
+
   bool _isPaused = false;
   DateTime? _slowSince;
   DateTime? _fastSince;
@@ -81,16 +84,21 @@ class MotionPatternDetector {
 
   /// Reset all state for a freshly started (or resumed) ride.
   void resetForNewRide() {
+    clearPause();
+    _suggestEnd = false;
+    _stillSince = null;
+    _stillAnchorLat = null;
+    _stillAnchorLng = null;
+  }
+
+  /// Clear auto-pause without resetting suggest-end / arm state.
+  void clearPause() {
     _isPaused = false;
     _slowSince = null;
     _fastSince = null;
     _pausedAt = null;
     _pauseAnchorLat = null;
     _pauseAnchorLng = null;
-    _suggestEnd = false;
-    _stillSince = null;
-    _stillAnchorLat = null;
-    _stillAnchorLng = null;
   }
 
   /// Reset arm-state tracking. Call before (re)arming for auto-start.
@@ -114,6 +122,11 @@ class MotionPatternDetector {
   }
 
   void _updatePause(double? speedMps, double lat, double lng, DateTime ts) {
+    if (!autoPauseEnabled) {
+      if (_isPaused) clearPause();
+      return;
+    }
+
     final speed = speedMps ?? -1;
     if (!_isPaused) {
       if (speed >= 0 && speed < pauseSpeedThresholdMps) {

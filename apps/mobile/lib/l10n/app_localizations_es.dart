@@ -12,7 +12,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appTitle => 'RiderLab';
 
   @override
-  String get tagline => 'Entrada. Ápice. Salida. Domina cada curva.';
+  String get tagline => 'Domina cada curva.';
+
+  @override
+  String get autoPauseToggle => 'Pausa auto';
+
+  @override
+  String get autoPauseToggleHint =>
+      'Pausa y reanuda la grabación al detenerte o moverte';
 
   @override
   String get startRide => 'Iniciar ruta';
@@ -991,4 +998,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String syncCloudRidesDone(int ok, int fail) {
     return 'Nube: $ok ok, $fail fallaron';
   }
+
+  @override
+  String get playStoreUpdatesOnly =>
+      'En esta versión las actualizaciones llegan por Google Play.';
 }

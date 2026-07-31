@@ -107,8 +107,20 @@ abstract class AppLocalizations {
   /// No description provided for @tagline.
   ///
   /// In es, this message translates to:
-  /// **'Entrada. Ápice. Salida. Domina cada curva.'**
+  /// **'Domina cada curva.'**
   String get tagline;
+
+  /// No description provided for @autoPauseToggle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausa auto'**
+  String get autoPauseToggle;
+
+  /// No description provided for @autoPauseToggleHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausa y reanuda la grabación al detenerte o moverte'**
+  String get autoPauseToggleHint;
 
   /// No description provided for @startRide.
   ///
@@ -1873,6 +1885,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Nube: {ok} ok, {fail} fallaron'**
   String syncCloudRidesDone(int ok, int fail);
+
+  /// No description provided for @playStoreUpdatesOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'En esta versión las actualizaciones llegan por Google Play.'**
+  String get playStoreUpdatesOnly;
 }
 
 class _AppLocalizationsDelegate
