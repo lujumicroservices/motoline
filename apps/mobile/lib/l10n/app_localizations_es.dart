@@ -770,7 +770,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get endSession => 'Terminar sesión';
 
   @override
-  String get byRawThrottle => 'by Raw Throttle';
+  String get byRawThrottle => 'by RawThrottle';
 
   @override
   String get pro => 'PRO';

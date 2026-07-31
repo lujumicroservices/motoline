@@ -230,7 +230,7 @@
   "loopArmed": "Auto-lap armed",
   "lapCountLabel": "Lap {count}",
   "endSession": "End session",
-  "byRawThrottle": "by Raw Throttle",
+  "byRawThrottle": "by RawThrottle",
   "pro": "PRO",
   "free": "Free",
   "settings": "Settings",

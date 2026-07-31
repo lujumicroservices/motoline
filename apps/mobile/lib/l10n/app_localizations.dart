@@ -1481,7 +1481,7 @@ abstract class AppLocalizations {
   /// No description provided for @byRawThrottle.
   ///
   /// In es, this message translates to:
-  /// **'by Raw Throttle'**
+  /// **'by RawThrottle'**
   String get byRawThrottle;
 
   /// No description provided for @pro.

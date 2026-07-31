@@ -21,7 +21,7 @@ class RiderLabMark extends StatelessWidget {
   final Color? color;
   final Color? labColor;
 
-  /// When true, shows [attribution] under the wordmark (e.g. "by Raw Throttle").
+  /// When true, shows [attribution] under the wordmark (e.g. "by RawThrottle").
   final bool showAttribution;
   final String? attribution;
 
