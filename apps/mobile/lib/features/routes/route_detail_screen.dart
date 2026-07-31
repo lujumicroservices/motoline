@@ -161,7 +161,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
       appBar: AppBar(
         title: Text(
           route.name,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
         actions: [
           PopupMenuButton<String>(
@@ -241,11 +241,11 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
         backgroundColor: AppTheme.asphaltElevated,
         title: Text(
           title,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
         content: Text(
           body,
-          style: GoogleFonts.outfit(color: AppTheme.steel, height: 1.4),
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, height: 1.4),
         ),
         actions: [
           TextButton(
@@ -356,7 +356,7 @@ class _LapsTab extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   DateFormat.MMMd().add_jm().format(ride.startedAt),
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+                  style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   '${ride.distanceKm.toStringAsFixed(2)} km'
@@ -457,7 +457,7 @@ class _LoopModuleTab extends StatelessWidget {
       children: [
         Text(
           l10n.routeLoopModuleHelp,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.rajdhani(
             color: AppTheme.steel,
             fontSize: 14,
             height: 1.45,
@@ -492,7 +492,7 @@ class _LoopModuleTab extends StatelessWidget {
         const SizedBox(height: 24),
         Text(
           l10n.routeLoopSavedTitle,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontWeight: FontWeight.w700,
             fontSize: 16,
           ),
@@ -528,7 +528,7 @@ class _LoopModuleTab extends StatelessWidget {
           const SizedBox(height: 28),
           Text(
             l10n.routeLoopDetectedTitle,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 16,
             ),
@@ -588,7 +588,7 @@ class _SavedLoopTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     loop.name,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.exo2(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -598,7 +598,7 @@ class _SavedLoopTile extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 4),
                     child: Text(
                       l10n.routeLoopPrimary,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: RideVizPalette.leanLeft,
@@ -668,7 +668,7 @@ class _DetectedTile extends StatelessWidget {
         title: Text(
           '${(candidate.pathMeters / 1000).toStringAsFixed(2)} km · '
           '${formatDuration(candidate.duration)}',
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           l10n.routeLoopDetectedHint,

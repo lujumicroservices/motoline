@@ -31,7 +31,7 @@ class RideSharePanel extends ConsumerWidget {
         children: [
           Text(
             l10n.shareRideTitle,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 16,
             ),
@@ -39,7 +39,7 @@ class RideSharePanel extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             l10n.shareRideHelp,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
@@ -60,7 +60,7 @@ class RideSharePanel extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             l10n.assignRoute,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w600,
               fontSize: 13,
             ),

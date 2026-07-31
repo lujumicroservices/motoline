@@ -76,7 +76,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 28),
           Text(
             l10n.syncCloudRides,
-            style: GoogleFonts.syne(
+            style: GoogleFonts.barlowCondensed(
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -84,7 +84,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           Text(
             l10n.syncCloudRidesHelp,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.4,
@@ -105,7 +105,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 28),
           Text(
             l10n.proUnlock,
-            style: GoogleFonts.syne(
+            style: GoogleFonts.barlowCondensed(
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -113,7 +113,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           Text(
             l10n.proUnlockBody,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.4,
@@ -124,11 +124,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               l10n.proToggleDev,
-              style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               l10n.proToggleHelp,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 12,
               ),
@@ -150,7 +150,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(width: 8),
                 Text(
                   l10n.proUnlocked,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.rajdhani(
                     color: RideVizPalette.leanLeft,
                     fontWeight: FontWeight.w600,
                   ),
@@ -160,7 +160,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 32),
           Text(
             l10n.language,
-            style: GoogleFonts.syne(
+            style: GoogleFonts.barlowCondensed(
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -170,7 +170,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               locale.languageCode == 'es' ? l10n.spanish : l10n.english,
-              style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
             ),
             trailing: TextButton(
               onPressed: () => ref.read(localeProvider.notifier).toggle(),

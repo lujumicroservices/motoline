@@ -387,7 +387,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                 ),
                 title: Text(
                   _zoomed ? l10n.rideLabSegment : l10n.rideLab,
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                  style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
                 ),
                 actions: [
                   IconButton(
@@ -416,7 +416,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         Text(
                           DateFormat('EEE · MMM d · HH:mm')
                               .format(ride.startedAt),
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.exo2(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
                             height: 1.15,
@@ -425,7 +425,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         const SizedBox(height: 6),
                         Text(
                           _zoomed ? l10n.segmentZoomHint : l10n.collapseHint,
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.rajdhani(
                             color: AppTheme.steel,
                             fontSize: 15,
                           ),
@@ -503,7 +503,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                 const SizedBox(height: 10),
                                 Text(
                                   l10n.leanHelp,
-                                  style: GoogleFonts.outfit(
+                                  style: GoogleFonts.rajdhani(
                                     color: AppTheme.steel,
                                     fontSize: 13,
                                     height: 1.35,
@@ -512,7 +512,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                 const SizedBox(height: 8),
                                 Text(
                                   l10n.leanPhoneDisclaimer,
-                                  style: GoogleFonts.outfit(
+                                  style: GoogleFonts.rajdhani(
                                     color: AppTheme.mist.withValues(alpha: 0.85),
                                     fontSize: 12,
                                     height: 1.4,
@@ -537,7 +537,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                       _zoomed
                                           ? l10n.mapHintZoom
                                           : l10n.mapHint,
-                                      style: GoogleFonts.outfit(
+                                      style: GoogleFonts.rajdhani(
                                         color: AppTheme.steel,
                                         fontSize: 13,
                                       ),
@@ -780,7 +780,7 @@ class _TimeScrubber extends StatelessWidget {
             children: [
               Text(
                 l10n.playhead,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   fontSize: 11,
                   letterSpacing: 1.3,
                   fontWeight: FontWeight.w600,
@@ -790,7 +790,7 @@ class _TimeScrubber extends StatelessWidget {
               const Spacer(),
               Text(
                 _fmt(seconds),
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
@@ -800,7 +800,7 @@ class _TimeScrubber extends StatelessWidget {
           const SizedBox(height: 6),
           Text.rich(
             TextSpan(
-              style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
               children: [
                 TextSpan(
                   text:
@@ -898,7 +898,7 @@ class _ScoreHero extends StatelessWidget {
                     ),
                     Text(
                       '${(score * t).round()}',
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.exo2(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                       ),
@@ -913,7 +913,7 @@ class _ScoreHero extends StatelessWidget {
                   children: [
                     Text(
                       'LINE QUALITY',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         fontSize: 11,
                         letterSpacing: 1.4,
                         fontWeight: FontWeight.w600,
@@ -923,7 +923,7 @@ class _ScoreHero extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       label,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.exo2(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                       ),
@@ -931,7 +931,7 @@ class _ScoreHero extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       'From GPS density, accuracy, and coverage.',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
                         fontSize: 13,
                         height: 1.35,
@@ -1042,7 +1042,7 @@ class _BigStat extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               fontSize: 11,
               letterSpacing: 1.1,
               fontWeight: FontWeight.w600,
@@ -1056,7 +1056,7 @@ class _BigStat extends StatelessWidget {
               Flexible(
                 child: Text(
                   value,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.exo2(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     height: 1,
@@ -1102,7 +1102,7 @@ class _PrecisionPanel extends StatelessWidget {
         children: [
           Text(
             'Capture precision',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -1110,7 +1110,7 @@ class _PrecisionPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'How cleanly this ride was measured on your phone.',
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -1172,7 +1172,7 @@ class _MiniPill extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               fontSize: 10,
               letterSpacing: 0.9,
               color: AppTheme.steel,
@@ -1181,7 +1181,7 @@ class _MiniPill extends StatelessWidget {
           ),
           Text(
             value,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),
@@ -1247,7 +1247,7 @@ class _InsightStrip extends StatelessWidget {
       children: [
         Text(
           'Coach notes',
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -1279,7 +1279,7 @@ class _InsightStrip extends StatelessWidget {
                 Expanded(
                   child: Text(
                     insights[i],
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.rajdhani(
                       fontSize: 14,
                       height: 1.45,
                       color: AppTheme.mist,

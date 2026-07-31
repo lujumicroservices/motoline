@@ -54,7 +54,7 @@ class FreeAdBanner extends ConsumerWidget {
                 ),
                 child: Text(
                   l10n.adPlaceholder,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.rajdhani(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.6,
@@ -66,7 +66,7 @@ class FreeAdBanner extends ConsumerWidget {
               Expanded(
                 child: Text(
                   l10n.removeAdsWithPro,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.rajdhani(
                     fontSize: 13,
                     color: AppTheme.mist,
                   ),
@@ -76,7 +76,7 @@ class FreeAdBanner extends ConsumerWidget {
               ),
               Text(
                 l10n.upgradeToPro,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: RideVizPalette.leanLeft,

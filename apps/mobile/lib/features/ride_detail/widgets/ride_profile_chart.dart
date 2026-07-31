@@ -73,7 +73,7 @@ class RideProfileChart extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -81,7 +81,7 @@ class RideProfileChart extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -111,7 +111,7 @@ class RideProfileChart extends StatelessWidget {
                     reservedSize: 36,
                     getTitlesWidget: (value, meta) => Text(
                       value.toStringAsFixed(0),
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
                         fontSize: 10,
                       ),
@@ -127,7 +127,7 @@ class RideProfileChart extends StatelessWidget {
                       if (value < 0) return const SizedBox.shrink();
                       return Text(
                         _formatAxisTime(value),
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.rajdhani(
                           color: AppTheme.steel,
                           fontSize: 10,
                         ),
@@ -154,7 +154,7 @@ class RideProfileChart extends StatelessWidget {
                     for (final t in touched)
                       LineTooltipItem(
                         '${t.y.toStringAsFixed(1)} $unit\n${_formatAxisTime(t.x)}',
-                        GoogleFonts.spaceGrotesk(
+                        GoogleFonts.exo2(
                           color: AppTheme.mist,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,

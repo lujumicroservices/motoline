@@ -26,7 +26,7 @@ class AccountAuthSection extends ConsumerWidget {
       children: [
         Text(
           l10n.accountSection,
-          style: GoogleFonts.syne(
+          style: GoogleFonts.barlowCondensed(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -34,7 +34,7 @@ class AccountAuthSection extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           permanent ? l10n.accountSignedInBody : l10n.accountGuestBody,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.rajdhani(
             color: AppTheme.steel,
             fontSize: 14,
             height: 1.4,
@@ -71,7 +71,7 @@ class AccountAuthSection extends ConsumerWidget {
                           permanent
                               ? (label ?? l10n.accountSignedIn)
                               : l10n.accountGuest,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.exo2(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                           ),
@@ -79,7 +79,7 @@ class AccountAuthSection extends ConsumerWidget {
                         if (permanent && email != null && email.isNotEmpty)
                           Text(
                             email,
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
                               fontSize: 12,
                             ),
@@ -140,7 +140,7 @@ class AccountAuthSection extends ConsumerWidget {
           const SizedBox(height: 10),
           Text(
             error,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.signal,
               fontSize: 13,
               height: 1.35,

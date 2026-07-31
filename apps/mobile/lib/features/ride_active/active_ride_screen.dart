@@ -279,7 +279,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
           child: Text(
             l10n.activeMountHelp,
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
         ),
         Padding(
@@ -516,7 +516,7 @@ class _StatusChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               color: color,
               fontWeight: FontWeight.w700,
               fontSize: 12,
@@ -555,7 +555,7 @@ class _SuggestEndBanner extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.suggestEndTitle,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.exo2(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                   ),
@@ -645,7 +645,7 @@ class _LoopHud extends StatelessWidget {
                 children: [
                   Text(
                     l10n.loopArmed,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.exo2(
                       color: AppTheme.line,
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
@@ -654,7 +654,7 @@ class _LoopHud extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     l10n.lapCountLabel(lapCount),
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.exo2(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
                     ),
@@ -679,13 +679,13 @@ class _LoopHud extends StatelessWidget {
               icon: const Icon(Icons.map_outlined),
               label: Text(
                 l10n.loopOpenMarkMap,
-                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.loopMarkMapHint,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 12,
                 height: 1.3,
@@ -765,7 +765,7 @@ class _StartErrorBody extends StatelessWidget {
           Text(
             l10n.couldNotStart,
             textAlign: TextAlign.center,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
@@ -774,7 +774,7 @@ class _StartErrorBody extends StatelessWidget {
           Text(
             error,
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 15),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 15),
           ),
           const Spacer(),
           FilledButton(
@@ -816,7 +816,7 @@ class _StatCard extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 11,
               letterSpacing: 1.1,
@@ -829,7 +829,7 @@ class _StatCard extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
                   height: 1,

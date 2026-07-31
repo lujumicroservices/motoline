@@ -33,17 +33,17 @@ class SpeedColorLegend extends StatelessWidget {
           children: [
             Text(
               '0',
-              style: GoogleFonts.outfit(fontSize: 10, color: AppTheme.steel),
+              style: GoogleFonts.rajdhani(fontSize: 10, color: AppTheme.steel),
             ),
             const Spacer(),
             Text(
               'blue→lime→yellow→red→magenta',
-              style: GoogleFonts.outfit(fontSize: 9, color: AppTheme.steel),
+              style: GoogleFonts.rajdhani(fontSize: 9, color: AppTheme.steel),
             ),
             const Spacer(),
             Text(
               RideVizPalette.speedCapKmh.toStringAsFixed(0),
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.rajdhani(
                 fontSize: 10,
                 color: AppTheme.mist,
                 fontWeight: FontWeight.w600,

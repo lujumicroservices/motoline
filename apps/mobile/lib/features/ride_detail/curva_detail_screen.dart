@@ -81,7 +81,7 @@ class _CurvaDetailScreenState extends ConsumerState<CurvaDetailScreen> {
       appBar: AppBar(
         title: Text(
           l10n.curvaTitle(_index + 1),
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
         actions: [
           if (total > 1)
@@ -90,7 +90,7 @@ class _CurvaDetailScreenState extends ConsumerState<CurvaDetailScreen> {
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
                   '${_index + 1} / $total',
-                  style: GoogleFonts.outfit(color: AppTheme.steel),
+                  style: GoogleFonts.rajdhani(color: AppTheme.steel),
                 ),
               ),
             ),
@@ -112,7 +112,7 @@ class _CurvaDetailScreenState extends ConsumerState<CurvaDetailScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
                 child: Text(
                   l10n.curvaSwipeHint,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.rajdhani(
                     color: AppTheme.steel,
                     fontSize: 12,
                   ),
@@ -201,7 +201,7 @@ class _CurvaPage extends StatelessWidget {
       children: [
         Text(
           stretchLabel,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontSize: 26,
             fontWeight: FontWeight.w700,
             color: sideColor,
@@ -213,7 +213,7 @@ class _CurvaPage extends StatelessWidget {
           '${formatDuration(a.duration)} · '
           'giro ${a.stretch.headingChangeDeg.abs().toStringAsFixed(0)}° · '
           'lean ${a.stretch.avgAbsLeanDeg.toStringAsFixed(0)}°',
-          style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 14),
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 14),
         ),
         const SizedBox(height: 12),
         Row(
@@ -247,12 +247,12 @@ class _CurvaPage extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           l10n.curvaMapLegend,
-          style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 12),
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
         ),
         const SizedBox(height: 20),
         Text(
           l10n.curveLine,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -333,7 +333,7 @@ class _CurvaPage extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           l10n.curvaCoach,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.rajdhani(
             color: AppTheme.steel,
             fontSize: 13,
             height: 1.4,
@@ -381,7 +381,7 @@ class _PhaseCard extends StatelessWidget {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Text(
               letter,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w800,
                 color: AppTheme.asphalt,
               ),
@@ -390,18 +390,18 @@ class _PhaseCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             title,
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 11),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 11),
           ),
           Text(
             speedKmh.toStringAsFixed(0),
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 22,
             ),
           ),
           Text(
             context.l10n.kmh,
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 11),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 11),
           ),
         ],
       ),
@@ -432,11 +432,11 @@ class _DeltaRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: GoogleFonts.outfit(fontSize: 14)),
+            child: Text(label, style: GoogleFonts.rajdhani(fontSize: 14)),
           ),
           Text(
             value,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               color: color,
             ),
@@ -474,7 +474,7 @@ class _StatTile extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               fontSize: 10,
               letterSpacing: 1.0,
               color: AppTheme.steel,
@@ -487,7 +487,7 @@ class _StatTile extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: color,
@@ -499,7 +499,7 @@ class _StatTile extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
                     hint!,
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.rajdhani(
                       color: AppTheme.steel,
                       fontSize: 12,
                     ),
@@ -635,7 +635,7 @@ class _CurvaMapState extends State<_CurvaMap> {
           ),
           child: Text(
             letter,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w800,
               fontSize: 12,
               color: AppTheme.asphalt,

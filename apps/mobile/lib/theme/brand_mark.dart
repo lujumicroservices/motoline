@@ -3,9 +3,62 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_theme.dart';
 
+/// Shared type styles — motorsport / telemetry feel.
+class AppFonts {
+  AppFonts._();
+
+  /// Wordmark + timing-board display (condensed, aggressive).
+  static TextStyle brand({
+    double fontSize = 34,
+    FontWeight fontWeight = FontWeight.w800,
+    double letterSpacing = 0.8,
+    double height = 1.0,
+    Color? color,
+  }) =>
+      GoogleFonts.barlowCondensed(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        letterSpacing: letterSpacing,
+        height: height,
+        color: color,
+      );
+
+  /// Titles, HUD numbers, buttons.
+  static TextStyle display({
+    double? fontSize,
+    FontWeight fontWeight = FontWeight.w700,
+    double? letterSpacing,
+    double? height,
+    Color? color,
+  }) =>
+      GoogleFonts.exo2(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        letterSpacing: letterSpacing ?? 0.2,
+        height: height,
+        color: color,
+      );
+
+  /// Body, captions, secondary chrome.
+  static TextStyle body({
+    double? fontSize,
+    FontWeight fontWeight = FontWeight.w500,
+    double? letterSpacing,
+    double? height,
+    Color? color,
+  }) =>
+      GoogleFonts.rajdhani(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        letterSpacing: letterSpacing,
+        height: height,
+        color: color,
+      );
+}
+
 enum BrandMarkSize { hero, title, eyebrow }
 
-/// RiderLab wordmark — single-line performance lockup (`Rider` + `Lab`).
+/// RiderLab wordmark — condensed race lockup (`RIDER` + `LAB`).
 class RiderLabMark extends StatelessWidget {
   const RiderLabMark({
     super.key,
@@ -34,43 +87,41 @@ class RiderLabMark extends StatelessWidget {
     final lab = labColor ?? AppTheme.brand;
 
     final riderSize = switch (size) {
-      BrandMarkSize.hero => 34.0,
-      BrandMarkSize.title => 22.0,
-      BrandMarkSize.eyebrow => 13.0,
+      BrandMarkSize.hero => 42.0,
+      BrandMarkSize.title => 26.0,
+      BrandMarkSize.eyebrow => 15.0,
     };
     final labSize = switch (size) {
-      BrandMarkSize.hero => 34.0,
-      BrandMarkSize.title => 22.0,
-      BrandMarkSize.eyebrow => 13.0,
+      BrandMarkSize.hero => 42.0,
+      BrandMarkSize.title => 26.0,
+      BrandMarkSize.eyebrow => 15.0,
     };
+    // Condensed race tracking: Rider tight, LAB slightly open like a decal.
     final riderTracking = switch (size) {
-      BrandMarkSize.hero => -1.2,
-      BrandMarkSize.title => -0.6,
-      BrandMarkSize.eyebrow => 0.4,
+      BrandMarkSize.hero => 1.2,
+      BrandMarkSize.title => 1.0,
+      BrandMarkSize.eyebrow => 1.4,
     };
     final labTracking = switch (size) {
-      BrandMarkSize.hero => 0.8,
-      BrandMarkSize.title => 0.6,
-      BrandMarkSize.eyebrow => 1.4,
+      BrandMarkSize.hero => 2.4,
+      BrandMarkSize.title => 2.0,
+      BrandMarkSize.eyebrow => 2.2,
     };
     final weight = switch (size) {
       BrandMarkSize.hero => FontWeight.w800,
       BrandMarkSize.title => FontWeight.w700,
-      BrandMarkSize.eyebrow => FontWeight.w600,
+      BrandMarkSize.eyebrow => FontWeight.w700,
     };
 
-    // Syne for the brand lockup; Outfit/SpaceGrotesk stay for UI chrome.
-    final riderStyle = GoogleFonts.syne(
+    final riderStyle = AppFonts.brand(
       fontSize: riderSize,
       fontWeight: weight,
-      height: 1.0,
       letterSpacing: riderTracking,
       color: base,
     );
-    final labStyle = GoogleFonts.syne(
+    final labStyle = AppFonts.brand(
       fontSize: labSize,
       fontWeight: FontWeight.w800,
-      height: 1.0,
       letterSpacing: labTracking,
       color: lab,
     );
@@ -81,8 +132,8 @@ class RiderLabMark extends StatelessWidget {
       child: Text.rich(
         TextSpan(
           children: [
-            TextSpan(text: 'Rider', style: riderStyle),
-            TextSpan(text: 'Lab', style: labStyle),
+            TextSpan(text: 'RIDER', style: riderStyle),
+            TextSpan(text: 'LAB', style: labStyle),
           ],
         ),
         maxLines: 1,
@@ -102,8 +153,8 @@ class RiderLabMark extends StatelessWidget {
     }
 
     final attrSize = switch (size) {
-      BrandMarkSize.hero => 12.0,
-      BrandMarkSize.title => 11.0,
+      BrandMarkSize.hero => 11.0,
+      BrandMarkSize.title => 10.0,
       BrandMarkSize.eyebrow => 9.0,
     };
 
@@ -117,12 +168,12 @@ class RiderLabMark extends StatelessWidget {
           Container(
             height: 3,
             width: switch (size) {
-              BrandMarkSize.hero => 56.0,
-              BrandMarkSize.title => 40.0,
+              BrandMarkSize.hero => 64.0,
+              BrandMarkSize.title => 44.0,
               BrandMarkSize.eyebrow => 28.0,
             },
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(1),
               gradient: const LinearGradient(
                 colors: [AppTheme.signal, AppTheme.lineHot, AppTheme.line],
               ),
@@ -132,13 +183,13 @@ class RiderLabMark extends StatelessWidget {
         if (showAttr) ...[
           SizedBox(height: size == BrandMarkSize.hero ? 8 : 4),
           Text(
-            attribution!,
+            attribution!.toUpperCase(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.outfit(
+            style: AppFonts.body(
               fontSize: attrSize,
               fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
+              letterSpacing: 2.4,
               color: AppTheme.steel,
             ),
           ),

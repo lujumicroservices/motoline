@@ -115,7 +115,7 @@ class MapLayerToggles extends StatelessWidget {
       child: FilterChip(
         label: Text(
           label,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.rajdhani(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: selected ? AppTheme.asphalt : AppTheme.mist,

@@ -23,7 +23,7 @@ class RoutesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.routesTitle,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
         actions: [
           const Padding(
@@ -60,7 +60,7 @@ class RoutesScreen extends ConsumerWidget {
                 children: [
                   Text(
                     l10n.routesHowTitle,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.exo2(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -68,7 +68,7 @@ class RoutesScreen extends ConsumerWidget {
                   const SizedBox(height: 10),
                   Text(
                     l10n.routesHowBody,
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.rajdhani(
                       color: AppTheme.steel,
                       fontSize: 14,
                       height: 1.45,
@@ -80,7 +80,7 @@ class RoutesScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               l10n.myRoutes,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -110,7 +110,7 @@ class RoutesScreen extends ConsumerWidget {
                           ),
                           child: Text(
                             info,
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
                               fontSize: 12,
                               height: 1.35,
@@ -127,7 +127,7 @@ class RoutesScreen extends ConsumerWidget {
                           ),
                           child: Text(
                             '${l10n.cloudUnavailable}: $err',
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.rajdhani(
                               color: AppTheme.mist,
                               fontSize: 13,
                               height: 1.35,
@@ -163,7 +163,7 @@ class RoutesScreen extends ConsumerWidget {
             const SizedBox(height: 28),
             Text(
               l10n.friendRoutes,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -190,7 +190,7 @@ class RoutesScreen extends ConsumerWidget {
                         leading: const Icon(Icons.route, color: AppTheme.line),
                         title: Text(
                           r.name,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.exo2(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -246,7 +246,7 @@ class RoutesScreen extends ConsumerWidget {
               backgroundColor: AppTheme.asphaltElevated,
               title: Text(
                 l10n.createRoute,
-                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -368,7 +368,7 @@ class _MyRouteTile extends ConsumerWidget {
             Expanded(
               child: Text(
                 route.name,
-                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
               ),
             ),
             if (route.isLoopReady)

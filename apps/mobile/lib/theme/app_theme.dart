@@ -24,7 +24,7 @@ class AppTheme {
   /// Peak / warning — race amber.
   static const lineHot = Color(0xFFFFC107);
 
-  /// Brand accent on the wordmark (`Lab`) — same family as throttle signal.
+  /// Brand accent on the wordmark (`LAB`) — same family as throttle signal.
   static const brand = Color(0xFFFF5A2A);
 
   static ThemeData dark() {
@@ -42,8 +42,9 @@ class AppTheme {
       scaffoldBackgroundColor: asphalt,
     );
 
+    // Exo 2 for UI chrome (titles + body via text theme).
     return base.copyWith(
-      textTheme: GoogleFonts.outfitTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.exo2TextTheme(base.textTheme).apply(
         bodyColor: mist,
         displayColor: mist,
       ),
@@ -52,10 +53,11 @@ class AppTheme {
         foregroundColor: mist,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.spaceGrotesk(
+        titleTextStyle: GoogleFonts.exo2(
           color: mist,
           fontSize: 22,
           fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
         ),
       ),
       cardTheme: CardThemeData(
@@ -69,11 +71,11 @@ class AppTheme {
           foregroundColor: mist,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.spaceGrotesk(
+          textStyle: GoogleFonts.exo2(
             fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
+            letterSpacing: 0.6,
           ),
         ),
       ),
@@ -83,7 +85,11 @@ class AppTheme {
           side: const BorderSide(color: steel),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: GoogleFonts.exo2(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.4,
           ),
         ),
       ),

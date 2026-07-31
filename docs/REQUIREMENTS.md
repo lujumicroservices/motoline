@@ -271,7 +271,7 @@ flowchart LR
 
 ### Brand typography & chrome
 
-- Wordmark: `RiderLabMark` — **Syne** single-line lockup, `Rider` + `Lab`; `Lab` uses throttle brand orange (`AppTheme.brand`), not lean cyan.
+- Wordmark: `RiderLabMark` — **Barlow Condensed** uppercase lockup `RIDER` + `LAB` (race-decal tracking); `LAB` uses throttle brand orange.
 - Accent bar: signal → amber → mint gradient under hero/title marks.
+- UI titles / buttons: **Exo 2**; body / captions often **Rajdhani** (via `AppFonts` + theme).
 - Chrome palette: carbon asphalt, hot signal CTA, electric mint telemetry, race amber peaks.
-- UI type remains Outfit + Space Grotesk.

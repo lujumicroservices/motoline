@@ -53,7 +53,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       appBar: AppBar(
         title: Text(
           l10n.friends,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
       ),
       body: RefreshIndicator(
@@ -67,7 +67,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
           children: [
             Text(
               l10n.friendsSubtitle,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 14,
                 height: 1.4,
@@ -76,7 +76,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             const SizedBox(height: 20),
             Text(
               l10n.yourName,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -124,7 +124,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                         anonymousOff
                             ? l10n.cloudAnonymousOff
                             : l10n.cloudUnavailable,
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.rajdhani(
                           color: AppTheme.steel,
                           height: 1.4,
                         ),
@@ -133,7 +133,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                         const SizedBox(height: 8),
                         Text(
                           msg.replaceFirst('Bad state: ', ''),
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.rajdhani(
                             color: AppTheme.steel.withValues(alpha: 0.75),
                             fontSize: 12,
                           ),
@@ -158,7 +158,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                     child: Text(
                       l10n.friendsEmpty,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
                         height: 1.4,
                       ),
@@ -222,12 +222,12 @@ class _FriendTile extends ConsumerWidget {
           backgroundColor: AppTheme.line.withValues(alpha: 0.25),
           child: Text(
             friend.label.isNotEmpty ? friend.label[0].toUpperCase() : '?',
-            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
           ),
         ),
         title: Text(
           friend.label,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           l10n.friendRides,
@@ -260,7 +260,7 @@ class FriendRidesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           friend.label,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
       ),
       body: ridesAsync.when(
@@ -292,7 +292,7 @@ class FriendRidesScreen extends ConsumerWidget {
                 ),
                 title: Text(
                   DateFormat('EEE · MMM d · HH:mm').format(ride.startedAt.toLocal()),
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+                  style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   '${ride.distanceKm.toStringAsFixed(1)} km · '
@@ -334,7 +334,7 @@ class _FriendRideSheet extends StatelessWidget {
         children: [
           Text(
             ride.riderLabel,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 20,
             ),
@@ -370,7 +370,7 @@ class _FriendRideSheet extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             l10n.comparePickPeer,
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
         ],
       ),
@@ -384,7 +384,7 @@ class _FriendRideSheet extends StatelessWidget {
         Text(label, style: const TextStyle(color: AppTheme.steel, fontSize: 11)),
         Text(
           value,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
       ],
     );

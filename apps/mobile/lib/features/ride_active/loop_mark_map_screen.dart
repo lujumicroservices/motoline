@@ -223,7 +223,7 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen> {
                           ),
                           child: Text(
                             hint,
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.exo2(
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
@@ -270,7 +270,7 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen> {
                       children: [
                         Text(
                           l10n.loopMarkMapHelp,
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.rajdhani(
                             color: AppTheme.steel,
                             fontSize: 13,
                             height: 1.35,
@@ -352,7 +352,7 @@ class _AbMarker extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.spaceGrotesk(
+        style: GoogleFonts.exo2(
           fontWeight: FontWeight.w800,
           color: AppTheme.asphalt,
           fontSize: 16,

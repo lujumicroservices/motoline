@@ -88,7 +88,7 @@ class CompareMetricsTable extends StatelessWidget {
                 child: Text(
                   leftLabel,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                  style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
                 ),
               ),
               const SizedBox(width: 8),
@@ -96,7 +96,7 @@ class CompareMetricsTable extends StatelessWidget {
                 child: Text(
                   rightLabel,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                  style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -166,7 +166,7 @@ class CompareMetricsTable extends StatelessWidget {
             child: Text(
               leftText,
               textAlign: TextAlign.center,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w600,
                 color: leftWin ? RideVizPalette.leanLeft : null,
               ),
@@ -184,7 +184,7 @@ class CompareMetricsTable extends StatelessWidget {
             child: Text(
               rightText,
               textAlign: TextAlign.center,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w600,
                 color: rightWin ? RideVizPalette.leanRight : null,
               ),

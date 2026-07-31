@@ -28,7 +28,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
         children: [
           Text(
             l10n.updateAvailable,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 16,
             ),
@@ -125,7 +125,7 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
       backgroundColor: AppTheme.asphaltElevated,
       title: Text(
         _error == null ? l10n.downloadingUpdate : l10n.updateFailed,
-        style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+        style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
       ),
       content: _error != null
           ? Text(_error!, style: const TextStyle(color: AppTheme.steel))
@@ -206,7 +206,7 @@ Future<void> promptManualUpdateCheck(
           backgroundColor: AppTheme.asphaltElevated,
           title: Text(
             'RiderLab ${update.version}',
-            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
           ),
           content: Text(
             dialogL10n.updatePrompt(update.currentVersion),

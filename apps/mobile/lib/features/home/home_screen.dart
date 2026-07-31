@@ -86,7 +86,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         child: Text(
                           '${l10n.entry.toUpperCase()} · ${l10n.apex.toUpperCase()} · ${l10n.exit.toUpperCase()}',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.exo2(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.9,
@@ -146,7 +146,7 @@ class HomeScreen extends ConsumerWidget {
                             ref.read(localeProvider.notifier).toggle(),
                         icon: Text(
                           locale.languageCode.toUpperCase(),
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.exo2(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                             color: AppTheme.mist,
@@ -164,7 +164,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   Text(
                     l10n.tagline,
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.rajdhani(
                       fontSize: 16,
                       color: AppTheme.steel,
                       height: 1.35,
@@ -258,7 +258,7 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
               child: Text(
                 l10n.yourRides,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -326,7 +326,7 @@ class _ArmedBanner extends StatelessWidget {
               children: [
                 Text(
                   l10n.waitingForMotion,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.exo2(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
@@ -366,7 +366,7 @@ class _RecoveryBanner extends ConsumerWidget {
         children: [
           Text(
             l10n.unfinishedRide,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 16,
             ),
@@ -507,7 +507,7 @@ class _RideTile extends ConsumerWidget {
                   children: [
                     Text(
                       date,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.exo2(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -556,7 +556,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             context.l10n.emptyRidesTitle,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontSize: 20,
               fontWeight: FontWeight.w600,
             ),
@@ -601,7 +601,7 @@ class _SeasonStrip extends StatelessWidget {
         children: [
           Text(
             'PERFORMANCE',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontSize: 11,
               letterSpacing: 1.6,
               fontWeight: FontWeight.w700,
@@ -660,12 +660,12 @@ class _GarageStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.steel),
+          style: GoogleFonts.rajdhani(fontSize: 11, color: AppTheme.steel),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: AppTheme.mist,

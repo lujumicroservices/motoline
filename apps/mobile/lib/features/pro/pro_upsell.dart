@@ -63,7 +63,7 @@ class ProUpsellBanner extends ConsumerWidget {
                   ),
                   child: Text(
                     l10n.pro,
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.exo2(
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
                       color: AppTheme.asphalt,
@@ -82,7 +82,7 @@ class ProUpsellBanner extends ConsumerWidget {
             SizedBox(height: compact ? 8 : 12),
             Text(
               title,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w700,
                 fontSize: compact ? 16 : 18,
               ),
@@ -90,7 +90,7 @@ class ProUpsellBanner extends ConsumerWidget {
             const SizedBox(height: 6),
             Text(
               body,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 13,
                 height: 1.35,
@@ -112,7 +112,7 @@ class ProUpsellBanner extends ConsumerWidget {
               ),
               child: Text(
                 l10n.upgradeToPro,
-                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
               ),
             ),
           ],

@@ -78,7 +78,7 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
       appBar: AppBar(
         title: Text(
           l10n.compareTitle,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
       ),
       body: rideAsync.when(
@@ -98,7 +98,7 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
                 children: [
                   Text(
                     l10n.comparePickPeer,
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.rajdhani(
                       color: AppTheme.steel,
                       fontSize: 14,
                     ),
@@ -119,7 +119,7 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Text(
                             l10n.compareEmpty,
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
                               height: 1.4,
                             ),
@@ -215,7 +215,7 @@ class _PeerPickTile extends StatelessWidget {
                     children: [
                       Text(
                         peer.riderLabel,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.exo2(
                           fontWeight: FontWeight.w600,
                         ),
                       ),

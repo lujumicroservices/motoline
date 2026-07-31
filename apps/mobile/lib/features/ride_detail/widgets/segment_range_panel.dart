@@ -64,7 +64,7 @@ class SegmentRangePanel extends StatelessWidget {
             children: [
               Text(
                 zoomed ? l10n.segmentZoom : l10n.segment,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   fontSize: 11,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w600,
@@ -78,7 +78,7 @@ class SegmentRangePanel extends StatelessWidget {
               const Spacer(),
               Text(
                 '${_fmt(startSeconds)} → ${_fmt(endSeconds)}',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: isPro ? null : AppTheme.steel,
@@ -91,7 +91,7 @@ class SegmentRangePanel extends StatelessWidget {
             isPro
                 ? (zoomed ? l10n.segmentHintZoomed : l10n.segmentHint)
                 : l10n.segmentProLocked,
-            style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 8),
           IgnorePointer(
@@ -129,7 +129,7 @@ class SegmentRangePanel extends StatelessWidget {
             children: [
               Text(
                 'pts ${startIndex + 1}–${endIndex + 1} / $totalPoints',
-                style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.steel),
+                style: GoogleFonts.rajdhani(fontSize: 12, color: AppTheme.steel),
               ),
               const Spacer(),
               if (!isPro)

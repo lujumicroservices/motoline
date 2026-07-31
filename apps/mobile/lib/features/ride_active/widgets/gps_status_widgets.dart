@@ -66,7 +66,7 @@ class GpsWarmupPanel extends StatelessWidget {
           Text(
             ready ? l10n.gpsReady : l10n.startingRide,
             textAlign: TextAlign.center,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontSize: 28,
               fontWeight: FontWeight.w700,
             ),
@@ -75,7 +75,7 @@ class GpsWarmupPanel extends StatelessWidget {
           Text(
             status.message ?? 'Preparing high-precision GPS…',
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 16,
               height: 1.4,
@@ -93,7 +93,7 @@ class GpsWarmupPanel extends StatelessWidget {
           Text(
             l10n.gpsWarmHelp(meters),
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.steel.withValues(alpha: 0.85),
               fontSize: 13,
               height: 1.4,
@@ -136,7 +136,7 @@ class _AccuracyMeter extends StatelessWidget {
             children: [
               Text(
                 l10n.horizontalAccuracy,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   fontSize: 11,
                   letterSpacing: 1.1,
                   fontWeight: FontWeight.w600,
@@ -146,7 +146,7 @@ class _AccuracyMeter extends StatelessWidget {
               const Spacer(),
               Text(
                 '±${accuracyMeters.toStringAsFixed(1)} m',
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: accent,
@@ -167,7 +167,7 @@ class _AccuracyMeter extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             l10n.lowerBetter(meters),
-            style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.steel),
+            style: GoogleFonts.rajdhani(fontSize: 12, color: AppTheme.steel),
           ),
         ],
       ),
@@ -220,7 +220,7 @@ class GpsLockBadge extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               color: color,
               fontWeight: FontWeight.w700,
               fontSize: 12,

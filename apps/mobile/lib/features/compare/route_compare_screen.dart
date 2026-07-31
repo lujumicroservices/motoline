@@ -66,7 +66,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
           widget.routeName?.isNotEmpty == true
               ? l10n.compareRouteTitle(widget.routeName!)
               : l10n.compareLocalTitle,
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
       ),
       body: ridesAsync.when(
@@ -81,7 +81,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
                 child: Text(
                   l10n.compareLocalEmpty,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.rajdhani(
                     color: AppTheme.steel,
                     height: 1.4,
                     fontSize: 15,
@@ -100,7 +100,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
             children: [
               Text(
                 l10n.compareLocalHelp,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   color: AppTheme.steel,
                   fontSize: 14,
                   height: 1.4,
@@ -109,7 +109,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
               const SizedBox(height: 16),
               Text(
                 l10n.compareBaseline,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                   color: RideVizPalette.leanLeft,
@@ -134,7 +134,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
               const SizedBox(height: 16),
               Text(
                 l10n.compareChallenger,
-                style: GoogleFonts.spaceGrotesk(
+                style: GoogleFonts.exo2(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                   color: RideVizPalette.leanRight,
@@ -205,7 +205,7 @@ class _LocalPickTile extends StatelessWidget {
                     children: [
                       Text(
                         DateFormat.MMMd().add_jm().format(ride.startedAt),
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.exo2(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -292,7 +292,7 @@ class _LocalPairCompare extends ConsumerWidget {
           child: Text(
             deltaLabel,
             textAlign: TextAlign.center,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),

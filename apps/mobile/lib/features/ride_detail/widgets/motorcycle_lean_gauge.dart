@@ -53,7 +53,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
             children: [
               Text(
                 l10n.bikeLean.toUpperCase(),
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   fontSize: 11,
                   letterSpacing: 1.4,
                   fontWeight: FontWeight.w600,
@@ -64,7 +64,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
               if (neutralLabel != null)
                 Text(
                   neutralLabel!,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.rajdhani(
                     fontSize: 11,
                     color: AppTheme.steel,
                   ),
@@ -86,7 +86,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '${absLean.toStringAsFixed(0)}° $side',
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontSize: 28,
               fontWeight: FontWeight.w700,
               color: RideVizPalette.leanColor(leanDegrees),
@@ -140,7 +140,7 @@ class _SidePeak extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.rajdhani(
             fontSize: 10,
             letterSpacing: 1.0,
             color: AppTheme.steel,
@@ -149,7 +149,7 @@ class _SidePeak extends StatelessWidget {
         ),
         Text(
           value,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: color,

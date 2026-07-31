@@ -25,7 +25,7 @@ class RoadStretchesPanel extends StatelessWidget {
     if (stretches.isEmpty) {
       return Text(
         l10n.roadStretchesEmpty,
-        style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+        style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
       );
     }
 
@@ -37,7 +37,7 @@ class RoadStretchesPanel extends StatelessWidget {
       children: [
         Text(
           l10n.roadStretchesHelp(rectas, curvas),
-          style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 12),
         for (var i = 0; i < stretches.length; i++) ...[
@@ -119,7 +119,7 @@ class _StretchCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: GoogleFonts.exo2(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                         color: color,
@@ -132,7 +132,7 @@ class _StretchCard extends StatelessWidget {
                       '${isCurva ? ' · Δh ${stretch.headingChangeDeg.abs().toStringAsFixed(0)}°' : ''}'
                       '${isCurva && stretch.avgAbsLeanDeg > 0 ? ' · lean ${stretch.avgAbsLeanDeg.toStringAsFixed(0)}°' : ''}'
                       '${isCurva ? ' · ${l10n.openDetail}' : ''}',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
                         fontSize: 12,
                       ),

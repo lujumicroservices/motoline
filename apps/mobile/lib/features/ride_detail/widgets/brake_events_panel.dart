@@ -44,7 +44,7 @@ class BrakeEventsPanel extends StatelessWidget {
     if (events.isEmpty) {
       return Text(
         l10n.brakesEmpty,
-        style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+        style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
       );
     }
 
@@ -61,7 +61,7 @@ class BrakeEventsPanel extends StatelessWidget {
       children: [
         Text(
           l10n.brakesHelp,
-          style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 12),
         for (var i = 0; i < visibleCount; i++) ...[
@@ -103,7 +103,7 @@ class BrakeEventsPanel extends StatelessWidget {
                     Expanded(
                       child: Text(
                         l10n.brakesProTeaser(visibleCount, events.length),
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.rajdhani(
                           fontSize: 13,
                           height: 1.35,
                         ),
@@ -155,7 +155,7 @@ class _ObfuscatedBrakeCard extends StatelessWidget {
                       children: [
                         Text(
                           '••:••.•••',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.exo2(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                             color: AppTheme.steel,
@@ -165,7 +165,7 @@ class _ObfuscatedBrakeCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             '#$index · •••••',
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.rajdhani(
                               fontSize: 11,
                               letterSpacing: 1.0,
                               fontWeight: FontWeight.w700,
@@ -183,7 +183,7 @@ class _ObfuscatedBrakeCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '••• → ••• · −•• · peak •.•',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
                         fontSize: 13,
                       ),
@@ -266,7 +266,7 @@ class _BrakeCard extends StatelessWidget {
                 children: [
                   Text(
                     formatDurationPrecise(event.duration),
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.exo2(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
@@ -275,7 +275,7 @@ class _BrakeCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       '#$index · ${_hardnessLabel(context).toUpperCase()}',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.rajdhani(
                         fontSize: 11,
                         letterSpacing: 1.0,
                         fontWeight: FontWeight.w700,
@@ -296,7 +296,7 @@ class _BrakeCard extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 l10n.brakeAtTime(formatElapsedPrecise(atSeconds)),
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -307,7 +307,7 @@ class _BrakeCard extends StatelessWidget {
                 '${event.endSpeedKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
                 '−${event.speedDropKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
                 'peak ${event.peakDecelMps2.toStringAsFixed(1)} m/s²',
-                style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
+                style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
               ),
               const SizedBox(height: 8),
               ClipRRect(

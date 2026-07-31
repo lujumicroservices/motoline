@@ -390,7 +390,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                         child: _layers.showRoadKindContrast
                             ? Text(
                                 '${l10n.recta} · ${l10n.curva}',
-                                style: GoogleFonts.outfit(
+                                style: GoogleFonts.rajdhani(
                                   color: AppTheme.steel,
                                   fontSize: 12,
                                 ),
@@ -609,7 +609,7 @@ class _TopBar extends StatelessWidget {
             ),
             child: Text(
               selecting ? l10n.selectAreaHint : title,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
               ),
@@ -725,7 +725,7 @@ class _BottomPanel extends StatelessWidget {
                         selection!.end - selection!.start + 1,
                       )
                     : l10n.fullscreenMapHelp),
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,

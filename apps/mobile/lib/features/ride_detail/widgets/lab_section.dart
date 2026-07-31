@@ -55,7 +55,7 @@ class LabSection extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 title,
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.exo2(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -75,7 +75,7 @@ class LabSection extends StatelessWidget {
                                 ),
                                 child: Text(
                                   badge!,
-                                  style: GoogleFonts.outfit(
+                                  style: GoogleFonts.rajdhani(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                     color: RideVizPalette.leanLeft,
@@ -91,7 +91,7 @@ class LabSection extends StatelessWidget {
                             subtitle!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
                               fontSize: 12,
                             ),

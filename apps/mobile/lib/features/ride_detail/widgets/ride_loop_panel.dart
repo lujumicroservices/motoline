@@ -173,7 +173,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
       children: [
         Text(
           l10n.rideLoopHelp,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.rajdhani(
             color: AppTheme.steel,
             fontSize: 13,
             height: 1.4,
@@ -216,7 +216,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
         const SizedBox(height: 16),
         Text(
           l10n.routeLoopSavedTitle,
-          style: GoogleFonts.spaceGrotesk(
+          style: GoogleFonts.exo2(
             fontWeight: FontWeight.w700,
             fontSize: 14,
           ),
@@ -253,7 +253,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
                         Expanded(
                           child: Text(
                             loop.name,
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.exo2(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -261,7 +261,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
                         if (loop.isPrimary)
                           Text(
                             l10n.routeLoopPrimary,
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.rajdhani(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: RideVizPalette.leanLeft,
@@ -278,7 +278,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
           const SizedBox(height: 16),
           Text(
             l10n.routeLoopDetectedTitle,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.exo2(
               fontWeight: FontWeight.w700,
               fontSize: 14,
             ),
@@ -298,7 +298,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
                   title: Text(
                     '${(c.pathMeters / 1000).toStringAsFixed(2)} km · '
                     '${formatDuration(c.duration)}',
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
                     l10n.routeLoopDetectedHint,

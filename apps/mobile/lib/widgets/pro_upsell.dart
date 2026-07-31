@@ -46,7 +46,7 @@ class _ProUpsellSheet extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               l10n.proUnlock,
-              style: GoogleFonts.syne(
+              style: GoogleFonts.barlowCondensed(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
               ),
@@ -54,7 +54,7 @@ class _ProUpsellSheet extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               l10n.proUnlockBody,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 15,
                 height: 1.4,
@@ -75,7 +75,7 @@ class _ProUpsellSheet extends ConsumerWidget {
               Text(
                 l10n.proUnlocked,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.rajdhani(
                   color: RideVizPalette.leanLeft,
                   fontWeight: FontWeight.w700,
                 ),
@@ -92,7 +92,7 @@ class _ProUpsellSheet extends ConsumerWidget {
             Text(
               l10n.proToggleHelp,
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 12,
               ),
@@ -119,7 +119,7 @@ class _FeatureRow extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.outfit(fontSize: 14, height: 1.35),
+            style: GoogleFonts.rajdhani(fontSize: 14, height: 1.35),
           ),
         ),
       ],
@@ -145,7 +145,7 @@ class ProBadge extends StatelessWidget {
       ),
       child: Text(
         l10n.pro,
-        style: GoogleFonts.outfit(
+        style: GoogleFonts.rajdhani(
           fontSize: 10,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,

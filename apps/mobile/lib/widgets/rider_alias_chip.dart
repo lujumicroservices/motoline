@@ -49,7 +49,7 @@ class RiderAliasChip extends ConsumerWidget {
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.exo2(
                     fontWeight: FontWeight.w700,
                     fontSize: compact ? 12 : 13,
                     color: alias.isEmpty ? AppTheme.steel : AppTheme.mist,
