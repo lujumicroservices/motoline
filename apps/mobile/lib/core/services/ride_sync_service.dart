@@ -10,7 +10,8 @@ import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../supabase/supabase_bootstrap.dart';
 
-/// Uploads a completed local ride to Supabase (shared by default for closed beta).
+/// Uploads completed local rides to Supabase, and pulls owned cloud rides
+/// into local SQLite so Garage shows recovered / moved data.
 class RideSyncService {
   RideSyncService({
     RideDatabase? database,
@@ -21,10 +22,19 @@ class RideSyncService {
   final RideDatabase _db;
   final SupabaseClient? _client;
 
+  String? lastPullInfo;
+  String? lastPullError;
+
   SupabaseClient get _supabase {
     final injected = _client;
     if (injected != null) return injected;
     return SupabaseBootstrap.client;
+  }
+
+  static String? _str(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
   }
 
   /// Upsert ride summary + replace track points. Soft-fails when offline / no auth.
@@ -87,6 +97,109 @@ class RideSyncService {
     } catch (e, st) {
       debugPrint('CornerIQ sync failed: $e\n$st');
       return null;
+    }
+  }
+
+  /// Download this account's cloud rides (+ GPS points) into local Garage.
+  Future<int> pullMyCloudRides() async {
+    lastPullError = null;
+    lastPullInfo = null;
+    if (!SupabaseBootstrap.isReady) {
+      lastPullError = 'Cloud not configured';
+      return 0;
+    }
+
+    try {
+      final session = await SupabaseBootstrap.ensureSession();
+      final me = _str(session?.user.id ?? _supabase.auth.currentUser?.id);
+      if (me == null) {
+        lastPullError =
+            SupabaseBootstrap.lastAuthError ?? 'Not signed in to cloud';
+        return 0;
+      }
+
+      final rows = await _supabase
+          .from('rides')
+          .select()
+          .eq('user_id', me)
+          .order('started_at', ascending: false);
+
+      var imported = 0;
+      for (final raw in (rows as List)) {
+        try {
+          final map = Map<String, dynamic>.from(raw as Map);
+          final cloudId = _str(map['id']);
+          final localId = _str(map['local_id']) ?? cloudId;
+          if (localId == null || cloudId == null) continue;
+
+          final started = DateTime.tryParse(_str(map['started_at']) ?? '');
+          if (started == null) continue;
+          final ended = DateTime.tryParse(_str(map['ended_at']) ?? '');
+
+          final leanL = (map['max_lean_left_deg'] as num?)?.toDouble();
+          final leanR = (map['max_lean_right_deg'] as num?)?.toDouble();
+          double? maxLean;
+          if (leanL != null || leanR != null) {
+            maxLean = math.max(leanL?.abs() ?? 0, leanR?.abs() ?? 0);
+          }
+
+          final ride = Ride(
+            id: localId,
+            startedAt: started.toLocal(),
+            endedAt: ended?.toLocal(),
+            status: RideStatus.completed,
+            distanceMeters: (map['distance_meters'] as num?)?.toDouble() ?? 0,
+            pointCount: (map['point_count'] as num?)?.toInt() ?? 0,
+            maxSpeedMps: (map['max_speed_mps'] as num?)?.toDouble(),
+            avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
+            maxLeanDegrees: maxLean,
+            routeId: _str(map['route_id']),
+            isShared: map['is_shared'] == true || map['is_shared'] == 1,
+          );
+          await _db.upsertRide(ride);
+
+          final pointRows = await _supabase
+              .from('track_points')
+              .select()
+              .eq('ride_id', cloudId)
+              .order('recorded_at');
+
+          final points = <TrackPoint>[];
+          for (final pr in (pointRows as List)) {
+            final pm = Map<String, dynamic>.from(pr as Map);
+            final ts = DateTime.tryParse(_str(pm['recorded_at']) ?? '');
+            final lat = (pm['latitude'] as num?)?.toDouble();
+            final lng = (pm['longitude'] as num?)?.toDouble();
+            if (ts == null || lat == null || lng == null) continue;
+            points.add(
+              TrackPoint(
+                id: null,
+                rideId: localId,
+                latitude: lat,
+                longitude: lng,
+                timestamp: ts.toLocal(),
+                altitude: (pm['altitude'] as num?)?.toDouble(),
+                speedMps: (pm['speed_mps'] as num?)?.toDouble(),
+                accuracyMeters: (pm['accuracy_meters'] as num?)?.toDouble(),
+                heading: (pm['heading'] as num?)?.toDouble(),
+                leanDegrees: (pm['lean_degrees'] as num?)?.toDouble(),
+              ),
+            );
+          }
+
+          await _db.replacePointsForRide(localId, points);
+          imported++;
+        } catch (e) {
+          debugPrint('CornerIQ pull ride skip: $e');
+        }
+      }
+
+      lastPullInfo = 'Pulled $imported cloud ride(s)';
+      return imported;
+    } catch (e) {
+      lastPullError = SupabaseBootstrap.lastAuthError ?? '$e';
+      debugPrint('CornerIQ pull rides: $e');
+      return 0;
     }
   }
 

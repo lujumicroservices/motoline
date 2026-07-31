@@ -207,7 +207,7 @@ class RouteService {
         return listLocal();
       }
 
-      unawaited(purgeOwnedLoopAnchorsOnce());
+      // Skip one-shot A/B purge — it cleared loop anchors and confused riders.
 
       // 1) Explicit owned query first (what "My routes" needs).
       final ownedRows = await _supabase

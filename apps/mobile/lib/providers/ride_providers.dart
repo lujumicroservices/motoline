@@ -7,9 +7,14 @@ import '../core/models/ride.dart';
 import '../core/models/track_point.dart';
 import '../core/services/loop_session_controller.dart';
 import '../core/services/ride_recorder.dart';
+import '../core/services/ride_sync_service.dart';
 
 final rideDatabaseProvider = Provider<RideDatabase>((ref) {
   return RideDatabase.instance;
+});
+
+final rideSyncServiceProvider = Provider<RideSyncService>((ref) {
+  return RideSyncService(database: ref.watch(rideDatabaseProvider));
 });
 
 final rideRecorderProvider = Provider<RideRecorder>((ref) {
@@ -19,6 +24,10 @@ final rideRecorderProvider = Provider<RideRecorder>((ref) {
 });
 
 final ridesListProvider = FutureProvider.autoDispose<List<Ride>>((ref) async {
+  // Pull owned cloud rides into SQLite so Garage shows recovered / moved data.
+  try {
+    await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+  } catch (_) {}
   return ref.watch(rideDatabaseProvider).listRides();
 });
 

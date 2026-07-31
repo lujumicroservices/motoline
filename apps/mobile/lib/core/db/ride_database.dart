@@ -246,6 +246,17 @@ class RideDatabase {
     await batch.commit(noResult: true);
   }
 
+  /// Replace all GPS samples for a ride (used by cloud pull).
+  Future<void> replacePointsForRide(
+    String rideId,
+    List<TrackPoint> points,
+  ) async {
+    final db = await database;
+    await db.delete('track_points', where: 'ride_id = ?', whereArgs: [rideId]);
+    if (points.isEmpty) return;
+    await insertPointsBatch(points);
+  }
+
   Future<List<Ride>> listRides() async {
     final db = await database;
     final rows = await db.query(

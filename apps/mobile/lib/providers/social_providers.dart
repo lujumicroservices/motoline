@@ -6,15 +6,11 @@ import '../core/db/ride_database.dart';
 import '../core/models/cloud_models.dart';
 import '../core/models/route_circuit.dart';
 import '../core/models/route_loop.dart';
-import '../core/services/ride_sync_service.dart';
 import '../core/services/route_loop_service.dart';
 import '../core/services/route_service.dart';
 import '../core/supabase/social_repository.dart';
 import '../core/supabase/supabase_bootstrap.dart';
-
-final rideSyncServiceProvider = Provider<RideSyncService>((ref) {
-  return RideSyncService(database: RideDatabase.instance);
-});
+import 'ride_providers.dart';
 
 final routeServiceProvider = Provider<RouteService>((ref) {
   return RouteService(database: RideDatabase.instance);
