@@ -15,6 +15,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import 'loop_mark_map_screen.dart';
@@ -62,14 +63,41 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
-    if (widget.autoStart) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.autoStart) {
+        unawaited(_bootstrap());
+      } else {
+        unawaited(_attachIfAlreadyRecording());
+      }
+    });
+  }
+
+  /// Arm-auto already started the recorder; still bind route/loop so laps
+  /// count under the ruta and auto-lap works.
+  Future<void> _attachIfAlreadyRecording() async {
+    final recorder = ref.read(rideRecorderProvider);
+    if (!recorder.isRecording) return;
+
+    final route = widget.route;
+    if (route != null) {
+      final active = recorder.activeRide;
+      if (active?.routeId != route.id) {
+        await recorder.setActiveRideRouteId(route.id);
+      }
+      if (_isLoop) {
+        final loopCtrl = ref.read(loopSessionControllerProvider);
+        await loopCtrl.bindRoute(route, loop: widget.loop);
+      }
     }
+    if (mounted) ref.invalidate(activeRideProvider);
   }
 
   Future<void> _bootstrap() async {
     final recorder = ref.read(rideRecorderProvider);
-    if (recorder.isRecording) return;
+    if (recorder.isRecording) {
+      await _attachIfAlreadyRecording();
+      return;
+    }
 
     setState(() {
       _starting = true;
@@ -159,6 +187,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                 ),
           actions: [
             if (!_starting && recorder.isRecording) ...[
+              const AdventureCameraStatusChip(),
               if (isPaused)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),

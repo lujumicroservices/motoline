@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/models/ride.dart';
 import '../../core/models/route_circuit.dart';
 import '../../core/models/route_loop.dart';
+import '../../core/services/ride_recorder.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
@@ -139,6 +141,9 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
       }
     }
     if (!mounted) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(RideRecorder.preferredArmRoutePrefKey, route.id);
+    if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ActiveRideScreen(
@@ -150,6 +155,24 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
     );
     ref.invalidate(ridesListProvider);
     ref.invalidate(ridesForRouteProvider(route.id));
+  }
+
+  Future<void> _armAutoForRoute() async {
+    final l10n = context.l10n;
+    final notifier = ref.read(armedStateProvider.notifier);
+    try {
+      await notifier.arm(routeId: route.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.armAutoRouteArmedNamed(route.name))),
+      );
+      Navigator.of(context).popUntil((r) => r.isFirst);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
   }
 
   @override
@@ -205,6 +228,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
             onDefineManual: _defineManual,
             onSaveDetected: _saveDetected,
             onStart: _startLoopRide,
+            onArm: _armAutoForRoute,
             onSetPrimary: (id) async {
               await ref
                   .read(routeLoopServiceProvider)
@@ -213,6 +237,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
               ref.invalidate(routesListProvider);
             },
             onDelete: (id) async {
+              final messenger = ScaffoldMessenger.of(context);
               final ok = await _confirm(
                 title: l10n.deleteLoop,
                 body: l10n.deleteLoopBody,
@@ -222,7 +247,6 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
               ref.invalidate(routeLoopsProvider(route.id));
               ref.invalidate(routesListProvider);
               if (!mounted) return;
-              final messenger = ScaffoldMessenger.of(context);
               messenger.showSnackBar(
                 SnackBar(content: Text(l10n.loopDeleted)),
               );
@@ -433,6 +457,7 @@ class _LoopModuleTab extends StatelessWidget {
     required this.onDefineManual,
     required this.onSaveDetected,
     required this.onStart,
+    required this.onArm,
     required this.onSetPrimary,
     required this.onDelete,
   });
@@ -445,6 +470,7 @@ class _LoopModuleTab extends StatelessWidget {
   final VoidCallback onDefineManual;
   final ValueChanged<DetectedLoopCandidate> onSaveDetected;
   final ValueChanged<RouteLoop> onStart;
+  final VoidCallback onArm;
   final ValueChanged<String> onSetPrimary;
   final ValueChanged<String> onDelete;
 
@@ -488,6 +514,12 @@ class _LoopModuleTab extends StatelessWidget {
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: onArm,
+          icon: const Icon(Icons.sensors),
+          label: Text(l10n.armAutoRide),
         ),
         const SizedBox(height: 24),
         Text(

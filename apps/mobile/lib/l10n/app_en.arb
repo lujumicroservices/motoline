@@ -315,5 +315,33 @@
       "fail": { "type": "int" }
     }
   },
-  "playStoreUpdatesOnly": "Updates install from Google Play for this build."
+  "playStoreUpdatesOnly": "Updates install from Google Play for this build.",
+  "labSection": "Lab (experimental)",
+  "labAdventureCameraHelp": "Optional GoPro shutter synced to rides. Off by default — does not change GPS recording.",
+  "labAdventureCameraEnable": "Adventure camera",
+  "labAdventureCameraEnableHelp": "Enable the camera lab module on this phone",
+  "labAdventureCameraSyncRide": "Record with ride",
+  "labAdventureCameraSyncRideHelp": "Start/stop the camera when a route recording starts/ends",
+  "labAdventureCameraSyncPause": "Follow auto-pause",
+  "labAdventureCameraSyncPauseHelp": "Stop the camera while GPS auto-pause is active (optional)",
+  "labAdventureCameraBackend": "Backend",
+  "labAdventureCameraBackendGoPro": "GoPro",
+  "labAdventureCameraBackendSim": "Simulate",
+  "labAdventureCameraConnect": "Connect",
+  "labAdventureCameraDisconnect": "Disconnect",
+  "labAdventureCameraPhaseOff": "Lab off",
+  "labAdventureCameraPhaseIdle": "Idle",
+  "labAdventureCameraPhaseScanning": "Scanning…",
+  "labAdventureCameraPhaseConnecting": "Connecting…",
+  "labAdventureCameraPhaseReady": "Ready",
+  "labAdventureCameraPhaseRecording": "Recording",
+  "labAdventureCameraPhaseError": "Error",
+  "armAutoNoRouteHint": "Armed with no route — the ride goes to Garage, not Laps. Open a route first or create one.",
+  "armAutoRouteArmed": "Armed — when you roll, the ride tags to your last route",
+  "armAutoRouteArmedNamed": "Armed for “{name}” — the ride will be saved on that route",
+  "@armAutoRouteArmedNamed": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  }
 }

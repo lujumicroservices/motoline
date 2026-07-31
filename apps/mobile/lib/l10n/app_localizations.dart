@@ -1891,6 +1891,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'En esta versión las actualizaciones llegan por Google Play.'**
   String get playStoreUpdatesOnly;
+
+  /// No description provided for @labSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab (experimental)'**
+  String get labSection;
+
+  /// No description provided for @labAdventureCameraHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Obturador GoPro opcional sincronizado con rides. Apagado por defecto — no cambia el GPS.'**
+  String get labAdventureCameraHelp;
+
+  /// No description provided for @labAdventureCameraEnable.
+  ///
+  /// In es, this message translates to:
+  /// **'Cámara adventure'**
+  String get labAdventureCameraEnable;
+
+  /// No description provided for @labAdventureCameraEnableHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa el módulo de cámara lab en este teléfono'**
+  String get labAdventureCameraEnableHelp;
+
+  /// No description provided for @labAdventureCameraSyncRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar con el ride'**
+  String get labAdventureCameraSyncRide;
+
+  /// No description provided for @labAdventureCameraSyncRideHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia/detiene la cámara al empezar/terminar la ruta'**
+  String get labAdventureCameraSyncRideHelp;
+
+  /// No description provided for @labAdventureCameraSyncPause.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguir pausa auto'**
+  String get labAdventureCameraSyncPause;
+
+  /// No description provided for @labAdventureCameraSyncPauseHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausa la cámara mientras la pausa auto de GPS está activa (opcional)'**
+  String get labAdventureCameraSyncPauseHelp;
+
+  /// No description provided for @labAdventureCameraBackend.
+  ///
+  /// In es, this message translates to:
+  /// **'Backend'**
+  String get labAdventureCameraBackend;
+
+  /// No description provided for @labAdventureCameraBackendGoPro.
+  ///
+  /// In es, this message translates to:
+  /// **'GoPro'**
+  String get labAdventureCameraBackendGoPro;
+
+  /// No description provided for @labAdventureCameraBackendSim.
+  ///
+  /// In es, this message translates to:
+  /// **'Simular'**
+  String get labAdventureCameraBackendSim;
+
+  /// No description provided for @labAdventureCameraConnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectar'**
+  String get labAdventureCameraConnect;
+
+  /// No description provided for @labAdventureCameraDisconnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Desconectar'**
+  String get labAdventureCameraDisconnect;
+
+  /// No description provided for @labAdventureCameraPhaseOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab apagado'**
+  String get labAdventureCameraPhaseOff;
+
+  /// No description provided for @labAdventureCameraPhaseIdle.
+  ///
+  /// In es, this message translates to:
+  /// **'Inactivo'**
+  String get labAdventureCameraPhaseIdle;
+
+  /// No description provided for @labAdventureCameraPhaseScanning.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando…'**
+  String get labAdventureCameraPhaseScanning;
+
+  /// No description provided for @labAdventureCameraPhaseConnecting.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectando…'**
+  String get labAdventureCameraPhaseConnecting;
+
+  /// No description provided for @labAdventureCameraPhaseReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo'**
+  String get labAdventureCameraPhaseReady;
+
+  /// No description provided for @labAdventureCameraPhaseRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando'**
+  String get labAdventureCameraPhaseRecording;
+
+  /// No description provided for @labAdventureCameraPhaseError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error'**
+  String get labAdventureCameraPhaseError;
+
+  /// No description provided for @armAutoNoRouteHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.'**
+  String get armAutoNoRouteHint;
+
+  /// No description provided for @armAutoRouteArmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Armado — al arrancar se guarda en tu última ruta'**
+  String get armAutoRouteArmed;
+
+  /// No description provided for @armAutoRouteArmedNamed.
+  ///
+  /// In es, this message translates to:
+  /// **'Armado para «{name}» — al arrancar el ride queda en esa ruta'**
+  String armAutoRouteArmedNamed(String name);
 }
 
 class _AppLocalizationsDelegate

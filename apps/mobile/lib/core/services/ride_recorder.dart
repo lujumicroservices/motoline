@@ -100,10 +100,12 @@ class RideRecorder {
   double _maxLeanLeft = 0;
   double _maxLeanRight = 0;
   bool _armed = false;
+  String? _armedRouteId;
   bool _autoPauseEnabled = true;
   bool _autoPausePrefLoaded = false;
 
   static const _autoPausePrefKey = 'corneriq_auto_pause';
+  static const preferredArmRoutePrefKey = 'corneriq_arm_route_id';
 
   Stream<ActiveRideSnapshot> get snapshots => _controller.stream;
 
@@ -116,6 +118,8 @@ class RideRecorder {
   Ride? get activeRide => _ride;
   bool get isRecording => _ride?.status == RideStatus.recording;
   bool get isArmed => _armed;
+  /// Route id that will be applied when arm auto-starts (if any).
+  String? get armedRouteId => _armedRouteId;
   bool get isPaused => isRecording && _motion.isPaused;
 
   /// Automatic pause/resume while recording (persisted).
@@ -318,7 +322,10 @@ class RideRecorder {
   /// Watch GPS (light stream) while not recording; auto-[start] once the
   /// motion pattern looks like the ride has begun. See
   /// [MotionPatternDetector.feedArmedSample] for the thresholds.
-  Future<void> armForAutoStart() async {
+  ///
+  /// When [routeId] is set, the auto-started ride is tagged to that ruta so
+  /// it appears under Route → Laps (same as Start from a loop).
+  Future<void> armForAutoStart({String? routeId}) async {
     if (_armed || isRecording) return;
 
     final permission = await _location.ensurePermission();
@@ -327,6 +334,11 @@ class RideRecorder {
     }
 
     _armMotion.resetArm();
+    _armedRouteId = routeId;
+    if (routeId != null && routeId.isNotEmpty) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(preferredArmRoutePrefKey, routeId);
+    }
     _armed = true;
     _armedController.add(true);
 
@@ -341,6 +353,7 @@ class RideRecorder {
   void disarm() {
     if (!_armed) return;
     _armed = false;
+    _armedRouteId = null;
     unawaited(_armSub?.cancel());
     _armSub = null;
     _armedController.add(false);
@@ -361,14 +374,19 @@ class RideRecorder {
     );
 
     if (shouldStart) {
+      final routeId = _armedRouteId;
       disarm();
-      unawaited(_autoStart());
+      unawaited(_autoStart(routeId: routeId));
     }
   }
 
-  Future<void> _autoStart() async {
+  Future<void> _autoStart({String? routeId}) async {
     try {
-      final ride = await start();
+      // Motion already proved GNSS — skip warm-up so the first metres are kept.
+      final ride = await start(
+        skipWarmup: true,
+        routeId: routeId,
+      );
       _autoStartController.add(ride);
     } catch (_) {
       // Swallow — rider can arm again or start manually.

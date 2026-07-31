@@ -1002,4 +1002,81 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get playStoreUpdatesOnly =>
       'En esta versión las actualizaciones llegan por Google Play.';
+
+  @override
+  String get labSection => 'Lab (experimental)';
+
+  @override
+  String get labAdventureCameraHelp =>
+      'Obturador GoPro opcional sincronizado con rides. Apagado por defecto — no cambia el GPS.';
+
+  @override
+  String get labAdventureCameraEnable => 'Cámara adventure';
+
+  @override
+  String get labAdventureCameraEnableHelp =>
+      'Activa el módulo de cámara lab en este teléfono';
+
+  @override
+  String get labAdventureCameraSyncRide => 'Grabar con el ride';
+
+  @override
+  String get labAdventureCameraSyncRideHelp =>
+      'Inicia/detiene la cámara al empezar/terminar la ruta';
+
+  @override
+  String get labAdventureCameraSyncPause => 'Seguir pausa auto';
+
+  @override
+  String get labAdventureCameraSyncPauseHelp =>
+      'Pausa la cámara mientras la pausa auto de GPS está activa (opcional)';
+
+  @override
+  String get labAdventureCameraBackend => 'Backend';
+
+  @override
+  String get labAdventureCameraBackendGoPro => 'GoPro';
+
+  @override
+  String get labAdventureCameraBackendSim => 'Simular';
+
+  @override
+  String get labAdventureCameraConnect => 'Conectar';
+
+  @override
+  String get labAdventureCameraDisconnect => 'Desconectar';
+
+  @override
+  String get labAdventureCameraPhaseOff => 'Lab apagado';
+
+  @override
+  String get labAdventureCameraPhaseIdle => 'Inactivo';
+
+  @override
+  String get labAdventureCameraPhaseScanning => 'Buscando…';
+
+  @override
+  String get labAdventureCameraPhaseConnecting => 'Conectando…';
+
+  @override
+  String get labAdventureCameraPhaseReady => 'Listo';
+
+  @override
+  String get labAdventureCameraPhaseRecording => 'Grabando';
+
+  @override
+  String get labAdventureCameraPhaseError => 'Error';
+
+  @override
+  String get armAutoNoRouteHint =>
+      'Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.';
+
+  @override
+  String get armAutoRouteArmed =>
+      'Armado — al arrancar se guarda en tu última ruta';
+
+  @override
+  String armAutoRouteArmedNamed(String name) {
+    return 'Armado para «$name» — al arrancar el ride queda en esa ruta';
+  }
 }

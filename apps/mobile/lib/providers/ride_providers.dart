@@ -72,7 +72,8 @@ class ArmedStateNotifier extends StateNotifier<bool> {
   final RideRecorder _recorder;
   late final StreamSubscription<bool> _sub;
 
-  Future<void> arm() => _recorder.armForAutoStart();
+  Future<void> arm({String? routeId}) =>
+      _recorder.armForAutoStart(routeId: routeId);
 
   void disarm() => _recorder.disarm();
 

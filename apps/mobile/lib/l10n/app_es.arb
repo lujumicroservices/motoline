@@ -392,5 +392,33 @@
       "fail": { "type": "int" }
     }
   },
-  "playStoreUpdatesOnly": "En esta versión las actualizaciones llegan por Google Play."
+  "playStoreUpdatesOnly": "En esta versión las actualizaciones llegan por Google Play.",
+  "labSection": "Lab (experimental)",
+  "labAdventureCameraHelp": "Obturador GoPro opcional sincronizado con rides. Apagado por defecto — no cambia el GPS.",
+  "labAdventureCameraEnable": "Cámara adventure",
+  "labAdventureCameraEnableHelp": "Activa el módulo de cámara lab en este teléfono",
+  "labAdventureCameraSyncRide": "Grabar con el ride",
+  "labAdventureCameraSyncRideHelp": "Inicia/detiene la cámara al empezar/terminar la ruta",
+  "labAdventureCameraSyncPause": "Seguir pausa auto",
+  "labAdventureCameraSyncPauseHelp": "Pausa la cámara mientras la pausa auto de GPS está activa (opcional)",
+  "labAdventureCameraBackend": "Backend",
+  "labAdventureCameraBackendGoPro": "GoPro",
+  "labAdventureCameraBackendSim": "Simular",
+  "labAdventureCameraConnect": "Conectar",
+  "labAdventureCameraDisconnect": "Desconectar",
+  "labAdventureCameraPhaseOff": "Lab apagado",
+  "labAdventureCameraPhaseIdle": "Inactivo",
+  "labAdventureCameraPhaseScanning": "Buscando…",
+  "labAdventureCameraPhaseConnecting": "Conectando…",
+  "labAdventureCameraPhaseReady": "Listo",
+  "labAdventureCameraPhaseRecording": "Grabando",
+  "labAdventureCameraPhaseError": "Error",
+  "armAutoNoRouteHint": "Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.",
+  "armAutoRouteArmed": "Armado — al arrancar se guarda en tu última ruta",
+  "armAutoRouteArmedNamed": "Armado para «{name}» — al arrancar el ride queda en esa ruta",
+  "@armAutoRouteArmedNamed": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  }
 }

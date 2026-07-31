@@ -14,6 +14,10 @@
 	<string>RiderLab needs background location so your pilot line keeps recording if the screen locks while you ride.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>RiderLab needs background location so your pilot line keeps recording if the screen locks while you ride.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>RiderLab uses Bluetooth to start and stop an optional adventure camera (GoPro) with your ride.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>RiderLab uses Bluetooth to start and stop an optional adventure camera (GoPro) with your ride.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

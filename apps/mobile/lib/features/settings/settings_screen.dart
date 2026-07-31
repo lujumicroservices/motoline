@@ -12,6 +12,7 @@ import '../../theme/ride_viz_palette.dart';
 import '../../widgets/account_auth_section.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
+import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -73,6 +74,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 28),
           const AccountAuthSection(),
+          const SizedBox(height: 28),
+          const AdventureCameraSettingsSection(),
           const SizedBox(height: 28),
           Text(
             l10n.syncCloudRides,

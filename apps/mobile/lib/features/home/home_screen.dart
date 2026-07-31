@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/models/ride.dart';
+import '../../core/models/route_circuit.dart';
+import '../../core/models/route_loop.dart';
+import '../../core/services/ride_recorder.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/locale_provider.dart';
@@ -17,6 +21,7 @@ import '../../theme/brand_mark.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
+import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
@@ -37,18 +42,12 @@ class HomeScreen extends ConsumerWidget {
 
     ref.listen(autoStartEventsProvider, (previous, next) {
       next.whenData((ride) {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const ActiveRideScreen(autoStart: false),
-          ),
-        ).then((_) {
-          ref.invalidate(ridesListProvider);
-          ref.invalidate(incompleteRideProvider);
-        });
+        unawaited(_openAutoStartedRide(context, ref, ride));
       });
     });
 
-    return Scaffold(
+    return AdventureCameraLifecycleBinder(
+      child: Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -251,7 +250,18 @@ class HomeScreen extends ConsumerWidget {
                   return;
                 }
                 try {
-                  await notifier.arm();
+                  final routeId = await _resolveArmRouteId(ref);
+                  await notifier.arm(routeId: routeId);
+                  if (!context.mounted) return;
+                  if (routeId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.armAutoNoRouteHint)),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.armAutoRouteArmed)),
+                    );
+                  }
                 } catch (e) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -266,8 +276,55 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+      ),
     );
   }
+}
+
+Future<void> _openAutoStartedRide(
+  BuildContext context,
+  WidgetRef ref,
+  Ride ride,
+) async {
+  RouteCircuit? route;
+  RouteLoop? loop;
+  final routeId = ride.routeId;
+  if (routeId != null && routeId.isNotEmpty) {
+    final db = ref.read(rideDatabaseProvider);
+    route = await db.getRoute(routeId);
+    loop = await db.getPrimaryLoop(routeId);
+  }
+  if (!context.mounted) return;
+  await Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => ActiveRideScreen(
+        autoStart: false,
+        mode: route != null ? ActiveRideMode.loop : ActiveRideMode.normal,
+        route: route,
+        loop: loop,
+      ),
+    ),
+  );
+  ref.invalidate(ridesListProvider);
+  ref.invalidate(incompleteRideProvider);
+  if (routeId != null) {
+    ref.invalidate(ridesForRouteProvider(routeId));
+  }
+}
+
+/// Prefer last armed/started route; else newest local circuit.
+Future<String?> _resolveArmRouteId(WidgetRef ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  final preferred =
+      prefs.getString(RideRecorder.preferredArmRoutePrefKey)?.trim();
+  final db = ref.read(rideDatabaseProvider);
+  if (preferred != null && preferred.isNotEmpty) {
+    final existing = await db.getRoute(preferred);
+    if (existing != null) return preferred;
+  }
+  final routes = await db.listRoutes();
+  if (routes.isEmpty) return null;
+  return routes.first.id;
 }
 
 class _HomeActionDock extends StatelessWidget {

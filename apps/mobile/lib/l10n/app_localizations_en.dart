@@ -995,4 +995,81 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get playStoreUpdatesOnly =>
       'Updates install from Google Play for this build.';
+
+  @override
+  String get labSection => 'Lab (experimental)';
+
+  @override
+  String get labAdventureCameraHelp =>
+      'Optional GoPro shutter synced to rides. Off by default — does not change GPS recording.';
+
+  @override
+  String get labAdventureCameraEnable => 'Adventure camera';
+
+  @override
+  String get labAdventureCameraEnableHelp =>
+      'Enable the camera lab module on this phone';
+
+  @override
+  String get labAdventureCameraSyncRide => 'Record with ride';
+
+  @override
+  String get labAdventureCameraSyncRideHelp =>
+      'Start/stop the camera when a route recording starts/ends';
+
+  @override
+  String get labAdventureCameraSyncPause => 'Follow auto-pause';
+
+  @override
+  String get labAdventureCameraSyncPauseHelp =>
+      'Stop the camera while GPS auto-pause is active (optional)';
+
+  @override
+  String get labAdventureCameraBackend => 'Backend';
+
+  @override
+  String get labAdventureCameraBackendGoPro => 'GoPro';
+
+  @override
+  String get labAdventureCameraBackendSim => 'Simulate';
+
+  @override
+  String get labAdventureCameraConnect => 'Connect';
+
+  @override
+  String get labAdventureCameraDisconnect => 'Disconnect';
+
+  @override
+  String get labAdventureCameraPhaseOff => 'Lab off';
+
+  @override
+  String get labAdventureCameraPhaseIdle => 'Idle';
+
+  @override
+  String get labAdventureCameraPhaseScanning => 'Scanning…';
+
+  @override
+  String get labAdventureCameraPhaseConnecting => 'Connecting…';
+
+  @override
+  String get labAdventureCameraPhaseReady => 'Ready';
+
+  @override
+  String get labAdventureCameraPhaseRecording => 'Recording';
+
+  @override
+  String get labAdventureCameraPhaseError => 'Error';
+
+  @override
+  String get armAutoNoRouteHint =>
+      'Armed with no route — the ride goes to Garage, not Laps. Open a route first or create one.';
+
+  @override
+  String get armAutoRouteArmed =>
+      'Armed — when you roll, the ride tags to your last route';
+
+  @override
+  String armAutoRouteArmedNamed(String name) {
+    return 'Armed for “$name” — the ride will be saved on that route';
+  }
 }
