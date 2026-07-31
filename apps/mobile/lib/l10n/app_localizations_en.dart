@@ -913,6 +913,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteConfirm => 'Delete';
 
   @override
+  String get deleteRide => 'Delete ride';
+
+  @override
+  String get deleteRideBody =>
+      'This permanently removes the ride and its GPS line from this phone (and the cloud if synced).';
+
+  @override
+  String get rideDeleted => 'Ride deleted';
+
+  @override
   String get accountSection => 'Account';
 
   @override

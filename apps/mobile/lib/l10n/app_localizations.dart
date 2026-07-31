@@ -1748,6 +1748,24 @@ abstract class AppLocalizations {
   /// **'Eliminar'**
   String get deleteConfirm;
 
+  /// No description provided for @deleteRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar ride'**
+  String get deleteRide;
+
+  /// No description provided for @deleteRideBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrará permanentemente el ride y su línea GPS de este teléfono (y de la nube si estaba sincronizado).'**
+  String get deleteRideBody;
+
+  /// No description provided for @rideDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Ride eliminado'**
+  String get rideDeleted;
+
   /// No description provided for @accountSection.
   ///
   /// In es, this message translates to:

@@ -918,6 +918,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteConfirm => 'Eliminar';
 
   @override
+  String get deleteRide => 'Eliminar ride';
+
+  @override
+  String get deleteRideBody =>
+      'Se borrará permanentemente el ride y su línea GPS de este teléfono (y de la nube si estaba sincronizado).';
+
+  @override
+  String get rideDeleted => 'Ride eliminado';
+
+  @override
   String get accountSection => 'Cuenta';
 
   @override

@@ -363,13 +363,57 @@ class _LapsTab extends ConsumerWidget {
                   '${ride.maxSpeedKmh == null ? '' : ' · max ${ride.maxSpeedKmh!.toStringAsFixed(0)} km/h'}',
                   style: const TextStyle(color: AppTheme.steel, fontSize: 12),
                 ),
-                trailing: const Icon(Icons.chevron_right, color: AppTheme.steel),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: l10n.deleteRide,
+                      onPressed: () async {
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(l10n.deleteRide),
+                            content: Text(l10n.deleteRideBody),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text(l10n.notNow),
+                              ),
+                              FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppTheme.signal,
+                                ),
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text(l10n.deleteConfirm),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (ok != true || !context.mounted) return;
+                        await ref
+                            .read(rideSyncServiceProvider)
+                            .deleteRideEverywhere(ride.id);
+                        ref.invalidate(ridesForRouteProvider(route.id));
+                        ref.invalidate(ridesListProvider);
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.rideDeleted)),
+                        );
+                      },
+                      icon: const Icon(Icons.delete_outline),
+                      color: AppTheme.signal,
+                    ),
+                    const Icon(Icons.chevron_right, color: AppTheme.steel),
+                  ],
+                ),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => RideDetailScreen(rideId: ride.id),
                     ),
-                  );
+                  ).then((_) {
+                    ref.invalidate(ridesForRouteProvider(route.id));
+                  });
                 },
               ),
           ],

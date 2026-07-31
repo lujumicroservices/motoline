@@ -317,6 +317,36 @@ class _MyRouteTile extends ConsumerWidget {
 
   final RouteCircuit route;
 
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteRoute),
+        content: Text(l10n.deleteRouteBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.notNow),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.deleteConfirm),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    await ref.read(routeServiceProvider).deleteRoute(route.id);
+    ref.invalidate(routesListProvider);
+    ref.invalidate(sharedPeerRoutesProvider);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.routeDeleted)),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -329,7 +359,9 @@ class _MyRouteTile extends ConsumerWidget {
             MaterialPageRoute<void>(
               builder: (_) => RouteDetailScreen(route: route),
             ),
-          );
+          ).then((_) {
+            ref.invalidate(routesListProvider);
+          });
         },
         title: Row(
           children: [
@@ -354,12 +386,23 @@ class _MyRouteTile extends ConsumerWidget {
           ].join(' · '),
           style: const TextStyle(color: AppTheme.steel, fontSize: 12),
         ),
-        trailing: Switch(
-          value: route.isShared,
-          onChanged: (v) async {
-            await ref.read(routeServiceProvider).setShared(route.id, v);
-            ref.invalidate(routesListProvider);
-          },
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Switch(
+              value: route.isShared,
+              onChanged: (v) async {
+                await ref.read(routeServiceProvider).setShared(route.id, v);
+                ref.invalidate(routesListProvider);
+              },
+            ),
+            IconButton(
+              tooltip: l10n.deleteRoute,
+              onPressed: () => _confirmDelete(context, ref),
+              icon: const Icon(Icons.delete_outline),
+              color: AppTheme.signal,
+            ),
+          ],
         ),
       ),
     );

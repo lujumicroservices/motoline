@@ -11,7 +11,6 @@ import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/ride_providers.dart';
-import '../../providers/social_providers.dart';
 import '../../providers/update_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
@@ -282,7 +281,12 @@ class HomeScreen extends ConsumerWidget {
                     separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final ride = completed[index];
-                      return _RideTile(ride: ride);
+                      return _RideTile(
+                        ride: ride,
+                        onDeleted: () {
+                          ref.invalidate(ridesListProvider);
+                        },
+                      );
                     },
                   );
                 },
@@ -419,15 +423,52 @@ class _RecoveryBanner extends ConsumerWidget {
   }
 }
 
-class _RideTile extends StatelessWidget {
-  const _RideTile({required this.ride});
+class _RideTile extends ConsumerWidget {
+  const _RideTile({
+    required this.ride,
+    required this.onDeleted,
+  });
 
   final Ride ride;
+  final VoidCallback onDeleted;
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteRide),
+        content: Text(l10n.deleteRideBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.notNow),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.deleteConfirm),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    await ref.read(rideSyncServiceProvider).deleteRideEverywhere(ride.id);
+    if (ride.routeId != null) {
+      ref.invalidate(ridesForRouteProvider(ride.routeId!));
+    }
+    onDeleted();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.rideDeleted)),
+    );
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final date = DateFormat.MMMd().add_jm().format(ride.startedAt);
     final abandoned = ride.status == RideStatus.abandoned;
+    final l10n = context.l10n;
 
     return Material(
       color: AppTheme.asphaltElevated,
@@ -441,7 +482,7 @@ class _RideTile extends StatelessWidget {
                   MaterialPageRoute<void>(
                     builder: (_) => RideDetailScreen(rideId: ride.id),
                   ),
-                );
+                ).then((_) => onDeleted());
               },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -487,8 +528,12 @@ class _RideTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (!abandoned)
-                const Icon(Icons.chevron_right, color: AppTheme.steel),
+              IconButton(
+                tooltip: l10n.deleteRide,
+                onPressed: () => _confirmDelete(context, ref),
+                icon: const Icon(Icons.delete_outline),
+                color: AppTheme.signal,
+              ),
             ],
           ),
         ),

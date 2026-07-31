@@ -221,6 +221,32 @@ class RideSyncService {
     }
   }
 
+  /// Delete a ride locally and, when online, its cloud copy (by `local_id`).
+  Future<void> deleteRideEverywhere(String localRideId) async {
+    await _db.deleteRide(localRideId);
+
+    if (!SupabaseBootstrap.isReady) return;
+    try {
+      await SupabaseBootstrap.ensureSession();
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final rows = await _supabase
+          .from('rides')
+          .select('id')
+          .eq('local_id', localRideId)
+          .eq('user_id', userId);
+      for (final row in List<Map<String, dynamic>>.from(rows as List)) {
+        final cloudId = _str(row['id']);
+        if (cloudId == null) continue;
+        await _supabase.from('track_points').delete().eq('ride_id', cloudId);
+        await _supabase.from('rides').delete().eq('id', cloudId);
+      }
+    } catch (e) {
+      debugPrint('CornerIQ ride cloud delete: $e');
+    }
+  }
+
   Map<String, dynamic> _pointRow(TrackPoint p) => {
         'recorded_at': p.timestamp.toUtc().toIso8601String(),
         'latitude': p.latitude,

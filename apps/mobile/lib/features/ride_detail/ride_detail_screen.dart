@@ -132,6 +132,42 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
     super.dispose();
   }
 
+  Future<void> _confirmDeleteRide() async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteRide),
+        content: Text(l10n.deleteRideBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.notNow),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.deleteConfirm),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+
+    final rideId = widget.rideId;
+    await ref.read(rideSyncServiceProvider).deleteRideEverywhere(rideId);
+    ref.invalidate(ridesListProvider);
+    ref.invalidate(rideProvider(rideId));
+    if (widget.analytics.ride.routeId != null) {
+      ref.invalidate(ridesForRouteProvider(widget.analytics.ride.routeId!));
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.rideDeleted)),
+    );
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
   RideAnalytics get _view {
     if (!_zoomed || _full.samples.length < 2) return _full;
     return _full.segment(_segStart, _segEnd);
@@ -353,9 +389,15 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                   _zoomed ? l10n.rideLabSegment : l10n.rideLab,
                   style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
                 ),
-                actions: const [
-                  Padding(
-                    padding: EdgeInsets.only(right: 12),
+                actions: [
+                  IconButton(
+                    tooltip: l10n.deleteRide,
+                    icon: const Icon(Icons.delete_outline),
+                    color: AppTheme.signal,
+                    onPressed: _confirmDeleteRide,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8),
                     child: Center(child: RiderAliasChip(compact: true)),
                   ),
                 ],
