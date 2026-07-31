@@ -75,20 +75,33 @@ class RouteCircuit {
         geofenceRadiusM: (map['geofence_radius_m'] as num?)?.toDouble(),
       );
 
-  factory RouteCircuit.fromCloud(Map<String, dynamic> map) => RouteCircuit(
-        id: map['id'] as String,
-        name: map['name'] as String,
-        description: map['description'] as String?,
-        isShared: map['is_shared'] as bool? ?? false,
-        createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ??
-            DateTime.now(),
-        ownerId: map['owner_id'] as String?,
-        initLat: (map['init_lat'] as num?)?.toDouble(),
-        initLng: (map['init_lng'] as num?)?.toDouble(),
-        endLat: (map['end_lat'] as num?)?.toDouble(),
-        endLng: (map['end_lng'] as num?)?.toDouble(),
-        geofenceRadiusM: (map['geofence_radius_m'] as num?)?.toDouble(),
-      );
+  factory RouteCircuit.fromCloud(Map<String, dynamic> map) {
+    String? str(dynamic v) {
+      if (v == null) return null;
+      final s = v.toString().trim();
+      return s.isEmpty ? null : s;
+    }
+
+    final sharedRaw = map['is_shared'];
+    final isShared = sharedRaw is bool
+        ? sharedRaw
+        : sharedRaw == true || sharedRaw == 1 || sharedRaw == 'true';
+
+    return RouteCircuit(
+      id: str(map['id']) ?? '',
+      name: str(map['name']) ?? '',
+      description: str(map['description']),
+      isShared: isShared,
+      createdAt: DateTime.tryParse(str(map['created_at']) ?? '') ??
+          DateTime.now(),
+      ownerId: str(map['owner_id']),
+      initLat: (map['init_lat'] as num?)?.toDouble(),
+      initLng: (map['init_lng'] as num?)?.toDouble(),
+      endLat: (map['end_lat'] as num?)?.toDouble(),
+      endLng: (map['end_lng'] as num?)?.toDouble(),
+      geofenceRadiusM: (map['geofence_radius_m'] as num?)?.toDouble(),
+    );
+  }
 
   RouteCircuit copyWith({
     String? name,

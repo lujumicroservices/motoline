@@ -89,26 +89,52 @@ class RoutesScreen extends ConsumerWidget {
             Builder(
               builder: (context) {
                 final err = ref.watch(routesRefreshErrorProvider);
-                if (err == null || err.isEmpty) {
+                final info = ref.watch(routesRefreshInfoProvider);
+                if ((err == null || err.isEmpty) &&
+                    (info == null || info.isEmpty)) {
                   return const SizedBox.shrink();
                 }
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.lineHot.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${l10n.cloudUnavailable}: $err',
-                      style: GoogleFonts.outfit(
-                        color: AppTheme.mist,
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (info != null && info.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.mist.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            info,
+                            style: GoogleFonts.outfit(
+                              color: AppTheme.steel,
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                      if (err != null && err.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.lineHot.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${l10n.cloudUnavailable}: $err',
+                            style: GoogleFonts.outfit(
+                              color: AppTheme.mist,
+                              fontSize: 13,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },
@@ -177,6 +203,18 @@ class RoutesScreen extends ConsumerWidget {
                             fontSize: 12,
                           ),
                         ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          color: AppTheme.steel,
+                        ),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  RouteDetailScreen(route: r.toLocal()),
+                            ),
+                          );
+                        },
                       ),
                   ],
                 );

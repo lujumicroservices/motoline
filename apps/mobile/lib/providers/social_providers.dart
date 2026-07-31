@@ -44,6 +44,11 @@ final routesRefreshErrorProvider = Provider.autoDispose<String?>((ref) {
   return ref.watch(routeServiceProvider).lastRefreshError;
 });
 
+final routesRefreshInfoProvider = Provider.autoDispose<String?>((ref) {
+  ref.watch(routesListProvider);
+  return ref.watch(routeServiceProvider).lastRefreshInfo;
+});
+
 final sharedPeerRoutesProvider =
     FutureProvider.autoDispose<List<RouteCircuitCloud>>((ref) async {
   if (!SupabaseBootstrap.isReady) return const [];

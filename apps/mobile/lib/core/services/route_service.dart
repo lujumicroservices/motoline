@@ -26,6 +26,9 @@ class RouteService {
   /// Last refresh error for Routes UI (auth / network).
   String? lastRefreshError;
 
+  /// Short diagnostic shown on Routes (e.g. synced counts / user id).
+  String? lastRefreshInfo;
+
   SupabaseClient get _supabase {
     final injected = _client;
     if (injected != null) return injected;
@@ -33,6 +36,12 @@ class RouteService {
   }
 
   Future<List<RouteCircuit>> listLocal() => _db.listRoutes();
+
+  static String? _str(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
+  }
 
   Future<RouteCircuit> createRoute({
     required String name,
@@ -48,7 +57,6 @@ class RouteService {
     final now = DateTime.now();
     String? ownerId;
 
-    // Prefer cloud id so peers can join the same route_id.
     if (SupabaseBootstrap.isReady) {
       try {
         await SupabaseBootstrap.ensureSession();
@@ -67,7 +75,7 @@ class RouteService {
               })
               .select()
               .single();
-          id = row['id'] as String;
+          id = _str(row['id']) ?? id;
         }
       } catch (e) {
         debugPrint('CornerIQ route cloud create failed: $e');
@@ -125,7 +133,6 @@ class RouteService {
     return updated;
   }
 
-  /// One-shot: clear A/B on every route this user owns (peers refresh clean).
   Future<void> purgeOwnedLoopAnchorsOnce() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool(_loopPurgePref) == true) return;
@@ -152,9 +159,40 @@ class RouteService {
     await prefs.setBool(_loopPurgePref, true);
   }
 
-  /// Pull cloud routes into local SQLite; return **my** routes for the UI.
+  RouteCircuit _parseCloudRoute(Map<String, dynamic> map) {
+    final id = _str(map['id']);
+    final name = _str(map['name']);
+    if (id == null || name == null) {
+      throw StateError('Route missing id/name');
+    }
+    final sharedRaw = map['is_shared'];
+    final isShared = sharedRaw is bool
+        ? sharedRaw
+        : sharedRaw == true || sharedRaw == 1 || sharedRaw == 'true';
+
+    return RouteCircuit(
+      id: id,
+      name: name,
+      description: _str(map['description']),
+      isShared: isShared,
+      createdAt: DateTime.tryParse(_str(map['created_at']) ?? '') ??
+          DateTime.now(),
+      ownerId: _str(map['owner_id']),
+      initLat: (map['init_lat'] as num?)?.toDouble(),
+      initLng: (map['init_lng'] as num?)?.toDouble(),
+      endLat: (map['end_lat'] as num?)?.toDouble(),
+      endLng: (map['end_lng'] as num?)?.toDouble(),
+      geofenceRadiusM: (map['geofence_radius_m'] as num?)?.toDouble(),
+    );
+  }
+
+  /// Pull cloud routes; return **my** owned routes for the Routes UI.
+  ///
+  /// Uses the in-memory owned list as source of truth (does not depend on a
+  /// SQLite re-read after upsert, which was empty for some devices).
   Future<List<RouteCircuit>> refreshFromCloud() async {
     lastRefreshError = null;
+    lastRefreshInfo = null;
     if (!SupabaseBootstrap.isReady) {
       lastRefreshError = 'Cloud not configured';
       return listLocal();
@@ -162,63 +200,76 @@ class RouteService {
 
     try {
       final session = await SupabaseBootstrap.ensureSession();
-      final me = session?.user.id ?? _supabase.auth.currentUser?.id;
+      final me = _str(session?.user.id ?? _supabase.auth.currentUser?.id);
       if (me == null) {
         lastRefreshError =
             SupabaseBootstrap.lastAuthError ?? 'Not signed in to cloud';
-        return _db.listMyRoutes(null);
+        return listLocal();
       }
 
-      // Do not block listing on the one-shot purge.
       unawaited(purgeOwnedLoopAnchorsOnce());
 
-      final rows = await _supabase
+      // 1) Explicit owned query first (what "My routes" needs).
+      final ownedRows = await _supabase
           .from('routes')
           .select()
+          .eq('owner_id', me)
           .order('created_at', ascending: false);
 
-      final mineFromCloud = <RouteCircuit>[];
-      for (final raw in (rows as List)) {
+      final mine = <RouteCircuit>[];
+      String? upsertError;
+      for (final raw in (ownedRows as List)) {
         try {
-          final map = Map<String, dynamic>.from(raw as Map);
-          final r = RouteCircuit.fromCloud(map);
-          await _db.upsertRoute(r);
-          if (!r.isLoopReady) {
-            try {
-              await _db.deleteLoopsForRoute(r.id);
-            } catch (e) {
-              debugPrint('CornerIQ deleteLoops skip: $e');
-            }
-          }
-          if (r.ownerId == me) {
-            mineFromCloud.add(r);
-          }
-        } catch (e) {
-          debugPrint('CornerIQ route upsert skip: $e');
-        }
-      }
-
-      // Prefer explicit owned query if the broad select somehow missed ours.
-      if (mineFromCloud.isEmpty) {
-        try {
-          final ownedRows = await _supabase
-              .from('routes')
-              .select()
-              .eq('owner_id', me)
-              .order('created_at', ascending: false);
-          for (final raw in (ownedRows as List)) {
-            final r = RouteCircuit.fromCloud(
-              Map<String, dynamic>.from(raw as Map),
-            );
+          final r = _parseCloudRoute(Map<String, dynamic>.from(raw as Map));
+          try {
             await _db.upsertRoute(r);
-            mineFromCloud.add(r);
+          } catch (e) {
+            upsertError ??= '$e';
+            debugPrint('CornerIQ owned route upsert: $e');
           }
+          mine.add(r);
         } catch (e) {
-          debugPrint('CornerIQ owned routes query: $e');
+          upsertError ??= '$e';
+          debugPrint('CornerIQ owned route parse: $e');
         }
       }
 
-      return _db.listMyRoutes(me);
+      // 2) Also cache shared peer routes locally (for friend section / compare).
+      try {
+        final sharedRows = await _supabase
+            .from('routes')
+            .select()
+            .eq('is_shared', true)
+            .order('created_at', ascending: false);
+        for (final raw in (sharedRows as List)) {
+          try {
+            final r = _parseCloudRoute(Map<String, dynamic>.from(raw as Map));
+            if (r.ownerId == me) continue;
+            await _db.upsertRoute(r);
+          } catch (e) {
+            debugPrint('CornerIQ shared route cache: $e');
+          }
+        }
+      } catch (e) {
+        debugPrint('CornerIQ shared routes: $e');
+      }
+
+      final short = me.length > 8 ? me.substring(0, 8) : me;
+      lastRefreshInfo =
+          'Cloud ok · $short… · ${mine.length} own route(s)';
+      if (upsertError != null && mine.isEmpty) {
+        lastRefreshError = 'Local save failed: $upsertError';
+      }
+
+      if (mine.isNotEmpty) return mine;
+
+      // Fallback: legacy local rows without owner.
+      final local = await _db.listMyRoutes(me);
+      if (local.isNotEmpty) return local;
+
+      lastRefreshError ??=
+          'No routes owned by this cloud account. Create one or ask to re-copy.';
+      return const [];
     } catch (e) {
       lastRefreshError = SupabaseBootstrap.lastAuthError ?? '$e';
       debugPrint('CornerIQ routes refresh: $e');

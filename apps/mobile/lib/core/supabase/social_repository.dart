@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../analytics/bbox_utils.dart';
 import '../models/cloud_models.dart';
+import '../models/route_circuit.dart';
 import '../supabase/supabase_bootstrap.dart';
 
 /// Friends (all profiles) + same-area peer rides for closed beta.
@@ -199,7 +200,7 @@ class SocialRepository {
         .order('created_at', ascending: false);
     return (rows as List)
         .cast<Map<String, dynamic>>()
-        .where((r) => r['owner_id'] != me)
+        .where((r) => r['owner_id']?.toString() != me)
         .map(RouteCircuitCloud.fromMap)
         .toList();
   }
@@ -220,11 +221,27 @@ class RouteCircuitCloud {
   final String? description;
   final String? displayName;
 
-  factory RouteCircuitCloud.fromMap(Map<String, dynamic> map) =>
-      RouteCircuitCloud(
-        id: map['id'] as String,
-        ownerId: map['owner_id'] as String,
-        name: map['name'] as String,
-        description: map['description'] as String?,
+  factory RouteCircuitCloud.fromMap(Map<String, dynamic> map) {
+    String? str(dynamic v) {
+      if (v == null) return null;
+      final s = v.toString().trim();
+      return s.isEmpty ? null : s;
+    }
+
+    return RouteCircuitCloud(
+      id: str(map['id']) ?? '',
+      ownerId: str(map['owner_id']) ?? '',
+      name: str(map['name']) ?? '',
+      description: str(map['description']),
+    );
+  }
+
+  RouteCircuit toLocal() => RouteCircuit(
+        id: id,
+        name: name,
+        description: description,
+        isShared: true,
+        createdAt: DateTime.now(),
+        ownerId: ownerId,
       );
 }
