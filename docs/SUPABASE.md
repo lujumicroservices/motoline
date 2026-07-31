@@ -20,12 +20,18 @@ Separate project under org **luju.nieves** (not Luju POS / auto).
 
 ## Schema
 
-Migration: `supabase/migrations/20260730200000_corneriq_core.sql`
+Migrations:
+
+- `supabase/migrations/20260730200000_corneriq_core.sql` — core tables + RLS
+- `supabase/migrations/20260731010000_friends_bbox_compare.sql` — ride bbox + overlap RPC + closed-beta profile visibility
 
 Tables: `profiles`, `routes`, `rides`, `track_points` with RLS:
 
 - Own rows: full access
 - Shared rides/routes: readable by other authenticated users (peer compare)
+- **Closed beta:** every authenticated user can read every `profiles` row (friends = all riders)
+- `rides` bbox columns (`min_lat` / `max_lat` / `min_lng` / `max_lng`) for same-area match
+- RPC `rides_overlapping(...)` — peer shared rides whose bbox intersects yours (with pad)
 
 ## Auth
 
@@ -39,10 +45,12 @@ Email / magic-link can be added later for named riders.
 # from repo root (already linked)
 supabase link --project-ref eabhnmlfsfibgwkspqwa
 supabase db query --linked -f supabase/migrations/20260730200000_corneriq_core.sql
+supabase db query --linked -f supabase/migrations/20260731010000_friends_bbox_compare.sql
 ```
 
-## Next product steps
+## Product steps
 
-1. Upload ride after End ride (local SQLite → `rides` + `track_points`)
-2. Tag `route_id` / loop mode
-3. Compare UI: own + `is_shared` peers on same route
+1. Upload ride after End ride (local SQLite → `rides` + `track_points`, `is_shared=true`, bbox)
+2. Friends list = all other profiles; set display name
+3. Compare UI: peers whose ride bbox overlaps yours
+4. Later: invite graph, named routes / loop mode, private toggle

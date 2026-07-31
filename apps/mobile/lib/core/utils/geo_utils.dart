@@ -65,4 +65,39 @@ String formatDuration(Duration d) {
   return '$m:$s';
 }
 
+/// Inclusive index window for points that fall inside a lat/lng box.
+///
+/// Prefers the longest contiguous run inside the box (best for loops that
+/// re-enter the same area). Returns null when fewer than 2 points qualify.
+({int start, int end, int insideCount})? segmentIndicesInBounds({
+  required List<TrackPoint> points,
+  required bool Function(TrackPoint point) isInside,
+}) {
+  if (points.length < 2) return null;
+
+  var bestStart = -1;
+  var bestEnd = -1;
+  var bestLen = 0;
+  var runStart = -1;
+  var insideCount = 0;
+
+  for (var i = 0; i < points.length; i++) {
+    if (isInside(points[i])) {
+      insideCount++;
+      if (runStart < 0) runStart = i;
+      final len = i - runStart + 1;
+      if (len > bestLen) {
+        bestLen = len;
+        bestStart = runStart;
+        bestEnd = i;
+      }
+    } else {
+      runStart = -1;
+    }
+  }
+
+  if (bestStart < 0 || bestEnd <= bestStart) return null;
+  return (start: bestStart, end: bestEnd, insideCount: insideCount);
+}
+
 double _toRad(double deg) => deg * math.pi / 180;

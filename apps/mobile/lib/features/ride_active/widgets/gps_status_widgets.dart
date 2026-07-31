@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/services/location_service.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -16,12 +17,15 @@ class GpsWarmupPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final ready = status.isReady || status.phase == GpsWarmupPhase.timeout;
     final accent = ready
         ? RideVizPalette.leanLeft
         : (status.phase == GpsWarmupPhase.locking
             ? AppTheme.lineHot
             : AppTheme.steel);
+    final meters =
+        LocationService.warmTargetAccuracyMeters.toStringAsFixed(0);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
@@ -60,7 +64,7 @@ class GpsWarmupPanel extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           Text(
-            ready ? 'GPS ready' : 'Starting ride',
+            ready ? l10n.gpsReady : l10n.startingRide,
             textAlign: TextAlign.center,
             style: GoogleFonts.spaceGrotesk(
               fontSize: 28,
@@ -87,9 +91,7 @@ class GpsWarmupPanel extends StatelessWidget {
           ],
           const SizedBox(height: 24),
           Text(
-            'Stay outdoors with a clear sky view. '
-            'Recording starts when GPS is warm enough '
-            '(target ±${LocationService.warmTargetAccuracyMeters.toStringAsFixed(0)} m).',
+            l10n.gpsWarmHelp(meters),
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               color: AppTheme.steel.withValues(alpha: 0.85),
@@ -117,6 +119,9 @@ class _AccuracyMeter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final meters =
+        LocationService.warmTargetAccuracyMeters.toStringAsFixed(0);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
@@ -130,7 +135,7 @@ class _AccuracyMeter extends StatelessWidget {
           Row(
             children: [
               Text(
-                'HORIZONTAL ACCURACY',
+                l10n.horizontalAccuracy,
                 style: GoogleFonts.outfit(
                   fontSize: 11,
                   letterSpacing: 1.1,
@@ -161,7 +166,7 @@ class _AccuracyMeter extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Lower is better · ready at ±${LocationService.warmTargetAccuracyMeters.toStringAsFixed(0)} m',
+            l10n.lowerBetter(meters),
             style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.steel),
           ),
         ],

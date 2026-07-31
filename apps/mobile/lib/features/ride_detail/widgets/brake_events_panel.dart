@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/analytics/brake_detection.dart';
 import '../../../core/utils/geo_utils.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -19,19 +20,11 @@ class BrakeEventsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (events.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.asphaltElevated,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          'No clear brake pulses from GPS speed. '
-          'Harder stops outdoors usually show as yellow/orange/red hits.',
-          style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
-        ),
+      return Text(
+        l10n.brakesEmpty,
+        style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
       );
     }
 
@@ -39,16 +32,7 @@ class BrakeEventsPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Braking (from speed)',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Inferred from how fast speed falls — not a brake sensor. '
-          'Tap a hit to jump the playhead.',
+          l10n.brakesHelp,
           style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 12),
@@ -78,8 +62,18 @@ class _BrakeCard extends StatelessWidget {
   final BrakeEvent event;
   final VoidCallback? onTap;
 
+  String _hardnessLabel(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (event.hardness) {
+      BrakeHardness.light => l10n.brakeLight,
+      BrakeHardness.medium => l10n.brakeMedium,
+      BrakeHardness.hard => l10n.brakeHard,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final color = RideVizPalette.brakeColor(event.hardness);
     return Material(
       color: AppTheme.asphaltElevated,
@@ -101,7 +95,7 @@ class _BrakeCard extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '#$index · ${event.hardnessLabel.toUpperCase()}',
+                    '#$index · ${_hardnessLabel(context).toUpperCase()}',
                     style: GoogleFonts.outfit(
                       fontSize: 11,
                       letterSpacing: 1.0,
@@ -122,8 +116,8 @@ class _BrakeCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 '${event.startSpeedKmh.toStringAsFixed(0)} → '
-                '${event.endSpeedKmh.toStringAsFixed(0)} km/h  ·  '
-                '−${event.speedDropKmh.toStringAsFixed(0)} km/h  ·  '
+                '${event.endSpeedKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
+                '−${event.speedDropKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
                 'peak ${event.peakDecelMps2.toStringAsFixed(1)} m/s²',
                 style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
               ),

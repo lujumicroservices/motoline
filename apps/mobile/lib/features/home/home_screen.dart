@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,10 +8,14 @@ import 'package:intl/intl.dart';
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/models/ride.dart';
 import '../../core/utils/geo_utils.dart';
+import '../../l10n/l10n_ext.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/ride_providers.dart';
+import '../../providers/social_providers.dart';
 import '../../providers/update_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
+import '../friends/friends_screen.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import 'update_widgets.dart';
@@ -19,9 +25,11 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final ridesAsync = ref.watch(ridesListProvider);
     final incompleteAsync = ref.watch(incompleteRideProvider);
     final updateAsync = ref.watch(appUpdateCheckProvider);
+    final locale = ref.watch(localeProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -40,7 +48,7 @@ class HomeScreen extends ConsumerWidget {
                         const CornerIqMark(size: BrandMarkSize.hero),
                         const SizedBox(height: 8),
                         Text(
-                          'Record the line you rode. Scrub it. Improve every corner.',
+                          l10n.tagline,
                           style: GoogleFonts.outfit(
                             fontSize: 16,
                             color: AppTheme.steel,
@@ -51,7 +59,31 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Check for updates',
+                    tooltip: l10n.friends,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const FriendsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.group_outlined),
+                    color: AppTheme.mist,
+                  ),
+                  IconButton(
+                    tooltip: l10n.language,
+                    onPressed: () => ref.read(localeProvider.notifier).toggle(),
+                    icon: Text(
+                      locale.languageCode.toUpperCase(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: AppTheme.mist,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: l10n.checkUpdates,
                     onPressed: () => promptManualUpdateCheck(context, ref),
                     icon: const Icon(Icons.system_update_alt_outlined),
                     color: AppTheme.steel,
@@ -92,7 +124,7 @@ class HomeScreen extends ConsumerWidget {
                     ref.invalidate(incompleteRideProvider);
                   });
                 },
-                child: const Text('Start ride'),
+                child: Text(l10n.startRide),
               ),
             ),
             ridesAsync.when(
@@ -110,7 +142,7 @@ class HomeScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
               child: Text(
-                'Your rides',
+                l10n.yourRides,
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -154,6 +186,7 @@ class _RecoveryBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       padding: const EdgeInsets.all(16),
@@ -166,7 +199,7 @@ class _RecoveryBanner extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Unfinished ride found',
+            l10n.unfinishedRide,
             style: GoogleFonts.spaceGrotesk(
               fontWeight: FontWeight.w700,
               fontSize: 16,
@@ -174,8 +207,9 @@ class _RecoveryBanner extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Started ${DateFormat.MMMd().add_jm().format(ride.startedAt)}. '
-            'Finalize it to keep the line, or discard.',
+            l10n.unfinishedRideBody(
+              DateFormat.MMMd().add_jm().format(ride.startedAt),
+            ),
             style: const TextStyle(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 12),
@@ -190,7 +224,7 @@ class _RecoveryBanner extends ConsumerWidget {
                     ref.invalidate(ridesListProvider);
                     ref.invalidate(incompleteRideProvider);
                   },
-                  child: const Text('Discard'),
+                  child: Text(l10n.discard),
                 ),
               ),
               const SizedBox(width: 10),
@@ -200,6 +234,9 @@ class _RecoveryBanner extends ConsumerWidget {
                     final completed = await ref
                         .read(rideRecorderProvider)
                         .finalizeRecovered(ride.id);
+                    unawaited(
+                      ref.read(rideSyncServiceProvider).syncRide(completed.id),
+                    );
                     ref.invalidate(ridesListProvider);
                     ref.invalidate(incompleteRideProvider);
                     if (!context.mounted) return;
@@ -209,7 +246,7 @@ class _RecoveryBanner extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: const Text('Keep line'),
+                  child: Text(l10n.keepLine),
                 ),
               ),
             ],
@@ -311,17 +348,17 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.map_outlined, size: 56, color: AppTheme.steel.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
           Text(
-            'No rides yet',
+            context.l10n.emptyRidesTitle,
             style: GoogleFonts.spaceGrotesk(
               fontSize: 20,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Start a ride and CornerIQ will draw the exact line you took on the street.',
+          Text(
+            context.l10n.emptyRidesBody,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.steel, height: 1.4),
+            style: const TextStyle(color: AppTheme.steel, height: 1.4),
           ),
         ],
       ),

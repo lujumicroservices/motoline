@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/utils/geo_utils.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -34,6 +35,7 @@ class SegmentRangePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (totalPoints < 2) return const SizedBox.shrink();
 
+    final l10n = context.l10n;
     final maxIndex = (totalPoints - 1).toDouble();
     final start = startIndex.clamp(0, totalPoints - 1).toDouble();
     final end = endIndex.clamp(startIndex, totalPoints - 1).toDouble();
@@ -55,7 +57,7 @@ class SegmentRangePanel extends StatelessWidget {
           Row(
             children: [
               Text(
-                zoomed ? 'SEGMENT ZOOM' : 'SEGMENT',
+                zoomed ? l10n.segmentZoom : l10n.segment,
                 style: GoogleFonts.outfit(
                   fontSize: 11,
                   letterSpacing: 1.2,
@@ -75,9 +77,7 @@ class SegmentRangePanel extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            zoomed
-                ? 'Map + metrics show this stretch only. Drag handles to refine.'
-                : 'Drag handles to pick a stretch, then zoom in for piece metrics.',
+            zoomed ? l10n.segmentHintZoomed : l10n.segmentHint,
             style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 8),
@@ -115,12 +115,12 @@ class SegmentRangePanel extends StatelessWidget {
               if (zoomed)
                 TextButton(
                   onPressed: onClear,
-                  child: const Text('Full ride'),
+                  child: Text(l10n.fullRide),
                 )
               else
                 FilledButton.tonal(
                   onPressed: endIndex > startIndex ? onZoom : null,
-                  child: const Text('Zoom to segment'),
+                  child: Text(l10n.zoomToSegment),
                 ),
             ],
           ),

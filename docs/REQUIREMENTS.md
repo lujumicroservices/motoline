@@ -147,14 +147,14 @@ flowchart LR
 
 ### Privacy / sharing (product rules)
 
-- Default: rides are **private** to the owner.
-- Rider opts in to share a ride or a whole **route** for comparison (anonymous nickname or display name).
-- Compare only shows peers who shared that same route (never dump everyone’s GPS publicly without consent).
+- **Closed beta (current):** every authenticated app user appears on every other user’s friend list. Completed rides upload **shared by default** so friends can compare.
+- Later (open release): private by default; opt-in share; invite/friend graph instead of “everyone is friends.”
+- Compare only shows peers who shared a ride covering the **same / similar area** (never dump unrelated GPS).
 
 ### Route identity (MVP approach)
 
-- Prefer **explicit**: rides/laps tagged to a named route / loop definition from §3.
-- Fallback later: spatial similarity (polyline match) — not required for first ship.
+- **Closed-beta peer match:** bounding-box overlap (with pad) on shared rides — no named route required.
+- Later: explicit `route_id` / loop tagging (§3); optional polyline similarity.
 
 ### Compare experience
 
@@ -211,6 +211,31 @@ flowchart LR
 
 ---
 
+## 6. Recta vs curva
+
+**Goal:** Split the pilot line into **rectas** (straights) and **curvas** (turns), with optional izquierda/derecha.
+
+### Signals
+
+- Primary: GPS heading / bearing change along the path
+- Soft vote: lean L/R for turn side
+- Merge tiny scraps into neighboring stretches
+
+### UI
+
+- Collapsible Ride Lab section **Rectas y curvas**
+- Tap a **curva** → detail screen: zoomed map with E / A / S markers + entrada / ápice / salida speeds, lean, deltas
+- Tap a **recta** → jump playhead
+
+### Acceptance criteria
+
+- [x] Detect stretches with Spanish labels (Recta / Curva / Curva izquierda|derecha)
+- [x] List in Ride Lab with distance + duration
+- [x] Curva detail: zoomed map + entrada / ápice / salida
+- [ ] Optional snapshot/picture export of curva (later)
+
+---
+
 ## Implementation order (suggested)
 
 
@@ -241,6 +266,7 @@ flowchart LR
 | REQ-COMPARE | Compare metrics on same route (local then multi-user via Supabase) | Planned |
 | REQ-SYNC | Supabase CornerIQ project + schema + Flutter client bootstrap | In progress |
 | REQ-SEGMENT | Select/zoom road segment + segment metrics | In progress |
+| REQ-ROAD-KIND | Recta vs curva from heading (+ lean side) | In progress |
 
 ### Brand typography
 

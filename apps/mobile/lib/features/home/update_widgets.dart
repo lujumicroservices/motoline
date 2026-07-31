@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/app_update_service.dart';
 import '../../providers/update_providers.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 
 class UpdateAvailableBanner extends ConsumerWidget {
@@ -13,6 +14,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       padding: const EdgeInsets.all(16),
@@ -25,7 +27,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Update available',
+            l10n.updateAvailable,
             style: GoogleFonts.spaceGrotesk(
               fontWeight: FontWeight.w700,
               fontSize: 16,
@@ -33,8 +35,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'CornerIQ ${update.version} is ready '
-            '(you have ${update.currentVersion}).',
+            l10n.updateReady(update.version, update.currentVersion),
             style: const TextStyle(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 12),
@@ -46,14 +47,14 @@ class UpdateAvailableBanner extends ConsumerWidget {
                     ref.read(dismissedUpdateTagProvider.notifier).state =
                         update.tagName;
                   },
-                  child: const Text('Later'),
+                  child: Text(l10n.later),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
                   onPressed: () => showUpdateInstaller(context, ref, update),
-                  child: const Text('Update'),
+                  child: Text(l10n.update),
                 ),
               ),
             ],
@@ -119,10 +120,11 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
       backgroundColor: AppTheme.asphaltElevated,
       title: Text(
-        _error == null ? 'Downloading update' : 'Update failed',
+        _error == null ? l10n.downloadingUpdate : l10n.updateFailed,
         style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
       ),
       content: _error != null
@@ -144,7 +146,7 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
                 const SizedBox(height: 10),
                 Text(
                   _progress <= 0
-                      ? 'Connecting…'
+                      ? l10n.connecting
                       : '${(_progress * 100).clamp(0, 100).toStringAsFixed(0)}%',
                   style: const TextStyle(color: AppTheme.steel),
                 ),
@@ -154,7 +156,7 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
         if (_error != null)
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
       ],
     );
@@ -165,20 +167,21 @@ Future<void> promptManualUpdateCheck(
   BuildContext context,
   WidgetRef ref,
 ) async {
+  final l10n = context.l10n;
   showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (_) => const AlertDialog(
+    builder: (_) => AlertDialog(
       backgroundColor: AppTheme.asphaltElevated,
       content: Row(
         children: [
-          SizedBox(
+          const SizedBox(
             width: 22,
             height: 22,
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
-          SizedBox(width: 14),
-          Expanded(child: Text('Checking for updates…')),
+          const SizedBox(width: 14),
+          Expanded(child: Text(l10n.checkingUpdates)),
         ],
       ),
     ),
@@ -190,35 +193,37 @@ Future<void> promptManualUpdateCheck(
     Navigator.of(context).pop();
     if (update == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You’re on the latest CornerIQ.')),
+        SnackBar(content: Text(l10n.onLatest)),
       );
       return;
     }
     ref.invalidate(appUpdateCheckProvider);
     final install = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.asphaltElevated,
-        title: Text(
-          'CornerIQ ${update.version}',
-          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
-        ),
-        content: Text(
-          'A newer build is available (you have ${update.currentVersion}). '
-          'Download and install now?',
-          style: const TextStyle(color: AppTheme.steel),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Not now'),
+      builder: (ctx) {
+        final dialogL10n = ctx.l10n;
+        return AlertDialog(
+          backgroundColor: AppTheme.asphaltElevated,
+          title: Text(
+            'CornerIQ ${update.version}',
+            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Update'),
+          content: Text(
+            dialogL10n.updatePrompt(update.currentVersion),
+            style: const TextStyle(color: AppTheme.steel),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(dialogL10n.notNow),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(dialogL10n.update),
+            ),
+          ],
+        );
+      },
     );
     if (install == true && context.mounted) {
       await showUpdateInstaller(context, ref, update);
@@ -227,7 +232,7 @@ Future<void> promptManualUpdateCheck(
     if (!context.mounted) return;
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Update check failed: $e')),
+      SnackBar(content: Text(l10n.updateCheckFailed('$e'))),
     );
   }
 }

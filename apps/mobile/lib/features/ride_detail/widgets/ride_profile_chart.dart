@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/analytics/ride_analytics.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -278,23 +279,23 @@ class SpeedProfileChart extends StatelessWidget {
     required this.series,
     this.selectedSeconds,
     this.onSelectSeconds,
-    this.subtitle =
-        'High-contrast speed colors. Tap to scrub map + lean.',
+    this.subtitle,
   });
 
   final List<TimedValue> series;
   final double? selectedSeconds;
   final ValueChanged<double>? onSelectSeconds;
-  final String subtitle;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return RideProfileChart(
-      title: 'Speed profile',
-      subtitle: subtitle,
+      title: l10n.speedProfile,
+      subtitle: subtitle ?? l10n.chartSpeedSub,
       series: series,
       lineColor: RideVizPalette.speedMid,
-      unit: 'km/h',
+      unit: l10n.kmh,
       baselineZero: true,
       minY: 0,
       selectedSeconds: selectedSeconds,
@@ -311,20 +312,20 @@ class LeanProfileChart extends StatelessWidget {
     required this.series,
     this.selectedSeconds,
     this.onSelectSeconds,
-    this.subtitle =
-        'Cyan = left · amber = right. Relative lean vs inferred 0°.',
+    this.subtitle,
   });
 
   final List<TimedValue> series;
   final double? selectedSeconds;
   final ValueChanged<double>? onSelectSeconds;
-  final String subtitle;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return RideProfileChart(
-      title: 'Lean left / right',
-      subtitle: subtitle,
+      title: l10n.leanProfile,
+      subtitle: subtitle ?? l10n.leanHelp,
       series: series,
       lineColor: RideVizPalette.leanLeft,
       unit: '°',

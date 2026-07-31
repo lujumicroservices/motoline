@@ -5,6 +5,7 @@ import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
 import 'brake_detection.dart';
 import 'lean_neutral.dart';
+import 'road_kind_detection.dart';
 
 class RideAnalytics {
   RideAnalytics({
@@ -24,6 +25,10 @@ class RideAnalytics {
       neutralDegrees: neutralLeanDegrees,
     );
     brakeEvents = detectBrakeEvents(samples);
+    roadStretches = detectRoadStretches(
+      samples,
+      neutralLeanDegrees: neutralLeanDegrees,
+    );
   }
 
   final Ride ride;
@@ -45,6 +50,9 @@ class RideAnalytics {
 
   /// Brake applications inferred from GPS speed drop.
   late final List<BrakeEvent> brakeEvents;
+
+  /// Recta / curva stretches from heading change.
+  late final List<RoadStretch> roadStretches;
 
   bool get hasData => samples.isNotEmpty;
 

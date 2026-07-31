@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -26,12 +27,13 @@ class MotorcycleLeanGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final absLean = leanDegrees.abs().clamp(0, 70);
     final side = leanDegrees < -1
-        ? 'LEFT'
+        ? l10n.leftShort
         : leanDegrees > 1
-            ? 'RIGHT'
-            : 'UPRIGHT';
+            ? l10n.rightShort
+            : '·';
 
     return Container(
       width: double.infinity,
@@ -50,7 +52,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
           Row(
             children: [
               Text(
-                'BIKE LEAN',
+                l10n.bikeLean.toUpperCase(),
                 style: GoogleFonts.outfit(
                   fontSize: 11,
                   letterSpacing: 1.4,
@@ -95,7 +97,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
             children: [
               Expanded(
                 child: _SidePeak(
-                  label: 'MAX LEFT',
+                  label: '${l10n.maxLean.toUpperCase()} ${l10n.leftShort.toUpperCase()}',
                   value: '${maxLeftDegrees.toStringAsFixed(0)}°',
                   color: RideVizPalette.leanLeft,
                   alignEnd: false,
@@ -103,7 +105,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
               ),
               Expanded(
                 child: _SidePeak(
-                  label: 'MAX RIGHT',
+                  label: '${l10n.maxLean.toUpperCase()} ${l10n.rightShort.toUpperCase()}',
                   value: '${maxRightDegrees.toStringAsFixed(0)}°',
                   color: RideVizPalette.leanRight,
                   alignEnd: true,

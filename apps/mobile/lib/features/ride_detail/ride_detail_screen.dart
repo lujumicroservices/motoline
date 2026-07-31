@@ -3,16 +3,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/analytics/curva_analysis.dart';
 import '../../core/analytics/ride_analytics.dart';
+import '../../core/analytics/road_kind_detection.dart';
 import '../../core/models/track_point.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../compare/ride_compare_screen.dart';
+import 'curva_detail_screen.dart';
+import 'fullscreen_map_screen.dart';
 import 'pilot_line_map.dart';
 import 'widgets/brake_events_panel.dart';
+import 'widgets/lab_section.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
 import 'widgets/ride_profile_chart.dart';
+import 'widgets/road_stretches_panel.dart';
 import 'widgets/segment_range_panel.dart';
 
 class RideDetailScreen extends ConsumerWidget {
@@ -24,6 +32,7 @@ class RideDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rideAsync = ref.watch(rideProvider(rideId));
     final pointsAsync = ref.watch(ridePointsProvider(rideId));
+    final l10n = context.l10n;
 
     return Scaffold(
       body: rideAsync.when(
@@ -31,7 +40,7 @@ class RideDetailScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('$e')),
         data: (ride) {
           if (ride == null) {
-            return const Center(child: Text('Ride not found'));
+            return Center(child: Text(l10n.rideNotFound));
           }
           return pointsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -68,7 +77,24 @@ class _RideDashboardState extends State<_RideDashboard>
   late int _segEnd;
   bool _zoomed = false;
 
+  final Set<String> _expanded = {
+    'overview',
+    'map',
+  };
+
   RideAnalytics get _full => widget.analytics;
+
+  bool _isOpen(String id) => _expanded.contains(id);
+
+  void _toggle(String id) {
+    setState(() {
+      if (_expanded.contains(id)) {
+        _expanded.remove(id);
+      } else {
+        _expanded.add(id);
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -142,8 +168,74 @@ class _RideDashboardState extends State<_RideDashboard>
     });
   }
 
+  Future<void> _openFullscreenMap() async {
+    final full = _full;
+    if (full.samples.length < 2) return;
+    final absoluteScrub = _zoomed
+        ? (_segStart + _scrubIndex).clamp(0, full.samples.length - 1)
+        : _scrubIndex.clamp(0, full.samples.length - 1);
+
+    final result = await Navigator.of(context).push<FullscreenMapSelection>(
+      MaterialPageRoute(
+        builder: (_) => FullscreenMapScreen(
+          points: full.samples,
+          scrubIndex: absoluteScrub,
+          brakeEvents: full.brakeEvents,
+          initialFocusStart: _zoomed ? _segStart : null,
+          initialFocusEnd: _zoomed ? _segEnd : null,
+        ),
+      ),
+    );
+    if (!mounted || result == null) return;
+    setState(() {
+      _segStart = result.startIndex;
+      _segEnd = result.endIndex;
+      _zoomed = true;
+      final len = _segEnd - _segStart + 1;
+      _scrubIndex = (len ~/ 2).clamp(0, len - 1);
+      _expanded.addAll({'overview', 'map', 'segment'});
+    });
+  }
+
+  void _openRoadStretch(int stretchIndex) {
+    final a = _view;
+    if (stretchIndex < 0 || stretchIndex >= a.roadStretches.length) return;
+    final stretch = a.roadStretches[stretchIndex];
+
+    if (stretch.kind == RoadKind.recta) {
+      _setScrubIndex(stretch.startIndex);
+      return;
+    }
+
+    final analysis = CurvaAnalysis.fromRide(
+      samples: a.samples,
+      stretch: stretch,
+      neutralLeanDegrees: a.neutralLeanDegrees,
+    );
+    if (analysis == null) {
+      _setScrubIndex(stretch.startIndex);
+      return;
+    }
+
+    var curvaNumber = 0;
+    for (var i = 0; i <= stretchIndex; i++) {
+      if (a.roadStretches[i].kind == RoadKind.curva) curvaNumber++;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CurvaDetailScreen(
+          samples: a.samples,
+          analysis: analysis,
+          curvaNumber: curvaNumber,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final full = _full;
     final a = _view;
     final ride = full.ride;
@@ -169,7 +261,7 @@ class _RideDashboardState extends State<_RideDashboard>
                   },
                 ),
                 title: Text(
-                  _zoomed ? 'Ride lab · segment' : 'Ride lab',
+                  _zoomed ? l10n.rideLabSegment : l10n.rideLab,
                   style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
                 ),
               ),
@@ -195,136 +287,223 @@ class _RideDashboardState extends State<_RideDashboard>
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          _zoomed
-                              ? 'Segment zoom — metrics and charts are for this stretch only.'
-                              : 'Scrub any moment. Select a segment to zoom a piece of road.',
+                          _zoomed ? l10n.segmentZoomHint : l10n.collapseHint,
                           style: GoogleFonts.outfit(
                             color: AppTheme.steel,
                             fontSize: 15,
                           ),
                         ),
-                        if (full.samples.length >= 2) ...[
-                          const SizedBox(height: 20),
-                          SegmentRangePanel(
-                            totalPoints: full.samples.length,
-                            startIndex: _segStart,
-                            endIndex: _segEnd,
-                            startSeconds: full.secondsForIndex(_segStart),
-                            endSeconds: full.secondsForIndex(_segEnd),
-                            zoomed: _zoomed,
-                            onRangeChanged: _setSegmentRange,
-                            onZoom: _zoomToSegment,
-                            onClear: _clearSegmentZoom,
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        _ScoreHero(
-                          score: a.lineScore,
-                          label: _zoomed
-                              ? '${a.lineScoreLabel} · segment'
-                              : a.lineScoreLabel,
-                          animation: _intro,
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: ComparePeersEntry(localRideId: ride.id),
                         ),
-                        const SizedBox(height: 20),
-                        _MetricGrid(analytics: a),
-                        const SizedBox(height: 28),
-                        if (a.leanSides.sampleCount > 0) ...[
-                          MotorcycleLeanGauge(
-                            leanDegrees: scrubLean,
-                            maxLeftDegrees: a.maxLeanLeft,
-                            maxRightDegrees: a.maxLeanRight,
-                            neutralLabel:
-                                'At playhead · neutral offset ${a.neutralLeanDegrees.toStringAsFixed(0)}°',
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '0° is inferred upright (works with phone in pocket). '
-                            'Cyan = left bank · amber = right bank.',
-                            style: GoogleFonts.outfit(
-                              color: AppTheme.steel,
-                              fontSize: 13,
-                              height: 1.35,
-                            ),
-                          ),
-                          const SizedBox(height: 28),
-                        ],
-                        Text(
-                          _zoomed ? 'Segment line' : 'The line you took',
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _zoomed
-                              ? 'Bright = selected stretch · dim = rest of ride. '
-                                  'Dots = inferred brakes. Amber marker = scrub.'
-                              : 'Blue→lime→yellow→orange→red→magenta by speed. '
-                                  'Dots = inferred brakes. Amber = scrub.',
-                          style: GoogleFonts.outfit(
-                            color: AppTheme.steel,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        SizedBox(
-                          height: 280,
-                          child: PilotLineMap(
-                            key: ValueKey(
-                              'map-$_zoomed-$_segStart-$_segEnd',
-                            ),
-                            points: full.samples,
-                            scrubIndex: mapScrub,
-                            focusStartIndex: _zoomed ? _segStart : null,
-                            focusEndIndex: _zoomed ? _segEnd : null,
-                            brakeEvents: full.brakeEvents,
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-                        BrakeEventsPanel(
-                          events: a.brakeEvents,
-                          onSelectIndex: (localIndex) {
-                            _setScrubIndex(localIndex);
-                          },
-                        ),
-                        const SizedBox(height: 32),
-                        SpeedProfileChart(
-                          series: a.speedSeries,
-                          selectedSeconds: scrubSeconds,
-                          onSelectSeconds: _setScrubSeconds,
-                          subtitle: _zoomed
-                              ? 'Segment speed only. Tap to scrub.'
-                              : 'High-contrast speed colors. Tap to scrub.',
-                        ),
-                        const SizedBox(height: 32),
-                        if (a.leanSeries.isNotEmpty) ...[
-                          LeanProfileChart(
-                            series: a.leanSeries,
-                            selectedSeconds: scrubSeconds,
-                            onSelectSeconds: _setScrubSeconds,
-                          ),
-                          const SizedBox(height: 32),
-                        ],
-                        if (a.accuracySeries.isNotEmpty) ...[
-                          RideProfileChart(
-                            title: 'GPS precision',
-                            subtitle:
-                                'Horizontal accuracy in meters (lower is better)',
-                            series: a.accuracySeries,
-                            lineColor: AppTheme.signal,
-                            unit: 'm',
-                            baselineZero: true,
-                            minY: 0,
-                            selectedSeconds: scrubSeconds,
-                            onSelectSeconds: _setScrubSeconds,
-                          ),
-                          const SizedBox(height: 32),
-                        ],
-                        _PrecisionPanel(analytics: a),
-                        const SizedBox(height: 28),
-                        _InsightStrip(analytics: a),
                         const SizedBox(height: 16),
+                        if (full.samples.length >= 2)
+                          LabSection(
+                            title: l10n.sectionSegment,
+                            subtitle: l10n.sectionSegmentSub,
+                            expanded: _isOpen('segment'),
+                            onToggle: () => _toggle('segment'),
+                            child: SegmentRangePanel(
+                              totalPoints: full.samples.length,
+                              startIndex: _segStart,
+                              endIndex: _segEnd,
+                              startSeconds: full.secondsForIndex(_segStart),
+                              endSeconds: full.secondsForIndex(_segEnd),
+                              zoomed: _zoomed,
+                              onRangeChanged: _setSegmentRange,
+                              onZoom: _zoomToSegment,
+                              onClear: _clearSegmentZoom,
+                            ),
+                          ),
+                        LabSection(
+                          title: l10n.sectionOverview,
+                          subtitle: _zoomed
+                              ? l10n.sectionOverviewSubZoom
+                              : l10n.sectionOverviewSub,
+                          badge: '${a.lineScore}',
+                          expanded: _isOpen('overview'),
+                          onToggle: () => _toggle('overview'),
+                          child: Column(
+                            children: [
+                              _ScoreHero(
+                                score: a.lineScore,
+                                label: _zoomed
+                                    ? '${a.lineScoreLabel} · segment'
+                                    : a.lineScoreLabel,
+                                animation: _intro,
+                              ),
+                              const SizedBox(height: 16),
+                              _MetricGrid(analytics: a),
+                            ],
+                          ),
+                        ),
+                        if (a.leanSides.sampleCount > 0)
+                          LabSection(
+                            title: l10n.sectionLean,
+                            subtitle: l10n.sectionLeanSub,
+                            expanded: _isOpen('lean'),
+                            onToggle: () => _toggle('lean'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                MotorcycleLeanGauge(
+                                  leanDegrees: scrubLean,
+                                  maxLeftDegrees: a.maxLeanLeft,
+                                  maxRightDegrees: a.maxLeanRight,
+                                  neutralLabel:
+                                      'At playhead · neutral offset ${a.neutralLeanDegrees.toStringAsFixed(0)}°',
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  l10n.leanHelp,
+                                  style: GoogleFonts.outfit(
+                                    color: AppTheme.steel,
+                                    fontSize: 13,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        LabSection(
+                          title: l10n.sectionMap,
+                          subtitle: l10n.sectionMapSub,
+                          expanded: _isOpen('map'),
+                          onToggle: () => _toggle('map'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      _zoomed
+                                          ? l10n.mapHintZoom
+                                          : l10n.mapHint,
+                                      style: GoogleFonts.outfit(
+                                        color: AppTheme.steel,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton.filledTonal(
+                                    onPressed: full.samples.length >= 2
+                                        ? _openFullscreenMap
+                                        : null,
+                                    tooltip: l10n.openFullscreenMap,
+                                    icon: const Icon(Icons.fullscreen),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: full.samples.length >= 2
+                                      ? _openFullscreenMap
+                                      : null,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: SizedBox(
+                                    height: 280,
+                                    child: IgnorePointer(
+                                      child: PilotLineMap(
+                                        key: ValueKey(
+                                          'map-$_zoomed-$_segStart-$_segEnd',
+                                        ),
+                                        points: full.samples,
+                                        interactive: false,
+                                        scrubIndex: mapScrub,
+                                        focusStartIndex:
+                                            _zoomed ? _segStart : null,
+                                        focusEndIndex:
+                                            _zoomed ? _segEnd : null,
+                                        brakeEvents: full.brakeEvents,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        LabSection(
+                          title: l10n.sectionRoad,
+                          subtitle: l10n.sectionRoadSub,
+                          badge: '${a.roadStretches.length}',
+                          expanded: _isOpen('road'),
+                          onToggle: () => _toggle('road'),
+                          child: RoadStretchesPanel(
+                            stretches: a.roadStretches,
+                            onSelectStretch: _openRoadStretch,
+                          ),
+                        ),
+                        LabSection(
+                          title: l10n.sectionBrakes,
+                          subtitle: l10n.sectionBrakesSub,
+                          badge: '${a.brakeEvents.length}',
+                          expanded: _isOpen('brakes'),
+                          onToggle: () => _toggle('brakes'),
+                          child: BrakeEventsPanel(
+                            events: a.brakeEvents,
+                            onSelectIndex: _setScrubIndex,
+                          ),
+                        ),
+                        LabSection(
+                          title: l10n.sectionCharts,
+                          subtitle: l10n.sectionChartsSub,
+                          expanded: _isOpen('charts'),
+                          onToggle: () => _toggle('charts'),
+                          child: Column(
+                            children: [
+                              SpeedProfileChart(
+                                series: a.speedSeries,
+                                selectedSeconds: scrubSeconds,
+                                onSelectSeconds: _setScrubSeconds,
+                                subtitle: _zoomed
+                                    ? l10n.chartSpeedSubZoom
+                                    : l10n.chartSpeedSub,
+                              ),
+                              if (a.leanSeries.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                LeanProfileChart(
+                                  series: a.leanSeries,
+                                  selectedSeconds: scrubSeconds,
+                                  onSelectSeconds: _setScrubSeconds,
+                                ),
+                              ],
+                              if (a.accuracySeries.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                RideProfileChart(
+                                  title: l10n.gpsPrecision,
+                                  subtitle: l10n.gpsPrecisionSub,
+                                  series: a.accuracySeries,
+                                  lineColor: AppTheme.signal,
+                                  unit: 'm',
+                                  baselineZero: true,
+                                  minY: 0,
+                                  selectedSeconds: scrubSeconds,
+                                  onSelectSeconds: _setScrubSeconds,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        LabSection(
+                          title: l10n.sectionNotes,
+                          subtitle: l10n.sectionNotesSub,
+                          expanded: _isOpen('notes'),
+                          onToggle: () => _toggle('notes'),
+                          child: Column(
+                            children: [
+                              _PrecisionPanel(analytics: a),
+                              const SizedBox(height: 16),
+                              _InsightStrip(analytics: a),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -385,11 +564,12 @@ class _TimeScrubber extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final speed = point.speedKmh;
     final side = leanDegrees < -1
-        ? 'L'
+        ? l10n.leftShort
         : leanDegrees > 1
-            ? 'R'
+            ? l10n.rightShort
             : '·';
     final min = minSeconds;
     final max = maxSeconds <= min ? min + 1 : maxSeconds;
@@ -408,7 +588,7 @@ class _TimeScrubber extends StatelessWidget {
           Row(
             children: [
               Text(
-                'PLAYHEAD',
+                l10n.playhead,
                 style: GoogleFonts.outfit(
                   fontSize: 11,
                   letterSpacing: 1.3,
@@ -434,7 +614,7 @@ class _TimeScrubber extends StatelessWidget {
                 TextSpan(
                   text:
                       'Point ${index + 1}/$totalPoints  ·  '
-                      '${speed == null ? "--" : "${speed.toStringAsFixed(0)} km/h"}  ·  lean ',
+                      '${speed == null ? "--" : "${speed.toStringAsFixed(0)} ${l10n.kmh}"}  ·  lean ',
                 ),
                 TextSpan(
                   text: '${leanDegrees.abs().toStringAsFixed(0)}° $side',
@@ -584,6 +764,7 @@ class _MetricGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final a = analytics;
     return Column(
       children: [
@@ -591,7 +772,7 @@ class _MetricGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _BigStat(
-                label: 'Distance',
+                label: l10n.distance,
                 value: a.distanceKm.toStringAsFixed(2),
                 unit: 'km',
                 accent: AppTheme.line,
@@ -600,7 +781,7 @@ class _MetricGrid extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _BigStat(
-                label: 'Duration',
+                label: l10n.duration,
                 value: formatDurationLong(a.duration),
                 unit: '',
                 accent: AppTheme.mist,
@@ -613,11 +794,11 @@ class _MetricGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _BigStat(
-                label: 'Max speed',
+                label: l10n.maxSpeed,
                 value: a.maxSpeedKmh == null
                     ? '--'
                     : a.maxSpeedKmh!.toStringAsFixed(0),
-                unit: 'km/h',
+                unit: l10n.kmh,
                 accent: a.maxSpeedKmh == null
                     ? AppTheme.steel
                     : RideVizPalette.speedColor(a.maxSpeedKmh!),
@@ -626,7 +807,7 @@ class _MetricGrid extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _BigStat(
-                label: 'Max L / R',
+                label: l10n.maxLR,
                 value: a.leanSides.sampleCount == 0
                     ? '--'
                     : '${a.maxLeanLeft.toStringAsFixed(0)}/${a.maxLeanRight.toStringAsFixed(0)}',
@@ -716,6 +897,7 @@ class _PrecisionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final a = analytics;
     return Container(
       width: double.infinity,
@@ -745,7 +927,7 @@ class _PrecisionPanel extends StatelessWidget {
             runSpacing: 10,
             children: [
               _MiniPill(
-                label: 'Points',
+                label: l10n.points,
                 value: '${a.samples.length}',
               ),
               _MiniPill(
@@ -770,7 +952,7 @@ class _PrecisionPanel extends StatelessWidget {
                 label: 'Moving avg',
                 value: a.avgMovingSpeedKmh == null
                     ? '--'
-                    : '${a.avgMovingSpeedKmh!.toStringAsFixed(0)} km/h',
+                    : '${a.avgMovingSpeedKmh!.toStringAsFixed(0)} ${l10n.kmh}',
               ),
             ],
           ),

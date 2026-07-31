@@ -1,0 +1,196 @@
+{
+  "@@locale": "es",
+  "appTitle": "CornerIQ",
+  "tagline": "Graba la línea que rodaste. Revísala. Mejora cada curva.",
+  "startRide": "Iniciar ruta",
+  "endRide": "Terminar ruta",
+  "recording": "Grabando",
+  "starting": "Iniciando…",
+  "live": "EN VIVO",
+  "checkUpdates": "Buscar actualizaciones",
+  "language": "Idioma",
+  "spanish": "Español",
+  "english": "English",
+  "garage": "Garaje",
+  "yourRides": "Tus rutas",
+  "emptyRidesTitle": "Aún no hay rutas",
+  "emptyRidesBody": "Inicia una ruta y CornerIQ dibujará la línea exacta que tomaste en la calle.",
+  "unfinishedRide": "Ruta sin terminar",
+  "unfinishedRideBody": "Empezó {when}. Finalízala para guardar la línea, o descártala.",
+  "@unfinishedRideBody": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "discard": "Descartar",
+  "keepLine": "Conservar línea",
+  "updateAvailable": "Actualización disponible",
+  "updateReady": "CornerIQ {version} está lista (tienes {current}).",
+  "@updateReady": {
+    "placeholders": {
+      "version": { "type": "String" },
+      "current": { "type": "String" }
+    }
+  },
+  "update": "Actualizar",
+  "later": "Después",
+  "onLatest": "Ya tienes la última CornerIQ.",
+  "downloadingUpdate": "Descargando actualización",
+  "updateFailed": "Falló la actualización",
+  "connecting": "Conectando…",
+  "close": "Cerrar",
+  "checkingUpdates": "Buscando actualizaciones…",
+  "updatePrompt": "Hay una versión nueva (tienes {current}). ¿Descargar e instalar ahora?",
+  "@updatePrompt": {
+    "placeholders": {
+      "current": { "type": "String" }
+    }
+  },
+  "notNow": "Ahora no",
+  "updateCheckFailed": "Error al buscar actualización: {error}",
+  "@updateCheckFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "rideLab": "Ride Lab",
+  "rideLabSegment": "Ride Lab · segmento",
+  "rideNotFound": "Ruta no encontrada",
+  "collapseHint": "Toca los encabezados para plegar. El playhead queda abajo.",
+  "segmentZoomHint": "Zoom de segmento — métricas y gráficas solo de este tramo.",
+  "sectionSegment": "Zoom de segmento",
+  "sectionSegmentSub": "Elige un tramo de carretera",
+  "sectionOverview": "Resumen",
+  "sectionOverviewSub": "Puntuación + métricas",
+  "sectionOverviewSubZoom": "Puntuación + métricas de este segmento",
+  "sectionLean": "Inclinación",
+  "sectionLeanSub": "Cian izquierda · ámbar derecha",
+  "sectionMap": "Mapa + línea",
+  "sectionMapSub": "Colores de velocidad · frenos",
+  "sectionRoad": "Rectas y curvas",
+  "sectionRoadSub": "Por cambio de rumbo",
+  "sectionBrakes": "Frenado",
+  "sectionBrakesSub": "Inferido por caída de velocidad",
+  "sectionCharts": "Gráficas",
+  "sectionChartsSub": "Velocidad · lean · GPS",
+  "sectionNotes": "Precisión + notas",
+  "sectionNotesSub": "Calidad GPS y notas",
+  "segment": "SEGMENTO",
+  "segmentZoom": "ZOOM DE SEGMENTO",
+  "segmentHint": "Arrastra los controles, luego haz zoom para métricas del tramo.",
+  "segmentHintZoomed": "Mapa y métricas muestran solo este tramo. Ajusta con los controles.",
+  "zoomToSegment": "Zoom al segmento",
+  "fullRide": "Ruta completa",
+  "playhead": "PLAYHEAD",
+  "distance": "Distancia",
+  "time": "Tiempo",
+  "speed": "Velocidad",
+  "bikeLean": "Inclinación",
+  "calibrating": "Calibrando…",
+  "points": "Puntos",
+  "maxLR": "Máx I / D",
+  "maxSpeed": "Vel. máx",
+  "duration": "Duración",
+  "speedProfile": "Perfil de velocidad",
+  "leanProfile": "Inclinación izq / der",
+  "gpsPrecision": "Precisión GPS",
+  "gpsPrecisionSub": "Precisión horizontal en metros (menor es mejor)",
+  "chartSpeedSub": "Colores de alto contraste. Toca para scrub.",
+  "chartSpeedSubZoom": "Solo velocidad del segmento. Toca para scrub.",
+  "leanHelp": "0° es vertical inferida (sirve con el teléfono en el bolsillo).",
+  "mapHint": "Azul→magenta según velocidad. Puntos = frenos inferidos.",
+  "mapHintZoom": "Brillante = tramo elegido · tenue = resto. Puntos = frenos.",
+  "startingRide": "Iniciando ruta",
+  "gpsReady": "GPS listo",
+  "gpsWarmHelp": "Quédate al aire libre con cielo abierto. La grabación empieza cuando el GPS esté lo bastante estable (objetivo ±{meters} m).",
+  "@gpsWarmHelp": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "horizontalAccuracy": "PRECISIÓN HORIZONTAL",
+  "lowerBetter": "Menor es mejor · listo a ±{meters} m",
+  "@lowerBetter": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "couldNotStart": "No se pudo iniciar la ruta",
+  "tryAgain": "Reintentar",
+  "back": "Volver",
+  "activeMountHelp": "Monta firme (vertical, pantalla hacia ti). Deja la notificación de grabación activa — la pantalla puede bloquearse.",
+  "curvaTitle": "Curva #{number}",
+  "@curvaTitle": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "curveLine": "Línea de la curva",
+  "entry": "Entrada",
+  "apex": "Ápice",
+  "exit": "Salida",
+  "brakeToApex": "Freno a ápice",
+  "accelFromApex": "Acelera desde ápice",
+  "leanAtApex": "Lean en ápice",
+  "maxLean": "Lean máx",
+  "leftShort": "Izq",
+  "rightShort": "Der",
+  "curvaMapLegend": "E = entrada · A = ápice · S = salida. Línea por velocidad.",
+  "curvaCoach": "Lectura rápida: mira si entras demasiado rápido (mucho freno a A), si el ápice es estable, y si sales acelerando limpio.",
+  "roadStretchesHelp": "Según cambio de rumbo (el lean ayuda al lado). {rectas} rectas · {curvas} curvas. Toca una curva para ver entrada / ápice / salida.",
+  "@roadStretchesHelp": {
+    "placeholders": {
+      "rectas": { "type": "int" },
+      "curvas": { "type": "int" }
+    }
+  },
+  "roadStretchesEmpty": "Aún no hay suficiente cambio de rumbo GPS para separar rectas y curvas.",
+  "openDetail": "abrir detalle",
+  "brakesHelp": "Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead.",
+  "brakesEmpty": "No hay frenadas claras por GPS. Las paradas fuertes suelen verse como golpes amarillo/naranja/rojo.",
+  "brakeLight": "Suave",
+  "brakeMedium": "Medio",
+  "brakeHard": "Fuerte",
+  "noGpsPoints": "Sin puntos GPS",
+  "kmh": "km/h",
+  "recta": "Recta",
+  "curva": "Curva",
+  "curvaIzquierda": "Curva izquierda",
+  "curvaDerecha": "Curva derecha",
+  "fullscreenMap": "Mapa completo",
+  "fullscreenMapHelp": "Desplaza y haz zoom libremente. Marca un área o usa el mapa visible, luego carga métricas de ese tramo.",
+  "selectArea": "Marcar área",
+  "selectAreaHint": "Arrastra un recuadro sobre el tramo",
+  "selectAreaBody": "Arrastra en el mapa para marcar un área. El pellizco sigue haciendo zoom.",
+  "useVisibleArea": "Usar mapa visible",
+  "clearArea": "Limpiar",
+  "loadAreaMetrics": "Cargar métricas del área",
+  "areaReady": "Área lista · {points} puntos GPS. Carga métricas para enfocar el Ride Lab en este tramo.",
+  "@areaReady": {
+    "placeholders": {
+      "points": { "type": "int" }
+    }
+  },
+  "zoomIn": "Acercar",
+  "zoomOut": "Alejar",
+  "fitRide": "Ajustar ruta",
+  "openFullscreenMap": "Abrir mapa completo",
+  "friends": "Amigos",
+  "friendsSubtitle": "Beta cerrada — todo quien tenga la app aparece en tu lista.",
+  "friendsEmpty": "Aún no hay otros riders. Cuando un amigo instale CornerIQ, aparecerá aquí.",
+  "yourName": "Tu nombre visible",
+  "saveName": "Guardar nombre",
+  "nameHint": "Apodo para amigos",
+  "nameSaved": "Nombre guardado",
+  "compare": "Comparar",
+  "compareTitle": "Comparar rutas",
+  "comparePickPeer": "Rutas de amigos en la misma zona",
+  "compareEmpty": "Ninguna ruta de amigos cubre esta zona todavía.",
+  "compareYou": "Tú",
+  "lineScore": "Puntuación de línea",
+  "avgSpeed": "Vel. media",
+  "friendRides": "Rutas compartidas",
+  "friendRidesEmpty": "Este rider aún no tiene rutas compartidas.",
+  "syncingRide": "Compartiendo ruta con amigos…",
+  "cloudUnavailable": "Nube no disponible — revisa conexión y auth anónima."
+}

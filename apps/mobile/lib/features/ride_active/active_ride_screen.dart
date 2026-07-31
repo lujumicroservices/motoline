@@ -7,7 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/models/track_point.dart';
 import '../../core/services/location_service.dart';
 import '../../core/utils/geo_utils.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
+import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../ride_detail/ride_detail_screen.dart';
@@ -83,6 +85,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final snapshotAsync = ref.watch(activeRideProvider);
     final recorder = ref.watch(rideRecorderProvider);
     final ride = recorder.activeRide;
@@ -96,7 +99,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_starting ? 'Starting…' : 'Recording'),
+          title: Text(_starting ? l10n.starting : l10n.recording),
           automaticallyImplyLeading: false,
           leading: (_starting || recorder.isRecording)
               ? null
@@ -128,7 +131,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'LIVE',
+                          l10n.live,
                           style: GoogleFonts.spaceGrotesk(
                             color: AppTheme.signal,
                             fontWeight: FontWeight.w700,
@@ -205,6 +208,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     required bool leanCalibrated,
     required double? accuracyMeters,
   }) {
+    final l10n = context.l10n;
     return Column(
       children: [
         Padding(
@@ -219,9 +223,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
           child: Text(
-            'Mount firmly (portrait, screen toward you). '
-            'Leave the recording notification on — screen can lock. '
-            'Settings → Location → Improve accuracy helps.',
+            l10n.activeMountHelp,
             style: GoogleFonts.outfit(color: AppTheme.steel, fontSize: 13),
           ),
         ),
@@ -231,7 +233,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             children: [
               Expanded(
                 child: _StatCard(
-                  label: 'Distance',
+                  label: l10n.distance,
                   value: distanceKm.toStringAsFixed(2),
                   unit: 'km',
                 ),
@@ -239,7 +241,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
-                  label: 'Time',
+                  label: l10n.time,
                   value: formatDuration(duration),
                   unit: '',
                 ),
@@ -254,17 +256,17 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             children: [
               Expanded(
                 child: _StatCard(
-                  label: 'Speed',
+                  label: l10n.speed,
                   value: speedKmh == null
                       ? '--'
                       : speedKmh.toStringAsFixed(0),
-                  unit: 'km/h',
+                  unit: l10n.kmh,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
-                  label: leanCalibrated ? 'Bike lean' : 'Calibrating…',
+                  label: leanCalibrated ? l10n.bikeLean : l10n.calibrating,
                   value: leanDegrees == null
                       ? '--'
                       : leanDegrees.abs().toStringAsFixed(0),
@@ -272,7 +274,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                       ? '°'
                       : (leanDegrees.abs() < 2
                           ? '°'
-                          : (leanDegrees >= 0 ? '° R' : '° L')),
+                          : (leanDegrees >= 0
+                              ? '° ${l10n.rightShort}'
+                              : '° ${l10n.leftShort}')),
                 ),
               ),
             ],
@@ -285,7 +289,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             children: [
               Expanded(
                 child: _StatCard(
-                  label: 'Points',
+                  label: l10n.points,
                   value: '$pointCount',
                   unit: '',
                 ),
@@ -293,7 +297,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
-                  label: 'Max L / R',
+                  label: l10n.maxLR,
                   value:
                       '${maxLeanLeft.toStringAsFixed(0)}/${maxLeanRight.toStringAsFixed(0)}',
                   unit: '°',
@@ -320,7 +324,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               minimumSize: const Size.fromHeight(56),
             ),
             onPressed: () => _stop(context),
-            child: const Text('End ride'),
+            child: Text(l10n.endRide),
           ),
         ),
       ],
@@ -331,6 +335,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final recorder = ref.read(rideRecorderProvider);
     try {
       final ride = await recorder.stop();
+      // Closed beta: share with friends (soft-fail offline).
+      unawaited(ref.read(rideSyncServiceProvider).syncRide(ride.id));
       if (!context.mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
@@ -359,6 +365,7 @@ class _StartErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
@@ -368,7 +375,7 @@ class _StartErrorBody extends StatelessWidget {
           const Icon(Icons.gps_off, size: 48, color: AppTheme.signal),
           const SizedBox(height: 16),
           Text(
-            'Couldn’t start ride',
+            l10n.couldNotStart,
             textAlign: TextAlign.center,
             style: GoogleFonts.spaceGrotesk(
               fontSize: 24,
@@ -384,12 +391,12 @@ class _StartErrorBody extends StatelessWidget {
           const Spacer(),
           FilledButton(
             onPressed: onRetry,
-            child: const Text('Try again'),
+            child: Text(l10n.tryAgain),
           ),
           const SizedBox(height: 10),
           OutlinedButton(
             onPressed: onBack,
-            child: const Text('Back'),
+            child: Text(l10n.back),
           ),
         ],
       ),
