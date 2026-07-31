@@ -1,14 +1,14 @@
-# Install CornerIQ (Android)
+# Install RiderLab (Android)
 
 This is a private test build — not from Play Store.
 
 ## Steps for friends
 
 1. Open the **GitHub Release** link you were sent.
-2. Download the latest **CornerIQ** APK.
+2. Download the latest **RiderLab** APK (`RiderLab-v….apk`).
 3. On your phone: open the downloaded file.
 4. If Android blocks it, allow **Install unknown apps** for your browser/Files app.
-5. Install → open **CornerIQ** → allow **Location** (needed to draw your ride line).
+5. Install → open **RiderLab** → allow **Location** (needed to draw your ride line).
 
 ## Tips
 

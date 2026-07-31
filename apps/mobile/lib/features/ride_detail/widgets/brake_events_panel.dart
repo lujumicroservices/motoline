@@ -12,11 +12,20 @@ class BrakeEventsPanel extends StatelessWidget {
   const BrakeEventsPanel({
     super.key,
     required this.events,
+    required this.secondsForIndex,
     this.onSelectIndex,
+    this.onZoomToBrake,
   });
 
   final List<BrakeEvent> events;
+
+  /// Elapsed ride seconds for a local sample index (view-relative).
+  final double Function(int index) secondsForIndex;
+
   final ValueChanged<int>? onSelectIndex;
+
+  /// Zoom Ride Lab map to this brake (indices are view-relative).
+  final ValueChanged<BrakeEvent>? onZoomToBrake;
 
   @override
   Widget build(BuildContext context) {
@@ -41,9 +50,13 @@ class BrakeEventsPanel extends StatelessWidget {
           _BrakeCard(
             index: i + 1,
             event: events[i],
+            atSeconds: secondsForIndex(events[i].startIndex),
             onTap: onSelectIndex == null
                 ? null
                 : () => onSelectIndex!(events[i].startIndex),
+            onZoomMap: onZoomToBrake == null
+                ? null
+                : () => onZoomToBrake!(events[i]),
           ),
         ],
       ],
@@ -55,12 +68,16 @@ class _BrakeCard extends StatelessWidget {
   const _BrakeCard({
     required this.index,
     required this.event,
+    required this.atSeconds,
     this.onTap,
+    this.onZoomMap,
   });
 
   final int index;
   final BrakeEvent event;
+  final double atSeconds;
   final VoidCallback? onTap;
+  final VoidCallback? onZoomMap;
 
   String _hardnessLabel(BuildContext context) {
     final l10n = context.l10n;
@@ -95,23 +112,41 @@ class _BrakeCard extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '#$index · ${_hardnessLabel(context).toUpperCase()}',
-                    style: GoogleFonts.outfit(
-                      fontSize: 11,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    formatDuration(event.duration),
+                    formatDurationPrecise(event.duration),
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: 15,
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '#$index · ${_hardnessLabel(context).toUpperCase()}',
+                      style: GoogleFonts.outfit(
+                        fontSize: 11,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                  if (onZoomMap != null)
+                    IconButton(
+                      tooltip: l10n.brakeZoomMap,
+                      onPressed: onZoomMap,
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.map_outlined, size: 22),
+                      color: AppTheme.mist,
+                    ),
                 ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                l10n.brakeAtTime(formatElapsedPrecise(atSeconds)),
+                style: GoogleFonts.outfit(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                ),
               ),
               const SizedBox(height: 6),
               Text(

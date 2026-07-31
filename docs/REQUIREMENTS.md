@@ -1,4 +1,4 @@
-# CornerIQ — product requirements
+# RiderLab — product requirements
 
 Living requirements for features beyond the current MVP. Status: **Planned** unless noted.
 
@@ -106,10 +106,10 @@ Avoid for lean: traffic green, and the speed red ramp (so speed vs lean stay dis
 
 ### Acceptance criteria
 
-- [ ] User can set Loop init and Loop end.
-- [ ] After both are set, subsequent passes create new lap records without tapping start each time.
-- [ ] Session end stops auto recording.
-- [ ] Rider can open a lap and see Ride Lab for that lap.
+- [x] User can set Loop init and Loop end.
+- [x] After both are set, subsequent passes create new lap records without tapping start each time.
+- [x] Session end stops auto recording.
+- [x] Rider can open a lap and see Ride Lab for that lap.
 
 ---
 
@@ -147,9 +147,9 @@ flowchart LR
 
 ### Privacy / sharing (product rules)
 
-- **Closed beta (current):** every authenticated app user appears on every other user’s friend list. Completed rides upload **shared by default** so friends can compare.
-- Later (open release): private by default; opt-in share; invite/friend graph instead of “everyone is friends.”
-- Compare only shows peers who shared a ride covering the **same / similar area** (never dump unrelated GPS).
+- **Closed beta (current):** every authenticated app user appears on every other user’s friend list. Rides can be shared with a toggle (default on). Named **routes/circuits** can be created, shared, and used to tag rides for peer compare.
+- Compare peers via **same `route_id`** and/or **overlapping bbox**.
+- Later (open release): invite/friend graph instead of “everyone is friends.”
 
 ### Route identity (MVP approach)
 
@@ -169,9 +169,9 @@ flowchart LR
 
 ### Acceptance criteria
 
-- [ ] User can select ≥2 rides/laps that share a route and open Compare (local first).
-- [ ] Key metrics shown in one comparison view.
-- [ ] Clear empty states when no same-route peers exist.
+- [x] User can select ≥2 rides/laps that share a route and open Compare (local first).
+- [x] Key metrics shown in one comparison view.
+- [x] Clear empty states when no same-route peers exist.
 - [ ] Cloud: authenticated sync of ride summaries + track (chunked).
 - [ ] Cloud: fetch shared peers for a route and compare against them.
 
@@ -262,13 +262,13 @@ flowchart LR
 |---|---|---|
 | REQ-SPEED-COLOR | Unified speed color scale (pale→dark red by speed) | In progress (map + speed chart + legend) |
 | REQ-LEAN-COLOR | Lean L/R colors (not green/red) | In progress (gauge + lean chart) |
-| REQ-LOOP | Loop mode init/end + auto laps | Planned |
-| REQ-COMPARE | Compare metrics on same route (local then multi-user via Supabase) | Planned |
+| REQ-LOOP | Loop mode init/end + auto laps | In progress (recorder + HUD shipped; needs field testing) |
+| REQ-COMPARE | Compare metrics on same route (local then multi-user via Supabase) | Local done; cloud peer path exists |
 | REQ-SYNC | Supabase CornerIQ project + schema + Flutter client bootstrap | In progress |
 | REQ-SEGMENT | Select/zoom road segment + segment metrics | In progress |
 | REQ-ROAD-KIND | Recta vs curva from heading (+ lean side) | In progress |
 
 ### Brand typography
 
-- Wordmark: `CornerIqMark` — **Syne** lockup, `Corner` + `IQ` with distinct tracking; `IQ` tinted cyan (lean accent, not speed red).
+- Wordmark: `RiderLabMark` — **Syne** lockup, `Rider` + `Lab` with distinct tracking; `Lab` tinted cyan (lean accent, not speed red).
 - UI chrome remains Outfit + Space Grotesk.

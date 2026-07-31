@@ -151,4 +151,80 @@ class SocialRepository {
         .map((r) => CloudRideSummary.fromMap(r, displayName: name))
         .toList();
   }
+
+  /// Peer shared rides tagged to the same named route.
+  Future<List<CloudRideSummary>> peersOnRoute(String routeId) async {
+    await _ensure();
+    final me = currentUserId;
+    final rows = await _supabase
+        .from('rides')
+        .select()
+        .eq('route_id', routeId)
+        .eq('is_shared', true)
+        .order('started_at', ascending: false)
+        .limit(40);
+    final list = (rows as List)
+        .cast<Map<String, dynamic>>()
+        .where((r) => r['user_id'] != me)
+        .toList();
+    if (list.isEmpty) return const [];
+
+    final userIds = list.map((r) => r['user_id'] as String).toSet().toList();
+    final profiles = await _supabase
+        .from('profiles')
+        .select('id, display_name')
+        .inFilter('id', userIds);
+    final nameById = <String, String?>{
+      for (final p in (profiles as List).cast<Map<String, dynamic>>())
+        p['id'] as String: p['display_name'] as String?,
+    };
+
+    return list
+        .map(
+          (r) => CloudRideSummary.fromMap(
+            r,
+            displayName: nameById[r['user_id'] as String],
+          ),
+        )
+        .toList();
+  }
+
+  Future<List<RouteCircuitCloud>> listSharedRoutes() async {
+    await _ensure();
+    final me = currentUserId;
+    final rows = await _supabase
+        .from('routes')
+        .select()
+        .eq('is_shared', true)
+        .order('created_at', ascending: false);
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .where((r) => r['owner_id'] != me)
+        .map(RouteCircuitCloud.fromMap)
+        .toList();
+  }
+}
+
+class RouteCircuitCloud {
+  const RouteCircuitCloud({
+    required this.id,
+    required this.ownerId,
+    required this.name,
+    this.description,
+    this.displayName,
+  });
+
+  final String id;
+  final String ownerId;
+  final String name;
+  final String? description;
+  final String? displayName;
+
+  factory RouteCircuitCloud.fromMap(Map<String, dynamic> map) =>
+      RouteCircuitCloud(
+        id: map['id'] as String,
+        ownerId: map['owner_id'] as String,
+        name: map['name'] as String,
+        description: map['description'] as String?,
+      );
 }

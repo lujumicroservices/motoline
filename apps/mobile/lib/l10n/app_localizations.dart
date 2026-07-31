@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In es, this message translates to:
-  /// **'CornerIQ'**
+  /// **'RiderLab'**
   String get appTitle;
 
   /// No description provided for @tagline.
@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @emptyRidesBody.
   ///
   /// In es, this message translates to:
-  /// **'Inicia una ruta y CornerIQ dibujará la línea exacta que tomaste en la calle.'**
+  /// **'Inicia una ruta y RiderLab dibujará la línea exacta que tomaste en la calle.'**
   String get emptyRidesBody;
 
   /// No description provided for @unfinishedRide.
@@ -221,7 +221,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateReady.
   ///
   /// In es, this message translates to:
-  /// **'CornerIQ {version} está lista (tienes {current}).'**
+  /// **'RiderLab {version} está lista (tienes {current}).'**
   String updateReady(String version, String current);
 
   /// No description provided for @update.
@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// No description provided for @onLatest.
   ///
   /// In es, this message translates to:
-  /// **'Ya tienes la última CornerIQ.'**
+  /// **'Ya tienes la última RiderLab.'**
   String get onLatest;
 
   /// No description provided for @downloadingUpdate.
@@ -707,7 +707,7 @@ abstract class AppLocalizations {
   /// No description provided for @roadStretchesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Según cambio de rumbo (el lean ayuda al lado). {rectas} rectas · {curvas} curvas. Toca una curva para ver entrada / ápice / salida.'**
+  /// **'Según rumbo + inclinación. {rectas} rectas · {curvas} curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.'**
   String roadStretchesHelp(int rectas, int curvas);
 
   /// No description provided for @roadStretchesEmpty.
@@ -725,7 +725,7 @@ abstract class AppLocalizations {
   /// No description provided for @brakesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead.'**
+  /// **'Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead. El botón de mapa hace zoom a ese freno.'**
   String get brakesHelp;
 
   /// No description provided for @brakesEmpty.
@@ -751,6 +751,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Fuerte'**
   String get brakeHard;
+
+  /// No description provided for @brakeAtTime.
+  ///
+  /// In es, this message translates to:
+  /// **'En {time}'**
+  String brakeAtTime(String time);
+
+  /// No description provided for @brakeZoomMap.
+  ///
+  /// In es, this message translates to:
+  /// **'Zoom del mapa al freno'**
+  String get brakeZoomMap;
 
   /// No description provided for @noGpsPoints.
   ///
@@ -881,7 +893,7 @@ abstract class AppLocalizations {
   /// No description provided for @friendsEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay otros riders. Cuando un amigo instale CornerIQ, aparecerá aquí.'**
+  /// **'Aún no hay otros riders. Cuando un amigo instale RiderLab, aparecerá aquí.'**
   String get friendsEmpty;
 
   /// No description provided for @yourName.
@@ -938,6 +950,78 @@ abstract class AppLocalizations {
   /// **'Tú'**
   String get compareYou;
 
+  /// No description provided for @compareLocalTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparar vueltas'**
+  String get compareLocalTitle;
+
+  /// No description provided for @compareRouteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparar · {name}'**
+  String compareRouteTitle(String name);
+
+  /// No description provided for @compareLocalHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una vuelta base y otra para comparar métricas y líneas en el mismo circuito.'**
+  String get compareLocalHelp;
+
+  /// No description provided for @compareLocalEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitas al menos 2 vueltas completadas en esta ruta. Usa modo Loop o etiqueta rides con la misma ruta.'**
+  String get compareLocalEmpty;
+
+  /// No description provided for @compareBaseline.
+  ///
+  /// In es, this message translates to:
+  /// **'Base'**
+  String get compareBaseline;
+
+  /// No description provided for @compareChallenger.
+  ///
+  /// In es, this message translates to:
+  /// **'Retador'**
+  String get compareChallenger;
+
+  /// No description provided for @compareLocal.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparar vueltas ({count})'**
+  String compareLocal(int count);
+
+  /// No description provided for @compareDeltaFaster.
+  ///
+  /// In es, this message translates to:
+  /// **'Retador más rápido por {delta}'**
+  String compareDeltaFaster(String delta);
+
+  /// No description provided for @compareDeltaSlower.
+  ///
+  /// In es, this message translates to:
+  /// **'Retador más lento por {delta}'**
+  String compareDeltaSlower(String delta);
+
+  /// No description provided for @compareDeltaTie.
+  ///
+  /// In es, this message translates to:
+  /// **'Mismo tiempo'**
+  String get compareDeltaTie;
+
+  /// No description provided for @compareLaps.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparar vueltas'**
+  String get compareLaps;
+
+  /// No description provided for @compareNeedTwoLaps.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca al menos 2 vueltas en esta ruta para comparar.'**
+  String get compareNeedTwoLaps;
+
   /// No description provided for @lineScore.
   ///
   /// In es, this message translates to:
@@ -973,6 +1057,240 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Nube no disponible — revisa conexión y auth anónima.'**
   String get cloudUnavailable;
+
+  /// No description provided for @cloudAnonymousOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos necesita Anonymous activado en la nube de RiderLab (proyecto Supabase CornerIQ):\nDashboard → Authentication → Providers → Anonymous → Enable.\nLuego vuelve a abrir Amigos y desliza para refrescar.'**
+  String get cloudAnonymousOff;
+
+  /// No description provided for @routesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutas'**
+  String get routesTitle;
+
+  /// No description provided for @routesHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombra un circuito, compártelo y etiqueta rides para que amigos comparen en la misma ruta.'**
+  String get routesHelp;
+
+  /// No description provided for @myRoutes.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus rutas'**
+  String get myRoutes;
+
+  /// No description provided for @routesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay rutas — crea una para etiquetar y compartir rides.'**
+  String get routesEmpty;
+
+  /// No description provided for @friendRoutes.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutas compartidas de amigos'**
+  String get friendRoutes;
+
+  /// No description provided for @friendRoutesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Ningún amigo ha compartido una ruta todavía.'**
+  String get friendRoutesEmpty;
+
+  /// No description provided for @createRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva ruta'**
+  String get createRoute;
+
+  /// No description provided for @routeNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre (ej. Glorieta norte)'**
+  String get routeNameHint;
+
+  /// No description provided for @routeDescHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas opcionales'**
+  String get routeDescHint;
+
+  /// No description provided for @shareRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir ruta'**
+  String get shareRoute;
+
+  /// No description provided for @shareRouteHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Los amigos ven este circuito y pueden comparar rides etiquetados.'**
+  String get shareRouteHelp;
+
+  /// No description provided for @routeCreated.
+  ///
+  /// In es, this message translates to:
+  /// **'Ruta creada'**
+  String get routeCreated;
+
+  /// No description provided for @sharedRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartida'**
+  String get sharedRoute;
+
+  /// No description provided for @privateRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Privada'**
+  String get privateRoute;
+
+  /// No description provided for @shareRideTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir y ruta'**
+  String get shareRideTitle;
+
+  /// No description provided for @shareRideHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparte este ride con amigos y opcionalmente asígnalo a un circuito.'**
+  String get shareRideHelp;
+
+  /// No description provided for @shareThisRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir este ride'**
+  String get shareThisRide;
+
+  /// No description provided for @assignRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Asignar a ruta'**
+  String get assignRoute;
+
+  /// No description provided for @noRouteAssigned.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin ruta'**
+  String get noRouteAssigned;
+
+  /// No description provided for @areaNoPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay tramo GPS en esa área — acerca el zoom o dibuja un recuadro más grande.'**
+  String get areaNoPoints;
+
+  /// No description provided for @curvaSwipeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Desliza izquierda / derecha para cambiar de curva.'**
+  String get curvaSwipeHint;
+
+  /// No description provided for @curvaOpenMap.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa completo'**
+  String get curvaOpenMap;
+
+  /// No description provided for @curvaZoomLab.
+  ///
+  /// In es, this message translates to:
+  /// **'Zoom Ride Lab'**
+  String get curvaZoomLab;
+
+  /// No description provided for @armAutoRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Armar auto-ride'**
+  String get armAutoRide;
+
+  /// No description provided for @disarmAutoRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Desarmar auto-ride'**
+  String get disarmAutoRide;
+
+  /// No description provided for @waitingForMotion.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando movimiento…'**
+  String get waitingForMotion;
+
+  /// No description provided for @armedBannerBody.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab iniciará la grabación sola en cuanto detecte que empiezas a rodar.'**
+  String get armedBannerBody;
+
+  /// No description provided for @loopMode.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo Loop'**
+  String get loopMode;
+
+  /// No description provided for @pausedLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'PAUSADO'**
+  String get pausedLabel;
+
+  /// No description provided for @suggestEndTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Sigues rodando?'**
+  String get suggestEndTitle;
+
+  /// No description provided for @suggestEndBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin movimiento hace rato. Termina la ruta o sigue rodando.'**
+  String get suggestEndBody;
+
+  /// No description provided for @keepRiding.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguir rodando'**
+  String get keepRiding;
+
+  /// No description provided for @markLoopInit.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar inicio de loop'**
+  String get markLoopInit;
+
+  /// No description provided for @loopInitSet.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio marcado'**
+  String get loopInitSet;
+
+  /// No description provided for @markLoopEnd.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar fin de loop'**
+  String get markLoopEnd;
+
+  /// No description provided for @loopArmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Auto-vuelta activada'**
+  String get loopArmed;
+
+  /// No description provided for @lapCountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelta {count}'**
+  String lapCountLabel(int count);
+
+  /// No description provided for @endSession.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminar sesión'**
+  String get endSession;
 }
 
 class _AppLocalizationsDelegate

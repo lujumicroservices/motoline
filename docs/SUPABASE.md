@@ -1,6 +1,6 @@
-# CornerIQ Supabase
+# RiderLab cloud (Supabase)
 
-Separate project under org **luju.nieves** (not Luju POS / auto).
+App brand: **RiderLab**. Cloud project in dashboard is still named **CornerIQ** (same org **luju.nieves** — not Luju POS / auto).
 
 | | |
 |---|---|
@@ -35,7 +35,12 @@ Tables: `profiles`, `routes`, `rides`, `track_points` with RLS:
 
 ## Auth
 
-Enable **Anonymous** sign-ins in Dashboard → Authentication → Providers (needed for device sessions without email yet).
+Enable **Anonymous** sign-ins in Dashboard → Authentication → Providers (required for Friends + ride sync on device).
+
+Direct link (CornerIQ project):  
+https://supabase.com/dashboard/project/eabhnmlfsfibgwkspqwa/auth/providers
+
+Without Anonymous, the Amigos screen shows “nube no disponible” / a prompt to enable it.
 
 Email / magic-link can be added later for named riders.
 
@@ -50,7 +55,9 @@ supabase db query --linked -f supabase/migrations/20260731010000_friends_bbox_co
 
 ## Product steps
 
-1. Upload ride after End ride (local SQLite → `rides` + `track_points`, `is_shared=true`, bbox)
-2. Friends list = all other profiles; set display name
-3. Compare UI: peers whose ride bbox overlaps yours
-4. Later: invite graph, named routes / loop mode, private toggle
+1. Enable **Anonymous** auth (required)
+2. Upload ride after End ride (`is_shared` from toggle, bbox, optional `route_id`)
+3. **Routes** screen: create named circuits, share toggle
+4. Ride Lab: assign ride to route + share this ride
+5. Friends list = all profiles (closed beta)
+6. Compare: peers on same `route_id` **or** overlapping bbox

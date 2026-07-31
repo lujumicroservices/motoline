@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/track_point.dart';
 import '../../core/services/location_service.dart';
+import '../../core/services/loop_session_controller.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
@@ -15,11 +16,21 @@ import '../ride_detail/pilot_line_map.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 
+/// Normal = single ride, manual/auto end. Loop = teaching lap + auto-lap
+/// session driven by [LoopSessionController]. See docs/REQUIREMENTS.md §3.
+enum ActiveRideMode { normal, loop }
+
 class ActiveRideScreen extends ConsumerStatefulWidget {
-  const ActiveRideScreen({super.key, this.autoStart = true});
+  const ActiveRideScreen({
+    super.key,
+    this.autoStart = true,
+    this.mode = ActiveRideMode.normal,
+  });
 
   /// When true, starts the recorder (with GPS warm-up UI) on open.
   final bool autoStart;
+
+  final ActiveRideMode mode;
 
   @override
   ConsumerState<ActiveRideScreen> createState() => _ActiveRideScreenState();
@@ -30,6 +41,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   bool _starting = false;
   GnssWarmupStatus? _warmup;
   Object? _startError;
+  bool _keepRidingDismissed = false;
+
+  bool get _isLoop => widget.mode == ActiveRideMode.loop;
 
   @override
   void initState() {
@@ -89,17 +103,34 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final snapshotAsync = ref.watch(activeRideProvider);
     final recorder = ref.watch(rideRecorderProvider);
     final ride = recorder.activeRide;
+    final snap = snapshotAsync.valueOrNull;
+    final isPaused = snap?.isPaused ?? false;
+    final rawSuggestEnd = snap?.suggestEnd ?? false;
+    if (!rawSuggestEnd && _keepRidingDismissed) {
+      // Motion resumed — rearm the banner for a future stationary spell.
+      _keepRidingDismissed = false;
+    }
+    final suggestEnd = rawSuggestEnd && !_keepRidingDismissed;
+
+    final loopStateAsync = _isLoop ? ref.watch(loopSessionStateProvider) : null;
+    final loopState = loopStateAsync?.valueOrNull;
 
     return PopScope(
       canPop: !_starting && !recorder.isRecording,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (_starting) return;
-        // Recording: use End ride.
+        // Recording: use End ride / End session.
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_starting ? l10n.starting : l10n.recording),
+          title: Text(
+            _starting
+                ? l10n.starting
+                : _isLoop
+                    ? l10n.loopMode
+                    : l10n.recording,
+          ),
           automaticallyImplyLeading: false,
           leading: (_starting || recorder.isRecording)
               ? null
@@ -108,41 +139,28 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                   onPressed: () => Navigator.of(context).pop(),
                 ),
           actions: [
-            if (!_starting && recorder.isRecording)
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Center(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppTheme.signal.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppTheme.signal,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.live,
-                          style: GoogleFonts.spaceGrotesk(
-                            color: AppTheme.signal,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
+            if (!_starting && recorder.isRecording) ...[
+              if (isPaused)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _StatusChip(
+                    label: l10n.pausedLabel,
+                    color: AppTheme.lineHot,
+                    icon: Icons.pause_circle_outline,
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _StatusChip(
+                    label: l10n.live,
+                    color: AppTheme.signal,
+                    icon: null,
+                    dotted: true,
                   ),
                 ),
-              ),
+              const SizedBox(width: 4),
+            ],
           ],
         ),
         body: _starting
@@ -159,37 +177,53 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                     onRetry: _bootstrap,
                     onBack: () => Navigator.of(context).pop(),
                   )
-                : snapshotAsync.when(
-                    loading: () => _body(
-                      context,
-                      distanceKm: ride?.distanceKm ?? 0,
-                      duration: ride?.duration ?? Duration.zero,
-                      points: const <TrackPoint>[],
-                      pointCount: ride?.pointCount ?? 0,
-                      speedKmh: null,
-                      leanDegrees: null,
-                      maxLeanLeft: 0,
-                      maxLeanRight: 0,
-                      leanCalibrated: false,
-                      accuracyMeters: null,
-                    ),
-                    error: (e, _) => Center(child: Text('$e')),
-                    data: (snap) {
-                      final r = snap?.ride ?? ride;
-                      return _body(
-                        context,
-                        distanceKm: r?.distanceKm ?? 0,
-                        duration: r?.duration ?? Duration.zero,
-                        points: snap?.points ?? const <TrackPoint>[],
-                        pointCount: r?.pointCount ?? 0,
-                        speedKmh: snap?.lastPoint?.speedKmh,
-                        leanDegrees: snap?.relativeLeanDegrees,
-                        maxLeanLeft: snap?.maxLeanLeftDegrees ?? 0,
-                        maxLeanRight: snap?.maxLeanRightDegrees ?? 0,
-                        leanCalibrated: snap?.leanCalibrated ?? false,
-                        accuracyMeters: snap?.lastPoint?.accuracyMeters,
-                      );
-                    },
+                : Column(
+                    children: [
+                      if (suggestEnd)
+                        _SuggestEndBanner(
+                          onKeepRiding: () =>
+                              setState(() => _keepRidingDismissed = true),
+                          onEnd: () => _isLoop
+                              ? _endLoopSession(context)
+                              : _stop(context),
+                        ),
+                      Expanded(
+                        child: snapshotAsync.when(
+                          loading: () => _body(
+                            context,
+                            distanceKm: ride?.distanceKm ?? 0,
+                            duration: ride?.duration ?? Duration.zero,
+                            points: const <TrackPoint>[],
+                            pointCount: ride?.pointCount ?? 0,
+                            speedKmh: null,
+                            leanDegrees: null,
+                            maxLeanLeft: 0,
+                            maxLeanRight: 0,
+                            leanCalibrated: false,
+                            accuracyMeters: null,
+                            loopState: loopState,
+                          ),
+                          error: (e, _) => Center(child: Text('$e')),
+                          data: (snap) {
+                            final r = snap?.ride ?? ride;
+                            return _body(
+                              context,
+                              distanceKm: r?.distanceKm ?? 0,
+                              duration: r?.duration ?? Duration.zero,
+                              points: snap?.points ?? const <TrackPoint>[],
+                              pointCount: r?.pointCount ?? 0,
+                              speedKmh: snap?.lastPoint?.speedKmh,
+                              leanDegrees: snap?.relativeLeanDegrees,
+                              maxLeanLeft: snap?.maxLeanLeftDegrees ?? 0,
+                              maxLeanRight: snap?.maxLeanRightDegrees ?? 0,
+                              leanCalibrated: snap?.leanCalibrated ?? false,
+                              accuracyMeters: snap?.lastPoint?.accuracyMeters,
+                              loopState: loopState,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
       ),
     );
@@ -207,6 +241,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     required double maxLeanRight,
     required bool leanCalibrated,
     required double? accuracyMeters,
+    required LoopSessionState? loopState,
   }) {
     final l10n = context.l10n;
     return Column(
@@ -316,17 +351,20 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.signal,
-              minimumSize: const Size.fromHeight(56),
+        if (_isLoop)
+          _LoopHud(loopState: loopState, onEndSession: () => _endLoopSession(context))
+        else
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.signal,
+                minimumSize: const Size.fromHeight(56),
+              ),
+              onPressed: () => _stop(context),
+              child: Text(l10n.endRide),
             ),
-            onPressed: () => _stop(context),
-            child: Text(l10n.endRide),
           ),
-        ),
       ],
     );
   }
@@ -349,6 +387,259 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         SnackBar(content: Text('$e')),
       );
     }
+  }
+
+  Future<void> _endLoopSession(BuildContext context) async {
+    final loopController = ref.read(loopSessionControllerProvider);
+    try {
+      await loopController.endSession();
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({
+    required this.label,
+    required this.color,
+    this.icon,
+    this.dotted = false,
+  });
+
+  final String label;
+  final Color color;
+  final IconData? icon;
+  final bool dotted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (dotted)
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            )
+          else if (icon != null)
+            Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SuggestEndBanner extends StatelessWidget {
+  const _SuggestEndBanner({required this.onKeepRiding, required this.onEnd});
+
+  final VoidCallback onKeepRiding;
+  final VoidCallback onEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.asphaltElevated,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.lineHot.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.timer_outlined, color: AppTheme.lineHot, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.suggestEndTitle,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.suggestEndBody,
+            style: const TextStyle(color: AppTheme.steel, fontSize: 13),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onKeepRiding,
+                  child: Text(l10n.keepRiding),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
+                  onPressed: onEnd,
+                  child: Text(l10n.endRide),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoopHud extends StatelessWidget {
+  const _LoopHud({required this.loopState, required this.onEndSession});
+
+  final LoopSessionState? loopState;
+  final VoidCallback onEndSession;
+
+  static Future<void> _runLoopAction(
+    BuildContext context,
+    Future<void> action,
+  ) async {
+    try {
+      await action;
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = loopState;
+    final hasInit = state?.hasInit ?? false;
+    final hasEnd = state?.hasEnd ?? false;
+    final lapCount = state?.lapCount ?? 0;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (hasEnd)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: AppTheme.line.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.line.withValues(alpha: 0.4)),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    l10n.loopArmed,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: AppTheme.line,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.lapCountLabel(lapCount),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else ...[
+            Consumer(
+              builder: (context, ref, _) {
+                return FilledButton.icon(
+                  onPressed: hasInit
+                      ? null
+                      : () => _runLoopAction(
+                          context,
+                          ref.read(loopSessionControllerProvider).markInit(),
+                        ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(64),
+                    backgroundColor:
+                        hasInit ? AppTheme.asphaltElevated : AppTheme.line,
+                    foregroundColor:
+                        hasInit ? AppTheme.steel : AppTheme.asphalt,
+                  ),
+                  icon: Icon(hasInit ? Icons.check_circle : Icons.flag_outlined),
+                  label: Text(
+                    hasInit ? l10n.loopInitSet : l10n.markLoopInit,
+                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            Consumer(
+              builder: (context, ref, _) {
+                return FilledButton.icon(
+                  onPressed: hasInit
+                      ? () => _runLoopAction(
+                          context,
+                          ref.read(loopSessionControllerProvider).markEnd(),
+                        )
+                      : null,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(64),
+                    backgroundColor: AppTheme.lineHot,
+                    foregroundColor: AppTheme.asphalt,
+                  ),
+                  icon: const Icon(Icons.sports_score),
+                  label: Text(
+                    l10n.markLoopEnd,
+                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                  ),
+                );
+              },
+            ),
+          ],
+          const SizedBox(height: 10),
+          OutlinedButton(
+            onPressed: onEndSession,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+              side: const BorderSide(color: AppTheme.signal),
+              foregroundColor: AppTheme.signal,
+            ),
+            child: Text(l10n.endSession),
+          ),
+        ],
+      ),
+    );
   }
 }
 

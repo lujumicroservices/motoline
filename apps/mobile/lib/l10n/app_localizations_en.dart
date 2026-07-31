@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'CornerIQ';
+  String get appTitle => 'RiderLab';
 
   @override
   String get tagline =>
@@ -53,7 +53,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyRidesBody =>
-      'Start a ride and CornerIQ will draw the exact line you took on the street.';
+      'Start a ride and RiderLab will draw the exact line you took on the street.';
 
   @override
   String get unfinishedRide => 'Unfinished ride found';
@@ -74,7 +74,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String updateReady(String version, String current) {
-    return 'CornerIQ $version is ready (you have $current).';
+    return 'RiderLab $version is ready (you have $current).';
   }
 
   @override
@@ -84,7 +84,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get later => 'Later';
 
   @override
-  String get onLatest => 'You’re on the latest CornerIQ.';
+  String get onLatest => 'You’re on the latest RiderLab.';
 
   @override
   String get downloadingUpdate => 'Downloading update';
@@ -338,7 +338,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String roadStretchesHelp(int rectas, int curvas) {
-    return 'From heading change (lean helps side). $rectas straights · $curvas turns. Tap a turn for entry / apex / exit.';
+    return 'From heading change + lean. $rectas straights · $curvas turns. Tap a turn for entry / apex / exit — swipe between turns.';
   }
 
   @override
@@ -350,7 +350,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get brakesHelp =>
-      'Inferred from how fast speed falls — not a brake sensor. Tap a hit to jump the playhead.';
+      'Inferred from how fast speed falls — not a brake sensor. Tap a hit to jump the playhead. Map button zooms to that brake.';
 
   @override
   String get brakesEmpty =>
@@ -364,6 +364,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get brakeHard => 'Hard';
+
+  @override
+  String brakeAtTime(String time) {
+    return 'At $time';
+  }
+
+  @override
+  String get brakeZoomMap => 'Zoom map to brake';
 
   @override
   String get noGpsPoints => 'No GPS points';
@@ -435,7 +443,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get friendsEmpty =>
-      'No other riders yet. When a friend installs CornerIQ, they appear here.';
+      'No other riders yet. When a friend installs RiderLab, they appear here.';
 
   @override
   String get yourName => 'Your display name';
@@ -465,6 +473,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get compareYou => 'You';
 
   @override
+  String get compareLocalTitle => 'Compare laps';
+
+  @override
+  String compareRouteTitle(String name) {
+    return 'Compare · $name';
+  }
+
+  @override
+  String get compareLocalHelp =>
+      'Pick a baseline lap and a challenger to compare metrics and lines on this circuit.';
+
+  @override
+  String get compareLocalEmpty =>
+      'You need at least 2 completed laps on this route. Use Loop mode or tag rides with the same route.';
+
+  @override
+  String get compareBaseline => 'Baseline';
+
+  @override
+  String get compareChallenger => 'Challenger';
+
+  @override
+  String compareLocal(int count) {
+    return 'Compare laps ($count)';
+  }
+
+  @override
+  String compareDeltaFaster(String delta) {
+    return 'Challenger faster by $delta';
+  }
+
+  @override
+  String compareDeltaSlower(String delta) {
+    return 'Challenger slower by $delta';
+  }
+
+  @override
+  String get compareDeltaTie => 'Same time';
+
+  @override
+  String get compareLaps => 'Compare laps';
+
+  @override
+  String get compareNeedTwoLaps =>
+      'Tag at least 2 laps on this route to compare.';
+
+  @override
   String get lineScore => 'Line score';
 
   @override
@@ -482,4 +537,131 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cloudUnavailable =>
       'Cloud not available — check connection and Anonymous auth.';
+
+  @override
+  String get cloudAnonymousOff =>
+      'Friends need Anonymous sign-in enabled in the RiderLab cloud (Supabase project CornerIQ):\nDashboard → Authentication → Providers → Anonymous → Enable.\nThen reopen Amigos and pull to refresh.';
+
+  @override
+  String get routesTitle => 'Routes';
+
+  @override
+  String get routesHelp =>
+      'Name a circuit, share it, and tag rides so friends can compare on the same route.';
+
+  @override
+  String get myRoutes => 'Your routes';
+
+  @override
+  String get routesEmpty =>
+      'No routes yet — create one to tag and share rides.';
+
+  @override
+  String get friendRoutes => 'Friends’ shared routes';
+
+  @override
+  String get friendRoutesEmpty => 'No shared routes from friends yet.';
+
+  @override
+  String get createRoute => 'New route';
+
+  @override
+  String get routeNameHint => 'Route name (e.g. Glorieta norte)';
+
+  @override
+  String get routeDescHint => 'Optional notes';
+
+  @override
+  String get shareRoute => 'Share route';
+
+  @override
+  String get shareRouteHelp =>
+      'Friends can see this circuit and compare tagged rides.';
+
+  @override
+  String get routeCreated => 'Route created';
+
+  @override
+  String get sharedRoute => 'Shared';
+
+  @override
+  String get privateRoute => 'Private';
+
+  @override
+  String get shareRideTitle => 'Share & route';
+
+  @override
+  String get shareRideHelp =>
+      'Share this ride with friends and optionally tag a named circuit.';
+
+  @override
+  String get shareThisRide => 'Share this ride';
+
+  @override
+  String get assignRoute => 'Assign to route';
+
+  @override
+  String get noRouteAssigned => 'No route';
+
+  @override
+  String get areaNoPoints =>
+      'No GPS stretch found in that area — zoom in or draw a larger box.';
+
+  @override
+  String get curvaSwipeHint => 'Swipe left / right to move between turns.';
+
+  @override
+  String get curvaOpenMap => 'Full map';
+
+  @override
+  String get curvaZoomLab => 'Zoom Ride Lab';
+
+  @override
+  String get armAutoRide => 'Arm auto-ride';
+
+  @override
+  String get disarmAutoRide => 'Disarm auto-ride';
+
+  @override
+  String get waitingForMotion => 'Waiting for motion…';
+
+  @override
+  String get armedBannerBody =>
+      'RiderLab will start recording on its own once it detects you\'ve started riding.';
+
+  @override
+  String get loopMode => 'Loop mode';
+
+  @override
+  String get pausedLabel => 'PAUSED';
+
+  @override
+  String get suggestEndTitle => 'Still riding?';
+
+  @override
+  String get suggestEndBody =>
+      'No movement for a while. End the ride or keep riding.';
+
+  @override
+  String get keepRiding => 'Keep riding';
+
+  @override
+  String get markLoopInit => 'Mark loop init';
+
+  @override
+  String get loopInitSet => 'Init marked';
+
+  @override
+  String get markLoopEnd => 'Mark loop end';
+
+  @override
+  String get loopArmed => 'Auto-lap armed';
+
+  @override
+  String lapCountLabel(int count) {
+    return 'Lap $count';
+  }
+
+  @override
+  String get endSession => 'End session';
 }

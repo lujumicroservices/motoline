@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/db/ride_database.dart';
 import '../core/models/ride.dart';
 import '../core/models/track_point.dart';
+import '../core/services/loop_session_controller.dart';
 import '../core/services/ride_recorder.dart';
 
 final rideDatabaseProvider = Provider<RideDatabase>((ref) {
@@ -29,6 +32,11 @@ final ridePointsProvider =
   return ref.watch(rideDatabaseProvider).getPoints(id);
 });
 
+final ridesForRouteProvider =
+    FutureProvider.autoDispose.family<List<Ride>, String>((ref, routeId) {
+  return ref.watch(rideDatabaseProvider).listRidesForRoute(routeId);
+});
+
 final activeRideProvider = StreamProvider.autoDispose<ActiveRideSnapshot?>((ref) {
   final recorder = ref.watch(rideRecorderProvider);
   return recorder.snapshots.map<ActiveRideSnapshot?>((s) => s);
@@ -36,4 +44,54 @@ final activeRideProvider = StreamProvider.autoDispose<ActiveRideSnapshot?>((ref)
 
 final incompleteRideProvider = FutureProvider.autoDispose<Ride?>((ref) {
   return ref.watch(rideDatabaseProvider).getActiveRide();
+});
+
+/// Fires whenever arm+auto-start fires — UI listens (via `ref.listen`) to
+/// navigate to the active ride screen.
+final autoStartEventsProvider = StreamProvider.autoDispose<Ride>((ref) {
+  final recorder = ref.watch(rideRecorderProvider);
+  return recorder.autoStartEvents;
+});
+
+/// Wraps [RideRecorder.armForAutoStart] / [RideRecorder.disarm] so the UI can
+/// toggle + observe the "waiting for motion…" armed state reactively.
+class ArmedStateNotifier extends StateNotifier<bool> {
+  ArmedStateNotifier(this._recorder) : super(_recorder.isArmed) {
+    _sub = _recorder.armedStates.listen((armed) => state = armed);
+  }
+
+  final RideRecorder _recorder;
+  late final StreamSubscription<bool> _sub;
+
+  Future<void> arm() => _recorder.armForAutoStart();
+
+  void disarm() => _recorder.disarm();
+
+  @override
+  void dispose() {
+    unawaited(_sub.cancel());
+    super.dispose();
+  }
+}
+
+final armedStateProvider =
+    StateNotifierProvider.autoDispose<ArmedStateNotifier, bool>((ref) {
+  final recorder = ref.watch(rideRecorderProvider);
+  return ArmedStateNotifier(recorder);
+});
+
+final loopSessionControllerProvider =
+    Provider.autoDispose<LoopSessionController>((ref) {
+  final controller = LoopSessionController(
+    recorder: ref.watch(rideRecorderProvider),
+    database: ref.watch(rideDatabaseProvider),
+  );
+  ref.onDispose(() => unawaited(controller.dispose()));
+  return controller;
+});
+
+final loopSessionStateProvider =
+    StreamProvider.autoDispose<LoopSessionState>((ref) {
+  final controller = ref.watch(loopSessionControllerProvider);
+  return controller.states;
 });

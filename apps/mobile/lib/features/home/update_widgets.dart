@@ -134,7 +134,7 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'CornerIQ ${widget.update.version}',
+                  'RiderLab ${widget.update.version}',
                   style: const TextStyle(color: AppTheme.steel),
                 ),
                 const SizedBox(height: 14),
@@ -205,7 +205,7 @@ Future<void> promptManualUpdateCheck(
         return AlertDialog(
           backgroundColor: AppTheme.asphaltElevated,
           title: Text(
-            'CornerIQ ${update.version}',
+            'RiderLab ${update.version}',
             style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
           ),
           content: Text(

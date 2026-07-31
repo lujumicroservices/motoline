@@ -57,8 +57,18 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     super.initState();
     final lo = widget.initialFocusStart;
     final hi = widget.initialFocusEnd;
-    if (lo != null && hi != null && hi > lo && hi < widget.points.length) {
+    if (lo != null &&
+        hi != null &&
+        hi > lo &&
+        hi < widget.points.length &&
+        lo >= 0) {
       _selection = (start: lo, end: hi, insideCount: hi - lo + 1);
+      final slice = widget.points.sublist(lo, hi + 1);
+      if (slice.length >= 2) {
+        _areaBounds = LatLngBounds.fromPoints([
+          for (final p in slice) LatLng(p.latitude, p.longitude),
+        ]);
+      }
     }
   }
 
@@ -76,15 +86,46 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     );
   }
 
+  void _fitSelection(int start, int end) {
+    if (end <= start || end >= widget.points.length) return;
+    final slice = widget.points.sublist(start, end + 1);
+    if (slice.length < 2) return;
+    final bounds = LatLngBounds.fromPoints([
+      for (final p in slice) LatLng(p.latitude, p.longitude),
+    ]);
+    _map.fitCamera(
+      CameraFit.bounds(
+        bounds: bounds,
+        padding: const EdgeInsets.fromLTRB(48, 140, 48, 220),
+        maxZoom: 18,
+      ),
+    );
+  }
+
   void _zoomBy(double delta) {
     final cam = _map.camera;
     _map.move(cam.center, (cam.zoom + delta).clamp(3.0, 19.0));
   }
 
-  void _applyBounds(LatLngBounds bounds) {
+  /// Slightly expand a drawn/visible box so edge GPS samples still count.
+  LatLngBounds _padBounds(LatLngBounds bounds, {double padDeg = 0.00012}) {
+    return LatLngBounds(
+      LatLng(bounds.south - padDeg, bounds.west - padDeg),
+      LatLng(bounds.north + padDeg, bounds.east + padDeg),
+    );
+  }
+
+  void _applyBounds(LatLngBounds raw, {bool showFeedback = true}) {
+    final bounds = _padBounds(raw);
+    final center = LatLng(
+      (bounds.north + bounds.south) / 2,
+      (bounds.east + bounds.west) / 2,
+    );
     final hit = segmentIndicesInBounds(
       points: widget.points,
       isInside: (p) => bounds.contains(LatLng(p.latitude, p.longitude)),
+      preferLat: center.latitude,
+      preferLng: center.longitude,
     );
     setState(() {
       _areaBounds = bounds;
@@ -92,10 +133,27 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       _dragStart = null;
       _dragCurrent = null;
     });
+    if (hit != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _fitSelection(hit.start, hit.end);
+      });
+    } else if (showFeedback && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.areaNoPoints)),
+      );
+    }
   }
 
   void _useVisibleArea() {
-    _applyBounds(_map.camera.visibleBounds);
+    // Shrink visible camera slightly so chrome/edges don't pull the whole ride.
+    final vis = _map.camera.visibleBounds;
+    final latPad = (vis.north - vis.south) * 0.08;
+    final lngPad = (vis.east - vis.west) * 0.08;
+    final inset = LatLngBounds(
+      LatLng(vis.south + latPad, vis.west + lngPad),
+      LatLng(vis.north - latPad, vis.east - lngPad),
+    );
+    _applyBounds(inset);
   }
 
   void _onSelectPanStart(DragStartDetails details) {
@@ -227,7 +285,12 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
             ),
           ),
           if (_selectMode)
-            Positioned.fill(
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              // Keep bottom chrome + zoom controls tappable.
+              bottom: 210,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onPanStart: _onSelectPanStart,
@@ -314,11 +377,22 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     if (focusLo > 0) {
       out.addAll(_plainSegments(points.sublist(0, focusLo + 1), dimmed: true));
     }
-    out.addAll(_coloredSegments(points.sublist(focusLo, focusHi + 1)));
+    out.addAll(
+      _coloredSegmentsGapAware(points.sublist(focusLo, focusHi + 1)),
+    );
     if (focusHi < points.length - 1) {
       out.addAll(
         _plainSegments(points.sublist(focusHi, points.length), dimmed: true),
       );
+    }
+    return out;
+  }
+
+  List<Polyline> _coloredSegmentsGapAware(List<TrackPoint> segment) {
+    final out = <Polyline>[];
+    for (final gapSeg in splitByGpsGaps(segment)) {
+      if (gapSeg.length < 2) continue;
+      out.addAll(_coloredSegments(gapSeg));
     }
     return out;
   }

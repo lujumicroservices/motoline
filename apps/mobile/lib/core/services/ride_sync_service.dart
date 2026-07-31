@@ -54,7 +54,8 @@ class RideSyncService {
         'max_lean_left_deg': analytics.maxLeanLeft,
         'max_lean_right_deg': analytics.maxLeanRight,
         'line_score': analytics.lineScore,
-        'is_shared': true,
+        'is_shared': ride.isShared,
+        'route_id': ride.routeId,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
         if (bbox != null) ...bbox.toMap(),
       };

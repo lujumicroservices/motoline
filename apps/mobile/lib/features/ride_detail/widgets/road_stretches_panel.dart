@@ -44,6 +44,9 @@ class RoadStretchesPanel extends StatelessWidget {
           if (i > 0) const SizedBox(height: 8),
           _StretchCard(
             index: i + 1,
+            curvaNumber: stretches[i].kind == RoadKind.curva
+                ? stretches.take(i + 1).where((s) => s.kind == RoadKind.curva).length
+                : null,
             stretch: stretches[i],
             onTap: onSelectStretch == null
                 ? null
@@ -59,10 +62,12 @@ class _StretchCard extends StatelessWidget {
   const _StretchCard({
     required this.index,
     required this.stretch,
+    this.curvaNumber,
     this.onTap,
   });
 
   final int index;
+  final int? curvaNumber;
   final RoadStretch stretch;
   final VoidCallback? onTap;
 
@@ -90,6 +95,9 @@ class _StretchCard extends StatelessWidget {
                 : AppTheme.lineHot;
 
     final isCurva = stretch.kind == RoadKind.curva;
+    final title = isCurva && curvaNumber != null
+        ? '${l10n.curvaTitle(curvaNumber!)} · ${_label(context)}'
+        : '#$index · ${_label(context)}';
 
     return Material(
       color: AppTheme.asphalt,
@@ -110,7 +118,7 @@ class _StretchCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '#$index · ${_label(context)}',
+                      title,
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -122,6 +130,7 @@ class _StretchCard extends StatelessWidget {
                       '${(stretch.distanceMeters / 1000).toStringAsFixed(2)} km · '
                       '${formatDuration(stretch.duration)}'
                       '${isCurva ? ' · Δh ${stretch.headingChangeDeg.abs().toStringAsFixed(0)}°' : ''}'
+                      '${isCurva && stretch.avgAbsLeanDeg > 0 ? ' · lean ${stretch.avgAbsLeanDeg.toStringAsFixed(0)}°' : ''}'
                       '${isCurva ? ' · ${l10n.openDetail}' : ''}',
                       style: GoogleFonts.outfit(
                         color: AppTheme.steel,

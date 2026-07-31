@@ -18,6 +18,7 @@ import '../../theme/brand_mark.dart';
 import '../friends/friends_screen.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
+import '../routes/routes_screen.dart';
 import 'update_widgets.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -30,6 +31,20 @@ class HomeScreen extends ConsumerWidget {
     final incompleteAsync = ref.watch(incompleteRideProvider);
     final updateAsync = ref.watch(appUpdateCheckProvider);
     final locale = ref.watch(localeProvider);
+    final armed = ref.watch(armedStateProvider);
+
+    ref.listen(autoStartEventsProvider, (previous, next) {
+      next.whenData((ride) {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const ActiveRideScreen(autoStart: false),
+          ),
+        ).then((_) {
+          ref.invalidate(ridesListProvider);
+          ref.invalidate(incompleteRideProvider);
+        });
+      });
+    });
 
     return Scaffold(
       body: SafeArea(
@@ -45,7 +60,7 @@ class HomeScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const CornerIqMark(size: BrandMarkSize.hero),
+                        const RiderLabMark(size: BrandMarkSize.hero),
                         const SizedBox(height: 8),
                         Text(
                           l10n.tagline,
@@ -57,6 +72,18 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    tooltip: l10n.routesTitle,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const RoutesScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.route_outlined),
+                    color: AppTheme.mist,
                   ),
                   IconButton(
                     tooltip: l10n.friends,
@@ -111,6 +138,7 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
             ),
+            if (armed) const _ArmedBanner(),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: FilledButton(
@@ -125,6 +153,59 @@ class HomeScreen extends ConsumerWidget {
                   });
                 },
                 child: Text(l10n.startRide),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        final notifier = ref.read(armedStateProvider.notifier);
+                        if (armed) {
+                          notifier.disarm();
+                        } else {
+                          try {
+                            await notifier.arm();
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('$e')),
+                            );
+                          }
+                        }
+                      },
+                      style: armed
+                          ? OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.lineHot,
+                              side: const BorderSide(color: AppTheme.lineHot),
+                            )
+                          : null,
+                      child: Text(
+                        armed ? l10n.disarmAutoRide : l10n.armAutoRide,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ActiveRideScreen(
+                              mode: ActiveRideMode.loop,
+                            ),
+                          ),
+                        ).then((_) {
+                          ref.invalidate(ridesListProvider);
+                          ref.invalidate(incompleteRideProvider);
+                        });
+                      },
+                      child: Text(l10n.loopMode),
+                    ),
+                  ),
+                ],
               ),
             ),
             ridesAsync.when(
@@ -174,6 +255,49 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ArmedBanner extends StatelessWidget {
+  const _ArmedBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.asphaltElevated,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.lineHot.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.motion_photos_auto, color: AppTheme.lineHot),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.waitingForMotion,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.armedBannerBody,
+                  style: const TextStyle(color: AppTheme.steel, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

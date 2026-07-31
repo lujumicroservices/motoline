@@ -9,7 +9,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'CornerIQ';
+  String get appTitle => 'RiderLab';
 
   @override
   String get tagline =>
@@ -53,7 +53,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emptyRidesBody =>
-      'Inicia una ruta y CornerIQ dibujará la línea exacta que tomaste en la calle.';
+      'Inicia una ruta y RiderLab dibujará la línea exacta que tomaste en la calle.';
 
   @override
   String get unfinishedRide => 'Ruta sin terminar';
@@ -74,7 +74,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String updateReady(String version, String current) {
-    return 'CornerIQ $version está lista (tienes $current).';
+    return 'RiderLab $version está lista (tienes $current).';
   }
 
   @override
@@ -84,7 +84,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get later => 'Después';
 
   @override
-  String get onLatest => 'Ya tienes la última CornerIQ.';
+  String get onLatest => 'Ya tienes la última RiderLab.';
 
   @override
   String get downloadingUpdate => 'Descargando actualización';
@@ -341,7 +341,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String roadStretchesHelp(int rectas, int curvas) {
-    return 'Según cambio de rumbo (el lean ayuda al lado). $rectas rectas · $curvas curvas. Toca una curva para ver entrada / ápice / salida.';
+    return 'Según rumbo + inclinación. $rectas rectas · $curvas curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.';
   }
 
   @override
@@ -353,7 +353,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get brakesHelp =>
-      'Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead.';
+      'Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead. El botón de mapa hace zoom a ese freno.';
 
   @override
   String get brakesEmpty =>
@@ -367,6 +367,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get brakeHard => 'Fuerte';
+
+  @override
+  String brakeAtTime(String time) {
+    return 'En $time';
+  }
+
+  @override
+  String get brakeZoomMap => 'Zoom del mapa al freno';
 
   @override
   String get noGpsPoints => 'Sin puntos GPS';
@@ -438,7 +446,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get friendsEmpty =>
-      'Aún no hay otros riders. Cuando un amigo instale CornerIQ, aparecerá aquí.';
+      'Aún no hay otros riders. Cuando un amigo instale RiderLab, aparecerá aquí.';
 
   @override
   String get yourName => 'Tu nombre visible';
@@ -468,6 +476,53 @@ class AppLocalizationsEs extends AppLocalizations {
   String get compareYou => 'Tú';
 
   @override
+  String get compareLocalTitle => 'Comparar vueltas';
+
+  @override
+  String compareRouteTitle(String name) {
+    return 'Comparar · $name';
+  }
+
+  @override
+  String get compareLocalHelp =>
+      'Elige una vuelta base y otra para comparar métricas y líneas en el mismo circuito.';
+
+  @override
+  String get compareLocalEmpty =>
+      'Necesitas al menos 2 vueltas completadas en esta ruta. Usa modo Loop o etiqueta rides con la misma ruta.';
+
+  @override
+  String get compareBaseline => 'Base';
+
+  @override
+  String get compareChallenger => 'Retador';
+
+  @override
+  String compareLocal(int count) {
+    return 'Comparar vueltas ($count)';
+  }
+
+  @override
+  String compareDeltaFaster(String delta) {
+    return 'Retador más rápido por $delta';
+  }
+
+  @override
+  String compareDeltaSlower(String delta) {
+    return 'Retador más lento por $delta';
+  }
+
+  @override
+  String get compareDeltaTie => 'Mismo tiempo';
+
+  @override
+  String get compareLaps => 'Comparar vueltas';
+
+  @override
+  String get compareNeedTwoLaps =>
+      'Marca al menos 2 vueltas en esta ruta para comparar.';
+
+  @override
   String get lineScore => 'Puntuación de línea';
 
   @override
@@ -485,4 +540,133 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get cloudUnavailable =>
       'Nube no disponible — revisa conexión y auth anónima.';
+
+  @override
+  String get cloudAnonymousOff =>
+      'Amigos necesita Anonymous activado en la nube de RiderLab (proyecto Supabase CornerIQ):\nDashboard → Authentication → Providers → Anonymous → Enable.\nLuego vuelve a abrir Amigos y desliza para refrescar.';
+
+  @override
+  String get routesTitle => 'Rutas';
+
+  @override
+  String get routesHelp =>
+      'Nombra un circuito, compártelo y etiqueta rides para que amigos comparen en la misma ruta.';
+
+  @override
+  String get myRoutes => 'Tus rutas';
+
+  @override
+  String get routesEmpty =>
+      'Aún no hay rutas — crea una para etiquetar y compartir rides.';
+
+  @override
+  String get friendRoutes => 'Rutas compartidas de amigos';
+
+  @override
+  String get friendRoutesEmpty =>
+      'Ningún amigo ha compartido una ruta todavía.';
+
+  @override
+  String get createRoute => 'Nueva ruta';
+
+  @override
+  String get routeNameHint => 'Nombre (ej. Glorieta norte)';
+
+  @override
+  String get routeDescHint => 'Notas opcionales';
+
+  @override
+  String get shareRoute => 'Compartir ruta';
+
+  @override
+  String get shareRouteHelp =>
+      'Los amigos ven este circuito y pueden comparar rides etiquetados.';
+
+  @override
+  String get routeCreated => 'Ruta creada';
+
+  @override
+  String get sharedRoute => 'Compartida';
+
+  @override
+  String get privateRoute => 'Privada';
+
+  @override
+  String get shareRideTitle => 'Compartir y ruta';
+
+  @override
+  String get shareRideHelp =>
+      'Comparte este ride con amigos y opcionalmente asígnalo a un circuito.';
+
+  @override
+  String get shareThisRide => 'Compartir este ride';
+
+  @override
+  String get assignRoute => 'Asignar a ruta';
+
+  @override
+  String get noRouteAssigned => 'Sin ruta';
+
+  @override
+  String get areaNoPoints =>
+      'No hay tramo GPS en esa área — acerca el zoom o dibuja un recuadro más grande.';
+
+  @override
+  String get curvaSwipeHint =>
+      'Desliza izquierda / derecha para cambiar de curva.';
+
+  @override
+  String get curvaOpenMap => 'Mapa completo';
+
+  @override
+  String get curvaZoomLab => 'Zoom Ride Lab';
+
+  @override
+  String get armAutoRide => 'Armar auto-ride';
+
+  @override
+  String get disarmAutoRide => 'Desarmar auto-ride';
+
+  @override
+  String get waitingForMotion => 'Esperando movimiento…';
+
+  @override
+  String get armedBannerBody =>
+      'RiderLab iniciará la grabación sola en cuanto detecte que empiezas a rodar.';
+
+  @override
+  String get loopMode => 'Modo Loop';
+
+  @override
+  String get pausedLabel => 'PAUSADO';
+
+  @override
+  String get suggestEndTitle => '¿Sigues rodando?';
+
+  @override
+  String get suggestEndBody =>
+      'Sin movimiento hace rato. Termina la ruta o sigue rodando.';
+
+  @override
+  String get keepRiding => 'Seguir rodando';
+
+  @override
+  String get markLoopInit => 'Marcar inicio de loop';
+
+  @override
+  String get loopInitSet => 'Inicio marcado';
+
+  @override
+  String get markLoopEnd => 'Marcar fin de loop';
+
+  @override
+  String get loopArmed => 'Auto-vuelta activada';
+
+  @override
+  String lapCountLabel(int count) {
+    return 'Vuelta $count';
+  }
+
+  @override
+  String get endSession => 'Terminar sesión';
 }

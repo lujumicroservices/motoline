@@ -29,7 +29,7 @@ class AppUpdateInfo {
   final String currentVersion;
   final String currentBuild;
 
-  String get title => 'CornerIQ $version';
+  String get title => 'RiderLab $version';
 }
 
 /// Checks GitHub Releases for a newer APK and installs it (Android sideload).
@@ -114,7 +114,7 @@ class AppUpdateService {
     final installPerm = await Permission.requestInstallPackages.request();
     if (!installPerm.isGranted) {
       throw StateError(
-        'Allow “Install unknown apps” for CornerIQ to install updates.',
+        'Allow “Install unknown apps” for RiderLab to install updates.',
       );
     }
 

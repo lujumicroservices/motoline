@@ -102,10 +102,46 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                 padding: EdgeInsets.all(32),
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => Text(
-                l10n.cloudUnavailable,
-                style: const TextStyle(color: AppTheme.steel),
-              ),
+              error: (e, _) {
+                final msg = '$e';
+                final anonymousOff = msg.contains('anonymous_disabled') ||
+                    msg.toLowerCase().contains('anonymous');
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        anonymousOff
+                            ? l10n.cloudAnonymousOff
+                            : l10n.cloudUnavailable,
+                        style: GoogleFonts.outfit(
+                          color: AppTheme.steel,
+                          height: 1.4,
+                        ),
+                      ),
+                      if (!anonymousOff) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          msg.replaceFirst('Bad state: ', ''),
+                          style: GoogleFonts.outfit(
+                            color: AppTheme.steel.withValues(alpha: 0.75),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      OutlinedButton(
+                        onPressed: () {
+                          ref.invalidate(friendsListProvider);
+                          ref.invalidate(myProfileProvider);
+                        },
+                        child: Text(l10n.tryAgain),
+                      ),
+                    ],
+                  ),
+                );
+              },
               data: (friends) {
                 if (friends.isEmpty) {
                   return Padding(

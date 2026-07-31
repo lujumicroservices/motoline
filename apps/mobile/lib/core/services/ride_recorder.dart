@@ -11,6 +11,7 @@ import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
 import 'lean_sensor.dart';
 import 'location_service.dart';
+import 'motion_pattern_detector.dart';
 
 class ActiveRideSnapshot {
   const ActiveRideSnapshot({
@@ -21,6 +22,9 @@ class ActiveRideSnapshot {
     this.maxLeanLeftDegrees,
     this.maxLeanRightDegrees,
     this.leanCalibrated = false,
+    this.isPaused = false,
+    this.suggestEnd = false,
+    this.pausedFor,
   });
 
   final Ride ride;
@@ -30,9 +34,24 @@ class ActiveRideSnapshot {
   final double? maxLeanLeftDegrees;
   final double? maxLeanRightDegrees;
   final bool leanCalibrated;
+
+  /// True while auto-paused (low speed sustained) — points aren't stored.
+  final bool isPaused;
+
+  /// True once near-stationary for long enough that the UI should offer
+  /// "End ride?" — cleared automatically when motion resumes.
+  final bool suggestEnd;
+
+  /// How long the ride has been auto-paused, when [isPaused] is true.
+  final Duration? pausedFor;
 }
 
 /// Offline-first recorder: GPS + lean IMU, flushed to SQLite in batches.
+///
+/// Also owns the "arm for auto-start" flow: while armed (and not already
+/// recording), a light GPS stream watches for a motion pattern that looks
+/// like the start of a ride, then calls [start] automatically and emits on
+/// [autoStartEvents] so the UI can navigate to the active ride screen.
 class RideRecorder {
   RideRecorder({
     RideDatabase? database,
@@ -49,11 +68,24 @@ class RideRecorder {
 
   final _pending = <TrackPoint>[];
   final _controller = StreamController<ActiveRideSnapshot>.broadcast();
+  final _autoStartController = StreamController<Ride>.broadcast();
+  final _armedController = StreamController<bool>.broadcast();
+
+  final MotionPatternDetector _motion = MotionPatternDetector();
+  final MotionPatternDetector _armMotion = MotionPatternDetector();
 
   StreamSubscription<Position>? _sub;
+  StreamSubscription<Position>? _armSub;
   Timer? _flushTimer;
   Ride? _ride;
+
+  /// Last accepted GPS fix, updated even while auto-paused (for live UI).
   TrackPoint? _lastPoint;
+
+  /// Last fix that was actually stored on the path (used for jump/distance
+  /// checks); frozen while auto-paused so the map shows a natural gap.
+  TrackPoint? _lastStoredPoint;
+
   final List<TrackPoint> _sessionPoints = [];
   double _distanceMeters = 0;
   double? _maxSpeedMps;
@@ -62,19 +94,38 @@ class RideRecorder {
   double? _maxLeanAbs;
   double _maxLeanLeft = 0;
   double _maxLeanRight = 0;
+  bool _armed = false;
 
   Stream<ActiveRideSnapshot> get snapshots => _controller.stream;
+
+  /// Fires with the newly created ride whenever arm+auto-start fires.
+  Stream<Ride> get autoStartEvents => _autoStartController.stream;
+
+  /// Fires whenever the armed state changes (true = armed, waiting for motion).
+  Stream<bool> get armedStates => _armedController.stream;
+
   Ride? get activeRide => _ride;
   bool get isRecording => _ride?.status == RideStatus.recording;
+  bool get isArmed => _armed;
+  bool get isPaused => isRecording && _motion.isPaused;
+
+  /// Last live GPS fix (updated even while paused) — used by callers (e.g.
+  /// Loop mode HUD) that need "current position" without waiting on stored
+  /// points.
+  TrackPoint? get lastLivePoint => _lastPoint;
 
   Future<Ride?> recoverIncompleteRide() => _db.getActiveRide();
 
   Future<Ride> start({
     void Function(GnssWarmupStatus status)? onWarmup,
+    bool skipWarmup = false,
+    String? routeId,
   }) async {
     if (_ride != null) {
       throw StateError('A ride is already recording');
     }
+    // Auto-start and manual start are mutually exclusive.
+    disarm();
 
     onWarmup?.call(
       const GnssWarmupStatus(
@@ -88,21 +139,32 @@ class RideRecorder {
       throw StateError(permission.message ?? 'Location permission denied');
     }
 
-    // Lock onto GNSS before the first stored point (shows live accuracy in UI).
-    await for (final status in _location.warmUpGnss()) {
-      onWarmup?.call(status);
+    if (skipWarmup) {
+      onWarmup?.call(
+        const GnssWarmupStatus(
+          phase: GpsWarmupPhase.ready,
+          message: 'Rolling to next lap…',
+        ),
+      );
+    } else {
+      // Lock onto GNSS before the first stored point (shows live accuracy in UI).
+      await for (final status in _location.warmUpGnss()) {
+        onWarmup?.call(status);
+      }
     }
 
     final ride = Ride(
       id: _uuid.v4(),
       startedAt: DateTime.now(),
       status: RideStatus.recording,
+      routeId: routeId,
     );
     await _db.upsertRide(ride);
     _ride = ride;
     _sessionPoints.clear();
     _pending.clear();
     _lastPoint = null;
+    _lastStoredPoint = null;
     _distanceMeters = 0;
     _maxSpeedMps = null;
     _speedSum = 0;
@@ -110,6 +172,7 @@ class RideRecorder {
     _maxLeanAbs = null;
     _maxLeanLeft = 0;
     _maxLeanRight = 0;
+    _motion.resetForNewRide();
 
     _lean.start();
 
@@ -155,6 +218,16 @@ class RideRecorder {
     _ride = null;
     _emitCompleted(completed);
     return completed;
+  }
+
+  /// Retag the currently-recording ride with [routeId] (e.g. once Loop mode
+  /// creates the route after recording has already begun).
+  Future<void> setActiveRideRouteId(String routeId) async {
+    final ride = _ride;
+    if (ride == null) return;
+    _ride = ride.copyWith(routeId: routeId);
+    await _db.upsertRide(_ride!);
+    _emit();
   }
 
   Future<Ride> finalizeRecovered(String rideId) async {
@@ -204,6 +277,74 @@ class RideRecorder {
     );
   }
 
+  // ---------------------------------------------------------------------
+  // Arm -> auto-start
+  // ---------------------------------------------------------------------
+
+  /// Watch GPS (light stream) while not recording; auto-[start] once the
+  /// motion pattern looks like the ride has begun. See
+  /// [MotionPatternDetector.feedArmedSample] for the thresholds.
+  Future<void> armForAutoStart() async {
+    if (_armed || isRecording) return;
+
+    final permission = await _location.ensurePermission();
+    if (!permission.granted) {
+      throw StateError(permission.message ?? 'Location permission denied');
+    }
+
+    _armMotion.resetArm();
+    _armed = true;
+    _armedController.add(true);
+
+    _armSub = _location.watchPositions().listen(
+      _onArmedPosition,
+      onError: (Object error, StackTrace stack) {
+        // Keep watching; transient GPS errors are expected.
+      },
+    );
+  }
+
+  void disarm() {
+    if (!_armed) return;
+    _armed = false;
+    unawaited(_armSub?.cancel());
+    _armSub = null;
+    _armedController.add(false);
+  }
+
+  void _onArmedPosition(Position position) {
+    if (!_armed || isRecording) return;
+    if (position.accuracy > LocationService.maxAcceptAccuracyMeters) return;
+
+    final speed = position.speed.isNaN || position.speed < 0
+        ? null
+        : position.speed;
+    final shouldStart = _armMotion.feedArmedSample(
+      speedMps: speed,
+      latitude: position.latitude,
+      longitude: position.longitude,
+      timestamp: position.timestamp,
+    );
+
+    if (shouldStart) {
+      disarm();
+      unawaited(_autoStart());
+    }
+  }
+
+  Future<void> _autoStart() async {
+    try {
+      final ride = await start();
+      _autoStartController.add(ride);
+    } catch (_) {
+      // Swallow — rider can arm again or start manually.
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // GPS handling
+  // ---------------------------------------------------------------------
+
   void _onPosition(Position position) {
     final ride = _ride;
     if (ride == null) return;
@@ -224,22 +365,38 @@ class RideRecorder {
     // Persist raw lean; UI uses relative lean from the sensor.
     final rawLean = _lean.rawLeanDegrees;
     final relativeLean = _lean.leanDegrees;
+    final speedMps = position.speed.isNaN || position.speed < 0
+        ? null
+        : position.speed;
     final point = TrackPoint(
       id: null,
       rideId: ride.id,
       latitude: position.latitude,
       longitude: position.longitude,
       altitude: position.altitude,
-      speedMps: position.speed.isNaN || position.speed < 0
-          ? null
-          : position.speed,
+      speedMps: speedMps,
       accuracyMeters: position.accuracy,
       heading: position.heading.isNaN ? null : position.heading,
       leanDegrees: rawLean,
       timestamp: position.timestamp,
     );
+    _lastPoint = point;
 
-    final previous = _lastPoint;
+    _motion.feedRideSample(
+      speedMps: speedMps,
+      latitude: position.latitude,
+      longitude: position.longitude,
+      timestamp: position.timestamp,
+    );
+
+    if (_motion.isPaused) {
+      // Auto-paused: don't append track points / distance so the resulting
+      // gap reads naturally on the map. Keep listening + emit live status.
+      _emit();
+      return;
+    }
+
+    final previous = _lastStoredPoint;
     if (previous != null) {
       final jump = haversineMeters(
         previous.latitude,
@@ -285,7 +442,7 @@ class RideRecorder {
       }
     }
 
-    _lastPoint = point;
+    _lastStoredPoint = point;
     _sessionPoints.add(point);
     _pending.add(point);
 
@@ -340,6 +497,9 @@ class RideRecorder {
         maxLeanLeftDegrees: _maxLeanLeft,
         maxLeanRightDegrees: _maxLeanRight,
         leanCalibrated: _lean.isCalibrated,
+        isPaused: _motion.isPaused,
+        suggestEnd: _motion.suggestEnd,
+        pausedFor: _motion.pausedFor(),
       ),
     );
   }
@@ -360,9 +520,12 @@ class RideRecorder {
 
   Future<void> dispose() async {
     await _sub?.cancel();
+    await _armSub?.cancel();
     _flushTimer?.cancel();
     _lean.stop();
     await _flushPending();
     await _controller.close();
+    await _autoStartController.close();
+    await _armedController.close();
   }
 }

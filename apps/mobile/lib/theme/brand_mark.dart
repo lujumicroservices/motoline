@@ -6,43 +6,43 @@ import 'ride_viz_palette.dart';
 
 enum BrandMarkSize { hero, title, eyebrow }
 
-/// CornerIQ wordmark — typographic brand lockup (Corner + IQ).
-class CornerIqMark extends StatelessWidget {
-  const CornerIqMark({
+/// RiderLab wordmark — typographic lockup (`Rider` + `Lab`).
+class RiderLabMark extends StatelessWidget {
+  const RiderLabMark({
     super.key,
     this.size = BrandMarkSize.hero,
     this.color,
-    this.iqColor,
+    this.labColor,
   });
 
   final BrandMarkSize size;
   final Color? color;
-  final Color? iqColor;
+  final Color? labColor;
 
   @override
   Widget build(BuildContext context) {
     final base = color ?? AppTheme.mist;
-    final iq = iqColor ?? _defaultIqColor(size);
+    final lab = labColor ?? _defaultLabColor(size);
 
-    final cornerSize = switch (size) {
+    final riderSize = switch (size) {
       BrandMarkSize.hero => 40.0,
       BrandMarkSize.title => 22.0,
       BrandMarkSize.eyebrow => 13.0,
     };
-    final iqSize = switch (size) {
+    final labSize = switch (size) {
       BrandMarkSize.hero => 40.0,
       BrandMarkSize.title => 22.0,
       BrandMarkSize.eyebrow => 13.0,
     };
-    final cornerTracking = switch (size) {
-      BrandMarkSize.hero => -1.2,
-      BrandMarkSize.title => -0.6,
-      BrandMarkSize.eyebrow => 0.8,
+    final riderTracking = switch (size) {
+      BrandMarkSize.hero => -1.0,
+      BrandMarkSize.title => -0.5,
+      BrandMarkSize.eyebrow => 0.6,
     };
-    final iqTracking = switch (size) {
-      BrandMarkSize.hero => 1.6,
-      BrandMarkSize.title => 1.2,
-      BrandMarkSize.eyebrow => 2.4,
+    final labTracking = switch (size) {
+      BrandMarkSize.hero => 1.4,
+      BrandMarkSize.title => 1.0,
+      BrandMarkSize.eyebrow => 2.0,
     };
     final weight = switch (size) {
       BrandMarkSize.hero => FontWeight.w800,
@@ -51,26 +51,26 @@ class CornerIqMark extends StatelessWidget {
     };
 
     // Syne for the brand lockup; Outfit/SpaceGrotesk stay for UI chrome.
-    final cornerStyle = GoogleFonts.syne(
-      fontSize: cornerSize,
+    final riderStyle = GoogleFonts.syne(
+      fontSize: riderSize,
       fontWeight: weight,
       height: 1.0,
-      letterSpacing: cornerTracking,
+      letterSpacing: riderTracking,
       color: base,
     );
-    final iqStyle = GoogleFonts.syne(
-      fontSize: iqSize,
+    final labStyle = GoogleFonts.syne(
+      fontSize: labSize,
       fontWeight: FontWeight.w800,
       height: 1.0,
-      letterSpacing: iqTracking,
-      color: iq,
+      letterSpacing: labTracking,
+      color: lab,
     );
 
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: 'Corner', style: cornerStyle),
-          TextSpan(text: 'IQ', style: iqStyle),
+          TextSpan(text: 'Rider', style: riderStyle),
+          TextSpan(text: 'Lab', style: labStyle),
         ],
       ),
       textHeightBehavior: const TextHeightBehavior(
@@ -80,7 +80,8 @@ class CornerIqMark extends StatelessWidget {
     );
   }
 
-  Color _defaultIqColor(BrandMarkSize size) {
+  Color _defaultLabColor(BrandMarkSize size) {
+    // Cyan lean accent — lab / analysis, not speed red.
     return switch (size) {
       BrandMarkSize.hero => RideVizPalette.leanLeft,
       BrandMarkSize.title => RideVizPalette.leanLeft,
@@ -88,3 +89,6 @@ class CornerIqMark extends StatelessWidget {
     };
   }
 }
+
+/// @Deprecated('Use RiderLabMark')
+typedef CornerIqMark = RiderLabMark;

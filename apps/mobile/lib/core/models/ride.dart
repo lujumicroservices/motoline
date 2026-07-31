@@ -11,6 +11,8 @@ class Ride {
     this.maxSpeedMps,
     this.avgSpeedMps,
     this.maxLeanDegrees,
+    this.routeId,
+    this.isShared = true,
   });
 
   final String id;
@@ -24,6 +26,12 @@ class Ride {
 
   /// Peak absolute lean (degrees) seen on this ride.
   final double? maxLeanDegrees;
+
+  /// Local/cloud route id (same UUID when synced).
+  final String? routeId;
+
+  /// Closed beta default: shared so friends can compare.
+  final bool isShared;
 
   Duration get duration {
     final end = endedAt ?? DateTime.now();
@@ -48,6 +56,8 @@ class Ride {
         'max_speed_mps': maxSpeedMps,
         'avg_speed_mps': avgSpeedMps,
         'max_lean_degrees': maxLeanDegrees,
+        'route_id': routeId,
+        'is_shared': isShared ? 1 : 0,
       };
 
   factory Ride.fromMap(Map<String, Object?> map) => Ride(
@@ -64,6 +74,8 @@ class Ride {
         maxSpeedMps: (map['max_speed_mps'] as num?)?.toDouble(),
         avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
         maxLeanDegrees: (map['max_lean_degrees'] as num?)?.toDouble(),
+        routeId: map['route_id'] as String?,
+        isShared: (map['is_shared'] as int?) != 0,
       );
 
   Ride copyWith({
@@ -74,6 +86,9 @@ class Ride {
     double? maxSpeedMps,
     double? avgSpeedMps,
     double? maxLeanDegrees,
+    String? routeId,
+    bool clearRouteId = false,
+    bool? isShared,
   }) =>
       Ride(
         id: id,
@@ -85,5 +100,7 @@ class Ride {
         maxSpeedMps: maxSpeedMps ?? this.maxSpeedMps,
         avgSpeedMps: avgSpeedMps ?? this.avgSpeedMps,
         maxLeanDegrees: maxLeanDegrees ?? this.maxLeanDegrees,
+        routeId: clearRouteId ? null : (routeId ?? this.routeId),
+        isShared: isShared ?? this.isShared,
       );
 }

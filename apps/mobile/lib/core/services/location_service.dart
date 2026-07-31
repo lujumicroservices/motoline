@@ -191,7 +191,7 @@ class LocationService {
         foregroundNotificationConfig: forSingleShot
             ? null
             : const ForegroundNotificationConfig(
-                notificationTitle: 'CornerIQ',
+                notificationTitle: 'RiderLab',
                 notificationText: 'High-precision recording…',
                 notificationChannelName: 'Ride recording',
                 enableWakeLock: true,

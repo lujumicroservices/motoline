@@ -65,34 +65,26 @@ class CurvaAnalysis {
     final entryIndex = lo;
     final exitIndex = hi;
 
-    // Apex: slowest point in the middle 60% of the curva (classic mini-speed).
-    // Fallback: peak absolute lean in that window.
+    // Apex: score mid-window by low speed + high |lean|.
     final midStart = lo + ((hi - lo) * 0.2).round();
     final midEnd = lo + ((hi - lo) * 0.8).round();
     var apexIndex = ((midStart + midEnd) / 2).round().clamp(lo, hi);
-    double? bestSpeed;
+    double? bestScore;
     for (var i = midStart; i <= midEnd; i++) {
       final s = samples[i].speedKmh;
-      if (s == null) continue;
-      if (bestSpeed == null || s < bestSpeed) {
-        bestSpeed = s;
+      final raw = samples[i].leanDegrees;
+      final lean = raw == null
+          ? 0.0
+          : relativeLeanDegrees(
+              rawLeanDegrees: raw,
+              neutralDegrees: neutralLeanDegrees,
+            ).abs();
+      // Prefer slow + leaned-in (classic apex).
+      final speedTerm = s ?? 40.0;
+      final score = lean * 1.2 - speedTerm;
+      if (bestScore == null || score > bestScore) {
+        bestScore = score;
         apexIndex = i;
-      }
-    }
-
-    if (bestSpeed == null) {
-      var peakLean = -1.0;
-      for (var i = midStart; i <= midEnd; i++) {
-        final raw = samples[i].leanDegrees;
-        if (raw == null) continue;
-        final abs = relativeLeanDegrees(
-          rawLeanDegrees: raw,
-          neutralDegrees: neutralLeanDegrees,
-        ).abs();
-        if (abs > peakLean) {
-          peakLean = abs;
-          apexIndex = i;
-        }
       }
     }
 

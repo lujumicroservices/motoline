@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,20 +9,24 @@ class SupabaseBootstrap {
   static bool _ready = false;
   static bool get isReady => _ready;
 
+  /// Last session error (e.g. Anonymous provider disabled) for UI.
+  static String? lastAuthError;
+
   static Future<void> init() async {
     if (_ready) return;
 
     await dotenv.load(fileName: '.env');
     final url = dotenv.env['SUPABASE_URL']?.trim() ?? '';
-    final publishable = dotenv.env['SUPABASE_PUBLISHABLE_KEY']?.trim();
+    final publishable = dotenv.env['SUPABASE_PUBLISHABLE_KEY']?.trim() ?? '';
     final anon = dotenv.env['SUPABASE_ANON_KEY']?.trim() ?? '';
-    final key = (publishable != null && publishable.isNotEmpty)
-        ? publishable
-        : anon;
+    // Prefer classic JWT anon key for Auth reliability on mobile.
+    final key = anon.isNotEmpty
+        ? anon
+        : (publishable.isNotEmpty ? publishable : '');
     if (url.isEmpty || key.isEmpty) {
       throw StateError(
-        'Missing SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY '
-        '(or SUPABASE_ANON_KEY) in apps/mobile/.env',
+        'Missing SUPABASE_URL and SUPABASE_ANON_KEY '
+        '(or SUPABASE_PUBLISHABLE_KEY) in apps/mobile/.env',
       );
     }
 
@@ -41,11 +46,43 @@ class SupabaseBootstrap {
 
   /// Ensures a session exists (anonymous) so RLS-backed sync can run.
   static Future<Session?> ensureSession() async {
+    lastAuthError = null;
     final auth = client.auth;
     final existing = auth.currentSession;
-    if (existing != null) return existing;
+    if (existing != null) {
+      await _ensureProfileRow(existing.user.id);
+      return existing;
+    }
 
-    final response = await auth.signInAnonymously();
-    return response.session;
+    try {
+      final response = await auth.signInAnonymously();
+      final session = response.session;
+      if (session == null) {
+        lastAuthError = 'Anonymous sign-in returned no session';
+        return null;
+      }
+      await _ensureProfileRow(session.user.id);
+      return session;
+    } on AuthException catch (e) {
+      lastAuthError = e.message;
+      debugPrint('CornerIQ auth: ${e.message}');
+      rethrow;
+    } catch (e) {
+      lastAuthError = '$e';
+      debugPrint('CornerIQ auth: $e');
+      rethrow;
+    }
+  }
+
+  /// Trigger should create the row; upsert covers older projects / races.
+  static Future<void> _ensureProfileRow(String userId) async {
+    try {
+      await client.from('profiles').upsert({
+        'id': userId,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint('CornerIQ profile upsert: $e');
+    }
   }
 }

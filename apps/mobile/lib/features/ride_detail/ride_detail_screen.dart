@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/analytics/brake_detection.dart';
 import '../../core/analytics/curva_analysis.dart';
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/analytics/road_kind_detection.dart';
@@ -13,6 +14,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../compare/ride_compare_screen.dart';
+import '../compare/route_compare_screen.dart';
 import 'curva_detail_screen.dart';
 import 'fullscreen_map_screen.dart';
 import 'pilot_line_map.dart';
@@ -20,6 +22,7 @@ import 'widgets/brake_events_panel.dart';
 import 'widgets/lab_section.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
 import 'widgets/ride_profile_chart.dart';
+import 'widgets/ride_share_panel.dart';
 import 'widgets/road_stretches_panel.dart';
 import 'widgets/segment_range_panel.dart';
 
@@ -136,6 +139,27 @@ class _RideDashboardState extends State<_RideDashboard>
     _setScrubIndex(_view.indexForSeconds(seconds));
   }
 
+  /// Zoom map + metrics window onto a brake pulse (indices are view-local).
+  void _zoomToBrake(BrakeEvent event) {
+    final full = _full;
+    if (full.samples.length < 2) return;
+    final view = _view;
+    final absStart = view.mapIndexOffset + event.startIndex;
+    final absEnd = view.mapIndexOffset + event.endIndex;
+    const pad = 6;
+    final lo = (absStart - pad).clamp(0, full.samples.length - 2);
+    final hi = (absEnd + pad).clamp(lo + 1, full.samples.length - 1);
+    setState(() {
+      _segStart = lo;
+      _segEnd = hi;
+      _zoomed = true;
+      final len = hi - lo + 1;
+      final localMid = ((absStart + absEnd) ~/ 2) - lo;
+      _scrubIndex = localMid.clamp(0, len - 1);
+      _expanded.addAll({'map', 'brakes', 'segment', 'overview'});
+    });
+  }
+
   void _setSegmentRange(int start, int end) {
     final max = _full.samples.length - 1;
     if (max < 1) return;
@@ -197,40 +221,65 @@ class _RideDashboardState extends State<_RideDashboard>
     });
   }
 
-  void _openRoadStretch(int stretchIndex) {
+  Future<void> _openRoadStretch(int stretchIndex) async {
     final a = _view;
     if (stretchIndex < 0 || stretchIndex >= a.roadStretches.length) return;
     final stretch = a.roadStretches[stretchIndex];
 
     if (stretch.kind == RoadKind.recta) {
+      // Focus Ride Lab on this straight.
+      setState(() {
+        _segStart = stretch.startIndex;
+        _segEnd = stretch.endIndex;
+        _zoomed = stretch.endIndex > stretch.startIndex;
+        final len = _segEnd - _segStart + 1;
+        _scrubIndex = 0;
+        if (_zoomed) {
+          _scrubIndex = (len ~/ 2).clamp(0, len - 1);
+          _expanded.addAll({'overview', 'map', 'segment'});
+        }
+      });
+      return;
+    }
+
+    final analyses = <CurvaAnalysis>[];
+    var initial = 0;
+    for (var i = 0; i < a.roadStretches.length; i++) {
+      final s = a.roadStretches[i];
+      if (s.kind != RoadKind.curva) continue;
+      final analysis = CurvaAnalysis.fromRide(
+        samples: a.samples,
+        stretch: s,
+        neutralLeanDegrees: a.neutralLeanDegrees,
+      );
+      if (analysis == null) continue;
+      if (i == stretchIndex) initial = analyses.length;
+      analyses.add(analysis);
+    }
+
+    if (analyses.isEmpty) {
       _setScrubIndex(stretch.startIndex);
       return;
     }
 
-    final analysis = CurvaAnalysis.fromRide(
-      samples: a.samples,
-      stretch: stretch,
-      neutralLeanDegrees: a.neutralLeanDegrees,
-    );
-    if (analysis == null) {
-      _setScrubIndex(stretch.startIndex);
-      return;
-    }
-
-    var curvaNumber = 0;
-    for (var i = 0; i <= stretchIndex; i++) {
-      if (a.roadStretches[i].kind == RoadKind.curva) curvaNumber++;
-    }
-
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
+    final result = await Navigator.of(context).push<FullscreenMapSelection>(
+      MaterialPageRoute(
         builder: (_) => CurvaDetailScreen(
           samples: a.samples,
-          analysis: analysis,
-          curvaNumber: curvaNumber,
+          analyses: analyses,
+          initialIndex: initial,
         ),
       ),
     );
+    if (!mounted || result == null) return;
+    setState(() {
+      _segStart = result.startIndex;
+      _segEnd = result.endIndex;
+      _zoomed = true;
+      final len = _segEnd - _segStart + 1;
+      _scrubIndex = (len ~/ 2).clamp(0, len - 1);
+      _expanded.addAll({'overview', 'map', 'segment'});
+    });
   }
 
   @override
@@ -274,7 +323,7 @@ class _RideDashboardState extends State<_RideDashboard>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const CornerIqMark(size: BrandMarkSize.eyebrow),
+                        const RiderLabMark(size: BrandMarkSize.eyebrow),
                         const SizedBox(height: 8),
                         Text(
                           DateFormat('EEE · MMM d · HH:mm')
@@ -294,10 +343,16 @@ class _RideDashboardState extends State<_RideDashboard>
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: ComparePeersEntry(localRideId: ride.id),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
+                          children: [
+                            CompareLocalRouteEntry(ride: ride),
+                            ComparePeersEntry(localRideId: ride.id),
+                          ],
                         ),
+                        const SizedBox(height: 12),
+                        RideSharePanel(ride: ride),
                         const SizedBox(height: 16),
                         if (full.samples.length >= 2)
                           LabSection(
@@ -448,7 +503,9 @@ class _RideDashboardState extends State<_RideDashboard>
                           onToggle: () => _toggle('brakes'),
                           child: BrakeEventsPanel(
                             events: a.brakeEvents,
+                            secondsForIndex: a.secondsForIndex,
                             onSelectIndex: _setScrubIndex,
+                            onZoomToBrake: _zoomToBrake,
                           ),
                         ),
                         LabSection(

@@ -51,4 +51,46 @@ void main() {
     final bigTurn = stretches.any((s) => s.headingChangeDeg.abs() > 45);
     expect(hasCurva || bigTurn, isTrue);
   });
+
+  test('lean + mild heading marks a curva', () {
+    final t0 = DateTime.utc(2026, 7, 30, 20);
+    final points = <TrackPoint>[];
+    for (var i = 0; i < 8; i++) {
+      points.add(
+        TrackPoint(
+          id: i,
+          rideId: 'r',
+          latitude: 25.0 + i * 0.00015,
+          longitude: -100.0,
+          timestamp: t0.add(Duration(milliseconds: i * 300)),
+          speedMps: 12,
+          leanDegrees: 0,
+        ),
+      );
+    }
+    // Gentle heading change with strong lean (pocket turn).
+    for (var i = 0; i < 10; i++) {
+      final t = i / 10.0;
+      points.add(
+        TrackPoint(
+          id: 100 + i,
+          rideId: 'r',
+          latitude: 25.0 + 8 * 0.00015 + i * 0.00008,
+          longitude: -100.0 + i * 0.00012,
+          timestamp: t0.add(Duration(milliseconds: 2400 + i * 300)),
+          speedMps: 10,
+          leanDegrees: 18 + t * 4,
+        ),
+      );
+    }
+
+    final stretches = detectRoadStretches(
+      points,
+      neutralLeanDegrees: 0,
+      minDistanceMeters: 5,
+      minSamples: 3,
+      minCurvaHeadingDeg: 15,
+    );
+    expect(stretches.any((s) => s.kind == RoadKind.curva), isTrue);
+  });
 }

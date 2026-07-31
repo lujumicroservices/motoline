@@ -16,18 +16,18 @@ Future<void> main() async {
   } catch (_) {
     // Auth provider may be off; app still works offline.
   }
-  runApp(const ProviderScope(child: CornerIqApp()));
+  runApp(const ProviderScope(child: RiderLabApp()));
 }
 
-class CornerIqApp extends ConsumerWidget {
-  const CornerIqApp({super.key});
+class RiderLabApp extends ConsumerWidget {
+  const RiderLabApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp(
-      title: 'CornerIQ',
+      title: 'RiderLab',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       locale: locale,

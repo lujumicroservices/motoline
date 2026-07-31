@@ -1,6 +1,6 @@
 {
   "@@locale": "es",
-  "appTitle": "CornerIQ",
+  "appTitle": "RiderLab",
   "tagline": "Graba la línea que rodaste. Revísala. Mejora cada curva.",
   "startRide": "Iniciar ruta",
   "endRide": "Terminar ruta",
@@ -14,7 +14,7 @@
   "garage": "Garaje",
   "yourRides": "Tus rutas",
   "emptyRidesTitle": "Aún no hay rutas",
-  "emptyRidesBody": "Inicia una ruta y CornerIQ dibujará la línea exacta que tomaste en la calle.",
+  "emptyRidesBody": "Inicia una ruta y RiderLab dibujará la línea exacta que tomaste en la calle.",
   "unfinishedRide": "Ruta sin terminar",
   "unfinishedRideBody": "Empezó {when}. Finalízala para guardar la línea, o descártala.",
   "@unfinishedRideBody": {
@@ -25,7 +25,7 @@
   "discard": "Descartar",
   "keepLine": "Conservar línea",
   "updateAvailable": "Actualización disponible",
-  "updateReady": "CornerIQ {version} está lista (tienes {current}).",
+  "updateReady": "RiderLab {version} está lista (tienes {current}).",
   "@updateReady": {
     "placeholders": {
       "version": { "type": "String" },
@@ -34,7 +34,7 @@
   },
   "update": "Actualizar",
   "later": "Después",
-  "onLatest": "Ya tienes la última CornerIQ.",
+  "onLatest": "Ya tienes la última RiderLab.",
   "downloadingUpdate": "Descargando actualización",
   "updateFailed": "Falló la actualización",
   "connecting": "Conectando…",
@@ -137,7 +137,7 @@
   "rightShort": "Der",
   "curvaMapLegend": "E = entrada · A = ápice · S = salida. Línea por velocidad.",
   "curvaCoach": "Lectura rápida: mira si entras demasiado rápido (mucho freno a A), si el ápice es estable, y si sales acelerando limpio.",
-  "roadStretchesHelp": "Según cambio de rumbo (el lean ayuda al lado). {rectas} rectas · {curvas} curvas. Toca una curva para ver entrada / ápice / salida.",
+  "roadStretchesHelp": "Según rumbo + inclinación. {rectas} rectas · {curvas} curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.",
   "@roadStretchesHelp": {
     "placeholders": {
       "rectas": { "type": "int" },
@@ -146,11 +146,18 @@
   },
   "roadStretchesEmpty": "Aún no hay suficiente cambio de rumbo GPS para separar rectas y curvas.",
   "openDetail": "abrir detalle",
-  "brakesHelp": "Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead.",
+  "brakesHelp": "Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead. El botón de mapa hace zoom a ese freno.",
   "brakesEmpty": "No hay frenadas claras por GPS. Las paradas fuertes suelen verse como golpes amarillo/naranja/rojo.",
   "brakeLight": "Suave",
   "brakeMedium": "Medio",
   "brakeHard": "Fuerte",
+  "brakeAtTime": "En {time}",
+  "@brakeAtTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "brakeZoomMap": "Zoom del mapa al freno",
   "noGpsPoints": "Sin puntos GPS",
   "kmh": "km/h",
   "recta": "Recta",
@@ -177,7 +184,7 @@
   "openFullscreenMap": "Abrir mapa completo",
   "friends": "Amigos",
   "friendsSubtitle": "Beta cerrada — todo quien tenga la app aparece en tu lista.",
-  "friendsEmpty": "Aún no hay otros riders. Cuando un amigo instale CornerIQ, aparecerá aquí.",
+  "friendsEmpty": "Aún no hay otros riders. Cuando un amigo instale RiderLab, aparecerá aquí.",
   "yourName": "Tu nombre visible",
   "saveName": "Guardar nombre",
   "nameHint": "Apodo para amigos",
@@ -187,10 +194,86 @@
   "comparePickPeer": "Rutas de amigos en la misma zona",
   "compareEmpty": "Ninguna ruta de amigos cubre esta zona todavía.",
   "compareYou": "Tú",
+  "compareLocalTitle": "Comparar vueltas",
+  "compareRouteTitle": "Comparar · {name}",
+  "@compareRouteTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "compareLocalHelp": "Elige una vuelta base y otra para comparar métricas y líneas en el mismo circuito.",
+  "compareLocalEmpty": "Necesitas al menos 2 vueltas completadas en esta ruta. Usa modo Loop o etiqueta rides con la misma ruta.",
+  "compareBaseline": "Base",
+  "compareChallenger": "Retador",
+  "compareLocal": "Comparar vueltas ({count})",
+  "@compareLocal": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "compareDeltaFaster": "Retador más rápido por {delta}",
+  "@compareDeltaFaster": {
+    "placeholders": {
+      "delta": { "type": "String" }
+    }
+  },
+  "compareDeltaSlower": "Retador más lento por {delta}",
+  "@compareDeltaSlower": {
+    "placeholders": {
+      "delta": { "type": "String" }
+    }
+  },
+  "compareDeltaTie": "Mismo tiempo",
+  "compareLaps": "Comparar vueltas",
+  "compareNeedTwoLaps": "Marca al menos 2 vueltas en esta ruta para comparar.",
   "lineScore": "Puntuación de línea",
   "avgSpeed": "Vel. media",
   "friendRides": "Rutas compartidas",
   "friendRidesEmpty": "Este rider aún no tiene rutas compartidas.",
   "syncingRide": "Compartiendo ruta con amigos…",
-  "cloudUnavailable": "Nube no disponible — revisa conexión y auth anónima."
+  "cloudUnavailable": "Nube no disponible — revisa conexión y auth anónima.",
+  "cloudAnonymousOff": "Amigos necesita Anonymous activado en la nube de RiderLab (proyecto Supabase CornerIQ):\nDashboard → Authentication → Providers → Anonymous → Enable.\nLuego vuelve a abrir Amigos y desliza para refrescar.",
+  "routesTitle": "Rutas",
+  "routesHelp": "Nombra un circuito, compártelo y etiqueta rides para que amigos comparen en la misma ruta.",
+  "myRoutes": "Tus rutas",
+  "routesEmpty": "Aún no hay rutas — crea una para etiquetar y compartir rides.",
+  "friendRoutes": "Rutas compartidas de amigos",
+  "friendRoutesEmpty": "Ningún amigo ha compartido una ruta todavía.",
+  "createRoute": "Nueva ruta",
+  "routeNameHint": "Nombre (ej. Glorieta norte)",
+  "routeDescHint": "Notas opcionales",
+  "shareRoute": "Compartir ruta",
+  "shareRouteHelp": "Los amigos ven este circuito y pueden comparar rides etiquetados.",
+  "routeCreated": "Ruta creada",
+  "sharedRoute": "Compartida",
+  "privateRoute": "Privada",
+  "shareRideTitle": "Compartir y ruta",
+  "shareRideHelp": "Comparte este ride con amigos y opcionalmente asígnalo a un circuito.",
+  "shareThisRide": "Compartir este ride",
+  "assignRoute": "Asignar a ruta",
+  "noRouteAssigned": "Sin ruta",
+  "areaNoPoints": "No hay tramo GPS en esa área — acerca el zoom o dibuja un recuadro más grande.",
+  "curvaSwipeHint": "Desliza izquierda / derecha para cambiar de curva.",
+  "curvaOpenMap": "Mapa completo",
+  "curvaZoomLab": "Zoom Ride Lab",
+  "armAutoRide": "Armar auto-ride",
+  "disarmAutoRide": "Desarmar auto-ride",
+  "waitingForMotion": "Esperando movimiento…",
+  "armedBannerBody": "RiderLab iniciará la grabación sola en cuanto detecte que empiezas a rodar.",
+  "loopMode": "Modo Loop",
+  "pausedLabel": "PAUSADO",
+  "suggestEndTitle": "¿Sigues rodando?",
+  "suggestEndBody": "Sin movimiento hace rato. Termina la ruta o sigue rodando.",
+  "keepRiding": "Seguir rodando",
+  "markLoopInit": "Marcar inicio de loop",
+  "loopInitSet": "Inicio marcado",
+  "markLoopEnd": "Marcar fin de loop",
+  "loopArmed": "Auto-vuelta activada",
+  "lapCountLabel": "Vuelta {count}",
+  "@lapCountLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "endSession": "Terminar sesión"
 }

@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/ride.dart';
+import '../models/route_circuit.dart';
 import '../models/track_point.dart';
 
 class RideDatabase {
@@ -23,7 +24,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -35,7 +36,9 @@ class RideDatabase {
             point_count INTEGER NOT NULL DEFAULT 0,
             max_speed_mps REAL,
             avg_speed_mps REAL,
-            max_lean_degrees REAL
+            max_lean_degrees REAL,
+            route_id TEXT,
+            is_shared INTEGER NOT NULL DEFAULT 1
           )
         ''');
         await db.execute('''
@@ -56,6 +59,7 @@ class RideDatabase {
         await db.execute(
           'CREATE INDEX idx_points_ride ON track_points(ride_id, timestamp_ms)',
         );
+        await _createRoutesTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -66,8 +70,54 @@ class RideDatabase {
             'ALTER TABLE track_points ADD COLUMN lean_degrees REAL',
           );
         }
+        if (oldVersion < 3) {
+          await _createRoutesTable(db);
+          await db.execute('ALTER TABLE rides ADD COLUMN route_id TEXT');
+          await db.execute(
+            'ALTER TABLE rides ADD COLUMN is_shared INTEGER NOT NULL DEFAULT 1',
+          );
+        }
+        if (oldVersion < 4) {
+          await _addLoopColumnsIfMissing(db);
+        }
       },
     );
+  }
+
+  Future<void> _createRoutesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS routes (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        is_shared INTEGER NOT NULL DEFAULT 0,
+        created_at_ms INTEGER NOT NULL,
+        init_lat REAL,
+        init_lng REAL,
+        end_lat REAL,
+        end_lng REAL,
+        geofence_radius_m REAL
+      )
+    ''');
+  }
+
+  /// Fresh installs create `routes` with loop columns already present, but a
+  /// v1-2 -> v3 upgrade path may have created it without them (table was
+  /// created fresh at v3 with the old CREATE TABLE shape at upgrade time).
+  Future<void> _addLoopColumnsIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(routes)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    Future<void> addIfMissing(String name, String type) async {
+      if (!existing.contains(name)) {
+        await db.execute('ALTER TABLE routes ADD COLUMN $name $type');
+      }
+    }
+
+    await addIfMissing('init_lat', 'REAL');
+    await addIfMissing('init_lng', 'REAL');
+    await addIfMissing('end_lat', 'REAL');
+    await addIfMissing('end_lng', 'REAL');
+    await addIfMissing('geofence_radius_m', 'REAL');
   }
 
   Future<void> upsertRide(Ride ride) async {
@@ -115,6 +165,17 @@ class RideDatabase {
     return Ride.fromMap(rows.first);
   }
 
+  Future<List<Ride>> listRidesForRoute(String routeId) async {
+    final db = await database;
+    final rows = await db.query(
+      'rides',
+      where: 'route_id = ?',
+      whereArgs: [routeId],
+      orderBy: 'started_at_ms DESC',
+    );
+    return rows.map(Ride.fromMap).toList();
+  }
+
   Future<Ride?> getActiveRide() async {
     final db = await database;
     final rows = await db.query(
@@ -143,5 +204,43 @@ class RideDatabase {
     final db = await database;
     await db.delete('track_points', where: 'ride_id = ?', whereArgs: [id]);
     await db.delete('rides', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> upsertRoute(RouteCircuit route) async {
+    final db = await database;
+    await db.insert(
+      'routes',
+      route.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<RouteCircuit>> listRoutes() async {
+    final db = await database;
+    final rows = await db.query('routes', orderBy: 'created_at_ms DESC');
+    return rows.map(RouteCircuit.fromMap).toList();
+  }
+
+  Future<RouteCircuit?> getRoute(String id) async {
+    final db = await database;
+    final rows = await db.query(
+      'routes',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return RouteCircuit.fromMap(rows.first);
+  }
+
+  Future<void> deleteRoute(String id) async {
+    final db = await database;
+    await db.update(
+      'rides',
+      {'route_id': null},
+      where: 'route_id = ?',
+      whereArgs: [id],
+    );
+    await db.delete('routes', where: 'id = ?', whereArgs: [id]);
   }
 }
