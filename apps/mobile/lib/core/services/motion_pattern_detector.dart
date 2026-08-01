@@ -242,6 +242,6 @@ class MotionPatternDetector {
         timestamp.difference(_fastSinceArm!) >= autoStartAfter;
     final movedEnough = _armCumulativeMeters > autoStartDistanceMeters;
 
-    return sustained && movedEnough;
+    return sustained || movedEnough;
   }
 }

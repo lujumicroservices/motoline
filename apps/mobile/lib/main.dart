@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/services/arm_foreground_service.dart';
 import 'core/supabase/supabase_bootstrap.dart';
 import 'features/home/home_screen.dart';
 import 'l10n/app_localizations.dart';
@@ -10,6 +11,7 @@ import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ArmForegroundService.ensureInitialized();
   await SupabaseBootstrap.init();
   try {
     await SupabaseBootstrap.ensureSession();

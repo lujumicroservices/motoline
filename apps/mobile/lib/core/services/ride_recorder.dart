@@ -13,6 +13,7 @@ import '../utils/geo_utils.dart';
 import 'lean_sensor.dart';
 import 'location_service.dart';
 import 'motion_pattern_detector.dart';
+import 'arm_foreground_service.dart';
 
 class ActiveRideSnapshot {
   const ActiveRideSnapshot({
@@ -242,6 +243,7 @@ class RideRecorder {
     _flushTimer?.cancel();
     _flushTimer = null;
     _lean.stop();
+    unawaited(ArmForegroundService.stop());
     await _flushPending();
 
     final completed = ride.copyWith(
@@ -320,14 +322,9 @@ class RideRecorder {
   // Arm -> auto-start
   // ---------------------------------------------------------------------
 
-  /// Watch GPS (foreground service + wake lock) while not recording; auto-
-  /// [start] once motion looks like the ride began.
-  ///
-  /// When [routeId] is set, the auto-started ride is tagged to that ruta.
-  ///
-  /// Important: the GPS stream started here is **reused** when auto-start
-  /// fires. Canceling it and opening a new stream with the screen locked
-  /// fails on Android 12+ (cannot start a new FGS from the background).
+  /// Keep a dedicated foreground Dart isolate alive while armed so GPS is
+  /// processed even with the screen locked. Geolocator FGS alone is not
+  /// enough — native GPS can continue while Dart callbacks are frozen.
   Future<void> armForAutoStart({String? routeId}) async {
     if (_armed || isRecording) return;
 
@@ -345,17 +342,19 @@ class RideRecorder {
     _armed = true;
     _armedController.add(true);
 
-    _armSub = _location
-        .watchPositions(
-          notificationTitle: 'RiderLab',
-          notificationText: 'Armed — waiting to auto-start…',
-        )
-        .listen(
-          _onArmOrRidePosition,
-          onError: (Object error, StackTrace stack) {
-            debugPrint('CornerIQ arm GPS: $error');
-          },
-        );
+    final started = await ArmForegroundService.start(
+      onData: _onArmForegroundData,
+    );
+    if (!started) {
+      _armed = false;
+      _armedRouteId = null;
+      _armedController.add(false);
+      throw StateError(
+        'Could not start background GPS. Allow notifications and '
+        'disable battery restrictions for RiderLab, then try again.',
+      );
+    }
+    debugPrint('CornerIQ armed with foreground GPS isolate');
   }
 
   void disarm() {
@@ -363,42 +362,74 @@ class RideRecorder {
     _armed = false;
     _armedRouteId = null;
     _promotingArm = false;
-    // Tear down arm GPS only when not handed off to an active recording.
-    if (_sub == null) {
-      unawaited(_armSub?.cancel());
-    }
+    unawaited(_armSub?.cancel());
     _armSub = null;
+    unawaited(ArmForegroundService.stop());
     _armedController.add(false);
   }
 
-  /// Shared listener so arm → record does not cancel/restart GPS (screen off).
-  void _onArmOrRidePosition(Position position) {
+  void _onArmForegroundData(Object data) {
+    if (data is! Map) return;
+    final map = Map<Object?, Object?>.from(data);
+    if (map['type'] != 'arm_gps') return;
+
+    final lat = (map['lat'] as num?)?.toDouble();
+    final lng = (map['lng'] as num?)?.toDouble();
+    if (lat == null || lng == null) return;
+    final accuracy = (map['accuracy'] as num?)?.toDouble() ?? 999;
+    final speed = (map['speed'] as num?)?.toDouble();
+    final tsMs = map['ts'] as int?;
+    final timestamp = tsMs == null
+        ? DateTime.now()
+        : DateTime.fromMillisecondsSinceEpoch(tsMs);
+
     if (isRecording) {
-      _onPosition(position);
+      _onPosition(
+        Position(
+          longitude: lng,
+          latitude: lat,
+          timestamp: timestamp,
+          accuracy: accuracy,
+          altitude: 0,
+          altitudeAccuracy: 0,
+          heading: 0,
+          headingAccuracy: 0,
+          speed: speed ?? -1,
+          speedAccuracy: 0,
+        ),
+      );
       return;
     }
+
     if (!_armed) return;
-    _handleArmedSample(position);
+    if (accuracy > LocationService.maxAcceptAccuracyMeters) return;
+
+    _handleArmedSampleCoords(
+      speedMps: speed,
+      latitude: lat,
+      longitude: lng,
+      timestamp: timestamp,
+    );
   }
 
-  void _handleArmedSample(Position position) {
+  void _handleArmedSampleCoords({
+    required double? speedMps,
+    required double latitude,
+    required double longitude,
+    required DateTime timestamp,
+  }) {
     if (!_armed || isRecording || _promotingArm) return;
-    if (position.accuracy > LocationService.maxAcceptAccuracyMeters) return;
 
-    final speed = position.speed.isNaN || position.speed < 0
-        ? null
-        : position.speed;
     final shouldStart = _armMotion.feedArmedSample(
-      speedMps: speed,
-      latitude: position.latitude,
-      longitude: position.longitude,
-      timestamp: position.timestamp,
+      speedMps: speedMps,
+      latitude: latitude,
+      longitude: longitude,
+      timestamp: timestamp,
     );
 
     if (shouldStart) {
       final routeId = _armedRouteId;
       _promotingArm = true;
-      // Do NOT disarm()/cancel the stream first — promote in place.
       unawaited(() async {
         try {
           await _autoStart(routeId: routeId);
@@ -416,21 +447,15 @@ class RideRecorder {
     } catch (e, st) {
       debugPrint('CornerIQ auto-start failed: $e\n$st');
       if (!_armed && !isRecording) {
-        unawaited(_armSub?.cancel());
-        _armSub = null;
+        unawaited(ArmForegroundService.stop());
       }
     }
   }
 
-  /// Flip armed → recording on the **same** GPS subscription (FGS stays up).
+  /// Start dense Geolocator GPS while the arm FGS still holds priority.
   Future<Ride> _promoteArmedToRecording({String? routeId}) async {
     if (_ride != null) {
       throw StateError('A ride is already recording');
-    }
-    final liveSub = _armSub;
-    if (liveSub == null) {
-      // No live arm stream (e.g. race) — fall back; may fail if screen off.
-      return start(skipWarmup: true, routeId: routeId);
     }
 
     await _ensureAutoPausePref();
@@ -457,11 +482,8 @@ class RideRecorder {
     _maxLeanRight = 0;
     _motion.resetForNewRide();
 
-    // Hand the live subscription to the recording slot without canceling it.
     _armed = false;
     _armedRouteId = null;
-    _armSub = null;
-    _sub = liveSub;
     _armedController.add(false);
 
     _lean.start();
@@ -471,8 +493,30 @@ class RideRecorder {
       (_) => _flushPending(),
     );
 
+    await ArmForegroundService.updateNotification(
+      title: 'RiderLab',
+      text: 'Recording ride…',
+    );
+
+    try {
+      _sub = _location
+          .watchPositions(
+            notificationTitle: 'RiderLab',
+            notificationText: 'High-precision recording…',
+          )
+          .listen(
+            _onPosition,
+            onError: (Object error, StackTrace stack) {
+              debugPrint('CornerIQ ride GPS: $error');
+            },
+          );
+      await ArmForegroundService.stop();
+    } catch (e, st) {
+      debugPrint('CornerIQ dense GPS start failed, keep arm FGS: $e\n$st');
+    }
+
     _emit();
-    debugPrint('CornerIQ promoted arm → recording ${ride.id} (GPS reused)');
+    debugPrint('CornerIQ promoted arm → recording ${ride.id}');
     return ride;
   }
 

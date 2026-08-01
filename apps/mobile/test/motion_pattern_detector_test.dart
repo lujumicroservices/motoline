@@ -184,7 +184,7 @@ void main() {
   });
 
   group('arm -> auto-start', () {
-    test('does not trigger before sustained speed + distance', () {
+    test('does not trigger before speed or distance thresholds', () {
       final detector = MotionPatternDetector();
       final base = DateTime(2026, 1, 1);
 
@@ -196,22 +196,20 @@ void main() {
       );
       expect(triggered, isFalse);
 
-      // Fast but not enough cumulative distance yet.
+      // Fast but only a few seconds — not sustained yet, tiny distance.
       triggered = detector.feedArmedSample(
         speedMps: 8.0,
         latitude: 30.0002,
         longitude: 30,
-        timestamp: base.add(const Duration(seconds: 9)),
+        timestamp: base.add(const Duration(seconds: 3)),
       );
       expect(triggered, isFalse);
     });
 
-    test('triggers once speed sustained and distance covered', () {
+    test('triggers once speed is sustained (distance optional)', () {
       final detector = MotionPatternDetector();
       final base = DateTime(2026, 1, 1);
 
-      // ~0.0002 deg lat ~ 22m per step; accumulate distance across samples
-      // while staying above the auto-start speed threshold for 8s+.
       detector.feedArmedSample(
         speedMps: 8.0,
         latitude: 30.0000,
@@ -220,15 +218,35 @@ void main() {
       );
       detector.feedArmedSample(
         speedMps: 8.0,
-        latitude: 30.0010,
+        latitude: 30.0002,
         longitude: 30,
         timestamp: base.add(const Duration(seconds: 4)),
       );
       final triggered = detector.feedArmedSample(
         speedMps: 8.0,
-        latitude: 30.0020,
+        latitude: 30.0004,
         longitude: 30,
         timestamp: base.add(const Duration(seconds: 9)),
+      );
+      expect(triggered, isTrue);
+    });
+
+    test('triggers once distance covered (speed optional)', () {
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+
+      // Slow crawl but >80m cumulative (~0.001 deg lat ≈ 111m).
+      detector.feedArmedSample(
+        speedMps: 1.0,
+        latitude: 30.0000,
+        longitude: 30,
+        timestamp: base,
+      );
+      final triggered = detector.feedArmedSample(
+        speedMps: 1.0,
+        latitude: 30.0010,
+        longitude: 30,
+        timestamp: base.add(const Duration(seconds: 2)),
       );
       expect(triggered, isTrue);
     });
@@ -252,7 +270,7 @@ void main() {
         timestamp: base.add(const Duration(seconds: 9)),
       );
       // Immediately after reset there's no prior point to accumulate
-      // distance from, so this single sample cannot trigger yet.
+      // distance from, and a single sample cannot sustain 8s yet.
       expect(triggered, isFalse);
     });
     test('skips pause when autoPauseEnabled is false', () {
