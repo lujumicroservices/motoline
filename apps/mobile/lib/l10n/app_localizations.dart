@@ -2126,6 +2126,12 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraGroupPick.
   String get labAdventureCameraGroupPick;
 
+  /// No description provided for @labAdventureCameraGroupSetupHelp.
+  String get labAdventureCameraGroupSetupHelp;
+
+  /// No description provided for @labAdventureCameraGroupSetupBody.
+  String get labAdventureCameraGroupSetupBody;
+
   /// No description provided for @armAutoNoRouteHint.
   ///
   /// In es, this message translates to:

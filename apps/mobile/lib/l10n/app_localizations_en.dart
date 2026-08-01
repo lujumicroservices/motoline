@@ -1139,6 +1139,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labAdventureCameraGroupPick => 'Add to group';
 
   @override
+  String get labAdventureCameraGroupSetupHelp => 'Multi-camera setup help';
+
+  @override
+  String get labAdventureCameraGroupSetupBody =>
+      '1. Power on each GoPro and open the side door (Bluetooth on).\n2. On the phone, allow Bluetooth (and nearby devices) if asked.\n3. Tap Add GoPro — wait for the scan, then pick each camera.\n4. Leave cameras enabled in the list (toggle off to skip one).\n5. Tap Connect so RiderLab links the whole group.\n6. Start a ride (or use map zones / aggressive auto-record) — shutter starts/stops on every enabled camera.\n7. On the ride screen, CAM 2/2 means both cameras are recording.\n\nTips: keep phones close to the cameras for the first link. If a camera only wakes but does not record, Connect again, then start the ride. One failed camera does not stop the others.';
+
+  @override
   String get armAutoNoRouteHint =>
       'Armed with no route — the ride goes to Garage, not Laps. Open a route first or create one.';
 

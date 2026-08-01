@@ -1146,6 +1146,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get labAdventureCameraGroupPick => 'Añadir al grupo';
 
   @override
+  String get labAdventureCameraGroupSetupHelp => 'Ayuda: varias cámaras';
+
+  @override
+  String get labAdventureCameraGroupSetupBody =>
+      '1. Enciende cada GoPro y abre la tapa lateral (Bluetooth activo).\n2. En el teléfono, permite Bluetooth (y dispositivos cercanos) si lo pide.\n3. Toca Añadir GoPro — espera el escaneo y elige cada cámara.\n4. Déjalas activas en la lista (apaga el interruptor para omitir una).\n5. Toca Conectar para enlazar todo el grupo.\n6. Inicia un ride (o usa zonas del mapa / auto-grabar agresivo) — el obturador arranca/para en todas las cámaras activas.\n7. En la pantalla del ride, CAM 2/2 significa que ambas están grabando.\n\nConsejos: acerca el teléfono a las cámaras en el primer enlace. Si una solo enciende y no graba, Conecta de nuevo y luego inicia el ride. Si una falla, las demás siguen.';
+
+  @override
   String get armAutoNoRouteHint =>
       'Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.';
 

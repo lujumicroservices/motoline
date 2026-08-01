@@ -356,6 +356,48 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                   label: Text(l10n.labAdventureCameraGroupAdd),
                 ),
               ),
+              Theme(
+                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  childrenPadding: const EdgeInsets.only(bottom: 8),
+                  initiallyExpanded: false,
+                  title: Text(
+                    l10n.labAdventureCameraGroupSetupHelp,
+                    style: GoogleFonts.rajdhani(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: AppTheme.mist,
+                    ),
+                  ),
+                  leading: const Icon(
+                    Icons.help_outline,
+                    size: 20,
+                    color: AppTheme.lineHot,
+                  ),
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.asphaltElevated,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.mist.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.labAdventureCameraGroupSetupBody,
+                        style: GoogleFonts.rajdhani(
+                          color: AppTheme.steel,
+                          fontSize: 13,
+                          height: 1.45,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 8),
               Text(
                 l10n.labAdventureCameraBackend,
