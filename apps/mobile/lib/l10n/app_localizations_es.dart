@@ -457,6 +457,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get fitRide => 'Ajustar ruta';
 
   @override
+  String get myLocation => 'Mi ubicación';
+
+  @override
   String get openFullscreenMap => 'Abrir mapa completo';
 
   @override
@@ -1053,6 +1056,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get labAdventureCameraDisconnect => 'Desconectar';
 
   @override
+  String get labAdventureCameraTestHelp =>
+      'Prueba manual del obturador — sin ride. Conecta primero (o usa Simular).';
+
+  @override
+  String get labAdventureCameraTestStart => 'Probar inicio';
+
+  @override
+  String get labAdventureCameraTestStop => 'Probar parada';
+
+  @override
+  String get labAdventureCameraTestStartSnack => 'Inicio de cámara disparado';
+
+  @override
+  String get labAdventureCameraTestStopSnack => 'Parada de cámara disparada';
+
+  @override
   String get labAdventureCameraPhaseOff => 'Lab apagado';
 
   @override
@@ -1116,7 +1135,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get labAdventureCameraAggressiveHelp =>
-      'Inicia la cámara con inclinación fuerte o aceleración brusca';
+      'Arranca solo a ≥85 km/h con cambios de inclinación constantes; pausa al calmar la inclinación o bajar de velocidad';
 
   @override
   String get labAdventureCameraGroup => 'Grupo de cámaras';
@@ -1150,6 +1169,32 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get labAdventureCameraGroupSetupBody =>
       '1. Enciende cada GoPro y abre la tapa lateral (Bluetooth activo).\n2. En el teléfono, permite Bluetooth (y dispositivos cercanos) si lo pide.\n3. Toca Añadir GoPro — espera el escaneo y elige cada cámara.\n4. Déjalas activas en la lista (apaga el interruptor para omitir una).\n5. Toca Conectar para enlazar todo el grupo.\n6. Inicia un ride (o usa zonas del mapa / auto-grabar agresivo) — el obturador arranca/para en todas las cámaras activas.\n7. En la pantalla del ride, CAM 2/2 significa que ambas están grabando.\n\nConsejos: acerca el teléfono a las cámaras en el primer enlace. Si una solo enciende y no graba, Conecta de nuevo y luego inicia el ride. Si una falla, las demás siguen.';
+
+  @override
+  String get labAdventureCameraScenariosTitle => 'Setups de prueba';
+
+  @override
+  String get labAdventureCameraScenarioZonesTitle =>
+      'Solo entre puntos inicio/parada del mapa';
+
+  @override
+  String get labAdventureCameraScenarioZonesBody =>
+      'ON: Cámara adventure · Zonas inicio/fin en el mapa (coloca Inicio + Parada) · cámaras en el grupo.\nOFF: Grabar con el ride · Auto-grabar conducción agresiva · Seguir pausa auto.\n\nNota: estas son zonas de cámara del Lab — no los puntos A/B de vueltas de la ruta.';
+
+  @override
+  String get labAdventureCameraScenarioZonesApply => 'Aplicar setup solo zonas';
+
+  @override
+  String get labAdventureCameraScenarioAggressiveTitle =>
+      'Solo al empezar conducción divertida / agresiva';
+
+  @override
+  String get labAdventureCameraScenarioAggressiveBody =>
+      'ON: Cámara adventure · Auto-grabar conducción agresiva · cámaras en el grupo.\nOFF: Grabar con el ride · Zonas inicio/fin en el mapa · Seguir pausa auto.';
+
+  @override
+  String get labAdventureCameraScenarioAggressiveApply =>
+      'Aplicar setup solo agresivo';
 
   @override
   String get armAutoNoRouteHint =>

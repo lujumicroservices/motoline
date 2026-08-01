@@ -914,6 +914,12 @@ abstract class AppLocalizations {
   /// **'Ajustar ruta'**
   String get fitRide;
 
+  /// No description provided for @myLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi ubicación'**
+  String get myLocation;
+
   /// No description provided for @openFullscreenMap.
   ///
   /// In es, this message translates to:
@@ -1937,7 +1943,7 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraSyncRideHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inicia/detiene la cámara al empezar/terminar la ruta'**
+  /// **'Inicia/detiene con toda la ruta. Si hay zonas de inicio en el mapa, ellas mandan — la cámara espera el punto de inicio.'**
   String get labAdventureCameraSyncRideHelp;
 
   /// No description provided for @labAdventureCameraSyncPause.
@@ -1981,6 +1987,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Desconectar'**
   String get labAdventureCameraDisconnect;
+
+  /// No description provided for @labAdventureCameraTestHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba manual del obturador — sin ride. Conecta primero (o usa Simular).'**
+  String get labAdventureCameraTestHelp;
+
+  /// No description provided for @labAdventureCameraTestStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar inicio'**
+  String get labAdventureCameraTestStart;
+
+  /// No description provided for @labAdventureCameraTestStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar parada'**
+  String get labAdventureCameraTestStop;
+
+  /// No description provided for @labAdventureCameraTestStartSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio de cámara disparado'**
+  String get labAdventureCameraTestStartSnack;
+
+  /// No description provided for @labAdventureCameraTestStopSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada de cámara disparada'**
+  String get labAdventureCameraTestStopSnack;
 
   /// No description provided for @labAdventureCameraPhaseOff.
   ///
@@ -2033,7 +2069,7 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraZonesEnableHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inicia o detiene la cámara al entrar en geocercas del mapa (puedes poner varias)'**
+  /// **'Inicia/detiene al entrar en geocercas. Los puntos de inicio controlan la grabación (cámara apagada hasta llegar).'**
   String get labAdventureCameraZonesEnableHelp;
 
   /// No description provided for @labAdventureCameraZonesEdit.
@@ -2099,7 +2135,7 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraAggressiveHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inicia la cámara con inclinación fuerte o aceleración brusca'**
+  /// **'Arranca solo a ≥85 km/h con cambios de inclinación constantes; pausa al calmar la inclinación o bajar de velocidad'**
   String get labAdventureCameraAggressiveHelp;
 
   /// No description provided for @labAdventureCameraGroup.
@@ -2161,6 +2197,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'1. Enciende cada GoPro y abre la tapa lateral (Bluetooth activo).\n2. En el teléfono, permite Bluetooth (y dispositivos cercanos) si lo pide.\n3. Toca Añadir GoPro — espera el escaneo y elige cada cámara.\n4. Déjalas activas en la lista (apaga el interruptor para omitir una).\n5. Toca Conectar para enlazar todo el grupo.\n6. Inicia un ride (o usa zonas del mapa / auto-grabar agresivo) — el obturador arranca/para en todas las cámaras activas.\n7. En la pantalla del ride, CAM 2/2 significa que ambas están grabando.\n\nConsejos: acerca el teléfono a las cámaras en el primer enlace. Si una solo enciende y no graba, Conecta de nuevo y luego inicia el ride. Si una falla, las demás siguen.'**
   String get labAdventureCameraGroupSetupBody;
+
+  /// No description provided for @labAdventureCameraScenariosTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Setups de prueba'**
+  String get labAdventureCameraScenariosTitle;
+
+  /// No description provided for @labAdventureCameraScenarioZonesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo entre puntos inicio/parada del mapa'**
+  String get labAdventureCameraScenarioZonesTitle;
+
+  /// No description provided for @labAdventureCameraScenarioZonesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'ON: Cámara adventure · Zonas inicio/fin en el mapa (coloca Inicio + Parada) · cámaras en el grupo.\nOFF: Grabar con el ride · Auto-grabar conducción agresiva · Seguir pausa auto.\n\nNota: estas son zonas de cámara del Lab — no los puntos A/B de vueltas de la ruta.'**
+  String get labAdventureCameraScenarioZonesBody;
+
+  /// No description provided for @labAdventureCameraScenarioZonesApply.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplicar setup solo zonas'**
+  String get labAdventureCameraScenarioZonesApply;
+
+  /// No description provided for @labAdventureCameraScenarioAggressiveTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo al empezar conducción divertida / agresiva'**
+  String get labAdventureCameraScenarioAggressiveTitle;
+
+  /// No description provided for @labAdventureCameraScenarioAggressiveBody.
+  ///
+  /// In es, this message translates to:
+  /// **'ON: Cámara adventure · Auto-grabar conducción agresiva · cámaras en el grupo.\nOFF: Grabar con el ride · Zonas inicio/fin en el mapa · Seguir pausa auto.'**
+  String get labAdventureCameraScenarioAggressiveBody;
+
+  /// No description provided for @labAdventureCameraScenarioAggressiveApply.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplicar setup solo agresivo'**
+  String get labAdventureCameraScenarioAggressiveApply;
 
   /// No description provided for @armAutoNoRouteHint.
   ///

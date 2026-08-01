@@ -456,6 +456,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fitRide => 'Fit ride';
 
   @override
+  String get myLocation => 'My location';
+
+  @override
   String get openFullscreenMap => 'Open full map';
 
   @override
@@ -1047,6 +1050,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labAdventureCameraDisconnect => 'Disconnect';
 
   @override
+  String get labAdventureCameraTestHelp =>
+      'Manual shutter test — no ride required. Connect first (or use Simulate).';
+
+  @override
+  String get labAdventureCameraTestStart => 'Test start';
+
+  @override
+  String get labAdventureCameraTestStop => 'Test stop';
+
+  @override
+  String get labAdventureCameraTestStartSnack => 'Camera start triggered';
+
+  @override
+  String get labAdventureCameraTestStopSnack => 'Camera stop triggered';
+
+  @override
   String get labAdventureCameraPhaseOff => 'Lab off';
 
   @override
@@ -1110,7 +1129,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labAdventureCameraAggressiveHelp =>
-      'Start the camera when lean or hard acceleration looks aggressive';
+      'Starts only at ≥85 km/h with constant lean changes; pauses when lean settles or speed drops';
 
   @override
   String get labAdventureCameraGroup => 'Camera group';
@@ -1144,6 +1163,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get labAdventureCameraGroupSetupBody =>
       '1. Power on each GoPro and open the side door (Bluetooth on).\n2. On the phone, allow Bluetooth (and nearby devices) if asked.\n3. Tap Add GoPro — wait for the scan, then pick each camera.\n4. Leave cameras enabled in the list (toggle off to skip one).\n5. Tap Connect so RiderLab links the whole group.\n6. Start a ride (or use map zones / aggressive auto-record) — shutter starts/stops on every enabled camera.\n7. On the ride screen, CAM 2/2 means both cameras are recording.\n\nTips: keep phones close to the cameras for the first link. If a camera only wakes but does not record, Connect again, then start the ride. One failed camera does not stop the others.';
+
+  @override
+  String get labAdventureCameraScenariosTitle => 'Test setups';
+
+  @override
+  String get labAdventureCameraScenarioZonesTitle =>
+      'Only between map start/stop points';
+
+  @override
+  String get labAdventureCameraScenarioZonesBody =>
+      'ON: Adventure camera · Map start/stop zones (place Start + Stop on the map) · cameras in the group.\nOFF: Record with ride · Aggressive riding auto-record · Follow auto-pause.\n\nNote: these are Lab camera zones — not the route A/B lap points.';
+
+  @override
+  String get labAdventureCameraScenarioZonesApply => 'Apply zone-only setup';
+
+  @override
+  String get labAdventureCameraScenarioAggressiveTitle =>
+      'Only when fun / aggressive riding starts';
+
+  @override
+  String get labAdventureCameraScenarioAggressiveBody =>
+      'ON: Adventure camera · Aggressive riding auto-record · cameras in the group.\nOFF: Record with ride · Map start/stop zones · Follow auto-pause.';
+
+  @override
+  String get labAdventureCameraScenarioAggressiveApply =>
+      'Apply aggressive-only setup';
 
   @override
   String get armAutoNoRouteHint =>

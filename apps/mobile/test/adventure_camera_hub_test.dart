@@ -158,23 +158,110 @@ void main() {
     expect(d.feed(latitude: 0, longitude: 0), CameraZoneAction.start);
   });
 
-  test('aggressive detector fires on sustained lean', () {
+  test('aggressive requires 85+ and constant lean changes, then pauses when calm', () {
     final d = AggressiveRidingDetector(
-      leanHold: const Duration(milliseconds: 500),
-      cooldown: const Duration(seconds: 1),
+      changesToStart: 3,
+      changeWindow: const Duration(seconds: 6),
+      exitQuiet: const Duration(seconds: 2),
+      startCooldown: Duration.zero,
     );
     final t0 = DateTime.utc(2026, 1, 1, 12);
+
     expect(
-      d.feed(timestamp: t0, leanDegrees: 30, speedKmh: 50),
-      isFalse,
+      d.feed(timestamp: t0, leanDegrees: 10, speedKmh: 90),
+      isNull,
+    );
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(milliseconds: 200)),
+        leanDegrees: 20,
+        speedKmh: 50,
+      ),
+      isNull,
+      reason: 'lean change below min speed is ignored',
+    );
+
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(milliseconds: 400)),
+        leanDegrees: 5,
+        speedKmh: 90,
+      ),
+      isNull,
     );
     expect(
       d.feed(
         timestamp: t0.add(const Duration(milliseconds: 600)),
-        leanDegrees: 30,
-        speedKmh: 50,
+        leanDegrees: 18,
+        speedKmh: 92,
       ),
-      isTrue,
+      isNull,
+    );
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(milliseconds: 800)),
+        leanDegrees: 6,
+        speedKmh: 91,
+      ),
+      AggressiveRidingAction.start,
+    );
+
+    // Keep changing lean → stay recording.
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(seconds: 2)),
+        leanDegrees: 20,
+        speedKmh: 90,
+      ),
+      isNull,
+    );
+
+    // Calm lean → pause after exitQuiet.
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(seconds: 3)),
+        leanDegrees: 21,
+        speedKmh: 90,
+      ),
+      isNull,
+    );
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(seconds: 6)),
+        leanDegrees: 21.2,
+        speedKmh: 90,
+      ),
+      AggressiveRidingAction.pause,
+    );
+  });
+
+  test('aggressive detector starts on linked lean flips at speed', () {
+    final d = AggressiveRidingDetector(
+      changesToStart: 2,
+      leanChangeDegrees: 99,
+      startCooldown: Duration.zero,
+    );
+    final t0 = DateTime.utc(2026, 1, 1, 12);
+    expect(
+      d.feed(timestamp: t0, leanDegrees: -25, speedKmh: 95),
+      isNull,
+    );
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(milliseconds: 400)),
+        leanDegrees: 25,
+        speedKmh: 95,
+      ),
+      isNull,
+      reason: 'one flip not enough',
+    );
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(milliseconds: 800)),
+        leanDegrees: -25,
+        speedKmh: 95,
+      ),
+      AggressiveRidingAction.start,
     );
   });
 }

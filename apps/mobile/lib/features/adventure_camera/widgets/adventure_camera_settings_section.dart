@@ -186,6 +186,35 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               },
             ),
             if (enabled) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.labAdventureCameraScenariosTitle,
+                style: GoogleFonts.rajdhani(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _ScenarioCard(
+                title: l10n.labAdventureCameraScenarioZonesTitle,
+                body: l10n.labAdventureCameraScenarioZonesBody,
+                applyLabel: l10n.labAdventureCameraScenarioZonesApply,
+                onApply: () async {
+                  await hub.applyZoneOnlyPreset();
+                  ref.invalidate(adventureCameraHydratedProvider);
+                },
+              ),
+              const SizedBox(height: 8),
+              _ScenarioCard(
+                title: l10n.labAdventureCameraScenarioAggressiveTitle,
+                body: l10n.labAdventureCameraScenarioAggressiveBody,
+                applyLabel: l10n.labAdventureCameraScenarioAggressiveApply,
+                onApply: () async {
+                  await hub.applyAggressiveOnlyPreset();
+                  ref.invalidate(adventureCameraHydratedProvider);
+                },
+              ),
+              const SizedBox(height: 8),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
@@ -454,10 +483,111 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.labAdventureCameraTestHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () async {
+                        await hub.startRecordingNow();
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.labAdventureCameraTestStartSnack),
+                          ),
+                        );
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.signal,
+                        foregroundColor: AppTheme.mist,
+                      ),
+                      icon: const Icon(Icons.fiber_manual_record, size: 18),
+                      label: Text(l10n.labAdventureCameraTestStart),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await hub.stopRecordingNow();
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.labAdventureCameraTestStopSnack),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.stop_circle_outlined, size: 18),
+                      label: Text(l10n.labAdventureCameraTestStop),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ],
         );
       },
+    );
+  }
+}
+
+class _ScenarioCard extends StatelessWidget {
+  const _ScenarioCard({
+    required this.title,
+    required this.body,
+    required this.applyLabel,
+    required this.onApply,
+  });
+
+  final String title;
+  final String body;
+  final String applyLabel;
+  final Future<void> Function() onApply;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.asphaltElevated,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.mist.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            body,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 12,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton(
+              onPressed: () => onApply(),
+              child: Text(applyLabel),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

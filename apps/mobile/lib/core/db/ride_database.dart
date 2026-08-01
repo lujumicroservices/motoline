@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -62,6 +62,7 @@ class RideDatabase {
         );
         await _createRoutesTable(db);
         await _createRouteLoopsTable(db);
+        await _createCameraEventsTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -93,7 +94,73 @@ class RideDatabase {
         if (oldVersion < 7) {
           await _addOwnerIdColumnIfMissing(db);
         }
+        if (oldVersion < 8) {
+          await _createCameraEventsTable(db);
+        }
       },
+    );
+  }
+
+  Future<void> _createCameraEventsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS camera_events (
+        id TEXT PRIMARY KEY,
+        ride_local_id TEXT,
+        event_type TEXT NOT NULL,
+        payload_json TEXT NOT NULL DEFAULT '{}',
+        latitude REAL,
+        longitude REAL,
+        created_at_ms INTEGER NOT NULL,
+        synced INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_camera_events_synced '
+      'ON camera_events(synced, created_at_ms)',
+    );
+  }
+
+  Future<void> insertCameraEvent({
+    required String id,
+    String? rideLocalId,
+    required String eventType,
+    required String payloadJson,
+    double? latitude,
+    double? longitude,
+    required int createdAtMs,
+  }) async {
+    final db = await database;
+    await db.insert('camera_events', {
+      'id': id,
+      'ride_local_id': rideLocalId,
+      'event_type': eventType,
+      'payload_json': payloadJson,
+      'latitude': latitude,
+      'longitude': longitude,
+      'created_at_ms': createdAtMs,
+      'synced': 0,
+    });
+  }
+
+  Future<List<Map<String, Object?>>> listUnsyncedCameraEvents({
+    int limit = 200,
+  }) async {
+    final db = await database;
+    return db.query(
+      'camera_events',
+      where: 'synced = 0',
+      orderBy: 'created_at_ms ASC',
+      limit: limit,
+    );
+  }
+
+  Future<void> markCameraEventsSynced(List<String> ids) async {
+    if (ids.isEmpty) return;
+    final db = await database;
+    final placeholders = List.filled(ids.length, '?').join(',');
+    await db.rawUpdate(
+      'UPDATE camera_events SET synced = 1 WHERE id IN ($placeholders)',
+      ids,
     );
   }
 

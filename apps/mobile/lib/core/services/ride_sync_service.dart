@@ -9,6 +9,7 @@ import '../db/ride_database.dart';
 import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../supabase/supabase_bootstrap.dart';
+import '../../features/adventure_camera/camera_telemetry_service.dart';
 
 /// Uploads completed local rides to Supabase, and pulls owned cloud rides
 /// into local SQLite so Garage shows recovered / moved data.
@@ -52,6 +53,9 @@ class RideSyncService {
       }
     }
     debugPrint('CornerIQ syncAll: $ok ok, $fail failed');
+    try {
+      await CameraTelemetryService.instance.flushPending();
+    } catch (_) {}
     return (ok: ok, fail: fail);
   }
 
@@ -111,6 +115,10 @@ class RideSyncService {
       }
 
       debugPrint('CornerIQ synced ride $localRideId → $cloudRideId');
+      // Camera lab events / config for remote troubleshooting.
+      try {
+        await CameraTelemetryService.instance.flushPending();
+      } catch (_) {}
       return cloudRideId;
     } catch (e, st) {
       debugPrint('CornerIQ sync failed: $e\n$st');

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/models/track_point.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import '../../maps/live_gps_map_mixin.dart';
 import '../models/camera_zone.dart';
 
 /// Fullscreen map to place multiple GoPro start/stop geofences on a track.
@@ -24,7 +25,8 @@ class CameraZonesMapScreen extends StatefulWidget {
   State<CameraZonesMapScreen> createState() => _CameraZonesMapScreenState();
 }
 
-class _CameraZonesMapScreenState extends State<CameraZonesMapScreen> {
+class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
+    with LiveGpsMapMixin {
   final MapController _map = MapController();
   final _uuid = const Uuid();
 
@@ -35,6 +37,15 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen> {
   void initState() {
     super.initState();
     _zones = List.of(widget.initialZones);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      startLiveGps(map: _map, centerOnce: widget.trackPoints.isEmpty);
+    });
+  }
+
+  @override
+  void dispose() {
+    stopLiveGps();
+    super.dispose();
   }
 
   void _onTap(TapPosition tapPosition, LatLng latlng) {
@@ -58,6 +69,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen> {
     final pts = <LatLng>[
       for (final p in widget.trackPoints) LatLng(p.latitude, p.longitude),
       for (final z in _zones) LatLng(z.latitude, z.longitude),
+      if (liveGps != null) liveGps!,
     ];
     if (pts.isEmpty) return;
     _map.fitCamera(
@@ -185,6 +197,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen> {
                       ),
                   ],
                 ),
+                ...liveGpsLayers(),
               ],
             ),
           ),
@@ -209,6 +222,11 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen> {
                           ),
                         ),
                       ),
+                      IconButton.filledTonal(
+                        onPressed: () => centerOnLiveGps(_map),
+                        icon: const Icon(Icons.my_location),
+                      ),
+                      const SizedBox(width: 4),
                       IconButton.filledTonal(
                         onPressed: _fit,
                         icon: const Icon(Icons.fit_screen),

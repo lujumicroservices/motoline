@@ -39,7 +39,7 @@ class _AdventureCameraLifecycleBinderState
 
       final hub = ref.read(adventureCameraHubProvider);
       if (!_wasRecording && recording) {
-        unawaited(hub.onRideStarted());
+        unawaited(hub.onRideStarted(rideLocalId: snap!.ride.id));
       } else if (_wasRecording && !recording) {
         unawaited(hub.onRideStopped());
       } else if (recording && !_wasPaused && paused) {

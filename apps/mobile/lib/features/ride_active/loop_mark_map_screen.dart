@@ -8,6 +8,7 @@ import '../../core/services/loop_session_controller.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../maps/live_gps_map_mixin.dart';
 
 enum _MarkStep { placeA, placeB, done }
 
@@ -28,7 +29,8 @@ class LoopMarkMapScreen extends StatefulWidget {
   State<LoopMarkMapScreen> createState() => _LoopMarkMapScreenState();
 }
 
-class _LoopMarkMapScreenState extends State<LoopMarkMapScreen> {
+class _LoopMarkMapScreenState extends State<LoopMarkMapScreen>
+    with LiveGpsMapMixin {
   final MapController _map = MapController();
 
   LatLng? _pointA;
@@ -47,6 +49,15 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen> {
     } else {
       _step = _MarkStep.done;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      startLiveGps(map: _map, centerOnce: widget.points.isEmpty);
+    });
+  }
+
+  @override
+  void dispose() {
+    stopLiveGps();
+    super.dispose();
   }
 
   void _onTap(TapPosition tapPosition, LatLng latlng) {
@@ -190,6 +201,7 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen> {
                       ),
                   ],
                 ),
+                ...liveGpsLayers(),
               ],
             ),
           ),
@@ -247,6 +259,12 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen> {
                           icon: Icons.remove,
                           onPressed: () => _zoomBy(-1),
                           tooltip: l10n.zoomOut,
+                        ),
+                        const SizedBox(height: 8),
+                        _ZoomChip(
+                          icon: Icons.my_location,
+                          onPressed: () => centerOnLiveGps(_map),
+                          tooltip: l10n.myLocation,
                         ),
                         const SizedBox(height: 8),
                         _ZoomChip(

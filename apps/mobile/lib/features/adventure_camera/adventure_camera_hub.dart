@@ -7,6 +7,7 @@ import 'aggressive_riding_detector.dart';
 import 'adventure_camera_prefs.dart';
 import 'camera_controller.dart';
 import 'camera_group_controller.dart';
+import 'camera_telemetry_service.dart';
 import 'camera_zone_detector.dart';
 import 'gopro/gopro_ble_camera.dart';
 import 'models/adventure_camera_status.dart';
@@ -36,6 +37,7 @@ class AdventureCameraHub {
   final CameraZoneDetector _zones = CameraZoneDetector();
   final AggressiveRidingDetector _aggressive = AggressiveRidingDetector();
   final _uuid = const Uuid();
+  final CameraTelemetryService _telemetry = CameraTelemetryService.instance;
 
   Stream<AdventureCameraStatus> get statusStream => _statusOut.stream;
   AdventureCameraStatus get status => _status;
@@ -73,6 +75,7 @@ class AdventureCameraHub {
   Future<void> setLabEnabled(bool enabled) async {
     await AdventureCameraPrefs.setLabEnabled(enabled);
     _labEnabled = enabled;
+    unawaited(_telemetry.logPrefsChanged(key: 'lab_enabled', value: enabled));
     if (!enabled) {
       try {
         await _controller.stopRecording();
@@ -87,28 +90,63 @@ class AdventureCameraHub {
   Future<void> setSyncWithRide(bool value) async {
     _syncWithRide = value;
     await AdventureCameraPrefs.setSyncWithRide(value);
+    unawaited(
+      _telemetry.logPrefsChanged(key: 'sync_with_ride', value: value),
+    );
   }
 
   Future<void> setSyncPause(bool value) async {
     _syncPause = value;
     await AdventureCameraPrefs.setSyncPause(value);
+    unawaited(_telemetry.logPrefsChanged(key: 'sync_pause', value: value));
   }
 
   Future<void> setZonesEnabled(bool value) async {
     _zonesEnabled = value;
     await AdventureCameraPrefs.setZonesEnabled(value);
+    unawaited(
+      _telemetry.logPrefsChanged(key: 'zones_enabled', value: value),
+    );
   }
 
   Future<void> setAggressiveEnabled(bool value) async {
     _aggressiveEnabled = value;
     await AdventureCameraPrefs.setAggressiveEnabled(value);
+    unawaited(
+      _telemetry.logPrefsChanged(key: 'aggressive_enabled', value: value),
+    );
   }
 
   Future<void> setZones(List<CameraZone> zones) async {
     _zones.setZones(zones);
     await AdventureCameraPrefs.setZones(zones);
+    unawaited(
+      _telemetry.log(
+        eventType: 'zones_updated',
+        payload: CameraTelemetryService.zonesSummary(zones),
+      ),
+    );
+    unawaited(_telemetry.pushConfigSnapshot());
   }
 
+  /// One-tap tester presets (Settings → Lab).
+  Future<void> applyZoneOnlyPreset() async {
+    await setLabEnabled(true);
+    await setSyncWithRide(false);
+    await setSyncPause(false);
+    await setZonesEnabled(true);
+    await setAggressiveEnabled(false);
+    unawaited(_telemetry.log(eventType: 'preset_zone_only'));
+  }
+
+  Future<void> applyAggressiveOnlyPreset() async {
+    await setLabEnabled(true);
+    await setSyncWithRide(false);
+    await setSyncPause(false);
+    await setZonesEnabled(false);
+    await setAggressiveEnabled(true);
+    unawaited(_telemetry.log(eventType: 'preset_aggressive_only'));
+  }
   Future<void> setCameraGroup(List<CameraMember> members) async {
     _group = List.of(members);
     await AdventureCameraPrefs.setCameraGroup(_group);
@@ -181,15 +219,31 @@ class AdventureCameraHub {
   Future<void> stopRecordingNow() => _ensureStopRecording();
 
   /// Soft hook from ride lifecycle — connects and optionally starts shutter.
-  Future<void> onRideStarted() async {
+  Future<void> onRideStarted({String? rideLocalId}) async {
+    if (rideLocalId != null) _telemetry.bindRide(rideLocalId);
     if (!_labEnabled || !_anyTriggerEnabled) return;
     _zones.reset();
     _aggressive.reset();
+    unawaited(
+      _telemetry.log(
+        eventType: 'ride_started',
+        payload: {
+          'sync_with_ride': _syncWithRide,
+          'zones_enabled': _zonesEnabled,
+          'aggressive_enabled': _aggressiveEnabled,
+          'has_start_zones': _hasStartZones,
+          'zone_count': _zones.zones.length,
+          'group': CameraTelemetryService.groupSummary(_group),
+        },
+      ),
+    );
+    unawaited(_telemetry.pushConfigSnapshot(rideLocalId: rideLocalId));
     try {
       // Start geofences always gate shutter start (even if sync-with-ride is on).
       // Also skip BLE connect here to save phone + camera battery until needed.
       final zonesGateStart = _zonesEnabled && _hasStartZones;
       if (zonesGateStart) {
+        unawaited(_telemetry.log(eventType: 'waiting_start_zone'));
         _emit(
           AdventureCameraStatus(
             phase: AdventureCameraPhase.idle,
@@ -213,6 +267,7 @@ class AdventureCameraHub {
 
       // Aggressive-only: stay disconnected until motion triggers.
       if (_aggressiveEnabled) {
+        unawaited(_telemetry.log(eventType: 'waiting_aggressive'));
         _emit(
           AdventureCameraStatus(
             phase: AdventureCameraPhase.idle,
@@ -224,6 +279,9 @@ class AdventureCameraHub {
       }
     } catch (e) {
       debugPrint('AdventureCamera onRideStarted: $e');
+      unawaited(
+        _telemetry.log(eventType: 'error', payload: {'where': 'ride_started', 'error': '$e'}),
+      );
       _emit(
         AdventureCameraStatus(
           phase: AdventureCameraPhase.error,
@@ -238,14 +296,24 @@ class AdventureCameraHub {
     if (!_labEnabled) return;
     _zones.reset();
     _aggressive.reset();
-    if (!_syncWithRide && !_zonesEnabled && !_aggressiveEnabled) return;
+    if (!_syncWithRide && !_zonesEnabled && !_aggressiveEnabled) {
+      _telemetry.bindRide(null);
+      return;
+    }
     try {
       await _ensureStopRecording();
       // Drop BLE when the ride ends — big battery win vs keep-alive forever.
       await disconnect();
       _emit(_controller.status);
+      unawaited(_telemetry.log(eventType: 'ride_stopped'));
+      unawaited(_telemetry.flushPending());
     } catch (e) {
       debugPrint('AdventureCamera onRideStopped: $e');
+      unawaited(
+        _telemetry.log(eventType: 'error', payload: {'where': 'ride_stopped', 'error': '$e'}),
+      );
+    } finally {
+      _telemetry.bindRide(null);
     }
   }
 
@@ -283,9 +351,23 @@ class AdventureCameraHub {
     if (_zonesEnabled && _zones.zones.isNotEmpty) {
       final action = _zones.feed(latitude: latitude, longitude: longitude);
       if (action == CameraZoneAction.start) {
+        unawaited(
+          _telemetry.log(
+            eventType: 'zone_start',
+            latitude: latitude,
+            longitude: longitude,
+          ),
+        );
         await _ensureConnected();
         await _ensureStartRecording();
       } else if (action == CameraZoneAction.stop) {
+        unawaited(
+          _telemetry.log(
+            eventType: 'zone_stop',
+            latitude: latitude,
+            longitude: longitude,
+          ),
+        );
         await _ensureStopRecording();
         // Disconnect between clips when start zones will re-arm later.
         if (_hasStartZones) {
@@ -305,15 +387,50 @@ class AdventureCameraHub {
       }
     }
 
-    if (_aggressiveEnabled && !_controller.status.isRecording) {
-      final fired = _aggressive.feed(
+    if (_aggressiveEnabled) {
+      final action = _aggressive.feed(
         timestamp: now,
         leanDegrees: leanDegrees,
         speedKmh: speedKmh,
       );
-      if (fired) {
+      if (action == AggressiveRidingAction.start) {
+        unawaited(
+          _telemetry.log(
+            eventType: 'aggressive_start',
+            latitude: latitude,
+            longitude: longitude,
+            payload: {
+              'lean_degrees': leanDegrees,
+              'speed_kmh': speedKmh,
+            },
+          ),
+        );
         await _ensureConnected();
         await _ensureStartRecording();
+      } else if (action == AggressiveRidingAction.pause) {
+        unawaited(
+          _telemetry.log(
+            eventType: 'aggressive_pause',
+            latitude: latitude,
+            longitude: longitude,
+            payload: {
+              'lean_degrees': leanDegrees,
+              'speed_kmh': speedKmh,
+            },
+          ),
+        );
+        // Pause shutter but keep BLE ready for the next curve series.
+        await _ensureStopRecording();
+        _emit(
+          AdventureCameraStatus(
+            phase: AdventureCameraPhase.idle,
+            deviceName: _status.deviceName,
+            message: 'Left curve series — camera paused',
+            memberCount: _status.memberCount,
+            readyCount: _status.readyCount,
+            recordingCount: 0,
+          ),
+        );
       }
     }
   }
@@ -347,6 +464,17 @@ class AdventureCameraHub {
     }
     await _controller.startRecording();
     _emit(_controller.status);
+    unawaited(
+      _telemetry.log(
+        eventType: 'recording_start',
+        payload: {
+          'phase': _controller.status.phase.name,
+          'device': _controller.status.deviceName,
+          'recording_count': _controller.status.recordingCount,
+          'member_count': _controller.status.memberCount,
+        },
+      ),
+    );
   }
 
   Future<void> _ensureStopRecording() async {
@@ -354,6 +482,15 @@ class AdventureCameraHub {
         _controller.status.isReady) {
       await _controller.stopRecording();
       _emit(_controller.status);
+      unawaited(
+        _telemetry.log(
+          eventType: 'recording_stop',
+          payload: {
+            'phase': _controller.status.phase.name,
+            'device': _controller.status.deviceName,
+          },
+        ),
+      );
     }
   }
 
