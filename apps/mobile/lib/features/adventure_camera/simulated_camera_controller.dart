@@ -7,17 +7,18 @@ import 'models/adventure_camera_status.dart';
 
 /// Dev-only shutter that fakes a camera — no BLE hardware required.
 class SimulatedCameraController implements AdventureCameraController {
-  SimulatedCameraController()
+  SimulatedCameraController({this.displayName = 'Simulated cam'})
       : _controller = StreamController<AdventureCameraStatus>.broadcast() {
     _emit(
-      const AdventureCameraStatus(
+      AdventureCameraStatus(
         phase: AdventureCameraPhase.ready,
-        deviceName: 'Simulated cam',
+        deviceName: displayName,
         message: 'Lab simulator — no hardware',
       ),
     );
   }
 
+  final String displayName;
   final StreamController<AdventureCameraStatus> _controller;
   AdventureCameraStatus _status = AdventureCameraStatus.disabled;
 
@@ -36,9 +37,9 @@ class SimulatedCameraController implements AdventureCameraController {
   @override
   Future<void> connect({String? preferredDeviceId}) async {
     _emit(
-      const AdventureCameraStatus(
+      AdventureCameraStatus(
         phase: AdventureCameraPhase.ready,
-        deviceName: 'Simulated cam',
+        deviceName: displayName,
         message: 'Lab simulator ready',
       ),
     );
@@ -47,20 +48,20 @@ class SimulatedCameraController implements AdventureCameraController {
   @override
   Future<void> disconnect() async {
     _emit(
-      const AdventureCameraStatus(
+      AdventureCameraStatus(
         phase: AdventureCameraPhase.idle,
-        deviceName: 'Simulated cam',
+        deviceName: displayName,
       ),
     );
   }
 
   @override
   Future<void> startRecording() async {
-    debugPrint('AdventureCamera[sim]: START recording');
+    debugPrint('AdventureCamera[sim]: START $displayName');
     _emit(
-      const AdventureCameraStatus(
+      AdventureCameraStatus(
         phase: AdventureCameraPhase.recording,
-        deviceName: 'Simulated cam',
+        deviceName: displayName,
         message: 'Sim recording',
       ),
     );
@@ -68,11 +69,11 @@ class SimulatedCameraController implements AdventureCameraController {
 
   @override
   Future<void> stopRecording() async {
-    debugPrint('AdventureCamera[sim]: STOP recording');
+    debugPrint('AdventureCamera[sim]: STOP $displayName');
     _emit(
-      const AdventureCameraStatus(
+      AdventureCameraStatus(
         phase: AdventureCameraPhase.ready,
-        deviceName: 'Simulated cam',
+        deviceName: displayName,
         message: 'Sim idle',
       ),
     );

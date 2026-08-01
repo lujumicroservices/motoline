@@ -8,6 +8,7 @@ import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../adventure_camera_prefs.dart';
 import '../models/adventure_camera_status.dart';
+import '../models/camera_member.dart';
 import '../models/camera_zone.dart';
 import '../providers/adventure_camera_providers.dart';
 import 'camera_zones_map_screen.dart';
@@ -38,6 +39,92 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
     if (result == null) return;
     await hub.setZones(result);
     ref.invalidate(adventureCameraHydratedProvider);
+  }
+
+  Future<void> _addCamera(BuildContext context, WidgetRef ref) async {
+    final hub = ref.read(adventureCameraHubProvider);
+    final l10n = context.l10n;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppTheme.asphaltElevated,
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 14),
+            Expanded(child: Text(l10n.labAdventureCameraGroupScanning)),
+          ],
+        ),
+      ),
+    );
+    try {
+      final hits = await hub.scanForCameras();
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+      final known = hub.cameraGroup.map((m) => m.remoteId).toSet();
+      final fresh = hits.where((h) => !known.contains(h.remoteId)).toList();
+      if (fresh.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.labAdventureCameraGroupNoneFound)),
+        );
+        return;
+      }
+      final picked = await showDialog<GoProScanHit>(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            backgroundColor: AppTheme.asphaltElevated,
+            title: Text(
+              l10n.labAdventureCameraGroupPick,
+              style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: fresh.length,
+                itemBuilder: (_, i) {
+                  final hit = fresh[i];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(hit.displayName),
+                    subtitle: Text(
+                      hit.rssi == null
+                          ? hit.remoteId
+                          : '${hit.remoteId}  ·  ${hit.rssi} dBm',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    onTap: () => Navigator.pop(ctx, hit),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.close),
+              ),
+            ],
+          );
+        },
+      );
+      if (picked == null) return;
+      await hub.addCameraToGroup(picked);
+      ref.invalidate(adventureCameraHydratedProvider);
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
   }
 
   @override
@@ -198,6 +285,76 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                   await hub.setAggressiveEnabled(v);
                   ref.invalidate(adventureCameraHydratedProvider);
                 },
+              ),
+              const SizedBox(height: 14),
+              Text(
+                l10n.labAdventureCameraGroup,
+                style: GoogleFonts.rajdhani(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.labAdventureCameraGroupHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (hub.cameraGroup.isEmpty)
+                Text(
+                  l10n.labAdventureCameraGroupEmpty,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 12,
+                  ),
+                )
+              else
+                ...[
+                  for (final member in hub.cameraGroup)
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      secondary: IconButton(
+                        tooltip: l10n.labAdventureCameraGroupRemove,
+                        onPressed: () async {
+                          await hub.removeCameraFromGroup(member.id);
+                          ref.invalidate(adventureCameraHydratedProvider);
+                        },
+                        icon: const Icon(Icons.delete_outline, size: 20),
+                      ),
+                      title: Text(
+                        member.displayName,
+                        style: GoogleFonts.rajdhani(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        member.remoteId,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.rajdhani(
+                          color: AppTheme.steel,
+                          fontSize: 11,
+                        ),
+                      ),
+                      value: member.enabled,
+                      activeThumbColor: AppTheme.lineHot,
+                      onChanged: (v) async {
+                        await hub.setCameraEnabled(member.id, v);
+                        ref.invalidate(adventureCameraHydratedProvider);
+                      },
+                    ),
+                ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _addCamera(context, ref),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(l10n.labAdventureCameraGroupAdd),
+                ),
               ),
               const SizedBox(height: 8),
               Text(

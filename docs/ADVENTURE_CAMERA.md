@@ -19,8 +19,9 @@ Settings → **Lab** → enable Adventure camera.
 | Follow auto-pause | Optional stop/start with GPS auto-pause |
 | Map start/stop zones | Multiple geofences; enter start → record, enter stop → idle. Turn off “Record with ride” to record *only* in zones |
 | Aggressive riding | Auto-start on sustained lean (~22°+) or hard acceleration |
+| **Camera group** | Multiple GoPros — Settings → Lab → Add GoPro; shutter fans out to every enabled camera |
 
-Camera failures never abort the ride.
+Camera failures never abort the ride. One camera failing does not block the others.
 
 ## Cold-start fix
 

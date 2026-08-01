@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../camera_controller.dart';
 import '../models/adventure_camera_status.dart';
+import '../models/camera_member.dart';
 import 'gopro_uuids.dart';
 
 /// Open GoPro BLE shutter control (experimental).
@@ -16,9 +17,12 @@ import 'gopro_uuids.dart';
 /// Cold cameras often wake on BLE connect but ignore an immediate shutter.
 /// After attach we wait for boot, send keep-alive, then retry shutter writes.
 class GoProBleCameraController implements AdventureCameraController {
-  GoProBleCameraController()
+  GoProBleCameraController({this.label})
       : _statusController =
             StreamController<AdventureCameraStatus>.broadcast();
+
+  /// Optional override for status [deviceName] (group member label).
+  final String? label;
 
   final StreamController<AdventureCameraStatus> _statusController;
   AdventureCameraStatus _status = const AdventureCameraStatus(
@@ -70,6 +74,53 @@ class GoProBleCameraController implements AdventureCameraController {
     if (FlutterBluePlus.adapterStateNow != BluetoothAdapterState.on) {
       await FlutterBluePlus.turnOn();
     }
+  }
+
+  /// Nearby GoPros for “add to group” (does not connect).
+  static Future<List<GoProScanHit>> scanNearby({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final probe = GoProBleCameraController();
+    try {
+      await probe.ensurePermissions();
+      await FlutterBluePlus.stopScan();
+      final byId = <String, GoProScanHit>{};
+      final sub = FlutterBluePlus.onScanResults.listen((results) {
+        for (final r in results) {
+          final name = r.device.platformName;
+          if (!name.toLowerCase().contains('gopro') &&
+              r.advertisementData.serviceUuids
+                  .map((u) => u.str128.toLowerCase())
+                  .every((u) => u != GoProBleUuids.service.toLowerCase())) {
+            continue;
+          }
+          final id = r.device.remoteId.str;
+          byId[id] = GoProScanHit(
+            remoteId: id,
+            displayName: name.isEmpty ? 'GoPro' : name,
+            rssi: r.rssi,
+          );
+        }
+      });
+      await FlutterBluePlus.startScan(
+        timeout: timeout,
+        androidUsesFineLocation: false,
+        withServices: [Guid(GoProBleUuids.service)],
+      );
+      await Future<void>.delayed(timeout);
+      await FlutterBluePlus.stopScan();
+      await sub.cancel();
+      final hits = byId.values.toList()
+        ..sort((a, b) => (b.rssi ?? -999).compareTo(a.rssi ?? -999));
+      return hits;
+    } finally {
+      await probe.dispose();
+    }
+  }
+
+  String _displayName(BluetoothDevice device) {
+    if (label != null && label!.isNotEmpty) return label!;
+    return device.platformName.isEmpty ? 'GoPro' : device.platformName;
   }
 
   @override
@@ -150,12 +201,11 @@ class GoProBleCameraController implements AdventureCameraController {
   }
 
   Future<void> _attach(BluetoothDevice device) async {
+    final name = _displayName(device);
     _emit(
       AdventureCameraStatus(
         phase: AdventureCameraPhase.connecting,
-        deviceName: device.platformName.isEmpty
-            ? 'GoPro'
-            : device.platformName,
+        deviceName: name,
         message: 'Connecting…',
       ),
     );
@@ -211,7 +261,7 @@ class GoProBleCameraController implements AdventureCameraController {
       _emit(
         AdventureCameraStatus(
           phase: AdventureCameraPhase.error,
-          deviceName: device.platformName,
+          deviceName: name,
           message: 'GoPro command characteristic missing (Open GoPro?)',
         ),
       );
@@ -243,9 +293,7 @@ class GoProBleCameraController implements AdventureCameraController {
     _emit(
       AdventureCameraStatus(
         phase: AdventureCameraPhase.connecting,
-        deviceName: device.platformName.isEmpty
-            ? 'GoPro'
-            : device.platformName,
+        deviceName: name,
         message: 'Waking camera…',
       ),
     );
@@ -258,9 +306,7 @@ class GoProBleCameraController implements AdventureCameraController {
     _emit(
       AdventureCameraStatus(
         phase: AdventureCameraPhase.ready,
-        deviceName: device.platformName.isEmpty
-            ? 'GoPro'
-            : device.platformName,
+        deviceName: name,
         message: 'Ready — will record with rides',
       ),
     );

@@ -84,7 +84,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get whatsNew => "What's new";
+  String get whatsNew => 'What\'s new';
 
   @override
   String get newVersionBadge => 'NEW';
@@ -1082,8 +1082,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'No zones yet — tap the map to add start/stop points';
 
   @override
-  String labAdventureCameraZonesCount(int count) =>
-      '$count zones on the map';
+  String labAdventureCameraZonesCount(int count) {
+    return '$count zones on the map';
+  }
 
   @override
   String get labAdventureCameraZonesTitle => 'Camera zones';
@@ -1110,6 +1111,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get labAdventureCameraAggressiveHelp =>
       'Start the camera when lean or hard acceleration looks aggressive';
+
+  @override
+  String get labAdventureCameraGroup => 'Camera group';
+
+  @override
+  String get labAdventureCameraGroupHelp =>
+      'Add multiple GoPros — shutter commands go to every enabled camera at once.';
+
+  @override
+  String get labAdventureCameraGroupEmpty => 'No cameras in the group yet.';
+
+  @override
+  String get labAdventureCameraGroupAdd => 'Add GoPro';
+
+  @override
+  String get labAdventureCameraGroupRemove => 'Remove';
+
+  @override
+  String get labAdventureCameraGroupScanning => 'Scanning for GoPros…';
+
+  @override
+  String get labAdventureCameraGroupNoneFound =>
+      'No new GoPros found — power on and open the side door.';
+
+  @override
+  String get labAdventureCameraGroupPick => 'Add to group';
 
   @override
   String get armAutoNoRouteHint =>

@@ -32,8 +32,14 @@ class AdventureCameraStatusChip extends ConsumerWidget {
     };
 
     final label = switch (status.phase) {
-      AdventureCameraPhase.recording => 'CAM',
-      AdventureCameraPhase.ready => 'CAM',
+      AdventureCameraPhase.recording =>
+        (status.memberCount != null && status.memberCount! > 1)
+            ? 'CAM ${status.recordingCount ?? 0}/${status.memberCount}'
+            : 'CAM',
+      AdventureCameraPhase.ready =>
+        (status.memberCount != null && status.memberCount! > 1)
+            ? 'CAM ${status.readyCount ?? 0}/${status.memberCount}'
+            : 'CAM',
       AdventureCameraPhase.error => 'CAM!',
       AdventureCameraPhase.scanning => '…',
       AdventureCameraPhase.connecting => '…',

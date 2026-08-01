@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'models/camera_member.dart';
 import 'models/camera_zone.dart';
 
 /// Persisted toggles for the experimental adventure-camera lab.
@@ -18,6 +19,7 @@ class AdventureCameraPrefs {
   static const zonesEnabledKey = 'lab_adventure_camera_zones_enabled';
   static const zonesJsonKey = 'lab_adventure_camera_zones_json';
   static const aggressiveEnabledKey = 'lab_adventure_camera_aggressive';
+  static const cameraGroupJsonKey = 'lab_adventure_camera_group_json';
 
   /// `gopro` | `simulated`
   static const backendGoPro = 'gopro';
@@ -120,5 +122,44 @@ class AdventureCameraPrefs {
   static Future<void> setAggressiveEnabled(bool value) async {
     final p = await SharedPreferences.getInstance();
     await p.setBool(aggressiveEnabledKey, value);
+  }
+
+  static Future<List<CameraMember>> cameraGroup() async {
+    final p = await SharedPreferences.getInstance();
+    final raw = p.getString(cameraGroupJsonKey);
+    if (raw == null || raw.isEmpty) {
+      // Migrate single last-device into a one-camera group when present.
+      final legacy = p.getString(lastDeviceIdKey);
+      if (legacy == null || legacy.isEmpty) return const [];
+      return [
+        CameraMember(
+          id: legacy,
+          remoteId: legacy,
+          displayName: 'GoPro',
+        ),
+      ];
+    }
+    try {
+      final list = jsonDecode(raw) as List<dynamic>;
+      return [
+        for (final item in list)
+          if (item is Map<String, dynamic>) CameraMember.fromJson(item)
+          else if (item is Map)
+            CameraMember.fromJson(Map<String, dynamic>.from(item)),
+      ].where((m) => m.remoteId.isNotEmpty).toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  static Future<void> setCameraGroup(List<CameraMember> members) async {
+    final p = await SharedPreferences.getInstance();
+    await p.setString(
+      cameraGroupJsonKey,
+      jsonEncode([for (final m in members) m.toJson()]),
+    );
+    if (members.isNotEmpty) {
+      await p.setString(lastDeviceIdKey, members.first.remoteId);
+    }
   }
 }

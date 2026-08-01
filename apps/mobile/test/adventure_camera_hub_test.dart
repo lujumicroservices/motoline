@@ -83,6 +83,34 @@ void main() {
     await hub.dispose();
   });
 
+  test('camera group records on all simulated members', () async {
+    SharedPreferences.setMockInitialValues({
+      AdventureCameraPrefs.labEnabledKey: true,
+      AdventureCameraPrefs.syncWithRideKey: true,
+      AdventureCameraPrefs.backendKey: AdventureCameraPrefs.backendSimulated,
+      AdventureCameraPrefs.cameraGroupJsonKey: '''
+[{"id":"a","remote_id":"sim-a","name":"Cam A","enabled":true},
+ {"id":"b","remote_id":"sim-b","name":"Cam B","enabled":true}]
+''',
+    });
+
+    final hub = AdventureCameraHub();
+    await hub.hydrate();
+    expect(hub.cameraGroup.length, 2);
+    expect(hub.backendId, 'camera_group');
+
+    await hub.onRideStarted();
+    // Group status updates are streamed; allow the aggregate emit to settle.
+    await Future<void>.delayed(Duration.zero);
+    expect(hub.status.phase, AdventureCameraPhase.recording);
+    expect(hub.status.recordingCount, 2);
+    expect(hub.status.memberCount, 2);
+
+    await hub.onRideStopped();
+    expect(hub.status.phase, AdventureCameraPhase.ready);
+    await hub.dispose();
+  });
+
   test('zone detector is edge-triggered', () {
     final d = CameraZoneDetector(
       zones: const [

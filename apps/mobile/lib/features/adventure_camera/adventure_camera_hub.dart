@@ -1,13 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 import 'aggressive_riding_detector.dart';
 import 'adventure_camera_prefs.dart';
 import 'camera_controller.dart';
+import 'camera_group_controller.dart';
 import 'camera_zone_detector.dart';
 import 'gopro/gopro_ble_camera.dart';
 import 'models/adventure_camera_status.dart';
+import 'models/camera_member.dart';
 import 'models/camera_zone.dart';
 import 'noop_camera_controller.dart';
 import 'simulated_camera_controller.dart';
@@ -28,9 +31,11 @@ class AdventureCameraHub {
   bool _syncPause = false;
   bool _zonesEnabled = false;
   bool _aggressiveEnabled = false;
+  List<CameraMember> _group = const [];
 
   final CameraZoneDetector _zones = CameraZoneDetector();
   final AggressiveRidingDetector _aggressive = AggressiveRidingDetector();
+  final _uuid = const Uuid();
 
   Stream<AdventureCameraStatus> get statusStream => _statusOut.stream;
   AdventureCameraStatus get status => _status;
@@ -40,6 +45,7 @@ class AdventureCameraHub {
   bool get zonesEnabled => _zonesEnabled;
   bool get aggressiveEnabled => _aggressiveEnabled;
   List<CameraZone> get zones => _zones.zones;
+  List<CameraMember> get cameraGroup => List.unmodifiable(_group);
   String get backendId => _controller.backendId;
 
   bool get _anyTriggerEnabled =>
@@ -55,6 +61,7 @@ class AdventureCameraHub {
     _zonesEnabled = await AdventureCameraPrefs.zonesEnabled();
     _aggressiveEnabled = await AdventureCameraPrefs.aggressiveEnabled();
     _zones.setZones(await AdventureCameraPrefs.zones());
+    _group = await AdventureCameraPrefs.cameraGroup();
     if (!_labEnabled) {
       await _swapController(NoopCameraController());
       _emit(AdventureCameraStatus.disabled);
@@ -102,6 +109,51 @@ class AdventureCameraHub {
     await AdventureCameraPrefs.setZones(zones);
   }
 
+  Future<void> setCameraGroup(List<CameraMember> members) async {
+    _group = List.of(members);
+    await AdventureCameraPrefs.setCameraGroup(_group);
+    if (_labEnabled) await _rebuildBackend();
+  }
+
+  Future<void> addCameraToGroup(GoProScanHit hit) async {
+    if (_group.any((m) => m.remoteId == hit.remoteId)) return;
+    final next = [
+      ..._group,
+      CameraMember(
+        id: _uuid.v4(),
+        remoteId: hit.remoteId,
+        displayName: hit.displayName,
+      ),
+    ];
+    await setCameraGroup(next);
+  }
+
+  Future<void> removeCameraFromGroup(String memberId) async {
+    await setCameraGroup(_group.where((m) => m.id != memberId).toList());
+  }
+
+  Future<void> setCameraEnabled(String memberId, bool enabled) async {
+    await setCameraGroup([
+      for (final m in _group)
+        if (m.id == memberId) m.copyWith(enabled: enabled) else m,
+    ]);
+  }
+
+  /// Scan nearby GoPros (or fake hits in simulated backend).
+  Future<List<GoProScanHit>> scanForCameras() async {
+    final backend = await AdventureCameraPrefs.backend();
+    if (backend == AdventureCameraPrefs.backendSimulated) {
+      return [
+        GoProScanHit(
+          remoteId: 'sim-${_uuid.v4()}',
+          displayName: 'Sim GoPro ${_group.length + 1}',
+          rssi: -40,
+        ),
+      ];
+    }
+    return GoProBleCameraController.scanNearby();
+  }
+
   Future<void> setBackend(String backend) async {
     await AdventureCameraPrefs.setBackend(backend);
     if (_labEnabled) await _rebuildBackend();
@@ -109,7 +161,13 @@ class AdventureCameraHub {
 
   Future<void> connect() async {
     if (!_labEnabled) return;
-    final preferred = await AdventureCameraPrefs.lastDeviceId();
+    if (_controller is CameraGroupController) {
+      await _controller.connect();
+      return;
+    }
+    final preferred = _group.isNotEmpty
+        ? _group.first.remoteId
+        : await AdventureCameraPrefs.lastDeviceId();
     await _controller.connect(preferredDeviceId: preferred);
     await _persistDeviceIdIfReady();
   }
@@ -139,6 +197,9 @@ class AdventureCameraHub {
             phase: AdventureCameraPhase.ready,
             deviceName: _status.deviceName,
             message: 'Waiting for map start zone…',
+            memberCount: _status.memberCount,
+            readyCount: _status.readyCount,
+            recordingCount: _status.recordingCount,
           ),
         );
         return;
@@ -244,14 +305,21 @@ class AdventureCameraHub {
         _controller.status.phase != AdventureCameraPhase.recording) {
       return;
     }
-    if (_controller.status.isRecording) return;
+    if (_controller.status.isRecording &&
+        (_controller.status.recordingCount == null ||
+            _controller.status.recordingCount ==
+                _controller.status.memberCount)) {
+      return;
+    }
     await _controller.startRecording();
+    _emit(_controller.status);
   }
 
   Future<void> _ensureStopRecording() async {
     if (_controller.status.phase == AdventureCameraPhase.recording ||
         _controller.status.isReady) {
       await _controller.stopRecording();
+      _emit(_controller.status);
     }
   }
 
@@ -267,21 +335,37 @@ class AdventureCameraHub {
 
   Future<void> _rebuildBackend() async {
     final backend = await AdventureCameraPrefs.backend();
-    final AdventureCameraController next = switch (backend) {
-      AdventureCameraPrefs.backendSimulated => SimulatedCameraController(),
-      _ => GoProBleCameraController(),
-    };
-    await _swapController(next);
+    final AdventureCameraController next;
     if (backend == AdventureCameraPrefs.backendSimulated) {
-      await next.connect();
+      if (_group.isEmpty) {
+        next = SimulatedCameraController();
+      } else {
+        next = CameraGroupController(
+          members: _group,
+          factory: (m) => SimulatedCameraController(displayName: m.displayName),
+        );
+      }
+    } else if (_group.isEmpty) {
+      // Legacy single-cam: scan first GoPro found.
+      next = GoProBleCameraController();
     } else {
+      next = CameraGroupController(
+        members: _group,
+        factory: (m) => GoProBleCameraController(label: m.displayName),
+      );
+    }
+    await _swapController(next);
+    if (backend == AdventureCameraPrefs.backendSimulated && _group.isEmpty) {
+      await next.connect();
+    } else if (_group.isEmpty) {
       _emit(
         const AdventureCameraStatus(
           phase: AdventureCameraPhase.idle,
-          message: 'Lab on — connect a GoPro',
+          message: 'Lab on — add GoPros to the group or Connect to scan one',
         ),
       );
     }
+    // Non-empty group: keep the controller's aggregated status from swap.
   }
 
   Future<void> _swapController(AdventureCameraController next) async {

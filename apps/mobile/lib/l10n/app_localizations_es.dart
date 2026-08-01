@@ -1088,8 +1088,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Sin zonas — toca el mapa para añadir inicio/parada';
 
   @override
-  String labAdventureCameraZonesCount(int count) =>
-      '$count zonas en el mapa';
+  String labAdventureCameraZonesCount(int count) {
+    return '$count zonas en el mapa';
+  }
 
   @override
   String get labAdventureCameraZonesTitle => 'Zonas de cámara';
@@ -1116,6 +1117,33 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get labAdventureCameraAggressiveHelp =>
       'Inicia la cámara con inclinación fuerte o aceleración brusca';
+
+  @override
+  String get labAdventureCameraGroup => 'Grupo de cámaras';
+
+  @override
+  String get labAdventureCameraGroupHelp =>
+      'Añade varias GoPro — el obturador se envía a todas las cámaras activas a la vez.';
+
+  @override
+  String get labAdventureCameraGroupEmpty =>
+      'Aún no hay cámaras en el grupo.';
+
+  @override
+  String get labAdventureCameraGroupAdd => 'Añadir GoPro';
+
+  @override
+  String get labAdventureCameraGroupRemove => 'Quitar';
+
+  @override
+  String get labAdventureCameraGroupScanning => 'Buscando GoPros…';
+
+  @override
+  String get labAdventureCameraGroupNoneFound =>
+      'No hay GoPros nuevas — enciéndelas y abre la tapa lateral.';
+
+  @override
+  String get labAdventureCameraGroupPick => 'Añadir al grupo';
 
   @override
   String get armAutoNoRouteHint =>

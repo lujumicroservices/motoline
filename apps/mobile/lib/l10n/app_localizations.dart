@@ -237,9 +237,15 @@ abstract class AppLocalizations {
   String updateReady(String version, String current);
 
   /// No description provided for @whatsNew.
+  ///
+  /// In es, this message translates to:
+  /// **'Novedades'**
   String get whatsNew;
 
   /// No description provided for @newVersionBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'NUEVA'**
   String get newVersionBadge;
 
   /// No description provided for @update.
@@ -599,13 +605,13 @@ abstract class AppLocalizations {
   /// No description provided for @mapHint.
   ///
   /// In es, this message translates to:
-  /// **'Azul→magenta según velocidad. Puntos = frenos inferidos.'**
+  /// **'Toca la línea para mover la moto. Azul→magenta por velocidad. Puntos = frenos.'**
   String get mapHint;
 
   /// No description provided for @mapHintZoom.
   ///
   /// In es, this message translates to:
-  /// **'Brillante = tramo elegido · tenue = resto. Puntos = frenos.'**
+  /// **'Toca la línea para mover la moto. Brillante = elegido · tenue = resto.'**
   String get mapHintZoom;
 
   /// No description provided for @startingRide.
@@ -2019,43 +2025,106 @@ abstract class AppLocalizations {
   String get labAdventureCameraPhaseError;
 
   /// No description provided for @labAdventureCameraZonesEnable.
+  ///
+  /// In es, this message translates to:
+  /// **'Zonas inicio/fin en el mapa'**
   String get labAdventureCameraZonesEnable;
 
   /// No description provided for @labAdventureCameraZonesEnableHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia o detiene la cámara al entrar en geocercas del mapa (puedes poner varias)'**
   String get labAdventureCameraZonesEnableHelp;
 
   /// No description provided for @labAdventureCameraZonesEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar zonas de cámara'**
   String get labAdventureCameraZonesEdit;
 
   /// No description provided for @labAdventureCameraZonesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin zonas — toca el mapa para añadir inicio/parada'**
   String get labAdventureCameraZonesEmpty;
 
   /// No description provided for @labAdventureCameraZonesCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} zonas en el mapa'**
   String labAdventureCameraZonesCount(int count);
 
   /// No description provided for @labAdventureCameraZonesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Zonas de cámara'**
   String get labAdventureCameraZonesTitle;
 
   /// No description provided for @labAdventureCameraZonesHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige Inicio o Parada y toca el mapa. Mantén pulsado un marcador para borrarlo. Apaga “Grabar con el ride” para grabar solo en las zonas.'**
   String get labAdventureCameraZonesHelp;
 
   /// No description provided for @labAdventureCameraZoneStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
   String get labAdventureCameraZoneStart;
 
   /// No description provided for @labAdventureCameraZoneStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada'**
   String get labAdventureCameraZoneStop;
 
   /// No description provided for @labAdventureCameraZonesClear.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar todas'**
   String get labAdventureCameraZonesClear;
 
   /// No description provided for @labAdventureCameraZonesSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar zonas'**
   String get labAdventureCameraZonesSave;
 
   /// No description provided for @labAdventureCameraAggressive.
+  ///
+  /// In es, this message translates to:
+  /// **'Auto-grabar conducción agresiva'**
   String get labAdventureCameraAggressive;
 
   /// No description provided for @labAdventureCameraAggressiveHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia la cámara con inclinación fuerte o aceleración brusca'**
   String get labAdventureCameraAggressiveHelp;
+
+  /// No description provided for @labAdventureCameraGroup.
+  String get labAdventureCameraGroup;
+
+  /// No description provided for @labAdventureCameraGroupHelp.
+  String get labAdventureCameraGroupHelp;
+
+  /// No description provided for @labAdventureCameraGroupEmpty.
+  String get labAdventureCameraGroupEmpty;
+
+  /// No description provided for @labAdventureCameraGroupAdd.
+  String get labAdventureCameraGroupAdd;
+
+  /// No description provided for @labAdventureCameraGroupRemove.
+  String get labAdventureCameraGroupRemove;
+
+  /// No description provided for @labAdventureCameraGroupScanning.
+  String get labAdventureCameraGroupScanning;
+
+  /// No description provided for @labAdventureCameraGroupNoneFound.
+  String get labAdventureCameraGroupNoneFound;
+
+  /// No description provided for @labAdventureCameraGroupPick.
+  String get labAdventureCameraGroupPick;
 
   /// No description provided for @armAutoNoRouteHint.
   ///
