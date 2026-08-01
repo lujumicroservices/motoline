@@ -1022,7 +1022,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labAdventureCameraSyncRideHelp =>
-      'Start/stop the camera when a route recording starts/ends';
+      'Start/stop with the whole ride. If map start zones are set, they override start — camera waits for the start point.';
 
   @override
   String get labAdventureCameraSyncPause => 'Follow auto-pause';
@@ -1072,7 +1072,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labAdventureCameraZonesEnableHelp =>
-      'Start or stop the camera when you enter geofences on the map (multiple OK)';
+      'Start/stop when you enter map geofences. Start points gate recording (camera stays off until you reach one).';
 
   @override
   String get labAdventureCameraZonesEdit => 'Edit camera zones';

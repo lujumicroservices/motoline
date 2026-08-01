@@ -2103,33 +2103,63 @@ abstract class AppLocalizations {
   String get labAdventureCameraAggressiveHelp;
 
   /// No description provided for @labAdventureCameraGroup.
+  ///
+  /// In es, this message translates to:
+  /// **'Grupo de cámaras'**
   String get labAdventureCameraGroup;
 
   /// No description provided for @labAdventureCameraGroupHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade varias GoPro — el obturador se envía a todas las cámaras activas a la vez.'**
   String get labAdventureCameraGroupHelp;
 
   /// No description provided for @labAdventureCameraGroupEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay cámaras en el grupo.'**
   String get labAdventureCameraGroupEmpty;
 
   /// No description provided for @labAdventureCameraGroupAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir GoPro'**
   String get labAdventureCameraGroupAdd;
 
   /// No description provided for @labAdventureCameraGroupRemove.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
   String get labAdventureCameraGroupRemove;
 
   /// No description provided for @labAdventureCameraGroupScanning.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando GoPros…'**
   String get labAdventureCameraGroupScanning;
 
   /// No description provided for @labAdventureCameraGroupNoneFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay GoPros nuevas — enciéndelas y abre la tapa lateral.'**
   String get labAdventureCameraGroupNoneFound;
 
   /// No description provided for @labAdventureCameraGroupPick.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir al grupo'**
   String get labAdventureCameraGroupPick;
 
   /// No description provided for @labAdventureCameraGroupSetupHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda: varias cámaras'**
   String get labAdventureCameraGroupSetupHelp;
 
   /// No description provided for @labAdventureCameraGroupSetupBody.
+  ///
+  /// In es, this message translates to:
+  /// **'1. Enciende cada GoPro y abre la tapa lateral (Bluetooth activo).\n2. En el teléfono, permite Bluetooth (y dispositivos cercanos) si lo pide.\n3. Toca Añadir GoPro — espera el escaneo y elige cada cámara.\n4. Déjalas activas en la lista (apaga el interruptor para omitir una).\n5. Toca Conectar para enlazar todo el grupo.\n6. Inicia un ride (o usa zonas del mapa / auto-grabar agresivo) — el obturador arranca/para en todas las cámaras activas.\n7. En la pantalla del ride, CAM 2/2 significa que ambas están grabando.\n\nConsejos: acerca el teléfono a las cámaras en el primer enlace. Si una solo enciende y no graba, Conecta de nuevo y luego inicia el ride. Si una falla, las demás siguen.'**
   String get labAdventureCameraGroupSetupBody;
 
   /// No description provided for @armAutoNoRouteHint.

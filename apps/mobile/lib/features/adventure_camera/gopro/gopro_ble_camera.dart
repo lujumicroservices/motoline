@@ -314,7 +314,8 @@ class GoProBleCameraController implements AdventureCameraController {
 
   void _startKeepAlive() {
     _keepAliveTimer?.cancel();
-    _keepAliveTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+    // 30s is enough to prevent GoPro BLE sleep; 8s was needlessly chatty.
+    _keepAliveTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       unawaited(_sendKeepAlive());
     });
   }

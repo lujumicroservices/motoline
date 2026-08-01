@@ -60,7 +60,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final notes = _previewNotes(update.releaseNotes);
+    final notes = formatReleaseNotes(update.releaseNotes, maxChars: 280);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
@@ -151,7 +151,11 @@ class UpdateAvailableBanner extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => showUpdateInstaller(context, ref, update),
+                  onPressed: () => confirmUpdateWithChangelog(
+                    context,
+                    ref,
+                    update,
+                  ),
                   child: Text(l10n.update),
                 ),
               ),
@@ -163,24 +167,134 @@ class UpdateAvailableBanner extends ConsumerWidget {
   }
 }
 
-String _previewNotes(String raw) {
-  final cleaned = raw
-      .replaceAll(RegExp(r'^#+\s*', multiLine: true), '')
-      .replaceAll(RegExp(r'\*\*?'), '')
-      .replaceAll('`', '')
-      .trim();
-  if (cleaned.isEmpty) return '';
-  final lines = cleaned
-      .split(RegExp(r'\r?\n'))
-      .map((l) => l.trim())
-      .where((l) => l.isNotEmpty && !l.toLowerCase().startsWith('## install'))
-      .take(5)
-      .toList();
+/// Strip markdown noise and optionally drop the Install footer.
+String formatReleaseNotes(String raw, {int? maxChars}) {
+  if (raw.trim().isEmpty) return '';
+
+  // Drop everything from "## Install" onward — install fluff, not changelog.
+  var body = raw;
+  final installAt = RegExp(
+    r'^#{1,3}\s*install\b',
+    multiLine: true,
+    caseSensitive: false,
+  ).firstMatch(body);
+  if (installAt != null) {
+    body = body.substring(0, installAt.start);
+  }
+
+  final lines = <String>[];
+  for (final rawLine in body.split(RegExp(r'\r?\n'))) {
+    var line = rawLine.trimRight();
+    if (line.trim().isEmpty) {
+      if (lines.isNotEmpty && lines.last.isNotEmpty) lines.add('');
+      continue;
+    }
+    line = line
+        .replaceFirst(RegExp(r'^#{1,6}\s*'), '')
+        .replaceAll('**', '')
+        .replaceAll('__', '')
+        .replaceAll('`', '')
+        .trimRight();
+    if (line.trim().isEmpty) continue;
+    // Keep bullets readable.
+    line = line.replaceFirst(RegExp(r'^[-*]\s+'), '• ');
+    lines.add(line);
+  }
+
+  while (lines.isNotEmpty && lines.first.isEmpty) {
+    lines.removeAt(0);
+  }
+  while (lines.isNotEmpty && lines.last.isEmpty) {
+    lines.removeLast();
+  }
+
   var text = lines.join('\n');
-  if (text.length > 320) {
-    text = '${text.substring(0, 317).trimRight()}…';
+  if (maxChars != null && text.length > maxChars) {
+    text = '${text.substring(0, maxChars - 1).trimRight()}…';
   }
   return text;
+}
+
+/// Full changelog dialog — always shown before download/install.
+Future<void> confirmUpdateWithChangelog(
+  BuildContext context,
+  WidgetRef ref,
+  AppUpdateInfo update,
+) async {
+  final notes = formatReleaseNotes(update.releaseNotes);
+  final install = await showDialog<bool>(
+    context: context,
+    builder: (ctx) {
+      final l10n = ctx.l10n;
+      final maxH = MediaQuery.sizeOf(ctx).height * 0.55;
+      return AlertDialog(
+        backgroundColor: AppTheme.asphaltElevated,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'RiderLab ${update.version}',
+              style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.updateReady(update.version, update.currentVersion),
+              style: const TextStyle(
+                color: AppTheme.steel,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxH),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.whatsNew,
+                    style: GoogleFonts.rajdhani(
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.lineHot,
+                      fontSize: 14,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    notes.isEmpty ? l10n.updatePrompt(update.currentVersion) : notes,
+                    style: const TextStyle(
+                      color: AppTheme.mist,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.notNow),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.update),
+          ),
+        ],
+      );
+    },
+  );
+  if (install == true && context.mounted) {
+    await showUpdateInstaller(context, ref, update);
+  }
 }
 
 Future<void> showUpdateInstaller(
@@ -324,65 +438,7 @@ Future<void> promptManualUpdateCheck(
       return;
     }
     ref.invalidate(appUpdateCheckProvider);
-    final notes = _previewNotes(update.releaseNotes);
-    final install = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final dialogL10n = ctx.l10n;
-        return AlertDialog(
-          backgroundColor: AppTheme.asphaltElevated,
-          title: Text(
-            'RiderLab ${update.version}',
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  dialogL10n.updatePrompt(update.currentVersion),
-                  style: const TextStyle(color: AppTheme.steel),
-                ),
-                if (notes.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    dialogL10n.whatsNew,
-                    style: GoogleFonts.rajdhani(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.lineHot,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    notes,
-                    style: const TextStyle(
-                      color: AppTheme.mist,
-                      fontSize: 13,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(dialogL10n.notNow),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(dialogL10n.update),
-            ),
-          ],
-        );
-      },
-    );
-    if (install == true && context.mounted) {
-      await showUpdateInstaller(context, ref, update);
-    }
+    await confirmUpdateWithChangelog(context, ref, update);
   } catch (e) {
     if (!context.mounted) return;
     Navigator.of(context).pop();

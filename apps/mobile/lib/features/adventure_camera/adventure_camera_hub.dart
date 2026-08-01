@@ -186,27 +186,41 @@ class AdventureCameraHub {
     _zones.reset();
     _aggressive.reset();
     try {
-      await _ensureConnected();
-      if (!_controller.status.isReady) return;
-
-      // Zone-only mode: stay ready until a start geofence (or aggressive).
-      final waitForZone = _zonesEnabled && _hasStartZones && !_syncWithRide;
-      if (waitForZone) {
+      // Start geofences always gate shutter start (even if sync-with-ride is on).
+      // Also skip BLE connect here to save phone + camera battery until needed.
+      final zonesGateStart = _zonesEnabled && _hasStartZones;
+      if (zonesGateStart) {
         _emit(
           AdventureCameraStatus(
-            phase: AdventureCameraPhase.ready,
+            phase: AdventureCameraPhase.idle,
             deviceName: _status.deviceName,
-            message: 'Waiting for map start zone…',
+            message:
+                'Waiting for map start zone — camera stays off to save battery',
             memberCount: _status.memberCount,
-            readyCount: _status.readyCount,
-            recordingCount: _status.recordingCount,
+            readyCount: 0,
+            recordingCount: 0,
           ),
         );
         return;
       }
 
       if (_syncWithRide) {
+        await _ensureConnected();
+        if (!_controller.status.isReady) return;
         await _ensureStartRecording();
+        return;
+      }
+
+      // Aggressive-only: stay disconnected until motion triggers.
+      if (_aggressiveEnabled) {
+        _emit(
+          AdventureCameraStatus(
+            phase: AdventureCameraPhase.idle,
+            deviceName: _status.deviceName,
+            message: 'Waiting for aggressive riding — camera off',
+            memberCount: _status.memberCount,
+          ),
+        );
       }
     } catch (e) {
       debugPrint('AdventureCamera onRideStarted: $e');
@@ -227,6 +241,9 @@ class AdventureCameraHub {
     if (!_syncWithRide && !_zonesEnabled && !_aggressiveEnabled) return;
     try {
       await _ensureStopRecording();
+      // Drop BLE when the ride ends — big battery win vs keep-alive forever.
+      await disconnect();
+      _emit(_controller.status);
     } catch (e) {
       debugPrint('AdventureCamera onRideStopped: $e');
     }
@@ -243,6 +260,8 @@ class AdventureCameraHub {
 
   Future<void> onRideResumed() async {
     if (!_labEnabled || !_syncWithRide || !_syncPause) return;
+    // Don't resume shutter if start zones gate recording.
+    if (_zonesEnabled && _hasStartZones) return;
     try {
       await _ensureStartRecording();
     } catch (e) {
@@ -268,6 +287,21 @@ class AdventureCameraHub {
         await _ensureStartRecording();
       } else if (action == CameraZoneAction.stop) {
         await _ensureStopRecording();
+        // Disconnect between clips when start zones will re-arm later.
+        if (_hasStartZones) {
+          await disconnect();
+          _emit(
+            AdventureCameraStatus(
+              phase: AdventureCameraPhase.idle,
+              deviceName: _status.deviceName,
+              message:
+                  'Stopped at zone — camera off until next start point',
+              memberCount: _status.memberCount,
+              readyCount: 0,
+              recordingCount: 0,
+            ),
+          );
+        }
       }
     }
 

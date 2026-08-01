@@ -41,7 +41,7 @@ void main() {
     expect(hub.status.phase, AdventureCameraPhase.recording);
 
     await hub.onRideStopped();
-    expect(hub.status.phase, AdventureCameraPhase.ready);
+    expect(hub.status.phase, AdventureCameraPhase.idle);
     await hub.dispose();
   });
 
@@ -73,13 +73,42 @@ void main() {
     ]);
 
     await hub.onRideStarted();
-    expect(hub.status.phase, AdventureCameraPhase.ready);
+    expect(hub.status.phase, AdventureCameraPhase.idle);
 
     await hub.onLiveSample(latitude: 19.4, longitude: -99.1, speedKmh: 40);
     expect(hub.status.phase, AdventureCameraPhase.recording);
 
     await hub.onLiveSample(latitude: 19.41, longitude: -99.11, speedKmh: 40);
-    expect(hub.status.phase, AdventureCameraPhase.ready);
+    expect(hub.status.phase, AdventureCameraPhase.idle);
+    await hub.dispose();
+  });
+
+  test('start zones gate shutter even when sync-with-ride is on', () async {
+    SharedPreferences.setMockInitialValues({
+      AdventureCameraPrefs.labEnabledKey: true,
+      AdventureCameraPrefs.syncWithRideKey: true,
+      AdventureCameraPrefs.zonesEnabledKey: true,
+      AdventureCameraPrefs.backendKey: AdventureCameraPrefs.backendSimulated,
+    });
+
+    final hub = AdventureCameraHub();
+    await hub.hydrate();
+    await hub.setZones([
+      const CameraZone(
+        id: 's1',
+        latitude: 19.4,
+        longitude: -99.1,
+        action: CameraZoneAction.start,
+        radiusMeters: 50,
+      ),
+    ]);
+
+    await hub.onRideStarted();
+    expect(hub.status.phase, AdventureCameraPhase.idle);
+    expect(hub.status.isRecording, isFalse);
+
+    await hub.onLiveSample(latitude: 19.4, longitude: -99.1, speedKmh: 40);
+    expect(hub.status.phase, AdventureCameraPhase.recording);
     await hub.dispose();
   });
 
@@ -107,7 +136,7 @@ void main() {
     expect(hub.status.memberCount, 2);
 
     await hub.onRideStopped();
-    expect(hub.status.phase, AdventureCameraPhase.ready);
+    expect(hub.status.phase, AdventureCameraPhase.idle);
     await hub.dispose();
   });
 

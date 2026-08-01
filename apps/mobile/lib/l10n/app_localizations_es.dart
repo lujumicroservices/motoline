@@ -1028,7 +1028,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get labAdventureCameraSyncRideHelp =>
-      'Inicia/detiene la cámara al empezar/terminar la ruta';
+      'Inicia/detiene con toda la ruta. Si hay zonas de inicio en el mapa, ellas mandan — la cámara espera el punto de inicio.';
 
   @override
   String get labAdventureCameraSyncPause => 'Seguir pausa auto';
@@ -1078,7 +1078,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get labAdventureCameraZonesEnableHelp =>
-      'Inicia o detiene la cámara al entrar en geocercas del mapa (puedes poner varias)';
+      'Inicia/detiene al entrar en geocercas. Los puntos de inicio controlan la grabación (cámara apagada hasta llegar).';
 
   @override
   String get labAdventureCameraZonesEdit => 'Editar zonas de cámara';
@@ -1126,8 +1126,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Añade varias GoPro — el obturador se envía a todas las cámaras activas a la vez.';
 
   @override
-  String get labAdventureCameraGroupEmpty =>
-      'Aún no hay cámaras en el grupo.';
+  String get labAdventureCameraGroupEmpty => 'Aún no hay cámaras en el grupo.';
 
   @override
   String get labAdventureCameraGroupAdd => 'Añadir GoPro';
