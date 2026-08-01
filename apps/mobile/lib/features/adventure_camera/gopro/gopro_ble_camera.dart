@@ -365,6 +365,18 @@ class GoProBleCameraController implements AdventureCameraController {
       await settings.write(GoProBleUuids.keepAlive, withoutResponse: false);
     } catch (e) {
       debugPrint('GoPro keep-alive: $e');
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.ble,
+          eventType: 'keep_alive_fail',
+          payload: {
+            'device': _status.deviceName,
+            'label': label,
+            'remote_id': remoteId,
+            'error': '$e',
+          },
+        ),
+      );
     }
   }
 
@@ -408,9 +420,27 @@ class GoProBleCameraController implements AdventureCameraController {
     await _writeShutter(on: false, retries: 2);
   }
 
+  Map<String, dynamic> _bleDevicePayload([Map<String, dynamic>? extra]) => {
+        'device': _status.deviceName,
+        'label': label,
+        'remote_id': remoteId,
+        ...?extra,
+      };
+
   Future<void> _writeShutter({required bool on, int retries = 2}) async {
     final cmd = _commandRequest;
     if (cmd == null) {
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.ble,
+          eventType: on ? 'shutter_on_fail' : 'shutter_off_fail',
+          payload: _bleDevicePayload({
+            'ok': false,
+            'reason': 'not_connected',
+            'on': on,
+          }),
+        ),
+      );
       _emit(
         AdventureCameraStatus(
           phase: AdventureCameraPhase.error,
@@ -423,6 +453,18 @@ class GoProBleCameraController implements AdventureCameraController {
 
     Object? lastError;
     for (var attempt = 1; attempt <= retries; attempt++) {
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.ble,
+          eventType: 'shutter_command',
+          payload: _bleDevicePayload({
+            'on': on,
+            'attempt': attempt,
+            'retries': retries,
+            'cold_start_grace': _needsColdStartGrace,
+          }),
+        ),
+      );
       try {
         if (on && _needsColdStartGrace && attempt > 1) {
           await _sendKeepAlive();
@@ -439,10 +481,11 @@ class GoProBleCameraController implements AdventureCameraController {
           RiderTelemetryService.instance.log(
             category: TelemetryCategory.ble,
             eventType: on ? 'shutter_on_ok' : 'shutter_off_ok',
-            payload: {
-              'device': _status.deviceName,
+            payload: _bleDevicePayload({
+              'ok': true,
+              'on': on,
               'attempt': attempt,
-            },
+            }),
           ),
         );
         _emit(
@@ -462,13 +505,13 @@ class GoProBleCameraController implements AdventureCameraController {
           RiderTelemetryService.instance.log(
             category: TelemetryCategory.ble,
             eventType: 'shutter_retry',
-            payload: {
+            payload: _bleDevicePayload({
+              'ok': false,
               'on': on,
               'attempt': attempt,
               'retries': retries,
               'error': '$e',
-              'device': _status.deviceName,
-            },
+            }),
           ),
         );
         if (attempt < retries) {
@@ -480,15 +523,15 @@ class GoProBleCameraController implements AdventureCameraController {
     }
 
     unawaited(
-      RiderTelemetryService.instance.error(
-        where: 'ble.shutter',
-        error: lastError ?? 'unknown',
+      RiderTelemetryService.instance.log(
         category: TelemetryCategory.ble,
-        payload: {
+        eventType: on ? 'shutter_on_fail' : 'shutter_off_fail',
+        payload: _bleDevicePayload({
+          'ok': false,
           'on': on,
           'retries': retries,
-          'device': _status.deviceName,
-        },
+          'error': '${lastError ?? 'unknown'}',
+        }),
       ),
     );
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../core/services/rider_telemetry_service.dart';
 import 'camera_controller.dart';
 import 'models/adventure_camera_status.dart';
 import 'models/camera_member.dart';
@@ -121,26 +122,193 @@ class CameraGroupController implements AdventureCameraController {
 
   @override
   Future<void> startRecording() async {
-    final ready = _slots.entries
-        .where((e) => e.value.status.isReady)
-        .toList(growable: false);
+    final ready = <MapEntry<String, AdventureCameraController>>[];
+    final skipped = <Map<String, dynamic>>[];
+    for (final member in enabledMembers) {
+      final c = _slots[member.id];
+      if (c == null) {
+        skipped.add({
+          'member_id': member.id,
+          'name': member.displayName,
+          'reason': 'no_controller',
+        });
+        continue;
+      }
+      if (c.status.isReady) {
+        ready.add(MapEntry(member.id, c));
+      } else if (c.status.isRecording) {
+        skipped.add({
+          'member_id': member.id,
+          'name': member.displayName,
+          'reason': 'already_recording',
+          'phase': c.status.phase.name,
+        });
+      } else {
+        skipped.add({
+          'member_id': member.id,
+          'name': member.displayName,
+          'reason': 'not_ready',
+          'phase': c.status.phase.name,
+        });
+      }
+    }
+    if (skipped.isNotEmpty) {
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.ble,
+          eventType: 'shutter_group_skip',
+          payload: {
+            'on': true,
+            'skipped': skipped,
+            'ready_count': ready.length,
+            'member_count': enabledMembers.length,
+          },
+        ),
+      );
+    }
     if (ready.isEmpty) {
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.ble,
+          eventType: 'shutter_on_fail',
+          payload: {
+            'ok': false,
+            'reason': 'no_ready_cameras',
+            'member_count': enabledMembers.length,
+            'skipped': skipped,
+          },
+        ),
+      );
       _emitAggregate();
       return;
     }
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.ble,
+        eventType: 'shutter_group_command',
+        payload: {
+          'on': true,
+          'targets': [
+            for (final e in ready)
+              {
+                'member_id': e.key,
+                'device': e.value.status.deviceName,
+                'phase': e.value.status.phase.name,
+              },
+          ],
+          'target_count': ready.length,
+          'member_count': enabledMembers.length,
+        },
+      ),
+    );
     await Future.wait([
       for (final e in ready) e.value.startRecording(),
     ]);
     _emitAggregate();
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.ble,
+        eventType: 'shutter_group_result',
+        payload: {
+          'on': true,
+          'ok': (_status.recordingCount ?? 0) > 0,
+          'recording_count': _status.recordingCount,
+          'ready_count': _status.readyCount,
+          'member_count': _status.memberCount,
+          'phase': _status.phase.name,
+          'message': _status.message,
+        },
+      ),
+    );
   }
 
   @override
   Future<void> stopRecording() async {
+    final targets = <MapEntry<String, AdventureCameraController>>[];
+    final skipped = <Map<String, dynamic>>[];
+    for (final member in enabledMembers) {
+      final c = _slots[member.id];
+      if (c == null) continue;
+      if (c.status.isReady || c.status.isRecording) {
+        targets.add(MapEntry(member.id, c));
+      } else {
+        skipped.add({
+          'member_id': member.id,
+          'name': member.displayName,
+          'reason': 'idle_or_error',
+          'phase': c.status.phase.name,
+        });
+      }
+    }
+    if (skipped.isNotEmpty) {
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.ble,
+          eventType: 'shutter_group_skip',
+          payload: {
+            'on': false,
+            'skipped': skipped,
+            'target_count': targets.length,
+            'member_count': enabledMembers.length,
+          },
+        ),
+      );
+    }
+    if (targets.isEmpty) {
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.ble,
+          eventType: 'shutter_off_fail',
+          payload: {
+            'ok': false,
+            'reason': 'no_targets',
+            'member_count': enabledMembers.length,
+            'skipped': skipped,
+          },
+        ),
+      );
+      _emitAggregate();
+      return;
+    }
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.ble,
+        eventType: 'shutter_group_command',
+        payload: {
+          'on': false,
+          'targets': [
+            for (final e in targets)
+              {
+                'member_id': e.key,
+                'device': e.value.status.deviceName,
+                'phase': e.value.status.phase.name,
+              },
+          ],
+          'target_count': targets.length,
+          'member_count': enabledMembers.length,
+        },
+      ),
+    );
     await Future.wait([
-      for (final c in _slots.values)
-        if (c.status.isReady || c.status.isRecording) c.stopRecording(),
+      for (final e in targets) e.value.stopRecording(),
     ]);
     _emitAggregate();
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.ble,
+        eventType: 'shutter_group_result',
+        payload: {
+          'on': false,
+          'ok': (_status.recordingCount ?? 0) == 0 &&
+              _status.phase != AdventureCameraPhase.error,
+          'recording_count': _status.recordingCount,
+          'ready_count': _status.readyCount,
+          'member_count': _status.memberCount,
+          'phase': _status.phase.name,
+          'message': _status.message,
+        },
+      ),
+    );
   }
 
   @override

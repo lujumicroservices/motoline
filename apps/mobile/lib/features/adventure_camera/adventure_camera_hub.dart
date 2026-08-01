@@ -531,14 +531,18 @@ class AdventureCameraHub {
     }
     await _controller.startRecording();
     _emit(_controller.status);
+    final started = _controller.status.isRecording;
     unawaited(
       _telemetry.log(
-        eventType: 'recording_start',
+        eventType: started ? 'recording_start_ok' : 'recording_start_fail',
         payload: {
+          'ok': started,
           'phase': _controller.status.phase.name,
           'device': _controller.status.deviceName,
+          'message': _controller.status.message,
           'recording_count': _controller.status.recordingCount,
           'member_count': _controller.status.memberCount,
+          'ready_count': _controller.status.readyCount,
         },
       ),
     );
@@ -549,12 +553,18 @@ class AdventureCameraHub {
         _controller.status.isReady) {
       await _controller.stopRecording();
       _emit(_controller.status);
+      final stopped = !_controller.status.isRecording &&
+          _controller.status.phase != AdventureCameraPhase.error;
       unawaited(
         _telemetry.log(
-          eventType: 'recording_stop',
+          eventType: stopped ? 'recording_stop_ok' : 'recording_stop_fail',
           payload: {
+            'ok': stopped,
             'phase': _controller.status.phase.name,
             'device': _controller.status.deviceName,
+            'message': _controller.status.message,
+            'recording_count': _controller.status.recordingCount,
+            'member_count': _controller.status.memberCount,
           },
         ),
       );
