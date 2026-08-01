@@ -223,7 +223,7 @@ class HomeScreen extends ConsumerWidget {
               onStart: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const ActiveRideScreen(),
+                    builder: (_) => const ActiveRideScreen(autoStart: false),
                   ),
                 ).then((_) {
                   ref.invalidate(ridesListProvider);
@@ -379,66 +379,71 @@ class _HomeActionDock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final compact = ButtonStyle(
-      visualDensity: VisualDensity.compact,
+    final glove = ButtonStyle(
       padding: const WidgetStatePropertyAll(
-        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       ),
-      minimumSize: const WidgetStatePropertyAll(Size(0, 40)),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      minimumSize: const WidgetStatePropertyAll(Size(0, 72)),
+      tapTargetSize: MaterialTapTargetSize.padded,
       textStyle: WidgetStatePropertyAll(
-        GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+        GoogleFonts.exo2(fontWeight: FontWeight.w800, fontSize: 18),
       ),
     );
 
     return Material(
       color: AppTheme.asphaltElevated,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: FilledButton.icon(
-                onPressed: onStart,
-                style: compact.copyWith(
-                  backgroundColor: const WidgetStatePropertyAll(AppTheme.mist),
-                  foregroundColor:
-                      const WidgetStatePropertyAll(AppTheme.asphalt),
-                ),
-                icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                label: Text(l10n.startRide),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              flex: 2,
-              child: OutlinedButton.icon(
-                onPressed: onArmToggle,
-                style: compact.copyWith(
-                  foregroundColor: WidgetStatePropertyAll(
-                    armed ? AppTheme.lineHot : AppTheme.mist,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: FilledButton.icon(
+                  onPressed: onStart,
+                  style: glove.copyWith(
+                    backgroundColor:
+                        const WidgetStatePropertyAll(AppTheme.mist),
+                    foregroundColor:
+                        const WidgetStatePropertyAll(AppTheme.asphalt),
                   ),
-                  side: WidgetStatePropertyAll(
-                    BorderSide(
-                      color: armed ? AppTheme.lineHot : AppTheme.steel,
+                  icon: const Icon(Icons.play_arrow_rounded, size: 32),
+                  label: Text(l10n.startRide),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: OutlinedButton.icon(
+                  onPressed: onArmToggle,
+                  style: glove.copyWith(
+                    foregroundColor: WidgetStatePropertyAll(
+                      armed ? AppTheme.lineHot : AppTheme.mist,
+                    ),
+                    side: WidgetStatePropertyAll(
+                      BorderSide(
+                        width: 2,
+                        color: armed ? AppTheme.lineHot : AppTheme.steel,
+                      ),
                     ),
                   ),
-                ),
-                icon: Icon(
-                  armed
-                      ? Icons.motion_photos_off_outlined
-                      : Icons.motion_photos_auto_outlined,
-                  size: 16,
-                ),
-                label: Text(
-                  armed ? l10n.disarmAutoRide : l10n.armAutoRide,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  icon: Icon(
+                    armed
+                        ? Icons.motion_photos_off_outlined
+                        : Icons.motion_photos_auto_outlined,
+                    size: 26,
+                  ),
+                  label: Text(
+                    armed ? l10n.disarmAutoRide : l10n.armAutoRide,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -2099,8 +2099,44 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraZonesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Elige Inicio o Parada y toca el mapa. Mantén pulsado un marcador para borrarlo. Apaga “Grabar con el ride” para grabar solo en las zonas.'**
+  /// **'Toca para colocar Inicio, luego toca de nuevo para la Parada de ese par. Mantén pulsado un marcador para borrar el par. Una Parada solo actúa después de su Inicio ligado.'**
   String get labAdventureCameraZonesHelp;
+
+  /// No description provided for @labAdventureCameraZonesPlaceStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente toque: Inicio ▶'**
+  String get labAdventureCameraZonesPlaceStart;
+
+  /// No description provided for @labAdventureCameraZonesPlaceStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente toque: Parada ■ de este par'**
+  String get labAdventureCameraZonesPlaceStop;
+
+  /// No description provided for @labAdventureCameraZonesPairs.
+  ///
+  /// In es, this message translates to:
+  /// **'Pares'**
+  String get labAdventureCameraZonesPairs;
+
+  /// No description provided for @rideDeckTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Panel del ride'**
+  String get rideDeckTitle;
+
+  /// No description provided for @rideDeckHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Conecta las cámaras aquí antes de salir. Inicia el ride cuando estés listo — el GPS empieza entonces.'**
+  String get rideDeckHelp;
+
+  /// No description provided for @startRideNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar ride ahora'**
+  String get startRideNow;
 
   /// No description provided for @labAdventureCameraZoneStart.
   ///

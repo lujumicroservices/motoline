@@ -62,6 +62,7 @@ void main() {
         longitude: -99.1,
         action: CameraZoneAction.start,
         radiusMeters: 50,
+        partnerId: 'e1',
       ),
       const CameraZone(
         id: 'e1',
@@ -69,6 +70,7 @@ void main() {
         longitude: -99.11,
         action: CameraZoneAction.stop,
         radiusMeters: 50,
+        partnerId: 's1',
       ),
     ]);
 
@@ -149,13 +151,54 @@ void main() {
           longitude: 0,
           action: CameraZoneAction.start,
           radiusMeters: 40,
+          partnerId: 'b',
         ),
       ],
     );
-    expect(d.feed(latitude: 0, longitude: 0), CameraZoneAction.start);
+    expect(d.feed(latitude: 0, longitude: 0)?.action, CameraZoneAction.start);
     expect(d.feed(latitude: 0, longitude: 0), isNull);
     expect(d.feed(latitude: 1, longitude: 1), isNull);
-    expect(d.feed(latitude: 0, longitude: 0), CameraZoneAction.start);
+    expect(d.feed(latitude: 0, longitude: 0)?.action, CameraZoneAction.start);
+  });
+
+  test('stop only fires after its partner start', () {
+    final d = CameraZoneDetector(
+      zones: const [
+        CameraZone(
+          id: 's1',
+          latitude: 0,
+          longitude: 0,
+          action: CameraZoneAction.start,
+          radiusMeters: 40,
+          partnerId: 'e1',
+        ),
+        CameraZone(
+          id: 'e1',
+          latitude: 1,
+          longitude: 1,
+          action: CameraZoneAction.stop,
+          radiusMeters: 40,
+          partnerId: 's1',
+        ),
+        CameraZone(
+          id: 'e2',
+          latitude: 2,
+          longitude: 2,
+          action: CameraZoneAction.stop,
+          radiusMeters: 40,
+          partnerId: 's2',
+        ),
+      ],
+    );
+    // Unrelated stop before any start → ignored.
+    expect(d.feed(latitude: 2, longitude: 2), isNull);
+    // Partner stop before its start → ignored.
+    expect(d.feed(latitude: 1, longitude: 1), isNull);
+    expect(d.feed(latitude: 0, longitude: 0)?.action, CameraZoneAction.start);
+    expect(d.feed(latitude: 1, longitude: 1)?.action, CameraZoneAction.stop);
+    // Same stop again without re-arming start → ignored.
+    expect(d.feed(latitude: 0.5, longitude: 0.5), isNull);
+    expect(d.feed(latitude: 1, longitude: 1), isNull);
   });
 
   test('aggressive requires 85+ and constant lean changes, then pauses when calm', () {

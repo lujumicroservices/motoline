@@ -1110,7 +1110,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labAdventureCameraZonesHelp =>
-      'Choose Start or Stop, then tap the map. Long-press a marker to remove it. Turn off “Record with ride” to record only inside zones.';
+      'Tap to place Start, then tap again for that Start’s Stop partner. Long-press a marker to remove the whole pair. A Stop only works after its linked Start was hit.';
+
+  @override
+  String get labAdventureCameraZonesPlaceStart => 'Next tap: Start ▶';
+
+  @override
+  String get labAdventureCameraZonesPlaceStop =>
+      'Next tap: Stop ■ for this pair';
+
+  @override
+  String get labAdventureCameraZonesPairs => 'Pairs';
+
+  @override
+  String get rideDeckTitle => 'Ride deck';
+
+  @override
+  String get rideDeckHelp =>
+      'Connect cameras here before you roll. Start the ride when you’re ready — GPS recording begins then.';
+
+  @override
+  String get startRideNow => 'Start ride now';
 
   @override
   String get labAdventureCameraZoneStart => 'Start';

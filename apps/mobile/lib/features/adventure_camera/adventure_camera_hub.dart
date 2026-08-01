@@ -318,22 +318,81 @@ class AdventureCameraHub {
   }
 
   Future<void> onRidePaused() async {
+    unawaited(
+      _telemetry.log(
+        eventType: 'ride_paused',
+        payload: {
+          'sync_with_ride': _syncWithRide,
+          'sync_pause': _syncPause,
+          'zones_enabled': _zonesEnabled,
+          'aggressive_enabled': _aggressiveEnabled,
+          'camera_will_stop': _labEnabled && _syncWithRide && _syncPause,
+          'was_recording': _controller.status.isRecording,
+        },
+      ),
+    );
     if (!_labEnabled || !_syncWithRide || !_syncPause) return;
     try {
       await _ensureStopRecording();
+      unawaited(
+        _telemetry.log(
+          eventType: 'recording_pause',
+          payload: {'reason': 'ride_auto_pause'},
+        ),
+      );
     } catch (e) {
       debugPrint('AdventureCamera onRidePaused: $e');
+      unawaited(
+        _telemetry.log(
+          eventType: 'error',
+          payload: {'where': 'ride_paused', 'error': '$e'},
+        ),
+      );
     }
   }
 
   Future<void> onRideResumed() async {
+    final gatedByZones = _zonesEnabled && _hasStartZones;
+    unawaited(
+      _telemetry.log(
+        eventType: 'ride_resumed',
+        payload: {
+          'sync_with_ride': _syncWithRide,
+          'sync_pause': _syncPause,
+          'zones_enabled': _zonesEnabled,
+          'gated_by_start_zones': gatedByZones,
+          'camera_will_resume':
+              _labEnabled && _syncWithRide && _syncPause && !gatedByZones,
+        },
+      ),
+    );
     if (!_labEnabled || !_syncWithRide || !_syncPause) return;
     // Don't resume shutter if start zones gate recording.
-    if (_zonesEnabled && _hasStartZones) return;
+    if (gatedByZones) {
+      unawaited(
+        _telemetry.log(
+          eventType: 'recording_resume_skipped',
+          payload: {'reason': 'waiting_start_zone'},
+        ),
+      );
+      return;
+    }
     try {
       await _ensureStartRecording();
+      unawaited(
+        _telemetry.log(
+          eventType: 'recording_resume',
+          payload: {'reason': 'ride_auto_resume'},
+        ),
+      );
     } catch (e) {
       debugPrint('AdventureCamera onRideResumed: $e');
+      unawaited(
+        _telemetry.log(
+          eventType: 'error',
+          payload: {'where': 'ride_resumed', 'error': '$e'},
+        ),
+      );
     }
   }
 
@@ -349,23 +408,31 @@ class AdventureCameraHub {
     final now = timestamp ?? DateTime.now();
 
     if (_zonesEnabled && _zones.zones.isNotEmpty) {
-      final action = _zones.feed(latitude: latitude, longitude: longitude);
-      if (action == CameraZoneAction.start) {
+      final hit = _zones.feed(latitude: latitude, longitude: longitude);
+      if (hit?.action == CameraZoneAction.start) {
         unawaited(
           _telemetry.log(
             eventType: 'zone_start',
             latitude: latitude,
             longitude: longitude,
+            payload: {
+              'zone_id': hit!.zoneId,
+              'partner_id': hit.partnerId,
+            },
           ),
         );
         await _ensureConnected();
         await _ensureStartRecording();
-      } else if (action == CameraZoneAction.stop) {
+      } else if (hit?.action == CameraZoneAction.stop) {
         unawaited(
           _telemetry.log(
             eventType: 'zone_stop',
             latitude: latitude,
             longitude: longitude,
+            payload: {
+              'zone_id': hit!.zoneId,
+              'partner_id': hit.partnerId,
+            },
           ),
         );
         await _ensureStopRecording();

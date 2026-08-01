@@ -9,6 +9,7 @@ class CameraZone {
     required this.action,
     this.radiusMeters = 40,
     this.label,
+    this.partnerId,
   });
 
   final String id;
@@ -18,6 +19,10 @@ class CameraZone {
   final double radiusMeters;
   final String? label;
 
+  /// Linked zone id: each Start must have a Stop partner (and vice versa).
+  /// A Stop only fires after its partner Start was entered.
+  final String? partnerId;
+
   CameraZone copyWith({
     String? id,
     double? latitude,
@@ -25,6 +30,8 @@ class CameraZone {
     CameraZoneAction? action,
     double? radiusMeters,
     String? label,
+    String? partnerId,
+    bool clearPartnerId = false,
   }) {
     return CameraZone(
       id: id ?? this.id,
@@ -33,6 +40,7 @@ class CameraZone {
       action: action ?? this.action,
       radiusMeters: radiusMeters ?? this.radiusMeters,
       label: label ?? this.label,
+      partnerId: clearPartnerId ? null : (partnerId ?? this.partnerId),
     );
   }
 
@@ -43,6 +51,7 @@ class CameraZone {
         'action': action.name,
         'radius_m': radiusMeters,
         if (label != null) 'label': label,
+        if (partnerId != null) 'partner_id': partnerId,
       };
 
   factory CameraZone.fromJson(Map<String, dynamic> json) {
@@ -56,6 +65,42 @@ class CameraZone {
           : CameraZoneAction.start,
       radiusMeters: (json['radius_m'] as num?)?.toDouble() ?? 40,
       label: json['label'] as String?,
+      partnerId: json['partner_id'] as String?,
     );
   }
+}
+
+/// Auto-link orphan starts/stops in list order (legacy prefs migration).
+List<CameraZone> pairOrphanCameraZones(List<CameraZone> zones) {
+  final byId = {for (final z in zones) z.id: z};
+  final unpairedStarts = zones
+      .where(
+        (z) =>
+            z.action == CameraZoneAction.start &&
+            (z.partnerId == null || !byId.containsKey(z.partnerId)),
+      )
+      .toList();
+  final unpairedStops = zones
+      .where(
+        (z) =>
+            z.action == CameraZoneAction.stop &&
+            (z.partnerId == null || !byId.containsKey(z.partnerId)),
+      )
+      .toList();
+
+  if (unpairedStarts.isEmpty || unpairedStops.isEmpty) {
+    return zones;
+  }
+
+  final next = {for (final z in zones) z.id: z};
+  final n = unpairedStarts.length < unpairedStops.length
+      ? unpairedStarts.length
+      : unpairedStops.length;
+  for (var i = 0; i < n; i++) {
+    final s = unpairedStarts[i];
+    final e = unpairedStops[i];
+    next[s.id] = s.copyWith(partnerId: e.id);
+    next[e.id] = e.copyWith(partnerId: s.id);
+  }
+  return [for (final z in zones) next[z.id]!];
 }

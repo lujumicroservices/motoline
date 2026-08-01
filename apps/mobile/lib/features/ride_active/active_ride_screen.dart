@@ -15,6 +15,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../adventure_camera/widgets/adventure_camera_ride_controls.dart';
 import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../ride_detail/ride_detail_screen.dart';
@@ -162,8 +163,14 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final loopStateAsync = _isLoop ? ref.watch(loopSessionStateProvider) : null;
     final loopState = loopStateAsync?.valueOrNull;
 
+    final isRecording = recorder.isRecording;
+    final staging = !widget.autoStart &&
+        !isRecording &&
+        !_starting &&
+        _startError == null;
+
     return PopScope(
-      canPop: !_starting && !recorder.isRecording,
+      canPop: !_starting && !isRecording,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (_starting) return;
@@ -174,39 +181,42 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           title: Text(
             _starting
                 ? l10n.starting
-                : _isLoop
-                    ? l10n.loopMode
-                    : l10n.recording,
+                : staging
+                    ? l10n.rideDeckTitle
+                    : _isLoop
+                        ? l10n.loopMode
+                        : l10n.recording,
           ),
           automaticallyImplyLeading: false,
-          leading: (_starting || recorder.isRecording)
+          leading: (_starting || isRecording)
               ? null
               : IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
           actions: [
-            if (!_starting && recorder.isRecording) ...[
+            if (!_starting && (isRecording || staging)) ...[
               const AdventureCameraStatusChip(),
-              if (isPaused)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _StatusChip(
-                    label: l10n.pausedLabel,
-                    color: AppTheme.lineHot,
-                    icon: Icons.pause_circle_outline,
+              if (isRecording)
+                if (isPaused)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _StatusChip(
+                      label: l10n.pausedLabel,
+                      color: AppTheme.lineHot,
+                      icon: Icons.pause_circle_outline,
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _StatusChip(
+                      label: l10n.live,
+                      color: AppTheme.signal,
+                      icon: null,
+                      dotted: true,
+                    ),
                   ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _StatusChip(
-                    label: l10n.live,
-                    color: AppTheme.signal,
-                    icon: null,
-                    dotted: true,
-                  ),
-                ),
             ],
           ],
         ),
@@ -224,7 +234,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                     onRetry: _bootstrap,
                     onBack: () => Navigator.of(context).pop(),
                   )
-                : Column(
+                : staging
+                    ? _RideDeckBody(onStartRide: _bootstrap)
+                    : Column(
                     children: [
                       if (suggestEnd)
                         _SuggestEndBanner(
@@ -533,6 +545,52 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         SnackBar(content: Text('$e')),
       );
     }
+  }
+}
+
+class _RideDeckBody extends StatelessWidget {
+  const _RideDeckBody({required this.onStartRide});
+
+  final Future<void> Function() onStartRide;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.rideDeckHelp,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 15,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const AdventureCameraRideControls(),
+            const Spacer(),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.mist,
+                foregroundColor: AppTheme.asphalt,
+                minimumSize: const Size.fromHeight(72),
+                textStyle: GoogleFonts.exo2(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
+              ),
+              onPressed: () => onStartRide(),
+              icon: const Icon(Icons.play_arrow_rounded, size: 36),
+              label: Text(l10n.startRideNow),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

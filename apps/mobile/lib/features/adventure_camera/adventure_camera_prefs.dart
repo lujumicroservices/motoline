@@ -95,12 +95,13 @@ class AdventureCameraPrefs {
     if (raw == null || raw.isEmpty) return const [];
     try {
       final list = jsonDecode(raw) as List<dynamic>;
-      return [
+      final parsed = [
         for (final item in list)
           if (item is Map<String, dynamic>) CameraZone.fromJson(item)
           else if (item is Map)
             CameraZone.fromJson(Map<String, dynamic>.from(item)),
       ];
+      return pairOrphanCameraZones(parsed);
     } catch (_) {
       return const [];
     }
@@ -108,9 +109,10 @@ class AdventureCameraPrefs {
 
   static Future<void> setZones(List<CameraZone> zones) async {
     final p = await SharedPreferences.getInstance();
+    final paired = pairOrphanCameraZones(zones);
     await p.setString(
       zonesJsonKey,
-      jsonEncode([for (final z in zones) z.toJson()]),
+      jsonEncode([for (final z in paired) z.toJson()]),
     );
   }
 

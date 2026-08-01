@@ -1116,7 +1116,27 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get labAdventureCameraZonesHelp =>
-      'Elige Inicio o Parada y toca el mapa. Mantén pulsado un marcador para borrarlo. Apaga “Grabar con el ride” para grabar solo en las zonas.';
+      'Toca para colocar Inicio, luego toca de nuevo para la Parada de ese par. Mantén pulsado un marcador para borrar el par. Una Parada solo actúa después de su Inicio ligado.';
+
+  @override
+  String get labAdventureCameraZonesPlaceStart => 'Siguiente toque: Inicio ▶';
+
+  @override
+  String get labAdventureCameraZonesPlaceStop =>
+      'Siguiente toque: Parada ■ de este par';
+
+  @override
+  String get labAdventureCameraZonesPairs => 'Pares';
+
+  @override
+  String get rideDeckTitle => 'Panel del ride';
+
+  @override
+  String get rideDeckHelp =>
+      'Conecta las cámaras aquí antes de salir. Inicia el ride cuando estés listo — el GPS empieza entonces.';
+
+  @override
+  String get startRideNow => 'Iniciar ride ahora';
 
   @override
   String get labAdventureCameraZoneStart => 'Inicio';

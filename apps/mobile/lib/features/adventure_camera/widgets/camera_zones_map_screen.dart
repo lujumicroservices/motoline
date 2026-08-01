@@ -10,7 +10,7 @@ import '../../../theme/app_theme.dart';
 import '../../maps/live_gps_map_mixin.dart';
 import '../models/camera_zone.dart';
 
-/// Fullscreen map to place multiple GoPro start/stop geofences on a track.
+/// Fullscreen map to place paired GoPro start/stop geofences on a track.
 class CameraZonesMapScreen extends StatefulWidget {
   const CameraZonesMapScreen({
     super.key,
@@ -31,12 +31,12 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
   final _uuid = const Uuid();
 
   late List<CameraZone> _zones;
-  CameraZoneAction _placeAction = CameraZoneAction.start;
+  String? _pendingStartId;
 
   @override
   void initState() {
     super.initState();
-    _zones = List.of(widget.initialZones);
+    _zones = pairOrphanCameraZones(List.of(widget.initialZones));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       startLiveGps(map: _map, centerOnce: widget.trackPoints.isEmpty);
     });
@@ -48,21 +48,63 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
     super.dispose();
   }
 
+  int _pairIndexFor(CameraZone z) {
+    final starts = _zones
+        .where((x) => x.action == CameraZoneAction.start)
+        .toList();
+    if (z.action == CameraZoneAction.start) {
+      final i = starts.indexWhere((s) => s.id == z.id);
+      return i < 0 ? 0 : i + 1;
+    }
+    final startId = z.partnerId;
+    final i = starts.indexWhere((s) => s.id == startId);
+    return i < 0 ? 0 : i + 1;
+  }
+
   void _onTap(TapPosition tapPosition, LatLng latlng) {
     setState(() {
-      _zones.add(
-        CameraZone(
-          id: _uuid.v4(),
-          latitude: latlng.latitude,
-          longitude: latlng.longitude,
-          action: _placeAction,
-        ),
-      );
+      if (_pendingStartId == null) {
+        final startId = _uuid.v4();
+        _zones.add(
+          CameraZone(
+            id: startId,
+            latitude: latlng.latitude,
+            longitude: latlng.longitude,
+            action: CameraZoneAction.start,
+          ),
+        );
+        _pendingStartId = startId;
+      } else {
+        final stopId = _uuid.v4();
+        final startId = _pendingStartId!;
+        _zones = [
+          for (final z in _zones)
+            if (z.id == startId) z.copyWith(partnerId: stopId) else z,
+          CameraZone(
+            id: stopId,
+            latitude: latlng.latitude,
+            longitude: latlng.longitude,
+            action: CameraZoneAction.stop,
+            partnerId: startId,
+          ),
+        ];
+        _pendingStartId = null;
+      }
     });
   }
 
   void _removeZone(String id) {
-    setState(() => _zones.removeWhere((z) => z.id == id));
+    setState(() {
+      String? partner;
+      for (final z in _zones) {
+        if (z.id == id) {
+          partner = z.partnerId;
+          break;
+        }
+      }
+      _zones.removeWhere((z) => z.id == id || z.id == partner);
+      if (_pendingStartId == id) _pendingStartId = null;
+    });
   }
 
   void _fit() {
@@ -98,11 +140,22 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
     } else if (_zones.isNotEmpty) {
       center = LatLng(_zones.first.latitude, _zones.first.longitude);
     } else {
-      center = const LatLng(19.43, -99.13);
+      center = liveGps ?? const LatLng(19.43, -99.13);
     }
 
-    final starts = _zones.where((z) => z.action == CameraZoneAction.start);
-    final stops = _zones.where((z) => z.action == CameraZoneAction.stop);
+    final starts =
+        _zones.where((z) => z.action == CameraZoneAction.start).length;
+    final pairs = _zones
+        .where(
+          (z) =>
+              z.action == CameraZoneAction.start &&
+              z.partnerId != null &&
+              _zones.any((x) => x.id == z.partnerId),
+        )
+        .length;
+    final nextHint = _pendingStartId == null
+        ? l10n.labAdventureCameraZonesPlaceStart
+        : l10n.labAdventureCameraZonesPlaceStop;
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
@@ -145,6 +198,23 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                       ),
                     ],
                   ),
+                // Pair link lines
+                PolylineLayer(
+                  polylines: [
+                    for (final z in _zones)
+                      if (z.action == CameraZoneAction.start &&
+                          z.partnerId != null)
+                        for (final stop in _zones.where((x) => x.id == z.partnerId))
+                          Polyline(
+                            points: [
+                              LatLng(z.latitude, z.longitude),
+                              LatLng(stop.latitude, stop.longitude),
+                            ],
+                            color: AppTheme.mist.withValues(alpha: 0.55),
+                            strokeWidth: 2,
+                          ),
+                  ],
+                ),
                 CircleLayer(
                   circles: [
                     for (final z in _zones)
@@ -168,8 +238,8 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                     for (final z in _zones)
                       Marker(
                         point: LatLng(z.latitude, z.longitude),
-                        width: 34,
-                        height: 34,
+                        width: 40,
+                        height: 40,
                         child: GestureDetector(
                           onLongPress: () => _removeZone(z.id),
                           child: Container(
@@ -185,9 +255,11 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                               ),
                             ),
                             child: Text(
-                              z.action == CameraZoneAction.start ? '▶' : '■',
+                              z.action == CameraZoneAction.start
+                                  ? '▶${_pairIndexFor(z)}'
+                                  : '■${_pairIndexFor(z)}',
                               style: const TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 color: AppTheme.asphalt,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -251,29 +323,20 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                             ),
                           ),
                           const SizedBox(height: 10),
-                          SegmentedButton<CameraZoneAction>(
-                            segments: [
-                              ButtonSegment(
-                                value: CameraZoneAction.start,
-                                label: Text(l10n.labAdventureCameraZoneStart),
-                                icon: const Icon(Icons.fiber_manual_record,
-                                    size: 14),
-                              ),
-                              ButtonSegment(
-                                value: CameraZoneAction.stop,
-                                label: Text(l10n.labAdventureCameraZoneStop),
-                                icon: const Icon(Icons.stop, size: 14),
-                              ),
-                            ],
-                            selected: {_placeAction},
-                            onSelectionChanged: (set) {
-                              setState(() => _placeAction = set.first);
-                            },
-                          ),
-                          const SizedBox(height: 8),
                           Text(
-                            '${l10n.labAdventureCameraZoneStart}: ${starts.length}'
-                            '  ·  ${l10n.labAdventureCameraZoneStop}: ${stops.length}',
+                            nextHint,
+                            style: GoogleFonts.exo2(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                              color: _pendingStartId == null
+                                  ? AppTheme.line
+                                  : AppTheme.signal,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${l10n.labAdventureCameraZonesPairs}: $pairs'
+                            '  ·  ${l10n.labAdventureCameraZoneStart}: $starts',
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.mist,
                               fontSize: 13,
@@ -289,7 +352,10 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                     Align(
                       alignment: Alignment.centerLeft,
                       child: TextButton.icon(
-                        onPressed: () => setState(_zones.clear),
+                        onPressed: () => setState(() {
+                          _zones.clear();
+                          _pendingStartId = null;
+                        }),
                         icon: const Icon(Icons.delete_outline, size: 18),
                         label: Text(l10n.labAdventureCameraZonesClear),
                       ),
@@ -297,7 +363,12 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: () => Navigator.of(context).pop(_zones),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52),
+                      ),
+                      onPressed: _pendingStartId != null
+                          ? null
+                          : () => Navigator.of(context).pop(_zones),
                       child: Text(l10n.labAdventureCameraZonesSave),
                     ),
                   ),
