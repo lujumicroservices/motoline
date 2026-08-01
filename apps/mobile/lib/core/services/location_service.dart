@@ -158,9 +158,19 @@ class LocationService {
   }
 
   /// Max-rate navigation stream with Android foreground service + wake lock.
-  Stream<Position> watchPositions() {
+  ///
+  /// Keep this stream alive across screen-off; do not cancel+restart it from
+  /// background (Android 12+ blocks new FGS starts when the screen is locked).
+  Stream<Position> watchPositions({
+    String notificationTitle = 'RiderLab',
+    String notificationText = 'High-precision recording…',
+  }) {
     return Geolocator.getPositionStream(
-      locationSettings: _highPrecisionSettings(forSingleShot: false),
+      locationSettings: _highPrecisionSettings(
+        forSingleShot: false,
+        notificationTitle: notificationTitle,
+        notificationText: notificationText,
+      ),
     );
   }
 
@@ -174,7 +184,11 @@ class LocationService {
     }
   }
 
-  LocationSettings _highPrecisionSettings({required bool forSingleShot}) {
+  LocationSettings _highPrecisionSettings({
+    required bool forSingleShot,
+    String notificationTitle = 'RiderLab',
+    String notificationText = 'High-precision recording…',
+  }) {
     if (!kIsWeb && Platform.isAndroid) {
       return AndroidSettings(
         // Highest priority available in geolocator.
@@ -190,9 +204,9 @@ class LocationService {
         useMSLAltitude: true,
         foregroundNotificationConfig: forSingleShot
             ? null
-            : const ForegroundNotificationConfig(
-                notificationTitle: 'RiderLab',
-                notificationText: 'High-precision recording…',
+            : ForegroundNotificationConfig(
+                notificationTitle: notificationTitle,
+                notificationText: notificationText,
                 notificationChannelName: 'Ride recording',
                 enableWakeLock: true,
                 setOngoing: true,

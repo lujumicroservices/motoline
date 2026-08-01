@@ -52,6 +52,7 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const _ArmAutoResumeOpener(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 16, 4),
               child: Column(
@@ -325,6 +326,57 @@ Future<String?> _resolveArmRouteId(WidgetRef ref) async {
   final routes = await db.listRoutes();
   if (routes.isEmpty) return null;
   return routes.first.id;
+}
+
+/// If arm auto-started while the screen was locked, open the active ride HUD
+/// when the user returns (broadcast stream events can be missed while paused).
+class _ArmAutoResumeOpener extends ConsumerStatefulWidget {
+  const _ArmAutoResumeOpener();
+
+  @override
+  ConsumerState<_ArmAutoResumeOpener> createState() =>
+      _ArmAutoResumeOpenerState();
+}
+
+class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
+    with WidgetsBindingObserver {
+  bool _opening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_openIfRecording());
+    }
+  }
+
+  Future<void> _openIfRecording() async {
+    if (_opening || !mounted) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    final recorder = ref.read(rideRecorderProvider);
+    final ride = recorder.activeRide;
+    if (!recorder.isRecording || ride == null) return;
+    _opening = true;
+    try {
+      await _openAutoStartedRide(context, ref, ride);
+    } finally {
+      _opening = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 class _HomeActionDock extends StatelessWidget {
