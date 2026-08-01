@@ -10,10 +10,11 @@ import '../db/ride_database.dart';
 import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
+import 'arm_foreground_service.dart';
 import 'lean_sensor.dart';
 import 'location_service.dart';
 import 'motion_pattern_detector.dart';
-import 'arm_foreground_service.dart';
+import 'rider_telemetry_service.dart';
 
 class ActiveRideSnapshot {
   const ActiveRideSnapshot({
@@ -79,11 +80,16 @@ class RideRecorder {
 
   final MotionPatternDetector _motion = MotionPatternDetector();
   final MotionPatternDetector _armMotion = MotionPatternDetector();
+  final RiderTelemetryService _telemetry = RiderTelemetryService.instance;
 
   StreamSubscription<Position>? _sub;
   StreamSubscription<Position>? _armSub;
   Timer? _flushTimer;
   Ride? _ride;
+  bool _wasPaused = false;
+  bool _wasSuggestEnd = false;
+  int _gpsSkipAccuracy = 0;
+  int _gpsSkipTeleport = 0;
 
   /// Last accepted GPS fix, updated even while auto-paused (for live UI).
   TrackPoint? _lastPoint;
@@ -167,6 +173,18 @@ class RideRecorder {
     disarm();
     await _ensureAutoPausePref();
 
+    unawaited(
+      _telemetry.log(
+        category: TelemetryCategory.ride,
+        eventType: 'start_requested',
+        payload: {
+          'route_id': routeId,
+          'skip_warmup': skipWarmup,
+          'auto_pause': _autoPauseEnabled,
+        },
+      ),
+    );
+
     onWarmup?.call(
       const GnssWarmupStatus(
         phase: GpsWarmupPhase.permissions,
@@ -176,6 +194,13 @@ class RideRecorder {
 
     final permission = await _location.ensurePermission();
     if (!permission.granted) {
+      unawaited(
+        _telemetry.error(
+          where: 'ride.start.permission',
+          error: permission.message ?? 'denied',
+          category: TelemetryCategory.gps,
+        ),
+      );
       throw StateError(permission.message ?? 'Location permission denied');
     }
 
@@ -190,6 +215,19 @@ class RideRecorder {
       // Lock onto GNSS before the first stored point (shows live accuracy in UI).
       await for (final status in _location.warmUpGnss()) {
         onWarmup?.call(status);
+        if (status.phase == GpsWarmupPhase.ready ||
+            status.phase == GpsWarmupPhase.timeout) {
+          unawaited(
+            _telemetry.log(
+              category: TelemetryCategory.gps,
+              eventType: 'warmup_${status.phase.name}',
+              payload: {
+                'accuracy_m': status.accuracyMeters,
+                'message': status.message,
+              },
+            ),
+          );
+        }
       }
     }
 
@@ -201,6 +239,7 @@ class RideRecorder {
     );
     await _db.upsertRide(ride);
     _ride = ride;
+    _telemetry.bindRide(ride.id);
     _sessionPoints.clear();
     _pending.clear();
     _lastPoint = null;
@@ -212,6 +251,10 @@ class RideRecorder {
     _maxLeanAbs = null;
     _maxLeanLeft = 0;
     _maxLeanRight = 0;
+    _wasPaused = false;
+    _wasSuggestEnd = false;
+    _gpsSkipAccuracy = 0;
+    _gpsSkipTeleport = 0;
     _motion.resetForNewRide();
 
     _lean.start();
@@ -224,8 +267,23 @@ class RideRecorder {
     _sub = _location.watchPositions().listen(
       _onPosition,
       onError: (Object error, StackTrace stack) {
-        // Keep recording; transient GPS errors are expected outdoors.
+        unawaited(
+          _telemetry.error(
+            where: 'ride.gps_stream',
+            error: error,
+            category: TelemetryCategory.gps,
+          ),
+        );
       },
+    );
+
+    unawaited(
+      _telemetry.log(
+        category: TelemetryCategory.ride,
+        eventType: 'started',
+        rideLocalId: ride.id,
+        payload: {'route_id': routeId},
+      ),
     );
 
     _emit();
@@ -256,6 +314,27 @@ class RideRecorder {
       maxLeanDegrees: _maxLeanAbs,
     );
     await _db.upsertRide(completed);
+    unawaited(
+      _telemetry.log(
+        category: TelemetryCategory.ride,
+        eventType: 'stopped',
+        rideLocalId: completed.id,
+        payload: {
+          'distance_m': completed.distanceMeters,
+          'point_count': completed.pointCount,
+          'max_speed_mps': completed.maxSpeedMps,
+          'gps_skip_accuracy': _gpsSkipAccuracy,
+          'gps_skip_teleport': _gpsSkipTeleport,
+          'duration_s': completed.endedAt == null
+              ? null
+              : completed.endedAt!
+                  .difference(completed.startedAt)
+                  .inSeconds,
+        },
+      ),
+    );
+    unawaited(_telemetry.flushPending());
+    _telemetry.bindRide(null);
     _ride = null;
     _emitCompleted(completed);
     return completed;
@@ -355,6 +434,13 @@ class RideRecorder {
       );
     }
     debugPrint('CornerIQ armed with foreground GPS isolate');
+    unawaited(
+      _telemetry.log(
+        category: TelemetryCategory.arm,
+        eventType: 'armed',
+        payload: {'route_id': routeId},
+      ),
+    );
   }
 
   void disarm() {
@@ -366,6 +452,12 @@ class RideRecorder {
     _armSub = null;
     unawaited(ArmForegroundService.stop());
     _armedController.add(false);
+    unawaited(
+      _telemetry.log(
+        category: TelemetryCategory.arm,
+        eventType: 'disarmed',
+      ),
+    );
   }
 
   void _onArmForegroundData(Object data) {
@@ -442,10 +534,33 @@ class RideRecorder {
 
   Future<void> _autoStart({String? routeId}) async {
     try {
+      unawaited(
+        _telemetry.log(
+          category: TelemetryCategory.arm,
+          eventType: 'auto_start_triggered',
+          payload: {'route_id': routeId},
+        ),
+      );
       final ride = await _promoteArmedToRecording(routeId: routeId);
+      unawaited(
+        _telemetry.log(
+          category: TelemetryCategory.arm,
+          eventType: 'auto_start_ok',
+          rideLocalId: ride.id,
+          payload: {'route_id': routeId},
+        ),
+      );
       _autoStartController.add(ride);
     } catch (e, st) {
       debugPrint('CornerIQ auto-start failed: $e\n$st');
+      unawaited(
+        _telemetry.error(
+          where: 'arm.auto_start',
+          error: e,
+          category: TelemetryCategory.arm,
+          payload: {'route_id': routeId},
+        ),
+      );
       if (!_armed && !isRecording) {
         unawaited(ArmForegroundService.stop());
       }
@@ -508,15 +623,38 @@ class RideRecorder {
             _onPosition,
             onError: (Object error, StackTrace stack) {
               debugPrint('CornerIQ ride GPS: $error');
+              unawaited(
+                _telemetry.error(
+                  where: 'ride.gps_stream_arm',
+                  error: error,
+                  category: TelemetryCategory.gps,
+                ),
+              );
             },
           );
       await ArmForegroundService.stop();
     } catch (e, st) {
       debugPrint('CornerIQ dense GPS start failed, keep arm FGS: $e\n$st');
+      unawaited(
+        _telemetry.error(
+          where: 'ride.dense_gps_start',
+          error: e,
+          category: TelemetryCategory.gps,
+        ),
+      );
     }
 
     _emit();
     debugPrint('CornerIQ promoted arm → recording ${ride.id}');
+    _telemetry.bindRide(ride.id);
+    unawaited(
+      _telemetry.log(
+        category: TelemetryCategory.ride,
+        eventType: 'started',
+        rideLocalId: ride.id,
+        payload: {'source': 'arm_auto', 'route_id': routeId},
+      ),
+    );
     return ride;
   }
 
@@ -530,6 +668,21 @@ class RideRecorder {
 
     // Keep weaker urban fixes for continuity; drop only bad locks.
     if (position.accuracy > LocationService.maxAcceptAccuracyMeters) {
+      _gpsSkipAccuracy++;
+      if (_gpsSkipAccuracy == 1 || _gpsSkipAccuracy % 25 == 0) {
+        unawaited(
+          _telemetry.log(
+            category: TelemetryCategory.gps,
+            eventType: 'skip_accuracy',
+            latitude: position.latitude,
+            longitude: position.longitude,
+            payload: {
+              'accuracy_m': position.accuracy,
+              'count': _gpsSkipAccuracy,
+            },
+          ),
+        );
+      }
       debugPrint(
         'CornerIQ GPS skip accuracy=${position.accuracy.toStringAsFixed(1)}m',
       );
@@ -568,7 +721,49 @@ class RideRecorder {
       timestamp: position.timestamp,
     );
 
-    if (_motion.isPaused) {
+    final paused = _motion.isPaused;
+    if (paused != _wasPaused) {
+      _wasPaused = paused;
+      unawaited(
+        _telemetry.log(
+          category: TelemetryCategory.ride,
+          eventType: paused ? 'auto_paused' : 'auto_resumed',
+          latitude: position.latitude,
+          longitude: position.longitude,
+          payload: {
+            'speed_kmh': speedKmh,
+            'accuracy_m': position.accuracy,
+          },
+        ),
+      );
+    }
+    if (_motion.suggestEnd != _wasSuggestEnd) {
+      _wasSuggestEnd = _motion.suggestEnd;
+      if (_wasSuggestEnd) {
+        unawaited(
+          _telemetry.log(
+            category: TelemetryCategory.ride,
+            eventType: 'suggest_end',
+            latitude: position.latitude,
+            longitude: position.longitude,
+          ),
+        );
+      }
+    }
+
+    unawaited(
+      _telemetry.maybeRideHeartbeat(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        speedKmh: speedKmh,
+        leanDegrees: relativeLean,
+        accuracyMeters: position.accuracy,
+        pointCount: _sessionPoints.length,
+        isPaused: paused,
+      ),
+    );
+
+    if (paused) {
       // Auto-paused: don't append track points / distance so the resulting
       // gap reads naturally on the map. Keep listening + emit live status.
       _emit();
@@ -593,6 +788,21 @@ class RideRecorder {
       );
       // Only drop true teleports — do NOT drop fast moto hops / roundabout arcs.
       if (jump > maxJump) {
+        _gpsSkipTeleport++;
+        unawaited(
+          _telemetry.log(
+            category: TelemetryCategory.gps,
+            eventType: 'skip_teleport',
+            latitude: point.latitude,
+            longitude: point.longitude,
+            payload: {
+              'jump_m': jump,
+              'dt_s': dtSec,
+              'max_m': maxJump,
+              'count': _gpsSkipTeleport,
+            },
+          ),
+        );
         debugPrint(
           'CornerIQ GPS skip teleport jump=${jump.toStringAsFixed(1)}m '
           'dt=${dtSec.toStringAsFixed(2)}s max=${maxJump.toStringAsFixed(1)}m',

@@ -10,6 +10,7 @@ import '../../core/models/route_loop.dart';
 import '../../core/models/track_point.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/loop_session_controller.dart';
+import '../../core/services/rider_telemetry_service.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
@@ -548,10 +549,26 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   }
 }
 
-class _RideDeckBody extends StatelessWidget {
+class _RideDeckBody extends StatefulWidget {
   const _RideDeckBody({required this.onStartRide});
 
   final Future<void> Function() onStartRide;
+
+  @override
+  State<_RideDeckBody> createState() => _RideDeckBodyState();
+}
+
+class _RideDeckBodyState extends State<_RideDeckBody> {
+  @override
+  void initState() {
+    super.initState();
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.app,
+        eventType: 'ride_deck_open',
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -583,7 +600,15 @@ class _RideDeckBody extends StatelessWidget {
                   fontSize: 20,
                 ),
               ),
-              onPressed: () => onStartRide(),
+              onPressed: () {
+                unawaited(
+                  RiderTelemetryService.instance.log(
+                    category: TelemetryCategory.app,
+                    eventType: 'ride_deck_start_tapped',
+                  ),
+                );
+                widget.onStartRide();
+              },
               icon: const Icon(Icons.play_arrow_rounded, size: 36),
               label: Text(l10n.startRideNow),
             ),

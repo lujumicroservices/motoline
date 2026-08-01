@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/services/rider_telemetry_service.dart';
 import '../camera_controller.dart';
 import '../models/adventure_camera_status.dart';
 import '../models/camera_member.dart';
@@ -179,6 +180,13 @@ class GoProBleCameraController implements AdventureCameraController {
       }
 
       if (found == null) {
+        unawaited(
+          RiderTelemetryService.instance.log(
+            category: TelemetryCategory.ble,
+            eventType: 'scan_empty',
+            payload: {'label': label},
+          ),
+        );
         _emit(
           const AdventureCameraStatus(
             phase: AdventureCameraPhase.error,
@@ -191,6 +199,14 @@ class GoProBleCameraController implements AdventureCameraController {
       await _attach(found);
     } catch (e) {
       debugPrint('GoPro connect: $e');
+      unawaited(
+        RiderTelemetryService.instance.error(
+          where: 'ble.connect',
+          error: e,
+          category: TelemetryCategory.ble,
+          payload: {'label': label},
+        ),
+      );
       _emit(
         AdventureCameraStatus(
           phase: AdventureCameraPhase.error,
@@ -225,6 +241,16 @@ class GoProBleCameraController implements AdventureCameraController {
         unawaited(_stopKeepAlive());
         if (_status.phase == AdventureCameraPhase.recording ||
             _status.phase == AdventureCameraPhase.ready) {
+          unawaited(
+            RiderTelemetryService.instance.log(
+              category: TelemetryCategory.ble,
+              eventType: 'disconnected',
+              payload: {
+                'device': _status.deviceName,
+                'was_phase': _status.phase.name,
+              },
+            ),
+          );
           _emit(
             AdventureCameraStatus(
               phase: AdventureCameraPhase.idle,
@@ -308,6 +334,13 @@ class GoProBleCameraController implements AdventureCameraController {
         phase: AdventureCameraPhase.ready,
         deviceName: name,
         message: 'Ready — will record with rides',
+      ),
+    );
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.ble,
+        eventType: 'connect_ok',
+        payload: {'device': name, 'label': label},
       ),
     );
   }
@@ -402,6 +435,16 @@ class GoProBleCameraController implements AdventureCameraController {
           await Future<void>.delayed(const Duration(milliseconds: 400));
         }
         if (on) _needsColdStartGrace = false;
+        unawaited(
+          RiderTelemetryService.instance.log(
+            category: TelemetryCategory.ble,
+            eventType: on ? 'shutter_on_ok' : 'shutter_off_ok',
+            payload: {
+              'device': _status.deviceName,
+              'attempt': attempt,
+            },
+          ),
+        );
         _emit(
           AdventureCameraStatus(
             phase: on
@@ -415,6 +458,19 @@ class GoProBleCameraController implements AdventureCameraController {
       } catch (e) {
         lastError = e;
         debugPrint('GoPro shutter attempt $attempt/$retries: $e');
+        unawaited(
+          RiderTelemetryService.instance.log(
+            category: TelemetryCategory.ble,
+            eventType: 'shutter_retry',
+            payload: {
+              'on': on,
+              'attempt': attempt,
+              'retries': retries,
+              'error': '$e',
+              'device': _status.deviceName,
+            },
+          ),
+        );
         if (attempt < retries) {
           await Future<void>.delayed(
             Duration(milliseconds: 900 * attempt),
@@ -422,6 +478,19 @@ class GoProBleCameraController implements AdventureCameraController {
         }
       }
     }
+
+    unawaited(
+      RiderTelemetryService.instance.error(
+        where: 'ble.shutter',
+        error: lastError ?? 'unknown',
+        category: TelemetryCategory.ble,
+        payload: {
+          'on': on,
+          'retries': retries,
+          'device': _status.deviceName,
+        },
+      ),
+    );
 
     _emit(
       AdventureCameraStatus(

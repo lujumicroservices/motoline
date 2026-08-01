@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 8,
+      version: 9,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -97,6 +97,9 @@ class RideDatabase {
         if (oldVersion < 8) {
           await _createCameraEventsTable(db);
         }
+        if (oldVersion < 9) {
+          await _addTelemetryCategoryColumnIfMissing(db);
+        }
       },
     );
   }
@@ -105,6 +108,7 @@ class RideDatabase {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS camera_events (
         id TEXT PRIMARY KEY,
+        category TEXT NOT NULL DEFAULT 'camera',
         ride_local_id TEXT,
         event_type TEXT NOT NULL,
         payload_json TEXT NOT NULL DEFAULT '{}',
@@ -120,8 +124,20 @@ class RideDatabase {
     );
   }
 
-  Future<void> insertCameraEvent({
+  Future<void> _addTelemetryCategoryColumnIfMissing(Database db) async {
+    await _createCameraEventsTable(db);
+    final columns = await db.rawQuery('PRAGMA table_info(camera_events)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    if (!existing.contains('category')) {
+      await db.execute(
+        "ALTER TABLE camera_events ADD COLUMN category TEXT NOT NULL DEFAULT 'camera'",
+      );
+    }
+  }
+
+  Future<void> insertTelemetryEvent({
     required String id,
+    required String category,
     String? rideLocalId,
     required String eventType,
     required String payloadJson,
@@ -132,6 +148,7 @@ class RideDatabase {
     final db = await database;
     await db.insert('camera_events', {
       'id': id,
+      'category': category,
       'ride_local_id': rideLocalId,
       'event_type': eventType,
       'payload_json': payloadJson,
@@ -142,8 +159,31 @@ class RideDatabase {
     });
   }
 
-  Future<List<Map<String, Object?>>> listUnsyncedCameraEvents({
-    int limit = 200,
+  /// Legacy name — camera lab still calls this.
+  Future<void> insertCameraEvent({
+    required String id,
+    String? rideLocalId,
+    required String eventType,
+    required String payloadJson,
+    double? latitude,
+    double? longitude,
+    required int createdAtMs,
+    String category = 'camera',
+  }) {
+    return insertTelemetryEvent(
+      id: id,
+      category: category,
+      rideLocalId: rideLocalId,
+      eventType: eventType,
+      payloadJson: payloadJson,
+      latitude: latitude,
+      longitude: longitude,
+      createdAtMs: createdAtMs,
+    );
+  }
+
+  Future<List<Map<String, Object?>>> listUnsyncedTelemetryEvents({
+    int limit = 300,
   }) async {
     final db = await database;
     return db.query(
@@ -154,7 +194,12 @@ class RideDatabase {
     );
   }
 
-  Future<void> markCameraEventsSynced(List<String> ids) async {
+  Future<List<Map<String, Object?>>> listUnsyncedCameraEvents({
+    int limit = 200,
+  }) =>
+      listUnsyncedTelemetryEvents(limit: limit);
+
+  Future<void> markTelemetryEventsSynced(List<String> ids) async {
     if (ids.isEmpty) return;
     final db = await database;
     final placeholders = List.filled(ids.length, '?').join(',');
@@ -163,6 +208,9 @@ class RideDatabase {
       ids,
     );
   }
+
+  Future<void> markCameraEventsSynced(List<String> ids) =>
+      markTelemetryEventsSynced(ids);
 
   Future<void> _addOwnerIdColumnIfMissing(Database db) async {
     final columns = await db.rawQuery('PRAGMA table_info(routes)');
