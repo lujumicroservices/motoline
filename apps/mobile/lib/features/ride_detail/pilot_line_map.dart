@@ -21,6 +21,7 @@ class PilotLineMap extends StatefulWidget {
     this.interactive = true,
     this.showStartEnd = true,
     this.scrubIndex,
+    this.onTapScrub,
     this.focusStartIndex,
     this.focusEndIndex,
     this.dimOutsideFocus = true,
@@ -36,6 +37,9 @@ class PilotLineMap extends StatefulWidget {
 
   /// When set, a playhead marker is drawn at this sample index (into [points]).
   final int? scrubIndex;
+
+  /// Tap near the track → absolute sample index into [points].
+  final ValueChanged<int>? onTapScrub;
 
   /// Inclusive focus window into [points] for segment zoom.
   final int? focusStartIndex;
@@ -331,6 +335,16 @@ class _PilotLineMapState extends State<PilotLineMap> {
           padding: const EdgeInsets.all(36),
           maxZoom: hasFocus ? 18 : 17,
         ),
+        onTap: widget.onTapScrub == null
+            ? null
+            : (tap, latLng) {
+                final idx = nearestTrackIndex(
+                  points,
+                  latLng.latitude,
+                  latLng.longitude,
+                );
+                if (idx != null) widget.onTapScrub!(idx);
+              },
       ),
       children: [
         TileLayer(

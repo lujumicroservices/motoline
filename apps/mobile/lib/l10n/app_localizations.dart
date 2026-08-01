@@ -236,6 +236,12 @@ abstract class AppLocalizations {
   /// **'RiderLab {version} está lista (tienes {current}).'**
   String updateReady(String version, String current);
 
+  /// No description provided for @whatsNew.
+  String get whatsNew;
+
+  /// No description provided for @newVersionBadge.
+  String get newVersionBadge;
+
   /// No description provided for @update.
   ///
   /// In es, this message translates to:
@@ -2011,6 +2017,45 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Error'**
   String get labAdventureCameraPhaseError;
+
+  /// No description provided for @labAdventureCameraZonesEnable.
+  String get labAdventureCameraZonesEnable;
+
+  /// No description provided for @labAdventureCameraZonesEnableHelp.
+  String get labAdventureCameraZonesEnableHelp;
+
+  /// No description provided for @labAdventureCameraZonesEdit.
+  String get labAdventureCameraZonesEdit;
+
+  /// No description provided for @labAdventureCameraZonesEmpty.
+  String get labAdventureCameraZonesEmpty;
+
+  /// No description provided for @labAdventureCameraZonesCount.
+  String labAdventureCameraZonesCount(int count);
+
+  /// No description provided for @labAdventureCameraZonesTitle.
+  String get labAdventureCameraZonesTitle;
+
+  /// No description provided for @labAdventureCameraZonesHelp.
+  String get labAdventureCameraZonesHelp;
+
+  /// No description provided for @labAdventureCameraZoneStart.
+  String get labAdventureCameraZoneStart;
+
+  /// No description provided for @labAdventureCameraZoneStop.
+  String get labAdventureCameraZoneStop;
+
+  /// No description provided for @labAdventureCameraZonesClear.
+  String get labAdventureCameraZonesClear;
+
+  /// No description provided for @labAdventureCameraZonesSave.
+  String get labAdventureCameraZonesSave;
+
+  /// No description provided for @labAdventureCameraAggressive.
+  String get labAdventureCameraAggressive;
+
+  /// No description provided for @labAdventureCameraAggressiveHelp.
+  String get labAdventureCameraAggressiveHelp;
 
   /// No description provided for @armAutoNoRouteHint.
   ///

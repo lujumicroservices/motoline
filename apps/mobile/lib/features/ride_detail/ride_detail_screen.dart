@@ -252,7 +252,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
         ? (_segStart + _scrubIndex).clamp(0, full.samples.length - 1)
         : _scrubIndex.clamp(0, full.samples.length - 1);
 
-    final result = await Navigator.of(context).push<FullscreenMapSelection>(
+    final result = await Navigator.of(context).push<Object?>(
       MaterialPageRoute(
         builder: (_) => FullscreenMapScreen(
           points: full.samples,
@@ -266,9 +266,18 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
       ),
     );
     if (!mounted) return;
-    // Keep toggles in sync if fullscreen mutated them via shared pattern —
-    // fullscreen owns a copy; parent keeps its own until we return.
-    if (result == null) return;
+    if (result is int) {
+      final abs = result.clamp(0, full.samples.length - 1);
+      setState(() {
+        if (_zoomed) {
+          _scrubIndex = (abs - _segStart).clamp(0, _segEnd - _segStart);
+        } else {
+          _scrubIndex = abs;
+        }
+      });
+      return;
+    }
+    if (result is! FullscreenMapSelection) return;
     if (!ref.read(isProProvider)) {
       showProUpsellSheet(context, ref);
       return;
@@ -560,35 +569,34 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                     setState(() => _mapLayers = v),
                               ),
                               const SizedBox(height: 12),
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: full.samples.length >= 2
-                                      ? _openFullscreenMap
-                                      : null,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: SizedBox(
-                                    height: 280,
-                                    child: IgnorePointer(
-                                      child: PilotLineMap(
-                                        key: ValueKey(
-                                          'map-$_zoomed-$_segStart-$_segEnd-'
-                                          '${_mapLayers.showSpeedColors}-'
-                                          '${_mapLayers.showRoadKindContrast}-'
-                                          '${_mapLayers.showBrakes}',
-                                        ),
-                                        points: full.samples,
-                                        interactive: false,
-                                        scrubIndex: mapScrub,
-                                        focusStartIndex:
-                                            _zoomed ? _segStart : null,
-                                        focusEndIndex:
-                                            _zoomed ? _segEnd : null,
-                                        brakeEvents: full.brakeEvents,
-                                        roadStretches: full.roadStretches,
-                                        layers: _mapLayers,
-                                      ),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: SizedBox(
+                                  height: 280,
+                                  child: PilotLineMap(
+                                    key: ValueKey(
+                                      'map-$_zoomed-$_segStart-$_segEnd-'
+                                      '${_mapLayers.showSpeedColors}-'
+                                      '${_mapLayers.showRoadKindContrast}-'
+                                      '${_mapLayers.showBrakes}',
                                     ),
+                                    points: full.samples,
+                                    interactive: true,
+                                    scrubIndex: mapScrub,
+                                    onTapScrub: (absIndex) {
+                                      if (_zoomed) {
+                                        _setScrubIndex(absIndex - _segStart);
+                                      } else {
+                                        _setScrubIndex(absIndex);
+                                      }
+                                    },
+                                    focusStartIndex:
+                                        _zoomed ? _segStart : null,
+                                    focusEndIndex:
+                                        _zoomed ? _segEnd : null,
+                                    brakeEvents: full.brakeEvents,
+                                    roadStretches: full.roadStretches,
+                                    layers: _mapLayers,
                                   ),
                                 ),
                               ),

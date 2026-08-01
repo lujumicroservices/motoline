@@ -2,15 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/models/track_point.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../adventure_camera_prefs.dart';
 import '../models/adventure_camera_status.dart';
+import '../models/camera_zone.dart';
 import '../providers/adventure_camera_providers.dart';
+import 'camera_zones_map_screen.dart';
 
 /// Settings → Lab block. Entirely optional; default off.
 class AdventureCameraSettingsSection extends ConsumerWidget {
   const AdventureCameraSettingsSection({super.key});
+
+  Future<List<TrackPoint>> _recentTrack(WidgetRef ref) async {
+    final rides = await ref.read(ridesListProvider.future);
+    if (rides.isEmpty) return const [];
+    final ride = rides.first;
+    return ref.read(rideDatabaseProvider).getPoints(ride.id);
+  }
+
+  Future<void> _editZones(BuildContext context, WidgetRef ref) async {
+    final hub = ref.read(adventureCameraHubProvider);
+    final track = await _recentTrack(ref);
+    if (!context.mounted) return;
+    final result = await Navigator.of(context).push<List<CameraZone>>(
+      MaterialPageRoute(
+        builder: (_) => CameraZonesMapScreen(
+          initialZones: hub.zones,
+          trackPoints: track,
+        ),
+      ),
+    );
+    if (result == null) return;
+    await hub.setZones(result);
+    ref.invalidate(adventureCameraHydratedProvider);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,6 +55,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
         final status = statusAsync.asData?.value ?? hub.status;
         final backend =
             backendAsync.asData?.value ?? AdventureCameraPrefs.backendGoPro;
+        final zoneCount = hub.zones.length;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,6 +136,66 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                 activeThumbColor: AppTheme.lineHot,
                 onChanged: (v) async {
                   await hub.setSyncPause(v);
+                  ref.invalidate(adventureCameraHydratedProvider);
+                },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  l10n.labAdventureCameraZonesEnable,
+                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  l10n.labAdventureCameraZonesEnableHelp,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 12,
+                  ),
+                ),
+                value: hub.zonesEnabled,
+                activeThumbColor: AppTheme.lineHot,
+                onChanged: (v) async {
+                  await hub.setZonesEnabled(v);
+                  ref.invalidate(adventureCameraHydratedProvider);
+                },
+              ),
+              if (hub.zonesEnabled) ...[
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    l10n.labAdventureCameraZonesEdit,
+                    style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    zoneCount == 0
+                        ? l10n.labAdventureCameraZonesEmpty
+                        : l10n.labAdventureCameraZonesCount(zoneCount),
+                    style: GoogleFonts.rajdhani(
+                      color: AppTheme.steel,
+                      fontSize: 12,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.map_outlined),
+                  onTap: () => _editZones(context, ref),
+                ),
+              ],
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  l10n.labAdventureCameraAggressive,
+                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  l10n.labAdventureCameraAggressiveHelp,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 12,
+                  ),
+                ),
+                value: hub.aggressiveEnabled,
+                activeThumbColor: AppTheme.lineHot,
+                onChanged: (v) async {
+                  await hub.setAggressiveEnabled(v);
                   ref.invalidate(adventureCameraHydratedProvider);
                 },
               ),

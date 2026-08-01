@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:motoline/features/adventure_camera/aggressive_riding_detector.dart';
 import 'package:motoline/features/adventure_camera/adventure_camera_hub.dart';
 import 'package:motoline/features/adventure_camera/adventure_camera_prefs.dart';
+import 'package:motoline/features/adventure_camera/camera_zone_detector.dart';
 import 'package:motoline/features/adventure_camera/models/adventure_camera_status.dart';
+import 'package:motoline/features/adventure_camera/models/camera_zone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -40,5 +43,81 @@ void main() {
     await hub.onRideStopped();
     expect(hub.status.phase, AdventureCameraPhase.ready);
     await hub.dispose();
+  });
+
+  test('zone-only mode waits until start geofence', () async {
+    SharedPreferences.setMockInitialValues({
+      AdventureCameraPrefs.labEnabledKey: true,
+      AdventureCameraPrefs.syncWithRideKey: false,
+      AdventureCameraPrefs.zonesEnabledKey: true,
+      AdventureCameraPrefs.backendKey: AdventureCameraPrefs.backendSimulated,
+    });
+
+    final hub = AdventureCameraHub();
+    await hub.hydrate();
+    await hub.setZones([
+      const CameraZone(
+        id: 's1',
+        latitude: 19.4,
+        longitude: -99.1,
+        action: CameraZoneAction.start,
+        radiusMeters: 50,
+      ),
+      const CameraZone(
+        id: 'e1',
+        latitude: 19.41,
+        longitude: -99.11,
+        action: CameraZoneAction.stop,
+        radiusMeters: 50,
+      ),
+    ]);
+
+    await hub.onRideStarted();
+    expect(hub.status.phase, AdventureCameraPhase.ready);
+
+    await hub.onLiveSample(latitude: 19.4, longitude: -99.1, speedKmh: 40);
+    expect(hub.status.phase, AdventureCameraPhase.recording);
+
+    await hub.onLiveSample(latitude: 19.41, longitude: -99.11, speedKmh: 40);
+    expect(hub.status.phase, AdventureCameraPhase.ready);
+    await hub.dispose();
+  });
+
+  test('zone detector is edge-triggered', () {
+    final d = CameraZoneDetector(
+      zones: const [
+        CameraZone(
+          id: 'a',
+          latitude: 0,
+          longitude: 0,
+          action: CameraZoneAction.start,
+          radiusMeters: 40,
+        ),
+      ],
+    );
+    expect(d.feed(latitude: 0, longitude: 0), CameraZoneAction.start);
+    expect(d.feed(latitude: 0, longitude: 0), isNull);
+    expect(d.feed(latitude: 1, longitude: 1), isNull);
+    expect(d.feed(latitude: 0, longitude: 0), CameraZoneAction.start);
+  });
+
+  test('aggressive detector fires on sustained lean', () {
+    final d = AggressiveRidingDetector(
+      leanHold: const Duration(milliseconds: 500),
+      cooldown: const Duration(seconds: 1),
+    );
+    final t0 = DateTime.utc(2026, 1, 1, 12);
+    expect(
+      d.feed(timestamp: t0, leanDegrees: 30, speedKmh: 50),
+      isFalse,
+    );
+    expect(
+      d.feed(
+        timestamp: t0.add(const Duration(milliseconds: 600)),
+        leanDegrees: 30,
+        speedKmh: 50,
+      ),
+      isTrue,
+    );
   });
 }

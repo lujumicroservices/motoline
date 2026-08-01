@@ -8,6 +8,50 @@ import '../../providers/update_providers.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 
+/// Compact header control: shows a NEW badge when a newer release exists.
+class UpdateCheckIconButton extends ConsumerWidget {
+  const UpdateCheckIconButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final updateAsync = ref.watch(appUpdateCheckProvider);
+    final hasUpdate = updateAsync.asData?.value != null;
+
+    return IconButton(
+      tooltip: hasUpdate ? l10n.updateAvailable : l10n.checkUpdates,
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(
+        minWidth: 36,
+        minHeight: 36,
+      ),
+      onPressed: () => promptManualUpdateCheck(context, ref),
+      icon: Badge(
+        isLabelVisible: hasUpdate,
+        backgroundColor: AppTheme.lineHot,
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+        label: Text(
+          l10n.newVersionBadge,
+          style: GoogleFonts.exo2(
+            fontSize: 8,
+            fontWeight: FontWeight.w800,
+            color: AppTheme.asphalt,
+            height: 1,
+          ),
+        ),
+        child: Icon(
+          hasUpdate
+              ? Icons.system_update_alt
+              : Icons.system_update_alt_outlined,
+          size: 18,
+          color: hasUpdate ? AppTheme.lineHot : AppTheme.steel,
+        ),
+      ),
+    );
+  }
+}
+
 class UpdateAvailableBanner extends ConsumerWidget {
   const UpdateAvailableBanner({super.key, required this.update});
 
@@ -16,29 +60,82 @@ class UpdateAvailableBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final notes = _previewNotes(update.releaseNotes);
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppTheme.asphaltElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.line.withValues(alpha: 0.45)),
+        border: Border.all(color: AppTheme.lineHot.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.lineHot.withValues(alpha: 0.18),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.updateAvailable,
-            style: GoogleFonts.exo2(
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppTheme.lineHot,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  l10n.newVersionBadge,
+                  style: GoogleFonts.exo2(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.asphalt,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.updateAvailable,
+                  style: GoogleFonts.exo2(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             l10n.updateReady(update.version, update.currentVersion),
             style: const TextStyle(color: AppTheme.steel, fontSize: 13),
           ),
+          if (notes.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              l10n.whatsNew,
+              style: GoogleFonts.rajdhani(
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                color: AppTheme.lineHot,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              notes,
+              style: const TextStyle(
+                color: AppTheme.mist,
+                fontSize: 13,
+                height: 1.35,
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Row(
             children: [
@@ -64,6 +161,26 @@ class UpdateAvailableBanner extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _previewNotes(String raw) {
+  final cleaned = raw
+      .replaceAll(RegExp(r'^#+\s*', multiLine: true), '')
+      .replaceAll(RegExp(r'\*\*?'), '')
+      .replaceAll('`', '')
+      .trim();
+  if (cleaned.isEmpty) return '';
+  final lines = cleaned
+      .split(RegExp(r'\r?\n'))
+      .map((l) => l.trim())
+      .where((l) => l.isNotEmpty && !l.toLowerCase().startsWith('## install'))
+      .take(5)
+      .toList();
+  var text = lines.join('\n');
+  if (text.length > 320) {
+    text = '${text.substring(0, 317).trimRight()}…';
+  }
+  return text;
 }
 
 Future<void> showUpdateInstaller(
@@ -207,6 +324,7 @@ Future<void> promptManualUpdateCheck(
       return;
     }
     ref.invalidate(appUpdateCheckProvider);
+    final notes = _previewNotes(update.releaseNotes);
     final install = await showDialog<bool>(
       context: context,
       builder: (ctx) {
@@ -217,9 +335,37 @@ Future<void> promptManualUpdateCheck(
             'RiderLab ${update.version}',
             style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
           ),
-          content: Text(
-            dialogL10n.updatePrompt(update.currentVersion),
-            style: const TextStyle(color: AppTheme.steel),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  dialogL10n.updatePrompt(update.currentVersion),
+                  style: const TextStyle(color: AppTheme.steel),
+                ),
+                if (notes.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    dialogL10n.whatsNew,
+                    style: GoogleFonts.rajdhani(
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.lineHot,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    notes,
+                    style: const TextStyle(
+                      color: AppTheme.mist,
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
           actions: [
             TextButton(

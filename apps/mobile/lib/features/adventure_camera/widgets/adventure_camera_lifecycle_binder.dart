@@ -24,6 +24,7 @@ class _AdventureCameraLifecycleBinderState
     extends ConsumerState<AdventureCameraLifecycleBinder> {
   bool _wasRecording = false;
   bool _wasPaused = false;
+  DateTime? _lastSampleAt;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +46,30 @@ class _AdventureCameraLifecycleBinderState
         unawaited(hub.onRidePaused());
       } else if (recording && _wasPaused && !paused) {
         unawaited(hub.onRideResumed());
+      }
+
+      // Mid-ride GPS / lean → map zones + aggressive auto-record.
+      final live = snap;
+      if (recording && !paused && live != null) {
+        final point = live.lastPoint;
+        if (point != null) {
+          final ts = point.timestamp;
+          // Deduplicate identical snapshot timestamps from stream churn.
+          if (_lastSampleAt == null || ts.isAfter(_lastSampleAt!)) {
+            _lastSampleAt = ts;
+            unawaited(
+              hub.onLiveSample(
+                latitude: point.latitude,
+                longitude: point.longitude,
+                leanDegrees: live.relativeLeanDegrees ?? point.leanDegrees,
+                speedKmh: point.speedKmh,
+                timestamp: ts,
+              ),
+            );
+          }
+        }
+      } else if (!recording) {
+        _lastSampleAt = null;
       }
 
       _wasRecording = recording;

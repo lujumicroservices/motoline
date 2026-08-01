@@ -12,6 +12,9 @@ import 'gopro_uuids.dart';
 ///
 /// Soft-fails: connection/command errors surface via [status], never throw to
 /// the ride recorder.
+///
+/// Cold cameras often wake on BLE connect but ignore an immediate shutter.
+/// After attach we wait for boot, send keep-alive, then retry shutter writes.
 class GoProBleCameraController implements AdventureCameraController {
   GoProBleCameraController()
       : _statusController =
@@ -24,8 +27,18 @@ class GoProBleCameraController implements AdventureCameraController {
 
   BluetoothDevice? _device;
   BluetoothCharacteristic? _commandRequest;
+  BluetoothCharacteristic? _settingsRequest;
   StreamSubscription<List<ScanResult>>? _scanSub;
   StreamSubscription<BluetoothConnectionState>? _connSub;
+  StreamSubscription<List<int>>? _cmdRspSub;
+  Timer? _keepAliveTimer;
+
+  /// True after a successful attach that had to boot from a cold/asleep camera.
+  /// Cleared after the first successful shutter (or disconnect).
+  bool _needsColdStartGrace = false;
+
+  /// Remote BLE id of the attached camera (for preferred reconnect).
+  String? get remoteId => _device?.remoteId.str;
 
   @override
   String get backendId => 'gopro_ble';
@@ -76,32 +89,43 @@ class GoProBleCameraController implements AdventureCameraController {
       BluetoothDevice? found;
       final completer = Completer<BluetoothDevice?>();
 
-      _scanSub = FlutterBluePlus.onScanResults.listen((results) {
-        for (final r in results) {
-          final name = r.device.platformName;
-          final id = r.device.remoteId.str;
-          final isGoPro = name.toLowerCase().contains('gopro');
-          final isPreferred =
-              preferredDeviceId != null && preferredDeviceId == id;
-          if (isGoPro || isPreferred) {
-            if (!completer.isCompleted) completer.complete(r.device);
-            break;
+      // Prefer reconnect by id when still bonded / in range.
+      if (preferredDeviceId != null && preferredDeviceId.isNotEmpty) {
+        try {
+          final known = BluetoothDevice.fromId(preferredDeviceId);
+          found = known;
+        } catch (_) {}
+      }
+
+      if (found == null) {
+        _scanSub = FlutterBluePlus.onScanResults.listen((results) {
+          for (final r in results) {
+            final name = r.device.platformName;
+            final id = r.device.remoteId.str;
+            final isGoPro = name.toLowerCase().contains('gopro');
+            final isPreferred =
+                preferredDeviceId != null && preferredDeviceId == id;
+            if (isGoPro || isPreferred) {
+              if (!completer.isCompleted) completer.complete(r.device);
+              break;
+            }
           }
-        }
-      });
+        });
 
-      await FlutterBluePlus.startScan(
-        timeout: const Duration(seconds: 12),
-        androidUsesFineLocation: false,
-      );
+        await FlutterBluePlus.startScan(
+          timeout: const Duration(seconds: 12),
+          androidUsesFineLocation: false,
+          withServices: [Guid(GoProBleUuids.service)],
+        );
 
-      found = await completer.future.timeout(
-        const Duration(seconds: 12),
-        onTimeout: () => null,
-      );
-      await FlutterBluePlus.stopScan();
-      await _scanSub?.cancel();
-      _scanSub = null;
+        found = await completer.future.timeout(
+          const Duration(seconds: 12),
+          onTimeout: () => null,
+        );
+        await FlutterBluePlus.stopScan();
+        await _scanSub?.cancel();
+        _scanSub = null;
+      }
 
       if (found == null) {
         _emit(
@@ -136,12 +160,19 @@ class GoProBleCameraController implements AdventureCameraController {
       ),
     );
 
+    await _stopKeepAlive();
+    await _cmdRspSub?.cancel();
     await _connSub?.cancel();
     _device = device;
-    await device.connect(autoConnect: false);
+    await device.connect(
+      autoConnect: false,
+      timeout: const Duration(seconds: 20),
+    );
     _connSub = device.connectionState.listen((state) {
       if (state == BluetoothConnectionState.disconnected) {
         _commandRequest = null;
+        _settingsRequest = null;
+        unawaited(_stopKeepAlive());
         if (_status.phase == AdventureCameraPhase.recording ||
             _status.phase == AdventureCameraPhase.ready) {
           _emit(
@@ -158,6 +189,8 @@ class GoProBleCameraController implements AdventureCameraController {
     final services = await device.discoverServices();
     BluetoothCharacteristic? cmd;
     BluetoothCharacteristic? rsp;
+    BluetoothCharacteristic? settings;
+    BluetoothCharacteristic? settingsRsp;
     for (final s in services) {
       for (final c in s.characteristics) {
         final id = c.uuid.str128.toLowerCase();
@@ -165,6 +198,10 @@ class GoProBleCameraController implements AdventureCameraController {
           cmd = c;
         } else if (id == GoProBleUuids.commandResponse.toLowerCase()) {
           rsp = c;
+        } else if (id == GoProBleUuids.settingsRequest.toLowerCase()) {
+          settings = c;
+        } else if (id == GoProBleUuids.settingsResponse.toLowerCase()) {
+          settingsRsp = c;
         }
       }
     }
@@ -182,13 +219,41 @@ class GoProBleCameraController implements AdventureCameraController {
     }
 
     _commandRequest = cmd;
+    _settingsRequest = settings;
+
     if (rsp != null && rsp.properties.notify) {
       try {
         await rsp.setNotifyValue(true);
+        await _cmdRspSub?.cancel();
+        _cmdRspSub = rsp.onValueReceived.listen((_) {});
       } catch (e) {
         debugPrint('GoPro notify: $e');
       }
     }
+    if (settingsRsp != null && settingsRsp.properties.notify) {
+      try {
+        await settingsRsp.setNotifyValue(true);
+      } catch (e) {
+        debugPrint('GoPro settings notify: $e');
+      }
+    }
+
+    // Cold wake: BLE connect often powers the camera on, but the Open GoPro
+    // command handler is not ready yet. Wait + keep-alive before claiming ready.
+    _emit(
+      AdventureCameraStatus(
+        phase: AdventureCameraPhase.connecting,
+        deviceName: device.platformName.isEmpty
+            ? 'GoPro'
+            : device.platformName,
+        message: 'Waking camera…',
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 2500));
+    await _sendKeepAlive();
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    _needsColdStartGrace = true;
+    _startKeepAlive();
 
     _emit(
       AdventureCameraStatus(
@@ -201,15 +266,42 @@ class GoProBleCameraController implements AdventureCameraController {
     );
   }
 
+  void _startKeepAlive() {
+    _keepAliveTimer?.cancel();
+    _keepAliveTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+      unawaited(_sendKeepAlive());
+    });
+  }
+
+  Future<void> _stopKeepAlive() async {
+    _keepAliveTimer?.cancel();
+    _keepAliveTimer = null;
+  }
+
+  Future<void> _sendKeepAlive() async {
+    final settings = _settingsRequest;
+    if (settings == null) return;
+    try {
+      await settings.write(GoProBleUuids.keepAlive, withoutResponse: false);
+    } catch (e) {
+      debugPrint('GoPro keep-alive: $e');
+    }
+  }
+
   @override
   Future<void> disconnect() async {
     try {
       await _scanSub?.cancel();
       _scanSub = null;
       await FlutterBluePlus.stopScan();
+      await _stopKeepAlive();
+      await _cmdRspSub?.cancel();
+      _cmdRspSub = null;
       await _connSub?.cancel();
       _connSub = null;
       _commandRequest = null;
+      _settingsRequest = null;
+      _needsColdStartGrace = false;
       final d = _device;
       _device = null;
       if (d != null) {
@@ -228,15 +320,15 @@ class GoProBleCameraController implements AdventureCameraController {
 
   @override
   Future<void> startRecording() async {
-    await _writeShutter(on: true);
+    await _writeShutter(on: true, retries: _needsColdStartGrace ? 4 : 2);
   }
 
   @override
   Future<void> stopRecording() async {
-    await _writeShutter(on: false);
+    await _writeShutter(on: false, retries: 2);
   }
 
-  Future<void> _writeShutter({required bool on}) async {
+  Future<void> _writeShutter({required bool on, int retries = 2}) async {
     final cmd = _commandRequest;
     if (cmd == null) {
       _emit(
@@ -248,28 +340,49 @@ class GoProBleCameraController implements AdventureCameraController {
       );
       return;
     }
-    try {
-      final bytes = on ? GoProBleUuids.shutterOn : GoProBleUuids.shutterOff;
-      await cmd.write(bytes, withoutResponse: false);
-      _emit(
-        AdventureCameraStatus(
-          phase: on
-              ? AdventureCameraPhase.recording
-              : AdventureCameraPhase.ready,
-          deviceName: _status.deviceName,
-          message: on ? 'Camera recording' : 'Camera idle',
-        ),
-      );
-    } catch (e) {
-      debugPrint('GoPro shutter: $e');
-      _emit(
-        AdventureCameraStatus(
-          phase: AdventureCameraPhase.error,
-          deviceName: _status.deviceName,
-          message: 'Shutter failed: $e',
-        ),
-      );
+
+    Object? lastError;
+    for (var attempt = 1; attempt <= retries; attempt++) {
+      try {
+        if (on && _needsColdStartGrace && attempt > 1) {
+          await _sendKeepAlive();
+          await Future<void>.delayed(const Duration(milliseconds: 800));
+        }
+        final bytes = on ? GoProBleUuids.shutterOn : GoProBleUuids.shutterOff;
+        await cmd.write(bytes, withoutResponse: false);
+        // Give the camera a beat to begin encoding after a cold wake.
+        if (on && _needsColdStartGrace) {
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+        }
+        if (on) _needsColdStartGrace = false;
+        _emit(
+          AdventureCameraStatus(
+            phase: on
+                ? AdventureCameraPhase.recording
+                : AdventureCameraPhase.ready,
+            deviceName: _status.deviceName,
+            message: on ? 'Camera recording' : 'Camera idle',
+          ),
+        );
+        return;
+      } catch (e) {
+        lastError = e;
+        debugPrint('GoPro shutter attempt $attempt/$retries: $e');
+        if (attempt < retries) {
+          await Future<void>.delayed(
+            Duration(milliseconds: 900 * attempt),
+          );
+        }
+      }
     }
+
+    _emit(
+      AdventureCameraStatus(
+        phase: AdventureCameraPhase.error,
+        deviceName: _status.deviceName,
+        message: 'Shutter failed: $lastError',
+      ),
+    );
   }
 
   @override

@@ -61,6 +61,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
   LatLngBounds? _areaBounds;
   ({int start, int end, int insideCount})? _selection;
   late MapLayerOptions _layers;
+  late int _scrubIndex;
 
   LatLngBounds? _rideBounds;
   LatLng? _rideCenter;
@@ -71,6 +72,12 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
   void initState() {
     super.initState();
     _layers = widget.initialLayers;
+    final scrub = widget.scrubIndex;
+    _scrubIndex = scrub != null &&
+            scrub >= 0 &&
+            scrub < widget.points.length
+        ? scrub
+        : (widget.points.isEmpty ? 0 : widget.points.length ~/ 2);
     final lo = widget.initialFocusStart;
     final hi = widget.initialFocusEnd;
     if (lo != null &&
@@ -247,6 +254,24 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     );
   }
 
+  void _setScrubAt(LatLng latLng) {
+    if (_selectMode) return;
+    final idx = nearestTrackIndex(
+      widget.points,
+      latLng.latitude,
+      latLng.longitude,
+    );
+    if (idx == null || idx == _scrubIndex) return;
+    setState(() {
+      _scrubIndex = idx;
+      _rebuildTrackLayers();
+    });
+  }
+
+  void _popWithScrub() {
+    Navigator.of(context).pop(_scrubIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -264,10 +289,24 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
     final hasFocus = focusLo != null && focusHi != null;
     final bounds = _rideBounds!;
     final center = _rideCenter!;
+    final scrubPoint = widget.points[_scrubIndex.clamp(0, points.length - 1)];
+    final lean = scrubPoint.leanDegrees ?? 0.0;
+    final speed = scrubPoint.speedKmh;
+    final leanSide = lean < -1
+        ? l10n.leftShort
+        : lean > 1
+            ? l10n.rightShort
+            : '·';
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
-      body: Stack(
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          _popWithScrub();
+        },
+        child: Stack(
         children: [
           Positioned.fill(
             child: FlutterMap(
@@ -286,6 +325,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                           InteractiveFlag.doubleTapZoom
                       : InteractiveFlag.all,
                 ),
+                onTap: _selectMode ? null : (tap, latLng) => _setScrubAt(latLng),
               ),
               children: [
                 TileLayer(
@@ -346,7 +386,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                   _TopBar(
                     title: l10n.fullscreenMap,
                     selecting: _selectMode,
-                    onBack: () => Navigator.of(context).pop(),
+                    onBack: _popWithScrub,
                     onToggleSelect: () {
                       _dragRect.value = (null, null);
                       setState(() {
@@ -379,6 +419,39 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                     ),
                   ),
                   const Spacer(),
+                  Material(
+                    color: AppTheme.asphaltElevated.withValues(alpha: 0.94),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.navigation,
+                            size: 16,
+                            color: AppTheme.lineHot,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${speed == null ? "--" : "${speed.toStringAsFixed(0)} ${l10n.kmh}"}'
+                              '  ·  ${lean.abs().toStringAsFixed(0)}° $leanSide'
+                              '  ·  ${_scrubIndex + 1}/${points.length}',
+                              style: GoogleFonts.rajdhani(
+                                color: AppTheme.mist,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   if (_layers.showLegend)
                     DecoratedBox(
                       decoration: const BoxDecoration(
@@ -412,6 +485,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -529,9 +603,8 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
       );
     }
 
-    final scrub = widget.scrubIndex;
+    final scrub = _scrubIndex;
     if (_layers.showPlayhead &&
-        scrub != null &&
         scrub >= 0 &&
         scrub < points.length) {
       final p = points[scrub];

@@ -84,6 +84,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get whatsNew => 'Novedades';
+
+  @override
+  String get newVersionBadge => 'NUEVA';
+
+  @override
   String get update => 'Actualizar';
 
   @override
@@ -274,11 +280,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mapHint =>
-      'Azul→magenta según velocidad. Puntos = frenos inferidos.';
+      'Toca la línea para mover la moto. Azul→magenta por velocidad. Puntos = frenos.';
 
   @override
   String get mapHintZoom =>
-      'Brillante = tramo elegido · tenue = resto. Puntos = frenos.';
+      'Toca la línea para mover la moto. Brillante = elegido · tenue = resto.';
 
   @override
   String get startingRide => 'Iniciando ruta';
@@ -1066,6 +1072,50 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get labAdventureCameraPhaseError => 'Error';
+
+  @override
+  String get labAdventureCameraZonesEnable => 'Zonas inicio/fin en el mapa';
+
+  @override
+  String get labAdventureCameraZonesEnableHelp =>
+      'Inicia o detiene la cámara al entrar en geocercas del mapa (puedes poner varias)';
+
+  @override
+  String get labAdventureCameraZonesEdit => 'Editar zonas de cámara';
+
+  @override
+  String get labAdventureCameraZonesEmpty =>
+      'Sin zonas — toca el mapa para añadir inicio/parada';
+
+  @override
+  String labAdventureCameraZonesCount(int count) =>
+      '$count zonas en el mapa';
+
+  @override
+  String get labAdventureCameraZonesTitle => 'Zonas de cámara';
+
+  @override
+  String get labAdventureCameraZonesHelp =>
+      'Elige Inicio o Parada y toca el mapa. Mantén pulsado un marcador para borrarlo. Apaga “Grabar con el ride” para grabar solo en las zonas.';
+
+  @override
+  String get labAdventureCameraZoneStart => 'Inicio';
+
+  @override
+  String get labAdventureCameraZoneStop => 'Parada';
+
+  @override
+  String get labAdventureCameraZonesClear => 'Borrar todas';
+
+  @override
+  String get labAdventureCameraZonesSave => 'Guardar zonas';
+
+  @override
+  String get labAdventureCameraAggressive => 'Auto-grabar conducción agresiva';
+
+  @override
+  String get labAdventureCameraAggressiveHelp =>
+      'Inicia la cámara con inclinación fuerte o aceleración brusca';
 
   @override
   String get armAutoNoRouteHint =>

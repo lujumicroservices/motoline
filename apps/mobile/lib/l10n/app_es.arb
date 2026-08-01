@@ -34,6 +34,8 @@
       "current": { "type": "String" }
     }
   },
+  "whatsNew": "Novedades",
+  "newVersionBadge": "NUEVA",
   "update": "Actualizar",
   "later": "Después",
   "onLatest": "Ya tienes la última RiderLab.",
@@ -103,8 +105,8 @@
   "chartSpeedSubZoom": "Solo velocidad del segmento. Toca para scrub.",
   "leanHelp": "0° es vertical inferida. Para inclinación precisa, monta el teléfono firme en vertical (pantalla hacia ti) en el tanque o manillar — evita bolsillo suelto o apaisado.",
   "leanPhoneDisclaimer": "La posición del celular importa: vertical, pantalla hacia ti, montaje fijo. Un bolsillo suelto sesga la inclinación.",
-  "mapHint": "Azul→magenta según velocidad. Puntos = frenos inferidos.",
-  "mapHintZoom": "Brillante = tramo elegido · tenue = resto. Puntos = frenos.",
+  "mapHint": "Toca la línea para mover la moto. Azul→magenta por velocidad. Puntos = frenos.",
+  "mapHintZoom": "Toca la línea para mover la moto. Brillante = elegido · tenue = resto.",
   "startingRide": "Iniciando ruta",
   "gpsReady": "GPS listo",
   "gpsWarmHelp": "Quédate al aire libre con cielo abierto. La grabación empieza cuando el GPS esté lo bastante estable (objetivo ±{meters} m).",
@@ -413,6 +415,24 @@
   "labAdventureCameraPhaseReady": "Listo",
   "labAdventureCameraPhaseRecording": "Grabando",
   "labAdventureCameraPhaseError": "Error",
+  "labAdventureCameraZonesEnable": "Zonas inicio/fin en el mapa",
+  "labAdventureCameraZonesEnableHelp": "Inicia o detiene la cámara al entrar en geocercas del mapa (puedes poner varias)",
+  "labAdventureCameraZonesEdit": "Editar zonas de cámara",
+  "labAdventureCameraZonesEmpty": "Sin zonas — toca el mapa para añadir inicio/parada",
+  "labAdventureCameraZonesCount": "{count} zonas en el mapa",
+  "@labAdventureCameraZonesCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "labAdventureCameraZonesTitle": "Zonas de cámara",
+  "labAdventureCameraZonesHelp": "Elige Inicio o Parada y toca el mapa. Mantén pulsado un marcador para borrarlo. Apaga “Grabar con el ride” para grabar solo en las zonas.",
+  "labAdventureCameraZoneStart": "Inicio",
+  "labAdventureCameraZoneStop": "Parada",
+  "labAdventureCameraZonesClear": "Borrar todas",
+  "labAdventureCameraZonesSave": "Guardar zonas",
+  "labAdventureCameraAggressive": "Auto-grabar conducción agresiva",
+  "labAdventureCameraAggressiveHelp": "Inicia la cámara con inclinación fuerte o aceleración brusca",
   "armAutoNoRouteHint": "Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.",
   "armAutoRouteArmed": "Armado — al arrancar se guarda en tu última ruta",
   "armAutoRouteArmedNamed": "Armado para «{name}» — al arrancar el ride queda en esa ruta",

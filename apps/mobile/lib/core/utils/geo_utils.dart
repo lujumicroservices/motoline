@@ -46,6 +46,33 @@ double pathDistanceMeters(List<TrackPoint> points) {
   return total;
 }
 
+/// Index of the track sample nearest to [lat]/[lng], or null if farther than
+/// [maxDistanceM] (avoids jumping the playhead on empty-map taps).
+int? nearestTrackIndex(
+  List<TrackPoint> points,
+  double lat,
+  double lng, {
+  double maxDistanceM = 80,
+}) {
+  if (points.isEmpty) return null;
+  var best = 0;
+  var bestD = double.infinity;
+  for (var i = 0; i < points.length; i++) {
+    final d = haversineMeters(
+      lat,
+      lng,
+      points[i].latitude,
+      points[i].longitude,
+    );
+    if (d < bestD) {
+      bestD = d;
+      best = i;
+    }
+  }
+  if (bestD > maxDistanceM) return null;
+  return best;
+}
+
 /// Marks gaps where consecutive samples are farther apart in time than [maxGap].
 List<List<TrackPoint>> splitByGpsGaps(
   List<TrackPoint> points, {

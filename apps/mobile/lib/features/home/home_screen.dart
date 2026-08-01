@@ -141,21 +141,7 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      IconButton(
-                        tooltip: l10n.checkUpdates,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
-                        ),
-                        onPressed: () => promptManualUpdateCheck(context, ref),
-                        icon: const Icon(
-                          Icons.system_update_alt_outlined,
-                          size: 18,
-                        ),
-                        color: AppTheme.steel,
-                      ),
+                      const UpdateCheckIconButton(),
                     ],
                   ),
                 ],

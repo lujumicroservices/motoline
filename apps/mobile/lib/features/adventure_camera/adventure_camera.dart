@@ -5,11 +5,15 @@ library;
 
 export 'adventure_camera_hub.dart';
 export 'adventure_camera_prefs.dart';
+export 'aggressive_riding_detector.dart';
 export 'camera_controller.dart';
+export 'camera_zone_detector.dart';
 export 'models/adventure_camera_status.dart';
+export 'models/camera_zone.dart';
 export 'noop_camera_controller.dart';
 export 'providers/adventure_camera_providers.dart';
 export 'simulated_camera_controller.dart';
 export 'widgets/adventure_camera_lifecycle_binder.dart';
 export 'widgets/adventure_camera_settings_section.dart';
 export 'widgets/adventure_camera_status_chip.dart';
+export 'widgets/camera_zones_map_screen.dart';
