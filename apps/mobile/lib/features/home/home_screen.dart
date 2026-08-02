@@ -25,6 +25,9 @@ import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
+import '../rodadas/rodada_detail_screen.dart';
+import '../rodadas/rodada_providers.dart';
+import '../rodadas/rodadas_screen.dart';
 import '../routes/routes_screen.dart';
 import 'update_widgets.dart';
 
@@ -105,6 +108,24 @@ class HomeScreen extends ConsumerWidget {
                         color: AppTheme.mist,
                       ),
                       IconButton(
+                        tooltip: 'Rodadas',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const RodadasScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.groups_2_outlined, size: 20),
+                        color: AppTheme.mist,
+                      ),
+                      IconButton(
                         tooltip: l10n.friends,
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
@@ -168,6 +189,7 @@ class HomeScreen extends ConsumerWidget {
               error: (_, _) => const SizedBox.shrink(),
             ),
             if (armed) const _ArmedBanner(),
+            const _RodadaHomeCard(),
             ridesAsync.when(
               data: (rides) {
                 final summary = FleetSummary.fromRides(rides);
@@ -446,6 +468,95 @@ class _HomeActionDock extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Lightweight home teaser — metadata only (no live/tracks/photos).
+class _RodadaHomeCard extends ConsumerWidget {
+  const _RodadaHomeCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(myRodadasProvider);
+    return async.maybeWhen(
+      data: (list) {
+        final highlight = () {
+          for (final r in list) {
+            if (r.status == 'live' || r.status == 'open') return r;
+          }
+          return list.isEmpty ? null : list.first;
+        }();
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Material(
+            color: AppTheme.asphaltElevated,
+            borderRadius: BorderRadius.circular(14),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () async {
+                if (highlight != null) {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          RodadaDetailScreen(rodadaId: highlight.id),
+                    ),
+                  );
+                } else {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const RodadasScreen(),
+                    ),
+                  );
+                }
+                ref.invalidate(myRodadasProvider);
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.groups_2_outlined,
+                      color: highlight?.status == 'live'
+                          ? AppTheme.line
+                          : AppTheme.mist,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            highlight == null
+                                ? 'Rodadas'
+                                : highlight.title,
+                            style: GoogleFonts.exo2(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                          Text(
+                            highlight == null
+                                ? 'Create a group ride · invite · share live GPS'
+                                : '${highlight.status.toUpperCase()} · ${highlight.memberCount} riders'
+                                    '${highlight.destination != null ? ' · ${highlight.destination}' : ''}',
+                            style: GoogleFonts.rajdhani(
+                              color: AppTheme.steel,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: AppTheme.steel),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }
