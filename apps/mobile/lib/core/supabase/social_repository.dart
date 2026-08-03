@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../analytics/bbox_utils.dart';
 import '../models/cloud_models.dart';
 import '../models/route_circuit.dart';
+import '../models/share_visibility.dart';
 import '../supabase/supabase_bootstrap.dart';
 
 /// Friends (all profiles) + same-area peer rides for closed beta.
@@ -138,7 +139,7 @@ class SocialRepository {
         .from('rides')
         .select()
         .eq('user_id', userId)
-        .eq('is_shared', true)
+        .neq('visibility', 'private')
         .order('started_at', ascending: false)
         .limit(20);
     final profile = await _supabase
@@ -161,7 +162,7 @@ class SocialRepository {
         .from('rides')
         .select()
         .eq('route_id', routeId)
-        .eq('is_shared', true)
+        .neq('visibility', 'private')
         .order('started_at', ascending: false)
         .limit(40);
     final list = (rows as List)
@@ -196,7 +197,7 @@ class SocialRepository {
     final rows = await _supabase
         .from('routes')
         .select()
-        .eq('is_shared', true)
+        .neq('visibility', 'private')
         .order('created_at', ascending: false);
     return (rows as List)
         .cast<Map<String, dynamic>>()
@@ -240,7 +241,7 @@ class RouteCircuitCloud {
         id: id,
         name: name,
         description: description,
-        isShared: true,
+        visibility: ShareVisibility.public,
         createdAt: DateTime.now(),
         ownerId: ownerId,
       );

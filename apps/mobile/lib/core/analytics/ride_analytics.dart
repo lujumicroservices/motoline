@@ -4,6 +4,7 @@ import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
 import 'brake_detection.dart';
+import 'corner_skill.dart';
 import 'lean_neutral.dart';
 import 'road_kind_detection.dart';
 
@@ -27,6 +28,11 @@ class RideAnalytics {
     brakeEvents = detectBrakeEvents(samples);
     roadStretches = detectRoadStretches(
       samples,
+      neutralLeanDegrees: neutralLeanDegrees,
+    );
+    skillSummary = const CornerSkillEngine().evaluate(
+      samples: samples,
+      stretches: roadStretches,
       neutralLeanDegrees: neutralLeanDegrees,
     );
   }
@@ -53,6 +59,9 @@ class RideAnalytics {
 
   /// Recta / curva stretches from heading change.
   late final List<RoadStretch> roadStretches;
+
+  /// Corner skill scores + short coach tips (technique, not GPS lock).
+  late final RideSkillSummary skillSummary;
 
   bool get hasData => samples.isNotEmpty;
 

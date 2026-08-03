@@ -1,3 +1,5 @@
+import 'share_visibility.dart';
+
 enum RideStatus { recording, completed, abandoned }
 
 class Ride {
@@ -12,7 +14,7 @@ class Ride {
     this.avgSpeedMps,
     this.maxLeanDegrees,
     this.routeId,
-    this.isShared = true,
+    this.visibility = ShareVisibility.friends,
   });
 
   final String id;
@@ -30,8 +32,11 @@ class Ride {
   /// Local/cloud route id (same UUID when synced).
   final String? routeId;
 
-  /// Closed beta default: shared so friends can compare.
-  final bool isShared;
+  /// Cloud visibility: private / friends / public.
+  final ShareVisibility visibility;
+
+  /// Legacy: true only when [visibility] is public.
+  bool get isShared => visibility.legacyIsShared;
 
   Duration get duration {
     final end = endedAt ?? DateTime.now();
@@ -57,7 +62,8 @@ class Ride {
         'avg_speed_mps': avgSpeedMps,
         'max_lean_degrees': maxLeanDegrees,
         'route_id': routeId,
-        'is_shared': isShared ? 1 : 0,
+        'is_shared': visibility.legacyIsShared ? 1 : 0,
+        'visibility': visibility.dbValue,
       };
 
   factory Ride.fromMap(Map<String, Object?> map) => Ride(
@@ -75,7 +81,10 @@ class Ride {
         avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
         maxLeanDegrees: (map['max_lean_degrees'] as num?)?.toDouble(),
         routeId: map['route_id'] as String?,
-        isShared: (map['is_shared'] as int?) != 0,
+        visibility: ShareVisibility.fromDb(
+          map['visibility'],
+          legacyIsShared: (map['is_shared'] as int?) != 0,
+        ),
       );
 
   Ride copyWith({
@@ -89,18 +98,24 @@ class Ride {
     String? routeId,
     bool clearRouteId = false,
     bool? isShared,
-  }) =>
-      Ride(
-        id: id,
-        startedAt: startedAt,
-        endedAt: endedAt ?? this.endedAt,
-        status: status ?? this.status,
-        distanceMeters: distanceMeters ?? this.distanceMeters,
-        pointCount: pointCount ?? this.pointCount,
-        maxSpeedMps: maxSpeedMps ?? this.maxSpeedMps,
-        avgSpeedMps: avgSpeedMps ?? this.avgSpeedMps,
-        maxLeanDegrees: maxLeanDegrees ?? this.maxLeanDegrees,
-        routeId: clearRouteId ? null : (routeId ?? this.routeId),
-        isShared: isShared ?? this.isShared,
-      );
+    ShareVisibility? visibility,
+  }) {
+    var nextVis = visibility ?? this.visibility;
+    if (visibility == null && isShared != null) {
+      nextVis = isShared ? ShareVisibility.public : ShareVisibility.private;
+    }
+    return Ride(
+      id: id,
+      startedAt: startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      status: status ?? this.status,
+      distanceMeters: distanceMeters ?? this.distanceMeters,
+      pointCount: pointCount ?? this.pointCount,
+      maxSpeedMps: maxSpeedMps ?? this.maxSpeedMps,
+      avgSpeedMps: avgSpeedMps ?? this.avgSpeedMps,
+      maxLeanDegrees: maxLeanDegrees ?? this.maxLeanDegrees,
+      routeId: clearRouteId ? null : (routeId ?? this.routeId),
+      visibility: nextVis,
+    );
+  }
 }

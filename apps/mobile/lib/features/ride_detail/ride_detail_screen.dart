@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +32,7 @@ import 'widgets/motorcycle_lean_gauge.dart';
 import 'widgets/ride_loop_panel.dart';
 import 'widgets/ride_profile_chart.dart';
 import 'widgets/ride_share_panel.dart';
+import 'widgets/ride_skill_coach_card.dart';
 import 'widgets/road_stretches_panel.dart';
 import 'widgets/segment_range_panel.dart';
 
@@ -447,6 +450,21 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                             CompareLocalRouteEntry(ride: ride),
                             ComparePeersEntry(localRideId: ride.id),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+                        RideSkillCoachCard(
+                          summary: a.skillSummary,
+                          onOpenCorners: a.skillSummary.corners.isEmpty
+                              ? null
+                              : () {
+                                  final stretches = a.roadStretches;
+                                  final firstCurva = stretches.indexWhere(
+                                    (s) => s.kind == RoadKind.curva,
+                                  );
+                                  if (firstCurva >= 0) {
+                                    unawaited(_openRoadStretch(firstCurva));
+                                  }
+                                },
                         ),
                         const SizedBox(height: 12),
                         RideSharePanel(ride: ride),

@@ -89,7 +89,8 @@ class RodadaOverviewTab extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Off by default. Live GPS only runs while you are on the Live tab.',
+              'Off by default. When on, location pings every 5 minutes for the '
+              'whole rodada (retries every 1 minute if a ping fails).',
               style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
             ),
             mine.when(
@@ -105,8 +106,10 @@ class RodadaOverviewTab extends ConsumerWidget {
                     _RsvpRow(rodadaId: rodadaId, current: m.rsvp),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Share live location'),
-                      subtitle: const Text('Only while Live tab is open'),
+                      title: const Text('Share location on route'),
+                      subtitle: const Text(
+                        'Every 5 min while rodada is open/live',
+                      ),
                       value: m.shareLive,
                       onChanged: (v) async {
                         await ref
@@ -116,6 +119,7 @@ class RodadaOverviewTab extends ConsumerWidget {
                               shareLive: v,
                             );
                         ref.invalidate(myRodadaMembershipProvider(rodadaId));
+                        ref.invalidate(myRodadasProvider);
                       },
                     ),
                     SwitchListTile(

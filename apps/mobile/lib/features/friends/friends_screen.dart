@@ -9,6 +9,8 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/alias_provider.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
+import '../rodadas/rodada_providers.dart';
+import '../rodadas/rodadas_screen.dart';
 
 class FriendsScreen extends ConsumerStatefulWidget {
   const FriendsScreen({super.key});
@@ -19,20 +21,38 @@ class FriendsScreen extends ConsumerStatefulWidget {
 
 class _FriendsScreenState extends ConsumerState<FriendsScreen> {
   final _nameController = TextEditingController();
+  final _searchController = TextEditingController();
   bool _nameSeeded = false;
   bool _saving = false;
+  String _searchQuery = '';
 
   @override
   void dispose() {
     _nameController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _invalidateSocial() {
+    ref.invalidate(friendsListProvider);
+    ref.invalidate(incomingFriendRequestsProvider);
+    ref.invalidate(outgoingFriendRequestsProvider);
+    ref.invalidate(myProfileProvider);
+    if (_searchQuery.length >= 2) {
+      ref.invalidate(riderSearchProvider(_searchQuery));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final friendsAsync = ref.watch(friendsListProvider);
+    final incomingAsync = ref.watch(incomingFriendRequestsProvider);
+    final outgoingAsync = ref.watch(outgoingFriendRequestsProvider);
     final meAsync = ref.watch(myProfileProvider);
+    final searchAsync = _searchQuery.length >= 2
+        ? ref.watch(riderSearchProvider(_searchQuery))
+        : null;
 
     meAsync.whenData((profile) {
       final cloudName = profile?.displayName?.trim() ?? '';
@@ -44,7 +64,6 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       } else if (cloudName.isNotEmpty &&
           _nameController.text.trim() != cloudName &&
           !_saving) {
-        // Keep field in sync when Google link updates profiles.display_name.
         _nameController.text = cloudName;
       }
     });
@@ -58,15 +77,14 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(friendsListProvider);
-          ref.invalidate(myProfileProvider);
+          _invalidateSocial();
           await ref.read(friendsListProvider.future);
         },
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
           children: [
             Text(
-              l10n.friendsSubtitle,
+              'Search riders, send friend requests, and invite accepted friends to a rodada.',
               style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 14,
@@ -105,7 +123,184 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
+            Text(
+              'Find riders',
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by name…',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: AppTheme.asphaltElevated,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (v) {
+                setState(() => _searchQuery = v.trim());
+              },
+            ),
+            if (searchAsync != null) ...[
+              const SizedBox(height: 8),
+              searchAsync.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (e, _) => Text('$e'),
+                data: (hits) {
+                  if (hits.isEmpty) {
+                    return Text(
+                      'No riders found',
+                      style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (final rider in hits)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(rider.label),
+                          trailing: FilledButton.tonal(
+                            onPressed: () async {
+                              try {
+                                await ref
+                                    .read(friendshipRepositoryProvider)
+                                    .requestFriend(rider.id);
+                                _invalidateSocial();
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Friend request sent to ${rider.label}',
+                                    ),
+                                  ),
+                                );
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('$e')),
+                                );
+                              }
+                            },
+                            child: const Text('Add'),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
+            const SizedBox(height: 20),
+            incomingAsync.when(
+              data: (reqs) {
+                if (reqs.isEmpty) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Requests',
+                      style: GoogleFonts.exo2(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    for (final r in reqs)
+                      Card(
+                        color: AppTheme.asphaltElevated,
+                        child: ListTile(
+                          title: Text(r.peer?.label ?? 'Rider'),
+                          subtitle: const Text('wants to be friends'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: 'Accept',
+                                onPressed: () async {
+                                  await ref
+                                      .read(friendshipRepositoryProvider)
+                                      .acceptRequest(r.id);
+                                  _invalidateSocial();
+                                },
+                                icon: const Icon(
+                                  Icons.check,
+                                  color: AppTheme.line,
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: 'Decline',
+                                onPressed: () async {
+                                  await ref
+                                      .read(friendshipRepositoryProvider)
+                                      .declineRequest(r.id);
+                                  _invalidateSocial();
+                                },
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: AppTheme.signal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            outgoingAsync.when(
+              data: (reqs) {
+                if (reqs.isEmpty) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pending sent',
+                      style: GoogleFonts.exo2(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    for (final r in reqs)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(r.peer?.label ?? 'Rider'),
+                        subtitle: const Text('Waiting for acceptance'),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            await ref
+                                .read(friendshipRepositoryProvider)
+                                .cancelOutgoing(r.id);
+                            _invalidateSocial();
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            Text(
+              'Your friends',
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 8),
             friendsAsync.when(
               loading: () => const Padding(
                 padding: EdgeInsets.all(32),
@@ -129,22 +324,9 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                           height: 1.4,
                         ),
                       ),
-                      if (!anonymousOff) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          msg.replaceFirst('Bad state: ', ''),
-                          style: GoogleFonts.rajdhani(
-                            color: AppTheme.steel.withValues(alpha: 0.75),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
                       const SizedBox(height: 14),
                       OutlinedButton(
-                        onPressed: () {
-                          ref.invalidate(friendsListProvider);
-                          ref.invalidate(myProfileProvider);
-                        },
+                        onPressed: _invalidateSocial,
                         child: Text(l10n.tryAgain),
                       ),
                     ],
@@ -154,9 +336,9 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
               data: (friends) {
                 if (friends.isEmpty) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    padding: const EdgeInsets.symmetric(vertical: 24),
                     child: Text(
-                      l10n.friendsEmpty,
+                      'No friends yet — search above and send a request.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
@@ -185,14 +367,12 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       final name = _nameController.text.trim();
       await ref.read(riderAliasProvider.notifier).setAlias(name);
       await ref.read(socialRepositoryProvider).updateDisplayName(name);
-      ref.invalidate(myProfileProvider);
-      ref.invalidate(friendsListProvider);
+      _invalidateSocial();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.nameSaved)),
       );
     } catch (e) {
-      // Still keep local alias if cloud fails.
       await ref
           .read(riderAliasProvider.notifier)
           .setAlias(_nameController.text);
@@ -233,7 +413,23 @@ class _FriendTile extends ConsumerWidget {
           l10n.friendRides,
           style: const TextStyle(color: AppTheme.steel, fontSize: 12),
         ),
-        trailing: const Icon(Icons.chevron_right, color: AppTheme.steel),
+        trailing: PopupMenuButton<String>(
+          onSelected: (v) async {
+            if (v == 'rides') {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => FriendRidesScreen(friend: friend),
+                ),
+              );
+            } else if (v == 'invite') {
+              await _inviteToRodada(context, ref);
+            }
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: 'rides', child: Text('View rides')),
+            PopupMenuItem(value: 'invite', child: Text('Invite to rodada')),
+          ],
+        ),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -243,6 +439,53 @@ class _FriendTile extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _inviteToRodada(BuildContext context, WidgetRef ref) async {
+    final rodadas = await ref.read(myRodadasProvider.future);
+    final open = rodadas
+        .where((r) => r.status == 'open' || r.status == 'live' || r.status == 'draft')
+        .toList();
+    if (!context.mounted) return;
+    if (open.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Create a rodada first')),
+      );
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const RodadasScreen()),
+      );
+      return;
+    }
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => ListView(
+        children: [
+          const ListTile(title: Text('Invite to…')),
+          for (final r in open)
+            ListTile(
+              title: Text(r.title),
+              subtitle: Text(r.status),
+              onTap: () => Navigator.pop(ctx, r.id),
+            ),
+        ],
+      ),
+    );
+    if (picked == null) return;
+    try {
+      await ref.read(rodadaRepositoryProvider).inviteUser(
+            rodadaId: picked,
+            userId: friend.id,
+          );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${friend.label} invited')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
   }
 }
 
@@ -291,7 +534,8 @@ class FriendRidesScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 title: Text(
-                  DateFormat('EEE · MMM d · HH:mm').format(ride.startedAt.toLocal()),
+                  DateFormat('EEE · MMM d · HH:mm')
+                      .format(ride.startedAt.toLocal()),
                   style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
@@ -301,8 +545,6 @@ class FriendRidesScreen extends ConsumerWidget {
                   style: const TextStyle(color: AppTheme.steel, fontSize: 13),
                 ),
                 onTap: () {
-                  // Friend-only view: open compare against local rides via peers list
-                  // from Ride Lab is primary; here show metrics sheet.
                   showModalBottomSheet<void>(
                     context: context,
                     backgroundColor: AppTheme.asphaltElevated,
@@ -347,46 +589,18 @@ class _FriendRideSheet extends StatelessWidget {
           const SizedBox(height: 16),
           Wrap(
             spacing: 16,
-            runSpacing: 10,
+            runSpacing: 8,
             children: [
-              _chip(l10n.distance, '${ride.distanceKm.toStringAsFixed(2)} km'),
-              _chip(l10n.duration, formatDuration(ride.duration)),
-              _chip(
-                l10n.maxSpeed,
+              Text('${ride.distanceKm.toStringAsFixed(1)} km'),
+              Text(formatDuration(ride.duration)),
+              Text(
                 '${ride.maxSpeedKmh?.toStringAsFixed(0) ?? "—"} ${l10n.kmh}',
               ),
-              _chip(
-                l10n.avgSpeed,
-                '${ride.avgSpeedKmh?.toStringAsFixed(0) ?? "—"} ${l10n.kmh}',
-              ),
-              _chip(
-                l10n.maxLR,
-                '${ride.maxLeanLeftDeg?.toStringAsFixed(0) ?? "—"}° / '
-                '${ride.maxLeanRightDeg?.toStringAsFixed(0) ?? "—"}°',
-              ),
-              _chip(l10n.lineScore, '${ride.lineScore ?? "—"}'),
+              if (ride.lineScore != null) Text('Score ${ride.lineScore}'),
             ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.comparePickPeer,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _chip(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: AppTheme.steel, fontSize: 11)),
-        Text(
-          value,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-        ),
-      ],
     );
   }
 }

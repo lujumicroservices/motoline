@@ -1,3 +1,5 @@
+import 'share_visibility.dart';
+
 /// Named circuit / route for tagging rides and peer compare.
 ///
 /// Loop A/B anchors on the route are a denormalized mirror of the primary
@@ -8,7 +10,7 @@ class RouteCircuit {
     required this.id,
     required this.name,
     this.description,
-    this.isShared = false,
+    this.visibility = ShareVisibility.friends,
     required this.createdAt,
     this.ownerId,
     this.initLat,
@@ -21,7 +23,7 @@ class RouteCircuit {
   final String id;
   final String name;
   final String? description;
-  final bool isShared;
+  final ShareVisibility visibility;
   final DateTime createdAt;
 
   /// Cloud owner (`profiles.id`). Null = created offline / legacy local row.
@@ -38,6 +40,8 @@ class RouteCircuit {
   /// Geofence radius (meters) used for auto-lap detection around init.
   final double? geofenceRadiusM;
 
+  bool get isShared => visibility.legacyIsShared;
+
   bool get hasLoopInit => initLat != null && initLng != null;
 
   bool get hasLoopEnd => endLat != null && endLng != null;
@@ -49,7 +53,8 @@ class RouteCircuit {
         'id': id,
         'name': name,
         'description': description,
-        'is_shared': isShared ? 1 : 0,
+        'is_shared': visibility.legacyIsShared ? 1 : 0,
+        'visibility': visibility.dbValue,
         'created_at_ms': createdAt.millisecondsSinceEpoch,
         'owner_id': ownerId,
         'init_lat': initLat,
@@ -63,7 +68,10 @@ class RouteCircuit {
         id: map['id'] as String,
         name: map['name'] as String,
         description: map['description'] as String?,
-        isShared: (map['is_shared'] as int?) == 1,
+        visibility: ShareVisibility.fromDb(
+          map['visibility'],
+          legacyIsShared: (map['is_shared'] as int?) == 1,
+        ),
         createdAt: DateTime.fromMillisecondsSinceEpoch(
           map['created_at_ms'] as int,
         ),
@@ -91,7 +99,10 @@ class RouteCircuit {
       id: str(map['id']) ?? '',
       name: str(map['name']) ?? '',
       description: str(map['description']),
-      isShared: isShared,
+      visibility: ShareVisibility.fromDb(
+        map['visibility'],
+        legacyIsShared: isShared,
+      ),
       createdAt: DateTime.tryParse(str(map['created_at']) ?? '') ??
           DateTime.now(),
       ownerId: str(map['owner_id']),
@@ -107,24 +118,30 @@ class RouteCircuit {
     String? name,
     String? description,
     bool? isShared,
+    ShareVisibility? visibility,
     String? ownerId,
     double? initLat,
     double? initLng,
     double? endLat,
     double? endLng,
     double? geofenceRadiusM,
-  }) =>
-      RouteCircuit(
-        id: id,
-        name: name ?? this.name,
-        description: description ?? this.description,
-        isShared: isShared ?? this.isShared,
-        createdAt: createdAt,
-        ownerId: ownerId ?? this.ownerId,
-        initLat: initLat ?? this.initLat,
-        initLng: initLng ?? this.initLng,
-        endLat: endLat ?? this.endLat,
-        endLng: endLng ?? this.endLng,
-        geofenceRadiusM: geofenceRadiusM ?? this.geofenceRadiusM,
-      );
+  }) {
+    var nextVis = visibility ?? this.visibility;
+    if (visibility == null && isShared != null) {
+      nextVis = isShared ? ShareVisibility.public : ShareVisibility.private;
+    }
+    return RouteCircuit(
+      id: id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      visibility: nextVis,
+      createdAt: createdAt,
+      ownerId: ownerId ?? this.ownerId,
+      initLat: initLat ?? this.initLat,
+      initLng: initLng ?? this.initLng,
+      endLat: endLat ?? this.endLat,
+      endLng: endLng ?? this.endLng,
+      geofenceRadiusM: geofenceRadiusM ?? this.geofenceRadiusM,
+    );
+  }
 }

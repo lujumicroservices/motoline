@@ -212,8 +212,9 @@ class RouteLoopService {
       id: route.id,
       name: route.name,
       description: route.description,
-      isShared: route.isShared,
+      visibility: route.visibility,
       createdAt: route.createdAt,
+      ownerId: route.ownerId,
     );
     await _db.upsertRoute(cleared);
   }

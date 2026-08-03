@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/route_circuit.dart';
+import '../../core/models/share_visibility.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/rider_alias_chip.dart';
+import '../../widgets/visibility_selector.dart';
 import 'route_detail_screen.dart';
 
 /// Manage named routes / circuits and share them with friends.
@@ -235,7 +237,7 @@ class RoutesScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final nameCtrl = TextEditingController();
     final descCtrl = TextEditingController();
-    var shared = true;
+    var visibility = ShareVisibility.friends;
 
     final ok = await showDialog<bool>(
       context: context,
@@ -261,16 +263,11 @@ class RoutesScreen extends ConsumerWidget {
                     controller: descCtrl,
                     decoration: InputDecoration(hintText: l10n.routeDescHint),
                   ),
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.shareRoute),
-                    subtitle: Text(
-                      l10n.shareRouteHelp,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    value: shared,
-                    onChanged: (v) => setLocal(() => shared = v),
+                  const SizedBox(height: 12),
+                  VisibilitySelector(
+                    value: visibility,
+                    dense: true,
+                    onChanged: (v) => setLocal(() => visibility = v),
                   ),
                 ],
               ),
@@ -295,7 +292,7 @@ class RoutesScreen extends ConsumerWidget {
       await ref.read(routeServiceProvider).createRoute(
             name: nameCtrl.text,
             description: descCtrl.text,
-            isShared: shared,
+            visibility: visibility,
           );
       ref.invalidate(routesListProvider);
       ref.invalidate(sharedPeerRoutesProvider);
@@ -381,7 +378,7 @@ class _MyRouteTile extends ConsumerWidget {
         subtitle: Text(
           [
             if (route.isLoopReady) l10n.routesLoopReady,
-            route.isShared ? l10n.sharedRoute : l10n.privateRoute,
+            route.visibility.label,
             l10n.routesTapHint,
           ].join(' · '),
           style: const TextStyle(color: AppTheme.steel, fontSize: 12),
@@ -389,12 +386,31 @@ class _MyRouteTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Switch(
-              value: route.isShared,
-              onChanged: (v) async {
-                await ref.read(routeServiceProvider).setShared(route.id, v);
+            PopupMenuButton<ShareVisibility>(
+              tooltip: 'Visibility',
+              initialValue: route.visibility,
+              onSelected: (v) async {
+                await ref
+                    .read(routeServiceProvider)
+                    .setVisibility(route.id, v);
                 ref.invalidate(routesListProvider);
+                ref.invalidate(sharedPeerRoutesProvider);
               },
+              itemBuilder: (_) => [
+                for (final v in ShareVisibility.values)
+                  PopupMenuItem(value: v, child: Text(v.label)),
+              ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Icon(
+                  switch (route.visibility) {
+                    ShareVisibility.private => Icons.lock_outline,
+                    ShareVisibility.friends => Icons.group_outlined,
+                    ShareVisibility.public => Icons.public,
+                  },
+                  color: AppTheme.mist,
+                ),
+              ),
             ),
             IconButton(
               tooltip: l10n.deleteRoute,

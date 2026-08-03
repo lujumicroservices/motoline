@@ -8,6 +8,7 @@ import '../core/models/route_circuit.dart';
 import '../core/models/route_loop.dart';
 import '../core/services/route_loop_service.dart';
 import '../core/services/route_service.dart';
+import '../core/supabase/friendship_repository.dart';
 import '../core/supabase/social_repository.dart';
 import '../core/supabase/supabase_bootstrap.dart';
 import 'ride_providers.dart';
@@ -27,6 +28,10 @@ final routeLoopsProvider =
 
 final socialRepositoryProvider = Provider<SocialRepository>((ref) {
   return SocialRepository();
+});
+
+final friendshipRepositoryProvider = Provider<FriendshipRepository>((ref) {
+  return FriendshipRepository();
 });
 
 final routesListProvider =
@@ -55,13 +60,14 @@ final sharedPeerRoutesProvider =
   }
 });
 
+/// Accepted friends only (invite / compare roster).
 final friendsListProvider =
     FutureProvider.autoDispose<List<RiderProfile>>((ref) async {
   if (!SupabaseBootstrap.isReady) {
     throw StateError('Supabase not initialized');
   }
   try {
-    return await ref.watch(socialRepositoryProvider).listFriends();
+    return await ref.watch(friendshipRepositoryProvider).listAcceptedFriends();
   } on AuthException catch (e) {
     throw StateError(_authHint(e.message));
   } catch (e) {
@@ -70,6 +76,38 @@ final friendsListProvider =
       throw StateError(_authHint(hint));
     }
     rethrow;
+  }
+});
+
+final incomingFriendRequestsProvider =
+    FutureProvider.autoDispose<List<Friendship>>((ref) async {
+  if (!SupabaseBootstrap.isReady) return const [];
+  try {
+    return await ref.watch(friendshipRepositoryProvider).listIncomingRequests();
+  } catch (_) {
+    return const [];
+  }
+});
+
+final outgoingFriendRequestsProvider =
+    FutureProvider.autoDispose<List<Friendship>>((ref) async {
+  if (!SupabaseBootstrap.isReady) return const [];
+  try {
+    return await ref.watch(friendshipRepositoryProvider).listOutgoingRequests();
+  } catch (_) {
+    return const [];
+  }
+});
+
+final riderSearchProvider =
+    FutureProvider.autoDispose.family<List<RiderProfile>, String>((ref, q) async {
+  if (!SupabaseBootstrap.isReady) return const [];
+  final query = q.trim();
+  if (query.length < 2) return const [];
+  try {
+    return await ref.watch(friendshipRepositoryProvider).searchRiders(query);
+  } catch (_) {
+    return const [];
   }
 });
 

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/supabase/supabase_bootstrap.dart';
 import 'models/rodada_models.dart';
-import 'rodada_live_session.dart';
 import 'rodada_repository.dart';
 
 final rodadaRepositoryProvider = Provider<RodadaRepository>((ref) {
@@ -71,26 +70,8 @@ final rodadaLivePositionsProvider = StreamProvider.autoDispose
   return controller.stream;
 });
 
-/// Starts publishing only when this provider is watched (Live tab) AND
-/// [shareLive] is true. Clears cloud position on dispose.
-final rodadaLivePublisherProvider =
-    Provider.autoDispose.family<void, String>((ref, rodadaId) {
-  final membership = ref.watch(myRodadaMembershipProvider(rodadaId));
-  final shareLive = membership.maybeWhen(
-    data: (m) => m?.shareLive == true,
-    orElse: () => false,
-  );
-  if (!shareLive || !SupabaseBootstrap.isReady) return;
-
-  final session = RodadaLiveSession(
-    rodadaId: rodadaId,
-    repository: ref.watch(rodadaRepositoryProvider),
-  );
-  unawaited(session.start());
-  ref.onDispose(() {
-    unawaited(session.dispose());
-  });
-});
+/// Route sharing runs via [RodadaRouteShareBinder] (5 min / retry 1 min)
+/// for the whole rodada — not tied to the Live tab lifecycle.
 
 final rodadaStopsProvider =
     FutureProvider.autoDispose.family<List<RodadaStop>, String>((ref, id) {

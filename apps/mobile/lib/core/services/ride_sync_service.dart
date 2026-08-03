@@ -7,6 +7,7 @@ import '../analytics/bbox_utils.dart';
 import '../analytics/ride_analytics.dart';
 import '../db/ride_database.dart';
 import '../models/ride.dart';
+import '../models/share_visibility.dart';
 import '../models/track_point.dart';
 import '../supabase/supabase_bootstrap.dart';
 import 'rider_telemetry_service.dart';
@@ -91,7 +92,8 @@ class RideSyncService {
         'max_lean_left_deg': analytics.maxLeanLeft,
         'max_lean_right_deg': analytics.maxLeanRight,
         'line_score': analytics.lineScore,
-        'is_shared': ride.isShared,
+        'visibility': ride.visibility.dbValue,
+        'is_shared': ride.visibility.legacyIsShared,
         'route_id': ride.routeId,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
         if (bbox != null) ...bbox.toMap(),
@@ -202,7 +204,11 @@ class RideSyncService {
             avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
             maxLeanDegrees: maxLean,
             routeId: _str(map['route_id']),
-            isShared: map['is_shared'] == true || map['is_shared'] == 1,
+            visibility: ShareVisibility.fromDb(
+              map['visibility'],
+              legacyIsShared:
+                  map['is_shared'] == true || map['is_shared'] == 1,
+            ),
           );
           await _db.upsertRide(ride);
 

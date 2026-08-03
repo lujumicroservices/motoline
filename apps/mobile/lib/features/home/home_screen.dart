@@ -27,6 +27,7 @@ import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../rodadas/rodada_detail_screen.dart';
 import '../rodadas/rodada_providers.dart';
+import '../rodadas/rodada_route_share_binder.dart';
 import '../rodadas/rodadas_screen.dart';
 import '../routes/routes_screen.dart';
 import 'update_widgets.dart';
@@ -49,7 +50,8 @@ class HomeScreen extends ConsumerWidget {
       });
     });
 
-    return AdventureCameraLifecycleBinder(
+    return RodadaRouteShareBinder(
+      child: AdventureCameraLifecycleBinder(
       child: Scaffold(
       body: SafeArea(
         child: Column(
@@ -284,6 +286,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
       ),
     );

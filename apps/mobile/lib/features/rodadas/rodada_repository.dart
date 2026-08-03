@@ -301,7 +301,8 @@ class RodadaRepository {
         .eq('rodada_id', rodadaId);
     final list = (rows as List).cast<Map<String, dynamic>>();
     final names = await _namesFor(list.map((r) => r['user_id'] as String));
-    final cutoff = DateTime.now().toUtc().subtract(const Duration(minutes: 3));
+    // Allow ~2 missed 5‑minute pings before dropping a rider from the map.
+    final cutoff = DateTime.now().toUtc().subtract(const Duration(minutes: 12));
     return list
         .map(
           (r) => RodadaLivePosition.fromMap(

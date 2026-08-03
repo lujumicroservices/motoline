@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 9,
+      version: 10,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -39,7 +39,8 @@ class RideDatabase {
             avg_speed_mps REAL,
             max_lean_degrees REAL,
             route_id TEXT,
-            is_shared INTEGER NOT NULL DEFAULT 1
+            is_shared INTEGER NOT NULL DEFAULT 0,
+            visibility TEXT NOT NULL DEFAULT 'friends'
           )
         ''');
         await db.execute('''
@@ -100,8 +101,30 @@ class RideDatabase {
         if (oldVersion < 9) {
           await _addTelemetryCategoryColumnIfMissing(db);
         }
+        if (oldVersion < 10) {
+          await _addVisibilityColumnsIfMissing(db);
+        }
       },
     );
+  }
+
+  Future<void> _addVisibilityColumnsIfMissing(Database db) async {
+    Future<void> addVis(String table) async {
+      final columns = await db.rawQuery('PRAGMA table_info($table)');
+      final existing = columns.map((c) => c['name'] as String).toSet();
+      if (!existing.contains('visibility')) {
+        await db.execute(
+          "ALTER TABLE $table ADD COLUMN visibility TEXT NOT NULL DEFAULT 'friends'",
+        );
+        // Preserve prior share flag: shared → public, else private.
+        await db.execute(
+          "UPDATE $table SET visibility = CASE WHEN is_shared = 1 THEN 'public' ELSE 'private' END",
+        );
+      }
+    }
+
+    await addVis('rides');
+    await addVis('routes');
   }
 
   Future<void> _createCameraEventsTable(Database db) async {
@@ -307,6 +330,7 @@ class RideDatabase {
         name TEXT NOT NULL,
         description TEXT,
         is_shared INTEGER NOT NULL DEFAULT 0,
+        visibility TEXT NOT NULL DEFAULT 'friends',
         created_at_ms INTEGER NOT NULL,
         owner_id TEXT,
         init_lat REAL,

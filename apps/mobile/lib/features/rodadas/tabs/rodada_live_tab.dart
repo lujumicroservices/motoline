@@ -17,8 +17,7 @@ class RodadaLiveTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Activate publisher only while this widget is mounted.
-    ref.watch(rodadaLivePublisherProvider(rodadaId));
+    // Publishing runs app-wide via RodadaRouteShareBinder (5 min / retry 1 min).
     final positions = ref.watch(rodadaLivePositionsProvider(rodadaId));
     final stops = ref.watch(rodadaStopsProvider(rodadaId));
     final overview = ref.watch(rodadaOverviewProvider(rodadaId));
@@ -46,7 +45,7 @@ class RodadaLiveTab extends ConsumerWidget {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Sharing live GPS · stops when you leave this tab',
+                          'Sharing location every 5 min (retry 1 min if fail)',
                           style: TextStyle(fontSize: 13),
                         ),
                       ),

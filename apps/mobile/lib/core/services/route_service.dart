@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../db/ride_database.dart';
 import '../models/route_circuit.dart';
+import '../models/share_visibility.dart';
 import '../supabase/supabase_bootstrap.dart';
 
 /// Create / share / sync named routes (circuits).
@@ -46,12 +47,15 @@ class RouteService {
   Future<RouteCircuit> createRoute({
     required String name,
     String? description,
-    bool isShared = true,
+    bool isShared = false,
+    ShareVisibility visibility = ShareVisibility.friends,
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
       throw ArgumentError('Route name required');
     }
+
+    final vis = isShared ? ShareVisibility.public : visibility;
 
     var id = _uuid.v4();
     final now = DateTime.now();
@@ -71,7 +75,8 @@ class RouteService {
                 'description': description?.trim().isEmpty == true
                     ? null
                     : description?.trim(),
-                'is_shared': isShared,
+                'visibility': vis.dbValue,
+                'is_shared': vis.legacyIsShared,
               })
               .select()
               .single();
@@ -86,7 +91,7 @@ class RouteService {
       id: id,
       name: trimmed,
       description: description,
-      isShared: isShared,
+      visibility: vis,
       createdAt: now,
       ownerId: ownerId,
     );
@@ -94,24 +99,35 @@ class RouteService {
     return route;
   }
 
-  Future<RouteCircuit> setShared(String routeId, bool shared) async {
+  Future<RouteCircuit> setVisibility(
+    String routeId,
+    ShareVisibility visibility,
+  ) async {
     final existing = await _db.getRoute(routeId);
     if (existing == null) throw StateError('Route not found');
-    final updated = existing.copyWith(isShared: shared);
+    final updated = existing.copyWith(visibility: visibility);
     await _db.upsertRoute(updated);
 
     if (SupabaseBootstrap.isReady) {
       try {
         await SupabaseBootstrap.ensureSession();
         await _supabase.from('routes').update({
-          'is_shared': shared,
+          'visibility': visibility.dbValue,
+          'is_shared': visibility.legacyIsShared,
           'updated_at': DateTime.now().toUtc().toIso8601String(),
         }).eq('id', routeId);
       } catch (e) {
-        debugPrint('CornerIQ route share sync: $e');
+        debugPrint('CornerIQ route visibility sync: $e');
       }
     }
     return updated;
+  }
+
+  Future<RouteCircuit> setShared(String routeId, bool shared) {
+    return setVisibility(
+      routeId,
+      shared ? ShareVisibility.public : ShareVisibility.private,
+    );
   }
 
   Future<RouteCircuit> rename(String routeId, String name) async {
@@ -174,7 +190,10 @@ class RouteService {
       id: id,
       name: name,
       description: _str(map['description']),
-      isShared: isShared,
+      visibility: ShareVisibility.fromDb(
+        map['visibility'],
+        legacyIsShared: isShared,
+      ),
       createdAt: DateTime.tryParse(_str(map['created_at']) ?? '') ??
           DateTime.now(),
       ownerId: _str(map['owner_id']),
@@ -239,7 +258,7 @@ class RouteService {
         final sharedRows = await _supabase
             .from('routes')
             .select()
-            .eq('is_shared', true)
+            .neq('visibility', 'private')
             .order('created_at', ascending: false);
         for (final raw in (sharedRows as List)) {
           try {
