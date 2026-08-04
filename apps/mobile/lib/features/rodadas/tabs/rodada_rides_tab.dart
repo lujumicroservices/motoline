@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/models/ride.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../models/rodada_models.dart';
@@ -17,6 +18,7 @@ class RodadaRidesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final rides = ref.watch(rodadaRidesProvider(rodadaId));
 
     return Column(
@@ -27,7 +29,7 @@ class RodadaRidesTab extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Shared tracks from members who opted in. Dense GPS stays on each phone.',
+                  l10n.sharedTracksHelp,
                   style: GoogleFonts.rajdhani(
                     color: AppTheme.steel,
                     fontSize: 13,
@@ -36,7 +38,7 @@ class RodadaRidesTab extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => _linkLatestRide(context, ref),
-                child: const Text('Link my ride'),
+                child: Text(l10n.linkMyRide),
               ),
             ],
           ),
@@ -47,7 +49,7 @@ class RodadaRidesTab extends ConsumerWidget {
             error: (e, _) => Center(child: Text('$e')),
             data: (list) {
               if (list.isEmpty) {
-                return const Center(child: Text('No shared rides yet'));
+                return Center(child: Text(l10n.noSharedRidesYet));
               }
               return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -60,7 +62,7 @@ class RodadaRidesTab extends ConsumerWidget {
                     subtitle: Text(
                       '${r.distanceKm.toStringAsFixed(1)} km'
                       '${r.maxSpeedKmh != null ? ' · ${r.maxSpeedKmh!.toStringAsFixed(0)} km/h' : ''}'
-                      '${r.lineScore != null ? ' · score ${r.lineScore}' : ''}',
+                      '${r.lineScore != null ? ' · ${l10n.scoreLabel(r.lineScore!)}' : ''}',
                     ),
                     trailing: const Icon(Icons.map_outlined),
                     onTap: () {
@@ -81,6 +83,7 @@ class RodadaRidesTab extends ConsumerWidget {
   }
 
   Future<void> _linkLatestRide(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     try {
       final rides = await ref.read(ridesListProvider.future);
       final completed =
@@ -88,7 +91,7 @@ class RodadaRidesTab extends ConsumerWidget {
       if (completed.isEmpty) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No completed rides to link')),
+          SnackBar(content: Text(l10n.noCompletedRidesToLink)),
         );
         return;
       }
@@ -100,7 +103,7 @@ class RodadaRidesTab extends ConsumerWidget {
       if (cloudId == null) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sync the ride first, then try again')),
+          SnackBar(content: Text(l10n.syncRideFirst)),
         );
         return;
       }
@@ -112,7 +115,7 @@ class RodadaRidesTab extends ConsumerWidget {
       ref.invalidate(myRodadaMembershipProvider(rodadaId));
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ride linked to this rodada')),
+        SnackBar(content: Text(l10n.rideLinkedToRodada)),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -131,6 +134,7 @@ class _RodadaRideTrackScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final track = ref.watch(rodadaRideTrackProvider(ride.id));
 
     return Scaffold(
@@ -145,7 +149,7 @@ class _RodadaRideTrackScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('$e')),
         data: (pts) {
           if (pts.isEmpty) {
-            return const Center(child: Text('No track points'));
+            return Center(child: Text(l10n.noTrackPoints));
           }
           final center = LatLng(pts.first.lat, pts.first.lng);
           return FlutterMap(

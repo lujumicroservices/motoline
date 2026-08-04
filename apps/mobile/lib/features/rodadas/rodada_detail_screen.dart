@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/supabase/supabase_bootstrap.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import 'rodada_providers.dart';
@@ -63,6 +64,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final overview = ref.watch(rodadaOverviewProvider(widget.rodadaId));
     final membership = ref.watch(myRodadaMembershipProvider(widget.rodadaId));
 
@@ -70,23 +72,23 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       appBar: AppBar(
         title: overview.when(
           data: (r) => Text(
-            r?.title ?? 'Rodada',
+            r?.title ?? l10n.rodadaFallback,
             style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
           ),
-          loading: () => const Text('Rodada'),
-          error: (_, __) => const Text('Rodada'),
+          loading: () => Text(l10n.rodadaFallback),
+          error: (_, __) => Text(l10n.rodadaFallback),
         ),
         actions: [
           overview.maybeWhen(
             data: (r) {
               if (r == null) return const SizedBox.shrink();
               return IconButton(
-                tooltip: 'Copy invite code',
+                tooltip: l10n.copyInviteCode,
                 onPressed: () async {
                   await Clipboard.setData(ClipboardData(text: r.inviteCode));
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Code ${r.inviteCode} copied')),
+                    SnackBar(content: Text(l10n.inviteCodeCopied(r.inviteCode))),
                   );
                 },
                 icon: const Icon(Icons.copy),
@@ -99,11 +101,11 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
               if (m == null || !m.isHost) return const SizedBox.shrink();
               return PopupMenuButton<String>(
                 onSelected: _hostAction,
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'live', child: Text('Mark as LIVE')),
-                  PopupMenuItem(value: 'open', child: Text('Mark as open')),
-                  PopupMenuItem(value: 'ended', child: Text('End rodada')),
-                  PopupMenuItem(value: 'invite', child: Text('Invite friend')),
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 'live', child: Text(l10n.markAsLive)),
+                  PopupMenuItem(value: 'open', child: Text(l10n.markAsOpen)),
+                  PopupMenuItem(value: 'ended', child: Text(l10n.endRodada)),
+                  PopupMenuItem(value: 'invite', child: Text(l10n.inviteFriend)),
                 ],
               );
             },
@@ -113,12 +115,12 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
         bottom: TabBar(
           controller: _tabs,
           isScrollable: true,
-          tabs: const [
-            Tab(text: 'Overview'),
-            Tab(text: 'Live'),
-            Tab(text: 'Rides'),
-            Tab(text: 'Photos'),
-            Tab(text: 'Radio'),
+          tabs: [
+            Tab(text: l10n.rodadaTabOverview),
+            Tab(text: l10n.rodadaTabLive),
+            Tab(text: l10n.rodadaTabRides),
+            Tab(text: l10n.rodadaTabPhotos),
+            Tab(text: l10n.rodadaTabRadio),
           ],
         ),
       ),
@@ -127,7 +129,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
         error: (e, _) => Center(child: Text('$e')),
         data: (rodada) {
           if (rodada == null) {
-            return const Center(child: Text('Rodada not found'));
+            return Center(child: Text(l10n.rodadaNotFound));
           }
           return Column(
             children: [
@@ -147,6 +149,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
   }
 
   Future<void> _hostAction(String action) async {
+    final l10n = context.l10n;
     final repo = ref.read(rodadaRepositoryProvider);
     try {
       if (action == 'invite') {
@@ -158,7 +161,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       ref.invalidate(myRodadasProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Status → $action')),
+        SnackBar(content: Text(l10n.rodadaStatusChanged(action))),
       );
     } catch (e) {
       if (!mounted) return;
@@ -169,6 +172,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
   }
 
   Future<void> _inviteFriend() async {
+    final l10n = context.l10n;
     if (!SupabaseBootstrap.isReady) return;
     final friends = await ref.read(friendsListProvider.future);
     if (!mounted) return;
@@ -176,9 +180,9 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       context: context,
       builder: (ctx) {
         if (friends.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(24),
-            child: Text('No friends to invite yet.'),
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(l10n.noFriendsToInvite),
           );
         }
         return ListView.builder(
@@ -201,7 +205,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
     ref.invalidate(rodadaMembersProvider(widget.rodadaId));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invite sent')),
+      SnackBar(content: Text(l10n.inviteSent)),
     );
   }
 }
@@ -213,6 +217,7 @@ class _StatusBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final overview = ref.watch(rodadaOverviewProvider(rodadaId));
     return overview.maybeWhen(
       data: (r) {
@@ -230,7 +235,7 @@ class _StatusBanner extends ConsumerWidget {
               if (r.destination != null && r.destination!.isNotEmpty)
                 r.destination!,
               if (when != null) when,
-              'code ${r.inviteCode}',
+              l10n.rodadaCodeBanner(r.inviteCode),
             ].join(' · '),
             style: GoogleFonts.rajdhani(
               color: AppTheme.steel,

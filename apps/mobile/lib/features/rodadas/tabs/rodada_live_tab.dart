@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../rodada_providers.dart';
 
@@ -17,6 +18,7 @@ class RodadaLiveTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     // Publishing runs app-wide via RodadaRouteShareBinder (5 min / retry 1 min).
     final positions = ref.watch(rodadaLivePositionsProvider(rodadaId));
     final stops = ref.watch(rodadaStopsProvider(rodadaId));
@@ -37,16 +39,16 @@ class RodadaLiveTab extends ConsumerWidget {
             if (m?.shareLive == true) {
               return Material(
                 color: AppTheme.line.withValues(alpha: 0.12),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Row(
                     children: [
-                      Icon(Icons.sensors, color: AppTheme.line, size: 18),
-                      SizedBox(width: 8),
+                      const Icon(Icons.sensors, color: AppTheme.line, size: 18),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Sharing location every 5 min (retry 1 min if fail)',
-                          style: TextStyle(fontSize: 13),
+                          l10n.sharingLocationBanner,
+                          style: const TextStyle(fontSize: 13),
                         ),
                       ),
                     ],
@@ -60,10 +62,10 @@ class RodadaLiveTab extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Live map is view-only. Enable sharing in Overview.',
-                        style: TextStyle(fontSize: 13, color: AppTheme.steel),
+                        l10n.liveMapViewOnly,
+                        style: const TextStyle(fontSize: 13, color: AppTheme.steel),
                       ),
                     ),
                     TextButton(
@@ -74,7 +76,7 @@ class RodadaLiveTab extends ConsumerWidget {
                             );
                         ref.invalidate(myRodadaMembershipProvider(rodadaId));
                       },
-                      child: const Text('Share live'),
+                      child: Text(l10n.shareLive),
                     ),
                   ],
                 ),
@@ -186,7 +188,7 @@ class RodadaLiveTab extends ConsumerWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Text(
-                            'No live riders yet. Opt-in riders appear here (~5s).',
+                            l10n.noLiveRidersYet,
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
                               fontSize: 14,
@@ -208,7 +210,7 @@ class RodadaLiveTab extends ConsumerWidget {
                           heroTag: 'rodada_stop',
                           onPressed: () => _addStop(context, ref),
                           icon: const Icon(Icons.add_location_alt),
-                          label: const Text('Stop'),
+                          label: Text(l10n.stopFab),
                         );
                       },
                       orElse: () => const SizedBox.shrink(),
@@ -224,23 +226,24 @@ class RodadaLiveTab extends ConsumerWidget {
   }
 
   Future<void> _addStop(BuildContext context, WidgetRef ref) async {
-    final titleCtrl = TextEditingController(text: 'Gas / break');
+    final l10n = context.l10n;
+    final titleCtrl = TextEditingController(text: l10n.gasBreakDefault);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add stop'),
+        title: Text(l10n.addStop),
         content: TextField(
           controller: titleCtrl,
-          decoration: const InputDecoration(labelText: 'Title'),
+          decoration: InputDecoration(labelText: l10n.stopTitleLabel),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Drop at my GPS'),
+            child: Text(l10n.dropAtMyGps),
           ),
         ],
       ),
@@ -251,7 +254,7 @@ class RodadaLiveTab extends ConsumerWidget {
       await ref.read(rodadaRepositoryProvider).addStop(
             rodadaId: rodadaId,
             title: titleCtrl.text.trim().isEmpty
-                ? 'Stop'
+                ? l10n.stopDefault
                 : titleCtrl.text.trim(),
             latitude: pos.latitude,
             longitude: pos.longitude,

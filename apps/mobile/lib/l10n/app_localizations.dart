@@ -407,7 +407,7 @@ abstract class AppLocalizations {
   /// No description provided for @rideLab.
   ///
   /// In es, this message translates to:
-  /// **'Ride Lab'**
+  /// **'Lab del ride'**
   String get rideLab;
 
   /// No description provided for @rideLabSegment.
@@ -491,19 +491,19 @@ abstract class AppLocalizations {
   /// No description provided for @sectionRoad.
   ///
   /// In es, this message translates to:
-  /// **'Rectas y curvas'**
+  /// **'Curvas'**
   String get sectionRoad;
 
   /// No description provided for @sectionRoadSub.
   ///
   /// In es, this message translates to:
-  /// **'Por cambio de rumbo'**
+  /// **'Por rumbo e inclinación'**
   String get sectionRoadSub;
 
   /// No description provided for @sectionLoop.
   ///
   /// In es, this message translates to:
-  /// **'Loop'**
+  /// **'Vueltas'**
   String get sectionLoop;
 
   /// No description provided for @sectionLoopSub.
@@ -587,7 +587,7 @@ abstract class AppLocalizations {
   /// No description provided for @playhead.
   ///
   /// In es, this message translates to:
-  /// **'PLAYHEAD'**
+  /// **'CURSOR'**
   String get playhead;
 
   /// No description provided for @distance.
@@ -839,13 +839,13 @@ abstract class AppLocalizations {
   /// No description provided for @roadStretchesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Según rumbo + inclinación. {rectas} rectas · {curvas} curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.'**
-  String roadStretchesHelp(int rectas, int curvas);
+  /// **'Según rumbo + inclinación. {curvas} curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.'**
+  String roadStretchesHelp(int curvas);
 
   /// No description provided for @roadStretchesEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay suficiente cambio de rumbo GPS para separar rectas y curvas.'**
+  /// **'Aún no hay suficiente cambio de rumbo GPS para detectar curvas.'**
   String get roadStretchesEmpty;
 
   /// No description provided for @openDetail.
@@ -1043,7 +1043,7 @@ abstract class AppLocalizations {
   /// No description provided for @mapLayerPlayhead.
   ///
   /// In es, this message translates to:
-  /// **'Playhead'**
+  /// **'Cursor'**
   String get mapLayerPlayhead;
 
   /// No description provided for @mapLayerLegend.
@@ -1445,7 +1445,7 @@ abstract class AppLocalizations {
   /// No description provided for @curvaZoomLab.
   ///
   /// In es, this message translates to:
-  /// **'Zoom Ride Lab'**
+  /// **'Zoom Lab'**
   String get curvaZoomLab;
 
   /// No description provided for @armAutoRide.
@@ -1799,7 +1799,7 @@ abstract class AppLocalizations {
   /// No description provided for @routeLoopSourceManual.
   ///
   /// In es, this message translates to:
-  /// **'Manual'**
+  /// **'A mano'**
   String get routeLoopSourceManual;
 
   /// No description provided for @routeLoopSourceDetected.
@@ -2383,6 +2383,1068 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Armado para «{name}» — al arrancar el ride queda en esa ruta'**
   String armAutoRouteArmedNamed(String name);
+
+  /// No description provided for @couldNotLoadRides.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar recorridos: {error}'**
+  String couldNotLoadRides(String error);
+
+  /// No description provided for @rodadasTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodadas'**
+  String get rodadasTitle;
+
+  /// No description provided for @rodadasHomeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea una rodada · invita · comparte GPS en vivo'**
+  String get rodadasHomeSubtitle;
+
+  /// No description provided for @friendsHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca riders, envía solicitudes de amistad e invita amigos aceptados a una rodada.'**
+  String get friendsHelp;
+
+  /// No description provided for @findRiders.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar riders'**
+  String get findRiders;
+
+  /// No description provided for @searchByNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar por nombre…'**
+  String get searchByNameHint;
+
+  /// No description provided for @noRidersFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron riders'**
+  String get noRidersFound;
+
+  /// No description provided for @friendRequestSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud enviada a {name}'**
+  String friendRequestSent(String name);
+
+  /// No description provided for @addFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir'**
+  String get addFriend;
+
+  /// No description provided for @friendRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes'**
+  String get friendRequests;
+
+  /// No description provided for @wantsToBeFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'quiere ser tu amigo'**
+  String get wantsToBeFriends;
+
+  /// No description provided for @accept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get accept;
+
+  /// No description provided for @decline.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazar'**
+  String get decline;
+
+  /// No description provided for @pendingSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendientes enviadas'**
+  String get pendingSent;
+
+  /// No description provided for @waitingAcceptance.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando aceptación'**
+  String get waitingAcceptance;
+
+  /// No description provided for @yourFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus amigos'**
+  String get yourFriends;
+
+  /// No description provided for @noFriendsYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes amigos — busca arriba y envía una solicitud.'**
+  String get noFriendsYet;
+
+  /// No description provided for @viewRides.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver recorridos'**
+  String get viewRides;
+
+  /// No description provided for @inviteToRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar a rodada'**
+  String get inviteToRodada;
+
+  /// No description provided for @createRodadaFirst.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea una rodada primero'**
+  String get createRodadaFirst;
+
+  /// No description provided for @inviteTo.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar a…'**
+  String get inviteTo;
+
+  /// No description provided for @friendInvited.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} invitado'**
+  String friendInvited(String name);
+
+  /// No description provided for @scoreLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntaje {score}'**
+  String scoreLabel(int score);
+
+  /// No description provided for @joinWithCodeTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Unirse con código'**
+  String get joinWithCodeTooltip;
+
+  /// No description provided for @createRodadaTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear rodada'**
+  String get createRodadaTooltip;
+
+  /// No description provided for @signInForRodadas.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para usar Rodadas'**
+  String get signInForRodadas;
+
+  /// No description provided for @couldNotLoadRodadas.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar rodadas.\n{error}'**
+  String couldNotLoadRodadas(String error);
+
+  /// No description provided for @groupRidesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodadas en grupo'**
+  String get groupRidesTitle;
+
+  /// No description provided for @groupRidesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea una rodada para Tapalpa, Moyahua o donde sea. Invita riders y comparte GPS en vivo, tracks y fotos solo si cada uno lo activa.'**
+  String get groupRidesBody;
+
+  /// No description provided for @createRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear rodada'**
+  String get createRodada;
+
+  /// No description provided for @joinWithInviteCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Unirse con código de invitación'**
+  String get joinWithInviteCode;
+
+  /// No description provided for @joinRodadaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Unirse a rodada'**
+  String get joinRodadaTitle;
+
+  /// No description provided for @inviteCodeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Código de invitación'**
+  String get inviteCodeLabel;
+
+  /// No description provided for @inviteCodeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'ej. TAP42A'**
+  String get inviteCodeHint;
+
+  /// No description provided for @joinButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Unirse'**
+  String get joinButton;
+
+  /// No description provided for @joinFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo unir: {error}'**
+  String joinFailed(String error);
+
+  /// No description provided for @timeTbd.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora por definir'**
+  String get timeTbd;
+
+  /// No description provided for @rodadaRidersCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} riders'**
+  String rodadaRidersCount(int count);
+
+  /// No description provided for @newRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva rodada'**
+  String get newRodada;
+
+  /// No description provided for @rodadaCreateButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear'**
+  String get rodadaCreateButton;
+
+  /// No description provided for @rodadaTitleLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Título'**
+  String get rodadaTitleLabel;
+
+  /// No description provided for @rodadaTitleHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Tapalpa sábado'**
+  String get rodadaTitleHint;
+
+  /// No description provided for @rodadaDestinationLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Destino'**
+  String get rodadaDestinationLabel;
+
+  /// No description provided for @rodadaDestinationHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Tapalpa / Moyahua / …'**
+  String get rodadaDestinationHint;
+
+  /// No description provided for @rodadaNotesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get rodadaNotesLabel;
+
+  /// No description provided for @rodadaNotesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Punto de encuentro en Shell, casco blanco…'**
+  String get rodadaNotesHint;
+
+  /// No description provided for @rodadaStartsAt.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza'**
+  String get rodadaStartsAt;
+
+  /// No description provided for @rodadaPickDateTime.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir fecha y hora'**
+  String get rodadaPickDateTime;
+
+  /// No description provided for @meetupPin.
+  ///
+  /// In es, this message translates to:
+  /// **'Pin de encuentro'**
+  String get meetupPin;
+
+  /// No description provided for @useMyGps.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar mi GPS'**
+  String get useMyGps;
+
+  /// No description provided for @clearPin.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar'**
+  String get clearPin;
+
+  /// No description provided for @meetupMapHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el mapa para fijar el punto de encuentro. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.'**
+  String get meetupMapHelp;
+
+  /// No description provided for @titleRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'El título es obligatorio'**
+  String get titleRequired;
+
+  /// No description provided for @locationFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'Falló la ubicación: {error}'**
+  String locationFailed(String error);
+
+  /// No description provided for @rodadaFallback.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodada'**
+  String get rodadaFallback;
+
+  /// No description provided for @copyInviteCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar código de invitación'**
+  String get copyInviteCode;
+
+  /// No description provided for @inviteCodeCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Código {code} copiado'**
+  String inviteCodeCopied(String code);
+
+  /// No description provided for @markAsLive.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar EN VIVO'**
+  String get markAsLive;
+
+  /// No description provided for @markAsOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar abierta'**
+  String get markAsOpen;
+
+  /// No description provided for @endRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminar rodada'**
+  String get endRodada;
+
+  /// No description provided for @inviteFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar amigo'**
+  String get inviteFriend;
+
+  /// No description provided for @rodadaTabOverview.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen'**
+  String get rodadaTabOverview;
+
+  /// No description provided for @rodadaTabLive.
+  ///
+  /// In es, this message translates to:
+  /// **'En vivo'**
+  String get rodadaTabLive;
+
+  /// No description provided for @rodadaTabRides.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorridos'**
+  String get rodadaTabRides;
+
+  /// No description provided for @rodadaTabPhotos.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotos'**
+  String get rodadaTabPhotos;
+
+  /// No description provided for @rodadaTabRadio.
+  ///
+  /// In es, this message translates to:
+  /// **'Radio'**
+  String get rodadaTabRadio;
+
+  /// No description provided for @rodadaNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodada no encontrada'**
+  String get rodadaNotFound;
+
+  /// No description provided for @rodadaStatusChanged.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado → {status}'**
+  String rodadaStatusChanged(String status);
+
+  /// No description provided for @noFriendsToInvite.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay amigos para invitar.'**
+  String get noFriendsToInvite;
+
+  /// No description provided for @inviteSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitación enviada'**
+  String get inviteSent;
+
+  /// No description provided for @rodadaCodeBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'código {code}'**
+  String rodadaCodeBanner(String code);
+
+  /// No description provided for @meetup.
+  ///
+  /// In es, this message translates to:
+  /// **'Encuentro'**
+  String get meetup;
+
+  /// No description provided for @yourSharing.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu compartición'**
+  String get yourSharing;
+
+  /// No description provided for @sharingDefaultsHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Apagado por defecto. Si lo activas, envía ubicación cada 5 minutos durante la rodada (reintenta cada 1 minuto si falla).'**
+  String get sharingDefaultsHelp;
+
+  /// No description provided for @notRodadaMember.
+  ///
+  /// In es, this message translates to:
+  /// **'No eres miembro.'**
+  String get notRodadaMember;
+
+  /// No description provided for @shareLocationOnRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir ubicación en ruta'**
+  String get shareLocationOnRoute;
+
+  /// No description provided for @shareLocationEvery5Min.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada 5 min mientras la rodada está abierta/en vivo'**
+  String get shareLocationEvery5Min;
+
+  /// No description provided for @shareTrackAfterRides.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir mi track después de recorridos'**
+  String get shareTrackAfterRides;
+
+  /// No description provided for @rodadaRiders.
+  ///
+  /// In es, this message translates to:
+  /// **'Riders'**
+  String get rodadaRiders;
+
+  /// No description provided for @noMembersYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay miembros'**
+  String get noMembersYet;
+
+  /// No description provided for @rsvpGoing.
+  ///
+  /// In es, this message translates to:
+  /// **'voy'**
+  String get rsvpGoing;
+
+  /// No description provided for @rsvpMaybe.
+  ///
+  /// In es, this message translates to:
+  /// **'tal vez'**
+  String get rsvpMaybe;
+
+  /// No description provided for @rsvpDeclined.
+  ///
+  /// In es, this message translates to:
+  /// **'no voy'**
+  String get rsvpDeclined;
+
+  /// No description provided for @memberLiveOn.
+  ///
+  /// In es, this message translates to:
+  /// **'vivo activo'**
+  String get memberLiveOn;
+
+  /// No description provided for @memberTrackOn.
+  ///
+  /// In es, this message translates to:
+  /// **'track activo'**
+  String get memberTrackOn;
+
+  /// No description provided for @sharingLocationBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartiendo ubicación cada 5 min (reintento 1 min si falla)'**
+  String get sharingLocationBanner;
+
+  /// No description provided for @liveMapViewOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa en vivo solo lectura. Activa compartir en Resumen.'**
+  String get liveMapViewOnly;
+
+  /// No description provided for @shareLive.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir en vivo'**
+  String get shareLive;
+
+  /// No description provided for @noLiveRidersYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay riders en vivo. Los que opten aparecen aquí (~5 s).'**
+  String get noLiveRidersYet;
+
+  /// No description provided for @addStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir parada'**
+  String get addStop;
+
+  /// No description provided for @stopFab.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada'**
+  String get stopFab;
+
+  /// No description provided for @stopTitleLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Título'**
+  String get stopTitleLabel;
+
+  /// No description provided for @dropAtMyGps.
+  ///
+  /// In es, this message translates to:
+  /// **'Soltar en mi GPS'**
+  String get dropAtMyGps;
+
+  /// No description provided for @gasBreakDefault.
+  ///
+  /// In es, this message translates to:
+  /// **'Gas / descanso'**
+  String get gasBreakDefault;
+
+  /// No description provided for @stopDefault.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada'**
+  String get stopDefault;
+
+  /// No description provided for @sharedTracksHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Tracks compartidos de miembros que lo activaron. El GPS denso queda en cada teléfono.'**
+  String get sharedTracksHelp;
+
+  /// No description provided for @linkMyRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Vincular mi recorrido'**
+  String get linkMyRide;
+
+  /// No description provided for @noSharedRidesYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay recorridos compartidos'**
+  String get noSharedRidesYet;
+
+  /// No description provided for @noCompletedRidesToLink.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay recorridos terminados para vincular'**
+  String get noCompletedRidesToLink;
+
+  /// No description provided for @syncRideFirst.
+  ///
+  /// In es, this message translates to:
+  /// **'Sincroniza el recorrido primero e inténtalo de nuevo'**
+  String get syncRideFirst;
+
+  /// No description provided for @rideLinkedToRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido vinculado a esta rodada'**
+  String get rideLinkedToRodada;
+
+  /// No description provided for @noTrackPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin puntos de track'**
+  String get noTrackPoints;
+
+  /// No description provided for @radioAllGood.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo bien'**
+  String get radioAllGood;
+
+  /// No description provided for @radioStoppingFiveMin.
+  ///
+  /// In es, this message translates to:
+  /// **'Parando 5 min'**
+  String get radioStoppingFiveMin;
+
+  /// No description provided for @radioNeedHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesito ayuda'**
+  String get radioNeedHelp;
+
+  /// No description provided for @noMessagesYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay mensajes'**
+  String get noMessagesYet;
+
+  /// No description provided for @shortRadioMessageHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje corto de radio…'**
+  String get shortRadioMessageHint;
+
+  /// No description provided for @safetyTag.
+  ///
+  /// In es, this message translates to:
+  /// **'SEGURIDAD'**
+  String get safetyTag;
+
+  /// No description provided for @riderFallback.
+  ///
+  /// In es, this message translates to:
+  /// **'Rider'**
+  String get riderFallback;
+
+  /// No description provided for @photosAlbumHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'El álbum carga solo miniaturas. La imagen completa se abre al tocar y se libera al cerrar.'**
+  String get photosAlbumHelp;
+
+  /// No description provided for @photoAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir'**
+  String get photoAdd;
+
+  /// No description provided for @noPhotosYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay fotos'**
+  String get noPhotosYet;
+
+  /// No description provided for @photoUploaded.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto subida'**
+  String get photoUploaded;
+
+  /// No description provided for @photoTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto'**
+  String get photoTitle;
+
+  /// No description provided for @skillCoach.
+  ///
+  /// In es, this message translates to:
+  /// **'Coach de habilidad'**
+  String get skillCoach;
+
+  /// No description provided for @skillCurvasRated.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} curvas calificadas · huellas para comparar'**
+  String skillCurvasRated(int count);
+
+  /// No description provided for @improveNextRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejorar el próximo recorrido'**
+  String get improveNextRide;
+
+  /// No description provided for @openCornerLab.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir corner lab'**
+  String get openCornerLab;
+
+  /// No description provided for @skillTipNoCurvas.
+  ///
+  /// In es, this message translates to:
+  /// **'No se detectaron curvas sólidas — recorre una sección sinuosa para tener una base.'**
+  String get skillTipNoCurvas;
+
+  /// No description provided for @skillTipEntryHot.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrada caliente ({entry}→{apex} km/h). Frena antes del tip-in.'**
+  String skillTipEntryHot(String entry, String apex);
+
+  /// No description provided for @skillTipModerateSpeedDrop.
+  ///
+  /// In es, this message translates to:
+  /// **'Caída moderada de velocidad al apex — trail brake un poco más.'**
+  String get skillTipModerateSpeedDrop;
+
+  /// No description provided for @skillTipLittleSpeedScrub.
+  ///
+  /// In es, this message translates to:
+  /// **'Poca reducción de velocidad — confirma que no llevas demasiada en mitad de curva.'**
+  String get skillTipLittleSpeedScrub;
+
+  /// No description provided for @skillTipWeakExitDrive.
+  ///
+  /// In es, this message translates to:
+  /// **'Salida débil — abre gas antes cuando la inclinación empiece a bajar.'**
+  String get skillTipWeakExitDrive;
+
+  /// No description provided for @skillTipPeakLeanNotAtApex.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación máxima no en el apex — inclina antes para estar listo en el apex.'**
+  String get skillTipPeakLeanNotAtApex;
+
+  /// No description provided for @skillTipLowLeanBigHeading.
+  ///
+  /// In es, this message translates to:
+  /// **'Gran cambio de rumbo con poca inclinación — revisa el sensor o inclínate más.'**
+  String get skillTipLowLeanBigHeading;
+
+  /// No description provided for @skillTipSolidCorner.
+  ///
+  /// In es, this message translates to:
+  /// **'Curva sólida — mantén este ritmo de entrada/apex.'**
+  String get skillTipSolidCorner;
+
+  /// No description provided for @skillHighlightBest.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor: {label} · {score}/100'**
+  String skillHighlightBest(String label, int score);
+
+  /// No description provided for @skillHighlightMedian.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntaje mediano de curvas {score}/100'**
+  String skillHighlightMedian(int score);
+
+  /// No description provided for @skillTipDrillRepeat.
+  ///
+  /// In es, this message translates to:
+  /// **'Práctica: repite una {label} similar y frena 10–15 m antes.'**
+  String skillTipDrillRepeat(String label);
+
+  /// No description provided for @performanceLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'RENDIMIENTO'**
+  String get performanceLabel;
+
+  /// No description provided for @statRides.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorridos'**
+  String get statRides;
+
+  /// No description provided for @statDistance.
+  ///
+  /// In es, this message translates to:
+  /// **'Distancia'**
+  String get statDistance;
+
+  /// No description provided for @statTopSpeed.
+  ///
+  /// In es, this message translates to:
+  /// **'Vel. máx.'**
+  String get statTopSpeed;
+
+  /// No description provided for @statPeakLean.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación'**
+  String get statPeakLean;
+
+  /// No description provided for @rideDiscarded.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartado'**
+  String get rideDiscarded;
+
+  /// No description provided for @gpsQualitySparseTip.
+  ///
+  /// In es, this message translates to:
+  /// **'GPS escaso — deja la notificación de grabación y evita límites de batería.'**
+  String get gpsQualitySparseTip;
+
+  /// No description provided for @gpsQualityFairTip.
+  ///
+  /// In es, this message translates to:
+  /// **'GPS ~{meters} m — la línea sirve, pero un poco suave.'**
+  String gpsQualityFairTip(String meters);
+
+  /// No description provided for @gpsQualityWeakTip.
+  ///
+  /// In es, this message translates to:
+  /// **'GPS débil (~{meters} m) — fija mejor el teléfono y rueda al aire libre.'**
+  String gpsQualityWeakTip(String meters);
+
+  /// No description provided for @skillLabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab de skill'**
+  String get skillLabTitle;
+
+  /// No description provided for @skillLabTapHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para ver errores y cómo mejorar'**
+  String get skillLabTapHint;
+
+  /// No description provided for @skillLabTapHintEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para tips tras un tramo sinuoso'**
+  String get skillLabTapHintEmpty;
+
+  /// No description provided for @skillLabFocusTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Dónde mejorar'**
+  String get skillLabFocusTitle;
+
+  /// No description provided for @skillLabFocusHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Replay para ver inclinación, freno y velocidad en vivo.'**
+  String get skillLabFocusHelp;
+
+  /// No description provided for @skillReplayTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Replay de curva'**
+  String get skillReplayTitle;
+
+  /// No description provided for @skillReplayHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el playhead en el mapa.'**
+  String get skillReplayHelp;
+
+  /// No description provided for @skillReplay.
+  ///
+  /// In es, this message translates to:
+  /// **'Replay'**
+  String get skillReplay;
+
+  /// No description provided for @play.
+  ///
+  /// In es, this message translates to:
+  /// **'Play'**
+  String get play;
+
+  /// No description provided for @pause.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausa'**
+  String get pause;
+
+  /// No description provided for @restart.
+  ///
+  /// In es, this message translates to:
+  /// **'Reiniciar'**
+  String get restart;
+
+  /// No description provided for @loopReplay.
+  ///
+  /// In es, this message translates to:
+  /// **'Bucle'**
+  String get loopReplay;
+
+  /// No description provided for @brake.
+  ///
+  /// In es, this message translates to:
+  /// **'Freno'**
+  String get brake;
+
+  /// No description provided for @engineLabelTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda a entrenar RiderLab'**
+  String get engineLabelTitle;
+
+  /// No description provided for @engineLabelIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo beta — unos toques tras cada ride enseñan inclinación, curvas y frenos. Puedes omitir.'**
+  String get engineLabelIntro;
+
+  /// No description provided for @engineLabelSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir'**
+  String get engineLabelSkip;
+
+  /// No description provided for @engineLabelSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar respuestas'**
+  String get engineLabelSave;
+
+  /// No description provided for @engineLabelMountQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dónde iba el teléfono en este ride?'**
+  String get engineLabelMountQ;
+
+  /// No description provided for @engineLabelMountCenter.
+  ///
+  /// In es, this message translates to:
+  /// **'Base (tanque / manillar)'**
+  String get engineLabelMountCenter;
+
+  /// No description provided for @engineLabelMountLeftPocket.
+  ///
+  /// In es, this message translates to:
+  /// **'Bolsillo izquierdo'**
+  String get engineLabelMountLeftPocket;
+
+  /// No description provided for @engineLabelMountRightPocket.
+  ///
+  /// In es, this message translates to:
+  /// **'Bolsillo derecho'**
+  String get engineLabelMountRightPocket;
+
+  /// No description provided for @engineLabelMountOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro / suelto'**
+  String get engineLabelMountOther;
+
+  /// No description provided for @engineLabelLeanQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿La inclinación se sintió bien?'**
+  String get engineLabelLeanQ;
+
+  /// No description provided for @engineLabelLeanGood.
+  ///
+  /// In es, this message translates to:
+  /// **'Se sintió bien'**
+  String get engineLabelLeanGood;
+
+  /// No description provided for @engineLabelLeanLeftHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Izquierda se veía alta'**
+  String get engineLabelLeanLeftHigh;
+
+  /// No description provided for @engineLabelLeanRightHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Derecha se veía alta'**
+  String get engineLabelLeanRightHigh;
+
+  /// No description provided for @engineLabelLeanBothOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Ambos lados mal'**
+  String get engineLabelLeanBothOff;
+
+  /// No description provided for @engineLabelLeanUnsure.
+  ///
+  /// In es, this message translates to:
+  /// **'No sé'**
+  String get engineLabelLeanUnsure;
+
+  /// No description provided for @engineLabelBrakeQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Los frenos detectados se vieron bien?'**
+  String get engineLabelBrakeQ;
+
+  /// No description provided for @engineLabelBrakeGood.
+  ///
+  /// In es, this message translates to:
+  /// **'Se sintió bien'**
+  String get engineLabelBrakeGood;
+
+  /// No description provided for @engineLabelBrakeTooMany.
+  ///
+  /// In es, this message translates to:
+  /// **'Demasiados / falsos'**
+  String get engineLabelBrakeTooMany;
+
+  /// No description provided for @engineLabelBrakeTooFew.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltaron frenos reales'**
+  String get engineLabelBrakeTooFew;
+
+  /// No description provided for @engineLabelBrakeUnsure.
+  ///
+  /// In es, this message translates to:
+  /// **'No sé'**
+  String get engineLabelBrakeUnsure;
+
+  /// No description provided for @engineLabelContextQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué tipo de ride fue?'**
+  String get engineLabelContextQ;
+
+  /// No description provided for @engineLabelContextStreet.
+  ///
+  /// In es, this message translates to:
+  /// **'Ciudad'**
+  String get engineLabelContextStreet;
+
+  /// No description provided for @engineLabelContextMountain.
+  ///
+  /// In es, this message translates to:
+  /// **'Montaña'**
+  String get engineLabelContextMountain;
+
+  /// No description provided for @engineLabelContextTrack.
+  ///
+  /// In es, this message translates to:
+  /// **'Pista'**
+  String get engineLabelContextTrack;
+
+  /// No description provided for @engineLabelContextCommute.
+  ///
+  /// In es, this message translates to:
+  /// **'Traslado'**
+  String get engineLabelContextCommute;
+
+  /// No description provided for @engineLabelContextOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get engineLabelContextOther;
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../rodada_providers.dart';
 
@@ -27,13 +28,16 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
   }
 
   Future<void> _send({String kind = 'text'}) async {
+    final l10n = context.l10n;
     final body = _controller.text.trim();
     if (body.isEmpty && kind == 'text') return;
     setState(() => _sending = true);
     try {
       await ref.read(rodadaRepositoryProvider).sendMessage(
             rodadaId: widget.rodadaId,
-            body: kind == 'safety' ? (body.isEmpty ? 'Need help' : body) : body,
+            body: kind == 'safety'
+                ? (body.isEmpty ? l10n.radioNeedHelp : body)
+                : body,
             kind: kind,
           );
       _controller.clear();
@@ -48,6 +52,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final messages = ref.watch(rodadaMessagesProvider(widget.rodadaId));
 
     return Column(
@@ -58,13 +63,13 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
             spacing: 8,
             children: [
               ActionChip(
-                label: const Text('All good'),
+                label: Text(l10n.radioAllGood),
                 onPressed: _sending
                     ? null
                     : () async {
                         await ref.read(rodadaRepositoryProvider).sendMessage(
                               rodadaId: widget.rodadaId,
-                              body: 'All good',
+                              body: l10n.radioAllGood,
                               kind: 'text',
                             );
                         ref.invalidate(
@@ -73,13 +78,13 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                       },
               ),
               ActionChip(
-                label: const Text('Stopping 5 min'),
+                label: Text(l10n.radioStoppingFiveMin),
                 onPressed: _sending
                     ? null
                     : () async {
                         await ref.read(rodadaRepositoryProvider).sendMessage(
                               rodadaId: widget.rodadaId,
-                              body: 'Stopping 5 min',
+                              body: l10n.radioStoppingFiveMin,
                               kind: 'text',
                             );
                         ref.invalidate(
@@ -89,7 +94,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
               ),
               ActionChip(
                 avatar: const Icon(Icons.warning_amber, size: 16),
-                label: const Text('Need help'),
+                label: Text(l10n.radioNeedHelp),
                 onPressed: _sending ? null : () => _send(kind: 'safety'),
               ),
             ],
@@ -101,7 +106,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
             error: (e, _) => Center(child: Text('$e')),
             data: (list) {
               if (list.isEmpty) {
-                return const Center(child: Text('No messages yet'));
+                return Center(child: Text(l10n.noMessagesYet));
               }
               return ListView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -123,8 +128,8 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${m.displayName ?? 'Rider'} · $time'
-                          '${m.isSafety ? ' · SAFETY' : ''}',
+                          '${m.displayName ?? l10n.riderFallback} · $time'
+                          '${m.isSafety ? ' · ${l10n.safetyTag}' : ''}',
                           style: GoogleFonts.exo2(
                             fontSize: 12,
                             color: m.isSafety ? AppTheme.signal : AppTheme.steel,
@@ -152,8 +157,8 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: 'Short radio message…',
+                    decoration: InputDecoration(
+                      hintText: l10n.shortRadioMessageHint,
                       isDense: true,
                     ),
                     onSubmitted: (_) => _send(),

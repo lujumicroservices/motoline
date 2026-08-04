@@ -19,7 +19,7 @@ import '../../theme/ride_viz_palette.dart';
 import '../adventure_camera/widgets/adventure_camera_ride_controls.dart';
 import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
 import '../ride_detail/pilot_line_map.dart';
-import '../ride_detail/ride_detail_screen.dart';
+import '../telemetry/ride_engine_label_screen.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 
@@ -521,9 +521,10 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       // Closed beta: share with friends (soft-fail offline).
       unawaited(ref.read(rideSyncServiceProvider).syncRide(ride.id));
       if (!context.mounted) return;
+      // Beta: collect mount/lean/brake labels before Ride Lab.
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
-          builder: (_) => RideDetailScreen(rideId: ride.id),
+          builder: (_) => RideEngineLabelScreen(rideId: ride.id),
         ),
       );
     } catch (e) {

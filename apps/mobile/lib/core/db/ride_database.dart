@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 11,
+      version: 12,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -65,6 +65,7 @@ class RideDatabase {
         await _createRoutesTable(db);
         await _createRouteLoopsTable(db);
         await _createCameraEventsTable(db);
+        await _createRideEngineLabelsTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -108,7 +109,31 @@ class RideDatabase {
         if (oldVersion < 11) {
           await _addRideTitleColumnIfMissing(db);
         }
+        if (oldVersion < 12) {
+          await _createRideEngineLabelsTable(db);
+        }
       },
+    );
+  }
+
+  Future<void> _createRideEngineLabelsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ride_engine_labels (
+        ride_id TEXT PRIMARY KEY,
+        phone_mount TEXT NOT NULL,
+        lean_quality TEXT,
+        brake_feel TEXT,
+        ride_context TEXT,
+        notes TEXT,
+        skipped INTEGER NOT NULL DEFAULT 0,
+        created_at_ms INTEGER NOT NULL,
+        synced INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ride_engine_labels_synced '
+      'ON ride_engine_labels(synced, created_at_ms)',
     );
   }
 
@@ -241,6 +266,49 @@ class RideDatabase {
     await db.rawUpdate(
       'UPDATE camera_events SET synced = 1 WHERE id IN ($placeholders)',
       ids,
+    );
+  }
+
+  Future<void> upsertRideEngineLabel(Map<String, Object?> row) async {
+    final db = await database;
+    await db.insert(
+      'ride_engine_labels',
+      row,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, Object?>?> getRideEngineLabel(String rideId) async {
+    final db = await database;
+    final rows = await db.query(
+      'ride_engine_labels',
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return rows.first;
+  }
+
+  Future<List<Map<String, Object?>>> listUnsyncedRideEngineLabels({
+    int limit = 100,
+  }) async {
+    final db = await database;
+    return db.query(
+      'ride_engine_labels',
+      where: 'synced = 0 AND skipped = 0',
+      orderBy: 'created_at_ms ASC',
+      limit: limit,
+    );
+  }
+
+  Future<void> markRideEngineLabelsSynced(List<String> rideIds) async {
+    if (rideIds.isEmpty) return;
+    final db = await database;
+    final placeholders = List.filled(rideIds.length, '?').join(',');
+    await db.rawUpdate(
+      'UPDATE ride_engine_labels SET synced = 1 WHERE ride_id IN ($placeholders)',
+      rideIds,
     );
   }
 

@@ -81,8 +81,8 @@
   "sectionLeanSub": "Cyan left · amber right",
   "sectionMap": "Map + line",
   "sectionMapSub": "Speed colors · brake dots",
-  "sectionRoad": "Straights & turns",
-  "sectionRoadSub": "From heading change",
+  "sectionRoad": "Turns",
+  "sectionRoadSub": "From heading change + lean",
   "sectionLoop": "Loop",
   "sectionLoopSub": "Detect or mark A/B on this ride",
   "sectionBrakes": "Braking",
@@ -139,8 +139,13 @@
   "rightShort": "R",
   "curvaMapLegend": "E = entry · A = apex · X = exit. Line colored by speed.",
   "curvaCoach": "Quick read: check if you entered too hot (big brake to A), if the apex is stable, and if you exit accelerating cleanly.",
-  "roadStretchesHelp": "From heading change + lean. {rectas} straights · {curvas} turns. Tap a turn for entry / apex / exit — swipe between turns.",
-  "roadStretchesEmpty": "Not enough GPS heading change yet to split straights and turns.",
+  "roadStretchesHelp": "From heading change + lean. {curvas} turns. Tap a turn for entry / apex / exit — swipe between turns.",
+  "@roadStretchesHelp": {
+    "placeholders": {
+      "curvas": { "type": "int" }
+    }
+  },
+  "roadStretchesEmpty": "Not enough GPS heading change yet to detect turns.",
   "openDetail": "open detail",
   "brakesHelp": "Inferred from how fast speed falls — not a brake sensor. Tap a hit to jump the playhead. Map button zooms to that brake.",
   "brakesEmpty": "No clear brake pulses from GPS speed. Harder stops outdoors usually show as yellow/orange/red hits.",
@@ -423,5 +428,274 @@
     "placeholders": {
       "name": { "type": "String" }
     }
-  }
+  },
+  "couldNotLoadRides": "Could not load rides: {error}",
+  "@couldNotLoadRides": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "rodadasTitle": "Rodadas",
+  "rodadasHomeSubtitle": "Create a group ride · invite · share live GPS",
+  "friendsHelp": "Search riders, send friend requests, and invite accepted friends to a rodada.",
+  "findRiders": "Find riders",
+  "searchByNameHint": "Search by name…",
+  "noRidersFound": "No riders found",
+  "friendRequestSent": "Friend request sent to {name}",
+  "@friendRequestSent": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "addFriend": "Add",
+  "friendRequests": "Requests",
+  "wantsToBeFriends": "wants to be friends",
+  "accept": "Accept",
+  "decline": "Decline",
+  "pendingSent": "Pending sent",
+  "waitingAcceptance": "Waiting for acceptance",
+  "yourFriends": "Your friends",
+  "noFriendsYet": "No friends yet — search above and send a request.",
+  "viewRides": "View rides",
+  "inviteToRodada": "Invite to rodada",
+  "createRodadaFirst": "Create a rodada first",
+  "inviteTo": "Invite to…",
+  "friendInvited": "{name} invited",
+  "@friendInvited": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "scoreLabel": "Score {score}",
+  "@scoreLabel": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "joinWithCodeTooltip": "Join with code",
+  "createRodadaTooltip": "Create rodada",
+  "signInForRodadas": "Sign in to use Rodadas",
+  "couldNotLoadRodadas": "Could not load rodadas.\n{error}",
+  "@couldNotLoadRodadas": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "groupRidesTitle": "Group rides",
+  "groupRidesBody": "Create a rodada for Tapalpa, Moyahua, or anywhere. Invite riders, then share live GPS, tracks, and photos only when you opt in.",
+  "createRodada": "Create rodada",
+  "joinWithInviteCode": "Join with invite code",
+  "joinRodadaTitle": "Join rodada",
+  "inviteCodeLabel": "Invite code",
+  "inviteCodeHint": "e.g. TAP42A",
+  "joinButton": "Join",
+  "joinFailed": "Join failed: {error}",
+  "@joinFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "timeTbd": "Time TBD",
+  "rodadaRidersCount": "{count} riders",
+  "@rodadaRidersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "newRodada": "New rodada",
+  "rodadaCreateButton": "Create",
+  "rodadaTitleLabel": "Title",
+  "rodadaTitleHint": "Tapalpa Saturday",
+  "rodadaDestinationLabel": "Destination",
+  "rodadaDestinationHint": "Tapalpa / Moyahua / …",
+  "rodadaNotesLabel": "Notes",
+  "rodadaNotesHint": "Meetup at Shell, white helmet…",
+  "rodadaStartsAt": "Starts at",
+  "rodadaPickDateTime": "Pick date & time",
+  "meetupPin": "Meetup pin",
+  "useMyGps": "Use my GPS",
+  "clearPin": "Clear",
+  "meetupMapHelp": "Tap the map to set the meetup. Live GPS and photos stay off until each rider opts in.",
+  "titleRequired": "Title is required",
+  "locationFailed": "Location failed: {error}",
+  "@locationFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "rodadaFallback": "Rodada",
+  "copyInviteCode": "Copy invite code",
+  "inviteCodeCopied": "Code {code} copied",
+  "@inviteCodeCopied": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "markAsLive": "Mark as LIVE",
+  "markAsOpen": "Mark as open",
+  "endRodada": "End rodada",
+  "inviteFriend": "Invite friend",
+  "rodadaTabOverview": "Overview",
+  "rodadaTabLive": "Live",
+  "rodadaTabRides": "Rides",
+  "rodadaTabPhotos": "Photos",
+  "rodadaTabRadio": "Radio",
+  "rodadaNotFound": "Rodada not found",
+  "rodadaStatusChanged": "Status → {status}",
+  "@rodadaStatusChanged": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "noFriendsToInvite": "No friends to invite yet.",
+  "inviteSent": "Invite sent",
+  "rodadaCodeBanner": "code {code}",
+  "@rodadaCodeBanner": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "meetup": "Meetup",
+  "yourSharing": "Your sharing",
+  "sharingDefaultsHelp": "Off by default. When on, location pings every 5 minutes for the whole rodada (retries every 1 minute if a ping fails).",
+  "notRodadaMember": "You are not a member.",
+  "shareLocationOnRoute": "Share location on route",
+  "shareLocationEvery5Min": "Every 5 min while rodada is open/live",
+  "shareTrackAfterRides": "Share my track after rides",
+  "rodadaRiders": "Riders",
+  "noMembersYet": "No members yet",
+  "rsvpGoing": "going",
+  "rsvpMaybe": "maybe",
+  "rsvpDeclined": "declined",
+  "memberLiveOn": "live on",
+  "memberTrackOn": "track on",
+  "sharingLocationBanner": "Sharing location every 5 min (retry 1 min if fail)",
+  "liveMapViewOnly": "Live map is view-only. Enable sharing in Overview.",
+  "shareLive": "Share live",
+  "noLiveRidersYet": "No live riders yet. Opt-in riders appear here (~5s).",
+  "addStop": "Add stop",
+  "stopFab": "Stop",
+  "stopTitleLabel": "Title",
+  "dropAtMyGps": "Drop at my GPS",
+  "gasBreakDefault": "Gas / break",
+  "stopDefault": "Stop",
+  "sharedTracksHelp": "Shared tracks from members who opted in. Dense GPS stays on each phone.",
+  "linkMyRide": "Link my ride",
+  "noSharedRidesYet": "No shared rides yet",
+  "noCompletedRidesToLink": "No completed rides to link",
+  "syncRideFirst": "Sync the ride first, then try again",
+  "rideLinkedToRodada": "Ride linked to this rodada",
+  "noTrackPoints": "No track points",
+  "radioAllGood": "All good",
+  "radioStoppingFiveMin": "Stopping 5 min",
+  "radioNeedHelp": "Need help",
+  "noMessagesYet": "No messages yet",
+  "shortRadioMessageHint": "Short radio message…",
+  "safetyTag": "SAFETY",
+  "riderFallback": "Rider",
+  "photosAlbumHelp": "Album loads thumbs only. Full image opens on tap and frees when closed.",
+  "photoAdd": "Add",
+  "noPhotosYet": "No photos yet",
+  "photoUploaded": "Photo uploaded",
+  "photoTitle": "Photo",
+  "skillCoach": "Skill coach",
+  "skillCurvasRated": "{count} curvas rated · fingerprints for peer compare",
+  "@skillCurvasRated": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "improveNextRide": "Improve next ride",
+  "openCornerLab": "Open corner lab",
+  "skillTipNoCurvas": "No solid curvas detected — ride a twisty section to build a baseline.",
+  "skillTipEntryHot": "Entry hot ({entry}→{apex} km/h). Brake earlier before tip-in.",
+  "@skillTipEntryHot": {
+    "placeholders": {
+      "entry": { "type": "String" },
+      "apex": { "type": "String" }
+    }
+  },
+  "skillTipModerateSpeedDrop": "Moderate speed drop to apex — trail brake a touch longer.",
+  "skillTipLittleSpeedScrub": "Little speed scrub — confirm you are not carrying too much mid-corner.",
+  "skillTipWeakExitDrive": "Weak exit drive — open throttle sooner once lean starts falling.",
+  "skillTipPeakLeanNotAtApex": "Peak lean not at apex — tip in earlier so the bike is set at the apex.",
+  "skillTipLowLeanBigHeading": "Big heading change with low lean — check sensor mount or commit more.",
+  "skillTipSolidCorner": "Solid corner — keep this entry/apex rhythm.",
+  "skillHighlightBest": "Best: {label} · {score}/100",
+  "@skillHighlightBest": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "score": { "type": "int" }
+    }
+  },
+  "skillHighlightMedian": "Median corner score {score}/100",
+  "@skillHighlightMedian": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "skillTipDrillRepeat": "Drill: repeat a similar {label} and brake 10–15 m earlier.",
+  "@skillTipDrillRepeat": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "performanceLabel": "PERFORMANCE",
+  "statRides": "Rides",
+  "statDistance": "Distance",
+  "statTopSpeed": "Top speed",
+  "statPeakLean": "Peak lean",
+  "rideDiscarded": "Discarded",
+  "gpsQualitySparseTip": "Sparse GPS — keep the recording notification on and avoid battery limits.",
+  "gpsQualityFairTip": "GPS ~{meters} m — line is usable but a bit soft.",
+  "@gpsQualityFairTip": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "gpsQualityWeakTip": "Weak GPS (~{meters} m) — remount the phone and try again outdoors.",
+  "@gpsQualityWeakTip": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "skillLabTitle": "Skill lab",
+  "skillLabTapHint": "Tap to see mistakes and how to improve",
+  "skillLabTapHintEmpty": "Tap for tips after a twisty ride",
+  "skillLabFocusTitle": "Where to improve",
+  "skillLabFocusHelp": "Lowest-scoring turns first. Bars show entry → apex → exit speed. Tap Replay to watch lean, brake, and speed live.",
+  "skillReplayTitle": "Corner replay",
+  "skillReplayHelp": "Watch how this stretch was ridden — lean, braking, and speed move with the map playhead.",
+  "skillReplay": "Replay",
+  "play": "Play",
+  "pause": "Pause",
+  "restart": "Restart",
+  "loopReplay": "Loop",
+  "brake": "Brake",
+  "engineLabelTitle": "Help train RiderLab",
+  "engineLabelIntro": "Beta only — a few taps after each ride teach lean, curves, and brakes. Skip anytime.",
+  "engineLabelSkip": "Skip",
+  "engineLabelSave": "Save answers",
+  "engineLabelMountQ": "Where was the phone on this ride?",
+  "engineLabelMountCenter": "Mount (tank / bars)",
+  "engineLabelMountLeftPocket": "Left pocket",
+  "engineLabelMountRightPocket": "Right pocket",
+  "engineLabelMountOther": "Other / loose",
+  "engineLabelLeanQ": "Did the lean / incline feel right?",
+  "engineLabelLeanGood": "Felt right",
+  "engineLabelLeanLeftHigh": "Left looked too high",
+  "engineLabelLeanRightHigh": "Right looked too high",
+  "engineLabelLeanBothOff": "Both sides off",
+  "engineLabelLeanUnsure": "Not sure",
+  "engineLabelBrakeQ": "Did the brake marks look right?",
+  "engineLabelBrakeGood": "Felt right",
+  "engineLabelBrakeTooMany": "Too many / fake brakes",
+  "engineLabelBrakeTooFew": "Missed real brakes",
+  "engineLabelBrakeUnsure": "Not sure",
+  "engineLabelContextQ": "What kind of ride was this?",
+  "engineLabelContextStreet": "Street",
+  "engineLabelContextMountain": "Mountain",
+  "engineLabelContextTrack": "Track",
+  "engineLabelContextCommute": "Commute",
+  "engineLabelContextOther": "Other"
 }

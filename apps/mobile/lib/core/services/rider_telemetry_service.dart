@@ -18,6 +18,8 @@ abstract final class TelemetryCategory {
   static const loop = 'loop';
   static const app = 'app';
   static const error = 'error';
+  /// Beta rider answers that train lean / curve / brake models.
+  static const engineLabel = 'engine_label';
 }
 
 /// Queues device troubleshooting events locally and uploads to Supabase

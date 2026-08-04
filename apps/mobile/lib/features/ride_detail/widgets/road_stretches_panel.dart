@@ -16,41 +16,41 @@ class RoadStretchesPanel extends StatelessWidget {
 
   final List<RoadStretch> stretches;
 
-  /// Called with stretch index in [stretches] list.
+  /// Called with stretch index in the full [stretches] list (curvas only listed).
   final ValueChanged<int>? onSelectStretch;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (stretches.isEmpty) {
+    final curvas = <({int index, RoadStretch stretch})>[
+      for (var i = 0; i < stretches.length; i++)
+        if (stretches[i].kind == RoadKind.curva)
+          (index: i, stretch: stretches[i]),
+    ];
+
+    if (curvas.isEmpty) {
       return Text(
         l10n.roadStretchesEmpty,
         style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
       );
     }
 
-    final rectas = stretches.where((s) => s.kind == RoadKind.recta).length;
-    final curvas = stretches.where((s) => s.kind == RoadKind.curva).length;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.roadStretchesHelp(rectas, curvas),
+          l10n.roadStretchesHelp(curvas.length),
           style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 12),
-        for (var i = 0; i < stretches.length; i++) ...[
-          if (i > 0) const SizedBox(height: 8),
+        for (var c = 0; c < curvas.length; c++) ...[
+          if (c > 0) const SizedBox(height: 8),
           _StretchCard(
-            index: i + 1,
-            curvaNumber: stretches[i].kind == RoadKind.curva
-                ? stretches.take(i + 1).where((s) => s.kind == RoadKind.curva).length
-                : null,
-            stretch: stretches[i],
+            curvaNumber: c + 1,
+            stretch: curvas[c].stretch,
             onTap: onSelectStretch == null
                 ? null
-                : () => onSelectStretch!(i),
+                : () => onSelectStretch!(curvas[c].index),
           ),
         ],
       ],
@@ -60,44 +60,32 @@ class RoadStretchesPanel extends StatelessWidget {
 
 class _StretchCard extends StatelessWidget {
   const _StretchCard({
-    required this.index,
     required this.stretch,
-    this.curvaNumber,
+    required this.curvaNumber,
     this.onTap,
   });
 
-  final int index;
-  final int? curvaNumber;
   final RoadStretch stretch;
+  final int curvaNumber;
   final VoidCallback? onTap;
 
   String _label(BuildContext context) {
     final l10n = context.l10n;
-    return switch (stretch.kind) {
-      RoadKind.recta => l10n.recta,
-      RoadKind.curva => stretch.side == TurnSide.izquierda
-          ? l10n.curvaIzquierda
-          : stretch.side == TurnSide.derecha
-              ? l10n.curvaDerecha
-              : l10n.curva,
+    return switch (stretch.side) {
+      TurnSide.izquierda => l10n.curvaIzquierda,
+      TurnSide.derecha => l10n.curvaDerecha,
+      TurnSide.none => l10n.curva,
     };
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final color = stretch.kind == RoadKind.recta
-        ? const Color(0xFF7E57C2)
-        : stretch.side == TurnSide.izquierda
-            ? RideVizPalette.leanLeft
-            : stretch.side == TurnSide.derecha
-                ? RideVizPalette.leanRight
-                : AppTheme.lineHot;
-
-    final isCurva = stretch.kind == RoadKind.curva;
-    final title = isCurva && curvaNumber != null
-        ? '${l10n.curvaTitle(curvaNumber!)} · ${_label(context)}'
-        : '#$index · ${_label(context)}';
+    final color = stretch.side == TurnSide.izquierda
+        ? RideVizPalette.leanLeft
+        : stretch.side == TurnSide.derecha
+            ? RideVizPalette.leanRight
+            : AppTheme.lineHot;
 
     return Material(
       color: AppTheme.asphalt,
@@ -118,7 +106,7 @@ class _StretchCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      '${l10n.curvaTitle(curvaNumber)} · ${_label(context)}',
                       style: GoogleFonts.exo2(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -129,9 +117,9 @@ class _StretchCard extends StatelessWidget {
                     Text(
                       '${(stretch.distanceMeters / 1000).toStringAsFixed(2)} km · '
                       '${formatDuration(stretch.duration)}'
-                      '${isCurva ? ' · Δh ${stretch.headingChangeDeg.abs().toStringAsFixed(0)}°' : ''}'
-                      '${isCurva && stretch.avgAbsLeanDeg > 0 ? ' · lean ${stretch.avgAbsLeanDeg.toStringAsFixed(0)}°' : ''}'
-                      '${isCurva ? ' · ${l10n.openDetail}' : ''}',
+                      ' · Δh ${stretch.headingChangeDeg.abs().toStringAsFixed(0)}°'
+                      '${stretch.avgAbsLeanDeg > 0 ? ' · lean ${stretch.avgAbsLeanDeg.toStringAsFixed(0)}°' : ''}'
+                      ' · ${l10n.openDetail}',
                       style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
                         fontSize: 12,
@@ -140,8 +128,8 @@ class _StretchCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                isCurva ? Icons.map_outlined : Icons.play_arrow_rounded,
+              const Icon(
+                Icons.map_outlined,
                 color: AppTheme.steel,
                 size: 18,
               ),

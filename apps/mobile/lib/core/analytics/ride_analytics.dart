@@ -7,6 +7,7 @@ import 'brake_detection.dart';
 import 'corner_skill.dart';
 import 'lean_neutral.dart';
 import 'road_kind_detection.dart';
+import '../telemetry/curves/curves.dart';
 
 class RideAnalytics {
   RideAnalytics({
@@ -27,6 +28,10 @@ class RideAnalytics {
     );
     brakeEvents = detectBrakeEvents(samples);
     roadStretches = detectRoadStretches(
+      samples,
+      neutralLeanDegrees: neutralLeanDegrees,
+    );
+    curveEvents = CurveEngine().analyze(
       samples,
       neutralLeanDegrees: neutralLeanDegrees,
     );
@@ -59,6 +64,9 @@ class RideAnalytics {
 
   /// Recta / curva stretches from heading change.
   late final List<RoadStretch> roadStretches;
+
+  /// Typed curve telemetry events (sweep / S / hairpin / …) — differentiator engine.
+  late final List<CurveEvent> curveEvents;
 
   /// Corner skill scores + short coach tips (technique, not GPS lock).
   late final RideSkillSummary skillSummary;

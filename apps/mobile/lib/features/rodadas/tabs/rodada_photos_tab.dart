@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../models/rodada_models.dart';
 import '../rodada_providers.dart';
@@ -14,6 +15,7 @@ class RodadaPhotosTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final photos = ref.watch(rodadaPhotosProvider(rodadaId));
 
     return Column(
@@ -24,7 +26,7 @@ class RodadaPhotosTab extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Album loads thumbs only. Full image opens on tap and frees when closed.',
+                  l10n.photosAlbumHelp,
                   style: GoogleFonts.rajdhani(
                     color: AppTheme.steel,
                     fontSize: 13,
@@ -34,7 +36,7 @@ class RodadaPhotosTab extends ConsumerWidget {
               FilledButton.tonalIcon(
                 onPressed: () => _pickAndUpload(context, ref),
                 icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-                label: const Text('Add'),
+                label: Text(l10n.photoAdd),
               ),
             ],
           ),
@@ -45,7 +47,7 @@ class RodadaPhotosTab extends ConsumerWidget {
             error: (e, _) => Center(child: Text('$e')),
             data: (list) {
               if (list.isEmpty) {
-                return const Center(child: Text('No photos yet'));
+                return Center(child: Text(l10n.noPhotosYet));
               }
               return GridView.builder(
                 padding: const EdgeInsets.all(12),
@@ -77,6 +79,7 @@ class RodadaPhotosTab extends ConsumerWidget {
   }
 
   Future<void> _pickAndUpload(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     try {
       final picker = ImagePicker();
       final file = await picker.pickImage(
@@ -96,7 +99,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       ref.invalidate(rodadaPhotosProvider(rodadaId));
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Photo uploaded')),
+        SnackBar(content: Text(l10n.photoUploaded)),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -145,10 +148,11 @@ class _PhotoViewer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final url = ref.watch(rodadaPhotoUrlProvider(photo.storagePath));
     return Scaffold(
       appBar: AppBar(
-        title: Text(photo.displayName ?? 'Photo'),
+        title: Text(photo.displayName ?? l10n.photoTitle),
       ),
       body: url.when(
         loading: () => const Center(child: CircularProgressIndicator()),

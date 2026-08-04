@@ -180,7 +180,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get rideLab => 'Ride Lab';
+  String get rideLab => 'Lab del ride';
 
   @override
   String get rideLabSegment => 'Ride Lab · segmento';
@@ -224,13 +224,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sectionMapSub => 'Colores de velocidad · frenos';
 
   @override
-  String get sectionRoad => 'Rectas y curvas';
+  String get sectionRoad => 'Curvas';
 
   @override
-  String get sectionRoadSub => 'Por cambio de rumbo';
+  String get sectionRoadSub => 'Por rumbo e inclinación';
 
   @override
-  String get sectionLoop => 'Loop';
+  String get sectionLoop => 'Vueltas';
 
   @override
   String get sectionLoopSub => 'Detecta o marca A/B en este ride';
@@ -274,7 +274,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get fullRide => 'Ruta completa';
 
   @override
-  String get playhead => 'PLAYHEAD';
+  String get playhead => 'CURSOR';
 
   @override
   String get distance => 'Distancia';
@@ -415,13 +415,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Lectura rápida: mira si entras demasiado rápido (mucho freno a A), si el ápice es estable, y si sales acelerando limpio.';
 
   @override
-  String roadStretchesHelp(int rectas, int curvas) {
-    return 'Según rumbo + inclinación. $rectas rectas · $curvas curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.';
+  String roadStretchesHelp(int curvas) {
+    return 'Según rumbo + inclinación. $curvas curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.';
   }
 
   @override
   String get roadStretchesEmpty =>
-      'Aún no hay suficiente cambio de rumbo GPS para separar rectas y curvas.';
+      'Aún no hay suficiente cambio de rumbo GPS para detectar curvas.';
 
   @override
   String get openDetail => 'abrir detalle';
@@ -528,7 +528,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mapLayerStartEnd => 'Inicio/fin';
 
   @override
-  String get mapLayerPlayhead => 'Playhead';
+  String get mapLayerPlayhead => 'Cursor';
 
   @override
   String get mapLayerLegend => 'Leyenda';
@@ -754,7 +754,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get curvaOpenMap => 'Mapa completo';
 
   @override
-  String get curvaZoomLab => 'Zoom Ride Lab';
+  String get curvaZoomLab => 'Zoom Lab';
 
   @override
   String get armAutoRide => 'Armar auto-ride';
@@ -948,7 +948,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routeLoopStartRide => 'Iniciar ride en loop';
 
   @override
-  String get routeLoopSourceManual => 'Manual';
+  String get routeLoopSourceManual => 'A mano';
 
   @override
   String get routeLoopSourceDetected => 'Detectado';
@@ -1280,4 +1280,596 @@ class AppLocalizationsEs extends AppLocalizations {
   String armAutoRouteArmedNamed(String name) {
     return 'Armado para «$name» — al arrancar el ride queda en esa ruta';
   }
+
+  @override
+  String couldNotLoadRides(String error) {
+    return 'No se pudieron cargar recorridos: $error';
+  }
+
+  @override
+  String get rodadasTitle => 'Rodadas';
+
+  @override
+  String get rodadasHomeSubtitle =>
+      'Crea una rodada · invita · comparte GPS en vivo';
+
+  @override
+  String get friendsHelp =>
+      'Busca riders, envía solicitudes de amistad e invita amigos aceptados a una rodada.';
+
+  @override
+  String get findRiders => 'Buscar riders';
+
+  @override
+  String get searchByNameHint => 'Buscar por nombre…';
+
+  @override
+  String get noRidersFound => 'No se encontraron riders';
+
+  @override
+  String friendRequestSent(String name) {
+    return 'Solicitud enviada a $name';
+  }
+
+  @override
+  String get addFriend => 'Añadir';
+
+  @override
+  String get friendRequests => 'Solicitudes';
+
+  @override
+  String get wantsToBeFriends => 'quiere ser tu amigo';
+
+  @override
+  String get accept => 'Aceptar';
+
+  @override
+  String get decline => 'Rechazar';
+
+  @override
+  String get pendingSent => 'Pendientes enviadas';
+
+  @override
+  String get waitingAcceptance => 'Esperando aceptación';
+
+  @override
+  String get yourFriends => 'Tus amigos';
+
+  @override
+  String get noFriendsYet =>
+      'Aún no tienes amigos — busca arriba y envía una solicitud.';
+
+  @override
+  String get viewRides => 'Ver recorridos';
+
+  @override
+  String get inviteToRodada => 'Invitar a rodada';
+
+  @override
+  String get createRodadaFirst => 'Crea una rodada primero';
+
+  @override
+  String get inviteTo => 'Invitar a…';
+
+  @override
+  String friendInvited(String name) {
+    return '$name invitado';
+  }
+
+  @override
+  String scoreLabel(int score) {
+    return 'Puntaje $score';
+  }
+
+  @override
+  String get joinWithCodeTooltip => 'Unirse con código';
+
+  @override
+  String get createRodadaTooltip => 'Crear rodada';
+
+  @override
+  String get signInForRodadas => 'Inicia sesión para usar Rodadas';
+
+  @override
+  String couldNotLoadRodadas(String error) {
+    return 'No se pudieron cargar rodadas.\n$error';
+  }
+
+  @override
+  String get groupRidesTitle => 'Rodadas en grupo';
+
+  @override
+  String get groupRidesBody =>
+      'Crea una rodada para Tapalpa, Moyahua o donde sea. Invita riders y comparte GPS en vivo, tracks y fotos solo si cada uno lo activa.';
+
+  @override
+  String get createRodada => 'Crear rodada';
+
+  @override
+  String get joinWithInviteCode => 'Unirse con código de invitación';
+
+  @override
+  String get joinRodadaTitle => 'Unirse a rodada';
+
+  @override
+  String get inviteCodeLabel => 'Código de invitación';
+
+  @override
+  String get inviteCodeHint => 'ej. TAP42A';
+
+  @override
+  String get joinButton => 'Unirse';
+
+  @override
+  String joinFailed(String error) {
+    return 'No se pudo unir: $error';
+  }
+
+  @override
+  String get timeTbd => 'Hora por definir';
+
+  @override
+  String rodadaRidersCount(int count) {
+    return '$count riders';
+  }
+
+  @override
+  String get newRodada => 'Nueva rodada';
+
+  @override
+  String get rodadaCreateButton => 'Crear';
+
+  @override
+  String get rodadaTitleLabel => 'Título';
+
+  @override
+  String get rodadaTitleHint => 'Tapalpa sábado';
+
+  @override
+  String get rodadaDestinationLabel => 'Destino';
+
+  @override
+  String get rodadaDestinationHint => 'Tapalpa / Moyahua / …';
+
+  @override
+  String get rodadaNotesLabel => 'Notas';
+
+  @override
+  String get rodadaNotesHint => 'Punto de encuentro en Shell, casco blanco…';
+
+  @override
+  String get rodadaStartsAt => 'Empieza';
+
+  @override
+  String get rodadaPickDateTime => 'Elegir fecha y hora';
+
+  @override
+  String get meetupPin => 'Pin de encuentro';
+
+  @override
+  String get useMyGps => 'Usar mi GPS';
+
+  @override
+  String get clearPin => 'Borrar';
+
+  @override
+  String get meetupMapHelp =>
+      'Toca el mapa para fijar el punto de encuentro. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.';
+
+  @override
+  String get titleRequired => 'El título es obligatorio';
+
+  @override
+  String locationFailed(String error) {
+    return 'Falló la ubicación: $error';
+  }
+
+  @override
+  String get rodadaFallback => 'Rodada';
+
+  @override
+  String get copyInviteCode => 'Copiar código de invitación';
+
+  @override
+  String inviteCodeCopied(String code) {
+    return 'Código $code copiado';
+  }
+
+  @override
+  String get markAsLive => 'Marcar EN VIVO';
+
+  @override
+  String get markAsOpen => 'Marcar abierta';
+
+  @override
+  String get endRodada => 'Terminar rodada';
+
+  @override
+  String get inviteFriend => 'Invitar amigo';
+
+  @override
+  String get rodadaTabOverview => 'Resumen';
+
+  @override
+  String get rodadaTabLive => 'En vivo';
+
+  @override
+  String get rodadaTabRides => 'Recorridos';
+
+  @override
+  String get rodadaTabPhotos => 'Fotos';
+
+  @override
+  String get rodadaTabRadio => 'Radio';
+
+  @override
+  String get rodadaNotFound => 'Rodada no encontrada';
+
+  @override
+  String rodadaStatusChanged(String status) {
+    return 'Estado → $status';
+  }
+
+  @override
+  String get noFriendsToInvite => 'Aún no hay amigos para invitar.';
+
+  @override
+  String get inviteSent => 'Invitación enviada';
+
+  @override
+  String rodadaCodeBanner(String code) {
+    return 'código $code';
+  }
+
+  @override
+  String get meetup => 'Encuentro';
+
+  @override
+  String get yourSharing => 'Tu compartición';
+
+  @override
+  String get sharingDefaultsHelp =>
+      'Apagado por defecto. Si lo activas, envía ubicación cada 5 minutos durante la rodada (reintenta cada 1 minuto si falla).';
+
+  @override
+  String get notRodadaMember => 'No eres miembro.';
+
+  @override
+  String get shareLocationOnRoute => 'Compartir ubicación en ruta';
+
+  @override
+  String get shareLocationEvery5Min =>
+      'Cada 5 min mientras la rodada está abierta/en vivo';
+
+  @override
+  String get shareTrackAfterRides => 'Compartir mi track después de recorridos';
+
+  @override
+  String get rodadaRiders => 'Riders';
+
+  @override
+  String get noMembersYet => 'Aún no hay miembros';
+
+  @override
+  String get rsvpGoing => 'voy';
+
+  @override
+  String get rsvpMaybe => 'tal vez';
+
+  @override
+  String get rsvpDeclined => 'no voy';
+
+  @override
+  String get memberLiveOn => 'vivo activo';
+
+  @override
+  String get memberTrackOn => 'track activo';
+
+  @override
+  String get sharingLocationBanner =>
+      'Compartiendo ubicación cada 5 min (reintento 1 min si falla)';
+
+  @override
+  String get liveMapViewOnly =>
+      'Mapa en vivo solo lectura. Activa compartir en Resumen.';
+
+  @override
+  String get shareLive => 'Compartir en vivo';
+
+  @override
+  String get noLiveRidersYet =>
+      'Aún no hay riders en vivo. Los que opten aparecen aquí (~5 s).';
+
+  @override
+  String get addStop => 'Añadir parada';
+
+  @override
+  String get stopFab => 'Parada';
+
+  @override
+  String get stopTitleLabel => 'Título';
+
+  @override
+  String get dropAtMyGps => 'Soltar en mi GPS';
+
+  @override
+  String get gasBreakDefault => 'Gas / descanso';
+
+  @override
+  String get stopDefault => 'Parada';
+
+  @override
+  String get sharedTracksHelp =>
+      'Tracks compartidos de miembros que lo activaron. El GPS denso queda en cada teléfono.';
+
+  @override
+  String get linkMyRide => 'Vincular mi recorrido';
+
+  @override
+  String get noSharedRidesYet => 'Aún no hay recorridos compartidos';
+
+  @override
+  String get noCompletedRidesToLink =>
+      'No hay recorridos terminados para vincular';
+
+  @override
+  String get syncRideFirst =>
+      'Sincroniza el recorrido primero e inténtalo de nuevo';
+
+  @override
+  String get rideLinkedToRodada => 'Recorrido vinculado a esta rodada';
+
+  @override
+  String get noTrackPoints => 'Sin puntos de track';
+
+  @override
+  String get radioAllGood => 'Todo bien';
+
+  @override
+  String get radioStoppingFiveMin => 'Parando 5 min';
+
+  @override
+  String get radioNeedHelp => 'Necesito ayuda';
+
+  @override
+  String get noMessagesYet => 'Aún no hay mensajes';
+
+  @override
+  String get shortRadioMessageHint => 'Mensaje corto de radio…';
+
+  @override
+  String get safetyTag => 'SEGURIDAD';
+
+  @override
+  String get riderFallback => 'Rider';
+
+  @override
+  String get photosAlbumHelp =>
+      'El álbum carga solo miniaturas. La imagen completa se abre al tocar y se libera al cerrar.';
+
+  @override
+  String get photoAdd => 'Añadir';
+
+  @override
+  String get noPhotosYet => 'Aún no hay fotos';
+
+  @override
+  String get photoUploaded => 'Foto subida';
+
+  @override
+  String get photoTitle => 'Foto';
+
+  @override
+  String get skillCoach => 'Coach de habilidad';
+
+  @override
+  String skillCurvasRated(int count) {
+    return '$count curvas calificadas · huellas para comparar';
+  }
+
+  @override
+  String get improveNextRide => 'Mejorar el próximo recorrido';
+
+  @override
+  String get openCornerLab => 'Abrir corner lab';
+
+  @override
+  String get skillTipNoCurvas =>
+      'No se detectaron curvas sólidas — recorre una sección sinuosa para tener una base.';
+
+  @override
+  String skillTipEntryHot(String entry, String apex) {
+    return 'Entrada caliente ($entry→$apex km/h). Frena antes del tip-in.';
+  }
+
+  @override
+  String get skillTipModerateSpeedDrop =>
+      'Caída moderada de velocidad al apex — trail brake un poco más.';
+
+  @override
+  String get skillTipLittleSpeedScrub =>
+      'Poca reducción de velocidad — confirma que no llevas demasiada en mitad de curva.';
+
+  @override
+  String get skillTipWeakExitDrive =>
+      'Salida débil — abre gas antes cuando la inclinación empiece a bajar.';
+
+  @override
+  String get skillTipPeakLeanNotAtApex =>
+      'Inclinación máxima no en el apex — inclina antes para estar listo en el apex.';
+
+  @override
+  String get skillTipLowLeanBigHeading =>
+      'Gran cambio de rumbo con poca inclinación — revisa el sensor o inclínate más.';
+
+  @override
+  String get skillTipSolidCorner =>
+      'Curva sólida — mantén este ritmo de entrada/apex.';
+
+  @override
+  String skillHighlightBest(String label, int score) {
+    return 'Mejor: $label · $score/100';
+  }
+
+  @override
+  String skillHighlightMedian(int score) {
+    return 'Puntaje mediano de curvas $score/100';
+  }
+
+  @override
+  String skillTipDrillRepeat(String label) {
+    return 'Práctica: repite una $label similar y frena 10–15 m antes.';
+  }
+
+  @override
+  String get performanceLabel => 'RENDIMIENTO';
+
+  @override
+  String get statRides => 'Recorridos';
+
+  @override
+  String get statDistance => 'Distancia';
+
+  @override
+  String get statTopSpeed => 'Vel. máx.';
+
+  @override
+  String get statPeakLean => 'Inclinación';
+
+  @override
+  String get rideDiscarded => 'Descartado';
+
+  @override
+  String get gpsQualitySparseTip =>
+      'GPS escaso — deja la notificación de grabación y evita límites de batería.';
+
+  @override
+  String gpsQualityFairTip(String meters) {
+    return 'GPS ~$meters m — la línea sirve, pero un poco suave.';
+  }
+
+  @override
+  String gpsQualityWeakTip(String meters) {
+    return 'GPS débil (~$meters m) — fija mejor el teléfono y rueda al aire libre.';
+  }
+
+  @override
+  String get skillLabTitle => 'Lab de skill';
+
+  @override
+  String get skillLabTapHint => 'Toca para ver errores y cómo mejorar';
+
+  @override
+  String get skillLabTapHintEmpty => 'Toca para tips tras un tramo sinuoso';
+
+  @override
+  String get skillLabFocusTitle => 'Dónde mejorar';
+
+  @override
+  String get skillLabFocusHelp =>
+      'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Replay para ver inclinación, freno y velocidad en vivo.';
+
+  @override
+  String get skillReplayTitle => 'Replay de curva';
+
+  @override
+  String get skillReplayHelp =>
+      'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el playhead en el mapa.';
+
+  @override
+  String get skillReplay => 'Replay';
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String get pause => 'Pausa';
+
+  @override
+  String get restart => 'Reiniciar';
+
+  @override
+  String get loopReplay => 'Bucle';
+
+  @override
+  String get brake => 'Freno';
+
+  @override
+  String get engineLabelTitle => 'Ayuda a entrenar RiderLab';
+
+  @override
+  String get engineLabelIntro =>
+      'Solo beta — unos toques tras cada ride enseñan inclinación, curvas y frenos. Puedes omitir.';
+
+  @override
+  String get engineLabelSkip => 'Omitir';
+
+  @override
+  String get engineLabelSave => 'Guardar respuestas';
+
+  @override
+  String get engineLabelMountQ => '¿Dónde iba el teléfono en este ride?';
+
+  @override
+  String get engineLabelMountCenter => 'Base (tanque / manillar)';
+
+  @override
+  String get engineLabelMountLeftPocket => 'Bolsillo izquierdo';
+
+  @override
+  String get engineLabelMountRightPocket => 'Bolsillo derecho';
+
+  @override
+  String get engineLabelMountOther => 'Otro / suelto';
+
+  @override
+  String get engineLabelLeanQ => '¿La inclinación se sintió bien?';
+
+  @override
+  String get engineLabelLeanGood => 'Se sintió bien';
+
+  @override
+  String get engineLabelLeanLeftHigh => 'Izquierda se veía alta';
+
+  @override
+  String get engineLabelLeanRightHigh => 'Derecha se veía alta';
+
+  @override
+  String get engineLabelLeanBothOff => 'Ambos lados mal';
+
+  @override
+  String get engineLabelLeanUnsure => 'No sé';
+
+  @override
+  String get engineLabelBrakeQ => '¿Los frenos detectados se vieron bien?';
+
+  @override
+  String get engineLabelBrakeGood => 'Se sintió bien';
+
+  @override
+  String get engineLabelBrakeTooMany => 'Demasiados / falsos';
+
+  @override
+  String get engineLabelBrakeTooFew => 'Faltaron frenos reales';
+
+  @override
+  String get engineLabelBrakeUnsure => 'No sé';
+
+  @override
+  String get engineLabelContextQ => '¿Qué tipo de ride fue?';
+
+  @override
+  String get engineLabelContextStreet => 'Ciudad';
+
+  @override
+  String get engineLabelContextMountain => 'Montaña';
+
+  @override
+  String get engineLabelContextTrack => 'Pista';
+
+  @override
+  String get engineLabelContextCommute => 'Traslado';
+
+  @override
+  String get engineLabelContextOther => 'Otro';
 }

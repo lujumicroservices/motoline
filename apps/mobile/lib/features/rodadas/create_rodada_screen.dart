@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import 'rodada_providers.dart';
 
@@ -58,6 +59,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
   }
 
   Future<void> _useMyLocation() async {
+    final l10n = context.l10n;
     try {
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -69,15 +71,16 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Location failed: $e')),
+        SnackBar(content: Text(l10n.locationFailed('$e'))),
       );
     }
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     final title = _title.text.trim();
     if (title.isEmpty) {
-      setState(() => _error = 'Title is required');
+      setState(() => _error = l10n.titleRequired);
       return;
     }
     setState(() {
@@ -108,10 +111,11 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'New rodada',
+          l10n.newRodada,
           style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
         actions: [
@@ -123,7 +127,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Create'),
+                : Text(l10n.rodadaCreateButton),
           ),
         ],
       ),
@@ -132,18 +136,18 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
         children: [
           TextField(
             controller: _title,
-            decoration: const InputDecoration(
-              labelText: 'Title',
-              hintText: 'Tapalpa Saturday',
+            decoration: InputDecoration(
+              labelText: l10n.rodadaTitleLabel,
+              hintText: l10n.rodadaTitleHint,
             ),
             textCapitalization: TextCapitalization.sentences,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _destination,
-            decoration: const InputDecoration(
-              labelText: 'Destination',
-              hintText: 'Tapalpa / Moyahua / …',
+            decoration: InputDecoration(
+              labelText: l10n.rodadaDestinationLabel,
+              hintText: l10n.rodadaDestinationHint,
             ),
             textCapitalization: TextCapitalization.words,
           ),
@@ -151,18 +155,18 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
           TextField(
             controller: _notes,
             maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Notes',
-              hintText: 'Meetup at Shell, white helmet…',
+            decoration: InputDecoration(
+              labelText: l10n.rodadaNotesLabel,
+              hintText: l10n.rodadaNotesHint,
             ),
           ),
           const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Starts at'),
+            title: Text(l10n.rodadaStartsAt),
             subtitle: Text(
               _startsAt == null
-                  ? 'Pick date & time'
+                  ? l10n.rodadaPickDateTime
                   : _startsAt!.toLocal().toString().substring(0, 16),
             ),
             trailing: const Icon(Icons.schedule),
@@ -172,18 +176,18 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
           Row(
             children: [
               Text(
-                'Meetup pin',
+                l10n.meetupPin,
                 style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
               ),
               const Spacer(),
               TextButton(
                 onPressed: _useMyLocation,
-                child: const Text('Use my GPS'),
+                child: Text(l10n.useMyGps),
               ),
               if (_meetup != null)
                 TextButton(
                   onPressed: () => setState(() => _meetup = null),
-                  child: const Text('Clear'),
+                  child: Text(l10n.clearPin),
                 ),
             ],
           ),
@@ -225,7 +229,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap the map to set the meetup. Live GPS and photos stay off until each rider opts in.',
+            l10n.meetupMapHelp,
             style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
           if (_error != null) ...[

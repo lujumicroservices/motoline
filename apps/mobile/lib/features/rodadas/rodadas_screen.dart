@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/supabase/supabase_bootstrap.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import 'create_rodada_screen.dart';
 import 'models/rodada_models.dart';
@@ -17,22 +18,23 @@ class RodadasScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final async = ref.watch(myRodadasProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Rodadas',
+          l10n.rodadasTitle,
           style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
-            tooltip: 'Join with code',
+            tooltip: l10n.joinWithCodeTooltip,
             onPressed: () => _joinWithCode(context, ref),
             icon: const Icon(Icons.vpn_key_outlined),
           ),
           IconButton(
-            tooltip: 'Create rodada',
+            tooltip: l10n.createRodadaTooltip,
             onPressed: () async {
               final id = await Navigator.of(context).push<String>(
                 MaterialPageRoute(builder: (_) => const CreateRodadaScreen()),
@@ -52,7 +54,7 @@ class RodadasScreen extends ConsumerWidget {
         ],
       ),
       body: !SupabaseBootstrap.isReady
-          ? const Center(child: Text('Sign in to use Rodadas'))
+          ? Center(child: Text(l10n.signInForRodadas))
           : RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(myRodadasProvider);
@@ -64,7 +66,7 @@ class RodadasScreen extends ConsumerWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text('Could not load rodadas.\n$e'),
+                      child: Text(l10n.couldNotLoadRodadas('$e')),
                     ),
                   ],
                 ),
@@ -75,7 +77,7 @@ class RodadasScreen extends ConsumerWidget {
                       children: [
                         const SizedBox(height: 40),
                         Text(
-                          'Group rides',
+                          l10n.groupRidesTitle,
                           style: GoogleFonts.exo2(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
@@ -83,9 +85,7 @@ class RodadasScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Create a rodada for Tapalpa, Moyahua, or anywhere. '
-                          'Invite riders, then share live GPS, tracks, and photos '
-                          'only when you opt in.',
+                          l10n.groupRidesBody,
                           style: GoogleFonts.rajdhani(
                             color: AppTheme.steel,
                             fontSize: 15,
@@ -111,13 +111,13 @@ class RodadasScreen extends ConsumerWidget {
                             }
                           },
                           icon: const Icon(Icons.add),
-                          label: const Text('Create rodada'),
+                          label: Text(l10n.createRodada),
                         ),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
                           onPressed: () => _joinWithCode(context, ref),
                           icon: const Icon(Icons.vpn_key_outlined),
-                          label: const Text('Join with invite code'),
+                          label: Text(l10n.joinWithInviteCode),
                         ),
                       ],
                     );
@@ -149,17 +149,18 @@ class RodadasScreen extends ConsumerWidget {
   }
 
   Future<void> _joinWithCode(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final controller = TextEditingController();
     final code = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Join rodada'),
+        title: Text(l10n.joinRodadaTitle),
         content: TextField(
           controller: controller,
           textCapitalization: TextCapitalization.characters,
-          decoration: const InputDecoration(
-            labelText: 'Invite code',
-            hintText: 'e.g. TAP42A',
+          decoration: InputDecoration(
+            labelText: l10n.inviteCodeLabel,
+            hintText: l10n.inviteCodeHint,
           ),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
@@ -169,11 +170,11 @@ class RodadasScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Join'),
+            child: Text(l10n.joinButton),
           ),
         ],
       ),
@@ -190,7 +191,7 @@ class RodadasScreen extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Join failed: $e')),
+        SnackBar(content: Text(l10n.joinFailed('$e'))),
       );
     }
   }
@@ -204,9 +205,10 @@ class _RodadaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final date = rodada.startsAt;
     final dateLabel = date == null
-        ? 'Time TBD'
+        ? l10n.timeTbd
         : DateFormat('EEE d MMM · HH:mm').format(date.toLocal());
     final statusColor = switch (rodada.status) {
       'live' => AppTheme.line,
@@ -251,7 +253,7 @@ class _RodadaCard extends StatelessWidget {
                             rodada.destination!.trim().isNotEmpty)
                           rodada.destination!,
                         dateLabel,
-                        '${rodada.memberCount} riders',
+                        l10n.rodadaRidersCount(rodada.memberCount),
                       ].join(' · '),
                       style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,

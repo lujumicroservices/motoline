@@ -84,7 +84,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
           children: [
             Text(
-              'Search riders, send friend requests, and invite accepted friends to a rodada.',
+              l10n.friendsHelp,
               style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 14,
@@ -125,7 +125,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Find riders',
+              l10n.findRiders,
               style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -135,7 +135,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search by name…',
+                hintText: l10n.searchByNameHint,
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppTheme.asphaltElevated,
@@ -156,7 +156,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                 data: (hits) {
                   if (hits.isEmpty) {
                     return Text(
-                      'No riders found',
+                      l10n.noRidersFound,
                       style: GoogleFonts.rajdhani(color: AppTheme.steel),
                     );
                   }
@@ -177,7 +177,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'Friend request sent to ${rider.label}',
+                                      l10n.friendRequestSent(rider.label),
                                     ),
                                   ),
                                 );
@@ -188,7 +188,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                                 );
                               }
                             },
-                            child: const Text('Add'),
+                            child: Text(l10n.addFriend),
                           ),
                         ),
                     ],
@@ -204,7 +204,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Requests',
+                      l10n.friendRequests,
                       style: GoogleFonts.exo2(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -215,13 +215,13 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                       Card(
                         color: AppTheme.asphaltElevated,
                         child: ListTile(
-                          title: Text(r.peer?.label ?? 'Rider'),
-                          subtitle: const Text('wants to be friends'),
+                          title: Text(r.peer?.label ?? l10n.riderFallback),
+                          subtitle: Text(l10n.wantsToBeFriends),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                tooltip: 'Accept',
+                                tooltip: l10n.accept,
                                 onPressed: () async {
                                   await ref
                                       .read(friendshipRepositoryProvider)
@@ -234,7 +234,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                                 ),
                               ),
                               IconButton(
-                                tooltip: 'Decline',
+                                tooltip: l10n.decline,
                                 onPressed: () async {
                                   await ref
                                       .read(friendshipRepositoryProvider)
@@ -264,7 +264,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Pending sent',
+                      l10n.pendingSent,
                       style: GoogleFonts.exo2(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -274,8 +274,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                     for (final r in reqs)
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: Text(r.peer?.label ?? 'Rider'),
-                        subtitle: const Text('Waiting for acceptance'),
+                        title: Text(r.peer?.label ?? l10n.riderFallback),
+                        subtitle: Text(l10n.waitingAcceptance),
                         trailing: TextButton(
                           onPressed: () async {
                             await ref
@@ -283,7 +283,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                                 .cancelOutgoing(r.id);
                             _invalidateSocial();
                           },
-                          child: const Text('Cancel'),
+                          child: Text(l10n.cancel),
                         ),
                       ),
                     const SizedBox(height: 16),
@@ -294,7 +294,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
               error: (_, __) => const SizedBox.shrink(),
             ),
             Text(
-              'Your friends',
+              l10n.yourFriends,
               style: GoogleFonts.exo2(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -338,7 +338,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
                     child: Text(
-                      'No friends yet — search above and send a request.',
+                      l10n.noFriendsYet,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.rajdhani(
                         color: AppTheme.steel,
@@ -425,9 +425,12 @@ class _FriendTile extends ConsumerWidget {
               await _inviteToRodada(context, ref);
             }
           },
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'rides', child: Text('View rides')),
-            PopupMenuItem(value: 'invite', child: Text('Invite to rodada')),
+          itemBuilder: (_) => [
+            PopupMenuItem(value: 'rides', child: Text(l10n.viewRides)),
+            PopupMenuItem(
+              value: 'invite',
+              child: Text(l10n.inviteToRodada),
+            ),
           ],
         ),
         onTap: () {
@@ -442,6 +445,7 @@ class _FriendTile extends ConsumerWidget {
   }
 
   Future<void> _inviteToRodada(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final rodadas = await ref.read(myRodadasProvider.future);
     final open = rodadas
         .where((r) => r.status == 'open' || r.status == 'live' || r.status == 'draft')
@@ -449,7 +453,7 @@ class _FriendTile extends ConsumerWidget {
     if (!context.mounted) return;
     if (open.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Create a rodada first')),
+        SnackBar(content: Text(l10n.createRodadaFirst)),
       );
       await Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (_) => const RodadasScreen()),
@@ -460,7 +464,7 @@ class _FriendTile extends ConsumerWidget {
       context: context,
       builder: (ctx) => ListView(
         children: [
-          const ListTile(title: Text('Invite to…')),
+          ListTile(title: Text(l10n.inviteTo)),
           for (final r in open)
             ListTile(
               title: Text(r.title),
@@ -478,7 +482,7 @@ class _FriendTile extends ConsumerWidget {
           );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${friend.label} invited')),
+        SnackBar(content: Text(l10n.friendInvited(friend.label))),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -596,7 +600,8 @@ class _FriendRideSheet extends StatelessWidget {
               Text(
                 '${ride.maxSpeedKmh?.toStringAsFixed(0) ?? "—"} ${l10n.kmh}',
               ),
-              if (ride.lineScore != null) Text('Score ${ride.lineScore}'),
+              if (ride.lineScore != null)
+                Text(l10n.scoreLabel(ride.lineScore!)),
             ],
           ),
         ],

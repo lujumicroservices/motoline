@@ -2,6 +2,31 @@ import '../models/track_point.dart';
 import 'curva_analysis.dart';
 import 'road_kind_detection.dart';
 
+/// Stable tip codes resolved to localized text in the UI layer.
+enum SkillTipId {
+  noCurvasDetected,
+  entryHot,
+  moderateSpeedDrop,
+  littleSpeedScrub,
+  weakExitDrive,
+  peakLeanNotAtApex,
+  lowLeanBigHeading,
+  solidCorner,
+  bestHighlight,
+  medianHighlight,
+  drillRepeatCorner,
+}
+
+class SkillTip {
+  const SkillTip(this.id, {this.entry, this.apex, this.label, this.score});
+
+  final SkillTipId id;
+  final int? entry;
+  final int? apex;
+  final String? label;
+  final int? score;
+}
+
 /// Per-corner skill rating derived from GPS + lean (no extra hardware).
 class CornerSkill {
   const CornerSkill({
@@ -13,7 +38,7 @@ class CornerSkill {
 
   final CurvaAnalysis analysis;
   final int score;
-  final List<String> tips;
+  final List<SkillTip> tips;
   final String fingerprint;
 
   String get label => analysis.labelEs;
@@ -29,8 +54,8 @@ class RideSkillSummary {
 
   final List<CornerSkill> corners;
   final int sessionScore;
-  final List<String> highlights;
-  final List<String> focusTips;
+  final List<SkillTip> highlights;
+  final List<SkillTip> focusTips;
 
   int get curvaCount => corners.length;
 }
@@ -62,7 +87,7 @@ class CornerSkillEngine {
         sessionScore: 0,
         highlights: [],
         focusTips: [
-          'No solid curvas detected — ride a twisty section to build a baseline.',
+          SkillTip(SkillTipId.noCurvasDetected),
         ],
       );
     }
@@ -73,16 +98,26 @@ class CornerSkillEngine {
     final best = corners.reduce((a, b) => a.score >= b.score ? a : b);
     final worst = corners.reduce((a, b) => a.score <= b.score ? a : b);
 
-    final highlights = <String>[
-      'Best: ${best.label} · ${best.score}/100',
+    final highlights = <SkillTip>[
+      SkillTip(
+        SkillTipId.bestHighlight,
+        label: best.label,
+        score: best.score,
+      ),
       if (scores.length >= 3)
-        'Median corner score ${scores[scores.length ~/ 2]}/100',
+        SkillTip(
+          SkillTipId.medianHighlight,
+          score: scores[scores.length ~/ 2],
+        ),
     ];
 
-    final focusTips = <String>[
+    final focusTips = <SkillTip>[
       ...worst.tips.take(2),
       if (worst.score < 70)
-        'Drill: repeat a similar ${worst.label.toLowerCase()} and brake 10–15 m earlier.',
+        SkillTip(
+          SkillTipId.drillRepeatCorner,
+          label: worst.label.toLowerCase(),
+        ),
     ];
 
     return RideSkillSummary(
@@ -119,7 +154,7 @@ class CornerSkillEngine {
   }
 
   CornerSkill _scoreCorner(CurvaAnalysis a, RoadStretch stretch) {
-    final tips = <String>[];
+    final tips = <SkillTip>[];
     var score = 70.0;
 
     final drop = a.speedDropToApexKmh;
@@ -133,17 +168,20 @@ class CornerSkillEngine {
     if (drop > 35) {
       score -= 18;
       tips.add(
-        'Entry hot (${entry.toStringAsFixed(0)}→${apex.toStringAsFixed(0)} km/h). '
-        'Brake earlier before tip-in.',
+        SkillTip(
+          SkillTipId.entryHot,
+          entry: entry.round(),
+          apex: apex.round(),
+        ),
       );
     } else if (drop > 22) {
       score -= 10;
-      tips.add('Moderate speed drop to apex — trail brake a touch longer.');
+      tips.add(const SkillTip(SkillTipId.moderateSpeedDrop));
     } else if (drop >= 8 && drop <= 22) {
       score += 8;
     } else if (drop < 5 && entry > 40) {
       score -= 6;
-      tips.add('Little speed scrub — confirm you are not carrying too much mid-corner.');
+      tips.add(const SkillTip(SkillTipId.littleSpeedScrub));
     }
 
     // Exit drive: rebuild speed after apex.
@@ -151,7 +189,7 @@ class CornerSkillEngine {
       score += 10;
     } else if (gain < 3 && a.distanceMeters > 40) {
       score -= 8;
-      tips.add('Weak exit drive — open throttle sooner once lean starts falling.');
+      tips.add(const SkillTip(SkillTipId.weakExitDrive));
     }
 
     // Lean commitment at apex vs peak.
@@ -161,13 +199,11 @@ class CornerSkillEngine {
         score += 6;
       } else if (apexLean < maxLean * 0.45 && maxLean > 20) {
         score -= 8;
-        tips.add(
-          'Peak lean not at apex — tip in earlier so the bike is set at the apex.',
-        );
+        tips.add(const SkillTip(SkillTipId.peakLeanNotAtApex));
       }
     } else if (stretch.headingChangeDeg.abs() > 50 && maxLean < 12) {
       score -= 10;
-      tips.add('Big heading change with low lean — check sensor mount or commit more.');
+      tips.add(const SkillTip(SkillTipId.lowLeanBigHeading));
     }
 
     // Smoothness proxy: duration vs distance (jerky = short chaotic).
@@ -180,7 +216,7 @@ class CornerSkillEngine {
 
     final clamped = score.round().clamp(0, 100);
     if (tips.isEmpty) {
-      tips.add('Solid corner — keep this entry/apex rhythm.');
+      tips.add(const SkillTip(SkillTipId.solidCorner));
     }
 
     return CornerSkill(

@@ -109,7 +109,7 @@ class HomeScreen extends ConsumerWidget {
                           color: AppTheme.mist,
                         ),
                       IconButton(
-                        tooltip: 'Rodadas',
+                        tooltip: l10n.rodadasTitle,
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(
@@ -271,7 +271,7 @@ class HomeScreen extends ConsumerWidget {
             Expanded(
               child: ridesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Could not load rides: $e')),
+                error: (e, _) => Center(child: Text(l10n.couldNotLoadRides('$e'))),
                 data: (rides) {
                   final completed = rides
                       .where((r) => r.status != RideStatus.recording)
@@ -501,6 +501,7 @@ class _RodadaHomeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final async = ref.watch(myRodadasProvider);
     return async.maybeWhen(
       data: (list) {
@@ -551,7 +552,7 @@ class _RodadaHomeCard extends ConsumerWidget {
                         children: [
                           Text(
                             highlight == null
-                                ? 'Rodadas'
+                                ? l10n.rodadasTitle
                                 : highlight.title,
                             style: GoogleFonts.exo2(
                               fontWeight: FontWeight.w700,
@@ -560,8 +561,8 @@ class _RodadaHomeCard extends ConsumerWidget {
                           ),
                           Text(
                             highlight == null
-                                ? 'Create a group ride · invite · share live GPS'
-                                : '${highlight.status.toUpperCase()} · ${highlight.memberCount} riders'
+                                ? l10n.rodadasHomeSubtitle
+                                : '${highlight.status.toUpperCase()} · ${l10n.rodadaRidersCount(highlight.memberCount)}'
                                     '${highlight.destination != null ? ' · ${highlight.destination}' : ''}',
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
@@ -801,7 +802,7 @@ class _RideTile extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       abandoned
-                          ? 'Discarded'
+                          ? l10n.rideDiscarded
                           : [
                               date,
                               '${ride.distanceKm.toStringAsFixed(2)} km',
@@ -878,6 +879,7 @@ class _SeasonStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -898,7 +900,7 @@ class _SeasonStrip extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PERFORMANCE',
+            l10n.performanceLabel,
             style: GoogleFonts.exo2(
               fontSize: 11,
               letterSpacing: 1.6,
@@ -911,19 +913,19 @@ class _SeasonStrip extends StatelessWidget {
             children: [
               Expanded(
                 child: _GarageStat(
-                  label: 'Rides',
+                  label: l10n.statRides,
                   value: '${summary.rideCount}',
                 ),
               ),
               Expanded(
                 child: _GarageStat(
-                  label: 'Distance',
+                  label: l10n.statDistance,
                   value: '${summary.totalDistanceKm.toStringAsFixed(1)} km',
                 ),
               ),
               Expanded(
                 child: _GarageStat(
-                  label: 'Top speed',
+                  label: l10n.statTopSpeed,
                   value: summary.bestMaxSpeedKmh == null
                       ? '--'
                       : summary.bestMaxSpeedKmh!.toStringAsFixed(0),
@@ -931,7 +933,7 @@ class _SeasonStrip extends StatelessWidget {
               ),
               Expanded(
                 child: _GarageStat(
-                  label: 'Peak lean',
+                  label: l10n.statPeakLean,
                   value: summary.bestMaxLean == null
                       ? '--'
                       : '${summary.bestMaxLean!.toStringAsFixed(0)}°',
