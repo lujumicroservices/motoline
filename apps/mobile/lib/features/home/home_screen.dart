@@ -768,7 +768,12 @@ class _RideTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      date,
+                      abandoned
+                          ? date
+                          : ride.displayTitle(
+                              dateFormat: (d) =>
+                                  DateFormat.MMMd().add_jm().format(d),
+                            ),
                       style: GoogleFonts.exo2(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -778,10 +783,17 @@ class _RideTile extends ConsumerWidget {
                     Text(
                       abandoned
                           ? 'Discarded'
-                          : '${ride.distanceKm.toStringAsFixed(2)} km · '
-                              '${formatDuration(ride.duration)}'
-                              '${ride.maxSpeedKmh == null ? '' : ' · max ${ride.maxSpeedKmh!.toStringAsFixed(0)} km/h'}'
-                              '${ride.maxLeanDegrees == null ? '' : ' · lean ${ride.maxLeanDegrees!.toStringAsFixed(0)}°'}',
+                          : [
+                              if (ride.title != null &&
+                                  ride.title!.trim().isNotEmpty)
+                                date,
+                              '${ride.distanceKm.toStringAsFixed(2)} km',
+                              formatDuration(ride.duration),
+                              if (ride.maxSpeedKmh != null)
+                                'max ${ride.maxSpeedKmh!.toStringAsFixed(0)} km/h',
+                              if (ride.maxLeanDegrees != null)
+                                'lean ${ride.maxLeanDegrees!.toStringAsFixed(0)}°',
+                            ].join(' · '),
                       style: const TextStyle(
                         color: AppTheme.steel,
                         fontSize: 13,

@@ -15,6 +15,7 @@ class Ride {
     this.maxLeanDegrees,
     this.routeId,
     this.visibility = ShareVisibility.friends,
+    this.title,
   });
 
   final String id;
@@ -35,8 +36,19 @@ class Ride {
   /// Cloud visibility: private / friends / public.
   final ShareVisibility visibility;
 
+  /// Human title, e.g. `Cañadas - Moyahua` (from start/end geocode).
+  final String? title;
+
   /// Legacy: true only when [visibility] is public.
   bool get isShared => visibility.legacyIsShared;
+
+  /// Title if set, otherwise a short date label.
+  String displayTitle({String Function(DateTime)? dateFormat}) {
+    final t = title?.trim();
+    if (t != null && t.isNotEmpty) return t;
+    if (dateFormat != null) return dateFormat(startedAt);
+    return startedAt.toLocal().toString().substring(0, 16);
+  }
 
   Duration get duration {
     final end = endedAt ?? DateTime.now();
@@ -64,6 +76,7 @@ class Ride {
         'route_id': routeId,
         'is_shared': visibility.legacyIsShared ? 1 : 0,
         'visibility': visibility.dbValue,
+        'title': title,
       };
 
   factory Ride.fromMap(Map<String, Object?> map) => Ride(
@@ -85,6 +98,7 @@ class Ride {
           map['visibility'],
           legacyIsShared: (map['is_shared'] as int?) != 0,
         ),
+        title: map['title'] as String?,
       );
 
   Ride copyWith({
@@ -99,6 +113,8 @@ class Ride {
     bool clearRouteId = false,
     bool? isShared,
     ShareVisibility? visibility,
+    String? title,
+    bool clearTitle = false,
   }) {
     var nextVis = visibility ?? this.visibility;
     if (visibility == null && isShared != null) {
@@ -116,6 +132,7 @@ class Ride {
       maxLeanDegrees: maxLeanDegrees ?? this.maxLeanDegrees,
       routeId: clearRouteId ? null : (routeId ?? this.routeId),
       visibility: nextVis,
+      title: clearTitle ? null : (title ?? this.title),
     );
   }
 }

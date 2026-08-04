@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 10,
+      version: 11,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -40,7 +40,8 @@ class RideDatabase {
             max_lean_degrees REAL,
             route_id TEXT,
             is_shared INTEGER NOT NULL DEFAULT 0,
-            visibility TEXT NOT NULL DEFAULT 'friends'
+            visibility TEXT NOT NULL DEFAULT 'friends',
+            title TEXT
           )
         ''');
         await db.execute('''
@@ -104,8 +105,19 @@ class RideDatabase {
         if (oldVersion < 10) {
           await _addVisibilityColumnsIfMissing(db);
         }
+        if (oldVersion < 11) {
+          await _addRideTitleColumnIfMissing(db);
+        }
       },
     );
+  }
+
+  Future<void> _addRideTitleColumnIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(rides)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    if (!existing.contains('title')) {
+      await db.execute('ALTER TABLE rides ADD COLUMN title TEXT');
+    }
   }
 
   Future<void> _addVisibilityColumnsIfMissing(Database db) async {

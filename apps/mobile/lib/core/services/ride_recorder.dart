@@ -14,6 +14,7 @@ import 'arm_foreground_service.dart';
 import 'lean_sensor.dart';
 import 'location_service.dart';
 import 'motion_pattern_detector.dart';
+import 'ride_place_name_service.dart';
 import 'rider_telemetry_service.dart';
 
 class ActiveRideSnapshot {
@@ -314,6 +315,7 @@ class RideRecorder {
       maxLeanDegrees: _maxLeanAbs,
     );
     await _db.upsertRide(completed);
+    unawaited(_assignPlaceTitle(completed));
     unawaited(
       _telemetry.log(
         category: TelemetryCategory.ride,
@@ -338,6 +340,22 @@ class RideRecorder {
     _ride = null;
     _emitCompleted(completed);
     return completed;
+  }
+
+  /// Best-effort reverse-geocode start/end → `Cañadas - Moyahua`.
+  Future<void> _assignPlaceTitle(Ride ride) async {
+    try {
+      if (ride.title != null && ride.title!.trim().isNotEmpty) return;
+      final points = await _db.getPoints(ride.id);
+      if (points.isEmpty) return;
+      final title = await RidePlaceNameService().titleFromTrack(points);
+      if (title == null || title.trim().isEmpty) return;
+      final named = ride.copyWith(title: title.trim());
+      await _db.upsertRide(named);
+      debugPrint('CornerIQ ride title: $title');
+    } catch (e) {
+      debugPrint('CornerIQ ride title: $e');
+    }
   }
 
   /// Retag the currently-recording ride with [routeId] (e.g. once Loop mode
@@ -383,6 +401,7 @@ class RideRecorder {
       maxLeanDegrees: maxLean,
     );
     await _db.upsertRide(completed);
+    unawaited(_assignPlaceTitle(completed));
     return completed;
   }
 

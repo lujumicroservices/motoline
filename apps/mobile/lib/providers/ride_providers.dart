@@ -6,6 +6,7 @@ import '../core/db/ride_database.dart';
 import '../core/models/ride.dart';
 import '../core/models/track_point.dart';
 import '../core/services/loop_session_controller.dart';
+import '../core/services/ride_place_name_service.dart';
 import '../core/services/ride_recorder.dart';
 import '../core/services/ride_sync_service.dart';
 
@@ -28,8 +29,34 @@ final ridesListProvider = FutureProvider.autoDispose<List<Ride>>((ref) async {
   try {
     await ref.read(rideSyncServiceProvider).pullMyCloudRides();
   } catch (_) {}
-  return ref.watch(rideDatabaseProvider).listRides();
+  final db = ref.watch(rideDatabaseProvider);
+  final rides = await db.listRides();
+  // Soft backfill: name a few untitled completed rides from start/end places.
+  unawaited(_backfillRideTitles(db, rides));
+  return rides;
 });
+
+Future<void> _backfillRideTitles(RideDatabase db, List<Ride> rides) async {
+  final pending = rides
+      .where(
+        (r) =>
+            r.status == RideStatus.completed &&
+            (r.title == null || r.title!.trim().isEmpty) &&
+            r.pointCount >= 2,
+      )
+      .take(3)
+      .toList();
+  if (pending.isEmpty) return;
+  final namer = RidePlaceNameService();
+  for (final ride in pending) {
+    try {
+      final points = await db.getPoints(ride.id);
+      final title = await namer.titleFromTrack(points);
+      if (title == null || title.trim().isEmpty) continue;
+      await db.upsertRide(ride.copyWith(title: title.trim()));
+    } catch (_) {}
+  }
+}
 
 final rideProvider =
     FutureProvider.autoDispose.family<Ride?, String>((ref, id) async {

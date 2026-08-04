@@ -95,6 +95,7 @@ class RideSyncService {
         'visibility': ride.visibility.dbValue,
         'is_shared': ride.visibility.legacyIsShared,
         'route_id': ride.routeId,
+        'title': ride.title,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
         if (bbox != null) ...bbox.toMap(),
       };
@@ -209,6 +210,7 @@ class RideSyncService {
               legacyIsShared:
                   map['is_shared'] == true || map['is_shared'] == 1,
             ),
+            title: _str(map['title']),
           );
           await _db.upsertRide(ride);
 

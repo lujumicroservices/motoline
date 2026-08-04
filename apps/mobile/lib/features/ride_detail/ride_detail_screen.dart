@@ -9,7 +9,9 @@ import '../../core/analytics/brake_detection.dart';
 import '../../core/analytics/curva_analysis.dart';
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/analytics/road_kind_detection.dart';
+import '../../core/models/ride.dart';
 import '../../core/models/track_point.dart';
+import '../../core/services/ride_place_name_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../providers/ride_providers.dart';
@@ -133,6 +135,89 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
   void dispose() {
     _intro.dispose();
     super.dispose();
+  }
+
+  Future<void> _renameOrGeocodeRide(Ride ride) async {
+    final ctrl = TextEditingController(text: ride.title ?? '');
+    final action = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.asphaltElevated,
+        title: const Text('Ride name'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: ctrl,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'Cañadas - Moyahua',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Auto uses start/end map places. You can edit anytime.',
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'geo'),
+            child: const Text('From map'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, 'save'),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (action == null || !mounted) return;
+
+    try {
+      String? title;
+      if (action == 'geo') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Looking up places…')),
+        );
+        final points = await ref.read(ridePointsProvider(ride.id).future);
+        title = await RidePlaceNameService().titleFromTrack(points);
+        if (title == null || title.isEmpty) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not resolve place names')),
+          );
+          return;
+        }
+      } else {
+        title = ctrl.text.trim();
+        if (title.isEmpty) title = null;
+      }
+      final updated = title == null
+          ? ride.copyWith(clearTitle: true)
+          : ride.copyWith(title: title);
+      await ref.read(rideDatabaseProvider).upsertRide(updated);
+      unawaited(ref.read(rideSyncServiceProvider).syncRide(ride.id));
+      ref.invalidate(rideProvider(ride.id));
+      ref.invalidate(ridesListProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(title == null ? 'Title cleared' : 'Named: $title')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
   }
 
   Future<void> _confirmDeleteRide() async {
@@ -426,20 +511,46 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         const RiderLabMark(size: BrandMarkSize.eyebrow),
                         const SizedBox(height: 8),
                         Text(
-                          DateFormat('EEE · MMM d · HH:mm')
-                              .format(ride.startedAt),
+                          ride.displayTitle(
+                            dateFormat: (d) =>
+                                DateFormat('EEE · MMM d · HH:mm').format(d),
+                          ),
                           style: GoogleFonts.exo2(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
                             height: 1.15,
                           ),
                         ),
+                        if (ride.title != null &&
+                            ride.title!.trim().isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            DateFormat('EEE · MMM d · HH:mm')
+                                .format(ride.startedAt),
+                            style: GoogleFonts.rajdhani(
+                              color: AppTheme.steel,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 6),
                         Text(
                           _zoomed ? l10n.segmentZoomHint : l10n.collapseHint,
                           style: GoogleFonts.rajdhani(
                             color: AppTheme.steel,
                             fontSize: 15,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => _renameOrGeocodeRide(ride),
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            label: Text(
+                              ride.title == null || ride.title!.isEmpty
+                                  ? 'Name from map'
+                                  : 'Rename ride',
+                            ),
                           ),
                         ),
                         const SizedBox(height: 12),
