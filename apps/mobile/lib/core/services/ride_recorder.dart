@@ -189,27 +189,27 @@ class RideRecorder {
     onWarmup?.call(
       const GnssWarmupStatus(
         phase: GpsWarmupPhase.permissions,
-        message: 'Checking location permission…',
       ),
     );
 
     final permission = await _location.ensurePermission();
     if (!permission.granted) {
+      final reason =
+          permission.reason ?? LocationPermissionDenyReason.denied;
       unawaited(
         _telemetry.error(
           where: 'ride.start.permission',
-          error: permission.message ?? 'denied',
+          error: reason.name,
           category: TelemetryCategory.gps,
         ),
       );
-      throw StateError(permission.message ?? 'Location permission denied');
+      throw LocationDeniedException(reason);
     }
 
     if (skipWarmup) {
       onWarmup?.call(
         const GnssWarmupStatus(
           phase: GpsWarmupPhase.ready,
-          message: 'Rolling to next lap…',
         ),
       );
     } else {
@@ -224,7 +224,6 @@ class RideRecorder {
               eventType: 'warmup_${status.phase.name}',
               payload: {
                 'accuracy_m': status.accuracyMeters,
-                'message': status.message,
               },
             ),
           );
@@ -428,7 +427,9 @@ class RideRecorder {
 
     final permission = await _location.ensurePermission();
     if (!permission.granted) {
-      throw StateError(permission.message ?? 'Location permission denied');
+      throw LocationDeniedException(
+        permission.reason ?? LocationPermissionDenyReason.denied,
+      );
     }
 
     _armMotion.resetArm();

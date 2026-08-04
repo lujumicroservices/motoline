@@ -91,7 +91,7 @@
   "rideLab": "Lab del ride",
   "rideLabSegment": "Ride Lab · segmento",
   "rideNotFound": "Ruta no encontrada",
-  "collapseHint": "Toca los encabezados para plegar. El playhead queda abajo.",
+  "collapseHint": "Toca los encabezados para plegar. El cursor queda abajo.",
   "segmentZoomHint": "Zoom de segmento — métricas y gráficas solo de este tramo.",
   "sectionSegment": "Zoom de segmento",
   "sectionSegmentSub": "Elige un tramo de carretera",
@@ -170,7 +170,7 @@
   "brakeToApex": "Freno a ápice",
   "accelFromApex": "Acelera desde ápice",
   "leanAtApex": "Lean en ápice",
-  "maxLean": "Lean máx",
+  "maxLean": "Incl. máx",
   "leftShort": "Izq",
   "rightShort": "Der",
   "curvaMapLegend": "E = entrada · A = ápice · S = salida. Línea por velocidad.",
@@ -304,7 +304,7 @@
   "sharedRoute": "Compartida",
   "privateRoute": "Privada",
   "shareRideTitle": "Compartir",
-  "shareRideHelp": "Comparte este ride con amigos y opcionalmente asígnalo a un circuito.",
+  "shareRideHelp": "Comparte este recorrido con amigos y opcionalmente asígnalo a un circuito.",
   "shareThisRide": "Compartir este ride",
   "assignRoute": "Asignar a ruta",
   "noRouteAssigned": "Sin ruta",
@@ -730,24 +730,24 @@
       "meters": { "type": "String" }
     }
   },
-  "skillLabTitle": "Lab de skill",
+  "skillLabTitle": "Lab de técnica",
   "skillLabTapHint": "Toca para ver errores y cómo mejorar",
   "skillLabTapHintEmpty": "Toca para tips tras un tramo sinuoso",
   "skillLabFocusTitle": "Dónde mejorar",
-  "skillLabFocusHelp": "Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Replay para ver inclinación, freno y velocidad en vivo.",
-  "skillReplayTitle": "Replay de curva",
-  "skillReplayHelp": "Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el playhead en el mapa.",
-  "skillReplay": "Replay",
-  "play": "Play",
+  "skillLabFocusHelp": "Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad en vivo.",
+  "skillReplayTitle": "Repetición de curva",
+  "skillReplayHelp": "Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el cursor en el mapa.",
+  "skillReplay": "Repetir",
+  "play": "Reproducir",
   "pause": "Pausa",
   "restart": "Reiniciar",
   "loopReplay": "Bucle",
   "brake": "Freno",
   "engineLabelTitle": "Ayuda a entrenar RiderLab",
-  "engineLabelIntro": "Solo beta — unos toques tras cada ride enseñan inclinación, curvas y frenos. Puedes omitir.",
+  "engineLabelIntro": "Solo beta — unos toques tras cada recorrido enseñan inclinación, curvas y frenos. Puedes omitir.",
   "engineLabelSkip": "Omitir",
   "engineLabelSave": "Guardar respuestas",
-  "engineLabelMountQ": "¿Dónde iba el teléfono en este ride?",
+  "engineLabelMountQ": "¿Dónde iba el teléfono en este recorrido?",
   "engineLabelMountCenter": "Base (tanque / manillar)",
   "engineLabelMountLeftPocket": "Bolsillo izquierdo",
   "engineLabelMountRightPocket": "Bolsillo derecho",
@@ -763,10 +763,72 @@
   "engineLabelBrakeTooMany": "Demasiados / falsos",
   "engineLabelBrakeTooFew": "Faltaron frenos reales",
   "engineLabelBrakeUnsure": "No sé",
-  "engineLabelContextQ": "¿Qué tipo de ride fue?",
+  "engineLabelContextQ": "¿Qué tipo de recorrido fue?",
   "engineLabelContextStreet": "Ciudad",
   "engineLabelContextMountain": "Montaña",
   "engineLabelContextTrack": "Pista",
   "engineLabelContextCommute": "Traslado",
-  "engineLabelContextOther": "Otro"
+  "engineLabelContextOther": "Otro",
+  "gpsCheckingPermission": "Comprobando permiso de ubicación…",
+  "gpsPreparing": "Preparando GPS de alta precisión…",
+  "gpsLookingSatellites": "Buscando satélites…",
+  "gpsWarming": "Calentando GPS…",
+  "gpsWarmingAcc": "Calentando GPS (±{meters} m)…",
+  "@gpsWarmingAcc": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "gpsReadyAcc": "GPS listo (±{meters} m)",
+  "@gpsReadyAcc": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "gpsStartWithAcc": "Arrancando con ±{meters} m — mantén el cielo abierto",
+  "@gpsStartWithAcc": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "gpsStartKeepSky": "Arrancando — mantén el cielo abierto para mejor señal",
+  "gpsRollingNextLap": "Rodando hacia la siguiente vuelta…",
+  "locationServicesOff": "Activa la ubicación para grabar tu línea.",
+  "locationPermissionDenied": "Se necesita permiso de ubicación para dibujar tu línea.",
+  "locationPermissionDeniedForever": "Activa la ubicación en Ajustes e inténtalo de nuevo.",
+  "leanAtPlayhead": "En el cursor · offset neutral {degrees}°",
+  "@leanAtPlayhead": {
+    "placeholders": {
+      "degrees": { "type": "String" }
+    }
+  },
+  "scrubPointMeta": "Punto {index}/{total}  ·  {speed}  ·  incl. ",
+  "@scrubPointMeta": {
+    "placeholders": {
+      "index": { "type": "int" },
+      "total": { "type": "int" },
+      "speed": { "type": "String" }
+    }
+  },
+  "scrubGpsMeta": "  ·  GPS {meters} m",
+  "@scrubGpsMeta": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "shareVisibilityHelp": "Elige quién puede ver este recorrido. Los amigos deben aceptar tu solicitud primero.",
+  "speedLegendScale": "azul→lima→amarillo→rojo→magenta",
+  "brakePeakDecel": "pico {value} m/s²",
+  "@brakePeakDecel": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "curvaMetaTurnLean": "giro {turn}° · incl. {lean}°",
+  "@curvaMetaTurnLean": {
+    "placeholders": {
+      "turn": { "type": "String" },
+      "lean": { "type": "String" }
+    }
+  }
 }

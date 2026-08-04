@@ -43,7 +43,7 @@ class RideSharePanel extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Choose who can see this ride. Friends must accept your request first.',
+            l10n.shareVisibilityHelp,
             style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 13,

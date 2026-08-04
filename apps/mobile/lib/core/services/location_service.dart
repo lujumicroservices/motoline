@@ -5,14 +5,29 @@ import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+enum LocationPermissionDenyReason {
+  servicesOff,
+  denied,
+  deniedForever,
+}
+
 class LocationPermissionResult {
   const LocationPermissionResult({
     required this.granted,
-    this.message,
+    this.reason,
   });
 
   final bool granted;
-  final String? message;
+  final LocationPermissionDenyReason? reason;
+}
+
+class LocationDeniedException implements Exception {
+  const LocationDeniedException(this.reason);
+
+  final LocationPermissionDenyReason reason;
+
+  @override
+  String toString() => reason.name;
 }
 
 enum GpsWarmupPhase {
@@ -28,12 +43,10 @@ class GnssWarmupStatus {
   const GnssWarmupStatus({
     required this.phase,
     this.accuracyMeters,
-    this.message,
   });
 
   final GpsWarmupPhase phase;
   final double? accuracyMeters;
-  final String? message;
 
   bool get isReady => phase == GpsWarmupPhase.ready;
 
@@ -69,7 +82,7 @@ class LocationService {
     if (!serviceEnabled) {
       return const LocationPermissionResult(
         granted: false,
-        message: 'Turn on location services to record your line.',
+        reason: LocationPermissionDenyReason.servicesOff,
       );
     }
 
@@ -81,7 +94,7 @@ class LocationService {
     if (permission == LocationPermission.denied) {
       return const LocationPermissionResult(
         granted: false,
-        message: 'Location permission is required to draw your pilot line.',
+        reason: LocationPermissionDenyReason.denied,
       );
     }
 
@@ -89,7 +102,7 @@ class LocationService {
       await openAppSettings();
       return const LocationPermissionResult(
         granted: false,
-        message: 'Enable location in Settings, then try again.',
+        reason: LocationPermissionDenyReason.deniedForever,
       );
     }
 
@@ -109,10 +122,7 @@ class LocationService {
   Stream<GnssWarmupStatus> warmUpGnss({
     Duration timeout = const Duration(seconds: 8),
   }) async* {
-    yield const GnssWarmupStatus(
-      phase: GpsWarmupPhase.searching,
-      message: 'Looking for satellites…',
-    );
+    yield const GnssWarmupStatus(phase: GpsWarmupPhase.searching);
 
     final deadline = DateTime.now().add(timeout);
     Position? best;
@@ -127,22 +137,15 @@ class LocationService {
           yield GnssWarmupStatus(
             phase: GpsWarmupPhase.ready,
             accuracyMeters: acc,
-            message: 'GPS ready (±${acc.toStringAsFixed(0)} m)',
           );
           return;
         }
         yield GnssWarmupStatus(
           phase: GpsWarmupPhase.locking,
           accuracyMeters: acc > 0 ? acc : null,
-          message: acc > 0
-              ? 'Warming GPS (±${acc.toStringAsFixed(0)} m)…'
-              : 'Warming GPS…',
         );
       } catch (_) {
-        yield const GnssWarmupStatus(
-          phase: GpsWarmupPhase.searching,
-          message: 'Looking for satellites…',
-        );
+        yield const GnssWarmupStatus(phase: GpsWarmupPhase.searching);
       }
       await Future<void>.delayed(const Duration(milliseconds: 250));
     }
@@ -151,9 +154,6 @@ class LocationService {
     yield GnssWarmupStatus(
       phase: GpsWarmupPhase.timeout,
       accuracyMeters: (bestAcc != null && bestAcc > 0) ? bestAcc : null,
-      message: bestAcc != null && bestAcc > 0
-          ? 'Starting with ±${bestAcc.toStringAsFixed(0)} m — keep sky view open'
-          : 'Starting — keep sky view open for a better lock',
     );
   }
 

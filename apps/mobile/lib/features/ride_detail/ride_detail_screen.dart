@@ -388,8 +388,10 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         const SizedBox(height: 8),
                         Text(
                           ride.displayTitle(
-                            dateFormat: (d) =>
-                                DateFormat('EEE Â· MMM d Â· HH:mm').format(d),
+                            dateFormat: (d) => DateFormat(
+                              'EEE · MMM d · HH:mm',
+                              l10n.localeName,
+                            ).format(d),
                           ),
                           style: GoogleFonts.exo2(
                             fontSize: 28,
@@ -401,8 +403,10 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                             ride.title!.trim().isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
-                            DateFormat('EEE Â· MMM d Â· HH:mm')
-                                .format(ride.startedAt),
+                            DateFormat(
+                              'EEE · MMM d · HH:mm',
+                              l10n.localeName,
+                            ).format(ride.startedAt),
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
                               fontSize: 15,
@@ -465,22 +469,9 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                           subtitle: _zoomed
                               ? l10n.sectionOverviewSubZoom
                               : l10n.sectionOverviewSub,
-                          badge: '${a.lineScore}',
                           expanded: _isOpen('overview'),
                           onToggle: () => _toggle('overview'),
-                          child: Column(
-                            children: [
-                              _ScoreHero(
-                                score: a.lineScore,
-                                label: _zoomed
-                                    ? '${a.lineScoreLabel} Â· segment'
-                                    : a.lineScoreLabel,
-                                animation: _intro,
-                              ),
-                              const SizedBox(height: 16),
-                              _MetricGrid(analytics: a),
-                            ],
-                          ),
+                          child: _MetricGrid(analytics: a),
                         ),
                         if (a.leanSides.sampleCount > 0)
                           LabSection(
@@ -495,8 +486,9 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                   leanDegrees: scrubLean,
                                   maxLeftDegrees: a.maxLeanLeft,
                                   maxRightDegrees: a.maxLeanRight,
-                                  neutralLabel:
-                                      'At playhead Â· neutral offset ${a.neutralLeanDegrees.toStringAsFixed(0)}Â°',
+                                  neutralLabel: l10n.leanAtPlayhead(
+                                    a.neutralLeanDegrees.toStringAsFixed(0),
+                                  ),
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
@@ -760,9 +752,12 @@ class _TimeScrubber extends StatelessWidget {
         ? l10n.leftShort
         : leanDegrees > 1
             ? l10n.rightShort
-            : 'Â·';
+            : '·';
     final min = minSeconds;
     final max = maxSeconds <= min ? min + 1 : maxSeconds;
+    final speedLabel = speed == null
+        ? '--'
+        : '${speed.toStringAsFixed(0)} ${l10n.kmh}';
 
     return Container(
       width: double.infinity,
@@ -802,20 +797,23 @@ class _TimeScrubber extends StatelessWidget {
               style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
               children: [
                 TextSpan(
-                  text:
-                      'Point ${index + 1}/$totalPoints  Â·  '
-                      '${speed == null ? "--" : "${speed.toStringAsFixed(0)} ${l10n.kmh}"}  Â·  lean ',
+                  text: l10n.scrubPointMeta(
+                    index + 1,
+                    totalPoints,
+                    speedLabel,
+                  ),
                 ),
                 TextSpan(
-                  text: '${leanDegrees.abs().toStringAsFixed(0)}Â° $side',
+                  text: '${leanDegrees.abs().toStringAsFixed(0)}° $side',
                   style: TextStyle(
                     color: RideVizPalette.leanColor(leanDegrees),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 TextSpan(
-                  text:
-                      '  Â·  GPS ${point.accuracyMeters?.toStringAsFixed(1) ?? "--"} m',
+                  text: l10n.scrubGpsMeta(
+                    point.accuracyMeters?.toStringAsFixed(1) ?? '--',
+                  ),
                 ),
               ],
             ),
@@ -845,105 +843,6 @@ class _TimeScrubber extends StatelessWidget {
     final m = total ~/ 60;
     final r = total % 60;
     return '$m:${r.toString().padLeft(2, '0')}';
-  }
-}
-
-class _ScoreHero extends StatelessWidget {
-  const _ScoreHero({
-    required this.score,
-    required this.label,
-    required this.animation,
-  });
-
-  final int score;
-  final String label;
-  final Animation<double> animation;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, _) {
-        final t = Curves.easeOutCubic.transform(animation.value);
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2A3036),
-                Color(0xFF1E2226),
-                Color(0xFF171A1D),
-              ],
-            ),
-            border: Border.all(color: AppTheme.line.withValues(alpha: 0.25)),
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 88,
-                height: 88,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      value: score / 100 * t,
-                      strokeWidth: 7,
-                      backgroundColor: AppTheme.mist.withValues(alpha: 0.08),
-                      color: AppTheme.line,
-                    ),
-                    Text(
-                      '${(score * t).round()}',
-                      style: GoogleFonts.exo2(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'LINE QUALITY',
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 11,
-                        letterSpacing: 1.4,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.steel,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      label,
-                      style: GoogleFonts.exo2(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'From GPS density, accuracy, and coverage.',
-                      style: GoogleFonts.rajdhani(
-                        color: AppTheme.steel,
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 }
 

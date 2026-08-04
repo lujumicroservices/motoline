@@ -306,7 +306,7 @@ class _BrakeCard extends StatelessWidget {
                 '${event.startSpeedKmh.toStringAsFixed(0)} → '
                 '${event.endSpeedKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
                 '−${event.speedDropKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
-                'peak ${event.peakDecelMps2.toStringAsFixed(1)} m/s²',
+                '${l10n.brakePeakDecel(event.peakDecelMps2.toStringAsFixed(1))}',
                 style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
               ),
               const SizedBox(height: 8),

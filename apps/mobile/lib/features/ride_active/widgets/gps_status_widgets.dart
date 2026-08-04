@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/services/location_service.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../l10n/gps_warmup_l10n.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -73,7 +74,7 @@ class GpsWarmupPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            status.message ?? 'Preparing high-precision GPS…',
+            l10n.gpsWarmupStatusText(status),
             textAlign: TextAlign.center,
             style: GoogleFonts.rajdhani(
               color: AppTheme.steel,

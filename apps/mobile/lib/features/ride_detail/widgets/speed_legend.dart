@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -10,6 +11,7 @@ class SpeedColorLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -37,7 +39,7 @@ class SpeedColorLegend extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              'blue→lime→yellow→red→magenta',
+              l10n.speedLegendScale,
               style: GoogleFonts.rajdhani(fontSize: 9, color: AppTheme.steel),
             ),
             const Spacer(),

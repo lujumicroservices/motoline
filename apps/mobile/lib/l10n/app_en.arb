@@ -697,5 +697,67 @@
   "engineLabelContextMountain": "Mountain",
   "engineLabelContextTrack": "Track",
   "engineLabelContextCommute": "Commute",
-  "engineLabelContextOther": "Other"
+  "engineLabelContextOther": "Other",
+  "gpsCheckingPermission": "Checking location permission…",
+  "gpsPreparing": "Preparing high-precision GPS…",
+  "gpsLookingSatellites": "Looking for satellites…",
+  "gpsWarming": "Warming GPS…",
+  "gpsWarmingAcc": "Warming GPS (±{meters} m)…",
+  "@gpsWarmingAcc": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "gpsReadyAcc": "GPS ready (±{meters} m)",
+  "@gpsReadyAcc": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "gpsStartWithAcc": "Starting with ±{meters} m — keep sky view open",
+  "@gpsStartWithAcc": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "gpsStartKeepSky": "Starting — keep sky view open for a better lock",
+  "gpsRollingNextLap": "Rolling to next lap…",
+  "locationServicesOff": "Turn on location services to record your line.",
+  "locationPermissionDenied": "Location permission is required to draw your pilot line.",
+  "locationPermissionDeniedForever": "Enable location in Settings, then try again.",
+  "leanAtPlayhead": "At playhead · neutral offset {degrees}°",
+  "@leanAtPlayhead": {
+    "placeholders": {
+      "degrees": { "type": "String" }
+    }
+  },
+  "scrubPointMeta": "Point {index}/{total}  ·  {speed}  ·  lean ",
+  "@scrubPointMeta": {
+    "placeholders": {
+      "index": { "type": "int" },
+      "total": { "type": "int" },
+      "speed": { "type": "String" }
+    }
+  },
+  "scrubGpsMeta": "  ·  GPS {meters} m",
+  "@scrubGpsMeta": {
+    "placeholders": {
+      "meters": { "type": "String" }
+    }
+  },
+  "shareVisibilityHelp": "Choose who can see this ride. Friends must accept your request first.",
+  "speedLegendScale": "blue→lime→yellow→red→magenta",
+  "brakePeakDecel": "peak {value} m/s²",
+  "@brakePeakDecel": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "curvaMetaTurnLean": "turn {turn}° · lean {lean}°",
+  "@curvaMetaTurnLean": {
+    "placeholders": {
+      "turn": { "type": "String" },
+      "lean": { "type": "String" }
+    }
+  }
 }

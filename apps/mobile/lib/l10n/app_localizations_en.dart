@@ -1862,4 +1862,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get engineLabelContextOther => 'Other';
+
+  @override
+  String get gpsCheckingPermission => 'Checking location permission…';
+
+  @override
+  String get gpsPreparing => 'Preparing high-precision GPS…';
+
+  @override
+  String get gpsLookingSatellites => 'Looking for satellites…';
+
+  @override
+  String get gpsWarming => 'Warming GPS…';
+
+  @override
+  String gpsWarmingAcc(String meters) {
+    return 'Warming GPS (±$meters m)…';
+  }
+
+  @override
+  String gpsReadyAcc(String meters) {
+    return 'GPS ready (±$meters m)';
+  }
+
+  @override
+  String gpsStartWithAcc(String meters) {
+    return 'Starting with ±$meters m — keep sky view open';
+  }
+
+  @override
+  String get gpsStartKeepSky =>
+      'Starting — keep sky view open for a better lock';
+
+  @override
+  String get gpsRollingNextLap => 'Rolling to next lap…';
+
+  @override
+  String get locationServicesOff =>
+      'Turn on location services to record your line.';
+
+  @override
+  String get locationPermissionDenied =>
+      'Location permission is required to draw your pilot line.';
+
+  @override
+  String get locationPermissionDeniedForever =>
+      'Enable location in Settings, then try again.';
+
+  @override
+  String leanAtPlayhead(String degrees) {
+    return 'At playhead · neutral offset $degrees°';
+  }
+
+  @override
+  String scrubPointMeta(int index, int total, String speed) {
+    return 'Point $index/$total  ·  $speed  ·  lean ';
+  }
+
+  @override
+  String scrubGpsMeta(String meters) {
+    return '  ·  GPS $meters m';
+  }
+
+  @override
+  String get shareVisibilityHelp =>
+      'Choose who can see this ride. Friends must accept your request first.';
+
+  @override
+  String get speedLegendScale => 'blue→lime→yellow→red→magenta';
+
+  @override
+  String brakePeakDecel(String value) {
+    return 'peak $value m/s²';
+  }
+
+  @override
+  String curvaMetaTurnLean(String turn, String lean) {
+    return 'turn $turn° · lean $lean°';
+  }
 }

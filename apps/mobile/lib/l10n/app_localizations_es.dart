@@ -190,7 +190,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get collapseHint =>
-      'Toca los encabezados para plegar. El playhead queda abajo.';
+      'Toca los encabezados para plegar. El cursor queda abajo.';
 
   @override
   String get segmentZoomHint =>
@@ -398,7 +398,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get leanAtApex => 'Lean en ápice';
 
   @override
-  String get maxLean => 'Lean máx';
+  String get maxLean => 'Incl. máx';
 
   @override
   String get leftShort => 'Izq';
@@ -731,7 +731,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get shareRideHelp =>
-      'Comparte este ride con amigos y opcionalmente asígnalo a un circuito.';
+      'Comparte este recorrido con amigos y opcionalmente asígnalo a un circuito.';
 
   @override
   String get shareThisRide => 'Compartir este ride';
@@ -1754,7 +1754,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get skillLabTitle => 'Lab de skill';
+  String get skillLabTitle => 'Lab de técnica';
 
   @override
   String get skillLabTapHint => 'Toca para ver errores y cómo mejorar';
@@ -1767,20 +1767,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get skillLabFocusHelp =>
-      'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Replay para ver inclinación, freno y velocidad en vivo.';
+      'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad en vivo.';
 
   @override
-  String get skillReplayTitle => 'Replay de curva';
+  String get skillReplayTitle => 'Repetición de curva';
 
   @override
   String get skillReplayHelp =>
-      'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el playhead en el mapa.';
+      'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el cursor en el mapa.';
 
   @override
-  String get skillReplay => 'Replay';
+  String get skillReplay => 'Repetir';
 
   @override
-  String get play => 'Play';
+  String get play => 'Reproducir';
 
   @override
   String get pause => 'Pausa';
@@ -1799,7 +1799,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get engineLabelIntro =>
-      'Solo beta — unos toques tras cada ride enseñan inclinación, curvas y frenos. Puedes omitir.';
+      'Solo beta — unos toques tras cada recorrido enseñan inclinación, curvas y frenos. Puedes omitir.';
 
   @override
   String get engineLabelSkip => 'Omitir';
@@ -1808,7 +1808,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get engineLabelSave => 'Guardar respuestas';
 
   @override
-  String get engineLabelMountQ => '¿Dónde iba el teléfono en este ride?';
+  String get engineLabelMountQ => '¿Dónde iba el teléfono en este recorrido?';
 
   @override
   String get engineLabelMountCenter => 'Base (tanque / manillar)';
@@ -1856,7 +1856,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get engineLabelBrakeUnsure => 'No sé';
 
   @override
-  String get engineLabelContextQ => '¿Qué tipo de ride fue?';
+  String get engineLabelContextQ => '¿Qué tipo de recorrido fue?';
 
   @override
   String get engineLabelContextStreet => 'Ciudad';
@@ -1872,4 +1872,81 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get engineLabelContextOther => 'Otro';
+
+  @override
+  String get gpsCheckingPermission => 'Comprobando permiso de ubicación…';
+
+  @override
+  String get gpsPreparing => 'Preparando GPS de alta precisión…';
+
+  @override
+  String get gpsLookingSatellites => 'Buscando satélites…';
+
+  @override
+  String get gpsWarming => 'Calentando GPS…';
+
+  @override
+  String gpsWarmingAcc(String meters) {
+    return 'Calentando GPS (±$meters m)…';
+  }
+
+  @override
+  String gpsReadyAcc(String meters) {
+    return 'GPS listo (±$meters m)';
+  }
+
+  @override
+  String gpsStartWithAcc(String meters) {
+    return 'Arrancando con ±$meters m — mantén el cielo abierto';
+  }
+
+  @override
+  String get gpsStartKeepSky =>
+      'Arrancando — mantén el cielo abierto para mejor señal';
+
+  @override
+  String get gpsRollingNextLap => 'Rodando hacia la siguiente vuelta…';
+
+  @override
+  String get locationServicesOff => 'Activa la ubicación para grabar tu línea.';
+
+  @override
+  String get locationPermissionDenied =>
+      'Se necesita permiso de ubicación para dibujar tu línea.';
+
+  @override
+  String get locationPermissionDeniedForever =>
+      'Activa la ubicación en Ajustes e inténtalo de nuevo.';
+
+  @override
+  String leanAtPlayhead(String degrees) {
+    return 'En el cursor · offset neutral $degrees°';
+  }
+
+  @override
+  String scrubPointMeta(int index, int total, String speed) {
+    return 'Punto $index/$total  ·  $speed  ·  incl. ';
+  }
+
+  @override
+  String scrubGpsMeta(String meters) {
+    return '  ·  GPS $meters m';
+  }
+
+  @override
+  String get shareVisibilityHelp =>
+      'Elige quién puede ver este recorrido. Los amigos deben aceptar tu solicitud primero.';
+
+  @override
+  String get speedLegendScale => 'azul→lima→amarillo→rojo→magenta';
+
+  @override
+  String brakePeakDecel(String value) {
+    return 'pico $value m/s²';
+  }
+
+  @override
+  String curvaMetaTurnLean(String turn, String lean) {
+    return 'giro $turn° · incl. $lean°';
+  }
 }

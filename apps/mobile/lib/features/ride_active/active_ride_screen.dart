@@ -13,6 +13,7 @@ import '../../core/services/loop_session_controller.dart';
 import '../../core/services/rider_telemetry_service.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../l10n/gps_warmup_l10n.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
@@ -106,7 +107,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       _startError = null;
       _warmup = const GnssWarmupStatus(
         phase: GpsWarmupPhase.permissions,
-        message: 'Checking location permission…',
       );
     });
 
@@ -226,12 +226,11 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                 status: _warmup ??
                     const GnssWarmupStatus(
                       phase: GpsWarmupPhase.searching,
-                      message: 'Preparing high-precision GPS…',
                     ),
               )
             : _startError != null
                 ? _StartErrorBody(
-                    error: '$_startError',
+                    error: context.l10n.userFacingError(_startError!),
                     onRetry: _bootstrap,
                     onBack: () => Navigator.of(context).pop(),
                   )

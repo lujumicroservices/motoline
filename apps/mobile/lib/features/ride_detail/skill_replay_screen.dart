@@ -215,6 +215,8 @@ class _SkillReplayScreenState extends State<SkillReplayScreen>
                       showSpeedColors: true,
                       showBrakes: true,
                       showRoadKindContrast: false,
+                      // Keep the map clear so the playhead animation is fully visible.
+                      showLegend: false,
                     ),
                   ),
                 ),

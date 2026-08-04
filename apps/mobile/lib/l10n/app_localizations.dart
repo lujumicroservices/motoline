@@ -425,7 +425,7 @@ abstract class AppLocalizations {
   /// No description provided for @collapseHint.
   ///
   /// In es, this message translates to:
-  /// **'Toca los encabezados para plegar. El playhead queda abajo.'**
+  /// **'Toca los encabezados para plegar. El cursor queda abajo.'**
   String get collapseHint;
 
   /// No description provided for @segmentZoomHint.
@@ -809,7 +809,7 @@ abstract class AppLocalizations {
   /// No description provided for @maxLean.
   ///
   /// In es, this message translates to:
-  /// **'Lean máx'**
+  /// **'Incl. máx'**
   String get maxLean;
 
   /// No description provided for @leftShort.
@@ -1403,7 +1403,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareRideHelp.
   ///
   /// In es, this message translates to:
-  /// **'Comparte este ride con amigos y opcionalmente asígnalo a un circuito.'**
+  /// **'Comparte este recorrido con amigos y opcionalmente asígnalo a un circuito.'**
   String get shareRideHelp;
 
   /// No description provided for @shareThisRide.
@@ -3215,7 +3215,7 @@ abstract class AppLocalizations {
   /// No description provided for @skillLabTitle.
   ///
   /// In es, this message translates to:
-  /// **'Lab de skill'**
+  /// **'Lab de técnica'**
   String get skillLabTitle;
 
   /// No description provided for @skillLabTapHint.
@@ -3239,31 +3239,31 @@ abstract class AppLocalizations {
   /// No description provided for @skillLabFocusHelp.
   ///
   /// In es, this message translates to:
-  /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Replay para ver inclinación, freno y velocidad en vivo.'**
+  /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad en vivo.'**
   String get skillLabFocusHelp;
 
   /// No description provided for @skillReplayTitle.
   ///
   /// In es, this message translates to:
-  /// **'Replay de curva'**
+  /// **'Repetición de curva'**
   String get skillReplayTitle;
 
   /// No description provided for @skillReplayHelp.
   ///
   /// In es, this message translates to:
-  /// **'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el playhead en el mapa.'**
+  /// **'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el cursor en el mapa.'**
   String get skillReplayHelp;
 
   /// No description provided for @skillReplay.
   ///
   /// In es, this message translates to:
-  /// **'Replay'**
+  /// **'Repetir'**
   String get skillReplay;
 
   /// No description provided for @play.
   ///
   /// In es, this message translates to:
-  /// **'Play'**
+  /// **'Reproducir'**
   String get play;
 
   /// No description provided for @pause.
@@ -3299,7 +3299,7 @@ abstract class AppLocalizations {
   /// No description provided for @engineLabelIntro.
   ///
   /// In es, this message translates to:
-  /// **'Solo beta — unos toques tras cada ride enseñan inclinación, curvas y frenos. Puedes omitir.'**
+  /// **'Solo beta — unos toques tras cada recorrido enseñan inclinación, curvas y frenos. Puedes omitir.'**
   String get engineLabelIntro;
 
   /// No description provided for @engineLabelSkip.
@@ -3317,7 +3317,7 @@ abstract class AppLocalizations {
   /// No description provided for @engineLabelMountQ.
   ///
   /// In es, this message translates to:
-  /// **'¿Dónde iba el teléfono en este ride?'**
+  /// **'¿Dónde iba el teléfono en este recorrido?'**
   String get engineLabelMountQ;
 
   /// No description provided for @engineLabelMountCenter.
@@ -3413,7 +3413,7 @@ abstract class AppLocalizations {
   /// No description provided for @engineLabelContextQ.
   ///
   /// In es, this message translates to:
-  /// **'¿Qué tipo de ride fue?'**
+  /// **'¿Qué tipo de recorrido fue?'**
   String get engineLabelContextQ;
 
   /// No description provided for @engineLabelContextStreet.
@@ -3445,6 +3445,120 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Otro'**
   String get engineLabelContextOther;
+
+  /// No description provided for @gpsCheckingPermission.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprobando permiso de ubicación…'**
+  String get gpsCheckingPermission;
+
+  /// No description provided for @gpsPreparing.
+  ///
+  /// In es, this message translates to:
+  /// **'Preparando GPS de alta precisión…'**
+  String get gpsPreparing;
+
+  /// No description provided for @gpsLookingSatellites.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando satélites…'**
+  String get gpsLookingSatellites;
+
+  /// No description provided for @gpsWarming.
+  ///
+  /// In es, this message translates to:
+  /// **'Calentando GPS…'**
+  String get gpsWarming;
+
+  /// No description provided for @gpsWarmingAcc.
+  ///
+  /// In es, this message translates to:
+  /// **'Calentando GPS (±{meters} m)…'**
+  String gpsWarmingAcc(String meters);
+
+  /// No description provided for @gpsReadyAcc.
+  ///
+  /// In es, this message translates to:
+  /// **'GPS listo (±{meters} m)'**
+  String gpsReadyAcc(String meters);
+
+  /// No description provided for @gpsStartWithAcc.
+  ///
+  /// In es, this message translates to:
+  /// **'Arrancando con ±{meters} m — mantén el cielo abierto'**
+  String gpsStartWithAcc(String meters);
+
+  /// No description provided for @gpsStartKeepSky.
+  ///
+  /// In es, this message translates to:
+  /// **'Arrancando — mantén el cielo abierto para mejor señal'**
+  String get gpsStartKeepSky;
+
+  /// No description provided for @gpsRollingNextLap.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodando hacia la siguiente vuelta…'**
+  String get gpsRollingNextLap;
+
+  /// No description provided for @locationServicesOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa la ubicación para grabar tu línea.'**
+  String get locationServicesOff;
+
+  /// No description provided for @locationPermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Se necesita permiso de ubicación para dibujar tu línea.'**
+  String get locationPermissionDenied;
+
+  /// No description provided for @locationPermissionDeniedForever.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa la ubicación en Ajustes e inténtalo de nuevo.'**
+  String get locationPermissionDeniedForever;
+
+  /// No description provided for @leanAtPlayhead.
+  ///
+  /// In es, this message translates to:
+  /// **'En el cursor · offset neutral {degrees}°'**
+  String leanAtPlayhead(String degrees);
+
+  /// No description provided for @scrubPointMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'Punto {index}/{total}  ·  {speed}  ·  incl. '**
+  String scrubPointMeta(int index, int total, String speed);
+
+  /// No description provided for @scrubGpsMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'  ·  GPS {meters} m'**
+  String scrubGpsMeta(String meters);
+
+  /// No description provided for @shareVisibilityHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige quién puede ver este recorrido. Los amigos deben aceptar tu solicitud primero.'**
+  String get shareVisibilityHelp;
+
+  /// No description provided for @speedLegendScale.
+  ///
+  /// In es, this message translates to:
+  /// **'azul→lima→amarillo→rojo→magenta'**
+  String get speedLegendScale;
+
+  /// No description provided for @brakePeakDecel.
+  ///
+  /// In es, this message translates to:
+  /// **'pico {value} m/s²'**
+  String brakePeakDecel(String value);
+
+  /// No description provided for @curvaMetaTurnLean.
+  ///
+  /// In es, this message translates to:
+  /// **'giro {turn}° · incl. {lean}°'**
+  String curvaMetaTurnLean(String turn, String lean);
 }
 
 class _AppLocalizationsDelegate

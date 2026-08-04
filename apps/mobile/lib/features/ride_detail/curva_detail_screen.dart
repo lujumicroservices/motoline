@@ -211,8 +211,10 @@ class _CurvaPage extends StatelessWidget {
         Text(
           '${a.distanceMeters.toStringAsFixed(0)} m · '
           '${formatDuration(a.duration)} · '
-          'giro ${a.stretch.headingChangeDeg.abs().toStringAsFixed(0)}° · '
-          'lean ${a.stretch.avgAbsLeanDeg.toStringAsFixed(0)}°',
+          '${l10n.curvaMetaTurnLean(
+            a.stretch.headingChangeDeg.abs().toStringAsFixed(0),
+            a.stretch.avgAbsLeanDeg.toStringAsFixed(0),
+          )}',
           style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 14),
         ),
         const SizedBox(height: 12),
