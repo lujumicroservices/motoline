@@ -22,10 +22,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Pausa y reanuda la grabación al detenerte o moverte';
 
   @override
-  String get startRide => 'Iniciar ruta';
+  String get startRide => 'Iniciar recorrido';
 
   @override
-  String get endRide => 'Terminar ruta';
+  String get endRide => 'Terminar recorrido';
 
   @override
   String get recording => 'Grabando';
@@ -52,7 +52,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get garage => 'Garaje';
 
   @override
-  String get yourRides => 'Tus rutas';
+  String get yourRides => 'Tus recorridos';
 
   @override
   String get nameRidesFromMap => 'Nombrar desde el mapa';
@@ -68,21 +68,54 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String namedRidesDone(int count) {
-    return 'Se nombraron $count rutas.';
+    return 'Se nombraron $count recorridos.';
   }
 
   @override
   String get rideUntitledHint => 'Origen - destino pendiente';
 
   @override
-  String get emptyRidesTitle => 'Aún no hay rutas';
+  String get rideNameTitle => 'Nombre del recorrido';
+
+  @override
+  String get rideNameHint => 'Tesistán - Zapopan';
+
+  @override
+  String get rideNameHelp =>
+      'Escribe un nombre o usa el mapa (inicio y fin del GPS).';
+
+  @override
+  String get nameFromMap => 'Desde el mapa';
+
+  @override
+  String get lookingUpPlaces => 'Buscando lugares…';
+
+  @override
+  String get couldNotResolvePlaces => 'No se pudieron obtener los nombres';
+
+  @override
+  String get rideTitleCleared => 'Nombre borrado';
+
+  @override
+  String rideNamed(String title) {
+    return 'Nombrado: $title';
+  }
+
+  @override
+  String get renameRide => 'Renombrar';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get emptyRidesTitle => 'Aún no hay recorridos';
 
   @override
   String get emptyRidesBody =>
-      'Inicia una ruta y RiderLab dibujará la línea exacta que tomaste en la calle.';
+      'Inicia un recorrido y RiderLab dibujará la línea exacta que tomaste en la calle.';
 
   @override
-  String get unfinishedRide => 'Ruta sin terminar';
+  String get unfinishedRide => 'Recorrido sin terminar';
 
   @override
   String unfinishedRideBody(String when) {
@@ -694,7 +727,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get privateRoute => 'Privada';
 
   @override
-  String get shareRideTitle => 'Compartir y ruta';
+  String get shareRideTitle => 'Compartir';
 
   @override
   String get shareRideHelp =>
@@ -1238,11 +1271,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get armAutoNoRouteHint =>
-      'Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.';
+      'Armado — al moverte se inicia un recorrido en el Garaje.';
 
   @override
-  String get armAutoRouteArmed =>
-      'Armado — al arrancar se guarda en tu última ruta';
+  String get armAutoRouteArmed => 'Armado — al arrancar se inicia el recorrido';
 
   @override
   String armAutoRouteArmedNamed(String name) {

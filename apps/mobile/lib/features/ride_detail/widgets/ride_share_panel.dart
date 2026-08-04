@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/features.dart';
 import '../../../core/models/ride.dart';
 import '../../../core/models/share_visibility.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -22,7 +23,6 @@ class RideSharePanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final routesAsync = ref.watch(routesListProvider);
 
     return Container(
       width: double.infinity,
@@ -55,60 +55,62 @@ class RideSharePanel extends ConsumerWidget {
             value: ride.visibility,
             onChanged: (v) => _setVisibility(ref, v),
           ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.assignRoute,
-            style: GoogleFonts.exo2(
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
+          if (AppFeatures.routesEnabled) ...[
+            const SizedBox(height: 12),
+            Text(
+              l10n.assignRoute,
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          routesAsync.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (_, _) => Text(
-              l10n.cloudUnavailable,
-              style: const TextStyle(color: AppTheme.steel, fontSize: 12),
-            ),
-            data: (routes) {
-              return DropdownButtonFormField<String?>(
-                key: ValueKey('route-${ride.id}-${ride.routeId}'),
-                initialValue: ride.routeId,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppTheme.asphalt,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                hint: Text(l10n.noRouteAssigned),
-                items: [
-                  DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text(l10n.noRouteAssigned),
-                  ),
-                  for (final r in routes)
-                    DropdownMenuItem<String?>(
-                      value: r.id,
-                      child: Text(r.name),
+            const SizedBox(height: 6),
+            ref.watch(routesListProvider).when(
+              loading: () => const LinearProgressIndicator(),
+              error: (_, _) => Text(
+                l10n.cloudUnavailable,
+                style: const TextStyle(color: AppTheme.steel, fontSize: 12),
+              ),
+              data: (routes) {
+                return DropdownButtonFormField<String?>(
+                  key: ValueKey('route-${ride.id}-${ride.routeId}'),
+                  initialValue: ride.routeId,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: AppTheme.asphalt,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
-                ],
-                onChanged: (routeId) {
-                  unawaited(_setRoute(ref, routeId));
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => _quickCreate(context, ref),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(l10n.createRoute),
+                  ),
+                  hint: Text(l10n.noRouteAssigned),
+                  items: [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text(l10n.noRouteAssigned),
+                    ),
+                    for (final r in routes)
+                      DropdownMenuItem<String?>(
+                        value: r.id,
+                        child: Text(r.name),
+                      ),
+                  ],
+                  onChanged: (routeId) {
+                    unawaited(_setRoute(ref, routeId));
+                  },
+                );
+              },
             ),
-          ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _quickCreate(context, ref),
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(l10n.createRoute),
+              ),
+            ),
+          ],
         ],
       ),
     );

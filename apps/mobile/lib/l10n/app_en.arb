@@ -31,6 +31,21 @@
     }
   },
   "rideUntitledHint": "Origin - destination pending",
+  "rideNameTitle": "Ride name",
+  "rideNameHint": "Tesistán - Zapopan",
+  "rideNameHelp": "Type a name, or use the map (GPS start and end).",
+  "nameFromMap": "From map",
+  "lookingUpPlaces": "Looking up places…",
+  "couldNotResolvePlaces": "Could not resolve place names",
+  "rideTitleCleared": "Title cleared",
+  "rideNamed": "Named: {title}",
+  "@rideNamed": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "renameRide": "Rename",
+  "cancel": "Cancel",
   "emptyRidesTitle": "No rides yet",
   "emptyRidesBody": "Start a ride and RiderLab will draw the exact line you took on the street.",
   "unfinishedRide": "Unfinished ride found",
@@ -217,7 +232,7 @@
   "routeCreated": "Route created",
   "sharedRoute": "Shared",
   "privateRoute": "Private",
-  "shareRideTitle": "Share & route",
+  "shareRideTitle": "Share",
   "shareRideHelp": "Share this ride with friends and optionally tag a named circuit.",
   "shareThisRide": "Share this ride",
   "assignRoute": "Assign to route",
@@ -401,8 +416,8 @@
   "labAdventureCameraScenarioAggressiveTitle": "Only when fun / aggressive riding starts",
   "labAdventureCameraScenarioAggressiveBody": "ON: Adventure camera · Aggressive riding auto-record · cameras in the group.\nOFF: Record with ride · Map start/stop zones · Follow auto-pause.",
   "labAdventureCameraScenarioAggressiveApply": "Apply aggressive-only setup",
-  "armAutoNoRouteHint": "Armed with no route — the ride goes to Garage, not Laps. Open a route first or create one.",
-  "armAutoRouteArmed": "Armed — when you roll, the ride tags to your last route",
+  "armAutoNoRouteHint": "Armed — when you roll, a ride starts in Garage.",
+  "armAutoRouteArmed": "Armed — rolling starts the ride",
   "armAutoRouteArmedNamed": "Armed for “{name}” — the ride will be saved on that route",
   "@armAutoRouteArmedNamed": {
     "placeholders": {

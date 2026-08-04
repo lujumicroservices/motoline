@@ -125,13 +125,13 @@ abstract class AppLocalizations {
   /// No description provided for @startRide.
   ///
   /// In es, this message translates to:
-  /// **'Iniciar ruta'**
+  /// **'Iniciar recorrido'**
   String get startRide;
 
   /// No description provided for @endRide.
   ///
   /// In es, this message translates to:
-  /// **'Terminar ruta'**
+  /// **'Terminar recorrido'**
   String get endRide;
 
   /// No description provided for @recording.
@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @yourRides.
   ///
   /// In es, this message translates to:
-  /// **'Tus rutas'**
+  /// **'Tus recorridos'**
   String get yourRides;
 
   /// No description provided for @nameRidesFromMap.
@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// No description provided for @namedRidesDone.
   ///
   /// In es, this message translates to:
-  /// **'Se nombraron {count} rutas.'**
+  /// **'Se nombraron {count} recorridos.'**
   String namedRidesDone(int count);
 
   /// No description provided for @rideUntitledHint.
@@ -218,22 +218,82 @@ abstract class AppLocalizations {
   /// **'Origen - destino pendiente'**
   String get rideUntitledHint;
 
+  /// No description provided for @rideNameTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del recorrido'**
+  String get rideNameTitle;
+
+  /// No description provided for @rideNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Tesistán - Zapopan'**
+  String get rideNameHint;
+
+  /// No description provided for @rideNameHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre o usa el mapa (inicio y fin del GPS).'**
+  String get rideNameHelp;
+
+  /// No description provided for @nameFromMap.
+  ///
+  /// In es, this message translates to:
+  /// **'Desde el mapa'**
+  String get nameFromMap;
+
+  /// No description provided for @lookingUpPlaces.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando lugares…'**
+  String get lookingUpPlaces;
+
+  /// No description provided for @couldNotResolvePlaces.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron obtener los nombres'**
+  String get couldNotResolvePlaces;
+
+  /// No description provided for @rideTitleCleared.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre borrado'**
+  String get rideTitleCleared;
+
+  /// No description provided for @rideNamed.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombrado: {title}'**
+  String rideNamed(String title);
+
+  /// No description provided for @renameRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Renombrar'**
+  String get renameRide;
+
+  /// No description provided for @cancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get cancel;
+
   /// No description provided for @emptyRidesTitle.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay rutas'**
+  /// **'Aún no hay recorridos'**
   String get emptyRidesTitle;
 
   /// No description provided for @emptyRidesBody.
   ///
   /// In es, this message translates to:
-  /// **'Inicia una ruta y RiderLab dibujará la línea exacta que tomaste en la calle.'**
+  /// **'Inicia un recorrido y RiderLab dibujará la línea exacta que tomaste en la calle.'**
   String get emptyRidesBody;
 
   /// No description provided for @unfinishedRide.
   ///
   /// In es, this message translates to:
-  /// **'Ruta sin terminar'**
+  /// **'Recorrido sin terminar'**
   String get unfinishedRide;
 
   /// No description provided for @unfinishedRideBody.
@@ -1337,7 +1397,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareRideTitle.
   ///
   /// In es, this message translates to:
-  /// **'Compartir y ruta'**
+  /// **'Compartir'**
   String get shareRideTitle;
 
   /// No description provided for @shareRideHelp.
@@ -2309,13 +2369,13 @@ abstract class AppLocalizations {
   /// No description provided for @armAutoNoRouteHint.
   ///
   /// In es, this message translates to:
-  /// **'Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.'**
+  /// **'Armado — al moverte se inicia un recorrido en el Garaje.'**
   String get armAutoNoRouteHint;
 
   /// No description provided for @armAutoRouteArmed.
   ///
   /// In es, this message translates to:
-  /// **'Armado — al arrancar se guarda en tu última ruta'**
+  /// **'Armado — al arrancar se inicia el recorrido'**
   String get armAutoRouteArmed;
 
   /// No description provided for @armAutoRouteArmedNamed.

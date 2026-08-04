@@ -4,8 +4,8 @@
   "tagline": "Domina cada curva.",
   "autoPauseToggle": "Pausa auto",
   "autoPauseToggleHint": "Pausa y reanuda la grabación al detenerte o moverte",
-  "startRide": "Iniciar ruta",
-  "endRide": "Terminar ruta",
+  "startRide": "Iniciar recorrido",
+  "endRide": "Terminar recorrido",
   "recording": "Grabando",
   "starting": "Iniciando…",
   "live": "EN VIVO",
@@ -14,7 +14,7 @@
   "spanish": "Español",
   "english": "English",
   "garage": "Garaje",
-  "yourRides": "Tus rutas",
+  "yourRides": "Tus recorridos",
   "nameRidesFromMap": "Nombrar desde el mapa",
   "nameRidesFromMapHelp": "Calcula origen y destino con GPS (ej. Tesistán - Zapopan).",
   "namingRidesProgress": "Nombrando {done} de {total}…",
@@ -24,16 +24,31 @@
       "total": { "type": "int" }
     }
   },
-  "namedRidesDone": "Se nombraron {count} rutas.",
+  "namedRidesDone": "Se nombraron {count} recorridos.",
   "@namedRidesDone": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
   "rideUntitledHint": "Origen - destino pendiente",
-  "emptyRidesTitle": "Aún no hay rutas",
-  "emptyRidesBody": "Inicia una ruta y RiderLab dibujará la línea exacta que tomaste en la calle.",
-  "unfinishedRide": "Ruta sin terminar",
+  "rideNameTitle": "Nombre del recorrido",
+  "rideNameHint": "Tesistán - Zapopan",
+  "rideNameHelp": "Escribe un nombre o usa el mapa (inicio y fin del GPS).",
+  "nameFromMap": "Desde el mapa",
+  "lookingUpPlaces": "Buscando lugares…",
+  "couldNotResolvePlaces": "No se pudieron obtener los nombres",
+  "rideTitleCleared": "Nombre borrado",
+  "rideNamed": "Nombrado: {title}",
+  "@rideNamed": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "renameRide": "Renombrar",
+  "cancel": "Cancelar",
+  "emptyRidesTitle": "Aún no hay recorridos",
+  "emptyRidesBody": "Inicia un recorrido y RiderLab dibujará la línea exacta que tomaste en la calle.",
+  "unfinishedRide": "Recorrido sin terminar",
   "unfinishedRideBody": "Empezó {when}. Finalízala para guardar la línea, o descártala.",
   "@unfinishedRideBody": {
     "placeholders": {
@@ -289,7 +304,7 @@
   "routeCreated": "Ruta creada",
   "sharedRoute": "Compartida",
   "privateRoute": "Privada",
-  "shareRideTitle": "Compartir y ruta",
+  "shareRideTitle": "Compartir",
   "shareRideHelp": "Comparte este ride con amigos y opcionalmente asígnalo a un circuito.",
   "shareThisRide": "Compartir este ride",
   "assignRoute": "Asignar a ruta",
@@ -478,8 +493,8 @@
   "labAdventureCameraScenarioAggressiveTitle": "Solo al empezar conducción divertida / agresiva",
   "labAdventureCameraScenarioAggressiveBody": "ON: Cámara adventure · Auto-grabar conducción agresiva · cámaras en el grupo.\nOFF: Grabar con el ride · Zonas inicio/fin en el mapa · Seguir pausa auto.",
   "labAdventureCameraScenarioAggressiveApply": "Aplicar setup solo agresivo",
-  "armAutoNoRouteHint": "Armado sin ruta — el ride irá al Garage, no a Vueltas. Ábrelo desde una ruta o crea una primero.",
-  "armAutoRouteArmed": "Armado — al arrancar se guarda en tu última ruta",
+  "armAutoNoRouteHint": "Armado — al moverte se inicia un recorrido en el Garaje.",
+  "armAutoRouteArmed": "Armado — al arrancar se inicia el recorrido",
   "armAutoRouteArmedNamed": "Armado para «{name}» — al arrancar el ride queda en esa ruta",
   "@armAutoRouteArmedNamed": {
     "placeholders": {

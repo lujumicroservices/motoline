@@ -75,6 +75,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideUntitledHint => 'Origin - destination pending';
 
   @override
+  String get rideNameTitle => 'Ride name';
+
+  @override
+  String get rideNameHint => 'Tesistán - Zapopan';
+
+  @override
+  String get rideNameHelp => 'Type a name, or use the map (GPS start and end).';
+
+  @override
+  String get nameFromMap => 'From map';
+
+  @override
+  String get lookingUpPlaces => 'Looking up places…';
+
+  @override
+  String get couldNotResolvePlaces => 'Could not resolve place names';
+
+  @override
+  String get rideTitleCleared => 'Title cleared';
+
+  @override
+  String rideNamed(String title) {
+    return 'Named: $title';
+  }
+
+  @override
+  String get renameRide => 'Rename';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
   String get emptyRidesTitle => 'No rides yet';
 
   @override
@@ -692,7 +724,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privateRoute => 'Private';
 
   @override
-  String get shareRideTitle => 'Share & route';
+  String get shareRideTitle => 'Share';
 
   @override
   String get shareRideHelp =>
@@ -1232,11 +1264,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get armAutoNoRouteHint =>
-      'Armed with no route — the ride goes to Garage, not Laps. Open a route first or create one.';
+      'Armed — when you roll, a ride starts in Garage.';
 
   @override
-  String get armAutoRouteArmed =>
-      'Armed — when you roll, the ride tags to your last route';
+  String get armAutoRouteArmed => 'Armed — rolling starts the ride';
 
   @override
   String armAutoRouteArmedNamed(String name) {
