@@ -55,6 +55,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourRides => 'Your rides';
 
   @override
+  String get nameRidesFromMap => 'Name from map';
+
+  @override
+  String get nameRidesFromMapHelp =>
+      'Calculate origin and destination from GPS (e.g. Tesistán - Zapopan).';
+
+  @override
+  String namingRidesProgress(int done, int total) {
+    return 'Naming $done of $total…';
+  }
+
+  @override
+  String namedRidesDone(int count) {
+    return 'Named $count rides.';
+  }
+
+  @override
+  String get rideUntitledHint => 'Origin - destination pending';
+
+  @override
   String get emptyRidesTitle => 'No rides yet';
 
   @override

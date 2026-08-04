@@ -31,12 +31,101 @@ final ridesListProvider = FutureProvider.autoDispose<List<Ride>>((ref) async {
   } catch (_) {}
   final db = ref.watch(rideDatabaseProvider);
   final rides = await db.listRides();
-  // Soft backfill: name a few untitled completed rides from start/end places.
-  unawaited(_backfillRideTitles(db, rides));
+  // Soft backfill start→end place titles; refresh list when any are written.
+  unawaited(() async {
+    final named = await nameUntitledRides(
+      db,
+      rides,
+      limit: 8,
+    );
+    if (named > 0) {
+      ref.invalidateSelf();
+    }
+  }());
   return rides;
 });
 
-Future<void> _backfillRideTitles(RideDatabase db, List<Ride> rides) async {
+/// Progress while naming rides from GPS start/end places.
+class RideTitleNamingState {
+  const RideTitleNamingState({
+    this.running = false,
+    this.done = 0,
+    this.total = 0,
+    this.lastTitle,
+  });
+
+  final bool running;
+  final int done;
+  final int total;
+  final String? lastTitle;
+
+  RideTitleNamingState copyWith({
+    bool? running,
+    int? done,
+    int? total,
+    String? lastTitle,
+    bool clearLast = false,
+  }) {
+    return RideTitleNamingState(
+      running: running ?? this.running,
+      done: done ?? this.done,
+      total: total ?? this.total,
+      lastTitle: clearLast ? null : (lastTitle ?? this.lastTitle),
+    );
+  }
+}
+
+class RideTitleNamingController extends StateNotifier<RideTitleNamingState> {
+  RideTitleNamingController(this._ref) : super(const RideTitleNamingState());
+
+  final Ref _ref;
+  bool _busy = false;
+
+  /// Name every untitled completed ride (start place - end place).
+  Future<int> nameAll({int limit = 40}) async {
+    if (_busy) return 0;
+    _busy = true;
+    state = const RideTitleNamingState(running: true);
+    try {
+      final db = _ref.read(rideDatabaseProvider);
+      final rides = await db.listRides();
+      final named = await nameUntitledRides(
+        db,
+        rides,
+        limit: limit,
+        onProgress: (done, total, title) {
+          state = RideTitleNamingState(
+            running: true,
+            done: done,
+            total: total,
+            lastTitle: title,
+          );
+        },
+      );
+      if (named > 0) {
+        _ref.invalidate(ridesListProvider);
+      }
+      return named;
+    } finally {
+      _busy = false;
+      state = state.copyWith(running: false);
+    }
+  }
+}
+
+final rideTitleNamingProvider =
+    StateNotifierProvider<RideTitleNamingController, RideTitleNamingState>(
+  (ref) => RideTitleNamingController(ref),
+);
+
+/// Reverse-geocode start/end for untitled completed rides.
+/// Returns how many titles were written.
+Future<int> nameUntitledRides(
+  RideDatabase db,
+  List<Ride> rides, {
+  int limit = 8,
+  void Function(int done, int total, String? title)? onProgress,
+}) async {
   final pending = rides
       .where(
         (r) =>
@@ -44,18 +133,25 @@ Future<void> _backfillRideTitles(RideDatabase db, List<Ride> rides) async {
             (r.title == null || r.title!.trim().isEmpty) &&
             r.pointCount >= 2,
       )
-      .take(3)
+      .take(limit)
       .toList();
-  if (pending.isEmpty) return;
+  if (pending.isEmpty) return 0;
   final namer = RidePlaceNameService();
-  for (final ride in pending) {
+  var named = 0;
+  for (var i = 0; i < pending.length; i++) {
+    final ride = pending[i];
+    String? title;
     try {
       final points = await db.getPoints(ride.id);
-      final title = await namer.titleFromTrack(points);
-      if (title == null || title.trim().isEmpty) continue;
-      await db.upsertRide(ride.copyWith(title: title.trim()));
+      title = await namer.titleFromTrack(points);
+      if (title != null && title.trim().isNotEmpty) {
+        await db.upsertRide(ride.copyWith(title: title.trim()));
+        named++;
+      }
     } catch (_) {}
+    onProgress?.call(i + 1, pending.length, title);
   }
+  return named;
 }
 
 final rideProvider =

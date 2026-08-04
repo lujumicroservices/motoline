@@ -15,6 +15,22 @@
   "english": "English",
   "garage": "Garage",
   "yourRides": "Your rides",
+  "nameRidesFromMap": "Name from map",
+  "nameRidesFromMapHelp": "Calculate origin and destination from GPS (e.g. Tesistán - Zapopan).",
+  "namingRidesProgress": "Naming {done} of {total}…",
+  "@namingRidesProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "namedRidesDone": "Named {count} rides.",
+  "@namedRidesDone": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rideUntitledHint": "Origin - destination pending",
   "emptyRidesTitle": "No rides yet",
   "emptyRidesBody": "Start a ride and RiderLab will draw the exact line you took on the street.",
   "unfinishedRide": "Unfinished ride found",

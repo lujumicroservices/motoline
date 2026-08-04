@@ -16,7 +16,7 @@ class RidePlaceNameService {
 
   static const _userAgent = 'RiderLab/1.27 (com.motoline.motoline; ride titles)';
 
-  /// Build `Start - End` (or a single place if both ends match).
+  /// Build `Origin - Destination` (e.g. Tesistán - Zapopan).
   Future<String?> titleFromTrack(List<TrackPoint> points) async {
     if (points.isEmpty) return null;
     final start = points.first;
@@ -50,7 +50,8 @@ class RidePlaceNameService {
         'format': 'jsonv2',
         'lat': lat.toString(),
         'lon': lng.toString(),
-        'zoom': '14',
+        // ~town / barrio — better for Tesistán, Cañadas, Zapopan.
+        'zoom': '15',
         'addressdetails': '1',
       });
       final res = await _client.get(

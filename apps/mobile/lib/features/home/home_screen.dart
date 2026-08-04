@@ -206,12 +206,67 @@ class HomeScreen extends ConsumerWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-              child: Text(
-                l10n.yourRides,
-                style: GoogleFonts.exo2(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.yourRides,
+                      style: GoogleFonts.exo2(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  ridesAsync.maybeWhen(
+                    data: (rides) {
+                      final untitled = rides
+                          .where(
+                            (r) =>
+                                r.status == RideStatus.completed &&
+                                (r.title == null || r.title!.trim().isEmpty) &&
+                                r.pointCount >= 2,
+                          )
+                          .isNotEmpty;
+                      final naming = ref.watch(rideTitleNamingProvider);
+                      if (!untitled && !naming.running) {
+                        return const SizedBox.shrink();
+                      }
+                      if (naming.running) {
+                        return Text(
+                          l10n.namingRidesProgress(naming.done, naming.total),
+                          style: const TextStyle(
+                            color: AppTheme.steel,
+                            fontSize: 12,
+                          ),
+                        );
+                      }
+                      return TextButton.icon(
+                        onPressed: () async {
+                          final count = await ref
+                              .read(rideTitleNamingProvider.notifier)
+                              .nameAll();
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                count > 0
+                                    ? l10n.namedRidesDone(count)
+                                    : l10n.nameRidesFromMapHelp,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.place_outlined, size: 18),
+                        label: Text(l10n.nameRidesFromMap),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppTheme.line,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      );
+                    },
+                    orElse: () => const SizedBox.shrink(),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -771,8 +826,7 @@ class _RideTile extends ConsumerWidget {
                       abandoned
                           ? date
                           : ride.displayTitle(
-                              dateFormat: (d) =>
-                                  DateFormat.MMMd().add_jm().format(d),
+                              dateFormat: (_) => l10n.rideUntitledHint,
                             ),
                       style: GoogleFonts.exo2(
                         fontWeight: FontWeight.w600,
@@ -784,9 +838,7 @@ class _RideTile extends ConsumerWidget {
                       abandoned
                           ? 'Discarded'
                           : [
-                              if (ride.title != null &&
-                                  ride.title!.trim().isNotEmpty)
-                                date,
+                              date,
                               '${ride.distanceKm.toStringAsFixed(2)} km',
                               formatDuration(ride.duration),
                               if (ride.maxSpeedKmh != null)

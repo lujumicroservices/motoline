@@ -55,6 +55,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get yourRides => 'Tus rutas';
 
   @override
+  String get nameRidesFromMap => 'Nombrar desde el mapa';
+
+  @override
+  String get nameRidesFromMapHelp =>
+      'Calcula origen y destino con GPS (ej. Tesistán - Zapopan).';
+
+  @override
+  String namingRidesProgress(int done, int total) {
+    return 'Nombrando $done de $total…';
+  }
+
+  @override
+  String namedRidesDone(int count) {
+    return 'Se nombraron $count rutas.';
+  }
+
+  @override
+  String get rideUntitledHint => 'Origen - destino pendiente';
+
+  @override
   String get emptyRidesTitle => 'Aún no hay rutas';
 
   @override

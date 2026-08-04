@@ -188,6 +188,36 @@ abstract class AppLocalizations {
   /// **'Tus rutas'**
   String get yourRides;
 
+  /// No description provided for @nameRidesFromMap.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombrar desde el mapa'**
+  String get nameRidesFromMap;
+
+  /// No description provided for @nameRidesFromMapHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Calcula origen y destino con GPS (ej. Tesistán - Zapopan).'**
+  String get nameRidesFromMapHelp;
+
+  /// No description provided for @namingRidesProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombrando {done} de {total}…'**
+  String namingRidesProgress(int done, int total);
+
+  /// No description provided for @namedRidesDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Se nombraron {count} rutas.'**
+  String namedRidesDone(int count);
+
+  /// No description provided for @rideUntitledHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Origen - destino pendiente'**
+  String get rideUntitledHint;
+
   /// No description provided for @emptyRidesTitle.
   ///
   /// In es, this message translates to:

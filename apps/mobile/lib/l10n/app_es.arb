@@ -15,6 +15,22 @@
   "english": "English",
   "garage": "Garaje",
   "yourRides": "Tus rutas",
+  "nameRidesFromMap": "Nombrar desde el mapa",
+  "nameRidesFromMapHelp": "Calcula origen y destino con GPS (ej. Tesistán - Zapopan).",
+  "namingRidesProgress": "Nombrando {done} de {total}…",
+  "@namingRidesProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "namedRidesDone": "Se nombraron {count} rutas.",
+  "@namedRidesDone": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rideUntitledHint": "Origen - destino pendiente",
   "emptyRidesTitle": "Aún no hay rutas",
   "emptyRidesBody": "Inicia una ruta y RiderLab dibujará la línea exacta que tomaste en la calle.",
   "unfinishedRide": "Ruta sin terminar",
