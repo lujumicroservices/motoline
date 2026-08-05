@@ -73,6 +73,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: RiderAliasChip(),
           ),
           const SizedBox(height: 28),
+          Text(
+            l10n.language,
+            style: GoogleFonts.barlowCondensed(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.translate, color: AppTheme.mist),
+            title: Text(
+              locale.languageCode == 'es' ? l10n.spanish : l10n.english,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            trailing: TextButton(
+              onPressed: () => ref.read(localeProvider.notifier).toggle(),
+              child: Text(
+                locale.languageCode == 'es' ? l10n.english : l10n.spanish,
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
           const AccountAuthSection(),
           const SizedBox(height: 28),
           const AdventureCameraSettingsSection(),
@@ -160,26 +183,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
-          const SizedBox(height: 32),
-          Text(
-            l10n.language,
-            style: GoogleFonts.barlowCondensed(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              locale.languageCode == 'es' ? l10n.spanish : l10n.english,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            trailing: TextButton(
-              onPressed: () => ref.read(localeProvider.notifier).toggle(),
-              child: Text(l10n.language),
-            ),
-          ),
         ],
       ),
     );

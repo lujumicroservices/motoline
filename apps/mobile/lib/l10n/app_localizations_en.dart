@@ -1757,7 +1757,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skillLabFocusHelp =>
-      'Lowest-scoring turns first. Bars show entry → apex → exit speed. Tap Replay to watch lean, brake, and speed live.';
+      'Lowest-scoring turns first. Bars show entry → apex → exit speed. Tap Replay to watch lean, brake, and speed — and compare the same corner section with a friend.';
 
   @override
   String get skillReplayTitle => 'Corner replay';
@@ -1767,7 +1767,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Watch how this stretch was ridden — lean, braking, and speed move with the map playhead.';
 
   @override
+  String get skillReplayCompareHelp =>
+      'Both lines are cropped to the same road section. Playheads advance by distance along the corner so you compare the line, not the clock.';
+
+  @override
+  String get skillReplayCompareWith => 'Compare with a friend';
+
+  @override
+  String get skillReplayNoPeerMatch =>
+      'This friend did not cover the same corner section.';
+
+  @override
+  String get skillReplayAlignedSection =>
+      'Same corner section for both riders (corridor match).';
+
+  @override
+  String get skillReplaySameSection => 'same section · path-synced';
+
+  @override
   String get skillReplay => 'Replay';
+
+  @override
+  String get compareSharedSectionHelp =>
+      'Solid = you · dashed = other. Lines are offset slightly and cropped to shared road so both stay visible.';
+
+  @override
+  String get compareTrackUnavailable =>
+      'Track points unavailable for this ride.';
+
+  @override
+  String get compareOneTrackOnly => 'Only one track has enough points to draw.';
 
   @override
   String get play => 'Play';

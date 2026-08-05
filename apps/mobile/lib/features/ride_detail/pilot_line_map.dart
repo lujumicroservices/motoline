@@ -19,6 +19,7 @@ class PilotLineMap extends StatefulWidget {
     required this.points,
     this.height,
     this.interactive = true,
+    this.allowZoom = false,
     this.showStartEnd = true,
     this.scrubIndex,
     this.onTapScrub,
@@ -33,6 +34,9 @@ class PilotLineMap extends StatefulWidget {
   final List<TrackPoint> points;
   final double? height;
   final bool interactive;
+
+  /// Pinch / double-tap zoom without full pan (good inside scroll views).
+  final bool allowZoom;
   final bool showStartEnd;
 
   /// When set, a playhead marker is drawn at this sample index (into [points]).
@@ -327,8 +331,13 @@ class _PilotLineMapState extends State<PilotLineMap> {
         initialCenter: _center!,
         initialZoom: hasFocus ? 16 : 15,
         interactionOptions: InteractionOptions(
-          flags:
-              widget.interactive ? InteractiveFlag.all : InteractiveFlag.none,
+          flags: widget.interactive
+              ? InteractiveFlag.all
+              : widget.allowZoom
+                  ? (InteractiveFlag.pinchZoom |
+                      InteractiveFlag.doubleTapZoom |
+                      InteractiveFlag.scrollWheelZoom)
+                  : InteractiveFlag.none,
         ),
         initialCameraFit: CameraFit.bounds(
           bounds: _bounds!,

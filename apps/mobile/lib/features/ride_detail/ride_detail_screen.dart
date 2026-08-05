@@ -456,6 +456,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                   summary: full.skillSummary,
                                   neutralLeanDegrees: full.neutralLeanDegrees,
                                   brakeEvents: full.brakeEvents,
+                                  localRideId: ride.id,
                                 ),
                               ),
                             );

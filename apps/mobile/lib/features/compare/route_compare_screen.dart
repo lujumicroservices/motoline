@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
-
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/models/ride.dart';
 import '../../core/utils/geo_utils.dart';
@@ -306,15 +304,13 @@ class _LocalPairCompare extends ConsumerWidget {
           right: CompareRideMetrics.fromAnalytics(right),
         ),
         const SizedBox(height: 20),
-        DualPolylineMap(
-          left: [
-            for (final p in left.samples) LatLng(p.latitude, p.longitude),
-          ],
-          right: [
-            for (final p in right.samples) LatLng(p.latitude, p.longitude),
-          ],
+        DualPolylineMap.fromTrackPoints(
+          left: left.samples,
+          right: right.samples,
           leftLabel: l10n.compareBaseline,
           rightLabel: l10n.compareChallenger,
+          sharedCorridorOnly: true,
+          caption: l10n.compareSharedSectionHelp,
         ),
       ],
     );

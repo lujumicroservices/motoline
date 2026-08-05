@@ -3239,7 +3239,7 @@ abstract class AppLocalizations {
   /// No description provided for @skillLabFocusHelp.
   ///
   /// In es, this message translates to:
-  /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad en vivo.'**
+  /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma sección de curva con un amigo.'**
   String get skillLabFocusHelp;
 
   /// No description provided for @skillReplayTitle.
@@ -3254,11 +3254,59 @@ abstract class AppLocalizations {
   /// **'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el cursor en el mapa.'**
   String get skillReplayHelp;
 
+  /// No description provided for @skillReplayCompareHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Ambas líneas se recortan al mismo tramo de carretera. Los cursores avanzan por distancia en la curva para comparar la línea, no el reloj.'**
+  String get skillReplayCompareHelp;
+
+  /// No description provided for @skillReplayCompareWith.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparar con un amigo'**
+  String get skillReplayCompareWith;
+
+  /// No description provided for @skillReplayNoPeerMatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Este amigo no pasó por la misma sección de la curva.'**
+  String get skillReplayNoPeerMatch;
+
+  /// No description provided for @skillReplayAlignedSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Misma sección de curva para ambos (coinciden en el corredor).'**
+  String get skillReplayAlignedSection;
+
+  /// No description provided for @skillReplaySameSection.
+  ///
+  /// In es, this message translates to:
+  /// **'misma sección · sincronizado por distancia'**
+  String get skillReplaySameSection;
+
   /// No description provided for @skillReplay.
   ///
   /// In es, this message translates to:
   /// **'Repetir'**
   String get skillReplay;
+
+  /// No description provided for @compareSharedSectionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Continua = tú · punteada = otro. Las líneas se separan un poco y se recortan al tramo compartido para ver ambas.'**
+  String get compareSharedSectionHelp;
+
+  /// No description provided for @compareTrackUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay puntos de track para este recorrido.'**
+  String get compareTrackUnavailable;
+
+  /// No description provided for @compareOneTrackOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo una de las dos rutas tiene puntos suficientes para dibujar.'**
+  String get compareOneTrackOnly;
 
   /// No description provided for @play.
   ///

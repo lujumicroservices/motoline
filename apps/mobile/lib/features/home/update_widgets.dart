@@ -23,8 +23,8 @@ class UpdateCheckIconButton extends ConsumerWidget {
       visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(
-        minWidth: 36,
-        minHeight: 36,
+        minWidth: 52,
+        minHeight: 52,
       ),
       onPressed: () => promptManualUpdateCheck(context, ref),
       icon: Badge(

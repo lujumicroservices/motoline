@@ -1767,7 +1767,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get skillLabFocusHelp =>
-      'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad en vivo.';
+      'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma sección de curva con un amigo.';
 
   @override
   String get skillReplayTitle => 'Repetición de curva';
@@ -1777,7 +1777,38 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el cursor en el mapa.';
 
   @override
+  String get skillReplayCompareHelp =>
+      'Ambas líneas se recortan al mismo tramo de carretera. Los cursores avanzan por distancia en la curva para comparar la línea, no el reloj.';
+
+  @override
+  String get skillReplayCompareWith => 'Comparar con un amigo';
+
+  @override
+  String get skillReplayNoPeerMatch =>
+      'Este amigo no pasó por la misma sección de la curva.';
+
+  @override
+  String get skillReplayAlignedSection =>
+      'Misma sección de curva para ambos (coinciden en el corredor).';
+
+  @override
+  String get skillReplaySameSection =>
+      'misma sección · sincronizado por distancia';
+
+  @override
   String get skillReplay => 'Repetir';
+
+  @override
+  String get compareSharedSectionHelp =>
+      'Continua = tú · punteada = otro. Las líneas se separan un poco y se recortan al tramo compartido para ver ambas.';
+
+  @override
+  String get compareTrackUnavailable =>
+      'No hay puntos de track para este recorrido.';
+
+  @override
+  String get compareOneTrackOnly =>
+      'Solo una de las dos rutas tiene puntos suficientes para dibujar.';
 
   @override
   String get play => 'Reproducir';

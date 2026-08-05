@@ -18,12 +18,14 @@ class SkillLabScreen extends StatelessWidget {
     required this.summary,
     required this.neutralLeanDegrees,
     this.brakeEvents = const [],
+    this.localRideId,
   });
 
   final List<TrackPoint> samples;
   final RideSkillSummary summary;
   final double neutralLeanDegrees;
   final List<BrakeEvent> brakeEvents;
+  final String? localRideId;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +91,7 @@ class SkillLabScreen extends StatelessWidget {
           neutralLeanDegrees: neutralLeanDegrees,
           brakeEvents: brakeEvents,
           title: corner.label,
+          localRideId: localRideId,
         ),
       ),
     );

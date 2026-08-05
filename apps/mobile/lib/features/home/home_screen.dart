@@ -10,7 +10,6 @@ import '../../core/features.dart';
 import '../../core/models/ride.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
-import '../../providers/locale_provider.dart';
 import '../../providers/ride_providers.dart';
 import '../../providers/update_providers.dart';
 import '../../theme/app_theme.dart';
@@ -23,11 +22,13 @@ import '../friends/friends_screen.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../ride_detail/ride_rename.dart';
+import '../rodadas/models/rodada_models.dart';
 import '../rodadas/rodada_detail_screen.dart';
 import '../rodadas/rodada_providers.dart';
 import '../rodadas/rodada_route_share_binder.dart';
 import '../rodadas/rodadas_screen.dart';
 import '../routes/routes_screen.dart';
+import 'home_nav_icons.dart';
 import 'update_widgets.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -39,7 +40,6 @@ class HomeScreen extends ConsumerWidget {
     final ridesAsync = ref.watch(ridesListProvider);
     final incompleteAsync = ref.watch(incompleteRideProvider);
     final updateAsync = ref.watch(appUpdateCheckProvider);
-    final locale = ref.watch(localeProvider);
     final armed = ref.watch(armedStateProvider);
 
     ref.listen(autoStartEventsProvider, (previous, next) {
@@ -90,14 +90,8 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                       if (AppFeatures.routesEnabled)
-                        IconButton(
+                        HomeNavIconButton(
                           tooltip: l10n.routesTitle,
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 36,
-                            minHeight: 36,
-                          ),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
@@ -105,17 +99,10 @@ class HomeScreen extends ConsumerWidget {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.route_outlined, size: 20),
-                          color: AppTheme.mist,
+                          painter: const RoutesRibbonIconPainter(),
                         ),
-                      IconButton(
+                      HomeNavIconButton(
                         tooltip: l10n.rodadasTitle,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
-                        ),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
@@ -123,17 +110,10 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.groups_2_outlined, size: 20),
-                        color: AppTheme.mist,
+                        painter: const RodadaPackIconPainter(),
                       ),
-                      IconButton(
+                      HomeNavIconButton(
                         tooltip: l10n.friends,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
-                        ),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
@@ -141,27 +121,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.group_outlined, size: 20),
-                        color: AppTheme.mist,
-                      ),
-                      IconButton(
-                        tooltip: l10n.language,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
-                        ),
-                        onPressed: () =>
-                            ref.read(localeProvider.notifier).toggle(),
-                        icon: Text(
-                          locale.languageCode.toUpperCase(),
-                          style: GoogleFonts.exo2(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                            color: AppTheme.mist,
-                          ),
-                        ),
+                        painter: const FriendsLinkIconPainter(),
                       ),
                       const UpdateCheckIconButton(),
                     ],
@@ -190,19 +150,19 @@ class HomeScreen extends ConsumerWidget {
               error: (_, _) => const SizedBox.shrink(),
             ),
             if (armed) const _ArmedBanner(),
-            const _RodadaHomeCard(),
             ridesAsync.when(
               data: (rides) {
                 final summary = FleetSummary.fromRides(rides);
                 if (summary.rideCount == 0) return const SizedBox.shrink();
                 return Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                   child: _SeasonStrip(summary: summary),
                 );
               },
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
             ),
+            const _RodadaHomeCard(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
               child: Row(
@@ -279,12 +239,37 @@ class HomeScreen extends ConsumerWidget {
                   if (completed.isEmpty) {
                     return const _EmptyState();
                   }
+                  final rows = _garageRowsByMonth(completed, l10n.localeName);
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                    itemCount: completed.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemCount: rows.length,
+                    separatorBuilder: (_, i) {
+                      final next = i + 1 < rows.length ? rows[i + 1] : null;
+                      if (next is _GarageMonthHeader) {
+                        return const SizedBox(height: 4);
+                      }
+                      return const SizedBox(height: 8);
+                    },
                     itemBuilder: (context, index) {
-                      final ride = completed[index];
+                      final row = rows[index];
+                      if (row is _GarageMonthHeader) {
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            top: index == 0 ? 0 : 10,
+                            bottom: 4,
+                          ),
+                          child: Text(
+                            row.label,
+                            style: GoogleFonts.exo2(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.6,
+                              color: AppTheme.steel,
+                            ),
+                          ),
+                        );
+                      }
+                      final ride = (row as _GarageRideRow).ride;
                       return _RideTile(
                         ride: ride,
                         onDeleted: () {
@@ -339,6 +324,67 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+sealed class _GarageRow {
+  const _GarageRow();
+}
+
+class _GarageMonthHeader extends _GarageRow {
+  const _GarageMonthHeader(this.label);
+  final String label;
+}
+
+class _GarageRideRow extends _GarageRow {
+  const _GarageRideRow(this.ride);
+  final Ride ride;
+}
+
+List<_GarageRow> _garageRowsByMonth(List<Ride> rides, String localeName) {
+  final rows = <_GarageRow>[];
+  String? lastKey;
+  final fmt = DateFormat.yMMMM(localeName);
+  for (final ride in rides) {
+    final key = '${ride.startedAt.year}-${ride.startedAt.month}';
+    if (key != lastKey) {
+      lastKey = key;
+      final raw = fmt.format(ride.startedAt);
+      final label = raw.isEmpty
+          ? key
+          : '${raw[0].toUpperCase()}${raw.substring(1)}';
+      rows.add(_GarageMonthHeader(label));
+    }
+    rows.add(_GarageRideRow(ride));
+  }
+  return rows;
+}
+
+/// Current live rodada, else the soonest upcoming/open one — never a list.
+RodadaSummary? _pickHomeRodada(List<RodadaSummary> list) {
+  final now = DateTime.now();
+  for (final r in list) {
+    if (r.isLive) return r;
+  }
+
+  final candidates = list.where((r) => !r.isEnded).toList();
+  if (candidates.isEmpty) return null;
+
+  final dated = candidates.where((r) => r.startsAt != null).toList()
+    ..sort((a, b) => a.startsAt!.compareTo(b.startsAt!));
+
+  // Nearest upcoming (or started within the last 12h — still "current").
+  final horizon = now.subtract(const Duration(hours: 12));
+  for (final r in dated) {
+    if (!r.startsAt!.isBefore(horizon)) return r;
+  }
+
+  // Open/draft without a start time.
+  for (final r in candidates) {
+    if (r.startsAt == null && (r.status == 'open' || r.status == 'draft')) {
+      return r;
+    }
+  }
+  return null;
 }
 
 Future<void> _openAutoStartedRide(
@@ -495,7 +541,7 @@ class _HomeActionDock extends StatelessWidget {
   }
 }
 
-/// Lightweight home teaser — metadata only (no live/tracks/photos).
+/// Lightweight home teaser — at most one rodada (live or nearest upcoming).
 class _RodadaHomeCard extends ConsumerWidget {
   const _RodadaHomeCard();
 
@@ -505,12 +551,8 @@ class _RodadaHomeCard extends ConsumerWidget {
     final async = ref.watch(myRodadasProvider);
     return async.maybeWhen(
       data: (list) {
-        final highlight = () {
-          for (final r in list) {
-            if (r.status == 'live' || r.status == 'open') return r;
-          }
-          return list.isEmpty ? null : list.first;
-        }();
+        final highlight = _pickHomeRodada(list);
+        if (highlight == null) return const SizedBox.shrink();
         return Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Material(
@@ -519,31 +561,28 @@ class _RodadaHomeCard extends ConsumerWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: () async {
-                if (highlight != null) {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                          RodadaDetailScreen(rodadaId: highlight.id),
-                    ),
-                  );
-                } else {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const RodadasScreen(),
-                    ),
-                  );
-                }
+                await Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        RodadaDetailScreen(rodadaId: highlight.id),
+                  ),
+                );
                 ref.invalidate(myRodadasProvider);
               },
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.groups_2_outlined,
-                      color: highlight?.status == 'live'
-                          ? AppTheme.line
-                          : AppTheme.mist,
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: CustomPaint(
+                        painter: RodadaPackIconPainter(
+                          color: highlight.isLive
+                              ? AppTheme.line
+                              : AppTheme.mist,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -551,19 +590,15 @@ class _RodadaHomeCard extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            highlight == null
-                                ? l10n.rodadasTitle
-                                : highlight.title,
+                            highlight.title,
                             style: GoogleFonts.exo2(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                             ),
                           ),
                           Text(
-                            highlight == null
-                                ? l10n.rodadasHomeSubtitle
-                                : '${highlight.status.toUpperCase()} · ${l10n.rodadaRidersCount(highlight.memberCount)}'
-                                    '${highlight.destination != null ? ' · ${highlight.destination}' : ''}',
+                            '${highlight.status.toUpperCase()} · ${l10n.rodadaRidersCount(highlight.memberCount)}'
+                            '${highlight.destination != null ? ' · ${highlight.destination}' : ''}',
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,
                               fontSize: 13,

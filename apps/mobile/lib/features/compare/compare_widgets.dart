@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/ride_analytics.dart';
+import '../../core/analytics/track_segment_align.dart';
 import '../../core/models/cloud_models.dart';
 import '../../core/models/track_point.dart';
 import '../../core/utils/geo_utils.dart';
@@ -212,7 +215,11 @@ class CompareMetricsTable extends StatelessWidget {
       '${l?.toStringAsFixed(0) ?? "—"}° / ${r?.toStringAsFixed(0) ?? "—"}°';
 }
 
-/// Two polylines on one map (baseline cyan, challenger amber).
+/// Two polylines on one map (baseline cyan solid, challenger amber dashed).
+///
+/// Near-identical GPS paths are separated with a small lateral offset so both
+/// lines stay readable. Prefer [fromTrackPoints] with [sharedCorridorOnly] so
+/// the map zooms to the comparable road section.
 class DualPolylineMap extends StatelessWidget {
   const DualPolylineMap({
     super.key,
@@ -220,12 +227,18 @@ class DualPolylineMap extends StatelessWidget {
     required this.right,
     required this.leftLabel,
     required this.rightLabel,
+    this.caption,
+    this.leftPlayhead,
+    this.rightPlayhead,
   });
 
   final List<LatLng> left;
   final List<LatLng> right;
   final String leftLabel;
   final String rightLabel;
+  final String? caption;
+  final LatLng? leftPlayhead;
+  final LatLng? rightPlayhead;
 
   factory DualPolylineMap.fromTrackPoints({
     Key? key,
@@ -233,32 +246,87 @@ class DualPolylineMap extends StatelessWidget {
     required List<TrackPoint> right,
     required String leftLabel,
     required String rightLabel,
+    bool sharedCorridorOnly = true,
+    String? caption,
+    LatLng? leftPlayhead,
+    LatLng? rightPlayhead,
   }) {
+    var l = left;
+    var r = right;
+    String? autoCaption = caption;
+    if (sharedCorridorOnly) {
+      final aligned = alignSharedCorridor(left, right);
+      if (aligned != null && aligned.isUsable) {
+        l = aligned.left;
+        r = aligned.right;
+        autoCaption ??= caption;
+      }
+    }
     return DualPolylineMap(
       key: key,
-      left: [for (final p in left) LatLng(p.latitude, p.longitude)],
-      right: [for (final p in right) LatLng(p.latitude, p.longitude)],
+      left: [for (final p in l) LatLng(p.latitude, p.longitude)],
+      right: [for (final p in r) LatLng(p.latitude, p.longitude)],
       leftLabel: leftLabel,
       rightLabel: rightLabel,
+      caption: autoCaption,
+      leftPlayhead: leftPlayhead,
+      rightPlayhead: rightPlayhead,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final all = [...left, ...right];
-    if (all.length < 2) return const SizedBox.shrink();
+    final drawLeft = left.length >= 2 ? _offsetPath(left, -3.5) : left;
+    final drawRight = right.length >= 2 ? _offsetPath(right, 3.5) : right;
+    final all = [
+      ...drawLeft,
+      ...drawRight,
+      ?leftPlayhead,
+      ?rightPlayhead,
+    ];
+    if (all.length < 2) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          context.l10n.compareTrackUnavailable,
+          style: GoogleFonts.rajdhani(color: AppTheme.steel),
+        ),
+      );
+    }
     final bounds = LatLngBounds.fromPoints(all);
+    final bothOk = drawLeft.length >= 2 && drawRight.length >= 2;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            _legendDot(RideVizPalette.leanLeft, leftLabel),
+            _legendDot(RideVizPalette.leanLeft, leftLabel, solid: true),
             const SizedBox(width: 16),
-            _legendDot(RideVizPalette.leanRight, rightLabel),
+            _legendDot(RideVizPalette.leanRight, rightLabel, solid: false),
           ],
         ),
+        if (caption != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            caption!,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 12,
+              height: 1.3,
+            ),
+          ),
+        ],
+        if (!bothOk) ...[
+          const SizedBox(height: 6),
+          Text(
+            context.l10n.compareOneTrackOnly,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.lineHot,
+              fontSize: 12,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -281,20 +349,58 @@ class DualPolylineMap extends StatelessWidget {
                 ),
                 PolylineLayer(
                   polylines: [
-                    if (left.length >= 2)
+                    if (drawLeft.length >= 2)
                       Polyline(
-                        points: left,
-                        strokeWidth: 4,
-                        color: RideVizPalette.leanLeft.withValues(alpha: 0.9),
+                        points: drawLeft,
+                        strokeWidth: 5.5,
+                        borderStrokeWidth: 2.5,
+                        borderColor: Colors.black.withValues(alpha: 0.55),
+                        color: RideVizPalette.leanLeft.withValues(alpha: 0.95),
                       ),
-                    if (right.length >= 2)
+                    if (drawRight.length >= 2)
                       Polyline(
-                        points: right,
-                        strokeWidth: 4,
-                        color: RideVizPalette.leanRight.withValues(alpha: 0.9),
+                        points: drawRight,
+                        strokeWidth: 5,
+                        borderStrokeWidth: 2,
+                        borderColor: Colors.black.withValues(alpha: 0.45),
+                        color: RideVizPalette.leanRight.withValues(alpha: 0.95),
+                        pattern: StrokePattern.dashed(
+                          segments: <double>[14, 10],
+                        ),
                       ),
                   ],
                 ),
+                if (leftPlayhead != null || rightPlayhead != null)
+                  MarkerLayer(
+                    markers: [
+                      if (leftPlayhead != null)
+                        Marker(
+                          point: leftPlayhead!,
+                          width: 16,
+                          height: 16,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: RideVizPalette.leanLeft,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                          ),
+                        ),
+                      if (rightPlayhead != null)
+                        Marker(
+                          point: rightPlayhead!,
+                          width: 16,
+                          height: 16,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: RideVizPalette.leanRight,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -303,14 +409,23 @@ class DualPolylineMap extends StatelessWidget {
     );
   }
 
-  Widget _legendDot(Color color, String label) {
+  Widget _legendDot(Color color, String label, {required bool solid}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          width: solid ? 18 : 18,
+          height: 4,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+            border: solid
+                ? null
+                : Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: solid
+              ? null
+              : CustomPaint(painter: _DashLegendPainter(color)),
         ),
         const SizedBox(width: 6),
         Text(label, style: const TextStyle(color: AppTheme.steel, fontSize: 12)),
@@ -318,3 +433,59 @@ class DualPolylineMap extends StatelessWidget {
     );
   }
 }
+
+class _DashLegendPainter extends CustomPainter {
+  _DashLegendPainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(0, size.height / 2), Offset(7, size.height / 2), paint);
+    canvas.drawLine(
+      Offset(11, size.height / 2),
+      Offset(size.width, size.height / 2),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashLegendPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Nudge a path ~[meters] to the right of travel so stacked GPS lines separate.
+List<LatLng> _offsetPath(List<LatLng> pts, double meters) {
+  if (pts.length < 2 || meters.abs() < 0.1) return pts;
+  const earth = 6371000.0;
+  final out = <LatLng>[];
+  for (var i = 0; i < pts.length; i++) {
+    final prev = pts[i > 0 ? i - 1 : 0];
+    final next = pts[i < pts.length - 1 ? i + 1 : i];
+    final lat1 = prev.latitude * math.pi / 180;
+    final lat2 = next.latitude * math.pi / 180;
+    final dLon = (next.longitude - prev.longitude) * math.pi / 180;
+    final y = math.sin(dLon) * math.cos(lat2);
+    final x = math.cos(lat1) * math.sin(lat2) -
+        math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
+    final bearing = math.atan2(y, x) + math.pi / 2;
+    final lat = pts[i].latitude * math.pi / 180;
+    final lon = pts[i].longitude * math.pi / 180;
+    final ang = meters / earth;
+    final nLat = math.asin(
+      math.sin(lat) * math.cos(ang) +
+          math.cos(lat) * math.sin(ang) * math.cos(bearing),
+    );
+    final nLon = lon +
+        math.atan2(
+          math.sin(bearing) * math.sin(ang) * math.cos(lat),
+          math.cos(ang) - math.sin(lat) * math.sin(nLat),
+        );
+    out.add(LatLng(nLat * 180 / math.pi, nLon * 180 / math.pi));
+  }
+  return out;
+}
+

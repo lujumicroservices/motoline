@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
-
 import '../../core/analytics/ride_analytics.dart';
+import '../../core/analytics/track_segment_align.dart';
 import '../../core/models/cloud_models.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
@@ -149,19 +148,25 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
                     const SizedBox(height: 20),
                     if (_loadingPeerTrack)
                       const Center(child: CircularProgressIndicator())
-                    else if (_peerPoints != null && points.isNotEmpty)
-                      DualPolylineMap(
-                        left: [
-                          for (final p in points)
-                            LatLng(p.latitude, p.longitude),
-                        ],
-                        right: [
-                          for (final p in _peerPoints!)
-                            LatLng(p.latitude, p.longitude),
-                        ],
-                        leftLabel: l10n.compareYou,
-                        rightLabel: _peer!.riderLabel,
-                      ),
+                    else if (_peerPoints != null && points.isNotEmpty) ...[
+                      if (_peerPoints!.length < 2)
+                        Text(
+                          l10n.compareTrackUnavailable,
+                          style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                        )
+                      else
+                        DualPolylineMap.fromTrackPoints(
+                          left: points,
+                          right: trackPointsFromCloud(
+                            _peerPoints!,
+                            rideId: _peer!.id,
+                          ),
+                          leftLabel: l10n.compareYou,
+                          rightLabel: _peer!.riderLabel,
+                          sharedCorridorOnly: true,
+                          caption: l10n.compareSharedSectionHelp,
+                        ),
+                    ],
                   ],
                 ],
               );
