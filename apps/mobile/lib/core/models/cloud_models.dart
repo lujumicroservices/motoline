@@ -3,11 +3,13 @@ class RiderProfile {
   const RiderProfile({
     required this.id,
     this.displayName,
+    this.bikeId,
     this.createdAt,
   });
 
   final String id;
   final String? displayName;
+  final String? bikeId;
   final DateTime? createdAt;
 
   String get label {
@@ -20,6 +22,7 @@ class RiderProfile {
   factory RiderProfile.fromMap(Map<String, dynamic> map) => RiderProfile(
         id: map['id'] as String,
         displayName: map['display_name'] as String?,
+        bikeId: map['bike_id'] as String?,
         createdAt: map['created_at'] == null
             ? null
             : DateTime.tryParse(map['created_at'] as String),

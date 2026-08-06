@@ -6,6 +6,7 @@ import '../../core/analytics/ride_analytics.dart';
 import '../../core/telemetry/labels/ride_engine_label.dart';
 import '../../core/telemetry/labels/ride_engine_label_service.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/bike_provider.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../ride_detail/ride_detail_screen.dart';
@@ -55,6 +56,7 @@ class _RideEngineLabelScreenState extends ConsumerState<RideEngineLabelScreen> {
             createdAt: DateTime.now(),
           ),
           analytics: analytics,
+          bikeId: ref.read(riderBikeProvider)?.id,
         );
       }
       if (!mounted) return;

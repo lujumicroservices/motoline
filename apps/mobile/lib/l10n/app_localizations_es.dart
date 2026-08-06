@@ -1770,6 +1770,47 @@ class AppLocalizationsEs extends AppLocalizations {
       'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma sección de curva con un amigo.';
 
   @override
+  String get bikeSection => 'Mi moto';
+
+  @override
+  String get bikeSelect => 'Elige tu moto';
+
+  @override
+  String get bikeSelectHelp =>
+      'Catálogo Triumph — se usa en Lean Lab y contexto de recorridos';
+
+  @override
+  String get bikePickerTitle => 'Garage';
+
+  @override
+  String get bikePickerHelp =>
+      'Elige la Triumph que ruedas. Etiqueta Lean Lab y datos de entrenamiento.';
+
+  @override
+  String get bikeClear => 'Quitar';
+
+  @override
+  String get bikeFamilyNaked => 'Naked';
+
+  @override
+  String get bikeFamilyAdventure => 'Adventure';
+
+  @override
+  String get bikeFamilyClassic => 'Clásica';
+
+  @override
+  String get bikeFamilySport => 'Sport';
+
+  @override
+  String get bikeFamilyCruiser => 'Cruiser';
+
+  @override
+  String get bikeFamilyOther => 'Otra';
+
+  @override
+  String get leanLabHomeCta => 'Lab de inclinación — Bugambilias';
+
+  @override
   String get leanLabTitle => 'Lab de inclinación';
 
   @override

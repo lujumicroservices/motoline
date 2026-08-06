@@ -125,6 +125,7 @@ class LeanLabSession {
     this.coveragePct = 0,
     this.totalClimbM = 0,
     this.totalDescentM = 0,
+    this.bikeId,
     this.createdAt,
     this.synced = false,
   });
@@ -141,6 +142,7 @@ class LeanLabSession {
   final double coveragePct;
   final double totalClimbM;
   final double totalDescentM;
+  final String? bikeId;
   final DateTime? createdAt;
   final bool synced;
 
@@ -167,6 +169,7 @@ class LeanLabSession {
       coveragePct: coveragePct ?? this.coveragePct,
       totalClimbM: totalClimbM ?? this.totalClimbM,
       totalDescentM: totalDescentM ?? this.totalDescentM,
+      bikeId: bikeId,
       createdAt: createdAt,
       synced: synced ?? this.synced,
     );
@@ -185,6 +188,7 @@ class LeanLabSession {
         'coverage_pct': coveragePct,
         'total_climb_m': totalClimbM,
         'total_descent_m': totalDescentM,
+        'bike_id': bikeId,
         'created_at_ms':
             (createdAt ?? DateTime.now()).millisecondsSinceEpoch,
         'synced': synced ? 1 : 0,
@@ -211,6 +215,7 @@ class LeanLabSession {
       coveragePct: (row['coverage_pct'] as num?)?.toDouble() ?? 0,
       totalClimbM: (row['total_climb_m'] as num?)?.toDouble() ?? 0,
       totalDescentM: (row['total_descent_m'] as num?)?.toDouble() ?? 0,
+      bikeId: row['bike_id'] as String?,
       createdAt: row['created_at_ms'] == null
           ? null
           : DateTime.fromMillisecondsSinceEpoch(row['created_at_ms'] as int),
@@ -230,6 +235,7 @@ class LeanLabSession {
       'direction': direction.id,
       'phone_mount': phoneMount,
       'phone_pose': phonePose.id,
+      'bike_id': bikeId,
       'frozen_neutral_deg': frozenNeutralDeg,
       'calib_at': calibAt?.toUtc().toIso8601String(),
       'coverage_pct': coveragePct,

@@ -45,13 +45,24 @@ class SocialRepository {
     await _ensure();
     final me = currentUserId;
     if (me == null) return null;
-    final row = await _supabase
-        .from('profiles')
-        .select('id, display_name, created_at')
-        .eq('id', me)
-        .maybeSingle();
-    if (row == null) return null;
-    return RiderProfile.fromMap(Map<String, dynamic>.from(row));
+    try {
+      final row = await _supabase
+          .from('profiles')
+          .select('id, display_name, bike_id, created_at')
+          .eq('id', me)
+          .maybeSingle();
+      if (row == null) return null;
+      return RiderProfile.fromMap(Map<String, dynamic>.from(row));
+    } catch (_) {
+      // Older schemas without bike_id.
+      final row = await _supabase
+          .from('profiles')
+          .select('id, display_name, created_at')
+          .eq('id', me)
+          .maybeSingle();
+      if (row == null) return null;
+      return RiderProfile.fromMap(Map<String, dynamic>.from(row));
+    }
   }
 
   Future<void> updateDisplayName(String name) async {
@@ -60,6 +71,16 @@ class SocialRepository {
     if (me == null) throw StateError('Not signed in');
     await _supabase.from('profiles').update({
       'display_name': name.trim().isEmpty ? null : name.trim(),
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', me);
+  }
+
+  Future<void> updateBikeId(String? bikeId) async {
+    await _ensure();
+    final me = currentUserId;
+    if (me == null) throw StateError('Not signed in');
+    await _supabase.from('profiles').update({
+      'bike_id': bikeId,
       'updated_at': DateTime.now().toUtc().toIso8601String(),
     }).eq('id', me);
   }

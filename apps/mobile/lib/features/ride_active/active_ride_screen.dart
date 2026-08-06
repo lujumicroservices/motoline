@@ -15,6 +15,7 @@ import '../../core/services/rider_telemetry_service.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../l10n/gps_warmup_l10n.dart';
+import '../../providers/bike_provider.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
@@ -139,6 +140,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           phonePose: leanLab.phonePose,
           frozenNeutralDeg: leanLab.frozenNeutralDeg,
           calibAt: leanLab.calibAt,
+          bikeId: ref.read(riderBikeProvider)?.id,
         );
       }
 

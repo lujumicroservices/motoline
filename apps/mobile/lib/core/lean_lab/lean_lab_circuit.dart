@@ -5,17 +5,18 @@ import '../utils/geo_utils.dart';
 
 /// Official Lean Lab test circuit — Bugambilias / Plaza Panorámica (Zapopan).
 ///
-/// Map: https://maps.app.goo.gl/ttgwT6ewv8DKUSQc8
+/// Map: https://maps.app.goo.gl/ymkVYu9uiB7fTEuN7
+/// Start/end pins are approximate; real path is a few meters inboard on asphalt.
 abstract final class BugambiliasCircuit {
-  static const protocolId = 'lean_lab_bugambilias_v1';
+  static const protocolId = 'lean_lab_bugambilias_v2';
   static const displayName = 'Bugambilias';
-  static const mapsUrl = 'https://maps.app.goo.gl/ttgwT6ewv8DKUSQc8';
+  static const mapsUrl = 'https://maps.app.goo.gl/ymkVYu9uiB7fTEuN7';
 
-  /// Lower end of the linked route.
-  static const startLat = 20.6032273;
-  static const startLng = -103.4352614;
+  /// Lower / east end of the linked route (inboard of the map pin).
+  static const startLat = 20.6043507;
+  static const startLng = -103.4409284;
 
-  /// Plaza Panorámica Bugambilias.
+  /// Plaza Panorámica Bugambilias (west end).
   static const plazaLat = 20.6113781;
   static const plazaLng = -103.4609937;
 
@@ -23,7 +24,7 @@ abstract final class BugambiliasCircuit {
   static const minLat = 20.598;
   static const maxLat = 20.618;
   static const minLng = -103.470;
-  static const maxLng = -103.425;
+  static const maxLng = -103.430;
 
   static bool contains(double lat, double lng) =>
       lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;

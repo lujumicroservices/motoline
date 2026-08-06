@@ -63,6 +63,7 @@ class LeanLabService {
     required PhonePoseId phonePose,
     required double frozenNeutralDeg,
     DateTime? calibAt,
+    String? bikeId,
   }) async {
     final session = LeanLabSession(
       rideId: rideId,
@@ -73,6 +74,7 @@ class LeanLabService {
       phonePose: phonePose,
       frozenNeutralDeg: frozenNeutralDeg,
       calibAt: calibAt ?? DateTime.now(),
+      bikeId: bikeId,
       createdAt: DateTime.now(),
     );
     await saveSession(session);

@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 13,
+      version: 14,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -116,6 +116,9 @@ class RideDatabase {
         if (oldVersion < 13) {
           await _createLeanLabSessionsTable(db);
         }
+        if (oldVersion < 14) {
+          await _addLeanLabBikeIdColumnIfMissing(db);
+        }
       },
     );
   }
@@ -135,6 +138,7 @@ class RideDatabase {
         coverage_pct REAL NOT NULL DEFAULT 0,
         total_climb_m REAL NOT NULL DEFAULT 0,
         total_descent_m REAL NOT NULL DEFAULT 0,
+        bike_id TEXT,
         created_at_ms INTEGER NOT NULL,
         synced INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
@@ -144,6 +148,14 @@ class RideDatabase {
       'CREATE INDEX IF NOT EXISTS idx_lean_lab_synced '
       'ON lean_lab_sessions(synced, created_at_ms)',
     );
+  }
+
+  Future<void> _addLeanLabBikeIdColumnIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(lean_lab_sessions)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    if (!existing.contains('bike_id')) {
+      await db.execute('ALTER TABLE lean_lab_sessions ADD COLUMN bike_id TEXT');
+    }
   }
 
   Future<void> _createRideEngineLabelsTable(Database db) async {

@@ -3242,6 +3242,84 @@ abstract class AppLocalizations {
   /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma sección de curva con un amigo.'**
   String get skillLabFocusHelp;
 
+  /// No description provided for @bikeSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi moto'**
+  String get bikeSection;
+
+  /// No description provided for @bikeSelect.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu moto'**
+  String get bikeSelect;
+
+  /// No description provided for @bikeSelectHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Catálogo Triumph — se usa en Lean Lab y contexto de recorridos'**
+  String get bikeSelectHelp;
+
+  /// No description provided for @bikePickerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Garage'**
+  String get bikePickerTitle;
+
+  /// No description provided for @bikePickerHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige la Triumph que ruedas. Etiqueta Lean Lab y datos de entrenamiento.'**
+  String get bikePickerHelp;
+
+  /// No description provided for @bikeClear.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
+  String get bikeClear;
+
+  /// No description provided for @bikeFamilyNaked.
+  ///
+  /// In es, this message translates to:
+  /// **'Naked'**
+  String get bikeFamilyNaked;
+
+  /// No description provided for @bikeFamilyAdventure.
+  ///
+  /// In es, this message translates to:
+  /// **'Adventure'**
+  String get bikeFamilyAdventure;
+
+  /// No description provided for @bikeFamilyClassic.
+  ///
+  /// In es, this message translates to:
+  /// **'Clásica'**
+  String get bikeFamilyClassic;
+
+  /// No description provided for @bikeFamilySport.
+  ///
+  /// In es, this message translates to:
+  /// **'Sport'**
+  String get bikeFamilySport;
+
+  /// No description provided for @bikeFamilyCruiser.
+  ///
+  /// In es, this message translates to:
+  /// **'Cruiser'**
+  String get bikeFamilyCruiser;
+
+  /// No description provided for @bikeFamilyOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otra'**
+  String get bikeFamilyOther;
+
+  /// No description provided for @leanLabHomeCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab de inclinación — Bugambilias'**
+  String get leanLabHomeCta;
+
   /// No description provided for @leanLabTitle.
   ///
   /// In es, this message translates to:

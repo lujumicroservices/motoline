@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
+import '../../providers/bike_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../providers/ride_providers.dart';
@@ -14,6 +15,7 @@ import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
 import '../lean_lab/lean_lab_screen.dart';
+import 'bike_picker_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -48,6 +50,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = context.l10n;
     final isPro = ref.watch(isProProvider);
     final locale = ref.watch(localeProvider);
+    final bike = ref.watch(riderBikeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -72,6 +75,70 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Align(
             alignment: Alignment.centerLeft,
             child: RiderAliasChip(),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.leanLabTitle,
+            style: GoogleFonts.barlowCondensed(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.motorcycle, color: AppTheme.line),
+            title: Text(
+              l10n.leanLabSettingsTile,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              l10n.leanLabSettingsHelp,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const LeanLabScreen(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.bikeSection,
+            style: GoogleFonts.barlowCondensed(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.two_wheeler, color: AppTheme.mist),
+            title: Text(
+              bike?.label ?? l10n.bikeSelect,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              bike == null ? l10n.bikeSelectHelp : bike.subtitle,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const BikePickerScreen(),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 28),
           Text(
@@ -100,38 +167,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const AccountAuthSection(),
           const SizedBox(height: 28),
           const AdventureCameraSettingsSection(),
-          const SizedBox(height: 28),
-          Text(
-            l10n.leanLabTitle,
-            style: GoogleFonts.barlowCondensed(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.motorcycle, color: AppTheme.mist),
-            title: Text(
-              l10n.leanLabSettingsTile,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              l10n.leanLabSettingsHelp,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const LeanLabScreen(),
-                ),
-              );
-            },
-          ),
           const SizedBox(height: 28),
           Text(
             l10n.syncCloudRides,

@@ -24,7 +24,11 @@ class RideEngineLabelService {
     return row != null;
   }
 
-  Future<void> save(RideEngineLabel label, {RideAnalytics? analytics}) async {
+  Future<void> save(
+    RideEngineLabel label, {
+    RideAnalytics? analytics,
+    String? bikeId,
+  }) async {
     await _db.upsertRideEngineLabel(label.toDb());
     if (label.skipped) return;
 
@@ -33,6 +37,7 @@ class RideEngineLabelService {
       curveEventCount: analytics?.curveEvents.length,
       pointCount: analytics?.samples.length,
       distanceKm: analytics?.distanceKm,
+      bikeId: bikeId,
     );
 
     await _telemetry.log(

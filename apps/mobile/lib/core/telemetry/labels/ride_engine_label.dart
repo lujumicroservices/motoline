@@ -64,6 +64,7 @@ class RideEngineLabel {
     int? curveEventCount,
     int? pointCount,
     double? distanceKm,
+    String? bikeId,
   }) {
     return {
       'schema': 'engine_label.v1',
@@ -78,6 +79,7 @@ class RideEngineLabel {
       'curve_event_count': curveEventCount,
       'point_count': pointCount,
       'distance_km': distanceKm,
+      'bike_id': bikeId,
       'labeled_at': createdAt.toUtc().toIso8601String(),
     };
   }

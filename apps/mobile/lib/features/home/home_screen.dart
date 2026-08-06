@@ -19,6 +19,7 @@ import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
+import '../lean_lab/lean_lab_screen.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../ride_detail/ride_rename.dart';
@@ -125,6 +126,24 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const UpdateCheckIconButton(),
                     ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.tonalIcon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const LeanLabScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.motorcycle),
+                      label: Text(l10n.leanLabHomeCta),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
                   ),
                 ],
               ),

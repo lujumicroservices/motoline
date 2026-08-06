@@ -1760,6 +1760,47 @@ class AppLocalizationsEn extends AppLocalizations {
       'Lowest-scoring turns first. Bars show entry → apex → exit speed. Tap Replay to watch lean, brake, and speed — and compare the same corner section with a friend.';
 
   @override
+  String get bikeSection => 'My bike';
+
+  @override
+  String get bikeSelect => 'Select your bike';
+
+  @override
+  String get bikeSelectHelp =>
+      'Triumph catalog — used for Lean Lab and ride context';
+
+  @override
+  String get bikePickerTitle => 'Garage';
+
+  @override
+  String get bikePickerHelp =>
+      'Pick the Triumph you ride. This tags Lean Lab and training labels.';
+
+  @override
+  String get bikeClear => 'Clear';
+
+  @override
+  String get bikeFamilyNaked => 'Naked';
+
+  @override
+  String get bikeFamilyAdventure => 'Adventure';
+
+  @override
+  String get bikeFamilyClassic => 'Classic';
+
+  @override
+  String get bikeFamilySport => 'Sport';
+
+  @override
+  String get bikeFamilyCruiser => 'Cruiser';
+
+  @override
+  String get bikeFamilyOther => 'Other';
+
+  @override
+  String get leanLabHomeCta => 'Lean Lab — Bugambilias';
+
+  @override
   String get leanLabTitle => 'Lean Lab';
 
   @override
