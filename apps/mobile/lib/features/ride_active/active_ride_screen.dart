@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/models/route_circuit.dart';
 import '../../core/models/route_loop.dart';
 import '../../core/models/track_point.dart';
@@ -19,6 +20,8 @@ import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../adventure_camera/widgets/adventure_camera_ride_controls.dart';
 import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
+import '../lean_lab/lean_lab_bootstrap.dart';
+import '../lean_lab/lean_lab_review_screen.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../telemetry/ride_engine_label_screen.dart';
 import 'loop_mark_map_screen.dart';
@@ -34,6 +37,7 @@ class ActiveRideScreen extends ConsumerStatefulWidget {
     this.mode = ActiveRideMode.normal,
     this.route,
     this.loop,
+    this.leanLabBootstrap,
   });
 
   /// When true, starts the recorder (with GPS warm-up UI) on open.
@@ -46,6 +50,9 @@ class ActiveRideScreen extends ConsumerStatefulWidget {
 
   /// Optional saved loop — arms auto-lap as soon as recording starts.
   final RouteLoop? loop;
+
+  /// When set, attaches a Lean Lab session after recording starts.
+  final LeanLabRideBootstrap? leanLabBootstrap;
 
   @override
   ConsumerState<ActiveRideScreen> createState() => _ActiveRideScreenState();
@@ -119,6 +126,21 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         routeId: widget.route?.id,
       );
       if (!mounted) return;
+
+      final leanLab = widget.leanLabBootstrap;
+      final started = recorder.activeRide;
+      if (leanLab != null && started != null) {
+        recorder.lockLeanNeutral(leanLab.frozenNeutralDeg);
+        await LeanLabService.instance.beginSession(
+          rideId: started.id,
+          sessionType: leanLab.sessionType,
+          direction: leanLab.direction,
+          phoneMount: leanLab.phoneMount,
+          phonePose: leanLab.phonePose,
+          frozenNeutralDeg: leanLab.frozenNeutralDeg,
+          calibAt: leanLab.calibAt,
+        );
+      }
 
       if (_isLoop && widget.route != null) {
         final loopCtrl = ref.read(loopSessionControllerProvider);
@@ -519,7 +541,24 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       final ride = await recorder.stop();
       // Closed beta: share with friends (soft-fail offline).
       unawaited(ref.read(rideSyncServiceProvider).syncRide(ride.id));
+      final points =
+          await ref.read(rideDatabaseProvider).getPoints(ride.id);
+      await LeanLabService.instance.finalizeTrackStats(
+        rideId: ride.id,
+        samples: points,
+      );
       if (!context.mounted) return;
+      final leanSession =
+          await LeanLabService.instance.getSession(ride.id);
+      if (!context.mounted) return;
+      if (leanSession != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => LeanLabReviewScreen(rideId: ride.id),
+          ),
+        );
+        return;
+      }
       // Beta: collect mount/lean/brake labels before Ride Lab.
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(

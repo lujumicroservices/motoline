@@ -3242,6 +3242,300 @@ abstract class AppLocalizations {
   /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma sección de curva con un amigo.'**
   String get skillLabFocusHelp;
 
+  /// No description provided for @leanLabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab de inclinación'**
+  String get leanLabTitle;
+
+  /// No description provided for @leanLabIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Protocolo para pilots en Bugambilias — ambos sentidos, con elevación. Calibra vertical, rueda y etiqueta curvas para pulir el lean.'**
+  String get leanLabIntro;
+
+  /// No description provided for @leanLabCircuitName.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuito Bugambilias'**
+  String get leanLabCircuitName;
+
+  /// No description provided for @leanLabCircuitHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Plaza Panorámica Bugambilias · ambos sentidos · abrir en Maps'**
+  String get leanLabCircuitHelp;
+
+  /// No description provided for @leanLabProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'{labeled} de {total} sesiones etiquetadas'**
+  String leanLabProgress(int labeled, int total);
+
+  /// No description provided for @leanLabProtocols.
+  ///
+  /// In es, this message translates to:
+  /// **'Protocolos'**
+  String get leanLabProtocols;
+
+  /// No description provided for @leanLabProtoOutbound.
+  ///
+  /// In es, this message translates to:
+  /// **'Base de ida'**
+  String get leanLabProtoOutbound;
+
+  /// No description provided for @leanLabProtoOutboundHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Hacia la plaza, mount al centro. Captura lean en subida/bajada.'**
+  String get leanLabProtoOutboundHelp;
+
+  /// No description provided for @leanLabProtoReturn.
+  ///
+  /// In es, this message translates to:
+  /// **'Base de regreso'**
+  String get leanLabProtoReturn;
+
+  /// No description provided for @leanLabProtoReturnHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Sentido contrario, mount al centro. Mismas curvas, lados invertidos.'**
+  String get leanLabProtoReturnHelp;
+
+  /// No description provided for @leanLabProtoPocket.
+  ///
+  /// In es, this message translates to:
+  /// **'Mount A/B — bolsillo'**
+  String get leanLabProtoPocket;
+
+  /// No description provided for @leanLabProtoPocketHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Mismo circuito con teléfono en bolsillo para aprender el sesgo del mount.'**
+  String get leanLabProtoPocketHelp;
+
+  /// No description provided for @leanLabProtoFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelta libre Lean Lab'**
+  String get leanLabProtoFree;
+
+  /// No description provided for @leanLabProtoFreeHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Cualquier sentido en este circuito con calib + etiquetas de curva.'**
+  String get leanLabProtoFreeHelp;
+
+  /// No description provided for @leanLabStartProtocol.
+  ///
+  /// In es, this message translates to:
+  /// **'Preparar y rodar'**
+  String get leanLabStartProtocol;
+
+  /// No description provided for @leanLabNeedsLabels.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltan etiquetas de curva'**
+  String get leanLabNeedsLabels;
+
+  /// No description provided for @leanLabElevationSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'↑{climb} m · ↓{descent} m'**
+  String leanLabElevationSummary(String climb, String descent);
+
+  /// No description provided for @leanLabPrepTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Prep Lean Lab'**
+  String get leanLabPrepTitle;
+
+  /// No description provided for @leanLabPrepHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige mount y pose, sujeta la moto vertical para congelar el neutro, y arranca la vuelta.'**
+  String get leanLabPrepHelp;
+
+  /// No description provided for @leanLabPoseQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo va el teléfono?'**
+  String get leanLabPoseQ;
+
+  /// No description provided for @leanLabPoseScreenOut.
+  ///
+  /// In es, this message translates to:
+  /// **'Vertical · pantalla afuera'**
+  String get leanLabPoseScreenOut;
+
+  /// No description provided for @leanLabPoseScreenIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Vertical · pantalla adentro'**
+  String get leanLabPoseScreenIn;
+
+  /// No description provided for @leanLabPoseLandscape.
+  ///
+  /// In es, this message translates to:
+  /// **'Horizontal'**
+  String get leanLabPoseLandscape;
+
+  /// No description provided for @leanLabDirectionQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dirección en Bugambilias?'**
+  String get leanLabDirectionQ;
+
+  /// No description provided for @leanLabDirectionOutbound.
+  ///
+  /// In es, this message translates to:
+  /// **'Ida (a la plaza)'**
+  String get leanLabDirectionOutbound;
+
+  /// No description provided for @leanLabDirectionReturn.
+  ///
+  /// In es, this message translates to:
+  /// **'Regreso'**
+  String get leanLabDirectionReturn;
+
+  /// No description provided for @leanLabCalibTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Calibración vertical'**
+  String get leanLabCalibTitle;
+
+  /// No description provided for @leanLabCalibHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Detenido, moto vertical, teléfono fijo. 4 segundos — congela 0° de lean para todo el recorrido.'**
+  String get leanLabCalibHelp;
+
+  /// No description provided for @leanLabCalibHold.
+  ///
+  /// In es, this message translates to:
+  /// **'Sostener vertical 4s'**
+  String get leanLabCalibHold;
+
+  /// No description provided for @leanLabCalibHolding.
+  ///
+  /// In es, this message translates to:
+  /// **'Quédate quieto…'**
+  String get leanLabCalibHolding;
+
+  /// No description provided for @leanLabRawNeutral.
+  ///
+  /// In es, this message translates to:
+  /// **'Ángulo crudo del teléfono'**
+  String get leanLabRawNeutral;
+
+  /// No description provided for @leanLabFrozenNeutral.
+  ///
+  /// In es, this message translates to:
+  /// **'Neutro congelado'**
+  String get leanLabFrozenNeutral;
+
+  /// No description provided for @leanLabStartRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar recorrido Lean Lab'**
+  String get leanLabStartRide;
+
+  /// No description provided for @leanLabReviewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Etiquetar inclinación'**
+  String get leanLabReviewTitle;
+
+  /// No description provided for @leanLabReviewHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'En cada curva: ¿el lean de la app se sintió alto, bien o bajo? Se muestra la pendiente para corregir sesgo de subida/bajada.'**
+  String get leanLabReviewHelp;
+
+  /// No description provided for @leanLabNoCorners.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay curvas detectadas para etiquetar en este recorrido.'**
+  String get leanLabNoCorners;
+
+  /// No description provided for @leanLabAppLean.
+  ///
+  /// In es, this message translates to:
+  /// **'Lean app'**
+  String get leanLabAppLean;
+
+  /// No description provided for @leanLabGrade.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get leanLabGrade;
+
+  /// No description provided for @leanLabBiasQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo se sintió el lean de la app en el ápice?'**
+  String get leanLabBiasQ;
+
+  /// No description provided for @leanLabBiasAppHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'App muy alto'**
+  String get leanLabBiasAppHigh;
+
+  /// No description provided for @leanLabBiasOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Se sintió bien'**
+  String get leanLabBiasOk;
+
+  /// No description provided for @leanLabBiasAppLow.
+  ///
+  /// In es, this message translates to:
+  /// **'App muy bajo'**
+  String get leanLabBiasAppLow;
+
+  /// No description provided for @leanLabBiasUnsure.
+  ///
+  /// In es, this message translates to:
+  /// **'No estoy seguro'**
+  String get leanLabBiasUnsure;
+
+  /// No description provided for @leanLabTrendClimbing.
+  ///
+  /// In es, this message translates to:
+  /// **'subiendo'**
+  String get leanLabTrendClimbing;
+
+  /// No description provided for @leanLabTrendDescending.
+  ///
+  /// In es, this message translates to:
+  /// **'bajando'**
+  String get leanLabTrendDescending;
+
+  /// No description provided for @leanLabTrendFlat.
+  ///
+  /// In es, this message translates to:
+  /// **'plano'**
+  String get leanLabTrendFlat;
+
+  /// No description provided for @leanLabSaveLabels.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar etiquetas'**
+  String get leanLabSaveLabels;
+
+  /// No description provided for @leanLabSettingsTile.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab de inclinación (pilots)'**
+  String get leanLabSettingsTile;
+
+  /// No description provided for @leanLabSettingsHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Protocolo Bugambilias · calib · elevación · verdad de curvas'**
+  String get leanLabSettingsHelp;
+
   /// No description provided for @skillReplayTitle.
   ///
   /// In es, this message translates to:

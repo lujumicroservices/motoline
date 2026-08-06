@@ -20,6 +20,8 @@ abstract final class TelemetryCategory {
   static const error = 'error';
   /// Beta rider answers that train lean / curve / brake models.
   static const engineLabel = 'engine_label';
+  /// Lean Lab protocol sessions (Bugambilias + corner ground truth).
+  static const leanLab = 'lean_lab';
 }
 
 /// Queues device troubleshooting events locally and uploads to Supabase

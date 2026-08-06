@@ -10,12 +10,14 @@ class HomeNavIconButton extends StatelessWidget {
     super.key,
     required this.tooltip,
     required this.onPressed,
-    required this.painter,
-  });
+    this.painter,
+    this.icon,
+  }) : assert(painter != null || icon != null);
 
   final String tooltip;
   final VoidCallback onPressed;
-  final CustomPainter painter;
+  final CustomPainter? painter;
+  final IconData? icon;
 
   static const double hit = 52;
 
@@ -26,16 +28,18 @@ class HomeNavIconButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: hit, minHeight: hit),
       onPressed: onPressed,
-      icon: SizedBox(
-        width: 34,
-        height: 34,
-        child: CustomPaint(painter: painter),
-      ),
+      icon: icon != null
+          ? Icon(icon, size: 28, color: AppTheme.mist)
+          : SizedBox(
+              width: 34,
+              height: 34,
+              child: CustomPaint(painter: painter!),
+            ),
     );
   }
 }
 
-/// Pack of three riders — Rodadas (group ride), not a generic “groups” icon.
+/// Three distinct motorcycles riding — Rodadas pack icon.
 class RodadaPackIconPainter extends CustomPainter {
   const RodadaPackIconPainter({this.color = AppTheme.mist});
 
@@ -46,115 +50,236 @@ class RodadaPackIconPainter extends CustomPainter {
     final stroke = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.1
+      ..strokeWidth = 1.7
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    final fill = Paint()..color = color.withValues(alpha: 0.9);
+    final fill = Paint()..color = color.withValues(alpha: 0.92);
 
-    void helmet(Offset c, double r) {
-      canvas.drawArc(
-        Rect.fromCircle(center: c, radius: r),
-        math.pi * 1.05,
-        math.pi * 1.1,
-        false,
-        stroke,
-      );
-      canvas.drawLine(
-        Offset(c.dx - r * 0.85, c.dy + r * 0.15),
-        Offset(c.dx + r * 0.85, c.dy + r * 0.15),
-        stroke,
-      );
-      canvas.drawCircle(Offset(c.dx, c.dy - r * 0.15), r * 0.18, fill);
-    }
+    // Back-left: upright / adventure (taller, longer wheelbase feel).
+    _adventureBike(
+      canvas,
+      origin: Offset(size.width * 0.02, size.height * 0.58),
+      scale: 0.72,
+      stroke: stroke,
+      fill: fill,
+    );
+    // Back-right: cruiser (low seat, fat rear wheel hint).
+    _cruiserBike(
+      canvas,
+      origin: Offset(size.width * 0.38, size.height * 0.62),
+      scale: 0.70,
+      stroke: stroke,
+      fill: fill,
+    );
+    // Lead: sport bike (tucked, sharp nose) — front / center.
+    _sportBike(
+      canvas,
+      origin: Offset(size.width * 0.22, size.height * 0.28),
+      scale: 0.92,
+      stroke: stroke,
+      fill: fill,
+    );
+  }
 
-    void bike(Offset rear, double scale) {
-      final wheel = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.8;
-      canvas.drawCircle(rear, 3.2 * scale, wheel);
-      canvas.drawCircle(
-        Offset(rear.dx + 11 * scale, rear.dy),
-        3.2 * scale,
-        wheel,
-      );
-      canvas.drawLine(
-        Offset(rear.dx + 1 * scale, rear.dy - 1),
-        Offset(rear.dx + 6 * scale, rear.dy - 5.5 * scale),
-        stroke,
-      );
-      canvas.drawLine(
-        Offset(rear.dx + 6 * scale, rear.dy - 5.5 * scale),
-        Offset(rear.dx + 10 * scale, rear.dy - 1),
-        stroke,
-      );
-    }
+  void _wheels(
+    Canvas canvas, {
+    required Offset rear,
+    required Offset front,
+    required double rRear,
+    required double rFront,
+    required Paint stroke,
+  }) {
+    canvas.drawCircle(rear, rRear, stroke);
+    canvas.drawCircle(front, rFront, stroke);
+  }
 
-    final w = size.width;
-    final h = size.height;
-    // Lead + two wingmen — pack formation.
-    helmet(Offset(w * 0.52, h * 0.28), w * 0.16);
-    bike(Offset(w * 0.34, h * 0.72), 0.95);
-    helmet(Offset(w * 0.22, h * 0.40), w * 0.13);
-    bike(Offset(w * 0.08, h * 0.82), 0.78);
-    helmet(Offset(w * 0.80, h * 0.40), w * 0.13);
-    bike(Offset(w * 0.62, h * 0.82), 0.78);
+  void _riderTuck(
+    Canvas canvas, {
+    required Offset seat,
+    required double scale,
+    required Paint stroke,
+    required Paint fill,
+    double lean = -0.15,
+  }) {
+    final head = Offset(
+      seat.dx + 5.5 * scale * math.cos(lean),
+      seat.dy - 7.5 * scale + 2 * scale * math.sin(lean),
+    );
+    canvas.drawCircle(head, 2.4 * scale, fill);
+    canvas.drawLine(
+      Offset(seat.dx + 1 * scale, seat.dy - 1 * scale),
+      head,
+      stroke,
+    );
+    // Arms toward bars.
+    canvas.drawLine(
+      Offset(seat.dx + 1.5 * scale, seat.dy - 2 * scale),
+      Offset(seat.dx + 9 * scale, seat.dy - 3.5 * scale),
+      stroke,
+    );
+  }
+
+  /// Sharp fairing, short wheelbase vibe.
+  void _sportBike(
+    Canvas canvas, {
+    required Offset origin,
+    required double scale,
+    required Paint stroke,
+    required Paint fill,
+  }) {
+    final rear = Offset(origin.dx + 3 * scale, origin.dy + 14 * scale);
+    final front = Offset(origin.dx + 22 * scale, origin.dy + 14 * scale);
+    _wheels(
+      canvas,
+      rear: rear,
+      front: front,
+      rRear: 3.4 * scale,
+      rFront: 3.2 * scale,
+      stroke: stroke,
+    );
+    // Swingarm + frame diamond.
+    canvas.drawLine(rear, Offset(origin.dx + 10 * scale, origin.dy + 8 * scale), stroke);
+    canvas.drawLine(
+      Offset(origin.dx + 10 * scale, origin.dy + 8 * scale),
+      Offset(origin.dx + 17 * scale, origin.dy + 7 * scale),
+      stroke,
+    );
+    canvas.drawLine(
+      Offset(origin.dx + 17 * scale, origin.dy + 7 * scale),
+      front,
+      stroke,
+    );
+    // Tail + seat.
+    canvas.drawLine(
+      Offset(origin.dx + 2 * scale, origin.dy + 9 * scale),
+      Offset(origin.dx + 11 * scale, origin.dy + 7.5 * scale),
+      stroke,
+    );
+    // Fairing / nose.
+    final fairing = Path()
+      ..moveTo(origin.dx + 15 * scale, origin.dy + 6 * scale)
+      ..lineTo(origin.dx + 23 * scale, origin.dy + 5 * scale)
+      ..lineTo(origin.dx + 20 * scale, origin.dy + 9 * scale)
+      ..close();
+    canvas.drawPath(fairing, stroke);
+    _riderTuck(
+      canvas,
+      seat: Offset(origin.dx + 9 * scale, origin.dy + 7 * scale),
+      scale: scale,
+      stroke: stroke,
+      fill: fill,
+      lean: -0.25,
+    );
+  }
+
+  /// Tall screen / upright bars.
+  void _adventureBike(
+    Canvas canvas, {
+    required Offset origin,
+    required double scale,
+    required Paint stroke,
+    required Paint fill,
+  }) {
+    final rear = Offset(origin.dx + 3 * scale, origin.dy + 13 * scale);
+    final front = Offset(origin.dx + 20 * scale, origin.dy + 13 * scale);
+    _wheels(
+      canvas,
+      rear: rear,
+      front: front,
+      rRear: 3.6 * scale,
+      rFront: 3.6 * scale,
+      stroke: stroke,
+    );
+    canvas.drawLine(rear, Offset(origin.dx + 9 * scale, origin.dy + 6 * scale), stroke);
+    canvas.drawLine(
+      Offset(origin.dx + 9 * scale, origin.dy + 6 * scale),
+      Offset(origin.dx + 15 * scale, origin.dy + 5.5 * scale),
+      stroke,
+    );
+    canvas.drawLine(
+      Offset(origin.dx + 15 * scale, origin.dy + 5.5 * scale),
+      front,
+      stroke,
+    );
+    // Tall windshield.
+    canvas.drawLine(
+      Offset(origin.dx + 15 * scale, origin.dy + 5.5 * scale),
+      Offset(origin.dx + 16.5 * scale, origin.dy + 1.2 * scale),
+      stroke,
+    );
+    // High bars.
+    canvas.drawLine(
+      Offset(origin.dx + 14 * scale, origin.dy + 5 * scale),
+      Offset(origin.dx + 18 * scale, origin.dy + 3 * scale),
+      stroke,
+    );
+    // Upright rider.
+    final seat = Offset(origin.dx + 8 * scale, origin.dy + 5.5 * scale);
+    final head = Offset(seat.dx + 2 * scale, seat.dy - 8 * scale);
+    canvas.drawCircle(head, 2.3 * scale, fill);
+    canvas.drawLine(seat, head, stroke);
+    canvas.drawLine(
+      Offset(seat.dx + 1 * scale, seat.dy - 3 * scale),
+      Offset(origin.dx + 17 * scale, origin.dy + 3.5 * scale),
+      stroke,
+    );
+  }
+
+  /// Low long silhouette, bigger rear hoop.
+  void _cruiserBike(
+    Canvas canvas, {
+    required Offset origin,
+    required double scale,
+    required Paint stroke,
+    required Paint fill,
+  }) {
+    final rear = Offset(origin.dx + 4 * scale, origin.dy + 13 * scale);
+    final front = Offset(origin.dx + 23 * scale, origin.dy + 13 * scale);
+    _wheels(
+      canvas,
+      rear: rear,
+      front: front,
+      rRear: 4.0 * scale,
+      rFront: 3.0 * scale,
+      stroke: stroke,
+    );
+    // Low frame.
+    canvas.drawLine(
+      Offset(rear.dx, rear.dy - 2 * scale),
+      Offset(origin.dx + 14 * scale, origin.dy + 9 * scale),
+      stroke,
+    );
+    canvas.drawLine(
+      Offset(origin.dx + 14 * scale, origin.dy + 9 * scale),
+      Offset(front.dx - 1 * scale, front.dy - 1 * scale),
+      stroke,
+    );
+    // Long seat / fender.
+    canvas.drawLine(
+      Offset(origin.dx + 3 * scale, origin.dy + 8.5 * scale),
+      Offset(origin.dx + 13 * scale, origin.dy + 8 * scale),
+      stroke,
+    );
+    // Forward controls / footpeg hint.
+    canvas.drawLine(
+      Offset(origin.dx + 12 * scale, origin.dy + 9 * scale),
+      Offset(origin.dx + 16 * scale, origin.dy + 12 * scale),
+      stroke,
+    );
+    // Relaxed rider.
+    final seat = Offset(origin.dx + 9 * scale, origin.dy + 7.5 * scale);
+    final head = Offset(seat.dx + 3 * scale, seat.dy - 6.5 * scale);
+    canvas.drawCircle(head, 2.2 * scale, fill);
+    canvas.drawLine(seat, head, stroke);
+    canvas.drawLine(
+      Offset(seat.dx + 1 * scale, seat.dy - 2 * scale),
+      Offset(origin.dx + 18 * scale, origin.dy + 8 * scale),
+      stroke,
+    );
   }
 
   @override
   bool shouldRepaint(covariant RodadaPackIconPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-/// Two linked helmets — Friends, distinct from Rodadas pack.
-class FriendsLinkIconPainter extends CustomPainter {
-  const FriendsLinkIconPainter({this.color = AppTheme.mist});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    final fill = Paint()..color = color.withValues(alpha: 0.85);
-
-    void helmet(Offset c, double r) {
-      canvas.drawArc(
-        Rect.fromCircle(center: c, radius: r),
-        math.pi * 1.05,
-        math.pi * 1.1,
-        false,
-        stroke,
-      );
-      canvas.drawLine(
-        Offset(c.dx - r * 0.9, c.dy + r * 0.2),
-        Offset(c.dx + r * 0.9, c.dy + r * 0.2),
-        stroke,
-      );
-      canvas.drawCircle(Offset(c.dx + r * 0.15, c.dy - r * 0.1), r * 0.22, fill);
-    }
-
-    final w = size.width;
-    final h = size.height;
-    final left = Offset(w * 0.30, h * 0.42);
-    final right = Offset(w * 0.70, h * 0.42);
-    helmet(left, w * 0.20);
-    helmet(right, w * 0.20);
-
-    // Link arc between riders.
-    final path = Path()
-      ..moveTo(left.dx + w * 0.12, left.dy + h * 0.22)
-      ..quadraticBezierTo(w * 0.5, h * 0.92, right.dx - w * 0.12, right.dy + h * 0.22);
-    canvas.drawPath(path, stroke);
-    canvas.drawCircle(Offset(w * 0.5, h * 0.78), 2.2, fill);
-  }
-
-  @override
-  bool shouldRepaint(covariant FriendsLinkIconPainter oldDelegate) =>
       oldDelegate.color != color;
 }
 
@@ -202,4 +327,3 @@ class RoutesRibbonIconPainter extends CustomPainter {
   bool shouldRepaint(covariant RoutesRibbonIconPainter oldDelegate) =>
       oldDelegate.color != color;
 }
-

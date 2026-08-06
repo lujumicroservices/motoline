@@ -15,6 +15,7 @@ class LeanSensor {
   DateTime? _calibStartedAt;
   final ListQueue<double> _calibBuffer = ListQueue<double>();
   bool _calibrated = false;
+  bool _locked = false;
 
   /// Raw phone lean (mount/pocket absolute).
   double? get rawLeanDegrees => _rawLeanDegrees;
@@ -31,6 +32,7 @@ class LeanSensor {
 
   double? get neutralDegrees => _neutralDegrees;
   bool get isCalibrated => _calibrated;
+  bool get isLocked => _locked;
   DateTime? get updatedAt => _updatedAt;
 
   void start() {
@@ -38,6 +40,7 @@ class LeanSensor {
     _rawLeanDegrees = null;
     _neutralDegrees = null;
     _calibrated = false;
+    _locked = false;
     _calibBuffer.clear();
     _calibStartedAt = DateTime.now();
 
@@ -53,12 +56,43 @@ class LeanSensor {
       _rawLeanDegrees =
           previous == null ? sample : previous * 0.7 + sample * 0.3;
       _updatedAt = DateTime.now();
-      _maybeFinishCalibration(_rawLeanDegrees!);
+      if (!_locked) {
+        _maybeFinishCalibration(_rawLeanDegrees!);
+      }
     });
+  }
+
+  /// Freeze upright zero from a guided hold (Lean Lab). Stops auto-refine.
+  void lockNeutral(double degrees) {
+    _neutralDegrees = degrees;
+    _calibrated = true;
+    _locked = true;
+  }
+
+  /// Sample current raw lean into the calib buffer (guided hold).
+  void sampleForManualCalib() {
+    final raw = _rawLeanDegrees;
+    if (raw == null) return;
+    _calibBuffer.addLast(raw);
+    while (_calibBuffer.length > 120) {
+      _calibBuffer.removeFirst();
+    }
+  }
+
+  /// Median of the current calib buffer, or null if too few samples.
+  double? peekCalibNeutral({int minSamples = 25}) {
+    if (_calibBuffer.length < minSamples) return null;
+    return _median(_calibBuffer.toList(growable: false));
+  }
+
+  void clearCalibBuffer() {
+    _calibBuffer.clear();
+    _calibStartedAt = DateTime.now();
   }
 
   /// While nearly stopped, keep refining neutral (pocket settles).
   void observeForNeutral({required double? speedKmh}) {
+    if (_locked) return;
     final raw = _rawLeanDegrees;
     if (raw == null) return;
     if (speedKmh != null && speedKmh > 8) return;

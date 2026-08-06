@@ -1770,6 +1770,168 @@ class AppLocalizationsEs extends AppLocalizations {
       'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma sección de curva con un amigo.';
 
   @override
+  String get leanLabTitle => 'Lab de inclinación';
+
+  @override
+  String get leanLabIntro =>
+      'Protocolo para pilots en Bugambilias — ambos sentidos, con elevación. Calibra vertical, rueda y etiqueta curvas para pulir el lean.';
+
+  @override
+  String get leanLabCircuitName => 'Circuito Bugambilias';
+
+  @override
+  String get leanLabCircuitHelp =>
+      'Plaza Panorámica Bugambilias · ambos sentidos · abrir en Maps';
+
+  @override
+  String leanLabProgress(int labeled, int total) {
+    return '$labeled de $total sesiones etiquetadas';
+  }
+
+  @override
+  String get leanLabProtocols => 'Protocolos';
+
+  @override
+  String get leanLabProtoOutbound => 'Base de ida';
+
+  @override
+  String get leanLabProtoOutboundHelp =>
+      'Hacia la plaza, mount al centro. Captura lean en subida/bajada.';
+
+  @override
+  String get leanLabProtoReturn => 'Base de regreso';
+
+  @override
+  String get leanLabProtoReturnHelp =>
+      'Sentido contrario, mount al centro. Mismas curvas, lados invertidos.';
+
+  @override
+  String get leanLabProtoPocket => 'Mount A/B — bolsillo';
+
+  @override
+  String get leanLabProtoPocketHelp =>
+      'Mismo circuito con teléfono en bolsillo para aprender el sesgo del mount.';
+
+  @override
+  String get leanLabProtoFree => 'Vuelta libre Lean Lab';
+
+  @override
+  String get leanLabProtoFreeHelp =>
+      'Cualquier sentido en este circuito con calib + etiquetas de curva.';
+
+  @override
+  String get leanLabStartProtocol => 'Preparar y rodar';
+
+  @override
+  String get leanLabNeedsLabels => 'Faltan etiquetas de curva';
+
+  @override
+  String leanLabElevationSummary(String climb, String descent) {
+    return '↑$climb m · ↓$descent m';
+  }
+
+  @override
+  String get leanLabPrepTitle => 'Prep Lean Lab';
+
+  @override
+  String get leanLabPrepHelp =>
+      'Elige mount y pose, sujeta la moto vertical para congelar el neutro, y arranca la vuelta.';
+
+  @override
+  String get leanLabPoseQ => '¿Cómo va el teléfono?';
+
+  @override
+  String get leanLabPoseScreenOut => 'Vertical · pantalla afuera';
+
+  @override
+  String get leanLabPoseScreenIn => 'Vertical · pantalla adentro';
+
+  @override
+  String get leanLabPoseLandscape => 'Horizontal';
+
+  @override
+  String get leanLabDirectionQ => '¿Dirección en Bugambilias?';
+
+  @override
+  String get leanLabDirectionOutbound => 'Ida (a la plaza)';
+
+  @override
+  String get leanLabDirectionReturn => 'Regreso';
+
+  @override
+  String get leanLabCalibTitle => 'Calibración vertical';
+
+  @override
+  String get leanLabCalibHelp =>
+      'Detenido, moto vertical, teléfono fijo. 4 segundos — congela 0° de lean para todo el recorrido.';
+
+  @override
+  String get leanLabCalibHold => 'Sostener vertical 4s';
+
+  @override
+  String get leanLabCalibHolding => 'Quédate quieto…';
+
+  @override
+  String get leanLabRawNeutral => 'Ángulo crudo del teléfono';
+
+  @override
+  String get leanLabFrozenNeutral => 'Neutro congelado';
+
+  @override
+  String get leanLabStartRide => 'Iniciar recorrido Lean Lab';
+
+  @override
+  String get leanLabReviewTitle => 'Etiquetar inclinación';
+
+  @override
+  String get leanLabReviewHelp =>
+      'En cada curva: ¿el lean de la app se sintió alto, bien o bajo? Se muestra la pendiente para corregir sesgo de subida/bajada.';
+
+  @override
+  String get leanLabNoCorners =>
+      'No hay curvas detectadas para etiquetar en este recorrido.';
+
+  @override
+  String get leanLabAppLean => 'Lean app';
+
+  @override
+  String get leanLabGrade => 'Pendiente';
+
+  @override
+  String get leanLabBiasQ => '¿Cómo se sintió el lean de la app en el ápice?';
+
+  @override
+  String get leanLabBiasAppHigh => 'App muy alto';
+
+  @override
+  String get leanLabBiasOk => 'Se sintió bien';
+
+  @override
+  String get leanLabBiasAppLow => 'App muy bajo';
+
+  @override
+  String get leanLabBiasUnsure => 'No estoy seguro';
+
+  @override
+  String get leanLabTrendClimbing => 'subiendo';
+
+  @override
+  String get leanLabTrendDescending => 'bajando';
+
+  @override
+  String get leanLabTrendFlat => 'plano';
+
+  @override
+  String get leanLabSaveLabels => 'Guardar etiquetas';
+
+  @override
+  String get leanLabSettingsTile => 'Lab de inclinación (pilots)';
+
+  @override
+  String get leanLabSettingsHelp =>
+      'Protocolo Bugambilias · calib · elevación · verdad de curvas';
+
+  @override
   String get skillReplayTitle => 'Repetición de curva';
 
   @override

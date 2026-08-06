@@ -13,6 +13,7 @@ import '../../widgets/account_auth_section.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
+import '../lean_lab/lean_lab_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -99,6 +100,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const AccountAuthSection(),
           const SizedBox(height: 28),
           const AdventureCameraSettingsSection(),
+          const SizedBox(height: 28),
+          Text(
+            l10n.leanLabTitle,
+            style: GoogleFonts.barlowCondensed(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.motorcycle, color: AppTheme.mist),
+            title: Text(
+              l10n.leanLabSettingsTile,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              l10n.leanLabSettingsHelp,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const LeanLabScreen(),
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 28),
           Text(
             l10n.syncCloudRides,

@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 12,
+      version: 13,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -66,6 +66,7 @@ class RideDatabase {
         await _createRouteLoopsTable(db);
         await _createCameraEventsTable(db);
         await _createRideEngineLabelsTable(db);
+        await _createLeanLabSessionsTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -112,7 +113,36 @@ class RideDatabase {
         if (oldVersion < 12) {
           await _createRideEngineLabelsTable(db);
         }
+        if (oldVersion < 13) {
+          await _createLeanLabSessionsTable(db);
+        }
       },
+    );
+  }
+
+  Future<void> _createLeanLabSessionsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS lean_lab_sessions (
+        ride_id TEXT PRIMARY KEY,
+        protocol_id TEXT NOT NULL,
+        session_type TEXT NOT NULL,
+        direction TEXT NOT NULL,
+        phone_mount TEXT NOT NULL,
+        phone_pose TEXT NOT NULL,
+        frozen_neutral_deg REAL NOT NULL,
+        calib_at_ms INTEGER,
+        corners_json TEXT NOT NULL DEFAULT '[]',
+        coverage_pct REAL NOT NULL DEFAULT 0,
+        total_climb_m REAL NOT NULL DEFAULT 0,
+        total_descent_m REAL NOT NULL DEFAULT 0,
+        created_at_ms INTEGER NOT NULL,
+        synced INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_lean_lab_synced '
+      'ON lean_lab_sessions(synced, created_at_ms)',
     );
   }
 
@@ -308,6 +338,46 @@ class RideDatabase {
     final placeholders = List.filled(rideIds.length, '?').join(',');
     await db.rawUpdate(
       'UPDATE ride_engine_labels SET synced = 1 WHERE ride_id IN ($placeholders)',
+      rideIds,
+    );
+  }
+
+  Future<void> upsertLeanLabSession(Map<String, Object?> row) async {
+    final db = await database;
+    await db.insert(
+      'lean_lab_sessions',
+      row,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, Object?>?> getLeanLabSession(String rideId) async {
+    final db = await database;
+    final rows = await db.query(
+      'lean_lab_sessions',
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return rows.first;
+  }
+
+  Future<List<Map<String, Object?>>> listLeanLabSessions({int limit = 40}) async {
+    final db = await database;
+    return db.query(
+      'lean_lab_sessions',
+      orderBy: 'created_at_ms DESC',
+      limit: limit,
+    );
+  }
+
+  Future<void> markLeanLabSessionsSynced(List<String> rideIds) async {
+    if (rideIds.isEmpty) return;
+    final db = await database;
+    final placeholders = List.filled(rideIds.length, '?').join(',');
+    await db.rawUpdate(
+      'UPDATE lean_lab_sessions SET synced = 1 WHERE ride_id IN ($placeholders)',
       rideIds,
     );
   }

@@ -1760,6 +1760,167 @@ class AppLocalizationsEn extends AppLocalizations {
       'Lowest-scoring turns first. Bars show entry → apex → exit speed. Tap Replay to watch lean, brake, and speed — and compare the same corner section with a friend.';
 
   @override
+  String get leanLabTitle => 'Lean Lab';
+
+  @override
+  String get leanLabIntro =>
+      'Pilot protocol for Bugambilias — both directions, with elevation. Calibrate upright, ride, then label corners so we can polish lean.';
+
+  @override
+  String get leanLabCircuitName => 'Bugambilias circuit';
+
+  @override
+  String get leanLabCircuitHelp =>
+      'Plaza Panorámica Bugambilias · both directions · open in Maps';
+
+  @override
+  String leanLabProgress(int labeled, int total) {
+    return '$labeled of $total sessions labeled';
+  }
+
+  @override
+  String get leanLabProtocols => 'Protocols';
+
+  @override
+  String get leanLabProtoOutbound => 'Baseline outbound';
+
+  @override
+  String get leanLabProtoOutboundHelp =>
+      'Toward the plaza, center mount. Capture climb/descend lean.';
+
+  @override
+  String get leanLabProtoReturn => 'Baseline return';
+
+  @override
+  String get leanLabProtoReturnHelp =>
+      'Opposite direction, center mount. Same corners, mirrored sides.';
+
+  @override
+  String get leanLabProtoPocket => 'Mount A/B — pocket';
+
+  @override
+  String get leanLabProtoPocketHelp =>
+      'Same circuit with phone in pocket to learn mount bias.';
+
+  @override
+  String get leanLabProtoFree => 'Free Lean Lab lap';
+
+  @override
+  String get leanLabProtoFreeHelp =>
+      'Any direction on this circuit with calib + corner labels.';
+
+  @override
+  String get leanLabStartProtocol => 'Prepare & ride';
+
+  @override
+  String get leanLabNeedsLabels => 'Needs corner labels';
+
+  @override
+  String leanLabElevationSummary(String climb, String descent) {
+    return '↑$climb m · ↓$descent m';
+  }
+
+  @override
+  String get leanLabPrepTitle => 'Lean Lab prep';
+
+  @override
+  String get leanLabPrepHelp =>
+      'Set mount and pose, hold the bike upright to freeze neutral, then start the lap.';
+
+  @override
+  String get leanLabPoseQ => 'How is the phone oriented?';
+
+  @override
+  String get leanLabPoseScreenOut => 'Portrait · screen out';
+
+  @override
+  String get leanLabPoseScreenIn => 'Portrait · screen in';
+
+  @override
+  String get leanLabPoseLandscape => 'Landscape';
+
+  @override
+  String get leanLabDirectionQ => 'Direction on Bugambilias?';
+
+  @override
+  String get leanLabDirectionOutbound => 'Outbound (to plaza)';
+
+  @override
+  String get leanLabDirectionReturn => 'Return';
+
+  @override
+  String get leanLabCalibTitle => 'Upright calibration';
+
+  @override
+  String get leanLabCalibHelp =>
+      'Stand still, bike upright, phone fixed. Hold 4 seconds — this freezes 0° lean for the whole ride.';
+
+  @override
+  String get leanLabCalibHold => 'Hold upright 4s';
+
+  @override
+  String get leanLabCalibHolding => 'Hold still…';
+
+  @override
+  String get leanLabRawNeutral => 'Raw phone angle';
+
+  @override
+  String get leanLabFrozenNeutral => 'Frozen neutral';
+
+  @override
+  String get leanLabStartRide => 'Start Lean Lab ride';
+
+  @override
+  String get leanLabReviewTitle => 'Label lean corners';
+
+  @override
+  String get leanLabReviewHelp =>
+      'For each corner: was the app lean high, OK, or low? Grade (elevation) is shown so we can fix climb/descent bias.';
+
+  @override
+  String get leanLabNoCorners => 'No corners detected on this ride to label.';
+
+  @override
+  String get leanLabAppLean => 'App lean';
+
+  @override
+  String get leanLabGrade => 'Grade';
+
+  @override
+  String get leanLabBiasQ => 'How did the app lean feel at apex?';
+
+  @override
+  String get leanLabBiasAppHigh => 'App too high';
+
+  @override
+  String get leanLabBiasOk => 'Felt right';
+
+  @override
+  String get leanLabBiasAppLow => 'App too low';
+
+  @override
+  String get leanLabBiasUnsure => 'Not sure';
+
+  @override
+  String get leanLabTrendClimbing => 'climbing';
+
+  @override
+  String get leanLabTrendDescending => 'descending';
+
+  @override
+  String get leanLabTrendFlat => 'flat';
+
+  @override
+  String get leanLabSaveLabels => 'Save corner labels';
+
+  @override
+  String get leanLabSettingsTile => 'Lean Lab (pilots)';
+
+  @override
+  String get leanLabSettingsHelp =>
+      'Bugambilias protocol · calib · elevation · corner ground truth';
+
+  @override
   String get skillReplayTitle => 'Corner replay';
 
   @override

@@ -1,0 +1,250 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../core/lean_lab/lean_lab_circuit.dart';
+import '../../core/lean_lab/lean_lab_models.dart';
+import '../../core/lean_lab/lean_lab_service.dart';
+import '../../l10n/l10n_ext.dart';
+import '../../theme/app_theme.dart';
+import 'lean_lab_prep_screen.dart';
+import 'lean_lab_review_screen.dart';
+
+/// Home for the 3-pilot Lean Lab protocol (Bugambilias + elevation).
+class LeanLabScreen extends ConsumerStatefulWidget {
+  const LeanLabScreen({super.key});
+
+  @override
+  ConsumerState<LeanLabScreen> createState() => _LeanLabScreenState();
+}
+
+class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
+  List<LeanLabSession> _sessions = const [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_reload());
+  }
+
+  Future<void> _reload() async {
+    setState(() => _loading = true);
+    final list = await LeanLabService.instance.listSessions();
+    if (!mounted) return;
+    setState(() {
+      _sessions = list;
+      _loading = false;
+    });
+  }
+
+  Future<void> _openMap() async {
+    final uri = Uri.parse(BugambiliasCircuit.mapsUrl);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _start(LeanLabSessionType type) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => LeanLabPrepScreen(sessionType: type),
+      ),
+    );
+    if (mounted) unawaited(_reload());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final labeled = _sessions.where((s) => s.corners.isNotEmpty).length;
+    final pending = _sessions.where((s) => s.needsCornerLabels).toList();
+
+    return Scaffold(
+      backgroundColor: AppTheme.asphalt,
+      appBar: AppBar(
+        title: Text(
+          l10n.leanLabTitle,
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        children: [
+          Text(
+            l10n.leanLabIntro,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Material(
+            color: AppTheme.asphaltElevated,
+            borderRadius: BorderRadius.circular(14),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: _openMap,
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    const Icon(Icons.map_outlined, color: AppTheme.line),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.leanLabCircuitName,
+                            style: GoogleFonts.exo2(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            l10n.leanLabCircuitHelp,
+                            style: GoogleFonts.rajdhani(
+                              color: AppTheme.steel,
+                              fontSize: 12,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.open_in_new, size: 18, color: AppTheme.steel),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.leanLabProgress(labeled, _sessions.length),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            l10n.leanLabProtocols,
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+          ),
+          const SizedBox(height: 8),
+          _ProtocolCard(
+            title: l10n.leanLabProtoOutbound,
+            subtitle: l10n.leanLabProtoOutboundHelp,
+            onStart: () => _start(LeanLabSessionType.baselineOutbound),
+          ),
+          _ProtocolCard(
+            title: l10n.leanLabProtoReturn,
+            subtitle: l10n.leanLabProtoReturnHelp,
+            onStart: () => _start(LeanLabSessionType.baselineReturn),
+          ),
+          _ProtocolCard(
+            title: l10n.leanLabProtoPocket,
+            subtitle: l10n.leanLabProtoPocketHelp,
+            onStart: () => _start(LeanLabSessionType.mountPocket),
+          ),
+          _ProtocolCard(
+            title: l10n.leanLabProtoFree,
+            subtitle: l10n.leanLabProtoFreeHelp,
+            onStart: () => _start(LeanLabSessionType.free),
+          ),
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (pending.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Text(
+              l10n.leanLabNeedsLabels,
+              style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+            ),
+            const SizedBox(height: 8),
+            for (final s in pending.take(8))
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.label_outline, color: AppTheme.lineHot),
+                title: Text(
+                  '${s.sessionType.id} · ${s.direction.id}',
+                  style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  l10n.leanLabElevationSummary(
+                    s.totalClimbM.toStringAsFixed(0),
+                    s.totalDescentM.toStringAsFixed(0),
+                  ),
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 12,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => LeanLabReviewScreen(rideId: s.rideId),
+                    ),
+                  );
+                  if (mounted) unawaited(_reload());
+                },
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ProtocolCard extends StatelessWidget {
+  const _ProtocolCard({
+    required this.title,
+    required this.subtitle,
+    required this.onStart,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: AppTheme.asphaltElevated,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 13,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 10),
+              FilledButton.tonalIcon(
+                onPressed: onStart,
+                icon: const Icon(Icons.play_arrow),
+                label: Text(l10n.leanLabStartProtocol),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

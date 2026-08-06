@@ -112,6 +112,7 @@ class RideRecorder {
   bool _promotingArm = false;
   bool _autoPauseEnabled = true;
   bool _autoPausePrefLoaded = false;
+  double? _pendingLeanNeutral;
 
   static const _autoPausePrefKey = 'corneriq_auto_pause';
   static const preferredArmRoutePrefKey = 'corneriq_arm_route_id';
@@ -146,6 +147,19 @@ class RideRecorder {
     await prefs.setBool(_autoPausePrefKey, enabled);
     if (isRecording) _emit();
   }
+
+  /// Queue a Lean Lab frozen neutral to apply right after [start].
+  void prepareLeanLabNeutral(double degrees) {
+    _pendingLeanNeutral = degrees;
+  }
+
+  /// Lock lean zero during an active recording (Lean Lab).
+  void lockLeanNeutral(double degrees) {
+    _lean.lockNeutral(degrees);
+    _pendingLeanNeutral = null;
+  }
+
+  double? get leanNeutralDegrees => _lean.neutralDegrees;
 
   Future<void> _ensureAutoPausePref() async {
     if (_autoPausePrefLoaded) return;
@@ -258,6 +272,11 @@ class RideRecorder {
     _motion.resetForNewRide();
 
     _lean.start();
+    final pendingNeutral = _pendingLeanNeutral;
+    if (pendingNeutral != null) {
+      _lean.lockNeutral(pendingNeutral);
+      _pendingLeanNeutral = null;
+    }
 
     _flushTimer = Timer.periodic(
       const Duration(seconds: 1),
@@ -622,6 +641,11 @@ class RideRecorder {
     _armedController.add(false);
 
     _lean.start();
+    final pendingNeutral = _pendingLeanNeutral;
+    if (pendingNeutral != null) {
+      _lean.lockNeutral(pendingNeutral);
+      _pendingLeanNeutral = null;
+    }
     _flushTimer?.cancel();
     _flushTimer = Timer.periodic(
       const Duration(seconds: 1),

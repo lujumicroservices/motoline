@@ -121,7 +121,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        painter: const FriendsLinkIconPainter(),
+                        icon: Icons.people_outline,
                       ),
                       const UpdateCheckIconButton(),
                     ],
