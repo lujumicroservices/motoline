@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/lean_lab/lean_lab_circuit.dart';
@@ -11,7 +12,7 @@ import '../../core/lean_lab/lean_lab_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import 'lean_lab_prep_screen.dart';
-import 'lean_lab_review_screen.dart';
+import 'lean_lab_session_detail_screen.dart';
 
 /// Home for the 3-pilot Lean Lab protocol (Bugambilias + elevation).
 class LeanLabScreen extends ConsumerStatefulWidget {
@@ -54,6 +55,30 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
     );
     if (mounted) unawaited(_reload());
   }
+
+  Future<void> _openSession(LeanLabSession s) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => LeanLabSessionDetailScreen(rideId: s.rideId),
+      ),
+    );
+    if (mounted) unawaited(_reload());
+  }
+
+  String _directionLabel(AppLocalizations l10n, LeanLabDirection d) =>
+      switch (d) {
+        LeanLabDirection.outbound => l10n.leanLabDirectionOutbound,
+        LeanLabDirection.returnTrip => l10n.leanLabDirectionReturn,
+        LeanLabDirection.unknown => '—',
+      };
+
+  String _typeLabel(AppLocalizations l10n, LeanLabSessionType t) =>
+      switch (t) {
+        LeanLabSessionType.baselineOutbound => l10n.leanLabProtoOutbound,
+        LeanLabSessionType.baselineReturn => l10n.leanLabProtoReturn,
+        LeanLabSessionType.mountPocket => l10n.leanLabProtoPocket,
+        LeanLabSessionType.free => l10n.leanLabProtoFree,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -156,44 +181,103 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
               padding: EdgeInsets.all(24),
               child: Center(child: CircularProgressIndicator()),
             )
-          else if (pending.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              l10n.leanLabNeedsLabels,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
-            ),
-            const SizedBox(height: 8),
-            for (final s in pending.take(8))
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.label_outline, color: AppTheme.lineHot),
-                title: Text(
-                  '${s.sessionType.id} · ${s.direction.id}',
-                  style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  l10n.leanLabElevationSummary(
-                    s.totalClimbM.toStringAsFixed(0),
-                    s.totalDescentM.toStringAsFixed(0),
-                  ),
-                  style: GoogleFonts.rajdhani(
-                    color: AppTheme.steel,
-                    fontSize: 12,
-                  ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () async {
-                  await Navigator.of(context).push<void>(
-                    MaterialPageRoute(
-                      builder: (_) => LeanLabReviewScreen(rideId: s.rideId),
-                    ),
-                  );
-                  if (mounted) unawaited(_reload());
-                },
+          else ...[
+            if (pending.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Text(
+                l10n.leanLabNeedsLabels,
+                style:
+                    GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
               ),
+              const SizedBox(height: 8),
+              for (final s in pending.take(8))
+                _SessionTile(
+                  session: s,
+                  title: _typeLabel(l10n, s.sessionType),
+                  direction: _directionLabel(l10n, s.direction),
+                  badgeColor: AppTheme.lineHot,
+                  badgeIcon: Icons.label_outline,
+                  onTap: () => _openSession(s),
+                ),
+            ],
+            if (_sessions.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Text(
+                l10n.leanLabPastSessions,
+                style:
+                    GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+              ),
+              const SizedBox(height: 8),
+              for (final s in _sessions.take(20))
+                _SessionTile(
+                  session: s,
+                  title: _typeLabel(l10n, s.sessionType),
+                  direction: _directionLabel(l10n, s.direction),
+                  badgeColor: s.needsCornerLabels
+                      ? AppTheme.lineHot
+                      : AppTheme.line,
+                  badgeIcon: s.needsCornerLabels
+                      ? Icons.label_outline
+                      : Icons.check_circle_outline,
+                  onTap: () => _openSession(s),
+                ),
+            ],
           ],
         ],
       ),
+    );
+  }
+}
+
+class _SessionTile extends StatelessWidget {
+  const _SessionTile({
+    required this.session,
+    required this.title,
+    required this.direction,
+    required this.badgeColor,
+    required this.badgeIcon,
+    required this.onTap,
+  });
+
+  final LeanLabSession session;
+  final String title;
+  final String direction;
+  final Color badgeColor;
+  final IconData badgeIcon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final when = session.createdAt;
+    final date = when == null
+        ? ''
+        : DateFormat.MMMd().add_Hm().format(when.toLocal());
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(badgeIcon, color: badgeColor),
+      title: Text(
+        '$title · $direction',
+        style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Text(
+        [
+          if (date.isNotEmpty) date,
+          l10n.leanLabElevationSummary(
+            session.totalClimbM.toStringAsFixed(0),
+            session.totalDescentM.toStringAsFixed(0),
+          ),
+          if (session.corners.isNotEmpty)
+            l10n.leanLabLabeledCount(session.corners.length),
+        ].join(' · '),
+        style: GoogleFonts.rajdhani(
+          color: AppTheme.steel,
+          fontSize: 12,
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
     );
   }
 }

@@ -760,6 +760,25 @@
   "leanLabSaveLabels": "Save corner labels",
   "leanLabSettingsTile": "Lean Lab (pilots)",
   "leanLabSettingsHelp": "Bugambilias protocol · calib · elevation · corner ground truth",
+  "leanLabPastSessions": "Past sessions",
+  "leanLabSessionDetailTitle": "Lean Lab session",
+  "leanLabSessionMissing": "This Lean Lab session was not found.",
+  "leanLabMeasuresTitle": "Measures",
+  "leanLabCornerMeasures": "Corner max lean",
+  "leanLabCoverage": "Circuit coverage",
+  "leanLabCornersCount": "Labeled corners",
+  "leanLabLabeledCount": "{count} corners labeled",
+  "@leanLabLabeledCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "leanLabEditConfigTitle": "Fix session setup",
+  "leanLabEditConfigHelp": "Correct ida/vuelta, mount, or pose if you set them wrong — lean numbers stay the same; labels stay until you re-save them.",
+  "leanLabSaveConfig": "Save setup",
+  "leanLabConfigSaved": "Session setup saved",
+  "leanLabRelabelCorners": "Review / update corner labels",
+  "leanLabOpenRide": "Open ride map",
   "skillReplayTitle": "Corner replay",
   "skillReplayHelp": "Watch how this stretch was ridden — lean, braking, and speed move with the map playhead.",
   "skillReplayCompareHelp": "Both lines are cropped to the same road section. Playheads advance by distance along the corner so you compare the line, not the clock.",

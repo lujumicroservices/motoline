@@ -2008,6 +2008,51 @@ class AppLocalizationsEs extends AppLocalizations {
       'Protocolo Bugambilias · calib · elevación · verdad de curvas';
 
   @override
+  String get leanLabPastSessions => 'Sesiones anteriores';
+
+  @override
+  String get leanLabSessionDetailTitle => 'Sesión Lean Lab';
+
+  @override
+  String get leanLabSessionMissing => 'No se encontró esta sesión de Lean Lab.';
+
+  @override
+  String get leanLabMeasuresTitle => 'Medidas';
+
+  @override
+  String get leanLabCornerMeasures => 'Lean máximo por curva';
+
+  @override
+  String get leanLabCoverage => 'Cobertura del circuito';
+
+  @override
+  String get leanLabCornersCount => 'Curvas etiquetadas';
+
+  @override
+  String leanLabLabeledCount(int count) {
+    return '$count curvas etiquetadas';
+  }
+
+  @override
+  String get leanLabEditConfigTitle => 'Corregir configuración';
+
+  @override
+  String get leanLabEditConfigHelp =>
+      'Corrige ida/vuelta, mount o pose si te equivocaste — los números de lean no cambian; las etiquetas se quedan hasta que las vuelvas a guardar.';
+
+  @override
+  String get leanLabSaveConfig => 'Guardar configuración';
+
+  @override
+  String get leanLabConfigSaved => 'Configuración guardada';
+
+  @override
+  String get leanLabRelabelCorners => 'Revisar / actualizar etiquetas';
+
+  @override
+  String get leanLabOpenRide => 'Abrir mapa del recorrido';
+
+  @override
   String get skillReplayTitle => 'Repetición de curva';
 
   @override

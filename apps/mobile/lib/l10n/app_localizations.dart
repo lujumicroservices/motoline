@@ -3674,6 +3674,90 @@ abstract class AppLocalizations {
   /// **'Protocolo Bugambilias · calib · elevación · verdad de curvas'**
   String get leanLabSettingsHelp;
 
+  /// No description provided for @leanLabPastSessions.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesiones anteriores'**
+  String get leanLabPastSessions;
+
+  /// No description provided for @leanLabSessionDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión Lean Lab'**
+  String get leanLabSessionDetailTitle;
+
+  /// No description provided for @leanLabSessionMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontró esta sesión de Lean Lab.'**
+  String get leanLabSessionMissing;
+
+  /// No description provided for @leanLabMeasuresTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Medidas'**
+  String get leanLabMeasuresTitle;
+
+  /// No description provided for @leanLabCornerMeasures.
+  ///
+  /// In es, this message translates to:
+  /// **'Lean máximo por curva'**
+  String get leanLabCornerMeasures;
+
+  /// No description provided for @leanLabCoverage.
+  ///
+  /// In es, this message translates to:
+  /// **'Cobertura del circuito'**
+  String get leanLabCoverage;
+
+  /// No description provided for @leanLabCornersCount.
+  ///
+  /// In es, this message translates to:
+  /// **'Curvas etiquetadas'**
+  String get leanLabCornersCount;
+
+  /// No description provided for @leanLabLabeledCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} curvas etiquetadas'**
+  String leanLabLabeledCount(int count);
+
+  /// No description provided for @leanLabEditConfigTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Corregir configuración'**
+  String get leanLabEditConfigTitle;
+
+  /// No description provided for @leanLabEditConfigHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Corrige ida/vuelta, mount o pose si te equivocaste — los números de lean no cambian; las etiquetas se quedan hasta que las vuelvas a guardar.'**
+  String get leanLabEditConfigHelp;
+
+  /// No description provided for @leanLabSaveConfig.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar configuración'**
+  String get leanLabSaveConfig;
+
+  /// No description provided for @leanLabConfigSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Configuración guardada'**
+  String get leanLabConfigSaved;
+
+  /// No description provided for @leanLabRelabelCorners.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisar / actualizar etiquetas'**
+  String get leanLabRelabelCorners;
+
+  /// No description provided for @leanLabOpenRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir mapa del recorrido'**
+  String get leanLabOpenRide;
+
   /// No description provided for @skillReplayTitle.
   ///
   /// In es, this message translates to:

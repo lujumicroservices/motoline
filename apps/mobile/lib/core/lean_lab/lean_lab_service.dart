@@ -118,6 +118,27 @@ class LeanLabService {
     );
   }
 
+  /// Fix mistaken prep choices (ida/vuelta, mount, pose, protocol) after the ride.
+  Future<LeanLabSession?> updateSessionConfig({
+    required String rideId,
+    LeanLabSessionType? sessionType,
+    LeanLabDirection? direction,
+    String? phoneMount,
+    PhonePoseId? phonePose,
+  }) async {
+    final existing = await getSession(rideId);
+    if (existing == null) return null;
+    final updated = existing.copyWith(
+      sessionType: sessionType,
+      direction: direction,
+      phoneMount: phoneMount,
+      phonePose: phonePose,
+      synced: false,
+    );
+    await saveSession(updated);
+    return updated;
+  }
+
   /// Suggested default mount for a session type.
   static String defaultMount(LeanLabSessionType type) =>
       type == LeanLabSessionType.mountPocket

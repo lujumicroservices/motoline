@@ -1997,6 +1997,51 @@ class AppLocalizationsEn extends AppLocalizations {
       'Bugambilias protocol · calib · elevation · corner ground truth';
 
   @override
+  String get leanLabPastSessions => 'Past sessions';
+
+  @override
+  String get leanLabSessionDetailTitle => 'Lean Lab session';
+
+  @override
+  String get leanLabSessionMissing => 'This Lean Lab session was not found.';
+
+  @override
+  String get leanLabMeasuresTitle => 'Measures';
+
+  @override
+  String get leanLabCornerMeasures => 'Corner max lean';
+
+  @override
+  String get leanLabCoverage => 'Circuit coverage';
+
+  @override
+  String get leanLabCornersCount => 'Labeled corners';
+
+  @override
+  String leanLabLabeledCount(int count) {
+    return '$count corners labeled';
+  }
+
+  @override
+  String get leanLabEditConfigTitle => 'Fix session setup';
+
+  @override
+  String get leanLabEditConfigHelp =>
+      'Correct ida/vuelta, mount, or pose if you set them wrong — lean numbers stay the same; labels stay until you re-save them.';
+
+  @override
+  String get leanLabSaveConfig => 'Save setup';
+
+  @override
+  String get leanLabConfigSaved => 'Session setup saved';
+
+  @override
+  String get leanLabRelabelCorners => 'Review / update corner labels';
+
+  @override
+  String get leanLabOpenRide => 'Open ride map';
+
+  @override
   String get skillReplayTitle => 'Corner replay';
 
   @override
