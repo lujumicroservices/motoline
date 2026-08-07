@@ -1929,6 +1929,41 @@ class AppLocalizationsEs extends AppLocalizations {
       'En cada curva: ¿el lean de la app se sintió alto, bien o bajo? Se muestra la pendiente para corregir sesgo de subida/bajada.';
 
   @override
+  String get leanLabReviewHelpMax =>
+      'El lean máximo de la curva queda fijo arriba. Reproduce la curva para ver lean y mapa; salta al pico cuando quieras.';
+
+  @override
+  String get leanLabMaxLean => 'Lean máximo';
+
+  @override
+  String get leanLabJumpToMax => 'Ir al lean máximo';
+
+  @override
+  String get leanLabLiveLean => 'Lean en vivo';
+
+  @override
+  String get leanLabAtPeak => 'en el pico';
+
+  @override
+  String get leanLabMaxLeanGps => 'GPS donde ocurrió el lean máximo';
+
+  @override
+  String leanLabMaxLeanGpsA(String lat, String lng) {
+    return 'A · $lat, $lng';
+  }
+
+  @override
+  String leanLabMaxLeanGpsB(String lat, String lng) {
+    return 'B · $lat, $lng';
+  }
+
+  @override
+  String get leanLabSideLeft => 'izquierda';
+
+  @override
+  String get leanLabSideRight => 'derecha';
+
+  @override
   String get leanLabNoCorners =>
       'No hay curvas detectadas para etiquetar en este recorrido.';
 

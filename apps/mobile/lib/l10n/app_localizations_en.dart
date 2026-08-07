@@ -1919,6 +1919,41 @@ class AppLocalizationsEn extends AppLocalizations {
       'For each corner: was the app lean high, OK, or low? Grade (elevation) is shown so we can fix climb/descent bias.';
 
   @override
+  String get leanLabReviewHelpMax =>
+      'Max lean for the curve stays fixed at the top. Play the corner to watch lean and the map move; jump to the peak when you want.';
+
+  @override
+  String get leanLabMaxLean => 'Max lean';
+
+  @override
+  String get leanLabJumpToMax => 'Jump to max lean';
+
+  @override
+  String get leanLabLiveLean => 'Live lean';
+
+  @override
+  String get leanLabAtPeak => 'at peak';
+
+  @override
+  String get leanLabMaxLeanGps => 'GPS where max lean happened';
+
+  @override
+  String leanLabMaxLeanGpsA(String lat, String lng) {
+    return 'A · $lat, $lng';
+  }
+
+  @override
+  String leanLabMaxLeanGpsB(String lat, String lng) {
+    return 'B · $lat, $lng';
+  }
+
+  @override
+  String get leanLabSideLeft => 'left';
+
+  @override
+  String get leanLabSideRight => 'right';
+
+  @override
   String get leanLabNoCorners => 'No corners detected on this ride to label.';
 
   @override

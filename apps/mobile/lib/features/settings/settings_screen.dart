@@ -14,6 +14,7 @@ import '../../widgets/account_auth_section.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
+import '../home/home_nav_icons.dart';
 import '../lean_lab/lean_lab_screen.dart';
 import 'bike_picker_screen.dart';
 
@@ -87,7 +88,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.motorcycle, color: AppTheme.line),
+            leading: const AppMotoIcon(size: 28, color: AppTheme.line),
             title: Text(
               l10n.leanLabSettingsTile,
               style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
@@ -119,7 +120,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.two_wheeler, color: AppTheme.mist),
+            leading: const AppMotoIcon(size: 28, color: AppTheme.mist),
             title: Text(
               bike?.label ?? l10n.bikeSelect,
               style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),

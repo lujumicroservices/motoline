@@ -795,6 +795,28 @@
   "leanLabStartRide": "Iniciar recorrido Lean Lab",
   "leanLabReviewTitle": "Etiquetar inclinación",
   "leanLabReviewHelp": "En cada curva: ¿el lean de la app se sintió alto, bien o bajo? Se muestra la pendiente para corregir sesgo de subida/bajada.",
+  "leanLabReviewHelpMax": "El lean máximo de la curva queda fijo arriba. Reproduce la curva para ver lean y mapa; salta al pico cuando quieras.",
+  "leanLabMaxLean": "Lean máximo",
+  "leanLabJumpToMax": "Ir al lean máximo",
+  "leanLabLiveLean": "Lean en vivo",
+  "leanLabAtPeak": "en el pico",
+  "leanLabMaxLeanGps": "GPS donde ocurrió el lean máximo",
+  "leanLabMaxLeanGpsA": "A · {lat}, {lng}",
+  "@leanLabMaxLeanGpsA": {
+    "placeholders": {
+      "lat": { "type": "String" },
+      "lng": { "type": "String" }
+    }
+  },
+  "leanLabMaxLeanGpsB": "B · {lat}, {lng}",
+  "@leanLabMaxLeanGpsB": {
+    "placeholders": {
+      "lat": { "type": "String" },
+      "lng": { "type": "String" }
+    }
+  },
+  "leanLabSideLeft": "izquierda",
+  "leanLabSideRight": "derecha",
   "leanLabNoCorners": "No hay curvas detectadas para etiquetar en este recorrido.",
   "leanLabAppLean": "Lean app",
   "leanLabGrade": "Pendiente",

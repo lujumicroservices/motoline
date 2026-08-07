@@ -100,7 +100,7 @@ class HomeScreen extends ConsumerWidget {
                               ),
                             );
                           },
-                          painter: const RoutesRibbonIconPainter(),
+                          asset: AppAssetIcon.routes,
                         ),
                       HomeNavIconButton(
                         tooltip: l10n.rodadasTitle,
@@ -111,7 +111,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        painter: const RodadaPackIconPainter(),
+                        asset: AppAssetIcon.rodadas,
                       ),
                       HomeNavIconButton(
                         tooltip: l10n.friends,
@@ -138,7 +138,10 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.motorcycle),
+                      icon: const AppMotoIcon(
+                        size: 22,
+                        color: AppTheme.mist,
+                      ),
                       label: Text(l10n.leanLabHomeCta),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -592,16 +595,12 @@ class _RodadaHomeCard extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: CustomPaint(
-                        painter: RodadaPackIconPainter(
-                          color: highlight.isLive
-                              ? AppTheme.line
-                              : AppTheme.mist,
-                        ),
-                      ),
+                    AppAssetIcon(
+                      asset: AppAssetIcon.rodadas,
+                      size: 36,
+                      color: highlight.isLive
+                          ? AppTheme.line
+                          : AppTheme.mist,
                     ),
                     const SizedBox(width: 12),
                     Expanded(

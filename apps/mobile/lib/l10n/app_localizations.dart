@@ -3530,6 +3530,66 @@ abstract class AppLocalizations {
   /// **'En cada curva: ¿el lean de la app se sintió alto, bien o bajo? Se muestra la pendiente para corregir sesgo de subida/bajada.'**
   String get leanLabReviewHelp;
 
+  /// No description provided for @leanLabReviewHelpMax.
+  ///
+  /// In es, this message translates to:
+  /// **'El lean máximo de la curva queda fijo arriba. Reproduce la curva para ver lean y mapa; salta al pico cuando quieras.'**
+  String get leanLabReviewHelpMax;
+
+  /// No description provided for @leanLabMaxLean.
+  ///
+  /// In es, this message translates to:
+  /// **'Lean máximo'**
+  String get leanLabMaxLean;
+
+  /// No description provided for @leanLabJumpToMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Ir al lean máximo'**
+  String get leanLabJumpToMax;
+
+  /// No description provided for @leanLabLiveLean.
+  ///
+  /// In es, this message translates to:
+  /// **'Lean en vivo'**
+  String get leanLabLiveLean;
+
+  /// No description provided for @leanLabAtPeak.
+  ///
+  /// In es, this message translates to:
+  /// **'en el pico'**
+  String get leanLabAtPeak;
+
+  /// No description provided for @leanLabMaxLeanGps.
+  ///
+  /// In es, this message translates to:
+  /// **'GPS donde ocurrió el lean máximo'**
+  String get leanLabMaxLeanGps;
+
+  /// No description provided for @leanLabMaxLeanGpsA.
+  ///
+  /// In es, this message translates to:
+  /// **'A · {lat}, {lng}'**
+  String leanLabMaxLeanGpsA(String lat, String lng);
+
+  /// No description provided for @leanLabMaxLeanGpsB.
+  ///
+  /// In es, this message translates to:
+  /// **'B · {lat}, {lng}'**
+  String leanLabMaxLeanGpsB(String lat, String lng);
+
+  /// No description provided for @leanLabSideLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'izquierda'**
+  String get leanLabSideLeft;
+
+  /// No description provided for @leanLabSideRight.
+  ///
+  /// In es, this message translates to:
+  /// **'derecha'**
+  String get leanLabSideRight;
+
   /// No description provided for @leanLabNoCorners.
   ///
   /// In es, this message translates to:

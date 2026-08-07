@@ -60,6 +60,13 @@ class LeanLabCornerLabel {
     this.deltaAltM = 0,
     this.vertTrend = VertTrend.unknown,
     this.notes,
+    this.maxLeanIndex,
+    this.maxLeanFromIndex,
+    this.maxLeanToIndex,
+    this.maxLeanFromLat,
+    this.maxLeanFromLng,
+    this.maxLeanToLat,
+    this.maxLeanToLng,
   });
 
   final int mapStartIndex;
@@ -77,6 +84,15 @@ class LeanLabCornerLabel {
   final VertTrend vertTrend;
   final String? notes;
 
+  /// Peak |lean| sample (not speed-based apex).
+  final int? maxLeanIndex;
+  final int? maxLeanFromIndex;
+  final int? maxLeanToIndex;
+  final double? maxLeanFromLat;
+  final double? maxLeanFromLng;
+  final double? maxLeanToLat;
+  final double? maxLeanToLng;
+
   Map<String, dynamic> toJson() => {
         'map_start': mapStartIndex,
         'map_end': mapEndIndex,
@@ -90,6 +106,13 @@ class LeanLabCornerLabel {
         'delta_alt_m': deltaAltM,
         'vert_trend': vertTrendId(vertTrend),
         'notes': notes,
+        'max_lean_i': maxLeanIndex,
+        'max_lean_from_i': maxLeanFromIndex,
+        'max_lean_to_i': maxLeanToIndex,
+        'max_lean_from_lat': maxLeanFromLat,
+        'max_lean_from_lng': maxLeanFromLng,
+        'max_lean_to_lat': maxLeanToLat,
+        'max_lean_to_lng': maxLeanToLng,
       };
 
   factory LeanLabCornerLabel.fromJson(Map<String, dynamic> json) {
@@ -106,6 +129,13 @@ class LeanLabCornerLabel {
       deltaAltM: (json['delta_alt_m'] as num?)?.toDouble() ?? 0,
       vertTrend: vertTrendFromId(json['vert_trend'] as String?),
       notes: json['notes'] as String?,
+      maxLeanIndex: (json['max_lean_i'] as num?)?.toInt(),
+      maxLeanFromIndex: (json['max_lean_from_i'] as num?)?.toInt(),
+      maxLeanToIndex: (json['max_lean_to_i'] as num?)?.toInt(),
+      maxLeanFromLat: (json['max_lean_from_lat'] as num?)?.toDouble(),
+      maxLeanFromLng: (json['max_lean_from_lng'] as num?)?.toDouble(),
+      maxLeanToLat: (json['max_lean_to_lat'] as num?)?.toDouble(),
+      maxLeanToLng: (json['max_lean_to_lng'] as num?)?.toDouble(),
     );
   }
 }

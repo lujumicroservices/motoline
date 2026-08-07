@@ -7,6 +7,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/bike_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../home/home_nav_icons.dart';
 
 /// Pick the rider's Triumph (or other) from the garage catalog.
 class BikePickerScreen extends ConsumerWidget {
@@ -44,8 +45,8 @@ class BikePickerScreen extends ConsumerWidget {
                 color: AppTheme.line.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
                 child: ListTile(
-                  leading: Icon(
-                    Icons.two_wheeler,
+                  leading: const AppMotoIcon(
+                    size: 28,
                     color: RideVizPalette.leanLeft,
                   ),
                   title: Text(

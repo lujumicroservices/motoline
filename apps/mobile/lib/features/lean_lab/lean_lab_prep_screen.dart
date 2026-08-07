@@ -12,6 +12,7 @@ import '../../core/telemetry/labels/ride_engine_label.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
+import '../home/home_nav_icons.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_detail/widgets/motorcycle_lean_gauge.dart';
 import 'lean_lab_bootstrap.dart';
@@ -239,7 +240,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.two_wheeler),
+                : const AppMotoIcon(size: 22),
             label: Text(l10n.leanLabStartRide),
           ),
         ],

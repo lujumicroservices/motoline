@@ -724,6 +724,28 @@
   "leanLabStartRide": "Start Lean Lab ride",
   "leanLabReviewTitle": "Label lean corners",
   "leanLabReviewHelp": "For each corner: was the app lean high, OK, or low? Grade (elevation) is shown so we can fix climb/descent bias.",
+  "leanLabReviewHelpMax": "Max lean for the curve stays fixed at the top. Play the corner to watch lean and the map move; jump to the peak when you want.",
+  "leanLabMaxLean": "Max lean",
+  "leanLabJumpToMax": "Jump to max lean",
+  "leanLabLiveLean": "Live lean",
+  "leanLabAtPeak": "at peak",
+  "leanLabMaxLeanGps": "GPS where max lean happened",
+  "leanLabMaxLeanGpsA": "A · {lat}, {lng}",
+  "@leanLabMaxLeanGpsA": {
+    "placeholders": {
+      "lat": { "type": "String" },
+      "lng": { "type": "String" }
+    }
+  },
+  "leanLabMaxLeanGpsB": "B · {lat}, {lng}",
+  "@leanLabMaxLeanGpsB": {
+    "placeholders": {
+      "lat": { "type": "String" },
+      "lng": { "type": "String" }
+    }
+  },
+  "leanLabSideLeft": "left",
+  "leanLabSideRight": "right",
   "leanLabNoCorners": "No corners detected on this ride to label.",
   "leanLabAppLean": "App lean",
   "leanLabGrade": "Grade",
