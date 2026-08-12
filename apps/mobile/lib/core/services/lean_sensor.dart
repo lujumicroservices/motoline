@@ -11,6 +11,9 @@ class LeanSensor {
   StreamSubscription<AccelerometerEvent>? _sub;
   double? _rawLeanDegrees;
   double? _neutralDegrees;
+  double? _gx;
+  double? _gy;
+  double? _gz;
   DateTime? _updatedAt;
   DateTime? _calibStartedAt;
   final ListQueue<double> _calibBuffer = ListQueue<double>();
@@ -39,6 +42,9 @@ class LeanSensor {
     _sub?.cancel();
     _rawLeanDegrees = null;
     _neutralDegrees = null;
+    _gx = null;
+    _gy = null;
+    _gz = null;
     _calibrated = false;
     _locked = false;
     _calibBuffer.clear();
@@ -47,14 +53,16 @@ class LeanSensor {
     _sub = accelerometerEventStream(
       samplingPeriod: SensorInterval.gameInterval,
     ).listen((event) {
-      final sample = leanFromAccelerometer(
-        x: event.x,
-        y: event.y,
-        z: event.z,
-      );
+      // Low-pass the gravity vector first (clinometer-style), then angle.
+      // Raw accel includes vibration; filtering XYZ is more stable than
+      // filtering the derived angle alone.
+      _gx = _gx == null ? event.x : _gx! * 0.85 + event.x * 0.15;
+      _gy = _gy == null ? event.y : _gy! * 0.85 + event.y * 0.15;
+      _gz = _gz == null ? event.z : _gz! * 0.85 + event.z * 0.15;
+      final sample = leanFromAccelerometer(x: _gx!, y: _gy!, z: _gz!);
       final previous = _rawLeanDegrees;
       _rawLeanDegrees =
-          previous == null ? sample : previous * 0.7 + sample * 0.3;
+          previous == null ? sample : previous * 0.6 + sample * 0.4;
       _updatedAt = DateTime.now();
       if (!_locked) {
         _maybeFinishCalibration(_rawLeanDegrees!);

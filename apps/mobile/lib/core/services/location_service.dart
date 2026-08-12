@@ -246,13 +246,48 @@ double maxPlausibleJumpMeters({
 
 double clampLeanDegrees(double lean) => lean.clamp(-70.0, 70.0);
 
-/// Phone-mounted lean proxy from gravity (degrees). Positive = lean right.
-/// Best with phone fixed in portrait, screen facing the rider.
+/// Phone lean / inclination from gravity (degrees).
+///
+/// Positive ≈ lean/tip one side, negative the other. Magnitude matches what
+/// typical clinometer apps show as degrees-from-vertical for a static phone.
+///
+/// Older code only used roll (`atan2(-x, …)`), so a wall tip (pitch, x≈0)
+/// read ~0° while other apps correctly showed ~20–30°. This uses the full
+/// tilt away from the phone axis currently closest to world-up.
 double leanFromAccelerometer({
   required double x,
   required double y,
   required double z,
 }) {
-  final leanRad = math.atan2(-x, math.sqrt(y * y + z * z));
-  return clampLeanDegrees(leanRad * 180 / math.pi);
+  final g = math.sqrt(x * x + y * y + z * z);
+  if (g < 1e-3) return 0;
+
+  final gx = x / g;
+  final gy = y / g;
+  final gz = z / g;
+  final absX = gx.abs();
+  final absY = gy.abs();
+  final absZ = gz.abs();
+
+  late final double magRad;
+  late final double sign;
+
+  if (absY >= absX && absY >= absZ) {
+    // Portrait-ish: Y closest to up (pocket / upright hold).
+    magRad = math.atan2(math.sqrt(gx * gx + gz * gz), absY);
+    // Prefer roll sign; if pitch dominates (wall tip), use pitch sign.
+    sign = absX >= absZ
+        ? (gx == 0 ? 1.0 : -gx.sign)
+        : (gz == 0 ? 1.0 : gz.sign);
+  } else if (absX >= absY && absX >= absZ) {
+    // Landscape-ish: X closest to up.
+    magRad = math.atan2(math.sqrt(gy * gy + gz * gz), absX);
+    sign = gy == 0 ? 1.0 : -gy.sign;
+  } else {
+    // Flat-ish: Z closest to up (screen up/down).
+    magRad = math.atan2(math.sqrt(gx * gx + gy * gy), absZ);
+    sign = gx == 0 ? 1.0 : -gx.sign;
+  }
+
+  return clampLeanDegrees(sign * magRad * 180 / math.pi);
 }
