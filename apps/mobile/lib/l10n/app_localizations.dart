@@ -3620,6 +3620,18 @@ abstract class AppLocalizations {
   /// **'No hay curvas detectadas para etiquetar en este recorrido.'**
   String get leanLabNoCorners;
 
+  /// No description provided for @leanLabNoTrackPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Este recorrido casi no tiene GPS en el teléfono. Abre Ajustes → Sincronizar rides con la nube (misma cuenta Google) y vuelve a intentar.'**
+  String get leanLabNoTrackPoints;
+
+  /// No description provided for @leanLabNoLeanData.
+  ///
+  /// In es, this message translates to:
+  /// **'El GPS está, pero faltan muestras de inclinación — no se pueden etiquetar curvas. Sincroniza de nuevo o graba la vuelta con el teléfono bien fijado.'**
+  String get leanLabNoLeanData;
+
   /// No description provided for @leanLabAppLean.
   ///
   /// In es, this message translates to:

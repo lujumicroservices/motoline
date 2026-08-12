@@ -244,7 +244,17 @@ class RideSyncService {
             );
           }
 
-          await _db.replacePointsForRide(localId, points);
+          // Never wipe a richer local track with empty / lean-less cloud data.
+          // That made Lean Lab "no curves" after a cloud pull.
+          final localPoints = await _db.getPoints(localId);
+          if (_shouldKeepLocalTrack(local: localPoints, cloud: points)) {
+            debugPrint(
+              'CornerIQ pull keep local track $localId '
+              '(local ${localPoints.length}, cloud ${points.length})',
+            );
+          } else {
+            await _db.replacePointsForRide(localId, points);
+          }
           imported++;
         } catch (e) {
           debugPrint('CornerIQ pull ride skip: $e');
@@ -297,4 +307,26 @@ class RideSyncService {
         'lean_degrees': p.leanDegrees,
         'pressure_hpa': p.pressureHpa,
       };
+
+  /// Prefer the denser / lean-richer track so labeling keeps working offline.
+  static bool _shouldKeepLocalTrack({
+    required List<TrackPoint> local,
+    required List<TrackPoint> cloud,
+  }) {
+    if (local.isEmpty) return false;
+    if (cloud.isEmpty) return true;
+
+    final localLean = local.where((p) => p.leanDegrees != null).length;
+    final cloudLean = cloud.where((p) => p.leanDegrees != null).length;
+
+    // Cloud is missing lean that local still has.
+    if (localLean >= 20 && cloudLean < (localLean * 0.4).round()) {
+      return true;
+    }
+    // Cloud track is drastically thinner than local GPS.
+    if (local.length >= 40 && cloud.length < (local.length * 0.45).round()) {
+      return true;
+    }
+    return false;
+  }
 }

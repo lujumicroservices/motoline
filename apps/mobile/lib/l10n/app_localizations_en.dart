@@ -1973,6 +1973,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabNoCorners => 'No corners detected on this ride to label.';
 
   @override
+  String get leanLabNoTrackPoints =>
+      'This ride has almost no GPS track on the phone. Open Settings → Sync rides with cloud (same Google account), then try again.';
+
+  @override
+  String get leanLabNoLeanData =>
+      'This ride’s GPS is here, but lean sensor samples are missing — so corners can’t be labeled. Re-sync the ride, or record the lap again with the phone firmly mounted.';
+
+  @override
   String get leanLabAppLean => 'App lean';
 
   @override

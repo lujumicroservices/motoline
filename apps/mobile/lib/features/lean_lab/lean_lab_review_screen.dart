@@ -61,9 +61,24 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
   }
 
   Future<void> _load() async {
+    // Ensure track (+ lean) is local before detecting corners.
+    try {
+      await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+    } catch (_) {}
     final session = await LeanLabService.instance.getSession(widget.rideId);
-    final ride = await ref.read(rideProvider(widget.rideId).future);
-    final points = await ref.read(ridePointsProvider(widget.rideId).future);
+    var ride = await ref.read(rideProvider(widget.rideId).future);
+    var points = await ref.read(ridePointsProvider(widget.rideId).future);
+    // If this phone wiped its track earlier, push/pull once more after keep-local fix.
+    if (points.length < 4) {
+      try {
+        await ref.read(rideSyncServiceProvider).syncRide(widget.rideId);
+        await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+        ref.invalidate(rideProvider(widget.rideId));
+        ref.invalidate(ridePointsProvider(widget.rideId));
+        ride = await ref.read(rideProvider(widget.rideId).future);
+        points = await ref.read(ridePointsProvider(widget.rideId).future);
+      } catch (_) {}
+    }
     if (!mounted || ride == null) return;
     final analytics = RideAnalytics(
       ride: ride,
@@ -90,6 +105,29 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
     final a = _analytics;
     if (a == null) return const [];
     final built = <_CornerCandidate>[];
+    final usedPeaks = <int>{};
+
+    void addCandidate({
+      required String label,
+      required int start,
+      required int end,
+      required int apex,
+      required MaxLeanHit hit,
+    }) {
+      if (usedPeaks.any((p) => (p - hit.peakIndex).abs() < 6)) return;
+      usedPeaks.add(hit.peakIndex);
+      built.add(
+        _CornerCandidate(
+          label: label,
+          analysisStart: start,
+          analysisEnd: end,
+          apexIndex: apex,
+          maxLean: hit,
+        ),
+      );
+    }
+
+    // 1) Primary: road-stretch skill corners.
     for (final c in a.skillSummary.corners) {
       final hit = findMaxLeanInWindow(
         samples: a.samples,
@@ -98,20 +136,108 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
         neutralLeanDegrees: _neutral,
       );
       if (hit == null) continue;
-      built.add(
-        _CornerCandidate(
-          label: c.label,
-          analysisStart: c.analysis.mapStartIndex,
-          analysisEnd: c.analysis.mapEndIndex,
-          apexIndex: c.analysis.apexIndex,
-          maxLean: hit,
-        ),
+      addCandidate(
+        label: c.label,
+        start: c.analysis.mapStartIndex,
+        end: c.analysis.mapEndIndex,
+        apex: c.analysis.apexIndex,
+        hit: hit,
       );
     }
+
+    // 2) Curve engine events (heading + lean), if skill missed them.
+    if (built.length < 5) {
+      for (final e in a.curveEvents) {
+        final hit = findMaxLeanInWindow(
+          samples: a.samples,
+          lo: e.startIndex,
+          hi: e.endIndex,
+          neutralLeanDegrees: _neutral,
+        );
+        if (hit == null || hit.absLeanDeg < 10) continue;
+        final side = hit.side == 'left' ? 'Curva izquierda' : 'Curva derecha';
+        addCandidate(
+          label: side,
+          start: e.startIndex,
+          end: e.endIndex,
+          apex: e.apexIndex ?? ((e.startIndex + e.endIndex) ~/ 2),
+          hit: hit,
+        );
+        if (built.length >= 5) break;
+      }
+    }
+
+    // 3) Raw lean peaks — recovers Bugambilias rides when stretch gating is strict.
+    if (built.length < 3) {
+      final peaks = findTopLeanPeaks(
+        samples: a.samples,
+        neutralLeanDegrees: _neutral,
+        maxPeaks: 5,
+      );
+      for (final hit in peaks) {
+        final lo = (hit.peakIndex - 8).clamp(0, a.samples.length - 1);
+        final hi = (hit.peakIndex + 8).clamp(lo, a.samples.length - 1);
+        final side = hit.side == 'left' ? 'Curva izquierda' : 'Curva derecha';
+        addCandidate(
+          label: side,
+          start: lo,
+          end: hi,
+          apex: hit.peakIndex,
+          hit: hit,
+        );
+        if (built.length >= 5) break;
+      }
+    }
+
+    // 4) Already-saved labels (relabel / restored cloud session).
+    if (built.isEmpty && a.samples.isNotEmpty) {
+      final last = a.samples.length - 1;
+      for (final c in _session?.corners ?? const <LeanLabCornerLabel>[]) {
+        final peak = (c.maxLeanIndex ?? c.apexIndex).clamp(0, last);
+        final lo = c.mapStartIndex.clamp(0, last);
+        final hi = c.mapEndIndex.clamp(lo, last);
+        var hit = findMaxLeanInWindow(
+          samples: a.samples,
+          lo: lo,
+          hi: hi,
+          neutralLeanDegrees: _neutral,
+        );
+        if (hit == null) {
+          final from = (c.maxLeanFromIndex ?? lo).clamp(0, last);
+          final to = (c.maxLeanToIndex ?? hi).clamp(from, last);
+          hit = MaxLeanHit(
+            peakIndex: peak,
+            signedLeanDeg: c.appLeanDeg,
+            fromIndex: from,
+            toIndex: to,
+            fromPoint: a.samples[from],
+            toPoint: a.samples[to],
+          );
+        }
+        final side = hit.side == 'left' ? 'Curva izquierda' : 'Curva derecha';
+        addCandidate(
+          label: side,
+          start: lo,
+          end: hi,
+          apex: c.apexIndex.clamp(0, last),
+          hit: hit,
+        );
+      }
+    }
+
     built.sort(
       (x, y) => y.maxLean.absLeanDeg.compareTo(x.maxLean.absLeanDeg),
     );
     return built.take(5).toList();
+  }
+
+  String _emptyReason(AppLocalizations l10n) {
+    final a = _analytics;
+    if (a == null) return l10n.leanLabNoCorners;
+    if (a.samples.length < 4) return l10n.leanLabNoTrackPoints;
+    final leanN = a.samples.where((p) => p.leanDegrees != null).length;
+    if (leanN < 8) return l10n.leanLabNoLeanData;
+    return l10n.leanLabNoCorners;
   }
 
   List<TrackPoint> _sliceFor(_CornerCandidate c) {
@@ -245,9 +371,9 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              l10n.leanLabNoCorners,
+              _emptyReason(l10n),
               textAlign: TextAlign.center,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 16),
             ),
           ),
         ),

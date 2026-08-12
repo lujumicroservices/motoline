@@ -160,3 +160,59 @@ MaxLeanHit? findMaxLeanInWindow({
 
   return (lo: lo, hi: hi);
 }
+
+/// Top relative-lean peaks across a ride (fallback when road-stretch curves miss).
+List<MaxLeanHit> findTopLeanPeaks({
+  required List<TrackPoint> samples,
+  required double neutralLeanDegrees,
+  int maxPeaks = 5,
+  double minAbsLeanDeg = 12,
+  int minSeparationSamples = 8,
+}) {
+  if (samples.length < 4) return const [];
+
+  final scored = <({int i, double lean})>[];
+  for (var i = 1; i < samples.length - 1; i++) {
+    final raw = samples[i].leanDegrees;
+    if (raw == null) continue;
+    final lean = relativeLeanDegrees(
+      rawLeanDegrees: raw,
+      neutralDegrees: neutralLeanDegrees,
+    );
+    if (lean.abs() < minAbsLeanDeg) continue;
+    final prevRaw = samples[i - 1].leanDegrees;
+    final nextRaw = samples[i + 1].leanDegrees;
+    if (prevRaw == null || nextRaw == null) continue;
+    final prev = relativeLeanDegrees(
+      rawLeanDegrees: prevRaw,
+      neutralDegrees: neutralLeanDegrees,
+    ).abs();
+    final next = relativeLeanDegrees(
+      rawLeanDegrees: nextRaw,
+      neutralDegrees: neutralLeanDegrees,
+    ).abs();
+    if (lean.abs() >= prev && lean.abs() >= next) {
+      scored.add((i: i, lean: lean));
+    }
+  }
+  scored.sort((a, b) => b.lean.abs().compareTo(a.lean.abs()));
+
+  final picked = <MaxLeanHit>[];
+  for (final s in scored) {
+    if (picked.any((p) => (p.peakIndex - s.i).abs() < minSeparationSamples)) {
+      continue;
+    }
+    final lo = (s.i - 6).clamp(0, samples.length - 1);
+    final hi = (s.i + 6).clamp(lo, samples.length - 1);
+    final hit = findMaxLeanInWindow(
+      samples: samples,
+      lo: lo,
+      hi: hi,
+      neutralLeanDegrees: neutralLeanDegrees,
+    );
+    if (hit == null) continue;
+    picked.add(hit);
+    if (picked.length >= maxPeaks) break;
+  }
+  return picked;
+}

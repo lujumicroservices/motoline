@@ -1984,6 +1984,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hay curvas detectadas para etiquetar en este recorrido.';
 
   @override
+  String get leanLabNoTrackPoints =>
+      'Este recorrido casi no tiene GPS en el teléfono. Abre Ajustes → Sincronizar rides con la nube (misma cuenta Google) y vuelve a intentar.';
+
+  @override
+  String get leanLabNoLeanData =>
+      'El GPS está, pero faltan muestras de inclinación — no se pueden etiquetar curvas. Sincroniza de nuevo o graba la vuelta con el teléfono bien fijado.';
+
+  @override
   String get leanLabAppLean => 'Lean app';
 
   @override

@@ -833,6 +833,8 @@
   "leanLabSideLeft": "izquierda",
   "leanLabSideRight": "derecha",
   "leanLabNoCorners": "No hay curvas detectadas para etiquetar en este recorrido.",
+  "leanLabNoTrackPoints": "Este recorrido casi no tiene GPS en el teléfono. Abre Ajustes → Sincronizar rides con la nube (misma cuenta Google) y vuelve a intentar.",
+  "leanLabNoLeanData": "El GPS está, pero faltan muestras de inclinación — no se pueden etiquetar curvas. Sincroniza de nuevo o graba la vuelta con el teléfono bien fijado.",
   "leanLabAppLean": "Lean app",
   "leanLabGrade": "Pendiente",
   "leanLabBiasQ": "¿Cómo se sintió el lean de la app en el ápice?",
