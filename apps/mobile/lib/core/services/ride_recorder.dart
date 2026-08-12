@@ -11,6 +11,7 @@ import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
 import 'arm_foreground_service.dart';
+import 'barometer_sensor.dart';
 import 'lean_sensor.dart';
 import 'location_service.dart';
 import 'motion_pattern_detector.dart';
@@ -30,6 +31,8 @@ class ActiveRideSnapshot {
     this.suggestEnd = false,
     this.pausedFor,
     this.autoPauseEnabled = true,
+    this.gpsRateHz,
+    this.pressureHpa,
   });
 
   final Ride ride;
@@ -52,6 +55,12 @@ class ActiveRideSnapshot {
 
   /// Whether automatic pause/resume is armed for this session.
   final bool autoPauseEnabled;
+
+  /// Rolling accepted-fix rate over ~12 s (null until enough samples).
+  final double? gpsRateHz;
+
+  /// Latest barometer reading (hPa), when the phone has one.
+  final double? pressureHpa;
 }
 
 /// Offline-first recorder: GPS + lean IMU, flushed to SQLite in batches.
@@ -65,18 +74,22 @@ class RideRecorder {
     RideDatabase? database,
     LocationService? locationService,
     LeanSensor? leanSensor,
+    BarometerSensor? barometerSensor,
   })  : _db = database ?? RideDatabase.instance,
         _location = locationService ?? LocationService(),
-        _lean = leanSensor ?? LeanSensor();
+        _lean = leanSensor ?? LeanSensor(),
+        _baro = barometerSensor ?? BarometerSensor();
 
   final RideDatabase _db;
   final LocationService _location;
   final LeanSensor _lean;
+  final BarometerSensor _baro;
   final _uuid = const Uuid();
 
   final _pending = <TrackPoint>[];
   final _controller = StreamController<ActiveRideSnapshot>.broadcast();
   final _autoStartController = StreamController<Ride>.broadcast();
+  final _fixAcceptTimes = <DateTime>[];
   final _armedController = StreamController<bool>.broadcast();
 
   final MotionPatternDetector _motion = MotionPatternDetector();
@@ -269,9 +282,11 @@ class RideRecorder {
     _wasSuggestEnd = false;
     _gpsSkipAccuracy = 0;
     _gpsSkipTeleport = 0;
+    _fixAcceptTimes.clear();
     _motion.resetForNewRide();
 
     _lean.start();
+    _baro.start();
     final pendingNeutral = _pendingLeanNeutral;
     if (pendingNeutral != null) {
       _lean.lockNeutral(pendingNeutral);
@@ -320,6 +335,8 @@ class RideRecorder {
     _flushTimer?.cancel();
     _flushTimer = null;
     _lean.stop();
+    _baro.stop();
+    _fixAcceptTimes.clear();
     unawaited(ArmForegroundService.stop());
     await _flushPending();
 
@@ -345,11 +362,9 @@ class RideRecorder {
           'max_speed_mps': completed.maxSpeedMps,
           'gps_skip_accuracy': _gpsSkipAccuracy,
           'gps_skip_teleport': _gpsSkipTeleport,
-          'duration_s': completed.endedAt == null
-              ? null
-              : completed.endedAt!
-                  .difference(completed.startedAt)
-                  .inSeconds,
+          'duration_s': completed.endedAt
+              ?.difference(completed.startedAt)
+              .inSeconds,
         },
       ),
     );
@@ -634,6 +649,7 @@ class RideRecorder {
     _maxLeanAbs = null;
     _maxLeanLeft = 0;
     _maxLeanRight = 0;
+    _fixAcceptTimes.clear();
     _motion.resetForNewRide();
 
     _armed = false;
@@ -641,6 +657,7 @@ class RideRecorder {
     _armedController.add(false);
 
     _lean.start();
+    _baro.start();
     final pendingNeutral = _pendingLeanNeutral;
     if (pendingNeutral != null) {
       _lean.lockNeutral(pendingNeutral);
@@ -754,9 +771,11 @@ class RideRecorder {
       accuracyMeters: position.accuracy,
       heading: position.heading.isNaN ? null : position.heading,
       leanDegrees: rawLean,
+      pressureHpa: _baro.pressureHpa,
       timestamp: position.timestamp,
     );
     _lastPoint = point;
+    _noteGpsAccept(position.timestamp);
 
     _motion.feedRideSample(
       speedMps: speedMps,
@@ -918,6 +937,24 @@ class RideRecorder {
     }
   }
 
+  void _noteGpsAccept(DateTime t) {
+    _fixAcceptTimes.add(t);
+    final cutoff = t.subtract(const Duration(seconds: 12));
+    while (_fixAcceptTimes.isNotEmpty &&
+        _fixAcceptTimes.first.isBefore(cutoff)) {
+      _fixAcceptTimes.removeAt(0);
+    }
+  }
+
+  double? get _liveGpsRateHz {
+    if (_fixAcceptTimes.length < 3) return null;
+    final spanMs = _fixAcceptTimes.last
+        .difference(_fixAcceptTimes.first)
+        .inMilliseconds;
+    if (spanMs < 400) return null;
+    return (_fixAcceptTimes.length - 1) / (spanMs / 1000.0);
+  }
+
   void _emit() {
     final ride = _ride;
     if (ride == null) return;
@@ -934,6 +971,8 @@ class RideRecorder {
         suggestEnd: _motion.suggestEnd,
         pausedFor: _motion.pausedFor(),
         autoPauseEnabled: _autoPauseEnabled,
+        gpsRateHz: _liveGpsRateHz,
+        pressureHpa: _baro.pressureHpa,
       ),
     );
   }
@@ -948,6 +987,8 @@ class RideRecorder {
         maxLeanLeftDegrees: _maxLeanLeft,
         maxLeanRightDegrees: _maxLeanRight,
         leanCalibrated: _lean.isCalibrated,
+        gpsRateHz: _liveGpsRateHz,
+        pressureHpa: _baro.pressureHpa ?? _lastPoint?.pressureHpa,
       ),
     );
   }
@@ -957,6 +998,8 @@ class RideRecorder {
     await _armSub?.cancel();
     _flushTimer?.cancel();
     _lean.stop();
+    _baro.stop();
+    _fixAcceptTimes.clear();
     await _flushPending();
     await _controller.close();
     await _autoStartController.close();

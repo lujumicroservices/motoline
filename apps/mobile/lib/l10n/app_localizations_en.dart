@@ -1744,6 +1744,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String gpsRateHz(String hz) {
+    return '$hz Hz';
+  }
+
+  @override
+  String get pressure => 'Pressure';
+
+  @override
+  String get pressureChartSub => 'Barometer reading along the ride (hPa)';
+
+  @override
   String get skillLabTitle => 'Skill lab';
 
   @override

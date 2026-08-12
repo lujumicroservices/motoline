@@ -64,6 +64,28 @@ class GpsQualityChip extends StatelessWidget {
                 letterSpacing: 0.6,
               ),
             ),
+            if (analytics.sampleRateHz != null) ...[
+              const SizedBox(width: 6),
+              Text(
+                l10n.gpsRateHz(analytics.sampleRateHz!.toStringAsFixed(1)),
+                style: GoogleFonts.exo2(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
+            ],
+            if (analytics.avgGpsAccuracyM != null) ...[
+              const SizedBox(width: 6),
+              Text(
+                '±${analytics.avgGpsAccuracyM!.toStringAsFixed(0)} m',
+                style: GoogleFonts.exo2(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
+            ],
           ],
         ),
         if (message != null) ...[

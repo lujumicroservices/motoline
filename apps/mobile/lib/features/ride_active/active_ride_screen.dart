@@ -284,6 +284,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                             maxLeanRight: 0,
                             leanCalibrated: false,
                             accuracyMeters: null,
+                            gpsRateHz: null,
+                            pressureHpa: null,
                             loopState: loopState,
                           ),
                           error: (e, _) => Center(child: Text('$e')),
@@ -301,6 +303,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                               maxLeanRight: snap?.maxLeanRightDegrees ?? 0,
                               leanCalibrated: snap?.leanCalibrated ?? false,
                               accuracyMeters: snap?.lastPoint?.accuracyMeters,
+                              gpsRateHz: snap?.gpsRateHz,
+                              pressureHpa: snap?.pressureHpa ??
+                                  snap?.lastPoint?.pressureHpa,
                               loopState: loopState,
                             );
                           },
@@ -324,6 +329,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     required double maxLeanRight,
     required bool leanCalibrated,
     required double? accuracyMeters,
+    required double? gpsRateHz,
+    required double? pressureHpa,
     required LoopSessionState? loopState,
   }) {
     final l10n = context.l10n;
@@ -333,7 +340,10 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
           child: Row(
             children: [
-              GpsLockBadge(accuracyMeters: accuracyMeters),
+              GpsLockBadge(
+                accuracyMeters: accuracyMeters,
+                rateHz: gpsRateHz,
+              ),
               const Spacer(),
             ],
           ),
@@ -415,13 +425,24 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
-                  label: l10n.maxLR,
-                  value:
-                      '${maxLeanLeft.toStringAsFixed(0)}/${maxLeanRight.toStringAsFixed(0)}',
-                  unit: '°',
+                  label: l10n.pressure,
+                  value: pressureHpa == null
+                      ? '--'
+                      : pressureHpa.toStringAsFixed(0),
+                  unit: 'hPa',
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: _StatCard(
+            label: l10n.maxLR,
+            value:
+                '${maxLeanLeft.toStringAsFixed(0)}/${maxLeanRight.toStringAsFixed(0)}',
+            unit: '°',
           ),
         ),
         const SizedBox(height: 16),

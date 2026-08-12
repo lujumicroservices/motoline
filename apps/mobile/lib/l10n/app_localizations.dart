@@ -3212,6 +3212,24 @@ abstract class AppLocalizations {
   /// **'GPS débil (~{meters} m) — fija mejor el teléfono y rueda al aire libre.'**
   String gpsQualityWeakTip(String meters);
 
+  /// No description provided for @gpsRateHz.
+  ///
+  /// In es, this message translates to:
+  /// **'{hz} Hz'**
+  String gpsRateHz(String hz);
+
+  /// No description provided for @pressure.
+  ///
+  /// In es, this message translates to:
+  /// **'Presión'**
+  String get pressure;
+
+  /// No description provided for @pressureChartSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Barómetro a lo largo del recorrido (hPa)'**
+  String get pressureChartSub;
+
   /// No description provided for @skillLabTitle.
   ///
   /// In es, this message translates to:

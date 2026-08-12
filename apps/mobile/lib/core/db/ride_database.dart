@@ -25,7 +25,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 14,
+      version: 15,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -55,6 +55,7 @@ class RideDatabase {
             accuracy_meters REAL,
             heading REAL,
             lean_degrees REAL,
+            pressure_hpa REAL,
             timestamp_ms INTEGER NOT NULL,
             FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
           )
@@ -119,8 +120,19 @@ class RideDatabase {
         if (oldVersion < 14) {
           await _addLeanLabBikeIdColumnIfMissing(db);
         }
+        if (oldVersion < 15) {
+          await _addPressureColumnIfMissing(db);
+        }
       },
     );
+  }
+
+  Future<void> _addPressureColumnIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(track_points)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    if (!existing.contains('pressure_hpa')) {
+      await db.execute('ALTER TABLE track_points ADD COLUMN pressure_hpa REAL');
+    }
   }
 
   Future<void> _createLeanLabSessionsTable(Database db) async {

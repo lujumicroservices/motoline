@@ -666,6 +666,18 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                   onSelectSeconds: _setScrubSeconds,
                                 ),
                               ],
+                              if (a.pressureSeries.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                RideProfileChart(
+                                  title: l10n.pressure,
+                                  subtitle: l10n.pressureChartSub,
+                                  series: a.pressureSeries,
+                                  lineColor: AppTheme.mist,
+                                  unit: 'hPa',
+                                  selectedSeconds: scrubSeconds,
+                                  onSelectSeconds: _setScrubSeconds,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -1007,6 +1019,11 @@ class _PrecisionPanel extends StatelessWidget {
               ? '--'
               : '${a.avgGpsAccuracyM!.toStringAsFixed(1)} m',
         ),
+        if (a.avgPressureHpa != null)
+          _MiniPill(
+            label: 'hPa',
+            value: a.avgPressureHpa!.toStringAsFixed(0),
+          ),
       ],
     );
   }

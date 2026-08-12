@@ -730,6 +730,14 @@
       "meters": { "type": "String" }
     }
   },
+  "gpsRateHz": "{hz} Hz",
+  "@gpsRateHz": {
+    "placeholders": {
+      "hz": { "type": "String" }
+    }
+  },
+  "pressure": "Presión",
+  "pressureChartSub": "Barómetro a lo largo del recorrido (hPa)",
   "skillLabTitle": "Lab de técnica",
   "skillLabTapHint": "Toca para ver errores y cómo mejorar",
   "skillLabTapHintEmpty": "Toca para tips tras un tramo sinuoso",

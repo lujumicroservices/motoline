@@ -176,22 +176,22 @@ class _AccuracyMeter extends StatelessWidget {
   }
 }
 
-/// Compact live GPS quality chip while recording.
+/// Compact live GPS capture chip while recording (rate + accuracy).
 class GpsLockBadge extends StatelessWidget {
-  const GpsLockBadge({super.key, this.accuracyMeters});
+  const GpsLockBadge({
+    super.key,
+    this.accuracyMeters,
+    this.rateHz,
+  });
 
   final double? accuracyMeters;
+  final double? rateHz;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final acc = accuracyMeters;
-    final label = acc == null
-        ? 'GPS…'
-        : acc <= LocationService.warmTargetAccuracyMeters
-            ? 'GPS ready ±${acc.toStringAsFixed(0)} m'
-            : acc <= LocationService.maxAcceptAccuracyMeters
-                ? 'GPS warm ±${acc.toStringAsFixed(0)} m'
-                : 'GPS weak ±${acc.toStringAsFixed(0)} m';
+    final hz = rateHz;
 
     final color = acc == null
         ? AppTheme.steel
@@ -206,6 +206,15 @@ class GpsLockBadge extends StatelessWidget {
         : acc <= LocationService.warmTargetAccuracyMeters
             ? Icons.gps_fixed
             : Icons.gps_not_fixed;
+
+    final parts = <String>[];
+    if (hz != null) {
+      parts.add(l10n.gpsRateHz(hz.toStringAsFixed(1)));
+    }
+    if (acc != null) {
+      parts.add('±${acc.toStringAsFixed(0)} m');
+    }
+    final label = parts.isEmpty ? 'GPS…' : 'GPS ${parts.join(' · ')}';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

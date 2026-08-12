@@ -235,6 +235,23 @@ class RideAnalytics {
             ),
       ];
 
+  List<TimedValue> get pressureSeries => [
+        for (final p in samples)
+          if (p.pressureHpa != null)
+            TimedValue(
+              seconds:
+                  p.timestamp.difference(_origin).inMilliseconds / 1000.0,
+              value: p.pressureHpa!,
+            ),
+      ];
+
+  double? get avgPressureHpa {
+    final vals =
+        samples.map((p) => p.pressureHpa).whereType<double>().toList();
+    if (vals.isEmpty) return null;
+    return vals.reduce((a, b) => a + b) / vals.length;
+  }
+
   double get totalSeconds {
     if (samples.length < 2) return 0;
     return samples.last.timestamp

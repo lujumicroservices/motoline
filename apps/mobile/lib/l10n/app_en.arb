@@ -659,6 +659,14 @@
       "meters": { "type": "String" }
     }
   },
+  "gpsRateHz": "{hz} Hz",
+  "@gpsRateHz": {
+    "placeholders": {
+      "hz": { "type": "String" }
+    }
+  },
+  "pressure": "Pressure",
+  "pressureChartSub": "Barometer reading along the ride (hPa)",
   "skillLabTitle": "Skill lab",
   "skillLabTapHint": "Tap to see mistakes and how to improve",
   "skillLabTapHintEmpty": "Tap for tips after a twisty ride",

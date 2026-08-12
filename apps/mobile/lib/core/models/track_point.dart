@@ -10,6 +10,7 @@ class TrackPoint {
     this.accuracyMeters,
     this.heading,
     this.leanDegrees,
+    this.pressureHpa,
   });
 
   final int? id;
@@ -24,6 +25,9 @@ class TrackPoint {
 
   /// Signed lean proxy from phone IMU (degrees). Positive = lean right.
   final double? leanDegrees;
+
+  /// Atmospheric pressure from phone barometer (hectopascals).
+  final double? pressureHpa;
 
   double? get speedKmh {
     final speed = speedMps;
@@ -46,6 +50,7 @@ class TrackPoint {
         'accuracy_meters': accuracyMeters,
         'heading': heading,
         'lean_degrees': leanDegrees,
+        'pressure_hpa': pressureHpa,
         'timestamp_ms': timestamp.millisecondsSinceEpoch,
       };
 
@@ -59,12 +64,18 @@ class TrackPoint {
         accuracyMeters: (map['accuracy_meters'] as num?)?.toDouble(),
         heading: (map['heading'] as num?)?.toDouble(),
         leanDegrees: (map['lean_degrees'] as num?)?.toDouble(),
+        pressureHpa: (map['pressure_hpa'] as num?)?.toDouble(),
         timestamp: DateTime.fromMillisecondsSinceEpoch(
           map['timestamp_ms'] as int,
         ),
       );
 
-  TrackPoint copyWith({int? id, double? leanDegrees}) => TrackPoint(
+  TrackPoint copyWith({
+    int? id,
+    double? leanDegrees,
+    double? pressureHpa,
+  }) =>
+      TrackPoint(
         id: id ?? this.id,
         rideId: rideId,
         latitude: latitude,
@@ -75,5 +86,6 @@ class TrackPoint {
         accuracyMeters: accuracyMeters,
         heading: heading,
         leanDegrees: leanDegrees ?? this.leanDegrees,
+        pressureHpa: pressureHpa ?? this.pressureHpa,
       );
 }

@@ -239,6 +239,7 @@ class RideSyncService {
                 accuracyMeters: (pm['accuracy_meters'] as num?)?.toDouble(),
                 heading: (pm['heading'] as num?)?.toDouble(),
                 leanDegrees: (pm['lean_degrees'] as num?)?.toDouble(),
+                pressureHpa: (pm['pressure_hpa'] as num?)?.toDouble(),
               ),
             );
           }
@@ -294,5 +295,6 @@ class RideSyncService {
         'accuracy_meters': p.accuracyMeters,
         'heading': p.heading,
         'lean_degrees': p.leanDegrees,
+        'pressure_hpa': p.pressureHpa,
       };
 }
