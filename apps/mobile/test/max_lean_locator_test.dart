@@ -39,4 +39,30 @@ void main() {
     expect(hit.toIndex, greaterThanOrEqualTo(3));
     expect(hit.fromPoint.latitude, isNot(equals(hit.toPoint.latitude)));
   });
+
+  test('padTrackAroundIndex keeps path on both sides of peak', () {
+    // ~11 m steps east (0.0001° ≈ 11 m at equator; fine for relative padding).
+    final samples = [
+      for (var i = 0; i < 40; i++)
+        _pt(
+          i,
+          lean: i == 5 ? -40 : -5,
+          lat: 20.6,
+          lng: -103.45 + i * 0.0001,
+        ),
+    ];
+    // Seed window leaves peak near the left edge.
+    final padded = padTrackAroundIndex(
+      samples: samples,
+      centerIndex: 5,
+      seedLo: 4,
+      seedHi: 12,
+      minSideMeters: 40,
+      minSideSamples: 4,
+    );
+    expect(padded.lo, lessThan(5));
+    expect(padded.hi, greaterThan(5));
+    expect(5 - padded.lo, greaterThanOrEqualTo(4));
+    expect(padded.hi - 5, greaterThanOrEqualTo(4));
+  });
 }

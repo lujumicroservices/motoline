@@ -26,6 +26,7 @@ class PilotLineMap extends StatefulWidget {
     this.focusStartIndex,
     this.focusEndIndex,
     this.dimOutsideFocus = true,
+    this.accentIndex,
     this.brakeEvents = const [],
     this.roadStretches = const [],
     this.layers = const MapLayerOptions(),
@@ -51,6 +52,9 @@ class PilotLineMap extends StatefulWidget {
 
   /// When focusing, draw the rest of the line dimmed.
   final bool dimOutsideFocus;
+
+  /// Optional fixed accent pin (e.g. max lean) — stays visible during scrub.
+  final int? accentIndex;
 
   /// Brake hits inferred from speed — drawn as map pins.
   final List<BrakeEvent> brakeEvents;
@@ -92,6 +96,7 @@ class _PilotLineMapState extends State<PilotLineMap> {
         a.focusStartIndex != b.focusStartIndex ||
         a.focusEndIndex != b.focusEndIndex ||
         a.dimOutsideFocus != b.dimOutsideFocus ||
+        a.accentIndex != b.accentIndex ||
         a.showStartEnd != b.showStartEnd ||
         a.layers.showSpeedColors != b.layers.showSpeedColors ||
         a.layers.showRoadKindContrast != b.layers.showRoadKindContrast ||
@@ -243,11 +248,39 @@ class _PilotLineMapState extends State<PilotLineMap> {
         ),
       );
     }
+
+    final accent = widget.accentIndex;
+    if (accent != null && accent >= 0 && accent < points.length) {
+      final p = points[accent];
+      markers.add(
+        Marker(
+          point: LatLng(p.latitude, p.longitude),
+          width: 30,
+          height: 30,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppTheme.lineHot,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.mist, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.lineHot.withValues(alpha: 0.4),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.flag, size: 14, color: AppTheme.asphalt),
+          ),
+        ),
+      );
+    }
+
     _baseMarkers = markers;
     _cacheIdentity = Object.hash(
       points.length,
       focusLo,
       focusHi,
+      accent,
       widget.layers.showSpeedColors,
       widget.layers.showRoadKindContrast,
       widget.layers.showBrakes,
@@ -341,7 +374,7 @@ class _PilotLineMapState extends State<PilotLineMap> {
         ),
         initialCameraFit: CameraFit.bounds(
           bounds: _bounds!,
-          padding: const EdgeInsets.all(36),
+          padding: const EdgeInsets.all(44),
           maxZoom: hasFocus ? 18 : 17,
         ),
         onTap: widget.onTapScrub == null

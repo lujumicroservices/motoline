@@ -398,20 +398,33 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                 borderRadius: BorderRadius.circular(14),
                 child: SizedBox(
                   height: 220,
-                  child: PilotLineMap(
-                    points: analytics.samples,
-                    interactive: false,
-                    allowZoom: true,
-                    scrubIndex: playGlobal,
-                    focusStartIndex: c.analysisStart,
-                    focusEndIndex: c.analysisEnd,
-                    dimOutsideFocus: true,
-                    layers: const MapLayerOptions(
-                      showSpeedColors: true,
-                      showBrakes: false,
-                      showRoadKindContrast: false,
-                      showLegend: false,
-                    ),
+                  child: Builder(
+                    builder: (context) {
+                      // Always keep GPS line on both sides of max lean.
+                      final mapFocus = padTrackAroundIndex(
+                        samples: analytics.samples,
+                        centerIndex: hit.peakIndex,
+                        seedLo: c.analysisStart,
+                        seedHi: c.analysisEnd,
+                      );
+                      return PilotLineMap(
+                        points: analytics.samples,
+                        interactive: false,
+                        allowZoom: true,
+                        scrubIndex: playGlobal,
+                        focusStartIndex: mapFocus.lo,
+                        focusEndIndex: mapFocus.hi,
+                        accentIndex: hit.peakIndex,
+                        dimOutsideFocus: true,
+                        layers: const MapLayerOptions(
+                          showSpeedColors: true,
+                          showBrakes: false,
+                          showRoadKindContrast: false,
+                          showLegend: false,
+                          showStartEnd: false,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

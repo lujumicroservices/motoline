@@ -1,5 +1,6 @@
 import '../analytics/lean_neutral.dart';
 import '../models/track_point.dart';
+import '../utils/geo_utils.dart';
 
 /// Peak lean inside a corner window, plus the GPS samples that bound it.
 class MaxLeanHit {
@@ -101,4 +102,61 @@ MaxLeanHit? findMaxLeanInWindow({
     fromPoint: samples[from],
     toPoint: samples[to],
   );
+}
+
+/// Map focus that always keeps track line on both sides of [centerIndex].
+///
+/// Starts from optional [seedLo]…[seedHi] (e.g. corner analysis window), then
+/// walks along the GPS path until each side has at least [minSideMeters]
+/// (and [minSideSamples] points when the path allows).
+({int lo, int hi}) padTrackAroundIndex({
+  required List<TrackPoint> samples,
+  required int centerIndex,
+  int? seedLo,
+  int? seedHi,
+  double minSideMeters = 55,
+  int minSideSamples = 8,
+}) {
+  if (samples.isEmpty) return (lo: 0, hi: 0);
+  final last = samples.length - 1;
+  final center = centerIndex.clamp(0, last);
+
+  var lo = (seedLo ?? center).clamp(0, last);
+  var hi = (seedHi ?? center).clamp(lo, last);
+  if (center < lo) lo = center;
+  if (center > hi) hi = center;
+
+  var leftDist = 0.0;
+  var leftCount = center - lo;
+  var i = lo;
+  while (i > 0 &&
+      (leftDist < minSideMeters || leftCount < minSideSamples)) {
+    leftDist += haversineMeters(
+      samples[i].latitude,
+      samples[i].longitude,
+      samples[i - 1].latitude,
+      samples[i - 1].longitude,
+    );
+    i -= 1;
+    leftCount += 1;
+  }
+  lo = i;
+
+  var rightDist = 0.0;
+  var rightCount = hi - center;
+  var j = hi;
+  while (j < last &&
+      (rightDist < minSideMeters || rightCount < minSideSamples)) {
+    rightDist += haversineMeters(
+      samples[j].latitude,
+      samples[j].longitude,
+      samples[j + 1].latitude,
+      samples[j + 1].longitude,
+    );
+    j += 1;
+    rightCount += 1;
+  }
+  hi = j;
+
+  return (lo: lo, hi: hi);
 }
