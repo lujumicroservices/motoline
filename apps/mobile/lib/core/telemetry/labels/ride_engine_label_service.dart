@@ -74,16 +74,19 @@ class RideEngineLabelService {
     if (!SupabaseBootstrap.isReady) return;
     final userId = SupabaseBootstrap.client.auth.currentUser?.id;
     if (userId == null) return;
-    await SupabaseBootstrap.client.from('ride_engine_labels').upsert({
-      'user_id': userId,
-      'ride_local_id': label.rideId,
-      'phone_mount': label.phoneMount,
-      'lean_quality': label.leanQuality,
-      'brake_feel': label.brakeFeel,
-      'ride_context': label.rideContext,
-      'notes': label.notes,
-      'payload': payload,
-      'labeled_at': label.createdAt.toUtc().toIso8601String(),
-    });
+    await SupabaseBootstrap.client.from('ride_engine_labels').upsert(
+      {
+        'user_id': userId,
+        'ride_local_id': label.rideId,
+        'phone_mount': label.phoneMount,
+        'lean_quality': label.leanQuality,
+        'brake_feel': label.brakeFeel,
+        'ride_context': label.rideContext,
+        'notes': label.notes,
+        'payload': payload,
+        'labeled_at': label.createdAt.toUtc().toIso8601String(),
+      },
+      onConflict: 'user_id,ride_local_id',
+    );
   }
 }

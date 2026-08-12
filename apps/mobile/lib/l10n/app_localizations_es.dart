@@ -1050,15 +1050,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rideLoopOpenRoute => 'Abrir ruta (vueltas + loops)';
 
   @override
-  String get syncCloudRides => 'Subir rides a la nube';
+  String get syncCloudRides => 'Sincronizar rides con la nube';
 
   @override
   String get syncCloudRidesHelp =>
-      'Guarda métricas (velocidad, lean, line score, GPS) de todos los rides terminados en tu cuenta.';
+      'Sube los rides terminados y descarga a este teléfono los rides del Garage y las sesiones de Lean Lab de esta cuenta.';
 
   @override
   String syncCloudRidesDone(int ok, int fail) {
-    return 'Nube: $ok ok, $fail fallaron';
+    return 'Subida: $ok ok, $fail fallaron';
+  }
+
+  @override
+  String syncCloudRidesPulled(int rides, int lean) {
+    return 'Descargados $rides rides, $lean Lean Lab';
   }
 
   @override

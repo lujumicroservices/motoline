@@ -345,13 +345,20 @@
   "rideLoopNeedPoints": "Not enough GPS points to mark a loop.",
   "rideLoopSaveFirst": "Save a loop first — that creates the route.",
   "rideLoopOpenRoute": "Open route (laps + loops)",
-  "syncCloudRides": "Upload rides to cloud",
-  "syncCloudRidesHelp": "Persists metrics (speed, lean, line score, GPS) for every completed ride on your account.",
-  "syncCloudRidesDone": "Cloud: {ok} ok, {fail} failed",
+  "syncCloudRides": "Sync rides with cloud",
+  "syncCloudRidesHelp": "Upload completed rides, then download this account’s Garage rides and Lean Lab sessions onto this phone.",
+  "syncCloudRidesDone": "Upload: {ok} ok, {fail} failed",
   "@syncCloudRidesDone": {
     "placeholders": {
-      "ok": { "type": "int" },
-      "fail": { "type": "int" }
+      "ok": {"type": "int"},
+      "fail": {"type": "int"}
+    }
+  },
+  "syncCloudRidesPulled": "Downloaded {rides} rides, {lean} Lean Lab",
+  "@syncCloudRidesPulled": {
+    "placeholders": {
+      "rides": {"type": "int"},
+      "lean": {"type": "int"}
     }
   },
   "playStoreUpdatesOnly": "Updates install from Google Play for this build.",

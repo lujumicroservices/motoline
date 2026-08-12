@@ -280,4 +280,57 @@ class LeanLabSession {
       'labeled_at': DateTime.now().toUtc().toIso8601String(),
     };
   }
+
+  /// Rebuild a local session from a cloud training payload.
+  static LeanLabSession? fromTrainingPayload(
+    Map<String, dynamic> payload, {
+    String? fallbackRideId,
+  }) {
+    final rideId = payload['ride_id'] as String? ?? fallbackRideId;
+    if (rideId == null || rideId.isEmpty) return null;
+
+    final cornersRaw = payload['corners'];
+    final corners = <LeanLabCornerLabel>[];
+    if (cornersRaw is List) {
+      for (final e in cornersRaw) {
+        if (e is Map) {
+          corners.add(
+            LeanLabCornerLabel.fromJson(Map<String, dynamic>.from(e)),
+          );
+        }
+      }
+    }
+
+    DateTime? calibAt;
+    final calibIso = payload['calib_at'] as String?;
+    if (calibIso != null) {
+      calibAt = DateTime.tryParse(calibIso)?.toLocal();
+    }
+
+    DateTime? createdAt;
+    final labeledIso = payload['labeled_at'] as String?;
+    if (labeledIso != null) {
+      createdAt = DateTime.tryParse(labeledIso)?.toLocal();
+    }
+
+    return LeanLabSession(
+      rideId: rideId,
+      protocolId:
+          payload['protocol_id'] as String? ?? BugambiliasCircuit.protocolId,
+      sessionType: LeanLabSessionType.fromId(payload['session_type'] as String?),
+      direction: LeanLabDirection.fromId(payload['direction'] as String?),
+      phoneMount: payload['phone_mount'] as String? ?? 'center_mount',
+      phonePose: PhonePoseId.fromId(payload['phone_pose'] as String?),
+      frozenNeutralDeg:
+          (payload['frozen_neutral_deg'] as num?)?.toDouble() ?? 0,
+      calibAt: calibAt,
+      corners: corners,
+      coveragePct: (payload['coverage_pct'] as num?)?.toDouble() ?? 0,
+      totalClimbM: (payload['total_climb_m'] as num?)?.toDouble() ?? 0,
+      totalDescentM: (payload['total_descent_m'] as num?)?.toDouble() ?? 0,
+      bikeId: payload['bike_id'] as String?,
+      createdAt: createdAt ?? DateTime.now(),
+      synced: true,
+    );
+  }
 }

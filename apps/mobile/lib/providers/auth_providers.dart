@@ -5,6 +5,7 @@ import '../core/auth/auth_provider_kind.dart';
 import '../core/auth/auth_service.dart';
 import '../core/supabase/supabase_bootstrap.dart';
 import 'alias_provider.dart';
+import 'ride_providers.dart';
 import 'social_providers.dart';
 import 'supabase_providers.dart';
 
@@ -52,6 +53,8 @@ class AuthActions {
       }
       ref.invalidate(myProfileProvider);
       ref.invalidate(friendsListProvider);
+      // Pull this account's cloud rides into Garage after identity change.
+      ref.invalidate(ridesListProvider);
       return true;
     } on AuthException catch (e) {
       if (e.message.toLowerCase().contains('cancel')) {

@@ -1043,15 +1043,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideLoopOpenRoute => 'Open route (laps + loops)';
 
   @override
-  String get syncCloudRides => 'Upload rides to cloud';
+  String get syncCloudRides => 'Sync rides with cloud';
 
   @override
   String get syncCloudRidesHelp =>
-      'Persists metrics (speed, lean, line score, GPS) for every completed ride on your account.';
+      'Upload completed rides, then download this account’s Garage rides and Lean Lab sessions onto this phone.';
 
   @override
   String syncCloudRidesDone(int ok, int fail) {
-    return 'Cloud: $ok ok, $fail failed';
+    return 'Upload: $ok ok, $fail failed';
+  }
+
+  @override
+  String syncCloudRidesPulled(int rides, int lean) {
+    return 'Downloaded $rides rides, $lean Lean Lab';
   }
 
   @override

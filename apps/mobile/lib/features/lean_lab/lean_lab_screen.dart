@@ -10,6 +10,7 @@ import '../../core/lean_lab/lean_lab_circuit.dart';
 import '../../core/lean_lab/lean_lab_models.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import 'lean_lab_prep_screen.dart';
 import 'lean_lab_session_detail_screen.dart';
@@ -34,12 +35,20 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
 
   Future<void> _reload() async {
     setState(() => _loading = true);
+    // Restore Garage tracks + Lean Lab metadata for this signed-in account.
+    try {
+      await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+    } catch (_) {}
+    try {
+      await LeanLabService.instance.pullMyCloudSessions();
+    } catch (_) {}
     final list = await LeanLabService.instance.listSessions();
     if (!mounted) return;
     setState(() {
       _sessions = list;
       _loading = false;
     });
+    ref.invalidate(ridesListProvider);
   }
 
   Future<void> _openMap() async {

@@ -1979,20 +1979,26 @@ abstract class AppLocalizations {
   /// No description provided for @syncCloudRides.
   ///
   /// In es, this message translates to:
-  /// **'Subir rides a la nube'**
+  /// **'Sincronizar rides con la nube'**
   String get syncCloudRides;
 
   /// No description provided for @syncCloudRidesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Guarda métricas (velocidad, lean, line score, GPS) de todos los rides terminados en tu cuenta.'**
+  /// **'Sube los rides terminados y descarga a este teléfono los rides del Garage y las sesiones de Lean Lab de esta cuenta.'**
   String get syncCloudRidesHelp;
 
   /// No description provided for @syncCloudRidesDone.
   ///
   /// In es, this message translates to:
-  /// **'Nube: {ok} ok, {fail} fallaron'**
+  /// **'Subida: {ok} ok, {fail} fallaron'**
   String syncCloudRidesDone(int ok, int fail);
+
+  /// No description provided for @syncCloudRidesPulled.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargados {rides} rides, {lean} Lean Lab'**
+  String syncCloudRidesPulled(int rides, int lean);
 
   /// No description provided for @playStoreUpdatesOnly.
   ///

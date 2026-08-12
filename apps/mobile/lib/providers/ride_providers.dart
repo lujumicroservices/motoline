@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/db/ride_database.dart';
+import '../core/lean_lab/lean_lab_service.dart';
 import '../core/models/ride.dart';
 import '../core/models/track_point.dart';
 import '../core/services/loop_session_controller.dart';
@@ -25,9 +26,13 @@ final rideRecorderProvider = Provider<RideRecorder>((ref) {
 });
 
 final ridesListProvider = FutureProvider.autoDispose<List<Ride>>((ref) async {
-  // Pull owned cloud rides into SQLite so Garage shows recovered / moved data.
+  // Pull owned cloud rides + Lean Lab sessions into SQLite so this phone
+  // shows recovered / moved data for the signed-in account.
   try {
     await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+  } catch (_) {}
+  try {
+    await LeanLabService.instance.pullMyCloudSessions();
   } catch (_) {}
   final db = ref.watch(rideDatabaseProvider);
   final rides = await db.listRides();

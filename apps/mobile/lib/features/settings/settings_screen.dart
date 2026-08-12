@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/lean_lab/lean_lab_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/bike_provider.dart';
 import '../../providers/locale_provider.dart';
@@ -32,12 +33,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = context.l10n;
     setState(() => _syncing = true);
     try {
-      final result =
-          await ref.read(rideSyncServiceProvider).syncAllCompletedRides();
+      final sync = ref.read(rideSyncServiceProvider);
+      final result = await sync.syncAllCompletedRides();
+      final pulled = await sync.pullMyCloudRides();
+      final leanPulled =
+          await LeanLabService.instance.pullMyCloudSessions();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.syncCloudRidesDone(result.ok, result.fail)),
+          content: Text(
+            '${l10n.syncCloudRidesDone(result.ok, result.fail)} · '
+            '${l10n.syncCloudRidesPulled(pulled, leanPulled)}',
+          ),
         ),
       );
       ref.invalidate(ridesListProvider);
