@@ -11,6 +11,7 @@ import '../../core/lean_lab/lean_lab_models.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/lean_lab/max_lean_locator.dart';
 import '../../core/models/track_point.dart';
+import '../../core/services/ride_sync_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
@@ -61,24 +62,17 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
   }
 
   Future<void> _load() async {
-    // Ensure track (+ lean) is local before detecting corners.
+    // Soft fill gaps only — never erase a good local track by opening label UI.
     try {
-      await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+      await ref.read(rideSyncServiceProvider).pullMyCloudRides(
+            policy: TrackPullPolicy.fillGapsOnly,
+          );
     } catch (_) {}
     final session = await LeanLabService.instance.getSession(widget.rideId);
-    var ride = await ref.read(rideProvider(widget.rideId).future);
-    var points = await ref.read(ridePointsProvider(widget.rideId).future);
-    // If this phone wiped its track earlier, push/pull once more after keep-local fix.
-    if (points.length < 4) {
-      try {
-        await ref.read(rideSyncServiceProvider).syncRide(widget.rideId);
-        await ref.read(rideSyncServiceProvider).pullMyCloudRides();
-        ref.invalidate(rideProvider(widget.rideId));
-        ref.invalidate(ridePointsProvider(widget.rideId));
-        ride = await ref.read(rideProvider(widget.rideId).future);
-        points = await ref.read(ridePointsProvider(widget.rideId).future);
-      } catch (_) {}
-    }
+    final ride = await ref.read(rideProvider(widget.rideId).future);
+    final points = await ref.read(ridePointsProvider(widget.rideId).future);
+    // Do NOT syncRide when local GPS is empty — that used to upload emptiness
+    // and delete the cloud backup.
     if (!mounted || ride == null) return;
     final analytics = RideAnalytics(
       ride: ride,

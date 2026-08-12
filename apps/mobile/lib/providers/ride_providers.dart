@@ -26,10 +26,11 @@ final rideRecorderProvider = Provider<RideRecorder>((ref) {
 });
 
 final ridesListProvider = FutureProvider.autoDispose<List<Ride>>((ref) async {
-  // Pull owned cloud rides + Lean Lab sessions into SQLite so this phone
-  // shows recovered / moved data for the signed-in account.
+  // Soft cloud fill: never wipe local GPS/lean just by opening Garage.
   try {
-    await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+    await ref.read(rideSyncServiceProvider).pullMyCloudRides(
+          policy: TrackPullPolicy.fillGapsOnly,
+        );
   } catch (_) {}
   try {
     await LeanLabService.instance.pullMyCloudSessions();

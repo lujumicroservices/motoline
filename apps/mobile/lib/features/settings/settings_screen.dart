@@ -8,6 +8,7 @@ import '../../providers/bike_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../providers/ride_providers.dart';
+import '../../core/services/ride_sync_service.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
@@ -35,15 +36,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       final sync = ref.read(rideSyncServiceProvider);
       final result = await sync.syncAllCompletedRides();
-      final pulled = await sync.pullMyCloudRides();
+      final pulled = await sync.pullMyCloudRides(
+        policy: TrackPullPolicy.preferRicher,
+      );
       final leanPulled =
           await LeanLabService.instance.pullMyCloudSessions();
       if (!mounted) return;
+      final err = sync.lastSyncError ?? sync.lastPullError;
+      final detail = err == null ? '' : '\n$err';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: Duration(seconds: err == null ? 4 : 10),
           content: Text(
             '${l10n.syncCloudRidesDone(result.ok, result.fail)} · '
-            '${l10n.syncCloudRidesPulled(pulled, leanPulled)}',
+            '${l10n.syncCloudRidesPulled(pulled, leanPulled)}'
+            '$detail',
           ),
         ),
       );

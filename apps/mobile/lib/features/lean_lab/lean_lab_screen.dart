@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/lean_lab/lean_lab_circuit.dart';
 import '../../core/lean_lab/lean_lab_models.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
+import '../../core/services/ride_sync_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
@@ -35,9 +36,11 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
 
   Future<void> _reload() async {
     setState(() => _loading = true);
-    // Restore Garage tracks + Lean Lab metadata for this signed-in account.
+    // Soft fill only — never wipe local GPS/lean by opening Lean Lab.
     try {
-      await ref.read(rideSyncServiceProvider).pullMyCloudRides();
+      await ref.read(rideSyncServiceProvider).pullMyCloudRides(
+            policy: TrackPullPolicy.fillGapsOnly,
+          );
     } catch (_) {}
     try {
       await LeanLabService.instance.pullMyCloudSessions();

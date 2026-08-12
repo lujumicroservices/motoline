@@ -12,6 +12,15 @@ import '../models/track_point.dart';
 import '../supabase/supabase_bootstrap.dart';
 import 'rider_telemetry_service.dart';
 
+/// How aggressively cloud GPS may overwrite local SQLite tracks.
+enum TrackPullPolicy {
+  /// Auto Garage / Lean Lab open: never wipe a local track that still has samples.
+  fillGapsOnly,
+
+  /// Settings sync: replace only when cloud is clearly richer (more lean + enough GPS).
+  preferRicher,
+}
+
 /// Uploads completed local rides to Supabase, and pulls owned cloud rides
 /// into local SQLite so Garage shows recovered / moved data.
 class RideSyncService {
@@ -26,6 +35,11 @@ class RideSyncService {
 
   String? lastPullInfo;
   String? lastPullError;
+  String? lastSyncError;
+  final List<String> lastSyncFailures = [];
+
+  /// Once we learn the remote has no `pressure_hpa`, stop sending it.
+  static bool _omitPressureHpa = false;
 
   SupabaseClient get _supabase {
     final injected = _client;
@@ -43,6 +57,8 @@ class RideSyncService {
   Future<({int ok, int fail})> syncAllCompletedRides() async {
     var ok = 0;
     var fail = 0;
+    lastSyncError = null;
+    lastSyncFailures.clear();
     final rides = await _db.listRides();
     for (final ride in rides) {
       if (ride.status != RideStatus.completed) continue;
@@ -58,25 +74,49 @@ class RideSyncService {
       await RiderTelemetryService.instance.log(
         category: TelemetryCategory.sync,
         eventType: 'sync_all_done',
-        payload: {'ok': ok, 'fail': fail},
+        payload: {
+          'ok': ok,
+          'fail': fail,
+          'last_error': lastSyncError,
+        },
       );
       await RiderTelemetryService.instance.flushPending();
     } catch (_) {}
     return (ok: ok, fail: fail);
   }
 
-  /// Upsert ride summary + replace track points. Soft-fails when offline / no auth.
+  /// Upsert ride summary + upload track points without destroying cloud backup
+  /// until the new points are fully inserted.
   Future<String?> syncRide(String localRideId) async {
     try {
-      if (!SupabaseBootstrap.isReady) return null;
+      if (!SupabaseBootstrap.isReady) {
+        lastSyncError = 'Cloud not configured';
+        return null;
+      }
       await SupabaseBootstrap.ensureSession();
       final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return null;
+      if (userId == null) {
+        lastSyncError =
+            SupabaseBootstrap.lastAuthError ?? 'Not signed in to cloud';
+        return null;
+      }
 
       final ride = await _db.getRide(localRideId);
-      if (ride == null || ride.status != RideStatus.completed) return null;
+      if (ride == null || ride.status != RideStatus.completed) {
+        return null;
+      }
 
       final points = await _db.getPoints(localRideId);
+      // Never upload an empty track over a ride that claimed it had GPS —
+      // that destroys the only remaining cloud backup after a local wipe.
+      if (points.isEmpty && ride.pointCount > 10) {
+        lastSyncError =
+            'Skipped upload for $localRideId: local GPS empty but ride had ${ride.pointCount} points';
+        lastSyncFailures.add(lastSyncError!);
+        debugPrint('CornerIQ sync skip empty wipe: $localRideId');
+        return null;
+      }
+
       final analytics = RideAnalytics(ride: ride, points: points);
       final bbox = bboxFromPoints(points);
 
@@ -108,18 +148,8 @@ class RideSyncService {
 
       final cloudRideId = row['id'] as String;
 
-      await _supabase.from('track_points').delete().eq('ride_id', cloudRideId);
-
       if (points.isNotEmpty) {
-        const chunkSize = 200;
-        for (var i = 0; i < points.length; i += chunkSize) {
-          final end = math.min(i + chunkSize, points.length);
-          final chunk = points.sublist(i, end).map(_pointRow).toList();
-          for (final row in chunk) {
-            row['ride_id'] = cloudRideId;
-          }
-          await _supabase.from('track_points').insert(chunk);
-        }
+        await _uploadTrackPointsSafe(cloudRideId, points);
       }
 
       debugPrint('CornerIQ synced ride $localRideId → $cloudRideId');
@@ -138,6 +168,8 @@ class RideSyncService {
       } catch (_) {}
       return cloudRideId;
     } catch (e, st) {
+      lastSyncError = '$e';
+      lastSyncFailures.add('$localRideId: $e');
       debugPrint('CornerIQ sync failed: $e\n$st');
       try {
         await RiderTelemetryService.instance.error(
@@ -151,8 +183,67 @@ class RideSyncService {
     }
   }
 
+  /// Insert new points first, then delete older rows. If insert fails, cloud
+  /// backup stays intact (unlike delete-then-insert).
+  Future<void> _uploadTrackPointsSafe(
+    String cloudRideId,
+    List<TrackPoint> points,
+  ) async {
+    int? maxIdBefore;
+    try {
+      final before = await _supabase
+          .from('track_points')
+          .select('id')
+          .eq('ride_id', cloudRideId)
+          .order('id', ascending: false)
+          .limit(1);
+      if (before.isNotEmpty) {
+        maxIdBefore = (before.first['id'] as num?)?.toInt();
+      }
+    } catch (_) {}
+
+    Future<void> insertAll({required bool withPressure}) async {
+      const chunkSize = 200;
+      for (var i = 0; i < points.length; i += chunkSize) {
+        final end = math.min(i + chunkSize, points.length);
+        final chunk = points
+            .sublist(i, end)
+            .map((p) => _pointRow(p, includePressure: withPressure))
+            .toList();
+        for (final row in chunk) {
+          row['ride_id'] = cloudRideId;
+        }
+        await _supabase.from('track_points').insert(chunk);
+      }
+    }
+
+    try {
+      await insertAll(withPressure: !_omitPressureHpa);
+    } catch (e) {
+      final msg = '$e'.toLowerCase();
+      if (!_omitPressureHpa && msg.contains('pressure_hpa')) {
+        _omitPressureHpa = true;
+        debugPrint('CornerIQ: remote missing pressure_hpa — retrying without it');
+        await insertAll(withPressure: false);
+      } else {
+        rethrow;
+      }
+    }
+
+    // New rows are inserted; remove only the previous generation.
+    if (maxIdBefore != null) {
+      await _supabase
+          .from('track_points')
+          .delete()
+          .eq('ride_id', cloudRideId)
+          .lte('id', maxIdBefore);
+    }
+  }
+
   /// Download this account's cloud rides (+ GPS points) into local Garage.
-  Future<int> pullMyCloudRides() async {
+  Future<int> pullMyCloudRides({
+    TrackPullPolicy policy = TrackPullPolicy.preferRicher,
+  }) async {
     lastPullError = null;
     lastPullInfo = null;
     if (!SupabaseBootstrap.isReady) {
@@ -176,6 +267,7 @@ class RideSyncService {
           .order('started_at', ascending: false);
 
       var imported = 0;
+      var keptLocal = 0;
       for (final raw in (rows as List)) {
         try {
           final map = Map<String, dynamic>.from(raw as Map);
@@ -244,13 +336,17 @@ class RideSyncService {
             );
           }
 
-          // Never wipe a richer local track with empty / lean-less cloud data.
-          // That made Lean Lab "no curves" after a cloud pull.
           final localPoints = await _db.getPoints(localId);
-          if (_shouldKeepLocalTrack(local: localPoints, cloud: points)) {
+          if (_shouldKeepLocalTrack(
+            local: localPoints,
+            cloud: points,
+            policy: policy,
+          )) {
+            keptLocal++;
             debugPrint(
               'CornerIQ pull keep local track $localId '
-              '(local ${localPoints.length}, cloud ${points.length})',
+              '(local ${localPoints.length}/${_leanCount(localPoints)} lean, '
+              'cloud ${points.length}/${_leanCount(points)} lean, $policy)',
             );
           } else {
             await _db.replacePointsForRide(localId, points);
@@ -258,10 +354,12 @@ class RideSyncService {
           imported++;
         } catch (e) {
           debugPrint('CornerIQ pull ride skip: $e');
+          lastPullError = '$e';
         }
       }
 
-      lastPullInfo = 'Pulled $imported cloud ride(s)';
+      lastPullInfo =
+          'Pulled $imported cloud ride(s), kept local track on $keptLocal';
       return imported;
     } catch (e) {
       lastPullError = SupabaseBootstrap.lastAuthError ?? '$e';
@@ -296,37 +394,53 @@ class RideSyncService {
     }
   }
 
-  Map<String, dynamic> _pointRow(TrackPoint p) => {
-        'recorded_at': p.timestamp.toUtc().toIso8601String(),
-        'latitude': p.latitude,
-        'longitude': p.longitude,
-        'altitude': p.altitude,
-        'speed_mps': p.speedMps,
-        'accuracy_meters': p.accuracyMeters,
-        'heading': p.heading,
-        'lean_degrees': p.leanDegrees,
-        'pressure_hpa': p.pressureHpa,
-      };
+  Map<String, dynamic> _pointRow(
+    TrackPoint p, {
+    required bool includePressure,
+  }) {
+    final row = <String, dynamic>{
+      'recorded_at': p.timestamp.toUtc().toIso8601String(),
+      'latitude': p.latitude,
+      'longitude': p.longitude,
+      'altitude': p.altitude,
+      'speed_mps': p.speedMps,
+      'accuracy_meters': p.accuracyMeters,
+      'heading': p.heading,
+      'lean_degrees': p.leanDegrees,
+    };
+    if (includePressure && p.pressureHpa != null) {
+      row['pressure_hpa'] = p.pressureHpa;
+    }
+    return row;
+  }
 
-  /// Prefer the denser / lean-richer track so labeling keeps working offline.
+  static int _leanCount(List<TrackPoint> pts) =>
+      pts.where((p) => p.leanDegrees != null).length;
+
+  /// Prefer denser / lean-richer local tracks so labeling keeps working.
   static bool _shouldKeepLocalTrack({
     required List<TrackPoint> local,
     required List<TrackPoint> cloud,
+    required TrackPullPolicy policy,
   }) {
     if (local.isEmpty) return false;
     if (cloud.isEmpty) return true;
 
-    final localLean = local.where((p) => p.leanDegrees != null).length;
-    final cloudLean = cloud.where((p) => p.leanDegrees != null).length;
+    final localLean = _leanCount(local);
+    final cloudLean = _leanCount(cloud);
 
-    // Cloud is missing lean that local still has.
-    if (localLean >= 20 && cloudLean < (localLean * 0.4).round()) {
-      return true;
+    switch (policy) {
+      case TrackPullPolicy.fillGapsOnly:
+        // Opening Garage / Lean Lab must never erase a ride that still has GPS.
+        return true;
+      case TrackPullPolicy.preferRicher:
+        // Keep local whenever it still has lean and cloud has less.
+        if (localLean > 0 && cloudLean < localLean) return true;
+        // Keep local whenever it has denser GPS.
+        if (cloud.length < local.length) return true;
+        // Keep local if cloud has zero lean but local has any.
+        if (localLean > 0 && cloudLean == 0) return true;
+        return false;
     }
-    // Cloud track is drastically thinner than local GPS.
-    if (local.length >= 40 && cloud.length < (local.length * 0.45).round()) {
-      return true;
-    }
-    return false;
   }
 }
