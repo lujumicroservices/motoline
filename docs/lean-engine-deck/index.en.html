@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RiderLab — Mount-aware lean engine</title>
+  <style>
+    :root {
+      --asphalt: #0e1013;
+      --elevated: #1a1e24;
+      --steel: #9ba4ae;
+      --mist: #f1f5f8;
+      --signal: #ff3d1f;
+      --line: #00d4aa;
+      --amber: #ffc107;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--asphalt);
+      color: var(--mist);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      overflow: hidden;
+    }
+    .deck { height: 100%; }
+    .slide {
+      display: none;
+      height: 100%;
+      padding: 48px 64px 72px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+    }
+    .slide.on { display: flex; }
+    .kicker {
+      color: var(--line);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    h1 { font-size: clamp(32px, 4.4vw, 58px); line-height: 1.08; font-weight: 800; }
+    h2 { font-size: clamp(26px, 3vw, 40px); font-weight: 800; }
+    p, li { color: var(--steel); font-size: clamp(16px, 1.6vw, 22px); line-height: 1.45; }
+    .row { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center; }
+    .row.flip { grid-template-columns: 0.9fr 1.1fr; }
+    img.hero {
+      width: 100%;
+      height: min(52vh, 520px);
+      object-fit: cover;
+      border-radius: 16px;
+      border: 1px solid #2a313a;
+    }
+    img.phone {
+      width: auto;
+      height: min(58vh, 560px);
+      max-width: min(100%, 280px);
+      object-fit: contain;
+      object-position: top;
+      border-radius: 18px;
+      border: 1px solid #2a313a;
+      background: #000;
+      justify-self: center;
+    }
+    .phones {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .phones img.phone { height: min(54vh, 520px); }
+    .row.phone-row { grid-template-columns: 1.15fr auto; }
+    .row.phone-row.flip { grid-template-columns: auto 1.15fr; }
+    .formula {
+      font-family: ui-monospace, Consolas, monospace;
+      color: var(--mist);
+      background: var(--elevated);
+      border-radius: 14px;
+      padding: 18px 22px;
+      font-size: clamp(16px, 1.8vw, 24px);
+      border-left: 4px solid var(--signal);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(14px, 1.4vw, 18px);
+    }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #2a313a; }
+    th { color: var(--line); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill {
+      background: var(--elevated);
+      border-radius: 999px;
+      padding: 8px 14px;
+      color: var(--mist);
+      font-size: 14px;
+    }
+    .pill em { color: var(--line); font-style: normal; }
+    .steps { list-style: none; display: grid; gap: 10px; }
+    .steps li {
+      background: var(--elevated);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--mist);
+    }
+    .steps li span { color: var(--signal); font-weight: 800; margin-right: 8px; }
+    .nav {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 28px 16px;
+      background: linear-gradient(transparent, #0e1013 40%);
+      font-size: 13px;
+      color: var(--steel);
+    }
+    .nav button {
+      background: var(--elevated);
+      color: var(--mist);
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .dots { display: flex; gap: 6px; }
+    .dots i {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #3a424c; display: block;
+    }
+    .dots i.on { background: var(--line); }
+    .never { color: var(--signal); }
+    @media (max-width: 900px) {
+      .slide { padding: 28px 22px 80px; }
+      .row, .row.flip, .row.phone-row, .row.phone-row.flip { grid-template-columns: 1fr; }
+      img.hero { height: 28vh; }
+      img.phone, .phones img.phone { height: 34vh; max-width: 160px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <section class="slide on">
+      <div class="kicker">RiderLab · Lean engine</div>
+      <div class="row phone-row">
+        <div>
+          <h1>The soul of the app<br/>is how we measure lean.</h1>
+          <p>Not one formula. Classify how the phone sits. Then compute bike lean.</p>
+        </div>
+        <img class="phone" src="img/app/home.png" alt="Garage with Lean Lab and 70° max lean" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">What we learned in the IMU lab</div>
+      <h2>Four traces. Two truths.</h2>
+      <div class="row">
+        <div>
+          <table>
+            <tr><th>Channel</th><th>Follows bike lean when</th></tr>
+            <tr><td>Roll / fused roll</td><td>Phone <b>vertical</b> (tank or pocket)</td></tr>
+            <tr><td>Pitch + vector</td><td>Phone <b>horizontal</b> (flat on tank)</td></tr>
+            <tr><td>Vector lean</td><td><b>Always</b> — 3D angle from freeze</td></tr>
+            <tr><td>Old App lean</td><td>Breaks if the tip is not portrait roll</td></tr>
+          </table>
+        </div>
+        <img class="hero" src="img/channels.png" alt="Four telemetry traces" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Finding 1</div>
+      <h2>Vertical tank or pocket → fused roll</h2>
+      <div class="row">
+        <img class="hero" src="img/vertical.png" alt="Portrait phone on tank" />
+        <div>
+          <p>Gravity sits on <b>+Y</b> (up the screen). Bike lean is left/right in that frame = <b>roll</b>. Gyro fusion keeps it alive through vibration.</p>
+          <p>Pitch is nod, hill, braking — not the corner.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Finding 2</div>
+      <h2>Horizontal on the tank → pitch + vector</h2>
+      <div class="row flip">
+        <div>
+          <p>Gravity sits on <b>+Z</b> (screen up). The same bike lean is now a different phone axis. Portrait <b>roll goes quiet</b>. Pitch and vector follow the lean.</p>
+          <p>This is why three phones on a wall disagreed: some were on roll, one was on pitch.</p>
+        </div>
+        <img class="hero" src="img/flat.png" alt="Phone lying flat on tank" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">The formula</div>
+      <h2>Magnitude from vector. Sign from the winner.</h2>
+      <div class="formula">bikeLean = sign(winning fused Euler) × angle(g, g0)</div>
+      <div class="row">
+        <img class="hero" src="img/formula.png" alt="Gravity vectors and angle" />
+        <ul class="steps">
+          <li><span>g0</span> Frozen gravity at upright (Layer A)</li>
+          <li><span>g</span> Live gravity while riding</li>
+          <li><span>|∠|</span> Vector lean — matches a clinometer</li>
+          <li><span>±</span> Left/right from roll (vertical) or pitch (flat)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Layer A · freeze</div>
+      <div class="row phone-row">
+        <div>
+          <h2>One ritual: upright, in the real mount, freeze g0</h2>
+          <p>The app reads which phone axis is up. That is the pose. No corner needed. Mount chips are labels for training — sensors pick the channel.</p>
+          <table>
+            <tr><th>Up axis</th><th>Pose</th><th>Lean channel</th></tr>
+            <tr><td>±Y</td><td>Vertical (tank / pocket)</td><td>Fused roll</td></tr>
+            <tr><td>±X</td><td>Landscape on its side</td><td>Fused pitch</td></tr>
+            <tr><td>±Z</td><td>Flat (screen up/down)</td><td>Pitch / vector</td></tr>
+          </table>
+        </div>
+        <img class="phone" src="img/app/settings-lean.png" alt="Lean Lab, sensors, and bike picker" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Layer A · tank</div>
+      <h2>Phone already mounted → Hold upright 4s</h2>
+      <ul class="steps">
+        <li><span>1</span> Bike upright, not on the sidestand if that leans it</li>
+        <li><span>2</span> Phone already portrait, landscape, or flat on the tank</li>
+        <li><span>3</span> Hands off · tap <b>Sostener vertical 4s</b></li>
+        <li><span>4</span> Check banner: Vertical / Landscape / Flat · vector ~0°</li>
+        <li><span>5</span> If vector is already 8°+, redo the freeze</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Layer A · pocket</div>
+      <h2>You cannot tap the screen in the pocket</h2>
+      <div class="row">
+        <img class="hero" src="img/pocket.png" alt="Tap, pocket, sit still" />
+        <ul class="steps">
+          <li><span>1</span> Sit on the bike, upright</li>
+          <li><span>2</span> Tap <b>Guardar en el bolsillo</b> (still in hand)</li>
+          <li><span>3</span> Pocket it fully before the countdown ends</li>
+          <li><span>4</span> Stay still. App ignores the motion, then captures ~3s</li>
+          <li><span>5</span> Strong haptic = freeze done. Ride can auto-start</li>
+        </ul>
+      </div>
+      <p>Never hold 4s in front of your face — that freezes the hand, not the pocket.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Never</div>
+      <div class="row phone-row">
+        <div>
+          <h2>These break g0</h2>
+          <ul class="steps">
+            <li class="never">Freeze in the hand, then pocket it</li>
+            <li class="never">Freeze on the sidestand</li>
+            <li class="never">Freeze while walking to the bike</li>
+            <li class="never">Flip screen or change pocket after freeze</li>
+            <li class="never">Trust roll when the banner says Flat</li>
+          </ul>
+        </div>
+        <img class="phone" src="img/app/technique-lab.png" alt="Technique lab: check the phone is secured" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Layer B · while riding</div>
+      <div class="row phone-row">
+        <div>
+          <h2>Four channels tell us if the phone slipped</h2>
+          <p>Vector lean is the oracle (always 3D tilt from g0). Every ~1s we ask: which Euler follows vector — and GPS turn rate?</p>
+          <div class="pills">
+            <div class="pill">Winner = <em>highest |corr| × energy</em></div>
+            <div class="pill">Need <em>|corr| &gt; 0.55</em></div>
+            <div class="pill">Straight road → <em>keep last pose</em></div>
+            <div class="pill">Sustained disagree → <em>reclassify</em></div>
+          </div>
+          <p>Gyro holds the winning Euler through bumps. GPS is not lean — it only votes “we are in a curve.”</p>
+        </div>
+        <img class="phone" src="img/app/lean-gauge.png" alt="Live lean gauge with speed and brake" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Three phones</div>
+      <h2>Each phone freezes in its own mount</h2>
+      <ul class="steps">
+        <li><span>A</span> Pocket → arm, pocket, haptic</li>
+        <li><span>B</span> Flat on tank → hold 4s</li>
+        <li><span>C</span> Portrait on tank → hold 4s</li>
+      </ul>
+      <p>Compare <b>vector magnitudes</b> on a slow lean. Winning <b>channel names</b> may differ — that is correct. The output number is still signed bike lean.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">In the garage</div>
+      <h2>Same number. Now on the ride.</h2>
+      <p>IMU lab teaches the engine. Garage already shows signed lean on the map and on every corner.</p>
+      <div class="phones">
+        <img class="phone" src="img/app/full-map.png" alt="Full map HUD with lean" />
+        <img class="phone" src="img/app/curve-detail.png" alt="Corner E A S with 45° lean" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Success</div>
+      <h2>We ship this when</h2>
+      <ul class="steps">
+        <li><span>✓</span> Same wall, any pose: vector within ~3° of a clinometer</li>
+        <li><span>✓</span> Vertical: live gauge follows fused roll</li>
+        <li><span>✓</span> Flat: live gauge follows pitch / vector</li>
+        <li><span>✓</span> Pocket slip: banner switches in a few seconds</li>
+        <li><span>✓</span> IMU lab shows pose + winner — same engine as production</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Next</div>
+      <div class="row phone-row">
+        <div>
+          <h1>LeanEngine</h1>
+          <p>g0 freeze · pose class · four-channel tracker · signed bike lean on every GPS point.</p>
+          <p>IMU lab becomes the teacher. Garage keeps the same <code>leanDegrees</code> field — the number just gets honest.</p>
+        </div>
+        <img class="phone" src="img/app/curve-detail.png" alt="Corner lean 45° in Ride Lab" />
+      </div>
+    </section>
+
+  </div>
+  <div class="nav">
+    <button type="button" id="prev">←</button>
+    <div class="dots" id="dots"></div>
+    <span id="pos">1 / 1</span>
+    <button type="button" id="next">→</button>
+  </div>
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const dots = document.getElementById("dots");
+    let i = 0;
+    slides.forEach(() => dots.appendChild(document.createElement("i")));
+    function show(n) {
+      i = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => s.classList.toggle("on", k === i));
+      [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
+      document.getElementById("pos").textContent = (i + 1) + " / " + slides.length;
+    }
+    document.getElementById("prev").onclick = () => show(i - 1);
+    document.getElementById("next").onclick = () => show(i + 1);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(i + 1); }
+      if (e.key === "ArrowLeft") show(i - 1);
+    });
+    let x0 = null;
+    document.addEventListener("touchstart", (e) => { x0 = e.changedTouches[0].screenX; });
+    document.addEventListener("touchend", (e) => {
+      if (x0 == null) return;
+      const dx = e.changedTouches[0].screenX - x0;
+      if (dx < -40) show(i + 1);
+      if (dx > 40) show(i - 1);
+      x0 = null;
+    });
+    show(0);
+  </script>
+</body>
+</html>

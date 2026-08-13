@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RiderLab — Motor de inclinación</title>
+  <style>
+    :root {
+      --asphalt: #0e1013;
+      --elevated: #1a1e24;
+      --steel: #9ba4ae;
+      --mist: #f1f5f8;
+      --signal: #ff3d1f;
+      --line: #00d4aa;
+      --amber: #ffc107;
+      --card: #151920;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--asphalt);
+      color: var(--mist);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      overflow: hidden;
+    }
+    .deck { height: 100%; }
+    .slide {
+      display: none;
+      height: 100%;
+      padding: 44px 56px 78px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+    .slide.on { display: flex; }
+    .kicker {
+      color: var(--line);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    h1 { font-size: clamp(30px, 4.2vw, 56px); line-height: 1.08; font-weight: 800; }
+    h2 { font-size: clamp(24px, 2.8vw, 38px); font-weight: 800; }
+    p, li { color: var(--steel); font-size: clamp(15px, 1.5vw, 21px); line-height: 1.45; }
+    b, strong { color: var(--mist); font-weight: 700; }
+    .row { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 36px; align-items: center; }
+    .row.flip { grid-template-columns: 0.85fr 1.15fr; }
+    .row.phone-row { grid-template-columns: 1.2fr auto; }
+    .row.phone-row.flip { grid-template-columns: auto 1.2fr; }
+    img.hero {
+      width: 100%;
+      height: min(50vh, 500px);
+      object-fit: cover;
+      border-radius: 16px;
+      border: 1px solid #2a313a;
+    }
+    .device {
+      background: #07090b;
+      border-radius: 28px;
+      padding: 11px 9px 14px;
+      border: 1px solid #3a424c;
+      box-shadow: 0 28px 64px rgba(0,0,0,.5);
+      justify-self: center;
+    }
+    .device img {
+      display: block;
+      height: min(62vh, 620px);
+      width: auto;
+      max-width: 270px;
+      border-radius: 18px;
+    }
+    .phones { display: flex; gap: 22px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+    .phones .device img { height: min(56vh, 540px); max-width: 240px; }
+    .formula {
+      font-family: ui-monospace, Consolas, monospace;
+      color: var(--mist);
+      background: var(--elevated);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: clamp(14px, 1.6vw, 22px);
+      border-left: 4px solid var(--signal);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: clamp(14px, 1.35vw, 18px); }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #2a313a; }
+    th { color: var(--line); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill {
+      background: var(--elevated);
+      border-radius: 999px;
+      padding: 8px 14px;
+      color: var(--mist);
+      font-size: 14px;
+    }
+    .pill em { color: var(--line); font-style: normal; }
+    .steps { list-style: none; display: grid; gap: 10px; }
+    .steps li {
+      background: var(--elevated);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--mist);
+    }
+    .steps li span { color: var(--signal); font-weight: 800; margin-right: 8px; }
+    .never { color: var(--signal); }
+    .fine { font-size: 14px; color: #6b7480; }
+    .nav {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 28px 16px;
+      background: linear-gradient(transparent, #0e1013 45%);
+      font-size: 13px;
+      color: var(--steel);
+      z-index: 5;
+    }
+    .nav button {
+      background: var(--elevated);
+      color: var(--mist);
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .nav a {
+      color: var(--steel);
+      text-decoration: none;
+      margin-right: 12px;
+    }
+    .dots { display: flex; gap: 6px; flex-wrap: wrap; max-width: 55vw; justify-content: center; }
+    .dots i { width: 7px; height: 7px; border-radius: 50%; background: #3a424c; display: block; }
+    .dots i.on { background: var(--line); }
+    @media (max-width: 900px) {
+      .slide { padding: 24px 18px 84px; }
+      .row, .row.flip, .row.phone-row, .row.phone-row.flip { grid-template-columns: 1fr; }
+      img.hero { height: 26vh; }
+      .device img, .phones .device img { height: 36vh; max-width: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <section class="slide on">
+      <div class="kicker">RiderLab · motor de inclinación</div>
+      <div class="row phone-row">
+        <div>
+          <h1>El alma de la app<br/>es cómo medimos<br/>la inclinación.</h1>
+          <p>No es una sola fórmula. Primero clasificamos cómo está el teléfono. Luego calculamos la inclinación de la moto.</p>
+        </div>
+        <div class="device">
+          <img src="img/app/home.png" alt="Garaje RiderLab con Lab de inclinación" />
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">El problema</div>
+      <div class="row phone-row">
+        <div>
+          <h2>El teléfono no es la moto.</h2>
+          <p>En el bolsillo medimos cadera. En el tanque medimos chasis. Si congelamos el cero mal, cada curva del día sale a <b>70°</b> — y eso no es un récord, es un sensor perdido.</p>
+          <ul class="steps">
+            <li><span>1</span> Fabricantes casi nunca publican un máximo de inclinación por modelo.</li>
+            <li><span>2</span> Harley sí: es el ángulo de roce SAE J1168, no un “lean seguro”.</li>
+            <li><span>3</span> Nuestra verdad es el chasis vs gravedad — con el teléfono ya montado.</li>
+          </ul>
+        </div>
+        <div class="device">
+          <img src="img/app/home.png" alt="Tres rides con lean 70°" />
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Lo que vimos en el IMU lab</div>
+      <h2>Cuatro trazas. Dos verdades.</h2>
+      <div class="row">
+        <div>
+          <table>
+            <tr><th>Canal</th><th>Sigue la inclinación de la moto cuando</th></tr>
+            <tr><td>Roll / roll fusionado</td><td>Teléfono <b>vertical</b> (tanque o bolsillo)</td></tr>
+            <tr><td>Pitch + vector</td><td>Teléfono <b>horizontal</b> (plano en el tanque)</td></tr>
+            <tr><td>Vector lean</td><td><b>Siempre</b> — ángulo 3D desde el cero congelado</td></tr>
+            <tr><td>Lean viejo de la app</td><td>Se rompe si la punta no es roll de retrato</td></tr>
+          </table>
+        </div>
+        <img class="hero" src="img/channels.png" alt="Cuatro canales de telemetría" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Hallazgo 1</div>
+      <h2>Vertical en tanque o bolsillo → roll fusionado</h2>
+      <div class="row">
+        <img class="hero" src="img/vertical.png" alt="Teléfono vertical en el tanque" />
+        <div>
+          <p>La gravedad se sienta en <b>+Y</b> (hacia arriba de la pantalla). La inclinación de la moto es izquierda / derecha en ese marco = <b>roll</b>. El giroscopio la mantiene viva entre vibración.</p>
+          <p>El pitch es cabeceo, pendiente, frenada — no es la curva.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Hallazgo 2</div>
+      <h2>Horizontal en el tanque → pitch + vector</h2>
+      <div class="row flip">
+        <div>
+          <p>La gravedad se sienta en <b>+Z</b> (pantalla hacia arriba). La misma inclinación de la moto ahora vive en otro eje. El <b>roll de retrato se queda mudo</b>. Pitch y vector sí siguen la curva.</p>
+          <p>Por eso tres teléfonos en una pared no coincidían: unos leían roll, uno leía pitch.</p>
+        </div>
+        <img class="hero" src="img/flat.png" alt="Teléfono plano en el tanque" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">La fórmula</div>
+      <h2>Magnitud del vector. Signo del ganador.</h2>
+      <div class="formula">inclinación = signo(Euler fusionado ganador) × ángulo(g, g0)</div>
+      <div class="row">
+        <img class="hero" src="img/formula.png" alt="Vectores de gravedad y ángulo" />
+        <ul class="steps">
+          <li><span>g0</span> Gravedad congelada con la moto derecha (Capa A)</li>
+          <li><span>g</span> Gravedad en vivo mientras ruedas</li>
+          <li><span>|∠|</span> Vector — coincide con un clinómetro</li>
+          <li><span>±</span> Izq / der desde roll (vertical) o pitch (plano)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Capa A · congelar</div>
+      <div class="row phone-row">
+        <div>
+          <h2>Un ritual: derecha, en el montaje real, congelar g0</h2>
+          <p>La app lee qué eje del teléfono apunta hacia arriba. Eso es la pose. No hace falta una curva. Los chips de montaje son etiquetas de entrenamiento — los sensores eligen el canal.</p>
+          <table>
+            <tr><th>Eje arriba</th><th>Pose</th><th>Canal de inclinación</th></tr>
+            <tr><td>±Y</td><td>Vertical (tanque / bolsillo)</td><td>Roll fusionado</td></tr>
+            <tr><td>±X</td><td>Horizontal de lado</td><td>Pitch fusionado</td></tr>
+            <tr><td>±Z</td><td>Plano (pantalla arriba / abajo)</td><td>Pitch / vector</td></tr>
+          </table>
+        </div>
+        <div class="device">
+          <img src="img/app/settings-lean.png" alt="Ajustes: Lab de inclinación y sensores" />
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Capa A · tanque</div>
+      <h2>Teléfono ya montado → sostener 4 s</h2>
+      <ul class="steps">
+        <li><span>1</span> Moto derecha, no en pata si eso la inclina</li>
+        <li><span>2</span> Teléfono ya en retrato, paisaje o plano sobre el tanque</li>
+        <li><span>3</span> Manos fuera · tocar <b>Sostener vertical 4s</b></li>
+        <li><span>4</span> Revisar banner: Vertical / Paisaje / Plano · vector ~0°</li>
+        <li><span>5</span> Si el vector ya va en 8°+, volver a congelar</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Capa A · bolsillo</div>
+      <h2>No puedes tocar la pantalla en el bolsillo</h2>
+      <div class="row">
+        <img class="hero" src="img/pocket.png" alt="Tocar, guardar, quedarse quieto" />
+        <ul class="steps">
+          <li><span>1</span> Sentado en la moto, derecha</li>
+          <li><span>2</span> Tocar <b>Guardar en el bolsillo</b> (aún en la mano)</li>
+          <li><span>3</span> Meterlo del todo antes de que acabe la cuenta</li>
+          <li><span>4</span> Quedarse quieto. La app ignora el movimiento y luego captura ~3 s</li>
+          <li><span>5</span> Vibración fuerte = cero listo. El ride puede arrancar solo</li>
+        </ul>
+      </div>
+      <p>Nunca sostener 4 s frente a la cara — eso congela la mano, no el bolsillo.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Nunca</div>
+      <div class="row phone-row">
+        <div>
+          <h2>Esto rompe el cero</h2>
+          <ul class="steps">
+            <li class="never">Congelar en la mano y luego meterlo al bolsillo</li>
+            <li class="never">Congelar en la pata lateral</li>
+            <li class="never">Congelar caminando hacia la moto</li>
+            <li class="never">Voltear la pantalla o cambiar de bolsillo después</li>
+            <li class="never">Confiar en roll cuando el banner dice Plano</li>
+          </ul>
+        </div>
+        <div class="device">
+          <img src="img/app/technique-lab.png" alt="Lab de técnica: revisa que el teléfono esté sujeto" />
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Capa B · mientras ruedas</div>
+      <div class="row phone-row">
+        <div>
+          <h2>Cuatro canales nos dicen si el teléfono se movió</h2>
+          <p>El vector es el oráculo (siempre es el tilt 3D desde g0). Cada ~1 s preguntamos: ¿qué Euler sigue al vector — y al giro del GPS?</p>
+          <div class="pills">
+            <div class="pill">Ganador = <em>|corr| × energía</em> más alto</div>
+            <div class="pill">Hace falta <em>|corr| &gt; 0.55</em></div>
+            <div class="pill">Recta → <em>mantener la pose</em></div>
+            <div class="pill">Desacuerdo sostenido → <em>reclasificar</em></div>
+          </div>
+          <p>El giroscopio sostiene el Euler ganador entre baches. El GPS no es inclinación — solo vota “vamos en curva”.</p>
+        </div>
+        <div class="device">
+          <img src="img/app/lean-gauge.png" alt="Medidor de inclinación con velocidad y freno" />
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">En el garaje</div>
+      <h2>El mismo número. Ya en el recorrido.</h2>
+      <p>El IMU lab enseña al motor. Ride Lab ya muestra inclinación firmada en el mapa y en cada curva — entrada, punto más cerrado, salida.</p>
+      <div class="phones">
+        <div class="device">
+          <img src="img/app/curves.png" alt="Lista de 9 curvas con inclinación" />
+        </div>
+        <div class="device">
+          <img src="img/app/curve-detail.png" alt="Curva #1 con E A S e inclinación 45°" />
+        </div>
+        <div class="device">
+          <img src="img/app/full-map.png" alt="Mapa completo con HUD de inclinación" />
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Tres teléfonos</div>
+      <h2>Cada uno congela en su propio montaje</h2>
+      <ul class="steps">
+        <li><span>A</span> Bolsillo → brazo, bolsillo, vibración</li>
+        <li><span>B</span> Plano en el tanque → sostener 4 s</li>
+        <li><span>C</span> Retrato en el tanque → sostener 4 s</li>
+      </ul>
+      <p>Compara <b>magnitudes de vector</b> en una inclinación lenta. Los <b>nombres de canal</b> pueden diferir — eso es correcto. El número de salida sigue siendo inclinación de la moto, con signo.</p>
+      <p class="fine">Bugambilias es el circuito piloto. Misma carretera, ida y vuelta, bolsillo A/B — para entrenar el sesgo, no esconderlo.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Éxito</div>
+      <h2>Esto se envía cuando</h2>
+      <ul class="steps">
+        <li><span>✓</span> Misma pared, cualquier pose: vector a ~3° de un clinómetro</li>
+        <li><span>✓</span> Vertical: el medidor en vivo sigue el roll fusionado</li>
+        <li><span>✓</span> Plano: el medidor sigue pitch / vector</li>
+        <li><span>✓</span> El bolsillo se recorre: el banner cambia en unos segundos</li>
+        <li><span>✓</span> El IMU lab muestra pose + ganador — el mismo motor que producción</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Siguiente</div>
+      <div class="row phone-row">
+        <div>
+          <h1>LeanEngine</h1>
+          <p>Congelar g0 · clasificar pose · tracker de cuatro canales · inclinación firmada en cada punto GPS.</p>
+          <p>El IMU lab se vuelve el maestro. El garaje conserva el mismo campo <code>leanDegrees</code> — el número, ahora sí, es honesto.</p>
+        </div>
+        <div class="device">
+          <img src="img/app/curve-detail.png" alt="Inclinación 45° en el lab de curvas" />
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <div class="nav">
+    <span>
+      <a href="index.en.html">EN</a>
+      <button type="button" id="prev">←</button>
+    </span>
+    <div class="dots" id="dots"></div>
+    <span>
+      <span id="pos">1 / 1</span>
+      <button type="button" id="next">→</button>
+    </span>
+  </div>
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const dots = document.getElementById("dots");
+    let i = 0;
+    slides.forEach(() => dots.appendChild(document.createElement("i")));
+    function show(n) {
+      i = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => s.classList.toggle("on", k === i));
+      [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
+      document.getElementById("pos").textContent = (i + 1) + " / " + slides.length;
+    }
+    document.getElementById("prev").onclick = () => show(i - 1);
+    document.getElementById("next").onclick = () => show(i + 1);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(i + 1); }
+      if (e.key === "ArrowLeft") show(i - 1);
+      if (e.key === "Home") show(0);
+      if (e.key === "End") show(slides.length - 1);
+      if (e.key === "f" || e.key === "F") {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+    });
+    let x0 = null;
+    document.addEventListener("touchstart", (e) => { x0 = e.changedTouches[0].screenX; });
+    document.addEventListener("touchend", (e) => {
+      if (x0 == null) return;
+      const dx = e.changedTouches[0].screenX - x0;
+      if (dx < -40) show(i + 1);
+      if (dx > 40) show(i - 1);
+      x0 = null;
+    });
+    show(0);
+  </script>
+</body>
+</html>
