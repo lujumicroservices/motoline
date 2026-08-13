@@ -474,7 +474,7 @@
   "labAdventureCameraZonesPlaceStop": "Siguiente toque: Parada ■ de este par",
   "labAdventureCameraZonesPairs": "Pares",
   "rideDeckTitle": "Panel del ride",
-  "rideDeckHelp": "Si va en el bolsillo: toca Guardar en el bolsillo y mételo antes de que acabe la cuenta. Quédate quieto hasta el haptic — no vuelves a tocar. Tanque/manillar: Sostener vertical 4s.",
+  "rideDeckHelp": "Toca una vez, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Al congelar 0°, el ride arranca solo — no vuelves a tocar.",
   "startRideNow": "Iniciar ride ahora",
   "labAdventureCameraZoneStart": "Inicio",
   "labAdventureCameraZoneStop": "Parada",
@@ -500,7 +500,7 @@
   "labAdventureCameraScenarioAggressiveBody": "ON: Cámara adventure · Auto-grabar conducción agresiva · cámaras en el grupo.\nOFF: Grabar con el ride · Zonas inicio/fin en el mapa · Seguir pausa auto.",
   "labAdventureCameraScenarioAggressiveApply": "Aplicar setup solo agresivo",
   "armAutoNoRouteHint": "Armado — al moverte se inicia un recorrido en el Garaje.",
-  "freezeThenArmHelp": "Toca ahora y mételo al bolsillo. Quédate quieto hasta el haptic. Luego bloquea la pantalla — al arrancar se inicia el ride. No vuelves a tocar.",
+  "freezeThenArmHelp": "Toca una vez, coloca el teléfono, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado. Luego bloquea la pantalla — al arrancar se inicia el ride. No vuelves a tocar.",
   "armAutoRouteArmed": "Armado — al arrancar se inicia el recorrido",
   "armAutoRouteArmedNamed": "Armado para «{name}» — al arrancar el ride queda en esa ruta",
   "@armAutoRouteArmedNamed": {
@@ -806,9 +806,9 @@
   "leanLabCalibHelp": "Moto vertical, teléfono ya montado. Sin tocarlo, 4 segundos — congela gravedad (g0). El vector lean debe quedar cerca de 0°.",
   "leanLabCalibHold": "Sostener vertical 4s",
   "leanLabCalibHolding": "Quédate quieto…",
-  "leanLabCalibPocket": "Guardar en el bolsillo",
-  "leanLabCalibPocketHelp": "Siéntate vertical en la moto. Toca, mételo del todo antes de que acabe la cuenta. Quédate quieto hasta el haptic — no congeles en la mano.",
-  "leanLabCalibPocketCountdown": "Mételo ahora · {n}s",
+  "leanLabCalibPocket": "Colocar el teléfono",
+  "leanLabCalibPocketHelp": "Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado y el ride arrancó — no congeles en la mano.",
+  "leanLabCalibPocketCountdown": "Colócalo ahora · {n}s",
   "@leanLabCalibPocketCountdown": {
     "placeholders": {
       "n": { "type": "int" }
@@ -816,7 +816,7 @@
   },
   "leanLabCalibPocketSettle": "Quédate quieto…",
   "leanLabCalibPocketCapture": "Capturando 0°…",
-  "leanLabCalibPocketFail": "No se quedó quieto. Sácalo y reintenta.",
+  "leanLabCalibPocketFail": "No se quedó quieto. Colócalo de nuevo y reintenta.",
   "leanLabFreezeRedo": "El teléfono ya va {n}° de vertical. Repite el freeze con la moto de verdad derecha.",
   "@leanLabFreezeRedo": {
     "placeholders": {

@@ -403,7 +403,7 @@
   "labAdventureCameraZonesPlaceStop": "Next tap: Stop ■ for this pair",
   "labAdventureCameraZonesPairs": "Pairs",
   "rideDeckTitle": "Ride deck",
-  "rideDeckHelp": "If the phone goes in a pocket: tap Pocket it now, then put it away before the countdown ends. Stay still until the haptic — you will not tap again. Tank/bars: Hold upright 4s.",
+  "rideDeckHelp": "Tap once, put the phone in the pocket or on the tank, stay still. When it locks 0°, the ride starts by itself — you will not tap again.",
   "startRideNow": "Start ride now",
   "labAdventureCameraZoneStart": "Start",
   "labAdventureCameraZoneStop": "Stop",
@@ -429,7 +429,7 @@
   "labAdventureCameraScenarioAggressiveBody": "ON: Adventure camera · Aggressive riding auto-record · cameras in the group.\nOFF: Record with ride · Map start/stop zones · Follow auto-pause.",
   "labAdventureCameraScenarioAggressiveApply": "Apply aggressive-only setup",
   "armAutoNoRouteHint": "Armed — when you roll, a ride starts in Garage.",
-  "freezeThenArmHelp": "Tap now, then pocket the phone. Stay still until the haptic. After that, lock the screen — rolling starts the ride. You will not tap again.",
+  "freezeThenArmHelp": "Tap once, mount the phone, stay still. A buzz and beep means 0° is locked. Then lock the screen — rolling starts the ride. You will not tap again.",
   "armAutoRouteArmed": "Armed — rolling starts the ride",
   "armAutoRouteArmedNamed": "Armed for “{name}” — the ride will be saved on that route",
   "@armAutoRouteArmedNamed": {
@@ -735,9 +735,9 @@
   "leanLabCalibHelp": "Bike upright, phone already mounted. Hands off, hold 4 seconds — this freezes gravity (g0). Vector lean should stay near 0°.",
   "leanLabCalibHold": "Hold upright 4s",
   "leanLabCalibHolding": "Hold still…",
-  "leanLabCalibPocket": "Pocket it now",
-  "leanLabCalibPocketHelp": "Sit upright on the bike. Tap, then pocket the phone fully before the countdown ends. Stay still until the haptic — do not freeze in your hand.",
-  "leanLabCalibPocketCountdown": "Pocket it now · {n}s",
+  "leanLabCalibPocket": "Place phone",
+  "leanLabCalibPocketHelp": "Tap, put the phone in the pocket or on the tank, stay still. A buzz and beep means 0° is locked and the ride started — do not freeze in your hand.",
+  "leanLabCalibPocketCountdown": "Place it now · {n}s",
   "@leanLabCalibPocketCountdown": {
     "placeholders": {
       "n": { "type": "int" }
@@ -745,7 +745,7 @@
   },
   "leanLabCalibPocketSettle": "Stay still…",
   "leanLabCalibPocketCapture": "Capturing 0°…",
-  "leanLabCalibPocketFail": "Didn't settle. Take it out and retry.",
+  "leanLabCalibPocketFail": "Didn't settle. Mount it again and retry.",
   "leanLabFreezeRedo": "Phone is already {n}° from vertical. Redo freeze with the bike truly upright.",
   "@leanLabFreezeRedo": {
     "placeholders": {

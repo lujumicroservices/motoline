@@ -2225,7 +2225,7 @@ abstract class AppLocalizations {
   /// No description provided for @rideDeckHelp.
   ///
   /// In es, this message translates to:
-  /// **'Si va en el bolsillo: toca Guardar en el bolsillo y mételo antes de que acabe la cuenta. Quédate quieto hasta el haptic — no vuelves a tocar. Tanque/manillar: Sostener vertical 4s.'**
+  /// **'Toca una vez, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Al congelar 0°, el ride arranca solo — no vuelves a tocar.'**
   String get rideDeckHelp;
 
   /// No description provided for @startRideNow.
@@ -2381,7 +2381,7 @@ abstract class AppLocalizations {
   /// No description provided for @freezeThenArmHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca ahora y mételo al bolsillo. Quédate quieto hasta el haptic. Luego bloquea la pantalla — al arrancar se inicia el ride. No vuelves a tocar.'**
+  /// **'Toca una vez, coloca el teléfono, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado. Luego bloquea la pantalla — al arrancar se inicia el ride. No vuelves a tocar.'**
   String get freezeThenArmHelp;
 
   /// No description provided for @armAutoRouteArmed.
@@ -3533,19 +3533,19 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCalibPocket.
   ///
   /// In es, this message translates to:
-  /// **'Guardar en el bolsillo'**
+  /// **'Colocar el teléfono'**
   String get leanLabCalibPocket;
 
   /// No description provided for @leanLabCalibPocketHelp.
   ///
   /// In es, this message translates to:
-  /// **'Siéntate vertical en la moto. Toca, mételo del todo antes de que acabe la cuenta. Quédate quieto hasta el haptic — no congeles en la mano.'**
+  /// **'Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado y el ride arrancó — no congeles en la mano.'**
   String get leanLabCalibPocketHelp;
 
   /// No description provided for @leanLabCalibPocketCountdown.
   ///
   /// In es, this message translates to:
-  /// **'Mételo ahora · {n}s'**
+  /// **'Colócalo ahora · {n}s'**
   String leanLabCalibPocketCountdown(int n);
 
   /// No description provided for @leanLabCalibPocketSettle.
@@ -3563,7 +3563,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCalibPocketFail.
   ///
   /// In es, this message translates to:
-  /// **'No se quedó quieto. Sácalo y reintenta.'**
+  /// **'No se quedó quieto. Colócalo de nuevo y reintenta.'**
   String get leanLabCalibPocketFail;
 
   /// No description provided for @leanLabFreezeRedo.

@@ -15,7 +15,6 @@ import '../../core/telemetry/labels/ride_engine_label.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
-import '../home/home_nav_icons.dart';
 import '../ride_active/active_ride_screen.dart';
 import '../ride_active/widgets/upright_freeze_panel.dart';
 import '../ride_detail/widgets/motorcycle_lean_gauge.dart';
@@ -37,13 +36,9 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
   late LeanLabDirection _direction;
   final LeanSensor _sensor = LeanSensor();
   late final UprightFreezeController _freeze;
-  double? _frozenNeutral;
   Vec3? _frozenG0;
   DateTime? _calibAt;
   bool _starting = false;
-
-  bool get _isPocket =>
-      _mount == PhoneMountId.leftPocket || _mount == PhoneMountId.rightPocket;
 
   int get _signFlip => _pose == PhonePoseId.portraitScreenIn ? -1 : 1;
 
@@ -57,12 +52,10 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
     _freeze = UprightFreezeController(
       _sensor.engine,
       signFlip: _signFlip,
-      onFrozen: (g0, {required bool fromPocket}) {
+      onFrozen: (g0) {
         _frozenG0 = g0;
-        _frozenNeutral = 0;
         _calibAt = DateTime.now();
-        if (fromPocket) unawaited(_startRide());
-        if (mounted) setState(() {});
+        unawaited(_startRide());
       },
     )..attach();
     _freeze.addListener(_onFreeze);
@@ -84,7 +77,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
 
   Future<void> _startRide() async {
     final g0 = _frozenG0;
-    if (g0 == null) return;
+    if (g0 == null || _starting) return;
     setState(() => _starting = true);
     final recorder = ref.read(rideRecorderProvider);
     recorder.prepareLeanLabUpright(g0, signFlip: _signFlip);
@@ -212,7 +205,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
               style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Text(
-            _isPocket ? l10n.leanLabCalibPocketHelp : l10n.leanLabCalibHelp,
+            l10n.leanLabCalibPocketHelp,
             style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 13,
@@ -244,25 +237,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
               ),
             ),
           const SizedBox(height: 12),
-          UprightFreezePanel(
-            controller: _freeze,
-            showPocket: _isPocket,
-            showTank: !_isPocket,
-          ),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: _frozenNeutral == null || _starting || busy
-                ? null
-                : _startRide,
-            icon: _starting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const AppMotoIcon(size: 22),
-            label: Text(l10n.leanLabStartRide),
-          ),
+          UprightFreezePanel(controller: _freeze),
         ],
       ),
     );

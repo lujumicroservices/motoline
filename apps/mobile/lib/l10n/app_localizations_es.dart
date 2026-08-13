@@ -1191,7 +1191,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rideDeckHelp =>
-      'Si va en el bolsillo: toca Guardar en el bolsillo y mételo antes de que acabe la cuenta. Quédate quieto hasta el haptic — no vuelves a tocar. Tanque/manillar: Sostener vertical 4s.';
+      'Toca una vez, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Al congelar 0°, el ride arranca solo — no vuelves a tocar.';
 
   @override
   String get startRideNow => 'Iniciar ride ahora';
@@ -1280,7 +1280,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get freezeThenArmHelp =>
-      'Toca ahora y mételo al bolsillo. Quédate quieto hasta el haptic. Luego bloquea la pantalla — al arrancar se inicia el ride. No vuelves a tocar.';
+      'Toca una vez, coloca el teléfono, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado. Luego bloquea la pantalla — al arrancar se inicia el ride. No vuelves a tocar.';
 
   @override
   String get armAutoRouteArmed => 'Armado — al arrancar se inicia el recorrido';
@@ -1933,15 +1933,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get leanLabCalibHolding => 'Quédate quieto…';
 
   @override
-  String get leanLabCalibPocket => 'Guardar en el bolsillo';
+  String get leanLabCalibPocket => 'Colocar el teléfono';
 
   @override
   String get leanLabCalibPocketHelp =>
-      'Siéntate vertical en la moto. Toca, mételo del todo antes de que acabe la cuenta. Quédate quieto hasta el haptic — no congeles en la mano.';
+      'Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado y el ride arrancó — no congeles en la mano.';
 
   @override
   String leanLabCalibPocketCountdown(int n) {
-    return 'Mételo ahora · ${n}s';
+    return 'Colócalo ahora · ${n}s';
   }
 
   @override
@@ -1952,7 +1952,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanLabCalibPocketFail =>
-      'No se quedó quieto. Sácalo y reintenta.';
+      'No se quedó quieto. Colócalo de nuevo y reintenta.';
 
   @override
   String leanLabFreezeRedo(String n) {

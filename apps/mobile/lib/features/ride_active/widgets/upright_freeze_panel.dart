@@ -5,20 +5,16 @@ import '../../../core/lean_lab/upright_freeze_controller.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 
-/// Tank hold + pocket countdown buttons. Same ritual on ride deck, arm, lab.
+/// One button: tap, mount the phone, freeze on stillness, then auto-start.
 class UprightFreezePanel extends StatelessWidget {
   const UprightFreezePanel({
     super.key,
     required this.controller,
     this.compact = false,
-    this.showTank = true,
-    this.showPocket = true,
   });
 
   final UprightFreezeController controller;
   final bool compact;
-  final bool showTank;
-  final bool showPocket;
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +22,10 @@ class UprightFreezePanel extends StatelessWidget {
     final c = controller;
     final busy = c.busy;
     final status = switch (c.phase) {
-      UprightFreezePhase.holding => l10n.leanLabCalibHolding,
-      UprightFreezePhase.pocketCountdown =>
+      UprightFreezePhase.countdown =>
         l10n.leanLabCalibPocketCountdown(c.countdownLeft),
-      UprightFreezePhase.pocketSettle => l10n.leanLabCalibPocketSettle,
-      UprightFreezePhase.pocketCapture => l10n.leanLabCalibPocketCapture,
+      UprightFreezePhase.settle => l10n.leanLabCalibPocketSettle,
+      UprightFreezePhase.capture => l10n.leanLabCalibPocketCapture,
       UprightFreezePhase.failed => l10n.leanLabCalibPocketFail,
       UprightFreezePhase.done => l10n.leanLabFrozenNeutral,
       UprightFreezePhase.idle => null,
@@ -53,37 +48,14 @@ class UprightFreezePanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
         ],
-        if (showPocket)
-          FilledButton.icon(
-            onPressed: busy ? null : c.beginPocket,
-            style: FilledButton.styleFrom(
-              minimumSize: Size.fromHeight(compact ? 56 : 64),
-            ),
-            icon: Icon(busy ? Icons.hourglass_top : Icons.move_to_inbox),
-            label: Text(
-              busy && c.phase != UprightFreezePhase.holding
-                  ? (status ?? l10n.leanLabCalibPocket)
-                  : l10n.leanLabCalibPocket,
-            ),
+        FilledButton.icon(
+          onPressed: busy ? null : c.beginPlace,
+          style: FilledButton.styleFrom(
+            minimumSize: Size.fromHeight(compact ? 56 : 72),
           ),
-        if (showPocket && showTank) const SizedBox(height: 8),
-        if (showTank)
-          FilledButton.tonalIcon(
-            onPressed: busy ? null : c.beginTankHold,
-            style: FilledButton.styleFrom(
-              minimumSize: Size.fromHeight(compact ? 52 : 56),
-            ),
-            icon: Icon(
-              busy && c.phase == UprightFreezePhase.holding
-                  ? Icons.hourglass_top
-                  : Icons.vertical_align_center,
-            ),
-            label: Text(
-              c.phase == UprightFreezePhase.holding
-                  ? l10n.leanLabCalibHolding
-                  : l10n.leanLabCalibHold,
-            ),
-          ),
+          icon: Icon(busy ? Icons.hourglass_top : Icons.play_arrow_rounded),
+          label: Text(l10n.leanLabCalibPocket),
+        ),
       ],
     );
   }

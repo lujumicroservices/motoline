@@ -62,7 +62,7 @@ class _UprightFreezeSheetState extends State<_UprightFreezeSheet> {
     _sensor.start();
     _freeze = UprightFreezeController(
       _sensor.engine,
-      onFrozen: (g0, {required bool fromPocket}) {
+      onFrozen: (g0) {
         if (!mounted) return;
         Navigator.of(context).pop(g0);
       },

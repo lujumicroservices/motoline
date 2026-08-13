@@ -647,7 +647,7 @@ class _RideDeckBodyState extends State<_RideDeckBody> {
     _sensor.start();
     _freeze = UprightFreezeController(
       _sensor.engine,
-      onFrozen: (g0, {required bool fromPocket}) {
+      onFrozen: (g0) {
         unawaited(_go(g0));
       },
     )..attach();

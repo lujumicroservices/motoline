@@ -5,19 +5,18 @@ import 'package:flutter/services.dart';
 
 import '../services/lean_engine.dart';
 import 'lean_imu_math.dart';
+import 'lock_cue.dart';
 
 enum UprightFreezePhase {
   idle,
-  holding,
-  pocketCountdown,
-  pocketSettle,
-  pocketCapture,
+  countdown,
+  settle,
+  capture,
   failed,
   done,
 }
 
-/// Shared tank-hold / pocket-countdown freeze. Used by Lean Lab, ride deck,
-/// arm, and IMU lab so the rider never has to tap a pocketed phone.
+/// Tap once → rider mounts the phone → stillness locks g0 → caller starts.
 class UprightFreezeController extends ChangeNotifier {
   UprightFreezeController(
     this.engine, {
@@ -27,7 +26,7 @@ class UprightFreezeController extends ChangeNotifier {
 
   final LeanEngine engine;
   int signFlip;
-  final void Function(Vec3 g0, {required bool fromPocket})? onFrozen;
+  final void Function(Vec3 g0)? onFrozen;
 
   UprightFreezePhase phase = UprightFreezePhase.idle;
   DateTime? _phaseAt;
@@ -36,13 +35,11 @@ class UprightFreezeController extends ChangeNotifier {
   Vec3? frozenG0;
   String? failId;
   Timer? _tick;
-  bool _fromPocket = false;
 
   bool get busy =>
-      phase == UprightFreezePhase.holding ||
-      phase == UprightFreezePhase.pocketCountdown ||
-      phase == UprightFreezePhase.pocketSettle ||
-      phase == UprightFreezePhase.pocketCapture;
+      phase == UprightFreezePhase.countdown ||
+      phase == UprightFreezePhase.settle ||
+      phase == UprightFreezePhase.capture;
 
   void attach() {
     _tick?.cancel();
@@ -60,19 +57,9 @@ class UprightFreezeController extends ChangeNotifier {
     super.dispose();
   }
 
-  void beginTankHold() {
-    _fromPocket = false;
-    phase = UprightFreezePhase.holding;
-    _phaseAt = DateTime.now();
-    frozenG0 = null;
-    failId = null;
-    engine.clearCalibBuffer();
-    notifyListeners();
-  }
-
-  void beginPocket() {
-    _fromPocket = true;
-    phase = UprightFreezePhase.pocketCountdown;
+  /// Start the only ritual: place the phone, wait until still, freeze, go.
+  void beginPlace() {
+    phase = UprightFreezePhase.countdown;
     _phaseAt = DateTime.now();
     countdownLeft = 5;
     frozenG0 = null;
@@ -84,50 +71,45 @@ class UprightFreezeController extends ChangeNotifier {
   }
 
   void _fail() {
-    HapticFeedback.vibrate();
+    unawaited(LockCue.fail());
     phase = UprightFreezePhase.failed;
-    failId = 'pocket_fail';
+    failId = 'place_fail';
     notifyListeners();
   }
 
   void _onTick() {
     final now = DateTime.now();
-    if (phase == UprightFreezePhase.holding ||
-        phase == UprightFreezePhase.pocketCapture) {
+    if (phase == UprightFreezePhase.capture) {
       engine.sampleForManualCalib();
     }
-    if (phase == UprightFreezePhase.holding) {
-      if (now.difference(_phaseAt ?? now) >= const Duration(seconds: 4)) {
-        _finish();
-      }
-    } else if (phase == UprightFreezePhase.pocketCountdown) {
+    if (phase == UprightFreezePhase.countdown) {
       final left = 5 - now.difference(_phaseAt ?? now).inSeconds;
       countdownLeft = left.clamp(0, 5);
       if (countdownLeft <= 0) {
-        phase = UprightFreezePhase.pocketSettle;
+        phase = UprightFreezePhase.settle;
         _phaseAt = now;
         _stillMs = 0;
         HapticFeedback.mediumImpact();
       }
       notifyListeners();
-    } else if (phase == UprightFreezePhase.pocketSettle) {
+    } else if (phase == UprightFreezePhase.settle) {
       if (engine.isStill) {
         _stillMs += 120;
         if (_stillMs >= 600) {
-          phase = UprightFreezePhase.pocketCapture;
+          phase = UprightFreezePhase.capture;
           _phaseAt = now;
           engine.clearCalibBuffer();
         }
       } else {
         _stillMs = 0;
       }
-      if (phase == UprightFreezePhase.pocketSettle &&
+      if (phase == UprightFreezePhase.settle &&
           now.difference(_phaseAt ?? now) >= const Duration(seconds: 12)) {
         _fail();
         return;
       }
       notifyListeners();
-    } else if (phase == UprightFreezePhase.pocketCapture) {
+    } else if (phase == UprightFreezePhase.capture) {
       if (now.difference(_phaseAt ?? now) >= const Duration(seconds: 3)) {
         _finish();
       }
@@ -141,10 +123,10 @@ class UprightFreezeController extends ChangeNotifier {
       return;
     }
     engine.lockUpright(g0, signFlip: signFlip);
-    HapticFeedback.heavyImpact();
+    unawaited(LockCue.ready());
     frozenG0 = g0;
     phase = UprightFreezePhase.done;
     notifyListeners();
-    onFrozen?.call(g0, fromPocket: _fromPocket);
+    onFrozen?.call(g0);
   }
 }

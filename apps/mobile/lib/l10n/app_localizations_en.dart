@@ -1184,7 +1184,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rideDeckHelp =>
-      'If the phone goes in a pocket: tap Pocket it now, then put it away before the countdown ends. Stay still until the haptic — you will not tap again. Tank/bars: Hold upright 4s.';
+      'Tap once, put the phone in the pocket or on the tank, stay still. When it locks 0°, the ride starts by itself — you will not tap again.';
 
   @override
   String get startRideNow => 'Start ride now';
@@ -1273,7 +1273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get freezeThenArmHelp =>
-      'Tap now, then pocket the phone. Stay still until the haptic. After that, lock the screen — rolling starts the ride. You will not tap again.';
+      'Tap once, mount the phone, stay still. A buzz and beep means 0° is locked. Then lock the screen — rolling starts the ride. You will not tap again.';
 
   @override
   String get armAutoRouteArmed => 'Armed — rolling starts the ride';
@@ -1923,15 +1923,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabCalibHolding => 'Hold still…';
 
   @override
-  String get leanLabCalibPocket => 'Pocket it now';
+  String get leanLabCalibPocket => 'Place phone';
 
   @override
   String get leanLabCalibPocketHelp =>
-      'Sit upright on the bike. Tap, then pocket the phone fully before the countdown ends. Stay still until the haptic — do not freeze in your hand.';
+      'Tap, put the phone in the pocket or on the tank, stay still. A buzz and beep means 0° is locked and the ride started — do not freeze in your hand.';
 
   @override
   String leanLabCalibPocketCountdown(int n) {
-    return 'Pocket it now · ${n}s';
+    return 'Place it now · ${n}s';
   }
 
   @override
@@ -1941,7 +1941,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabCalibPocketCapture => 'Capturing 0°…';
 
   @override
-  String get leanLabCalibPocketFail => 'Didn\'t settle. Take it out and retry.';
+  String get leanLabCalibPocketFail =>
+      'Didn\'t settle. Mount it again and retry.';
 
   @override
   String leanLabFreezeRedo(String n) {
