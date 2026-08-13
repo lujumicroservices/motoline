@@ -12,14 +12,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'RiderLab';
 
   @override
-  String get tagline => 'Own every corner.';
+  String get tagline => 'Ride every corner better.';
 
   @override
-  String get autoPauseToggle => 'Auto pause';
+  String get autoPauseToggle => 'Pause when I stop';
 
   @override
   String get autoPauseToggleHint =>
-      'Pause and resume recording when you stop or roll again';
+      'Recording pauses when you stop and starts again when you roll.';
 
   @override
   String get startRide => 'Start ride';
@@ -59,7 +59,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nameRidesFromMapHelp =>
-      'Calculate origin and destination from GPS (e.g. Tesistán - Zapopan).';
+      'Names the ride from where you started and finished (e.g. Tesistán - Zapopan).';
 
   @override
   String namingRidesProgress(int done, int total) {
@@ -72,7 +72,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rideUntitledHint => 'Origin - destination pending';
+  String get rideUntitledHint => 'Start - finish not named yet';
 
   @override
   String get rideNameTitle => 'Ride name';
@@ -81,7 +81,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideNameHint => 'Tesistán - Zapopan';
 
   @override
-  String get rideNameHelp => 'Type a name, or use the map (GPS start and end).';
+  String get rideNameHelp =>
+      'Type a name, or use the map from GPS start and finish.';
 
   @override
   String get nameFromMap => 'From map';
@@ -90,7 +91,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lookingUpPlaces => 'Looking up places…';
 
   @override
-  String get couldNotResolvePlaces => 'Could not resolve place names';
+  String get couldNotResolvePlaces => 'Couldn\'t find those place names';
 
   @override
   String get rideTitleCleared => 'Title cleared';
@@ -111,21 +112,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyRidesBody =>
-      'Start a ride and RiderLab will draw the exact line you took on the street.';
+      'Start a ride and RiderLab will draw the line you took on the street.';
 
   @override
   String get unfinishedRide => 'Unfinished ride found';
 
   @override
   String unfinishedRideBody(String when) {
-    return 'Started $when. Finalize it to keep the line, or discard.';
+    return 'Started $when. Finish it to save the line, or throw it away.';
   }
 
   @override
   String get discard => 'Discard';
 
   @override
-  String get keepLine => 'Keep line';
+  String get keepLine => 'Save line';
 
   @override
   String get updateAvailable => 'Update available';
@@ -148,7 +149,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get later => 'Later';
 
   @override
-  String get onLatest => 'You’re on the latest RiderLab.';
+  String get onLatest => 'You already have the latest RiderLab.';
 
   @override
   String get downloadingUpdate => 'Downloading update';
@@ -167,7 +168,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String updatePrompt(String current) {
-    return 'A newer build is available (you have $current). Download and install now?';
+    return 'A newer version is ready (you have $current). Download and install now?';
   }
 
   @override
@@ -182,63 +183,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideLab => 'Ride lab';
 
   @override
-  String get rideLabSegment => 'Ride lab · segment';
+  String get rideLabSegment => 'Ride lab · this stretch';
 
   @override
   String get rideNotFound => 'Ride not found';
 
   @override
   String get collapseHint =>
-      'Tap section headers to collapse. Playhead stays pinned at the bottom.';
+      'Tap a section title to hide it. The marker stays at the bottom.';
 
   @override
   String get segmentZoomHint =>
-      'Segment zoom — metrics and charts are for this stretch only.';
+      'This stretch only — numbers and charts are just for this part of the ride.';
 
   @override
-  String get sectionSegment => 'Segment zoom';
+  String get sectionSegment => 'This stretch';
 
   @override
-  String get sectionSegmentSub => 'Pick a stretch of road';
+  String get sectionSegmentSub => 'Pick part of the ride';
 
   @override
   String get sectionOverview => 'Overview';
 
   @override
-  String get sectionOverviewSub => 'Score + ride metrics';
+  String get sectionOverviewSub => 'Score and ride numbers';
 
   @override
-  String get sectionOverviewSubZoom => 'Score + metrics for this segment';
+  String get sectionOverviewSubZoom => 'Score and numbers for this stretch';
 
   @override
   String get sectionLean => 'Lean';
 
   @override
-  String get sectionLeanSub => 'Cyan left · amber right';
+  String get sectionLeanSub => 'Blue left · yellow right';
 
   @override
   String get sectionMap => 'Map + line';
 
   @override
-  String get sectionMapSub => 'Speed colors · brake dots';
+  String get sectionMapSub => 'Color = speed · dots = brakes';
 
   @override
   String get sectionRoad => 'Turns';
 
   @override
-  String get sectionRoadSub => 'From heading change + lean';
+  String get sectionRoadSub => 'Found from turning and lean';
 
   @override
-  String get sectionLoop => 'Loop';
+  String get sectionLoop => 'Laps';
 
   @override
-  String get sectionLoopSub => 'Detect or mark A/B on this ride';
+  String get sectionLoopSub => 'Find laps or mark start and finish';
 
   @override
   String get sectionBrakes => 'Braking';
 
   @override
-  String get sectionBrakesSub => 'Inferred from speed drop';
+  String get sectionBrakesSub => 'Guessed from how fast you slow down';
 
   @override
   String get sectionCharts => 'Charts';
@@ -250,30 +251,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionNotes => 'Precision + notes';
 
   @override
-  String get sectionNotesSub => 'GPS quality and coach notes';
+  String get sectionNotesSub => 'GPS quality and notes';
 
   @override
-  String get segment => 'SEGMENT';
+  String get segment => 'STRETCH';
 
   @override
-  String get segmentZoom => 'SEGMENT ZOOM';
+  String get segmentZoom => 'THIS STRETCH';
 
   @override
   String get segmentHint =>
-      'Drag handles to pick a stretch, then zoom in for piece metrics.';
+      'Drag the handles to pick part of the ride, then zoom in.';
 
   @override
   String get segmentHintZoomed =>
-      'Map + metrics show this stretch only. Drag handles to refine.';
+      'Map and numbers show only this stretch. Drag the handles to change it.';
 
   @override
-  String get zoomToSegment => 'Zoom to segment';
+  String get zoomToSegment => 'Zoom to this stretch';
 
   @override
   String get fullRide => 'Full ride';
 
   @override
-  String get playhead => 'PLAYHEAD';
+  String get playhead => 'MARKER';
 
   @override
   String get distance => 'Distance';
@@ -288,7 +289,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bikeLean => 'Bike lean';
 
   @override
-  String get calibrating => 'Calibrating…';
+  String get calibrating => 'Setting 0°…';
 
   @override
   String get points => 'Points';
@@ -313,29 +314,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gpsPrecisionSub =>
-      'Horizontal accuracy in meters (lower is better)';
+      'How accurate GPS is, in meters (smaller is better)';
 
   @override
-  String get chartSpeedSub => 'High-contrast speed colors. Tap to scrub.';
+  String get chartSpeedSub => 'Colors show speed. Tap to move along the ride.';
 
   @override
-  String get chartSpeedSubZoom => 'Segment speed only. Tap to scrub.';
+  String get chartSpeedSubZoom =>
+      'Speed for this stretch only. Tap to move along it.';
 
   @override
   String get leanHelp =>
-      '0° is inferred upright. For accurate lean, mount the phone firmly in portrait (screen toward you) on the tank or bars — avoid a loose pocket or landscape.';
+      '0° is upright. For a good reading, fix the phone on the tank or bars, screen toward you. A loose pocket throws the number off.';
 
   @override
   String get leanPhoneDisclaimer =>
-      'Phone position matters: portrait, screen facing you, fixed mount. A loose pocket skews incline readings.';
+      'How you carry the phone matters: upright, screen toward you, firmly held. A loose pocket makes lean look wrong.';
 
   @override
   String get mapHint =>
-      'Tap the line to move the bike. Blue→magenta by speed. Dots = brakes.';
+      'Tap the line to move the bike. Color is speed. Dots are brakes.';
 
   @override
   String get mapHintZoom =>
-      'Tap the line to move the bike. Bright = selected · dim = rest.';
+      'Tap the line to move the bike. Bright = this stretch · dim = the rest.';
 
   @override
   String get startingRide => 'Starting ride';
@@ -345,15 +347,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gpsWarmHelp(String meters) {
-    return 'Stay outdoors with a clear sky view. Recording starts when GPS is warm enough (target ±$meters m).';
+    return 'Stay outside with a clear view of the sky. Recording starts when GPS is good enough (about ±$meters m).';
   }
 
   @override
-  String get horizontalAccuracy => 'HORIZONTAL ACCURACY';
+  String get horizontalAccuracy => 'GPS ACCURACY';
 
   @override
   String lowerBetter(String meters) {
-    return 'Lower is better · ready at ±$meters m';
+    return 'Smaller is better · ready at ±$meters m';
   }
 
   @override
@@ -367,7 +369,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activeMountHelp =>
-      '0° was frozen before you rolled. Screen can lock — leave the recording notification on.';
+      '0° is already saved. You can lock the screen — leave the recording notification on.';
 
   @override
   String curvaTitle(int number) {
@@ -387,13 +389,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exit => 'Exit';
 
   @override
-  String get brakeToApex => 'Brake to apex';
+  String get brakeToApex => 'Brake to the tightest point';
 
   @override
-  String get accelFromApex => 'Accel from apex';
+  String get accelFromApex => 'Gas after the tightest point';
 
   @override
-  String get leanAtApex => 'Lean at apex';
+  String get leanAtApex => 'Lean at the tightest point';
 
   @override
   String get maxLean => 'Max lean';
@@ -406,31 +408,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get curvaMapLegend =>
-      'E = entry · A = apex · X = exit. Line colored by speed.';
+      'E = entry · A = tightest point · X = exit. Line color is speed.';
 
   @override
   String get curvaCoach =>
-      'Quick read: check if you entered too hot (big brake to A), if the apex is stable, and if you exit accelerating cleanly.';
+      'Quick check: did you come in too fast (lots of brake before A), was the middle of the turn steady, and did you exit on the gas?';
 
   @override
   String roadStretchesHelp(int curvas) {
-    return 'From heading change + lean. $curvas turns. Tap a turn for entry / apex / exit — swipe between turns.';
+    return 'Turns found from steering and lean. $curvas turns. Tap one to see entry, middle, and exit — swipe to the next.';
   }
 
   @override
   String get roadStretchesEmpty =>
-      'Not enough GPS heading change yet to detect turns.';
+      'Not enough turning on GPS yet to find corners.';
 
   @override
   String get openDetail => 'open detail';
 
   @override
   String get brakesHelp =>
-      'Inferred from how fast speed falls — not a brake sensor. Tap a hit to jump the playhead. Map button zooms to that brake.';
+      'Guessed from how fast speed drops — not a brake sensor. Tap a mark to jump there. Map button zooms to that brake.';
 
   @override
   String get brakesEmpty =>
-      'No clear brake pulses from GPS speed. Harder stops outdoors usually show as yellow/orange/red hits.';
+      'No clear brakes from GPS speed. Hard stops usually show as yellow, orange, or red marks.';
 
   @override
   String get brakeLight => 'Light';
@@ -472,7 +474,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fullscreenMapHelp =>
-      'Pan and zoom freely. Mark an area or use the visible map, then load metrics for that stretch.';
+      'Move and zoom freely. Draw a box or use what’s on screen, then load numbers for that stretch.';
 
   @override
   String get selectArea => 'Select area';
@@ -491,11 +493,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearArea => 'Clear';
 
   @override
-  String get loadAreaMetrics => 'Load metrics for area';
+  String get loadAreaMetrics => 'Load numbers for this area';
 
   @override
   String areaReady(int points) {
-    return 'Area ready · $points GPS points. Load metrics to focus Ride Lab on this stretch.';
+    return 'Area ready · $points GPS points. Load numbers to focus Ride lab on this stretch.';
   }
 
   @override
@@ -526,7 +528,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLayerStartEnd => 'Start/end';
 
   @override
-  String get mapLayerPlayhead => 'Playhead';
+  String get mapLayerPlayhead => 'Marker';
 
   @override
   String get mapLayerLegend => 'Legend';
@@ -536,7 +538,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get friendsSubtitle =>
-      'Closed beta — every rider with the app is on your list.';
+      'Closed group — anyone with the app shows up here.';
 
   @override
   String get friendsEmpty =>
@@ -579,17 +581,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get compareLocalHelp =>
-      'Pick a baseline lap and a challenger to compare metrics and lines on this circuit.';
+      'Pick a first lap and a second lap to compare times and lines on this circuit.';
 
   @override
   String get compareLocalEmpty =>
-      'You need at least 2 completed laps on this route. Use Loop mode or tag rides with the same route.';
+      'You need at least 2 finished laps on this route. Use lap mode or tag rides with the same route.';
 
   @override
   String get compareBaseline => 'Baseline';
 
   @override
-  String get compareChallenger => 'Challenger';
+  String get compareChallenger => 'Second lap';
 
   @override
   String compareLocal(int count) {
@@ -598,12 +600,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String compareDeltaFaster(String delta) {
-    return 'Challenger faster by $delta';
+    return 'Second lap faster by $delta';
   }
 
   @override
   String compareDeltaSlower(String delta) {
-    return 'Challenger slower by $delta';
+    return 'Second lap slower by $delta';
   }
 
   @override
@@ -633,31 +635,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cloudUnavailable =>
-      'Cloud not available — check connection and Anonymous auth.';
+      'Can\'t reach the cloud — check your internet and try again.';
 
   @override
   String get cloudAnonymousOff =>
-      'Friends need Anonymous sign-in enabled in the RiderLab cloud (Supabase project CornerIQ):\nDashboard → Authentication → Providers → Anonymous → Enable.\nThen reopen Amigos and pull to refresh.';
+      'Friends need sign-in turned on in RiderLab cloud. Ask the person who set up the app, then open Friends again and pull to refresh.';
 
   @override
   String get routesTitle => 'Routes';
 
   @override
   String get routesHelp =>
-      'Name a circuit, share it, and tag rides so friends can compare on the same route.';
+      'Name a circuit, share it, and tag rides so friends can compare on the same road.';
 
   @override
-  String get routesHowTitle => 'How do Routes work?';
+  String get routesHowTitle => 'How do routes work?';
 
   @override
   String get routesHowBody =>
-      '1) Create a route with + (e.g. “North roundabout”).\n2) Open the route → Loop tab: detect closed loops from tagged rides, or mark A/B yourself.\n3) Start a loop ride from a saved loop — each lap is tagged to this route.\n4) Or in Ride Lab → Share, tag any ride with this route.\n5) Turn sharing on if friends should compare on this circuit.';
+      '1) Create a route with + (e.g. “North roundabout”).\n2) Open the route → Laps tab: find closed laps from tagged rides, or mark start (A) and finish (B) yourself.\n3) Start a lap ride from a saved lap — each lap is saved on this route.\n4) Or in Ride lab → Share, tag any ride with this route.\n5) Turn sharing on if friends should compare on this circuit.';
 
   @override
-  String get routesTapHint => 'Tap for laps + Loop module';
+  String get routesTapHint => 'Tap for laps';
 
   @override
-  String get routesLoopReady => 'Loop ready';
+  String get routesLoopReady => 'Lap ready';
 
   @override
   String get setYourAlias => 'Set your alias';
@@ -670,20 +672,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proCurvaBannerBody =>
-      '0.5 s preview. Pro unlocks entry, apex, exit, and map with no lock.';
+      '0.5 s preview. Pro unlocks entry, middle, exit, and the map with no lock.';
 
   @override
   String get proNotesBannerTitle => 'Precision + notes · Pro';
 
   @override
   String get proNotesBannerBody =>
-      'GPS quality and coach tips stay in CornerIQ Pro.';
+      'GPS quality and riding tips stay in RiderLab Pro.';
 
   @override
   String get proFeatureCurva => 'Full corner detail (no banner)';
 
   @override
-  String get proFeatureNotes => 'GPS precision + coach notes';
+  String get proFeatureNotes => 'GPS accuracy + riding notes';
 
   @override
   String get myRoutes => 'Your routes';
@@ -753,20 +755,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get curvaZoomLab => 'Zoom Ride Lab';
 
   @override
-  String get armAutoRide => 'Arm auto-ride';
+  String get armAutoRide => 'Start when I roll';
 
   @override
-  String get disarmAutoRide => 'Disarm auto-ride';
+  String get disarmAutoRide => 'Cancel auto-start';
 
   @override
   String get waitingForMotion => 'Waiting for motion…';
 
   @override
   String get armedBannerBody =>
-      'RiderLab will start recording on its own once it detects you\'ve started riding.';
+      'RiderLab will start recording by itself when you start moving.';
 
   @override
-  String get loopMode => 'Loop mode';
+  String get loopMode => 'Lap mode';
 
   @override
   String get pausedLabel => 'PAUSED';
@@ -782,13 +784,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keepRiding => 'Keep riding';
 
   @override
-  String get markLoopInit => 'Mark loop init';
+  String get markLoopInit => 'Mark lap start';
 
   @override
   String get loopInitSet => 'Init marked';
 
   @override
-  String get markLoopEnd => 'Mark loop end';
+  String get markLoopEnd => 'Mark lap finish';
 
   @override
   String get markLoopInitHere => 'Mark A at my GPS';
@@ -801,7 +803,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loopMarkMapHint =>
-      'Open the fullscreen map, pan freely, then tap point A (start) and B (end) of the route.';
+      'Open the full map, move around, then tap A (start) and B (finish).';
 
   @override
   String get loopTapPointA => 'Tap the map to mark point A (start)';
@@ -810,11 +812,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loopTapPointB => 'Tap the map to mark point B (end)';
 
   @override
-  String get loopPointsReady => 'A and B ready — confirm to arm auto-lap';
+  String get loopPointsReady =>
+      'A and B are set — confirm to start counting laps';
 
   @override
   String get loopMarkMapHelp =>
-      'Free pan and zoom. First tap = A, second = B. The circle is the lap detection zone.';
+      'Move and zoom freely. First tap = A, second = B. The circle is where a lap is counted.';
 
   @override
   String get loopRemapA => 'Redo A';
@@ -823,7 +826,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loopConfirmAb => 'Confirm A and B';
 
   @override
-  String get loopArmed => 'Auto-lap armed';
+  String get loopArmed => 'Ready to count laps';
 
   @override
   String lapCountLabel(int count) {
@@ -850,11 +853,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proUnlockBody =>
-      'Segment any stretch, full corner detail, precision notes, full brakes, and no ads.';
+      'Pick any stretch, full corner detail, GPS notes, full brakes, and no ads.';
 
   @override
-  String get proFeatureSegment =>
-      'Segment zoom — select any sub-portion of the ride';
+  String get proFeatureSegment => 'Zoom any part of the ride';
 
   @override
   String get proFeatureBrakes => 'Full braking details (not just a preview)';
@@ -873,16 +875,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proToggleHelp =>
-      'Temporary unlock until store billing is wired. Turn off to preview Free.';
+      'Temporary unlock until store billing is ready. Turn off to see the free version.';
 
   @override
   String brakesProTeaser(int shown, int total) {
-    return 'Showing $shown of $total. Unlock Pro for the full braking list.';
+    return 'Showing $shown of $total. Unlock Pro for the full brake list.';
   }
 
   @override
-  String get segmentProLocked =>
-      'Selecting a sub-portion of the ride is a Pro feature.';
+  String get segmentProLocked => 'Picking part of the ride is a Pro feature.';
 
   @override
   String get adPlaceholder => 'Ad';
@@ -894,11 +895,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routeTabLaps => 'Laps';
 
   @override
-  String get routeTabLoop => 'Loop';
+  String get routeTabLoop => 'Laps';
 
   @override
   String get routeLoopModuleHelp =>
-      'Loops belong to this route. Detect closed loops from tagged rides, or mark start (A) and end (B) yourself on the map.';
+      'Laps belong to this route. Find closed laps from tagged rides, or mark start (A) and finish (B) on the map yourself.';
 
   @override
   String get routeLoopDefine => 'Mark A / B';
@@ -907,31 +908,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routeLoopDetect => 'Detect';
 
   @override
-  String get routeLoopSavedTitle => 'Saved loops';
+  String get routeLoopSavedTitle => 'Saved laps';
 
   @override
   String get routeLoopEmpty =>
-      'No loops yet — detect from rides or mark A and B on the map.';
+      'No laps yet — find them from rides or mark A and B on the map.';
 
   @override
-  String get routeLoopDetectedTitle => 'Detected candidates';
+  String get routeLoopDetectedTitle => 'Possible laps';
 
   @override
   String get routeLoopDetectedEmpty =>
-      'No closed loops found on tagged rides yet. Ride the circuit and try again.';
+      'No closed laps found on tagged rides yet. Ride the circuit and try again.';
 
   @override
   String get routeLoopDetectedHint =>
-      'Closed path inferred from GPS — save to use for auto-lap.';
+      'Closed path from GPS — save it to count laps automatically.';
 
   @override
   String get routeLoopSave => 'Save';
 
   @override
-  String get routeLoopSaved => 'Loop saved on this route';
+  String get routeLoopSaved => 'Lap saved on this route';
 
   @override
-  String get routeLoopManualName => 'Manual loop';
+  String get routeLoopManualName => 'Manual lap';
 
   @override
   String get routeLoopPrimary => 'PRIMARY';
@@ -940,7 +941,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routeLoopSetPrimary => 'Set as primary';
 
   @override
-  String get routeLoopStartRide => 'Start loop ride';
+  String get routeLoopStartRide => 'Start lap ride';
 
   @override
   String get routeLoopSourceManual => 'Manual';
@@ -953,30 +954,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteRouteBody =>
-      'This removes the route, its loops, and untags rides. If shared, it disappears for everyone.';
+      'This removes the route, its laps, and untags rides. If shared, it disappears for everyone.';
 
   @override
   String get routeDeleted => 'Route deleted';
 
   @override
-  String get deleteLoop => 'Delete loop';
+  String get deleteLoop => 'Delete lap';
 
   @override
   String get deleteLoopBody =>
-      'Removes this loop. If it was primary, A/B markers on the route are cleared too (friends see that on sync).';
+      'Removes this lap. If it was the main one, A/B marks on the route are cleared too (friends see that when they sync).';
 
   @override
-  String get loopDeleted => 'Loop deleted';
+  String get loopDeleted => 'Lap deleted';
 
   @override
-  String get deleteAllLoops => 'Remove all loops';
+  String get deleteAllLoops => 'Remove all laps';
 
   @override
   String get deleteAllLoopsBody =>
-      'Deletes every loop on this route and clears A/B markers. Friends get a loop-free route on sync.';
+      'Deletes every lap on this route and clears A/B marks. Friends get a lap-free route when they sync.';
 
   @override
-  String get loopsCleared => 'Loops cleared';
+  String get loopsCleared => 'Laps cleared';
 
   @override
   String get deleteConfirm => 'Delete';
@@ -999,7 +1000,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountGuestBody =>
-      'You\'re on a guest session. Sign in to keep your profile across devices — your current rides stay linked when possible.';
+      'You\'re a guest. Sign in to keep your profile on other phones — your rides stay linked when we can.';
 
   @override
   String get accountSignedIn => 'Signed in';
@@ -1024,30 +1025,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rideLoopHelp =>
-      'Find closed loops on this ride’s GPS, or mark start (A) and end (B) on the map. Saving creates/uses a route so you can run auto-lap later.';
+      'Find closed laps on this ride’s GPS, or mark start (A) and finish (B) on the map. Saving creates or uses a route so you can count laps later.';
 
   @override
-  String get rideLoopEmpty => 'No loops saved for this ride’s route yet.';
+  String get rideLoopEmpty => 'No laps saved for this ride’s route yet.';
 
   @override
   String get rideLoopDetectedEmpty =>
-      'No closed loop found on this ride. Try Mark A / B on the map.';
+      'No closed lap found on this ride. Try Mark A / B on the map.';
 
   @override
-  String get rideLoopNeedPoints => 'Not enough GPS points to mark a loop.';
+  String get rideLoopNeedPoints => 'Not enough GPS points to mark a lap.';
 
   @override
-  String get rideLoopSaveFirst => 'Save a loop first — that creates the route.';
+  String get rideLoopSaveFirst => 'Save a lap first — that creates the route.';
 
   @override
-  String get rideLoopOpenRoute => 'Open route (laps + loops)';
+  String get rideLoopOpenRoute => 'Open route (laps)';
 
   @override
   String get syncCloudRides => 'Sync rides with cloud';
 
   @override
   String get syncCloudRidesHelp =>
-      'Upload completed rides, then download this account’s Garage rides and Lean Lab sessions onto this phone.';
+      'Upload finished rides, then download this account’s garage rides and Lean lab sessions onto this phone.';
 
   @override
   String syncCloudRidesDone(int ok, int fail) {
@@ -1064,35 +1065,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'Updates install from Google Play for this build.';
 
   @override
-  String get labSection => 'Lab (experimental)';
+  String get labSection => 'Lab (try-out)';
 
   @override
   String get labAdventureCameraHelp =>
-      'Optional GoPro shutter synced to rides. Off by default — does not change GPS recording.';
+      'Optional GoPro shutter with the ride. Off by default — GPS recording does not change.';
 
   @override
   String get labAdventureCameraEnable => 'Adventure camera';
 
   @override
   String get labAdventureCameraEnableHelp =>
-      'Enable the camera lab module on this phone';
+      'Turn on the camera tools on this phone';
 
   @override
   String get labAdventureCameraSyncRide => 'Record with ride';
 
   @override
   String get labAdventureCameraSyncRideHelp =>
-      'Start/stop with the whole ride. If map start zones are set, they override start — camera waits for the start point.';
+      'Start and stop with the whole ride. If map start points are set, the camera waits until you reach one.';
 
   @override
   String get labAdventureCameraSyncPause => 'Follow auto-pause';
 
   @override
   String get labAdventureCameraSyncPauseHelp =>
-      'Stop the camera while GPS auto-pause is active (optional)';
+      'Stop the camera while auto-pause is on (optional)';
 
   @override
-  String get labAdventureCameraBackend => 'Backend';
+  String get labAdventureCameraBackend => 'Camera type';
 
   @override
   String get labAdventureCameraBackendGoPro => 'GoPro';
@@ -1108,7 +1109,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labAdventureCameraTestHelp =>
-      'Manual shutter test — no ride required. Connect first (or use Simulate).';
+      'Test the shutter by hand — no ride needed. Connect first (or use Simulate).';
 
   @override
   String get labAdventureCameraTestStart => 'Test start';
@@ -1144,11 +1145,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labAdventureCameraPhaseError => 'Error';
 
   @override
-  String get labAdventureCameraZonesEnable => 'Map start/stop zones';
+  String get labAdventureCameraZonesEnable => 'Start/stop on the map';
 
   @override
   String get labAdventureCameraZonesEnableHelp =>
-      'Start/stop when you enter map geofences. Start points gate recording (camera stays off until you reach one).';
+      'Start and stop when you enter map zones. The camera stays off until you reach a start point.';
 
   @override
   String get labAdventureCameraZonesEdit => 'Edit camera zones';
@@ -1167,7 +1168,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labAdventureCameraZonesHelp =>
-      'Tap to place Start, then tap again for that Start’s Stop partner. Long-press a marker to remove the whole pair. A Stop only works after its linked Start was hit.';
+      'Tap to place Start, then tap again for that Start’s Stop. Long-press a pin to remove the pair. A Stop only works after its Start was hit.';
 
   @override
   String get labAdventureCameraZonesPlaceStart => 'Next tap: Start ▶';
@@ -1180,11 +1181,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labAdventureCameraZonesPairs => 'Pairs';
 
   @override
-  String get rideDeckTitle => 'Ride deck';
+  String get rideDeckTitle => 'Start ride';
 
   @override
   String get rideDeckHelp =>
-      'Tap once, put the phone in the pocket or on the tank, stay still. When it locks 0°, the ride starts by itself — you will not tap again.';
+      'Tap once, put the phone in a pocket or on the tank, stay still. When you feel a buzz and beep, 0° is saved and the ride starts — you won’t tap again.';
 
   @override
   String get startRideNow => 'Start ride now';
@@ -1269,18 +1270,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get armAutoNoRouteHint =>
-      'Armed — when you roll, a ride starts in Garage.';
+      'Ready — when you roll, a ride starts in the garage.';
 
   @override
   String get freezeThenArmHelp =>
-      'Tap once, mount the phone, stay still. A buzz and beep means 0° is locked. Then lock the screen — rolling starts the ride. You will not tap again.';
+      'Tap once, put the phone in place, stay still. A buzz and beep means 0° is saved. Then lock the screen — rolling starts the ride. You won’t tap again.';
 
   @override
-  String get armAutoRouteArmed => 'Armed — rolling starts the ride';
+  String get armAutoRouteArmed => 'Ready — rolling starts the ride';
 
   @override
   String armAutoRouteArmedNamed(String name) {
-    return 'Armed for “$name” — the ride will be saved on that route';
+    return 'Ready for “$name” — the ride will be saved on that route';
   }
 
   @override
@@ -1531,7 +1532,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sharingDefaultsHelp =>
-      'Off by default. When on, location pings every 5 minutes for the whole rodada (retries every 1 minute if a ping fails).';
+      'Off until you turn it on. Then your location is sent every 5 minutes for the whole group ride (tries again every 1 minute if a send fails).';
 
   @override
   String get notRodadaMember => 'You are not a member.';
@@ -1543,7 +1544,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareLocationEvery5Min => 'Every 5 min while rodada is open/live';
 
   @override
-  String get shareTrackAfterRides => 'Share my track after rides';
+  String get shareTrackAfterRides => 'Share my line after rides';
 
   @override
   String get rodadaRiders => 'Riders';
@@ -1601,7 +1602,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sharedTracksHelp =>
-      'Shared tracks from members who opted in. Dense GPS stays on each phone.';
+      'Lines from riders who turned sharing on. Detailed GPS stays on each phone.';
 
   @override
   String get linkMyRide => 'Link my ride';
@@ -1659,11 +1660,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get photoTitle => 'Photo';
 
   @override
-  String get skillCoach => 'Skill coach';
+  String get skillCoach => 'Riding tips';
 
   @override
   String skillCurvasRated(int count) {
-    return '$count curvas rated · fingerprints for peer compare';
+    return '$count corners scored · good for comparing with friends';
   }
 
   @override
@@ -1674,36 +1675,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skillTipNoCurvas =>
-      'No solid curvas detected — ride a twisty section to build a baseline.';
+      'No solid corners found — ride a twisty stretch so we have something to go on.';
 
   @override
   String skillTipEntryHot(String entry, String apex) {
-    return 'Entry hot ($entry→$apex km/h). Brake earlier before tip-in.';
+    return 'Came in hot ($entry→$apex km/h). Brake earlier before you lean.';
   }
 
   @override
   String get skillTipModerateSpeedDrop =>
-      'Moderate speed drop to apex — trail brake a touch longer.';
+      'Speed drop to the middle is OK — brake a little longer as you lean in.';
 
   @override
   String get skillTipLittleSpeedScrub =>
-      'Little speed scrub — confirm you are not carrying too much mid-corner.';
+      'Speed barely dropped — check you’re not carrying too much in the middle of the turn.';
 
   @override
   String get skillTipWeakExitDrive =>
-      'Weak exit drive — open throttle sooner once lean starts falling.';
+      'Weak exit — open the gas sooner once the bike starts standing up.';
 
   @override
   String get skillTipPeakLeanNotAtApex =>
-      'Peak lean not at apex — tip in earlier so the bike is set at the apex.';
+      'Most lean wasn’t at the tightest point — lean in earlier so you’re set in the middle.';
 
   @override
   String get skillTipLowLeanBigHeading =>
-      'Big heading change with low lean — check sensor mount or commit more.';
+      'A lot of turning with little lean — check the phone is firmly held, or lean more.';
 
   @override
   String get skillTipSolidCorner =>
-      'Solid corner — keep this entry/apex rhythm.';
+      'Solid corner — keep this entry and middle rhythm.';
 
   @override
   String skillHighlightBest(String label, int score) {
@@ -1767,7 +1768,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skillLabTitle => 'Skill lab';
 
   @override
-  String get skillLabTapHint => 'Tap to see mistakes and how to improve';
+  String get skillLabTapHint => 'Tap to see mistakes and how to fix them';
 
   @override
   String get skillLabTapHintEmpty => 'Tap for tips after a twisty ride';
@@ -1777,7 +1778,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skillLabFocusHelp =>
-      'Lowest-scoring turns first. Bars show entry → apex → exit speed. Tap Replay to watch lean, brake, and speed — and compare the same corner section with a friend.';
+      'Worst-scoring turns first. Bars show entry → middle → exit speed. Tap Replay to watch lean, brake, and speed — and compare the same corner with a friend.';
 
   @override
   String get bikeSection => 'My bike';
@@ -1786,14 +1787,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bikeSelect => 'Select your bike';
 
   @override
-  String get bikeSelectHelp =>
-      'Used for Lean Lab and ride context';
+  String get bikeSelectHelp => 'Used for Lean lab and your rides';
 
   @override
   String get bikePickerTitle => 'Garage';
 
   @override
-  String get bikePickerHelp => 'Manufacturer, then year, then model.';
+  String get bikePickerHelp => 'Brand, then year, then model.';
 
   @override
   String get bikeClear => 'Clear';
@@ -1823,7 +1823,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bikeSearchHint => 'Search model or year';
 
   @override
-  String get bikeStepMake => 'Manufacturer';
+  String get bikeStepMake => 'Brand';
 
   @override
   String get bikeStepYear => 'Year';
@@ -1832,7 +1832,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bikeStepModel => 'Model';
 
   @override
-  String get bikeSearchMake => 'Search manufacturer';
+  String get bikeSearchMake => 'Search brand';
 
   @override
   String get bikeSearchYear => 'Search year';
@@ -1844,7 +1844,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bikePopularMakes => 'Popular';
 
   @override
-  String get bikeAllMakes => 'All manufacturers';
+  String get bikeAllMakes => 'All brands';
 
   @override
   String get bikeCustomModel => 'Other model…';
@@ -1860,7 +1860,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabIntro =>
-      'Pilot protocol for Bugambilias — both directions, with elevation. Calibrate upright, ride, then label corners so we can polish lean.';
+      'Bugambilias both ways, with hills. Set 0° with the bike upright, ride, then mark corners so we can improve lean.';
 
   @override
   String get leanLabCircuitName => 'Bugambilias circuit';
@@ -1882,28 +1882,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabProtoOutboundHelp =>
-      'Toward the plaza, center mount. Capture climb/descend lean.';
+      'Toward the plaza, phone in the usual place. Captures lean on climbs and descents.';
 
   @override
   String get leanLabProtoReturn => 'Baseline return';
 
   @override
   String get leanLabProtoReturnHelp =>
-      'Opposite direction, center mount. Same corners, mirrored sides.';
+      'The other way, same phone place. Same corners, opposite sides.';
 
   @override
-  String get leanLabProtoPocket => 'Mount A/B — pocket';
+  String get leanLabProtoPocket => 'Phone in pocket';
 
   @override
   String get leanLabProtoPocketHelp =>
-      'Same circuit with phone in pocket to learn mount bias.';
+      'Same circuit with the phone in a pocket, to see how that changes lean.';
 
   @override
   String get leanLabProtoFree => 'Free Lean Lab lap';
 
   @override
   String get leanLabProtoFreeHelp =>
-      'Any direction on this circuit with calib + corner labels.';
+      'Any direction on this circuit. Set 0°, then mark corners.';
 
   @override
   String get leanLabStartProtocol => 'Prepare & ride';
@@ -1921,10 +1921,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabPrepHelp =>
-      'Set mount and pose. Freeze g0 with the phone already in that mount — sensors pick roll vs pitch. Then start the lap.';
+      'Say how the phone sits, then save 0° with it already in place. After that, start the lap.';
 
   @override
-  String get leanLabPoseQ => 'How is the phone oriented?';
+  String get leanLabPoseQ => 'How is the phone sitting?';
 
   @override
   String get leanLabPoseScreenOut => 'Portrait · screen out';
@@ -1945,11 +1945,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabDirectionReturn => 'Return';
 
   @override
-  String get leanLabCalibTitle => 'Upright calibration';
+  String get leanLabCalibTitle => 'Save upright (0°)';
 
   @override
   String get leanLabCalibHelp =>
-      'Bike upright, phone already mounted. Hands off, hold 4 seconds — this freezes gravity (g0). Vector lean should stay near 0°.';
+      'Bike standing straight, phone already in place. Hands off for 4 seconds — this saves 0°. Lean should stay near 0°.';
 
   @override
   String get leanLabCalibHold => 'Hold upright 4s';
@@ -1962,7 +1962,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabCalibPocketHelp =>
-      'Tap, put the phone in the pocket or on the tank, stay still. A buzz and beep means 0° is locked and the ride started — do not freeze in your hand.';
+      'Tap, put the phone in a pocket or on the tank, stay still. A buzz and beep means 0° is saved and the ride started — don’t save 0° in your hand.';
 
   @override
   String leanLabCalibPocketCountdown(int n) {
@@ -1977,18 +1977,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabCalibPocketFail =>
-      'Didn\'t settle. Mount it again and retry.';
+      'It didn’t stay still. Put it back and try again.';
 
   @override
   String leanLabFreezeRedo(String n) {
-    return 'Phone is already $n° from vertical. Redo freeze with the bike truly upright.';
+    return 'The phone is already $n° from upright. Save 0° again with the bike truly standing straight.';
   }
 
   @override
-  String get leanLabRawNeutral => 'Raw phone angle';
+  String get leanLabRawNeutral => 'Phone angle';
 
   @override
-  String get leanLabFrozenNeutral => 'Frozen neutral';
+  String get leanLabFrozenNeutral => '0° saved';
 
   @override
   String get leanLabStartRide => 'Start Lean Lab ride';
@@ -1998,11 +1998,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabReviewHelp =>
-      'For each corner: was the app lean high, OK, or low? Grade (elevation) is shown so we can fix climb/descent bias.';
+      'For each corner: was the app lean high, OK, or low? Hill grade is shown so we can fix climb and descent.';
 
   @override
   String get leanLabReviewHelpMax =>
-      'Max lean for the curve stays fixed at the top. Play the corner to watch lean and the map move; jump to the peak when you want.';
+      'Max lean for the corner stays at the top. Play to watch lean and the map; jump to the peak when you want.';
 
   @override
   String get leanLabMaxLean => 'Max lean';
@@ -2053,7 +2053,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabGrade => 'Grade';
 
   @override
-  String get leanLabBiasQ => 'How did the app lean feel at apex?';
+  String get leanLabBiasQ =>
+      'How did the app lean feel in the middle of the turn?';
 
   @override
   String get leanLabBiasAppHigh => 'App too high';
@@ -2080,42 +2081,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabSaveLabels => 'Save corner labels';
 
   @override
-  String get leanLabSettingsTile => 'Lean Lab (pilots)';
+  String get leanLabSettingsTile => 'Lean lab (test)';
 
   @override
   String get leanLabSettingsHelp =>
-      'Bugambilias protocol · calib · elevation · corner ground truth';
+      'Bugambilias sessions · save 0° · hills · mark corners';
 
   @override
   String get leanImuLabTitle => 'IMU lean lab';
 
   @override
   String get leanImuLabIntro =>
-      'Same engine as production. Freeze upright in the real mount, then lean — bike lean is vector magnitude with the winning channel’s sign. Banner shows pose (Vertical / Landscape / Flat) and the winner.';
+      'Same lean as the ride. Save 0° with the phone in its real place, then lean. The banner shows how the phone sits.';
 
   @override
   String get leanImuLabSettingsTile => 'IMU lean sensors';
 
   @override
-  String get leanImuLabSettingsHelp =>
-      'Study accel / gyro / mag / baro and the mount-aware lean engine';
+  String get leanImuLabSettingsHelp => 'Watch sensors and how lean is measured';
 
   @override
-  String get leanImuLabFreeze => 'Freeze upright';
+  String get leanImuLabFreeze => 'Save 0° now';
 
   @override
   String get leanImuLabReset => 'Reset';
 
   @override
   String get leanImuLabFrozenHint =>
-      'g0 is frozen. Bike lean should be ~0° now. Tilt in any direction — vector is the angle, the winner supplies left/right.';
+      '0° is saved. Lean should be about 0° now. Tilt any way — the number is the angle, left or right comes from how the phone sits.';
 
   @override
   String get leanImuLabAnglesTitle => 'Angle candidates';
 
   @override
   String get leanImuLabAnglesHelp =>
-      'Bike lean = production. Vector = 3D angle from freeze. Roll follows lean when the phone is vertical; pitch when it is flat. Fused = gyro + accel. Old App lean is the closest-axis formula we retired.';
+      'Bike lean is what the ride uses. Vector is the 3D angle from 0°. Roll is used when the phone is upright; pitch when it is flat.';
 
   @override
   String get leanImuLabHistoryTitle => 'Last ~8 s';
@@ -2128,7 +2128,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanImuLabNextHelp =>
-      'Wall test: vector within ~3° of a clinometer, any pose. Vertical: bike lean follows fused roll. Flat: bike lean follows pitch/vector. Pocket slip: banner switches pose in a few seconds. Mag heading is extra (yaw), not bike lean.';
+      'Wall test: within about 3° of a real inclinometer, any position. Upright phone: lean follows roll. Flat phone: lean follows pitch. If the phone slips in a pocket, the banner changes in a few seconds.';
 
   @override
   String get leanLabPastSessions => 'Past sessions';
@@ -2161,7 +2161,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabEditConfigHelp =>
-      'Correct ida/vuelta, mount, or pose if you set them wrong — lean numbers stay the same; labels stay until you re-save them.';
+      'Fix outbound/return, phone place, or position if you set them wrong — lean numbers stay the same; labels stay until you save them again.';
 
   @override
   String get leanLabSaveConfig => 'Save setup';
@@ -2180,11 +2180,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skillReplayHelp =>
-      'Watch how this stretch was ridden — lean, braking, and speed move with the map playhead.';
+      'Watch how this stretch was ridden — lean, braking, and speed move with the map marker.';
 
   @override
   String get skillReplayCompareHelp =>
-      'Both lines are cropped to the same road section. Playheads advance by distance along the corner so you compare the line, not the clock.';
+      'Both lines are cut to the same stretch of road. Markers move by distance along the corner so you compare the line, not the clock.';
 
   @override
   String get skillReplayCompareWith => 'Compare with a friend';
@@ -2234,7 +2234,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get engineLabelIntro =>
-      'Beta only — a few taps after each ride teach lean, curves, and brakes. Skip anytime.';
+      'A few taps after each ride help teach lean, corners, and brakes. Skip anytime.';
 
   @override
   String get engineLabelSkip => 'Skip';
@@ -2246,7 +2246,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get engineLabelMountQ => 'Where was the phone on this ride?';
 
   @override
-  String get engineLabelMountCenter => 'Mount (tank / bars)';
+  String get engineLabelMountCenter => 'On the bike (tank / bars)';
 
   @override
   String get engineLabelMountLeftPocket => 'Left pocket';
@@ -2312,17 +2312,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gpsCheckingPermission => 'Checking location permission…';
 
   @override
-  String get gpsPreparing => 'Preparing high-precision GPS…';
+  String get gpsPreparing => 'Getting a better GPS lock…';
 
   @override
   String get gpsLookingSatellites => 'Looking for satellites…';
 
   @override
-  String get gpsWarming => 'Warming GPS…';
+  String get gpsWarming => 'Waiting for a better GPS lock…';
 
   @override
   String gpsWarmingAcc(String meters) {
-    return 'Warming GPS (±$meters m)…';
+    return 'Waiting for GPS (±$meters m)…';
   }
 
   @override
@@ -2348,7 +2348,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationPermissionDenied =>
-      'Location permission is required to draw your pilot line.';
+      'Location permission is needed to draw your line.';
 
   @override
   String get locationPermissionDeniedForever =>
@@ -2356,7 +2356,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String leanAtPlayhead(String degrees) {
-    return 'At playhead · neutral offset $degrees°';
+    return 'At marker · 0° offset $degrees°';
   }
 
   @override

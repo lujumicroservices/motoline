@@ -107,19 +107,19 @@ abstract class AppLocalizations {
   /// No description provided for @tagline.
   ///
   /// In es, this message translates to:
-  /// **'Domina cada curva.'**
+  /// **'Mejora en cada curva.'**
   String get tagline;
 
   /// No description provided for @autoPauseToggle.
   ///
   /// In es, this message translates to:
-  /// **'Pausa auto'**
+  /// **'Pausar al parar'**
   String get autoPauseToggle;
 
   /// No description provided for @autoPauseToggleHint.
   ///
   /// In es, this message translates to:
-  /// **'Pausa y reanuda la grabación al detenerte o moverte'**
+  /// **'La grabación se pausa cuando paras y sigue cuando vuelves a rodar.'**
   String get autoPauseToggleHint;
 
   /// No description provided for @startRide.
@@ -197,7 +197,7 @@ abstract class AppLocalizations {
   /// No description provided for @nameRidesFromMapHelp.
   ///
   /// In es, this message translates to:
-  /// **'Calcula origen y destino con GPS (ej. Tesistán - Zapopan).'**
+  /// **'Pone el nombre según dónde empezaste y terminaste (ej. Tesistán - Zapopan).'**
   String get nameRidesFromMapHelp;
 
   /// No description provided for @namingRidesProgress.
@@ -215,7 +215,7 @@ abstract class AppLocalizations {
   /// No description provided for @rideUntitledHint.
   ///
   /// In es, this message translates to:
-  /// **'Origen - destino pendiente'**
+  /// **'Inicio - fin aún sin nombre'**
   String get rideUntitledHint;
 
   /// No description provided for @rideNameTitle.
@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @couldNotResolvePlaces.
   ///
   /// In es, this message translates to:
-  /// **'No se pudieron obtener los nombres'**
+  /// **'No se encontraron esos lugares'**
   String get couldNotResolvePlaces;
 
   /// No description provided for @rideTitleCleared.
@@ -287,7 +287,7 @@ abstract class AppLocalizations {
   /// No description provided for @emptyRidesBody.
   ///
   /// In es, this message translates to:
-  /// **'Inicia un recorrido y RiderLab dibujará la línea exacta que tomaste en la calle.'**
+  /// **'Inicia un recorrido y RiderLab dibuja la línea que tomaste en la calle.'**
   String get emptyRidesBody;
 
   /// No description provided for @unfinishedRide.
@@ -299,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @unfinishedRideBody.
   ///
   /// In es, this message translates to:
-  /// **'Empezó {when}. Finalízala para guardar la línea, o descártala.'**
+  /// **'Empezó {when}. Termínalo para guardar la línea, o bórralo.'**
   String unfinishedRideBody(String when);
 
   /// No description provided for @discard.
@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @keepLine.
   ///
   /// In es, this message translates to:
-  /// **'Conservar línea'**
+  /// **'Guardar línea'**
   String get keepLine;
 
   /// No description provided for @updateAvailable.
@@ -407,43 +407,43 @@ abstract class AppLocalizations {
   /// No description provided for @rideLab.
   ///
   /// In es, this message translates to:
-  /// **'Lab del ride'**
+  /// **'Lab del recorrido'**
   String get rideLab;
 
   /// No description provided for @rideLabSegment.
   ///
   /// In es, this message translates to:
-  /// **'Ride Lab · segmento'**
+  /// **'Lab del recorrido · este tramo'**
   String get rideLabSegment;
 
   /// No description provided for @rideNotFound.
   ///
   /// In es, this message translates to:
-  /// **'Ruta no encontrada'**
+  /// **'Recorrido no encontrado'**
   String get rideNotFound;
 
   /// No description provided for @collapseHint.
   ///
   /// In es, this message translates to:
-  /// **'Toca los encabezados para plegar. El cursor queda abajo.'**
+  /// **'Toca un título para ocultarlo. El marcador se queda abajo.'**
   String get collapseHint;
 
   /// No description provided for @segmentZoomHint.
   ///
   /// In es, this message translates to:
-  /// **'Zoom de segmento — métricas y gráficas solo de este tramo.'**
+  /// **'Solo este tramo — números y gráficas son de esta parte del recorrido.'**
   String get segmentZoomHint;
 
   /// No description provided for @sectionSegment.
   ///
   /// In es, this message translates to:
-  /// **'Zoom de segmento'**
+  /// **'Este tramo'**
   String get sectionSegment;
 
   /// No description provided for @sectionSegmentSub.
   ///
   /// In es, this message translates to:
-  /// **'Elige un tramo de carretera'**
+  /// **'Elige una parte del recorrido'**
   String get sectionSegmentSub;
 
   /// No description provided for @sectionOverview.
@@ -455,13 +455,13 @@ abstract class AppLocalizations {
   /// No description provided for @sectionOverviewSub.
   ///
   /// In es, this message translates to:
-  /// **'Puntuación + métricas'**
+  /// **'Puntaje y números del recorrido'**
   String get sectionOverviewSub;
 
   /// No description provided for @sectionOverviewSubZoom.
   ///
   /// In es, this message translates to:
-  /// **'Puntuación + métricas de este segmento'**
+  /// **'Puntaje y números de este tramo'**
   String get sectionOverviewSubZoom;
 
   /// No description provided for @sectionLean.
@@ -473,7 +473,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionLeanSub.
   ///
   /// In es, this message translates to:
-  /// **'Cian izquierda · ámbar derecha'**
+  /// **'Azul izquierda · amarillo derecha'**
   String get sectionLeanSub;
 
   /// No description provided for @sectionMap.
@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionMapSub.
   ///
   /// In es, this message translates to:
-  /// **'Colores de velocidad · frenos'**
+  /// **'Color = velocidad · puntos = frenos'**
   String get sectionMapSub;
 
   /// No description provided for @sectionRoad.
@@ -497,7 +497,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionRoadSub.
   ///
   /// In es, this message translates to:
-  /// **'Por rumbo e inclinación'**
+  /// **'Por el giro y la inclinación'**
   String get sectionRoadSub;
 
   /// No description provided for @sectionLoop.
@@ -509,7 +509,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionLoopSub.
   ///
   /// In es, this message translates to:
-  /// **'Detecta o marca A/B en este ride'**
+  /// **'Encuentra vueltas o marca inicio y fin'**
   String get sectionLoopSub;
 
   /// No description provided for @sectionBrakes.
@@ -521,7 +521,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionBrakesSub.
   ///
   /// In es, this message translates to:
-  /// **'Inferido por caída de velocidad'**
+  /// **'Se calcula por qué tan rápido bajas de velocidad'**
   String get sectionBrakesSub;
 
   /// No description provided for @sectionCharts.
@@ -533,7 +533,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionChartsSub.
   ///
   /// In es, this message translates to:
-  /// **'Velocidad · lean · GPS'**
+  /// **'Velocidad · inclinación · GPS'**
   String get sectionChartsSub;
 
   /// No description provided for @sectionNotes.
@@ -545,49 +545,49 @@ abstract class AppLocalizations {
   /// No description provided for @sectionNotesSub.
   ///
   /// In es, this message translates to:
-  /// **'Calidad GPS y notas'**
+  /// **'Calidad del GPS y notas'**
   String get sectionNotesSub;
 
   /// No description provided for @segment.
   ///
   /// In es, this message translates to:
-  /// **'SEGMENTO'**
+  /// **'TRAMO'**
   String get segment;
 
   /// No description provided for @segmentZoom.
   ///
   /// In es, this message translates to:
-  /// **'ZOOM DE SEGMENTO'**
+  /// **'ESTE TRAMO'**
   String get segmentZoom;
 
   /// No description provided for @segmentHint.
   ///
   /// In es, this message translates to:
-  /// **'Arrastra los controles, luego haz zoom para métricas del tramo.'**
+  /// **'Arrastra los controles para elegir un tramo y luego acércalo.'**
   String get segmentHint;
 
   /// No description provided for @segmentHintZoomed.
   ///
   /// In es, this message translates to:
-  /// **'Mapa y métricas muestran solo este tramo. Ajusta con los controles.'**
+  /// **'El mapa y los números muestran solo este tramo. Arrastra para cambiarlo.'**
   String get segmentHintZoomed;
 
   /// No description provided for @zoomToSegment.
   ///
   /// In es, this message translates to:
-  /// **'Zoom al segmento'**
+  /// **'Acercar a este tramo'**
   String get zoomToSegment;
 
   /// No description provided for @fullRide.
   ///
   /// In es, this message translates to:
-  /// **'Ruta completa'**
+  /// **'Recorrido completo'**
   String get fullRide;
 
   /// No description provided for @playhead.
   ///
   /// In es, this message translates to:
-  /// **'CURSOR'**
+  /// **'MARCADOR'**
   String get playhead;
 
   /// No description provided for @distance.
@@ -617,7 +617,7 @@ abstract class AppLocalizations {
   /// No description provided for @calibrating.
   ///
   /// In es, this message translates to:
-  /// **'Calibrando…'**
+  /// **'Guardando 0°…'**
   String get calibrating;
 
   /// No description provided for @points.
@@ -665,49 +665,49 @@ abstract class AppLocalizations {
   /// No description provided for @gpsPrecisionSub.
   ///
   /// In es, this message translates to:
-  /// **'Precisión horizontal en metros (menor es mejor)'**
+  /// **'Qué tan preciso está el GPS, en metros (más bajo es mejor)'**
   String get gpsPrecisionSub;
 
   /// No description provided for @chartSpeedSub.
   ///
   /// In es, this message translates to:
-  /// **'Colores de alto contraste. Toca para scrub.'**
+  /// **'Los colores son la velocidad. Toca para moverte en el recorrido.'**
   String get chartSpeedSub;
 
   /// No description provided for @chartSpeedSubZoom.
   ///
   /// In es, this message translates to:
-  /// **'Solo velocidad del segmento. Toca para scrub.'**
+  /// **'Solo la velocidad de este tramo. Toca para moverte.'**
   String get chartSpeedSubZoom;
 
   /// No description provided for @leanHelp.
   ///
   /// In es, this message translates to:
-  /// **'0° es vertical inferida. Para inclinación precisa, monta el teléfono firme en vertical (pantalla hacia ti) en el tanque o manillar — evita bolsillo suelto o apaisado.'**
+  /// **'0° es la moto derecha. Para que salga bien, fija el teléfono en el tanque o el manubrio, pantalla hacia ti. Un bolsillo suelto tira el número.'**
   String get leanHelp;
 
   /// No description provided for @leanPhoneDisclaimer.
   ///
   /// In es, this message translates to:
-  /// **'La posición del celular importa: vertical, pantalla hacia ti, montaje fijo. Un bolsillo suelto sesga la inclinación.'**
+  /// **'Cómo llevas el teléfono importa: derecho, pantalla hacia ti, bien sujeto. Un bolsillo suelto hace ver mal la inclinación.'**
   String get leanPhoneDisclaimer;
 
   /// No description provided for @mapHint.
   ///
   /// In es, this message translates to:
-  /// **'Toca la línea para mover la moto. Azul→magenta por velocidad. Puntos = frenos.'**
+  /// **'Toca la línea para mover la moto. El color es la velocidad. Los puntos son frenos.'**
   String get mapHint;
 
   /// No description provided for @mapHintZoom.
   ///
   /// In es, this message translates to:
-  /// **'Toca la línea para mover la moto. Brillante = elegido · tenue = resto.'**
+  /// **'Toca la línea para mover la moto. Brillante = este tramo · tenue = el resto.'**
   String get mapHintZoom;
 
   /// No description provided for @startingRide.
   ///
   /// In es, this message translates to:
-  /// **'Iniciando ruta'**
+  /// **'Iniciando recorrido'**
   String get startingRide;
 
   /// No description provided for @gpsReady.
@@ -719,13 +719,13 @@ abstract class AppLocalizations {
   /// No description provided for @gpsWarmHelp.
   ///
   /// In es, this message translates to:
-  /// **'Quédate al aire libre con cielo abierto. La grabación empieza cuando el GPS esté lo bastante estable (objetivo ±{meters} m).'**
+  /// **'Quédate afuera con cielo abierto. La grabación empieza cuando el GPS esté suficientemente bien (cerca de ±{meters} m).'**
   String gpsWarmHelp(String meters);
 
   /// No description provided for @horizontalAccuracy.
   ///
   /// In es, this message translates to:
-  /// **'PRECISIÓN HORIZONTAL'**
+  /// **'PRECISIÓN GPS'**
   String get horizontalAccuracy;
 
   /// No description provided for @lowerBetter.
@@ -737,7 +737,7 @@ abstract class AppLocalizations {
   /// No description provided for @couldNotStart.
   ///
   /// In es, this message translates to:
-  /// **'No se pudo iniciar la ruta'**
+  /// **'No se pudo iniciar el recorrido'**
   String get couldNotStart;
 
   /// No description provided for @tryAgain.
@@ -755,7 +755,7 @@ abstract class AppLocalizations {
   /// No description provided for @activeMountHelp.
   ///
   /// In es, this message translates to:
-  /// **'El 0° se congeló antes de salir. La pantalla puede bloquearse — deja la notificación de grabación activa.'**
+  /// **'El 0° ya está guardado. Puedes bloquear la pantalla — deja la notificación de grabación encendida.'**
   String get activeMountHelp;
 
   /// No description provided for @curvaTitle.
@@ -779,7 +779,7 @@ abstract class AppLocalizations {
   /// No description provided for @apex.
   ///
   /// In es, this message translates to:
-  /// **'Ápice'**
+  /// **'Punto más cerrado'**
   String get apex;
 
   /// No description provided for @exit.
@@ -791,19 +791,19 @@ abstract class AppLocalizations {
   /// No description provided for @brakeToApex.
   ///
   /// In es, this message translates to:
-  /// **'Freno a ápice'**
+  /// **'Freno al punto más cerrado'**
   String get brakeToApex;
 
   /// No description provided for @accelFromApex.
   ///
   /// In es, this message translates to:
-  /// **'Acelera desde ápice'**
+  /// **'Acelera después del punto más cerrado'**
   String get accelFromApex;
 
   /// No description provided for @leanAtApex.
   ///
   /// In es, this message translates to:
-  /// **'Lean en ápice'**
+  /// **'Inclinación en el punto más cerrado'**
   String get leanAtApex;
 
   /// No description provided for @maxLean.
@@ -827,25 +827,25 @@ abstract class AppLocalizations {
   /// No description provided for @curvaMapLegend.
   ///
   /// In es, this message translates to:
-  /// **'E = entrada · A = ápice · S = salida. Línea por velocidad.'**
+  /// **'E = entrada · A = punto más cerrado · S = salida. El color es la velocidad.'**
   String get curvaMapLegend;
 
   /// No description provided for @curvaCoach.
   ///
   /// In es, this message translates to:
-  /// **'Lectura rápida: mira si entras demasiado rápido (mucho freno a A), si el ápice es estable, y si sales acelerando limpio.'**
+  /// **'Revisa rápido: si entraste muy rápido (mucho freno antes de A), si el centro de la curva iba estable y si saliste acelerando limpio.'**
   String get curvaCoach;
 
   /// No description provided for @roadStretchesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Según rumbo + inclinación. {curvas} curvas. Toca una curva para entrada / ápice / salida — desliza entre curvas.'**
+  /// **'Curvas según el giro y la inclinación. {curvas} curvas. Toca una para ver entrada, centro y salida — desliza para la siguiente.'**
   String roadStretchesHelp(int curvas);
 
   /// No description provided for @roadStretchesEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay suficiente cambio de rumbo GPS para detectar curvas.'**
+  /// **'Aún no hay suficiente giro en el GPS para detectar curvas.'**
   String get roadStretchesEmpty;
 
   /// No description provided for @openDetail.
@@ -857,13 +857,13 @@ abstract class AppLocalizations {
   /// No description provided for @brakesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inferido por qué tan rápido cae la velocidad — no es sensor de freno. Toca un golpe para saltar el playhead. El botón de mapa hace zoom a ese freno.'**
+  /// **'Se calcula por qué tan rápido baja la velocidad — no es un sensor de freno. Toca una marca para ir ahí. El botón del mapa acerca ese freno.'**
   String get brakesHelp;
 
   /// No description provided for @brakesEmpty.
   ///
   /// In es, this message translates to:
-  /// **'No hay frenadas claras por GPS. Las paradas fuertes suelen verse como golpes amarillo/naranja/rojo.'**
+  /// **'No hay frenadas claras por GPS. Las paradas fuertes suelen verse amarillo, naranja o rojo.'**
   String get brakesEmpty;
 
   /// No description provided for @brakeLight.
@@ -941,7 +941,7 @@ abstract class AppLocalizations {
   /// No description provided for @fullscreenMapHelp.
   ///
   /// In es, this message translates to:
-  /// **'Desplaza y haz zoom libremente. Marca un área o usa el mapa visible, luego carga métricas de ese tramo.'**
+  /// **'Mueve y acerca el mapa. Dibuja un recuadro o usa lo que se ve, y luego carga los números de ese tramo.'**
   String get fullscreenMapHelp;
 
   /// No description provided for @selectArea.
@@ -977,13 +977,13 @@ abstract class AppLocalizations {
   /// No description provided for @loadAreaMetrics.
   ///
   /// In es, this message translates to:
-  /// **'Cargar métricas del área'**
+  /// **'Cargar números de esta área'**
   String get loadAreaMetrics;
 
   /// No description provided for @areaReady.
   ///
   /// In es, this message translates to:
-  /// **'Área lista · {points} puntos GPS. Carga métricas para enfocar el Ride Lab en este tramo.'**
+  /// **'Área lista · {points} puntos GPS. Carga los números para ver este tramo en el lab.'**
   String areaReady(int points);
 
   /// No description provided for @zoomIn.
@@ -1001,7 +1001,7 @@ abstract class AppLocalizations {
   /// No description provided for @fitRide.
   ///
   /// In es, this message translates to:
-  /// **'Ajustar ruta'**
+  /// **'Ajustar recorrido'**
   String get fitRide;
 
   /// No description provided for @myLocation.
@@ -1043,7 +1043,7 @@ abstract class AppLocalizations {
   /// No description provided for @mapLayerPlayhead.
   ///
   /// In es, this message translates to:
-  /// **'Cursor'**
+  /// **'Marcador'**
   String get mapLayerPlayhead;
 
   /// No description provided for @mapLayerLegend.
@@ -1061,13 +1061,13 @@ abstract class AppLocalizations {
   /// No description provided for @friendsSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Beta cerrada — todo quien tenga la app aparece en tu lista.'**
+  /// **'Grupo cerrado — quien tenga la app aparece aquí.'**
   String get friendsSubtitle;
 
   /// No description provided for @friendsEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay otros riders. Cuando un amigo instale RiderLab, aparecerá aquí.'**
+  /// **'Aún no hay otros riders. Cuando un amigo instale RiderLab, aparece aquí.'**
   String get friendsEmpty;
 
   /// No description provided for @yourName.
@@ -1103,19 +1103,19 @@ abstract class AppLocalizations {
   /// No description provided for @compareTitle.
   ///
   /// In es, this message translates to:
-  /// **'Comparar rutas'**
+  /// **'Comparar recorridos'**
   String get compareTitle;
 
   /// No description provided for @comparePickPeer.
   ///
   /// In es, this message translates to:
-  /// **'Rutas de amigos en la misma zona'**
+  /// **'Recorridos de amigos en la misma zona'**
   String get comparePickPeer;
 
   /// No description provided for @compareEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Ninguna ruta de amigos cubre esta zona todavía.'**
+  /// **'Ningún recorrido de amigos cubre esta zona todavía.'**
   String get compareEmpty;
 
   /// No description provided for @compareYou.
@@ -1139,13 +1139,13 @@ abstract class AppLocalizations {
   /// No description provided for @compareLocalHelp.
   ///
   /// In es, this message translates to:
-  /// **'Elige una vuelta base y otra para comparar métricas y líneas en el mismo circuito.'**
+  /// **'Elige una primera vuelta y una segunda para comparar tiempos y líneas en el mismo circuito.'**
   String get compareLocalHelp;
 
   /// No description provided for @compareLocalEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Necesitas al menos 2 vueltas completadas en esta ruta. Usa modo Loop o etiqueta rides con la misma ruta.'**
+  /// **'Necesitas al menos 2 vueltas terminadas en esta ruta. Usa el modo vueltas o marca recorridos con la misma ruta.'**
   String get compareLocalEmpty;
 
   /// No description provided for @compareBaseline.
@@ -1157,7 +1157,7 @@ abstract class AppLocalizations {
   /// No description provided for @compareChallenger.
   ///
   /// In es, this message translates to:
-  /// **'Retador'**
+  /// **'Segunda vuelta'**
   String get compareChallenger;
 
   /// No description provided for @compareLocal.
@@ -1169,13 +1169,13 @@ abstract class AppLocalizations {
   /// No description provided for @compareDeltaFaster.
   ///
   /// In es, this message translates to:
-  /// **'Retador más rápido por {delta}'**
+  /// **'La segunda vuelta es más rápida por {delta}'**
   String compareDeltaFaster(String delta);
 
   /// No description provided for @compareDeltaSlower.
   ///
   /// In es, this message translates to:
-  /// **'Retador más lento por {delta}'**
+  /// **'La segunda vuelta es más lenta por {delta}'**
   String compareDeltaSlower(String delta);
 
   /// No description provided for @compareDeltaTie.
@@ -1211,31 +1211,31 @@ abstract class AppLocalizations {
   /// No description provided for @friendRides.
   ///
   /// In es, this message translates to:
-  /// **'Rutas compartidas'**
+  /// **'Recorridos compartidos'**
   String get friendRides;
 
   /// No description provided for @friendRidesEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Este rider aún no tiene rutas compartidas.'**
+  /// **'Este rider aún no tiene recorridos compartidos.'**
   String get friendRidesEmpty;
 
   /// No description provided for @syncingRide.
   ///
   /// In es, this message translates to:
-  /// **'Compartiendo ruta con amigos…'**
+  /// **'Compartiendo el recorrido con amigos…'**
   String get syncingRide;
 
   /// No description provided for @cloudUnavailable.
   ///
   /// In es, this message translates to:
-  /// **'Nube no disponible — revisa conexión y auth anónima.'**
+  /// **'No hay conexión con la nube — revisa internet e inténtalo de nuevo.'**
   String get cloudUnavailable;
 
   /// No description provided for @cloudAnonymousOff.
   ///
   /// In es, this message translates to:
-  /// **'Amigos necesita Anonymous activado en la nube de RiderLab (proyecto Supabase CornerIQ):\nDashboard → Authentication → Providers → Anonymous → Enable.\nLuego vuelve a abrir Amigos y desliza para refrescar.'**
+  /// **'Amigos necesita el inicio de sesión activado en la nube de RiderLab. Pregunta a quien configuró la app, luego abre Amigos otra vez y desliza para actualizar.'**
   String get cloudAnonymousOff;
 
   /// No description provided for @routesTitle.
@@ -1247,31 +1247,31 @@ abstract class AppLocalizations {
   /// No description provided for @routesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Nombra un circuito, compártelo y etiqueta rides para que amigos comparen en la misma ruta.'**
+  /// **'Nombra un circuito, compártelo y marca recorridos para que los amigos comparen en el mismo camino.'**
   String get routesHelp;
 
   /// No description provided for @routesHowTitle.
   ///
   /// In es, this message translates to:
-  /// **'¿Cómo se usan las Rutas?'**
+  /// **'¿Cómo se usan las rutas?'**
   String get routesHowTitle;
 
   /// No description provided for @routesHowBody.
   ///
   /// In es, this message translates to:
-  /// **'1) Crea una ruta con + (ej. «Glorieta norte»).\n2) Abre la ruta → pestaña Loop: detecta vueltas cerradas en rides etiquetados, o marca A/B tú mismo.\n3) Inicia un ride en loop desde un loop guardado — cada vuelta se etiqueta a esta ruta.\n4) O en Ride Lab → Comparte, etiqueta cualquier ride con esta ruta.\n5) Activa «compartida» si quieres que amigos comparen el mismo circuito.'**
+  /// **'1) Crea una ruta con + (ej. «Glorieta norte»).\n2) Abre la ruta → pestaña Vueltas: encuentra vueltas cerradas en recorridos marcados, o marca tú el inicio (A) y el fin (B).\n3) Inicia un recorrido de vueltas desde una vuelta guardada — cada vuelta se guarda en esta ruta.\n4) O en el lab del recorrido → Compartir, marca cualquier recorrido con esta ruta.\n5) Activa «compartida» si quieres que los amigos comparen el mismo circuito.'**
   String get routesHowBody;
 
   /// No description provided for @routesTapHint.
   ///
   /// In es, this message translates to:
-  /// **'Toca para vueltas + módulo Loop'**
+  /// **'Toca para ver vueltas'**
   String get routesTapHint;
 
   /// No description provided for @routesLoopReady.
   ///
   /// In es, this message translates to:
-  /// **'Loop listo'**
+  /// **'Vuelta lista'**
   String get routesLoopReady;
 
   /// No description provided for @setYourAlias.
@@ -1295,7 +1295,7 @@ abstract class AppLocalizations {
   /// No description provided for @proCurvaBannerBody.
   ///
   /// In es, this message translates to:
-  /// **'Vista previa de 0,5 s. Con Pro ves entrada, ápice, salida y mapa sin bloqueo.'**
+  /// **'Vista previa de 0,5 s. Con Pro ves entrada, centro, salida y el mapa sin bloqueo.'**
   String get proCurvaBannerBody;
 
   /// No description provided for @proNotesBannerTitle.
@@ -1307,7 +1307,7 @@ abstract class AppLocalizations {
   /// No description provided for @proNotesBannerBody.
   ///
   /// In es, this message translates to:
-  /// **'Calidad GPS y tips del coach están en CornerIQ Pro.'**
+  /// **'La calidad del GPS y los tips de manejo están en RiderLab Pro.'**
   String get proNotesBannerBody;
 
   /// No description provided for @proFeatureCurva.
@@ -1319,7 +1319,7 @@ abstract class AppLocalizations {
   /// No description provided for @proFeatureNotes.
   ///
   /// In es, this message translates to:
-  /// **'Precisión GPS + notas de coach'**
+  /// **'Precisión GPS + notas de manejo'**
   String get proFeatureNotes;
 
   /// No description provided for @myRoutes.
@@ -1331,7 +1331,7 @@ abstract class AppLocalizations {
   /// No description provided for @routesEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay rutas — crea una para etiquetar y compartir rides.'**
+  /// **'Aún no hay rutas — crea una para marcar y compartir recorridos.'**
   String get routesEmpty;
 
   /// No description provided for @friendRoutes.
@@ -1373,7 +1373,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareRouteHelp.
   ///
   /// In es, this message translates to:
-  /// **'Los amigos ven este circuito y pueden comparar rides etiquetados.'**
+  /// **'Los amigos ven este circuito y pueden comparar recorridos marcados.'**
   String get shareRouteHelp;
 
   /// No description provided for @routeCreated.
@@ -1409,7 +1409,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareThisRide.
   ///
   /// In es, this message translates to:
-  /// **'Compartir este ride'**
+  /// **'Compartir este recorrido'**
   String get shareThisRide;
 
   /// No description provided for @assignRoute.
@@ -1451,13 +1451,13 @@ abstract class AppLocalizations {
   /// No description provided for @armAutoRide.
   ///
   /// In es, this message translates to:
-  /// **'Armar auto-ride'**
+  /// **'Empezar al rodar'**
   String get armAutoRide;
 
   /// No description provided for @disarmAutoRide.
   ///
   /// In es, this message translates to:
-  /// **'Desarmar auto-ride'**
+  /// **'Cancelar arranque auto'**
   String get disarmAutoRide;
 
   /// No description provided for @waitingForMotion.
@@ -1469,13 +1469,13 @@ abstract class AppLocalizations {
   /// No description provided for @armedBannerBody.
   ///
   /// In es, this message translates to:
-  /// **'RiderLab iniciará la grabación sola en cuanto detecte que empiezas a rodar.'**
+  /// **'RiderLab empieza a grabar sola cuando te empiezas a mover.'**
   String get armedBannerBody;
 
   /// No description provided for @loopMode.
   ///
   /// In es, this message translates to:
-  /// **'Modo Loop'**
+  /// **'Modo vueltas'**
   String get loopMode;
 
   /// No description provided for @pausedLabel.
@@ -1493,7 +1493,7 @@ abstract class AppLocalizations {
   /// No description provided for @suggestEndBody.
   ///
   /// In es, this message translates to:
-  /// **'Sin movimiento hace rato. Termina la ruta o sigue rodando.'**
+  /// **'Sin movimiento hace rato. Termina el recorrido o sigue rodando.'**
   String get suggestEndBody;
 
   /// No description provided for @keepRiding.
@@ -1505,7 +1505,7 @@ abstract class AppLocalizations {
   /// No description provided for @markLoopInit.
   ///
   /// In es, this message translates to:
-  /// **'Marcar inicio de loop'**
+  /// **'Marcar inicio de vuelta'**
   String get markLoopInit;
 
   /// No description provided for @loopInitSet.
@@ -1517,7 +1517,7 @@ abstract class AppLocalizations {
   /// No description provided for @markLoopEnd.
   ///
   /// In es, this message translates to:
-  /// **'Marcar fin de loop'**
+  /// **'Marcar fin de vuelta'**
   String get markLoopEnd;
 
   /// No description provided for @markLoopInitHere.
@@ -1541,7 +1541,7 @@ abstract class AppLocalizations {
   /// No description provided for @loopMarkMapHint.
   ///
   /// In es, this message translates to:
-  /// **'Abre el mapa a pantalla completa, desplázate y toca el punto A (inicio) y el B (fin) de la ruta.'**
+  /// **'Abre el mapa completo, muévelo y toca el punto A (inicio) y el B (fin).'**
   String get loopMarkMapHint;
 
   /// No description provided for @loopTapPointA.
@@ -1559,13 +1559,13 @@ abstract class AppLocalizations {
   /// No description provided for @loopPointsReady.
   ///
   /// In es, this message translates to:
-  /// **'A y B listos — confirma para armar auto-vuelta'**
+  /// **'A y B listos — confirma para contar vueltas'**
   String get loopPointsReady;
 
   /// No description provided for @loopMarkMapHelp.
   ///
   /// In es, this message translates to:
-  /// **'Pan y zoom libres. Primer toque = A, segundo = B. El círculo es la zona de detección de vueltas.'**
+  /// **'Mueve y acerca el mapa. Primer toque = A, segundo = B. El círculo es donde se cuenta la vuelta.'**
   String get loopMarkMapHelp;
 
   /// No description provided for @loopRemapA.
@@ -1583,7 +1583,7 @@ abstract class AppLocalizations {
   /// No description provided for @loopArmed.
   ///
   /// In es, this message translates to:
-  /// **'Auto-vuelta activada'**
+  /// **'Listo para contar vueltas'**
   String get loopArmed;
 
   /// No description provided for @lapCountLabel.
@@ -1631,13 +1631,13 @@ abstract class AppLocalizations {
   /// No description provided for @proUnlockBody.
   ///
   /// In es, this message translates to:
-  /// **'Segmenta cualquier tramo, detalle completo de curvas, precisión + notas, frenadas completas y sin anuncios.'**
+  /// **'Elige cualquier tramo, detalle completo de curvas, notas de GPS, frenadas completas y sin anuncios.'**
   String get proUnlockBody;
 
   /// No description provided for @proFeatureSegment.
   ///
   /// In es, this message translates to:
-  /// **'Zoom de segmento — elige cualquier tramo del ride'**
+  /// **'Acercar cualquier parte del recorrido'**
   String get proFeatureSegment;
 
   /// No description provided for @proFeatureBrakes.
@@ -1673,7 +1673,7 @@ abstract class AppLocalizations {
   /// No description provided for @proToggleHelp.
   ///
   /// In es, this message translates to:
-  /// **'Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión Gratis.'**
+  /// **'Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión gratis.'**
   String get proToggleHelp;
 
   /// No description provided for @brakesProTeaser.
@@ -1685,7 +1685,7 @@ abstract class AppLocalizations {
   /// No description provided for @segmentProLocked.
   ///
   /// In es, this message translates to:
-  /// **'Elegir un tramo del ride es una función Pro.'**
+  /// **'Elegir un tramo del recorrido es una función Pro.'**
   String get segmentProLocked;
 
   /// No description provided for @adPlaceholder.
@@ -1709,13 +1709,13 @@ abstract class AppLocalizations {
   /// No description provided for @routeTabLoop.
   ///
   /// In es, this message translates to:
-  /// **'Loop'**
+  /// **'Vueltas'**
   String get routeTabLoop;
 
   /// No description provided for @routeLoopModuleHelp.
   ///
   /// In es, this message translates to:
-  /// **'Los loops pertenecen a esta ruta. Detecta vueltas cerradas en rides etiquetados, o marca tú el inicio (A) y el fin (B) en el mapa.'**
+  /// **'Las vueltas pertenecen a esta ruta. Encuentra vueltas cerradas en recorridos marcados, o marca tú el inicio (A) y el fin (B) en el mapa.'**
   String get routeLoopModuleHelp;
 
   /// No description provided for @routeLoopDefine.
@@ -1733,31 +1733,31 @@ abstract class AppLocalizations {
   /// No description provided for @routeLoopSavedTitle.
   ///
   /// In es, this message translates to:
-  /// **'Loops guardados'**
+  /// **'Vueltas guardadas'**
   String get routeLoopSavedTitle;
 
   /// No description provided for @routeLoopEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay loops — detecta desde rides o marca A y B en el mapa.'**
+  /// **'Aún no hay vueltas — encuéntralas en recorridos o marca A y B en el mapa.'**
   String get routeLoopEmpty;
 
   /// No description provided for @routeLoopDetectedTitle.
   ///
   /// In es, this message translates to:
-  /// **'Candidatos detectados'**
+  /// **'Vueltas posibles'**
   String get routeLoopDetectedTitle;
 
   /// No description provided for @routeLoopDetectedEmpty.
   ///
   /// In es, this message translates to:
-  /// **'No hay vueltas cerradas en los rides etiquetados. Rueda el circuito e intenta de nuevo.'**
+  /// **'No hay vueltas cerradas en los recorridos marcados. Rueda el circuito e inténtalo de nuevo.'**
   String get routeLoopDetectedEmpty;
 
   /// No description provided for @routeLoopDetectedHint.
   ///
   /// In es, this message translates to:
-  /// **'Trayecto cerrado inferido por GPS — guárdalo para auto-vuelta.'**
+  /// **'Camino cerrado según el GPS — guárdalo para que cuente las vueltas solo.'**
   String get routeLoopDetectedHint;
 
   /// No description provided for @routeLoopSave.
@@ -1769,13 +1769,13 @@ abstract class AppLocalizations {
   /// No description provided for @routeLoopSaved.
   ///
   /// In es, this message translates to:
-  /// **'Loop guardado en esta ruta'**
+  /// **'Vuelta guardada en esta ruta'**
   String get routeLoopSaved;
 
   /// No description provided for @routeLoopManualName.
   ///
   /// In es, this message translates to:
-  /// **'Loop manual'**
+  /// **'Vuelta a mano'**
   String get routeLoopManualName;
 
   /// No description provided for @routeLoopPrimary.
@@ -1793,7 +1793,7 @@ abstract class AppLocalizations {
   /// No description provided for @routeLoopStartRide.
   ///
   /// In es, this message translates to:
-  /// **'Iniciar ride en loop'**
+  /// **'Iniciar recorrido de vueltas'**
   String get routeLoopStartRide;
 
   /// No description provided for @routeLoopSourceManual.
@@ -1817,7 +1817,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteRouteBody.
   ///
   /// In es, this message translates to:
-  /// **'Se borrará esta ruta, sus loops y se desvincularán los rides. Si está compartida, desaparece para todos.'**
+  /// **'Se borra esta ruta, sus vueltas y se desmarcan los recorridos. Si está compartida, desaparece para todos.'**
   String get deleteRouteBody;
 
   /// No description provided for @routeDeleted.
@@ -1829,37 +1829,37 @@ abstract class AppLocalizations {
   /// No description provided for @deleteLoop.
   ///
   /// In es, this message translates to:
-  /// **'Eliminar loop'**
+  /// **'Eliminar vuelta'**
   String get deleteLoop;
 
   /// No description provided for @deleteLoopBody.
   ///
   /// In es, this message translates to:
-  /// **'Se elimina este loop. Si era el principal, se quitan también los puntos A/B de la ruta (incl. amigos al sincronizar).'**
+  /// **'Se elimina esta vuelta. Si era la principal, también se quitan los puntos A/B de la ruta (los amigos lo ven al sincronizar).'**
   String get deleteLoopBody;
 
   /// No description provided for @loopDeleted.
   ///
   /// In es, this message translates to:
-  /// **'Loop eliminado'**
+  /// **'Vuelta eliminada'**
   String get loopDeleted;
 
   /// No description provided for @deleteAllLoops.
   ///
   /// In es, this message translates to:
-  /// **'Quitar todos los loops'**
+  /// **'Quitar todas las vueltas'**
   String get deleteAllLoops;
 
   /// No description provided for @deleteAllLoopsBody.
   ///
   /// In es, this message translates to:
-  /// **'Se borran todos los loops de esta ruta y los puntos A/B. Los amigos verán la ruta sin loop al sincronizar.'**
+  /// **'Se borran todas las vueltas de esta ruta y los puntos A/B. Los amigos verán la ruta sin vueltas al sincronizar.'**
   String get deleteAllLoopsBody;
 
   /// No description provided for @loopsCleared.
   ///
   /// In es, this message translates to:
-  /// **'Loops eliminados'**
+  /// **'Vueltas eliminadas'**
   String get loopsCleared;
 
   /// No description provided for @deleteConfirm.
@@ -1871,19 +1871,19 @@ abstract class AppLocalizations {
   /// No description provided for @deleteRide.
   ///
   /// In es, this message translates to:
-  /// **'Eliminar ride'**
+  /// **'Eliminar recorrido'**
   String get deleteRide;
 
   /// No description provided for @deleteRideBody.
   ///
   /// In es, this message translates to:
-  /// **'Se borrará permanentemente el ride y su línea GPS de este teléfono (y de la nube si estaba sincronizado).'**
+  /// **'Se borra el recorrido y su línea GPS de este teléfono (y de la nube si estaba sincronizado).'**
   String get deleteRideBody;
 
   /// No description provided for @rideDeleted.
   ///
   /// In es, this message translates to:
-  /// **'Ride eliminado'**
+  /// **'Recorrido eliminado'**
   String get rideDeleted;
 
   /// No description provided for @accountSection.
@@ -1895,13 +1895,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountGuest.
   ///
   /// In es, this message translates to:
-  /// **'Rider invitado'**
+  /// **'Invitado'**
   String get accountGuest;
 
   /// No description provided for @accountGuestBody.
   ///
   /// In es, this message translates to:
-  /// **'Estás en sesión de invitado. Inicia sesión para conservar tu perfil entre dispositivos — tus rides actuales se vinculan cuando es posible.'**
+  /// **'Estás como invitado. Inicia sesión para guardar tu perfil en otros teléfonos — tus recorridos se vinculan cuando se puede.'**
   String get accountGuestBody;
 
   /// No description provided for @accountSignedIn.
@@ -1943,49 +1943,49 @@ abstract class AppLocalizations {
   /// No description provided for @rideLoopHelp.
   ///
   /// In es, this message translates to:
-  /// **'Encuentra vueltas cerradas en el GPS de este ride, o marca inicio (A) y fin (B) en el mapa. Al guardar se crea/usa una ruta para auto-vuelta después.'**
+  /// **'Encuentra vueltas cerradas en el GPS de este recorrido, o marca inicio (A) y fin (B) en el mapa. Al guardar se crea o usa una ruta para contar vueltas después.'**
   String get rideLoopHelp;
 
   /// No description provided for @rideLoopEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay loops guardados en la ruta de este ride.'**
+  /// **'Aún no hay vueltas guardadas en la ruta de este recorrido.'**
   String get rideLoopEmpty;
 
   /// No description provided for @rideLoopDetectedEmpty.
   ///
   /// In es, this message translates to:
-  /// **'No hay vuelta cerrada en este ride. Prueba Marcar A / B en el mapa.'**
+  /// **'No hay vuelta cerrada en este recorrido. Prueba Marcar A / B en el mapa.'**
   String get rideLoopDetectedEmpty;
 
   /// No description provided for @rideLoopNeedPoints.
   ///
   /// In es, this message translates to:
-  /// **'No hay suficientes puntos GPS para marcar un loop.'**
+  /// **'No hay suficientes puntos GPS para marcar una vuelta.'**
   String get rideLoopNeedPoints;
 
   /// No description provided for @rideLoopSaveFirst.
   ///
   /// In es, this message translates to:
-  /// **'Guarda un loop primero — eso crea la ruta.'**
+  /// **'Guarda una vuelta primero — eso crea la ruta.'**
   String get rideLoopSaveFirst;
 
   /// No description provided for @rideLoopOpenRoute.
   ///
   /// In es, this message translates to:
-  /// **'Abrir ruta (vueltas + loops)'**
+  /// **'Abrir ruta (vueltas)'**
   String get rideLoopOpenRoute;
 
   /// No description provided for @syncCloudRides.
   ///
   /// In es, this message translates to:
-  /// **'Sincronizar rides con la nube'**
+  /// **'Sincronizar recorridos con la nube'**
   String get syncCloudRides;
 
   /// No description provided for @syncCloudRidesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Sube los rides terminados y descarga a este teléfono los rides del Garage y las sesiones de Lean Lab de esta cuenta.'**
+  /// **'Sube los recorridos terminados y descarga a este teléfono los del garaje y las sesiones de Lab de inclinación de esta cuenta.'**
   String get syncCloudRidesHelp;
 
   /// No description provided for @syncCloudRidesDone.
@@ -1997,7 +1997,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncCloudRidesPulled.
   ///
   /// In es, this message translates to:
-  /// **'Descargados {rides} rides, {lean} Lean Lab'**
+  /// **'Descargados {rides} recorridos, {lean} Lab de inclinación'**
   String syncCloudRidesPulled(int rides, int lean);
 
   /// No description provided for @playStoreUpdatesOnly.
@@ -2009,55 +2009,55 @@ abstract class AppLocalizations {
   /// No description provided for @labSection.
   ///
   /// In es, this message translates to:
-  /// **'Lab (experimental)'**
+  /// **'Lab (pruebas)'**
   String get labSection;
 
   /// No description provided for @labAdventureCameraHelp.
   ///
   /// In es, this message translates to:
-  /// **'Obturador GoPro opcional sincronizado con rides. Apagado por defecto — no cambia el GPS.'**
+  /// **'GoPro opcional junto con el recorrido. Apagada por defecto — el GPS no cambia.'**
   String get labAdventureCameraHelp;
 
   /// No description provided for @labAdventureCameraEnable.
   ///
   /// In es, this message translates to:
-  /// **'Cámara adventure'**
+  /// **'Cámara de aventura'**
   String get labAdventureCameraEnable;
 
   /// No description provided for @labAdventureCameraEnableHelp.
   ///
   /// In es, this message translates to:
-  /// **'Activa el módulo de cámara lab en este teléfono'**
+  /// **'Activa las herramientas de cámara en este teléfono'**
   String get labAdventureCameraEnableHelp;
 
   /// No description provided for @labAdventureCameraSyncRide.
   ///
   /// In es, this message translates to:
-  /// **'Grabar con el ride'**
+  /// **'Grabar con el recorrido'**
   String get labAdventureCameraSyncRide;
 
   /// No description provided for @labAdventureCameraSyncRideHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inicia/detiene con toda la ruta. Si hay zonas de inicio en el mapa, ellas mandan — la cámara espera el punto de inicio.'**
+  /// **'Inicia y para con todo el recorrido. Si hay puntos de inicio en el mapa, la cámara espera hasta llegar a uno.'**
   String get labAdventureCameraSyncRideHelp;
 
   /// No description provided for @labAdventureCameraSyncPause.
   ///
   /// In es, this message translates to:
-  /// **'Seguir pausa auto'**
+  /// **'Seguir la pausa auto'**
   String get labAdventureCameraSyncPause;
 
   /// No description provided for @labAdventureCameraSyncPauseHelp.
   ///
   /// In es, this message translates to:
-  /// **'Pausa la cámara mientras la pausa auto de GPS está activa (opcional)'**
+  /// **'Para la cámara mientras la pausa auto del GPS está activa (opcional)'**
   String get labAdventureCameraSyncPauseHelp;
 
   /// No description provided for @labAdventureCameraBackend.
   ///
   /// In es, this message translates to:
-  /// **'Backend'**
+  /// **'Tipo de cámara'**
   String get labAdventureCameraBackend;
 
   /// No description provided for @labAdventureCameraBackendGoPro.
@@ -2087,7 +2087,7 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraTestHelp.
   ///
   /// In es, this message translates to:
-  /// **'Prueba manual del obturador — sin ride. Conecta primero (o usa Simular).'**
+  /// **'Prueba el disparo a mano — no hace falta un recorrido. Conecta primero (o usa Simular).'**
   String get labAdventureCameraTestHelp;
 
   /// No description provided for @labAdventureCameraTestStart.
@@ -2159,13 +2159,13 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraZonesEnable.
   ///
   /// In es, this message translates to:
-  /// **'Zonas inicio/fin en el mapa'**
+  /// **'Inicio/parada en el mapa'**
   String get labAdventureCameraZonesEnable;
 
   /// No description provided for @labAdventureCameraZonesEnableHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inicia/detiene al entrar en geocercas. Los puntos de inicio controlan la grabación (cámara apagada hasta llegar).'**
+  /// **'Inicia y para al entrar en zonas del mapa. La cámara se queda apagada hasta el punto de inicio.'**
   String get labAdventureCameraZonesEnableHelp;
 
   /// No description provided for @labAdventureCameraZonesEdit.
@@ -2219,19 +2219,19 @@ abstract class AppLocalizations {
   /// No description provided for @rideDeckTitle.
   ///
   /// In es, this message translates to:
-  /// **'Panel del ride'**
+  /// **'Iniciar recorrido'**
   String get rideDeckTitle;
 
   /// No description provided for @rideDeckHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca una vez, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Al congelar 0°, el ride arranca solo — no vuelves a tocar.'**
+  /// **'Toca una vez, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Cuando sientas vibrar y un beep, el 0° quedó guardado y el recorrido arranca — no vuelves a tocar.'**
   String get rideDeckHelp;
 
   /// No description provided for @startRideNow.
   ///
   /// In es, this message translates to:
-  /// **'Iniciar ride ahora'**
+  /// **'Iniciar recorrido ahora'**
   String get startRideNow;
 
   /// No description provided for @labAdventureCameraZoneStart.
@@ -2327,7 +2327,7 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraGroupSetupBody.
   ///
   /// In es, this message translates to:
-  /// **'1. Enciende cada GoPro y abre la tapa lateral (Bluetooth activo).\n2. En el teléfono, permite Bluetooth (y dispositivos cercanos) si lo pide.\n3. Toca Añadir GoPro — espera el escaneo y elige cada cámara.\n4. Déjalas activas en la lista (apaga el interruptor para omitir una).\n5. Toca Conectar para enlazar todo el grupo.\n6. Inicia un ride (o usa zonas del mapa / auto-grabar agresivo) — el obturador arranca/para en todas las cámaras activas.\n7. En la pantalla del ride, CAM 2/2 significa que ambas están grabando.\n\nConsejos: acerca el teléfono a las cámaras en el primer enlace. Si una solo enciende y no graba, Conecta de nuevo y luego inicia el ride. Si una falla, las demás siguen.'**
+  /// **'1. Enciende cada GoPro y abre la tapa lateral (Bluetooth activo).\n2. En el teléfono, permite Bluetooth (y dispositivos cercanos) si lo pide.\n3. Toca Añadir GoPro — espera el escaneo y elige cada cámara.\n4. Déjalas activas en la lista (apaga el interruptor para omitir una).\n5. Toca Conectar para enlazar todo el grupo.\n6. Inicia un recorrido (o usa zonas del mapa / auto-grabar agresivo) — el disparo arranca/para en todas las cámaras activas.\n7. En la pantalla del recorrido, CAM 2/2 significa que ambas están grabando.\n\nConsejos: acerca el teléfono a las cámaras en el primer enlace. Si una solo enciende y no graba, Conecta de nuevo y luego inicia el recorrido. Si una falla, las demás siguen.'**
   String get labAdventureCameraGroupSetupBody;
 
   /// No description provided for @labAdventureCameraScenariosTitle.
@@ -2345,7 +2345,7 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraScenarioZonesBody.
   ///
   /// In es, this message translates to:
-  /// **'ON: Cámara adventure · Zonas inicio/fin en el mapa (coloca Inicio + Parada) · cámaras en el grupo.\nOFF: Grabar con el ride · Auto-grabar conducción agresiva · Seguir pausa auto.\n\nNota: estas son zonas de cámara del Lab — no los puntos A/B de vueltas de la ruta.'**
+  /// **'ON: Cámara de aventura · Zonas inicio/fin en el mapa (coloca Inicio + Parada) · cámaras en el grupo.\nOFF: Grabar con el recorrido · Auto-grabar conducción agresiva · Seguir pausa auto.\n\nNota: estas son zonas de cámara del Lab — no los puntos A/B de vueltas de la ruta.'**
   String get labAdventureCameraScenarioZonesBody;
 
   /// No description provided for @labAdventureCameraScenarioZonesApply.
@@ -2363,7 +2363,7 @@ abstract class AppLocalizations {
   /// No description provided for @labAdventureCameraScenarioAggressiveBody.
   ///
   /// In es, this message translates to:
-  /// **'ON: Cámara adventure · Auto-grabar conducción agresiva · cámaras en el grupo.\nOFF: Grabar con el ride · Zonas inicio/fin en el mapa · Seguir pausa auto.'**
+  /// **'ON: Cámara de aventura · Auto-grabar conducción agresiva · cámaras en el grupo.\nOFF: Grabar con el recorrido · Zonas inicio/fin en el mapa · Seguir pausa auto.'**
   String get labAdventureCameraScenarioAggressiveBody;
 
   /// No description provided for @labAdventureCameraScenarioAggressiveApply.
@@ -2375,25 +2375,25 @@ abstract class AppLocalizations {
   /// No description provided for @armAutoNoRouteHint.
   ///
   /// In es, this message translates to:
-  /// **'Armado — al moverte se inicia un recorrido en el Garaje.'**
+  /// **'Listo — al rodar se inicia un recorrido en el garaje.'**
   String get armAutoNoRouteHint;
 
   /// No description provided for @freezeThenArmHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca una vez, coloca el teléfono, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado. Luego bloquea la pantalla — al arrancar se inicia el ride. No vuelves a tocar.'**
+  /// **'Toca una vez, coloca el teléfono, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado. Luego bloquea la pantalla — al arrancar se inicia el recorrido. No vuelves a tocar.'**
   String get freezeThenArmHelp;
 
   /// No description provided for @armAutoRouteArmed.
   ///
   /// In es, this message translates to:
-  /// **'Armado — al arrancar se inicia el recorrido'**
+  /// **'Listo — al arrancar se inicia el recorrido'**
   String get armAutoRouteArmed;
 
   /// No description provided for @armAutoRouteArmedNamed.
   ///
   /// In es, this message translates to:
-  /// **'Armado para «{name}» — al arrancar el ride queda en esa ruta'**
+  /// **'Listo para «{name}» — el recorrido se guarda en esa ruta'**
   String armAutoRouteArmedNamed(String name);
 
   /// No description provided for @couldNotLoadRides.
@@ -2567,7 +2567,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupRidesBody.
   ///
   /// In es, this message translates to:
-  /// **'Crea una rodada para Tapalpa, Moyahua o donde sea. Invita riders y comparte GPS en vivo, tracks y fotos solo si cada uno lo activa.'**
+  /// **'Crea una rodada para Tapalpa, Moyahua o donde sea. Invita riders y comparte GPS en vivo, líneas y fotos solo si cada uno lo activa.'**
   String get groupRidesBody;
 
   /// No description provided for @createRodada.
@@ -2831,13 +2831,13 @@ abstract class AppLocalizations {
   /// No description provided for @yourSharing.
   ///
   /// In es, this message translates to:
-  /// **'Tu compartición'**
+  /// **'Qué compartes'**
   String get yourSharing;
 
   /// No description provided for @sharingDefaultsHelp.
   ///
   /// In es, this message translates to:
-  /// **'Apagado por defecto. Si lo activas, envía ubicación cada 5 minutos durante la rodada (reintenta cada 1 minuto si falla).'**
+  /// **'Apagado hasta que lo actives. Luego se envía tu ubicación cada 5 minutos durante toda la rodada (reintenta cada 1 minuto si falla).'**
   String get sharingDefaultsHelp;
 
   /// No description provided for @notRodadaMember.
@@ -2861,7 +2861,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareTrackAfterRides.
   ///
   /// In es, this message translates to:
-  /// **'Compartir mi track después de recorridos'**
+  /// **'Compartir mi línea después de recorrer'**
   String get shareTrackAfterRides;
 
   /// No description provided for @rodadaRiders.
@@ -2903,7 +2903,7 @@ abstract class AppLocalizations {
   /// No description provided for @memberTrackOn.
   ///
   /// In es, this message translates to:
-  /// **'track activo'**
+  /// **'línea activa'**
   String get memberTrackOn;
 
   /// No description provided for @sharingLocationBanner.
@@ -2969,7 +2969,7 @@ abstract class AppLocalizations {
   /// No description provided for @sharedTracksHelp.
   ///
   /// In es, this message translates to:
-  /// **'Tracks compartidos de miembros que lo activaron. El GPS denso queda en cada teléfono.'**
+  /// **'Líneas de quienes activaron compartir. El GPS detallado se queda en cada teléfono.'**
   String get sharedTracksHelp;
 
   /// No description provided for @linkMyRide.
@@ -3005,7 +3005,7 @@ abstract class AppLocalizations {
   /// No description provided for @noTrackPoints.
   ///
   /// In es, this message translates to:
-  /// **'Sin puntos de track'**
+  /// **'Sin puntos de la línea'**
   String get noTrackPoints;
 
   /// No description provided for @radioAllGood.
@@ -3083,13 +3083,13 @@ abstract class AppLocalizations {
   /// No description provided for @skillCoach.
   ///
   /// In es, this message translates to:
-  /// **'Coach de habilidad'**
+  /// **'Tips de manejo'**
   String get skillCoach;
 
   /// No description provided for @skillCurvasRated.
   ///
   /// In es, this message translates to:
-  /// **'{count} curvas calificadas · huellas para comparar'**
+  /// **'{count} curvas calificadas · sirve para comparar con amigos'**
   String skillCurvasRated(int count);
 
   /// No description provided for @improveNextRide.
@@ -3101,55 +3101,55 @@ abstract class AppLocalizations {
   /// No description provided for @openCornerLab.
   ///
   /// In es, this message translates to:
-  /// **'Abrir corner lab'**
+  /// **'Abrir lab de curvas'**
   String get openCornerLab;
 
   /// No description provided for @skillTipNoCurvas.
   ///
   /// In es, this message translates to:
-  /// **'No se detectaron curvas sólidas — recorre una sección sinuosa para tener una base.'**
+  /// **'No se detectaron curvas claras — recorre un tramo sinuoso para tener una base.'**
   String get skillTipNoCurvas;
 
   /// No description provided for @skillTipEntryHot.
   ///
   /// In es, this message translates to:
-  /// **'Entrada caliente ({entry}→{apex} km/h). Frena antes del tip-in.'**
+  /// **'Entraste rápido ({entry}→{apex} km/h). Frena antes de inclinar.'**
   String skillTipEntryHot(String entry, String apex);
 
   /// No description provided for @skillTipModerateSpeedDrop.
   ///
   /// In es, this message translates to:
-  /// **'Caída moderada de velocidad al apex — trail brake un poco más.'**
+  /// **'Bajaste bien de velocidad al centro — frena un poco más al inclinar.'**
   String get skillTipModerateSpeedDrop;
 
   /// No description provided for @skillTipLittleSpeedScrub.
   ///
   /// In es, this message translates to:
-  /// **'Poca reducción de velocidad — confirma que no llevas demasiada en mitad de curva.'**
+  /// **'Casi no bajaste de velocidad — checa que no lleves de más a media curva.'**
   String get skillTipLittleSpeedScrub;
 
   /// No description provided for @skillTipWeakExitDrive.
   ///
   /// In es, this message translates to:
-  /// **'Salida débil — abre gas antes cuando la inclinación empiece a bajar.'**
+  /// **'Salida floja — abre el gas más pronto cuando la moto se empiece a parar.'**
   String get skillTipWeakExitDrive;
 
   /// No description provided for @skillTipPeakLeanNotAtApex.
   ///
   /// In es, this message translates to:
-  /// **'Inclinación máxima no en el apex — inclina antes para estar listo en el apex.'**
+  /// **'La inclinación máxima no fue en el punto más cerrado — inclina antes para llegar listo al centro.'**
   String get skillTipPeakLeanNotAtApex;
 
   /// No description provided for @skillTipLowLeanBigHeading.
   ///
   /// In es, this message translates to:
-  /// **'Gran cambio de rumbo con poca inclinación — revisa el sensor o inclínate más.'**
+  /// **'Mucho giro con poca inclinación — checa que el teléfono esté bien sujeto, o inclínate más.'**
   String get skillTipLowLeanBigHeading;
 
   /// No description provided for @skillTipSolidCorner.
   ///
   /// In es, this message translates to:
-  /// **'Curva sólida — mantén este ritmo de entrada/apex.'**
+  /// **'Buena curva — mantén este ritmo de entrada y centro.'**
   String get skillTipSolidCorner;
 
   /// No description provided for @skillHighlightBest.
@@ -3251,7 +3251,7 @@ abstract class AppLocalizations {
   /// No description provided for @skillLabTapHint.
   ///
   /// In es, this message translates to:
-  /// **'Toca para ver errores y cómo mejorar'**
+  /// **'Toca para ver errores y cómo mejorarlos'**
   String get skillLabTapHint;
 
   /// No description provided for @skillLabTapHintEmpty.
@@ -3269,7 +3269,7 @@ abstract class AppLocalizations {
   /// No description provided for @skillLabFocusHelp.
   ///
   /// In es, this message translates to:
-  /// **'Primero las curvas con peor puntaje. Las barras son entrada → ápice → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma sección de curva con un amigo.'**
+  /// **'Primero las curvas con peor puntaje. Las barras son entrada → centro → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma curva con un amigo.'**
   String get skillLabFocusHelp;
 
   /// No description provided for @bikeSection.
@@ -3287,19 +3287,19 @@ abstract class AppLocalizations {
   /// No description provided for @bikeSelectHelp.
   ///
   /// In es, this message translates to:
-  /// **'Se usa en Lean Lab y contexto de recorridos'**
+  /// **'Se usa en el Lab de inclinación y en tus recorridos'**
   String get bikeSelectHelp;
 
   /// No description provided for @bikePickerTitle.
   ///
   /// In es, this message translates to:
-  /// **'Garage'**
+  /// **'Garaje'**
   String get bikePickerTitle;
 
   /// No description provided for @bikePickerHelp.
   ///
   /// In es, this message translates to:
-  /// **'Fabricante, luego año, luego modelo.'**
+  /// **'Marca, luego año, luego modelo.'**
   String get bikePickerHelp;
 
   /// No description provided for @bikeClear.
@@ -3359,7 +3359,7 @@ abstract class AppLocalizations {
   /// No description provided for @bikeStepMake.
   ///
   /// In es, this message translates to:
-  /// **'Fabricante'**
+  /// **'Marca'**
   String get bikeStepMake;
 
   /// No description provided for @bikeStepYear.
@@ -3377,7 +3377,7 @@ abstract class AppLocalizations {
   /// No description provided for @bikeSearchMake.
   ///
   /// In es, this message translates to:
-  /// **'Buscar fabricante'**
+  /// **'Buscar marca'**
   String get bikeSearchMake;
 
   /// No description provided for @bikeSearchYear.
@@ -3401,7 +3401,7 @@ abstract class AppLocalizations {
   /// No description provided for @bikeAllMakes.
   ///
   /// In es, this message translates to:
-  /// **'Todos los fabricantes'**
+  /// **'Todas las marcas'**
   String get bikeAllMakes;
 
   /// No description provided for @bikeCustomModel.
@@ -3431,7 +3431,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabIntro.
   ///
   /// In es, this message translates to:
-  /// **'Protocolo para pilots en Bugambilias — ambos sentidos, con elevación. Calibra vertical, rueda y etiqueta curvas para pulir el lean.'**
+  /// **'Bugambilias en ambos sentidos, con subidas. Guarda el 0° con la moto derecha, rueda y marca las curvas para mejorar la inclinación.'**
   String get leanLabIntro;
 
   /// No description provided for @leanLabCircuitName.
@@ -3467,7 +3467,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabProtoOutboundHelp.
   ///
   /// In es, this message translates to:
-  /// **'Hacia la plaza, mount al centro. Captura lean en subida/bajada.'**
+  /// **'Hacia la plaza, teléfono en su lugar de siempre. Captura inclinación en subida y bajada.'**
   String get leanLabProtoOutboundHelp;
 
   /// No description provided for @leanLabProtoReturn.
@@ -3479,19 +3479,19 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabProtoReturnHelp.
   ///
   /// In es, this message translates to:
-  /// **'Sentido contrario, mount al centro. Mismas curvas, lados invertidos.'**
+  /// **'El otro sentido, mismo lugar del teléfono. Mismas curvas, lados al revés.'**
   String get leanLabProtoReturnHelp;
 
   /// No description provided for @leanLabProtoPocket.
   ///
   /// In es, this message translates to:
-  /// **'Mount A/B — bolsillo'**
+  /// **'Teléfono en el bolsillo'**
   String get leanLabProtoPocket;
 
   /// No description provided for @leanLabProtoPocketHelp.
   ///
   /// In es, this message translates to:
-  /// **'Mismo circuito con teléfono en bolsillo para aprender el sesgo del mount.'**
+  /// **'El mismo circuito con el teléfono en el bolsillo, para ver cómo cambia la inclinación.'**
   String get leanLabProtoPocketHelp;
 
   /// No description provided for @leanLabProtoFree.
@@ -3503,7 +3503,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabProtoFreeHelp.
   ///
   /// In es, this message translates to:
-  /// **'Cualquier sentido en este circuito con calib + etiquetas de curva.'**
+  /// **'Cualquier sentido en este circuito. Guarda el 0° y luego marca las curvas.'**
   String get leanLabProtoFreeHelp;
 
   /// No description provided for @leanLabStartProtocol.
@@ -3527,13 +3527,13 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabPrepTitle.
   ///
   /// In es, this message translates to:
-  /// **'Prep Lean Lab'**
+  /// **'Preparar Lab de inclinación'**
   String get leanLabPrepTitle;
 
   /// No description provided for @leanLabPrepHelp.
   ///
   /// In es, this message translates to:
-  /// **'Elige mount y pose. Congela g0 con el teléfono ya en ese mount — los sensores eligen roll o pitch. Luego arranca la vuelta.'**
+  /// **'Di cómo va el teléfono y guarda el 0° con él ya en su lugar. Después arranca la vuelta.'**
   String get leanLabPrepHelp;
 
   /// No description provided for @leanLabPoseQ.
@@ -3581,19 +3581,19 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCalibTitle.
   ///
   /// In es, this message translates to:
-  /// **'Calibración vertical'**
+  /// **'Guardar 0° (moto derecha)'**
   String get leanLabCalibTitle;
 
   /// No description provided for @leanLabCalibHelp.
   ///
   /// In es, this message translates to:
-  /// **'Moto vertical, teléfono ya montado. Sin tocarlo, 4 segundos — congela gravedad (g0). El vector lean debe quedar cerca de 0°.'**
+  /// **'Moto derecha, teléfono ya en su lugar. Sin tocarlo 4 segundos — así se guarda el 0°. La inclinación debe quedar cerca de 0°.'**
   String get leanLabCalibHelp;
 
   /// No description provided for @leanLabCalibHold.
   ///
   /// In es, this message translates to:
-  /// **'Sostener vertical 4s'**
+  /// **'Mantener derecha 4 s'**
   String get leanLabCalibHold;
 
   /// No description provided for @leanLabCalibHolding.
@@ -3611,7 +3611,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCalibPocketHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que 0° quedó congelado y el ride arrancó — no congeles en la mano.'**
+  /// **'Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado y el recorrido arrancó — no lo guardes en la mano.'**
   String get leanLabCalibPocketHelp;
 
   /// No description provided for @leanLabCalibPocketCountdown.
@@ -3635,25 +3635,25 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCalibPocketFail.
   ///
   /// In es, this message translates to:
-  /// **'No se quedó quieto. Colócalo de nuevo y reintenta.'**
+  /// **'No se quedó quieto. Colócalo de nuevo e inténtalo otra vez.'**
   String get leanLabCalibPocketFail;
 
   /// No description provided for @leanLabFreezeRedo.
   ///
   /// In es, this message translates to:
-  /// **'El teléfono ya va {n}° de vertical. Repite el freeze con la moto de verdad derecha.'**
+  /// **'El teléfono ya va {n}° de derecho. Vuelve a guardar el 0° con la moto bien parada.'**
   String leanLabFreezeRedo(String n);
 
   /// No description provided for @leanLabRawNeutral.
   ///
   /// In es, this message translates to:
-  /// **'Ángulo crudo del teléfono'**
+  /// **'Ángulo del teléfono'**
   String get leanLabRawNeutral;
 
   /// No description provided for @leanLabFrozenNeutral.
   ///
   /// In es, this message translates to:
-  /// **'Neutro congelado'**
+  /// **'0° guardado'**
   String get leanLabFrozenNeutral;
 
   /// No description provided for @leanLabStartRide.
@@ -3665,37 +3665,37 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabReviewTitle.
   ///
   /// In es, this message translates to:
-  /// **'Etiquetar inclinación'**
+  /// **'Marcar inclinación'**
   String get leanLabReviewTitle;
 
   /// No description provided for @leanLabReviewHelp.
   ///
   /// In es, this message translates to:
-  /// **'En cada curva: ¿el lean de la app se sintió alto, bien o bajo? Se muestra la pendiente para corregir sesgo de subida/bajada.'**
+  /// **'En cada curva: ¿la inclinación de la app se sintió alta, bien o baja? Se muestra la pendiente para corregir subida y bajada.'**
   String get leanLabReviewHelp;
 
   /// No description provided for @leanLabReviewHelpMax.
   ///
   /// In es, this message translates to:
-  /// **'El lean máximo de la curva queda fijo arriba. Reproduce la curva para ver lean y mapa; salta al pico cuando quieras.'**
+  /// **'La inclinación máxima de la curva se queda arriba. Reproduce para ver inclinación y mapa; salta al pico cuando quieras.'**
   String get leanLabReviewHelpMax;
 
   /// No description provided for @leanLabMaxLean.
   ///
   /// In es, this message translates to:
-  /// **'Lean máximo'**
+  /// **'Inclinación máxima'**
   String get leanLabMaxLean;
 
   /// No description provided for @leanLabJumpToMax.
   ///
   /// In es, this message translates to:
-  /// **'Ir al lean máximo'**
+  /// **'Ir a la inclinación máxima'**
   String get leanLabJumpToMax;
 
   /// No description provided for @leanLabLiveLean.
   ///
   /// In es, this message translates to:
-  /// **'Lean en vivo'**
+  /// **'Inclinación en vivo'**
   String get leanLabLiveLean;
 
   /// No description provided for @leanLabAtPeak.
@@ -3707,7 +3707,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabMaxLeanGps.
   ///
   /// In es, this message translates to:
-  /// **'GPS donde ocurrió el lean máximo'**
+  /// **'GPS donde ocurrió la inclinación máxima'**
   String get leanLabMaxLeanGps;
 
   /// No description provided for @leanLabMaxLeanGpsA.
@@ -3743,7 +3743,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabNoTrackPoints.
   ///
   /// In es, this message translates to:
-  /// **'Este recorrido casi no tiene GPS en el teléfono. Abre Ajustes → Sincronizar rides con la nube (misma cuenta Google) y vuelve a intentar.'**
+  /// **'Este recorrido casi no tiene GPS en el teléfono. Abre Ajustes → Sincronizar recorridos con la nube (misma cuenta Google) y vuelve a intentar.'**
   String get leanLabNoTrackPoints;
 
   /// No description provided for @leanLabNoLeanData.
@@ -3755,7 +3755,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabAppLean.
   ///
   /// In es, this message translates to:
-  /// **'Lean app'**
+  /// **'Inclinación de la app'**
   String get leanLabAppLean;
 
   /// No description provided for @leanLabGrade.
@@ -3767,7 +3767,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabBiasQ.
   ///
   /// In es, this message translates to:
-  /// **'¿Cómo se sintió el lean de la app en el ápice?'**
+  /// **'¿Cómo se sintió la inclinación de la app en el centro de la curva?'**
   String get leanLabBiasQ;
 
   /// No description provided for @leanLabBiasAppHigh.
@@ -3815,73 +3815,73 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabSaveLabels.
   ///
   /// In es, this message translates to:
-  /// **'Guardar etiquetas'**
+  /// **'Guardar marcas de curvas'**
   String get leanLabSaveLabels;
 
   /// No description provided for @leanLabSettingsTile.
   ///
   /// In es, this message translates to:
-  /// **'Lab de inclinación (pilots)'**
+  /// **'Lab de inclinación (pruebas)'**
   String get leanLabSettingsTile;
 
   /// No description provided for @leanLabSettingsHelp.
   ///
   /// In es, this message translates to:
-  /// **'Protocolo Bugambilias · calib · elevación · verdad de curvas'**
+  /// **'Sesiones en Bugambilias · guardar 0° · pendientes · marcar curvas'**
   String get leanLabSettingsHelp;
 
   /// No description provided for @leanImuLabTitle.
   ///
   /// In es, this message translates to:
-  /// **'Lab IMU de inclinación'**
+  /// **'Lab de sensores de inclinación'**
   String get leanImuLabTitle;
 
   /// No description provided for @leanImuLabIntro.
   ///
   /// In es, this message translates to:
-  /// **'El mismo motor que producción. Congela vertical en el mount real, luego inclina — bike lean es la magnitud vectorial con el signo del canal ganador. El banner muestra pose (Vertical / Landscape / Flat) y el ganador.'**
+  /// **'La misma inclinación que en el recorrido. Guarda el 0° con el teléfono en su lugar real, luego inclina. El letrero muestra cómo va el teléfono.'**
   String get leanImuLabIntro;
 
   /// No description provided for @leanImuLabSettingsTile.
   ///
   /// In es, this message translates to:
-  /// **'Sensores IMU de lean'**
+  /// **'Sensores de inclinación'**
   String get leanImuLabSettingsTile;
 
   /// No description provided for @leanImuLabSettingsHelp.
   ///
   /// In es, this message translates to:
-  /// **'Estudia accel / gyro / mag / baro y el motor de lean según el mount'**
+  /// **'Mira los sensores y cómo se mide la inclinación'**
   String get leanImuLabSettingsHelp;
 
   /// No description provided for @leanImuLabFreeze.
   ///
   /// In es, this message translates to:
-  /// **'Congelar vertical'**
+  /// **'Guardar 0° ahora'**
   String get leanImuLabFreeze;
 
   /// No description provided for @leanImuLabReset.
   ///
   /// In es, this message translates to:
-  /// **'Reset'**
+  /// **'Reiniciar'**
   String get leanImuLabReset;
 
   /// No description provided for @leanImuLabFrozenHint.
   ///
   /// In es, this message translates to:
-  /// **'g0 está congelado. Bike lean debe ser ~0°. Inclina en cualquier dirección — el vector es el ángulo, el ganador da izquierda/derecha.'**
+  /// **'El 0° está guardado. La inclinación debe ser cerca de 0°. Inclina a cualquier lado — el número es el ángulo.'**
   String get leanImuLabFrozenHint;
 
   /// No description provided for @leanImuLabAnglesTitle.
   ///
   /// In es, this message translates to:
-  /// **'Candidatos de ángulo'**
+  /// **'Ángulos'**
   String get leanImuLabAnglesTitle;
 
   /// No description provided for @leanImuLabAnglesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Bike lean = producción. Vector = ángulo 3D desde el freeze. Roll sigue el lean si el teléfono está vertical; pitch si está plano. Fused = gyro + accel. Old App lean es la fórmula de eje más cercano que retiramos.'**
+  /// **'Inclinación de la moto es lo que usa el recorrido. El vector es el ángulo 3D desde el 0°. El roll se usa si el teléfono está derecho; el pitch si está plano.'**
   String get leanImuLabAnglesHelp;
 
   /// No description provided for @leanImuLabHistoryTitle.
@@ -3899,13 +3899,13 @@ abstract class AppLocalizations {
   /// No description provided for @leanImuLabNextTitle.
   ///
   /// In es, this message translates to:
-  /// **'Cómo leer esto para producción'**
+  /// **'Cómo leer esto'**
   String get leanImuLabNextTitle;
 
   /// No description provided for @leanImuLabNextHelp.
   ///
   /// In es, this message translates to:
-  /// **'Pared: vector a ~3° de un clinómetro, cualquier pose. Vertical: bike lean sigue fused roll. Plano: sigue pitch/vector. Si se mueve en el bolsillo: el banner cambia de pose en unos segundos. Mag (heading) es extra, no es lean de la moto.'**
+  /// **'Prueba en la pared: a unos 3° de un inclinómetro de verdad, en cualquier posición. Teléfono derecho: la inclinación sigue el roll. Teléfono plano: sigue el pitch. Si se mueve en el bolsillo, el letrero cambia en unos segundos.'**
   String get leanImuLabNextHelp;
 
   /// No description provided for @leanLabPastSessions.
@@ -3935,7 +3935,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCornerMeasures.
   ///
   /// In es, this message translates to:
-  /// **'Lean máximo por curva'**
+  /// **'Inclinación máxima por curva'**
   String get leanLabCornerMeasures;
 
   /// No description provided for @leanLabCoverage.
@@ -3965,7 +3965,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabEditConfigHelp.
   ///
   /// In es, this message translates to:
-  /// **'Corrige ida/vuelta, mount o pose si te equivocaste — los números de lean no cambian; las etiquetas se quedan hasta que las vuelvas a guardar.'**
+  /// **'Corrige ida/regreso, lugar del teléfono o posición si te equivocaste — los números de inclinación no cambian; las marcas se quedan hasta que las vuelvas a guardar.'**
   String get leanLabEditConfigHelp;
 
   /// No description provided for @leanLabSaveConfig.
@@ -4001,13 +4001,13 @@ abstract class AppLocalizations {
   /// No description provided for @skillReplayHelp.
   ///
   /// In es, this message translates to:
-  /// **'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el cursor en el mapa.'**
+  /// **'Mira cómo se rodó este tramo — inclinación, freno y velocidad van con el marcador en el mapa.'**
   String get skillReplayHelp;
 
   /// No description provided for @skillReplayCompareHelp.
   ///
   /// In es, this message translates to:
-  /// **'Ambas líneas se recortan al mismo tramo de carretera. Los cursores avanzan por distancia en la curva para comparar la línea, no el reloj.'**
+  /// **'Ambas líneas se recortan al mismo tramo. Los marcadores avanzan por distancia en la curva para comparar la línea, no el reloj.'**
   String get skillReplayCompareHelp;
 
   /// No description provided for @skillReplayCompareWith.
@@ -4049,7 +4049,7 @@ abstract class AppLocalizations {
   /// No description provided for @compareTrackUnavailable.
   ///
   /// In es, this message translates to:
-  /// **'No hay puntos de track para este recorrido.'**
+  /// **'No hay puntos de la línea para este recorrido.'**
   String get compareTrackUnavailable;
 
   /// No description provided for @compareOneTrackOnly.
@@ -4097,7 +4097,7 @@ abstract class AppLocalizations {
   /// No description provided for @engineLabelIntro.
   ///
   /// In es, this message translates to:
-  /// **'Solo beta — unos toques tras cada recorrido enseñan inclinación, curvas y frenos. Puedes omitir.'**
+  /// **'Unos toques después de cada recorrido ayudan a enseñar inclinación, curvas y frenos. Puedes omitir.'**
   String get engineLabelIntro;
 
   /// No description provided for @engineLabelSkip.
@@ -4121,7 +4121,7 @@ abstract class AppLocalizations {
   /// No description provided for @engineLabelMountCenter.
   ///
   /// In es, this message translates to:
-  /// **'Base (tanque / manillar)'**
+  /// **'En la moto (tanque / manubrio)'**
   String get engineLabelMountCenter;
 
   /// No description provided for @engineLabelMountLeftPocket.
@@ -4253,7 +4253,7 @@ abstract class AppLocalizations {
   /// No description provided for @gpsPreparing.
   ///
   /// In es, this message translates to:
-  /// **'Preparando GPS de alta precisión…'**
+  /// **'Buscando mejor señal GPS…'**
   String get gpsPreparing;
 
   /// No description provided for @gpsLookingSatellites.
@@ -4265,13 +4265,13 @@ abstract class AppLocalizations {
   /// No description provided for @gpsWarming.
   ///
   /// In es, this message translates to:
-  /// **'Calentando GPS…'**
+  /// **'Esperando mejor señal GPS…'**
   String get gpsWarming;
 
   /// No description provided for @gpsWarmingAcc.
   ///
   /// In es, this message translates to:
-  /// **'Calentando GPS (±{meters} m)…'**
+  /// **'Esperando GPS (±{meters} m)…'**
   String gpsWarmingAcc(String meters);
 
   /// No description provided for @gpsReadyAcc.
@@ -4319,7 +4319,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanAtPlayhead.
   ///
   /// In es, this message translates to:
-  /// **'En el cursor · offset neutral {degrees}°'**
+  /// **'En el marcador · desfase de 0° {degrees}°'**
   String leanAtPlayhead(String degrees);
 
   /// No description provided for @scrubPointMeta.

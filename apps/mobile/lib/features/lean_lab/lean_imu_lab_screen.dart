@@ -259,7 +259,7 @@ class _PoseEngineBanner extends StatelessWidget {
         ? '${sample.pose.label} · ${sample.winningChannel}'
             '${conf > 0 ? '  ·  conf ${conf.toStringAsFixed(2)}' : ''}'
             '  ·  up ${sample.upAxis}'
-        : 'Hold freeze upright  ·  up ${sample.upAxis}  ·  ${sample.pose.label}';
+        : '${context.l10n.leanImuLabFreeze}  ·  up ${sample.upAxis}  ·  ${sample.pose.label}';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -350,7 +350,7 @@ class _AngleGrid extends StatelessWidget {
       crossAxisSpacing: 8,
       children: [
         _MetricTile(
-          label: 'Bike lean',
+          label: context.l10n.bikeLean,
           value: sample.bikeLean ?? 0,
           hint: 'sign × vector  (production)',
           color: AppTheme.signal,
@@ -567,7 +567,7 @@ class _Legend extends StatelessWidget {
       spacing: 12,
       runSpacing: 4,
       children: [
-        chip(AppTheme.signal, 'Bike lean'),
+        chip(AppTheme.signal, context.l10n.bikeLean),
         chip(AppTheme.line, 'Vector'),
         chip(const Color(0xFF7AB8FF), 'Roll'),
         chip(AppTheme.lineHot, 'Pitch'),
