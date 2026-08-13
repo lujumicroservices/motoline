@@ -1,6 +1,7 @@
+import 'dart:collection';
 import 'dart:math' as math;
 
-/// Phone-frame IMU helpers for the Lean IMU Lab (study, not production lean).
+/// Phone-frame IMU helpers shared by the IMU lab and production LeanEngine.
 ///
 /// Android / sensors_plus convention (portrait):
 /// X right, Y up the screen, Z out of the screen. Gravity ≈ +Y when upright.
@@ -102,6 +103,275 @@ double? tiltCompensatedHeadingDeg(Vec3 mag, Vec3 gravity) {
   return h;
 }
 
+/// How the phone sits in the mount. Sensors pick this from g0 — not the
+/// rider's mount/pose chips (those are training labels).
+enum PhonePoseClass {
+  unknown,
+  verticalY,
+  landscapeX,
+  flatZ;
+
+  String get id => switch (this) {
+        PhonePoseClass.unknown => 'unknown',
+        PhonePoseClass.verticalY => 'vertical_y',
+        PhonePoseClass.landscapeX => 'landscape_x',
+        PhonePoseClass.flatZ => 'flat_z',
+      };
+
+  String get label => switch (this) {
+        PhonePoseClass.unknown => 'Unknown',
+        PhonePoseClass.verticalY => 'Vertical',
+        PhonePoseClass.landscapeX => 'Landscape',
+        PhonePoseClass.flatZ => 'Flat',
+      };
+
+  /// Euler used for left/right sign (magnitude always comes from vector).
+  String get winningChannel => switch (this) {
+        PhonePoseClass.unknown => 'none',
+        PhonePoseClass.verticalY => 'fusedRoll',
+        PhonePoseClass.landscapeX => 'fusedPitch',
+        PhonePoseClass.flatZ => 'flatSign',
+      };
+}
+
+PhonePoseClass poseFromUpAxis(String axis) {
+  if (axis == '+Y' || axis == '−Y' || axis == '-Y') {
+    return PhonePoseClass.verticalY;
+  }
+  if (axis == '+X' || axis == '−X' || axis == '-X') {
+    return PhonePoseClass.landscapeX;
+  }
+  if (axis == '+Z' || axis == '−Z' || axis == '-Z') {
+    return PhonePoseClass.flatZ;
+  }
+  return PhonePoseClass.unknown;
+}
+
+PhonePoseClass poseFromGravity(Vec3 g) => poseFromUpAxis(dominantUpAxis(g));
+
+/// Portrait-like roll/pitch rates from phone-frame gyro, remapped by pose.
+({double rollRate, double pitchRate}) gyroRatesForPose(
+  Vec3 gyroRad,
+  PhonePoseClass pose,
+) {
+  return switch (pose) {
+    PhonePoseClass.verticalY || PhonePoseClass.unknown => (
+        rollRate: gyroRad.y,
+        pitchRate: gyroRad.x,
+      ),
+    PhonePoseClass.landscapeX => (
+        rollRate: gyroRad.z,
+        pitchRate: gyroRad.y,
+      ),
+    PhonePoseClass.flatZ => (
+        rollRate: gyroRad.z,
+        pitchRate: gyroRad.x,
+      ),
+  };
+}
+
+/// Left/right sign when the phone is flat (screen up/down). Matches roll
+/// convention: negative X is positive lean.
+double flatLeanSign(Vec3 gravity, Vec3 g0) {
+  final g = gravity.normalized;
+  final r = g0.normalized;
+  final dx = g.x - r.x;
+  final dy = g.y - r.y;
+  if (dx.abs() >= dy.abs()) {
+    return dx == 0 ? 1.0 : -dx.sign;
+  }
+  return dy == 0 ? 1.0 : dy.sign;
+}
+
+double eulerSign(double degrees) => degrees == 0 ? 1.0 : degrees.sign;
+
+/// Production lean: vector magnitude (clinometer) × sign from the winning
+/// fused Euler (or flat-plane gravity for screen-up mounts).
+double signedBikeLean({
+  required Vec3 gravity,
+  required Vec3 g0,
+  required PhonePoseClass pose,
+  required double fusedRoll,
+  required double fusedPitch,
+  required double freezeRoll,
+  required double freezePitch,
+  int signFlip = 1,
+}) {
+  if (pose == PhonePoseClass.unknown) return 0;
+  final mag = gravityAngleDeg(gravity, g0);
+  final double signed;
+  switch (pose) {
+    case PhonePoseClass.verticalY:
+      signed = eulerSign(fusedRoll - freezeRoll) * mag;
+    case PhonePoseClass.landscapeX:
+      signed = eulerSign(fusedPitch - freezePitch) * mag;
+    case PhonePoseClass.flatZ:
+      signed = flatLeanSign(gravity, g0) * mag;
+    case PhonePoseClass.unknown:
+      signed = 0;
+  }
+  return (signed * signFlip).clamp(-70.0, 70.0);
+}
+
+Vec3 medianVec3(List<Vec3> samples) {
+  if (samples.isEmpty) return const Vec3(0, 0, 0);
+  final xs = samples.map((v) => v.x).toList()..sort();
+  final ys = samples.map((v) => v.y).toList()..sort();
+  final zs = samples.map((v) => v.z).toList()..sort();
+  return Vec3(_medianSorted(xs), _medianSorted(ys), _medianSorted(zs));
+}
+
+double _medianSorted(List<double> sorted) {
+  final mid = sorted.length ~/ 2;
+  if (sorted.length.isOdd) return sorted[mid];
+  return (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+double? pearsonCorr(List<double> x, List<double> y) {
+  if (x.length != y.length || x.length < 8) return null;
+  final n = x.length;
+  var sx = 0.0, sy = 0.0;
+  for (var i = 0; i < n; i++) {
+    sx += x[i];
+    sy += y[i];
+  }
+  final mx = sx / n;
+  final my = sy / n;
+  var num = 0.0, dx = 0.0, dy = 0.0;
+  for (var i = 0; i < n; i++) {
+    final a = x[i] - mx;
+    final b = y[i] - my;
+    num += a * b;
+    dx += a * a;
+    dy += b * b;
+  }
+  final den = math.sqrt(dx * dy);
+  if (den < 1e-9) return null;
+  return _clamp(num / den, -1, 1);
+}
+
+double sampleVariance(List<double> x) {
+  if (x.length < 2) return 0;
+  var sum = 0.0;
+  for (final v in x) {
+    sum += v;
+  }
+  final mean = sum / x.length;
+  var acc = 0.0;
+  for (final v in x) {
+    final d = v - mean;
+    acc += d * d;
+  }
+  return acc / (x.length - 1);
+}
+
+class ChannelTrackerSample {
+  const ChannelTrackerSample({
+    required this.fusedRollAbs,
+    required this.fusedPitchAbs,
+    required this.pitchAbs,
+    required this.vector,
+    required this.headingRateAbs,
+  });
+
+  final double fusedRollAbs;
+  final double fusedPitchAbs;
+  final double pitchAbs;
+  final double vector;
+  final double headingRateAbs;
+}
+
+class ChannelTrackerResult {
+  const ChannelTrackerResult({
+    required this.pose,
+    required this.confidence,
+    required this.inCurve,
+    this.corrRoll,
+    this.corrPitch,
+  });
+
+  final PhonePoseClass? pose;
+  final double confidence;
+  final bool inCurve;
+  final double? corrRoll;
+  final double? corrPitch;
+}
+
+/// ~4–6 s window: which |Euler| follows vector lean?
+/// Returns null pose when the road is straight / energy is noise — keep last.
+class ChannelTracker {
+  ChannelTracker({this.windowSize = 120});
+
+  final int windowSize;
+  final ListQueue<ChannelTrackerSample> _buf = ListQueue<ChannelTrackerSample>();
+
+  static const minCorr = 0.55;
+  static const minEnergy = 4.0;
+
+  void add(ChannelTrackerSample s) {
+    _buf.addLast(s);
+    while (_buf.length > windowSize) {
+      _buf.removeFirst();
+    }
+  }
+
+  void reset() => _buf.clear();
+
+  ChannelTrackerResult evaluate({required PhonePoseClass locked}) {
+    final n = _buf.length;
+    if (n < 24) {
+      return ChannelTrackerResult(pose: null, confidence: 0, inCurve: false);
+    }
+    final roll = [for (final s in _buf) s.fusedRollAbs];
+    final pitch = [for (final s in _buf) s.fusedPitchAbs];
+    final pitchRaw = [for (final s in _buf) s.pitchAbs];
+    final vec = [for (final s in _buf) s.vector];
+    var headingSum = 0.0;
+    for (final s in _buf) {
+      headingSum += s.headingRateAbs;
+    }
+    final inCurve = headingSum / n > 4;
+
+    final corrRoll = pearsonCorr(roll, vec);
+    final corrPitchFused = pearsonCorr(pitch, vec);
+    final corrPitchRaw = pearsonCorr(pitchRaw, vec);
+    final corrPitch = () {
+      final a = corrPitchFused?.abs() ?? 0;
+      final b = corrPitchRaw?.abs() ?? 0;
+      if (b > a) return corrPitchRaw;
+      return corrPitchFused;
+    }();
+
+    final eRoll = sampleVariance(roll);
+    final ePitch = math.max(sampleVariance(pitch), sampleVariance(pitchRaw));
+    final scoreRoll = (corrRoll?.abs() ?? 0) * eRoll;
+    final scorePitch = (corrPitch?.abs() ?? 0) * ePitch;
+
+    final rollOk = (corrRoll?.abs() ?? 0) > minCorr && eRoll > minEnergy;
+    final pitchOk = (corrPitch?.abs() ?? 0) > minCorr && ePitch > minEnergy;
+
+    PhonePoseClass? winner;
+    var conf = 0.0;
+    if (rollOk && (!pitchOk || scoreRoll >= scorePitch)) {
+      winner = PhonePoseClass.verticalY;
+      conf = corrRoll!.abs();
+    } else if (pitchOk) {
+      winner = locked == PhonePoseClass.flatZ
+          ? PhonePoseClass.flatZ
+          : PhonePoseClass.landscapeX;
+      conf = corrPitch!.abs();
+    }
+
+    return ChannelTrackerResult(
+      pose: winner,
+      confidence: conf,
+      inCurve: inCurve,
+      corrRoll: corrRoll,
+      corrPitch: corrPitch,
+    );
+  }
+}
+
 class ComplementaryAttitude {
   ComplementaryAttitude({this.alpha = 0.98});
 
@@ -121,6 +391,8 @@ class ComplementaryAttitude {
     required Vec3 accel,
     required Vec3 gyroRad,
     required double dtSec,
+    PhonePoseClass pose = PhonePoseClass.unknown,
+    double linearMag = 0,
   }) {
     final aRoll = rollDeg(accel);
     final aPitch = pitchDeg(accel);
@@ -131,8 +403,14 @@ class ComplementaryAttitude {
       return;
     }
     final dt = dtSec.clamp(0.001, 0.1);
-    // gyro.x ≈ pitch rate, gyro.y ≈ roll rate in phone frame (portrait).
-    roll = alpha * (roll + _deg(gyroRad.y) * dt) + (1 - alpha) * aRoll;
-    pitch = alpha * (pitch + _deg(gyroRad.x) * dt) + (1 - alpha) * aPitch;
+    var a = alpha;
+    if (linearMag < 1.5) {
+      a = 0.92;
+    } else if (linearMag > 4) {
+      a = 0.99;
+    }
+    final rates = gyroRatesForPose(gyroRad, pose);
+    roll = a * (roll + _deg(rates.rollRate) * dt) + (1 - a) * aRoll;
+    pitch = a * (pitch + _deg(rates.pitchRate) * dt) + (1 - a) * aPitch;
   }
 }

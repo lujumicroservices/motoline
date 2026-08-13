@@ -1,144 +1,70 @@
-import 'dart:async';
-import 'dart:collection';
+import '../lean_lab/lean_imu_math.dart';
+import 'lean_engine.dart';
 
-import 'package:sensors_plus/sensors_plus.dart';
-
-import '../analytics/lean_neutral.dart';
-import 'location_service.dart';
-
-/// High-rate accelerometer lean with automatic neutral (pocket) calibration.
+/// Production lean facade. Pose-aware [LeanEngine] underneath; same getters
+/// the recorder, prep screen, and live gauge already use.
 class LeanSensor {
-  StreamSubscription<AccelerometerEvent>? _sub;
-  double? _rawLeanDegrees;
-  double? _neutralDegrees;
-  double? _gx;
-  double? _gy;
-  double? _gz;
-  DateTime? _updatedAt;
-  DateTime? _calibStartedAt;
-  final ListQueue<double> _calibBuffer = ListQueue<double>();
-  bool _calibrated = false;
-  bool _locked = false;
+  LeanSensor({LeanEngine? engine}) : _engine = engine ?? LeanEngine();
 
-  /// Raw phone lean (mount/pocket absolute).
-  double? get rawLeanDegrees => _rawLeanDegrees;
+  final LeanEngine _engine;
 
-  /// Lean relative to inferred upright (0 = bike upright).
-  double? get leanDegrees {
-    final raw = _rawLeanDegrees;
-    if (raw == null) return null;
-    return relativeLeanDegrees(
-      rawLeanDegrees: raw,
-      neutralDegrees: _neutralDegrees ?? 0,
-    );
+  LeanEngine get engine => _engine;
+
+  /// Signed bike lean once g0 is frozen; null before that.
+  double? get rawLeanDegrees => _engine.leanDegrees;
+
+  /// Same as [rawLeanDegrees] — output is already relative to freeze.
+  double? get leanDegrees => _engine.leanDegrees;
+
+  /// Always 0 after a vector freeze (lean is already bike-relative).
+  double? get neutralDegrees => _engine.hasFreeze ? 0 : null;
+
+  bool get isCalibrated => _engine.isCalibrated;
+  bool get isLocked => _engine.isLocked;
+  DateTime? get updatedAt => _engine.latest?.at;
+  PhonePoseClass get pose => _engine.pose;
+  LeanEngineSnapshot? get snapshot => _engine.latest;
+  bool get isStill => _engine.isStill;
+  Vec3? get frozenGravity => _engine.frozenGravity;
+
+  void start() => _engine.start();
+
+  void stop() => _engine.stop();
+
+  /// Guided freeze: lock current / provided gravity as upright.
+  void lockUpright(Vec3 g0, {int signFlip = 1}) {
+    _engine.lockUpright(g0, signFlip: signFlip);
   }
 
-  double? get neutralDegrees => _neutralDegrees;
-  bool get isCalibrated => _calibrated;
-  bool get isLocked => _locked;
-  DateTime? get updatedAt => _updatedAt;
-
-  void start() {
-    _sub?.cancel();
-    _rawLeanDegrees = null;
-    _neutralDegrees = null;
-    _gx = null;
-    _gy = null;
-    _gz = null;
-    _calibrated = false;
-    _locked = false;
-    _calibBuffer.clear();
-    _calibStartedAt = DateTime.now();
-
-    _sub = accelerometerEventStream(
-      samplingPeriod: SensorInterval.gameInterval,
-    ).listen((event) {
-      // Low-pass the gravity vector first (clinometer-style), then angle.
-      // Raw accel includes vibration; filtering XYZ is more stable than
-      // filtering the derived angle alone.
-      _gx = _gx == null ? event.x : _gx! * 0.85 + event.x * 0.15;
-      _gy = _gy == null ? event.y : _gy! * 0.85 + event.y * 0.15;
-      _gz = _gz == null ? event.z : _gz! * 0.85 + event.z * 0.15;
-      final sample = leanFromAccelerometer(x: _gx!, y: _gy!, z: _gz!);
-      final previous = _rawLeanDegrees;
-      _rawLeanDegrees =
-          previous == null ? sample : previous * 0.6 + sample * 0.4;
-      _updatedAt = DateTime.now();
-      if (!_locked) {
-        _maybeFinishCalibration(_rawLeanDegrees!);
-      }
-    });
-  }
-
-  /// Freeze upright zero from a guided hold (Lean Lab). Stops auto-refine.
+  /// Legacy scalar lock. Freezes current gravity (lean is already 0 at g0).
   void lockNeutral(double degrees) {
-    _neutralDegrees = degrees;
-    _calibrated = true;
-    _locked = true;
-  }
-
-  /// Sample current raw lean into the calib buffer (guided hold).
-  void sampleForManualCalib() {
-    final raw = _rawLeanDegrees;
-    if (raw == null) return;
-    _calibBuffer.addLast(raw);
-    while (_calibBuffer.length > 120) {
-      _calibBuffer.removeFirst();
+    final _ = degrees;
+    final g0 = _engine.frozenGravity ?? _engine.latest?.gravity;
+    if (g0 != null) {
+      _engine.freezeUpright(g0: g0, signFlip: _engine.signFlip, lock: true);
+    } else {
+      _engine.freezeUpright(lock: true);
     }
   }
 
-  /// Median of the current calib buffer, or null if too few samples.
+  void sampleForManualCalib() => _engine.sampleForManualCalib();
+
   double? peekCalibNeutral({int minSamples = 25}) {
-    if (_calibBuffer.length < minSamples) return null;
-    return _median(_calibBuffer.toList(growable: false));
+    final g = _engine.peekCalibGravity(minSamples: minSamples);
+    if (g == null) return null;
+    return 0;
   }
 
-  void clearCalibBuffer() {
-    _calibBuffer.clear();
-    _calibStartedAt = DateTime.now();
-  }
+  Vec3? peekCalibGravity({int minSamples = 20}) =>
+      _engine.peekCalibGravity(minSamples: minSamples);
 
-  /// While nearly stopped, keep refining neutral (pocket settles).
+  void clearCalibBuffer() => _engine.clearCalibBuffer();
+
   void observeForNeutral({required double? speedKmh}) {
-    if (_locked) return;
-    final raw = _rawLeanDegrees;
-    if (raw == null) return;
-    if (speedKmh != null && speedKmh > 8) return;
-    if (_calibrated && _calibBuffer.length > 80) return;
-    _calibBuffer.addLast(raw);
-    while (_calibBuffer.length > 120) {
-      _calibBuffer.removeFirst();
-    }
-    if (_calibBuffer.length >= 40) {
-      _neutralDegrees = _median(_calibBuffer.toList(growable: false));
-      _calibrated = true;
-    }
+    _engine.observeForNeutral(speedKmh: speedKmh);
   }
 
-  void stop() {
-    _sub?.cancel();
-    _sub = null;
-  }
-
-  void _maybeFinishCalibration(double raw) {
-    if (_calibrated) return;
-    final started = _calibStartedAt;
-    if (started == null) return;
-    _calibBuffer.addLast(raw);
-    while (_calibBuffer.length > 120) {
-      _calibBuffer.removeFirst();
-    }
-    final elapsed = DateTime.now().difference(started);
-    if (elapsed >= const Duration(seconds: 3) && _calibBuffer.length >= 40) {
-      _neutralDegrees = _median(_calibBuffer.toList(growable: false));
-      _calibrated = true;
-    }
-  }
-
-  double _median(List<double> values) {
-    final sorted = List<double>.from(values)..sort();
-    final mid = sorted.length ~/ 2;
-    if (sorted.length.isOdd) return sorted[mid];
-    return (sorted[mid - 1] + sorted[mid]) / 2;
+  void observeGps({double? headingDeg, double? speedKmh}) {
+    _engine.observeGps(headingDeg: headingDeg, speedKmh: speedKmh);
   }
 }

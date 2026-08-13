@@ -6,8 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/lean_lab/lean_imu_lab_sampler.dart';
 import '../../core/lean_lab/lean_imu_math.dart';
+import '../../core/lean_lab/upright_freeze_controller.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
+import '../ride_active/widgets/upright_freeze_panel.dart';
 
 /// Live IMU study bench — every signal the phone can give for lean.
 class LeanImuLabScreen extends StatefulWidget {
@@ -19,12 +21,15 @@ class LeanImuLabScreen extends StatefulWidget {
 
 class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
   final LeanImuLabSampler _lab = LeanImuLabSampler();
+  late final UprightFreezeController _freeze;
 
   @override
   void initState() {
     super.initState();
     _lab.addListener(_onTick);
     _lab.start();
+    _freeze = UprightFreezeController(_lab.engine)..attach();
+    _freeze.addListener(_onTick);
   }
 
   void _onTick() {
@@ -33,6 +38,8 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
 
   @override
   void dispose() {
+    _freeze.removeListener(_onTick);
+    _freeze.dispose();
     _lab.removeListener(_onTick);
     _lab.dispose();
     super.dispose();
@@ -66,12 +73,20 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                 ),
                 const SizedBox(height: 12),
                 _AttitudeBoard(sample: s, frozen: _lab.hasFreeze),
+                const SizedBox(height: 8),
+                _PoseEngineBanner(sample: s, frozen: _lab.hasFreeze),
                 const SizedBox(height: 12),
+                UprightFreezePanel(
+                  controller: _freeze,
+                  compact: true,
+                  showTank: false,
+                ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: FilledButton.icon(
-                        onPressed: _lab.freezeReference,
+                        onPressed: _freeze.busy ? null : _lab.freezeReference,
                         icon: const Icon(Icons.vertical_align_center),
                         label: Text(l10n.leanImuLabFreeze),
                       ),
@@ -79,7 +94,11 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: _lab.clearFreeze,
+                        onPressed: _freeze.busy
+                            ? null
+                            : () {
+                                _lab.clearFreeze();
+                              },
                         icon: const Icon(Icons.refresh),
                         label: Text(l10n.leanImuLabReset),
                       ),
@@ -228,6 +247,44 @@ class _AttitudeBoard extends StatelessWidget {
   }
 }
 
+class _PoseEngineBanner extends StatelessWidget {
+  const _PoseEngineBanner({required this.sample, required this.frozen});
+
+  final ImuSample sample;
+  final bool frozen;
+
+  @override
+  Widget build(BuildContext context) {
+    final conf = sample.trackerConfidence;
+    final text = frozen
+        ? '${sample.pose.label} · ${sample.winningChannel}'
+            '${conf > 0 ? '  ·  conf ${conf.toStringAsFixed(2)}' : ''}'
+            '  ·  up ${sample.upAxis}'
+        : 'Hold freeze upright  ·  up ${sample.upAxis}  ·  ${sample.pose.label}';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppTheme.asphaltElevated,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: frozen
+              ? AppTheme.line.withValues(alpha: 0.5)
+              : AppTheme.steel.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.exo2(
+          color: frozen ? AppTheme.line : AppTheme.mist,
+          fontWeight: FontWeight.w700,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+}
+
 class _AttitudePainter extends CustomPainter {
   _AttitudePainter({required this.sample});
 
@@ -257,8 +314,8 @@ class _AttitudePainter extends CustomPainter {
       Paint()..color = AppTheme.line,
     );
 
-    // App lean wedge (current production).
-    final leanRad = sample.appLean * math.pi / 180;
+    // Bike lean wedge (production).
+    final leanRad = (sample.bikeLean ?? sample.appLean) * math.pi / 180;
     final leanEnd = Offset(
       c.dx + math.sin(leanRad) * r,
       c.dy - math.cos(leanRad) * r * 0.15,
@@ -294,9 +351,9 @@ class _AngleGrid extends StatelessWidget {
       crossAxisSpacing: 8,
       children: [
         _MetricTile(
-          label: 'App lean (now)',
-          value: sample.appLean,
-          hint: 'Production formula',
+          label: 'Bike lean',
+          value: sample.bikeLean ?? 0,
+          hint: 'sign × vector  (production)',
           color: AppTheme.signal,
         ),
         _MetricTile(
@@ -304,6 +361,12 @@ class _AngleGrid extends StatelessWidget {
           value: sample.vectorLean,
           hint: '∠ gravity vs freeze',
           color: AppTheme.line,
+        ),
+        _MetricTile(
+          label: 'Old App lean',
+          value: sample.appLean,
+          hint: 'Legacy closest-axis',
+          color: AppTheme.steel,
         ),
         _MetricTile(
           label: 'Roll (X)',
@@ -427,7 +490,7 @@ class _HistoryChart extends StatelessWidget {
           minY: -70,
           maxY: 70,
           minX: 0,
-          maxX: spots((s) => s.appLean).last.x,
+          maxX: spots((s) => s.bikeLean ?? s.vectorLean).last.x,
           gridData: FlGridData(
             show: true,
             horizontalInterval: 20,
@@ -460,10 +523,10 @@ class _HistoryChart extends StatelessWidget {
           ),
           borderData: FlBorderData(show: false),
           lineBarsData: [
-            _bar(spots((s) => s.appLean), AppTheme.signal, 2.4),
-            _bar(spots((s) => s.roll), const Color(0xFF7AB8FF), 1.6),
-            _bar(spots((s) => s.pitch), AppTheme.lineHot, 1.6),
-            _bar(spots((s) => s.vectorLean), AppTheme.line, 2.2),
+            _bar(spots((s) => s.bikeLean ?? 0), AppTheme.signal, 2.6),
+            _bar(spots((s) => s.vectorLean), AppTheme.line, 2.0),
+            _bar(spots((s) => s.roll), const Color(0xFF7AB8FF), 1.4),
+            _bar(spots((s) => s.pitch), AppTheme.lineHot, 1.4),
             _bar(spots((s) => s.fusedRoll), const Color(0xFFC084FC), 1.4),
           ],
           lineTouchData: const LineTouchData(enabled: false),
@@ -505,10 +568,10 @@ class _Legend extends StatelessWidget {
       spacing: 12,
       runSpacing: 4,
       children: [
-        chip(AppTheme.signal, 'App lean'),
+        chip(AppTheme.signal, 'Bike lean'),
+        chip(AppTheme.line, 'Vector'),
         chip(const Color(0xFF7AB8FF), 'Roll'),
         chip(AppTheme.lineHot, 'Pitch'),
-        chip(AppTheme.line, 'Vector'),
         chip(const Color(0xFFC084FC), 'Fused roll'),
       ],
     );

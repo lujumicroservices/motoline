@@ -246,14 +246,10 @@ double maxPlausibleJumpMeters({
 
 double clampLeanDegrees(double lean) => lean.clamp(-70.0, 70.0);
 
-/// Phone lean / inclination from gravity (degrees).
+/// Legacy closest-axis lean (debug / IMU lab "App lean" only).
 ///
-/// Positive ≈ lean/tip one side, negative the other. Magnitude matches what
-/// typical clinometer apps show as degrees-from-vertical for a static phone.
-///
-/// Older code only used roll (`atan2(-x, …)`), so a wall tip (pitch, x≈0)
-/// read ~0° while other apps correctly showed ~20–30°. This uses the full
-/// tilt away from the phone axis currently closest to world-up.
+/// Production uses LeanEngine signed bike lean. Do not call this for new
+/// ride samples — it switches axes mid-tilt.
 double leanFromAccelerometer({
   required double x,
   required double y,

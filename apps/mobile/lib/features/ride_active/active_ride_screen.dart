@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../core/lean_lab/lean_imu_math.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
+import '../../core/lean_lab/upright_freeze_controller.dart';
 import '../../core/models/route_circuit.dart';
 import '../../core/models/route_loop.dart';
 import '../../core/models/track_point.dart';
+import '../../core/services/lean_sensor.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/loop_session_controller.dart';
 import '../../core/services/rider_telemetry_service.dart';
@@ -27,6 +30,7 @@ import '../ride_detail/pilot_line_map.dart';
 import '../telemetry/ride_engine_label_screen.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
+import 'widgets/upright_freeze_panel.dart';
 
 /// Normal = single ride. Loop = auto-lap session bound to a route loop.
 enum ActiveRideMode { normal, loop }
@@ -131,7 +135,12 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       final leanLab = widget.leanLabBootstrap;
       final started = recorder.activeRide;
       if (leanLab != null && started != null) {
-        recorder.lockLeanNeutral(leanLab.frozenNeutralDeg);
+        final g0 = leanLab.frozenG0;
+        if (g0 != null) {
+          recorder.lockLeanUpright(g0, signFlip: leanLab.signFlip);
+        } else {
+          recorder.lockLeanNeutral(leanLab.frozenNeutralDeg);
+        }
         await LeanLabService.instance.beginSession(
           rideId: started.id,
           sessionType: leanLab.sessionType,
@@ -259,7 +268,14 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                     onBack: () => Navigator.of(context).pop(),
                   )
                 : staging
-                    ? _RideDeckBody(onStartRide: _bootstrap)
+                    ? _RideDeckBody(
+                        onStartRide: (g0) async {
+                          ref
+                              .read(rideRecorderProvider)
+                              .prepareLeanLabUpright(g0);
+                          await _bootstrap();
+                        },
+                      )
                     : Column(
                     children: [
                       if (suggestEnd)
@@ -614,22 +630,59 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
 class _RideDeckBody extends StatefulWidget {
   const _RideDeckBody({required this.onStartRide});
 
-  final Future<void> Function() onStartRide;
+  final Future<void> Function(Vec3 g0) onStartRide;
 
   @override
   State<_RideDeckBody> createState() => _RideDeckBodyState();
 }
 
 class _RideDeckBodyState extends State<_RideDeckBody> {
+  final LeanSensor _sensor = LeanSensor();
+  late final UprightFreezeController _freeze;
+  bool _starting = false;
+
   @override
   void initState() {
     super.initState();
+    _sensor.start();
+    _freeze = UprightFreezeController(
+      _sensor.engine,
+      onFrozen: (g0, {required bool fromPocket}) {
+        unawaited(_go(g0));
+      },
+    )..attach();
+    _freeze.addListener(_onFreeze);
     unawaited(
       RiderTelemetryService.instance.log(
         category: TelemetryCategory.app,
         eventType: 'ride_deck_open',
       ),
     );
+  }
+
+  void _onFreeze() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _go(Vec3 g0) async {
+    if (_starting) return;
+    _starting = true;
+    _sensor.stop();
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.app,
+        eventType: 'ride_deck_start_tapped',
+      ),
+    );
+    await widget.onStartRide(g0);
+  }
+
+  @override
+  void dispose() {
+    _freeze.removeListener(_onFreeze);
+    _freeze.dispose();
+    _sensor.stop();
+    super.dispose();
   }
 
   @override
@@ -652,28 +705,7 @@ class _RideDeckBodyState extends State<_RideDeckBody> {
             const SizedBox(height: 16),
             const AdventureCameraRideControls(),
             const Spacer(),
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.mist,
-                foregroundColor: AppTheme.asphalt,
-                minimumSize: const Size.fromHeight(72),
-                textStyle: GoogleFonts.exo2(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
-                ),
-              ),
-              onPressed: () {
-                unawaited(
-                  RiderTelemetryService.instance.log(
-                    category: TelemetryCategory.app,
-                    eventType: 'ride_deck_start_tapped',
-                  ),
-                );
-                widget.onStartRide();
-              },
-              icon: const Icon(Icons.play_arrow_rounded, size: 36),
-              label: Text(l10n.startRideNow),
-            ),
+            UprightFreezePanel(controller: _freeze),
           ],
         ),
       ),

@@ -12,6 +12,7 @@ import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
 import 'arm_foreground_service.dart';
 import 'barometer_sensor.dart';
+import '../lean_lab/lean_imu_math.dart';
 import 'lean_sensor.dart';
 import 'location_service.dart';
 import 'motion_pattern_detector.dart';
@@ -126,6 +127,8 @@ class RideRecorder {
   bool _autoPauseEnabled = true;
   bool _autoPausePrefLoaded = false;
   double? _pendingLeanNeutral;
+  Vec3? _pendingG0;
+  int _pendingSignFlip = 1;
 
   static const _autoPausePrefKey = 'corneriq_auto_pause';
   static const preferredArmRoutePrefKey = 'corneriq_arm_route_id';
@@ -166,10 +169,38 @@ class RideRecorder {
     _pendingLeanNeutral = degrees;
   }
 
+  /// Queue frozen upright gravity (and optional screen-in sign flip).
+  void prepareLeanLabUpright(Vec3 g0, {int signFlip = 1}) {
+    _pendingG0 = g0;
+    _pendingSignFlip = signFlip;
+  }
+
   /// Lock lean zero during an active recording (Lean Lab).
   void lockLeanNeutral(double degrees) {
     _lean.lockNeutral(degrees);
     _pendingLeanNeutral = null;
+  }
+
+  /// Lock frozen g0 during an active recording (Lean Lab).
+  void lockLeanUpright(Vec3 g0, {int signFlip = 1}) {
+    _lean.lockUpright(g0, signFlip: signFlip);
+    _pendingG0 = null;
+    _pendingLeanNeutral = 0;
+  }
+
+  void _applyPendingLeanLock() {
+    final g0 = _pendingG0;
+    if (g0 != null) {
+      _lean.lockUpright(g0, signFlip: _pendingSignFlip);
+      _pendingG0 = null;
+      _pendingLeanNeutral = null;
+      return;
+    }
+    final pendingNeutral = _pendingLeanNeutral;
+    if (pendingNeutral != null) {
+      _lean.lockNeutral(pendingNeutral);
+      _pendingLeanNeutral = null;
+    }
   }
 
   double? get leanNeutralDegrees => _lean.neutralDegrees;
@@ -287,11 +318,7 @@ class RideRecorder {
 
     _lean.start();
     _baro.start();
-    final pendingNeutral = _pendingLeanNeutral;
-    if (pendingNeutral != null) {
-      _lean.lockNeutral(pendingNeutral);
-      _pendingLeanNeutral = null;
-    }
+    _applyPendingLeanLock();
 
     _flushTimer = Timer.periodic(
       const Duration(seconds: 1),
@@ -502,6 +529,8 @@ class RideRecorder {
     _armed = false;
     _armedRouteId = null;
     _promotingArm = false;
+    _pendingG0 = null;
+    _pendingSignFlip = 1;
     unawaited(_armSub?.cancel());
     _armSub = null;
     unawaited(ArmForegroundService.stop());
@@ -658,11 +687,7 @@ class RideRecorder {
 
     _lean.start();
     _baro.start();
-    final pendingNeutral = _pendingLeanNeutral;
-    if (pendingNeutral != null) {
-      _lean.lockNeutral(pendingNeutral);
-      _pendingLeanNeutral = null;
-    }
+    _applyPendingLeanLock();
     _flushTimer?.cancel();
     _flushTimer = Timer.periodic(
       const Duration(seconds: 1),
@@ -754,8 +779,12 @@ class RideRecorder {
         ? null
         : position.speed * 3.6;
     _lean.observeForNeutral(speedKmh: speedKmh);
+    _lean.observeGps(
+      headingDeg: position.heading.isNaN ? null : position.heading,
+      speedKmh: speedKmh,
+    );
 
-    // Persist raw lean; UI uses relative lean from the sensor.
+    // Signed bike lean (already relative to frozen g0).
     final rawLean = _lean.rawLeanDegrees;
     final relativeLean = _lean.leanDegrees;
     final speedMps = position.speed.isNaN || position.speed < 0

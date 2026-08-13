@@ -367,7 +367,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activeMountHelp =>
-      'Mount firmly (portrait, screen toward you). Leave the recording notification on — screen can lock.';
+      '0° was frozen before you rolled. Screen can lock — leave the recording notification on.';
 
   @override
   String curvaTitle(int number) {
@@ -1184,7 +1184,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rideDeckHelp =>
-      'Connect cameras here before you roll. Start the ride when you’re ready — GPS recording begins then.';
+      'If the phone goes in a pocket: tap Pocket it now, then put it away before the countdown ends. Stay still until the haptic — you will not tap again. Tank/bars: Hold upright 4s.';
 
   @override
   String get startRideNow => 'Start ride now';
@@ -1270,6 +1270,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get armAutoNoRouteHint =>
       'Armed — when you roll, a ride starts in Garage.';
+
+  @override
+  String get freezeThenArmHelp =>
+      'Tap now, then pocket the phone. Stay still until the haptic. After that, lock the screen — rolling starts the ride. You will not tap again.';
 
   @override
   String get armAutoRouteArmed => 'Armed — rolling starts the ride';
@@ -1882,7 +1886,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabPrepHelp =>
-      'Set mount and pose, hold the bike upright to freeze neutral, then start the lap.';
+      'Set mount and pose. Freeze g0 with the phone already in that mount — sensors pick roll vs pitch. Then start the lap.';
 
   @override
   String get leanLabPoseQ => 'How is the phone oriented?';
@@ -1910,13 +1914,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabCalibHelp =>
-      'Stand still, bike upright, phone fixed. Hold 4 seconds — this freezes 0° lean for the whole ride.';
+      'Bike upright, phone already mounted. Hands off, hold 4 seconds — this freezes gravity (g0). Vector lean should stay near 0°.';
 
   @override
   String get leanLabCalibHold => 'Hold upright 4s';
 
   @override
   String get leanLabCalibHolding => 'Hold still…';
+
+  @override
+  String get leanLabCalibPocket => 'Pocket it now';
+
+  @override
+  String get leanLabCalibPocketHelp =>
+      'Sit upright on the bike. Tap, then pocket the phone fully before the countdown ends. Stay still until the haptic — do not freeze in your hand.';
+
+  @override
+  String leanLabCalibPocketCountdown(int n) {
+    return 'Pocket it now · ${n}s';
+  }
+
+  @override
+  String get leanLabCalibPocketSettle => 'Stay still…';
+
+  @override
+  String get leanLabCalibPocketCapture => 'Capturing 0°…';
+
+  @override
+  String get leanLabCalibPocketFail => 'Didn\'t settle. Take it out and retry.';
+
+  @override
+  String leanLabFreezeRedo(String n) {
+    return 'Phone is already $n° from vertical. Redo freeze with the bike truly upright.';
+  }
 
   @override
   String get leanLabRawNeutral => 'Raw phone angle';
@@ -2025,14 +2055,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanImuLabIntro =>
-      'Live phone sensors for lean research. Freeze upright, then tilt the phone like a wall or a corner — compare roll, pitch, vector angle, and gyro fusion. Production still uses App lean until we pick a better one.';
+      'Same engine as production. Freeze upright in the real mount, then lean — bike lean is vector magnitude with the winning channel’s sign. Banner shows pose (Vertical / Landscape / Flat) and the winner.';
 
   @override
   String get leanImuLabSettingsTile => 'IMU lean sensors';
 
   @override
   String get leanImuLabSettingsHelp =>
-      'Study accel / gyro / mag / baro and multi-axis lean candidates';
+      'Study accel / gyro / mag / baro and the mount-aware lean engine';
 
   @override
   String get leanImuLabFreeze => 'Freeze upright';
@@ -2042,14 +2072,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanImuLabFrozenHint =>
-      'Vector lean is now the 3D angle from this freeze. Hold still, then lean in any direction.';
+      'g0 is frozen. Bike lean should be ~0° now. Tilt in any direction — vector is the angle, the winner supplies left/right.';
 
   @override
   String get leanImuLabAnglesTitle => 'Angle candidates';
 
   @override
   String get leanImuLabAnglesHelp =>
-      'Roll = left/right (old formula). Pitch = wall / fore-aft. Tilt = unsigned clinometer. Vector lean = full 3D angle from freeze (best for “any direction”). Fused = gyro integrated, accel corrected — what we want while moving.';
+      'Bike lean = production. Vector = 3D angle from freeze. Roll follows lean when the phone is vertical; pitch when it is flat. Fused = gyro + accel. Old App lean is the closest-axis formula we retired.';
 
   @override
   String get leanImuLabHistoryTitle => 'Last ~8 s';
@@ -2062,7 +2092,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanImuLabNextHelp =>
-      'Static wall test: Vector lean and Tilt should match other clinometer apps on all three phones. Riding: App lean / Roll break when the phone is not portrait-roll. Next implementation: freeze gravity at calib, use vector angle + fused roll/pitch, keep gyro for vibration. Mag heading is extra (yaw), not bike lean.';
+      'Wall test: vector within ~3° of a clinometer, any pose. Vertical: bike lean follows fused roll. Flat: bike lean follows pitch/vector. Pocket slip: banner switches pose in a few seconds. Mag heading is extra (yaw), not bike lean.';
 
   @override
   String get leanLabPastSessions => 'Past sessions';

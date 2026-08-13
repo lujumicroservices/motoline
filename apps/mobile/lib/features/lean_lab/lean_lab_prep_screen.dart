@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/lean_lab/lean_imu_math.dart';
 import '../../core/lean_lab/lean_lab_circuit.dart';
 import '../../core/lean_lab/lean_lab_models.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
+import '../../core/lean_lab/upright_freeze_controller.dart';
+import '../../core/services/lean_engine.dart';
 import '../../core/services/lean_sensor.dart';
 import '../../core/telemetry/labels/ride_engine_label.dart';
 import '../../l10n/l10n_ext.dart';
@@ -14,10 +17,11 @@ import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../home/home_nav_icons.dart';
 import '../ride_active/active_ride_screen.dart';
+import '../ride_active/widgets/upright_freeze_panel.dart';
 import '../ride_detail/widgets/motorcycle_lean_gauge.dart';
 import 'lean_lab_bootstrap.dart';
 
-/// Pre-ride ritual: mount, pose, direction, upright calib → start recording.
+/// Pre-ride ritual: mount, pose, direction, upright g0 freeze → start recording.
 class LeanLabPrepScreen extends ConsumerStatefulWidget {
   const LeanLabPrepScreen({super.key, required this.sessionType});
 
@@ -32,11 +36,16 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
   late PhonePoseId _pose;
   late LeanLabDirection _direction;
   final LeanSensor _sensor = LeanSensor();
-  Timer? _tick;
-  bool _holding = false;
+  late final UprightFreezeController _freeze;
   double? _frozenNeutral;
+  Vec3? _frozenG0;
   DateTime? _calibAt;
   bool _starting = false;
+
+  bool get _isPocket =>
+      _mount == PhoneMountId.leftPocket || _mount == PhoneMountId.rightPocket;
+
+  int get _signFlip => _pose == PhonePoseId.portraitScreenIn ? -1 : 1;
 
   @override
   void initState() {
@@ -45,46 +54,43 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
     _pose = PhonePoseId.portraitScreenOut;
     _direction = LeanLabService.defaultDirection(widget.sessionType);
     _sensor.start();
-    _tick = Timer.periodic(const Duration(milliseconds: 120), (_) {
-      if (!mounted) return;
-      if (_holding) _sensor.sampleForManualCalib();
-      setState(() {});
-    });
+    _freeze = UprightFreezeController(
+      _sensor.engine,
+      signFlip: _signFlip,
+      onFrozen: (g0, {required bool fromPocket}) {
+        _frozenG0 = g0;
+        _frozenNeutral = 0;
+        _calibAt = DateTime.now();
+        if (fromPocket) unawaited(_startRide());
+        if (mounted) setState(() {});
+      },
+    )..attach();
+    _freeze.addListener(_onFreeze);
+    _sensor.engine.addListener(_onFreeze);
+  }
+
+  void _onFreeze() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _tick?.cancel();
+    _freeze.removeListener(_onFreeze);
+    _sensor.engine.removeListener(_onFreeze);
+    _freeze.dispose();
     _sensor.stop();
     super.dispose();
   }
 
-  Future<void> _runHold() async {
-    setState(() {
-      _holding = true;
-      _frozenNeutral = null;
-    });
-    _sensor.clearCalibBuffer();
-    await Future<void>.delayed(const Duration(seconds: 4));
-    if (!mounted) return;
-    final n = _sensor.peekCalibNeutral(minSamples: 20) ??
-        _sensor.rawLeanDegrees;
-    setState(() {
-      _holding = false;
-      _frozenNeutral = n;
-      _calibAt = DateTime.now();
-    });
-  }
-
   Future<void> _startRide() async {
-    final neutral = _frozenNeutral;
-    if (neutral == null) return;
+    final g0 = _frozenG0;
+    if (g0 == null) return;
     setState(() => _starting = true);
     final recorder = ref.read(rideRecorderProvider);
-    recorder.prepareLeanLabNeutral(neutral);
+    recorder.prepareLeanLabUpright(g0, signFlip: _signFlip);
+    recorder.prepareLeanLabNeutral(0);
     _sensor.stop();
     try {
-      // Navigate to active ride; it starts recording via autoStart.
       if (!mounted) return;
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
@@ -95,7 +101,9 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
               direction: _direction,
               phoneMount: _mount,
               phonePose: _pose,
-              frozenNeutralDeg: neutral,
+              frozenNeutralDeg: 0,
+              frozenG0: g0,
+              signFlip: _signFlip,
               calibAt: _calibAt,
             ),
           ),
@@ -109,8 +117,10 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final lean = _sensor.leanDegrees ?? 0;
-    final raw = _sensor.rawLeanDegrees;
+    final snap = _sensor.snapshot;
+    final lean = snap?.bikeLean ?? 0;
+    final busy = _freeze.busy;
+    _freeze.signFlip = _signFlip;
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
@@ -148,7 +158,9 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
                 ChoiceChip(
                   label: Text(_mountLabel(l10n, m)),
                   selected: _mount == m,
-                  onSelected: (_) => setState(() => _mount = m),
+                  onSelected: busy
+                      ? null
+                      : (_) => setState(() => _mount = m),
                 ),
             ],
           ),
@@ -164,7 +176,9 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
                 ChoiceChip(
                   label: Text(_poseLabel(l10n, p)),
                   selected: _pose == p,
-                  onSelected: (_) => setState(() => _pose = p),
+                  onSelected: busy
+                      ? null
+                      : (_) => setState(() => _pose = p),
                 ),
             ],
           ),
@@ -178,14 +192,18 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
               ChoiceChip(
                 label: Text(l10n.leanLabDirectionOutbound),
                 selected: _direction == LeanLabDirection.outbound,
-                onSelected: (_) =>
-                    setState(() => _direction = LeanLabDirection.outbound),
+                onSelected: busy
+                    ? null
+                    : (_) =>
+                        setState(() => _direction = LeanLabDirection.outbound),
               ),
               ChoiceChip(
                 label: Text(l10n.leanLabDirectionReturn),
                 selected: _direction == LeanLabDirection.returnTrip,
-                onSelected: (_) =>
-                    setState(() => _direction = LeanLabDirection.returnTrip),
+                onSelected: busy
+                    ? null
+                    : (_) =>
+                        setState(() => _direction = LeanLabDirection.returnTrip),
               ),
             ],
           ),
@@ -194,13 +212,15 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
               style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Text(
-            l10n.leanLabCalibHelp,
+            _isPocket ? l10n.leanLabCalibPocketHelp : l10n.leanLabCalibHelp,
             style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
             ),
           ),
+          const SizedBox(height: 12),
+          if (snap != null) _PoseBanner(snap: snap, frozen: _frozenG0 != null),
           const SizedBox(height: 12),
           MotorcycleLeanGauge(
             leanDegrees: lean,
@@ -210,30 +230,30 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            raw == null
+            snap == null
                 ? '…'
-                : '${l10n.leanLabRawNeutral}: ${raw.toStringAsFixed(1)}°',
+                : '${l10n.leanLabRawNeutral}: ${snap.vectorLean.toStringAsFixed(1)}°',
             style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
           ),
-          if (_frozenNeutral != null)
+          if (_frozenG0 != null)
             Text(
-              '${l10n.leanLabFrozenNeutral}: ${_frozenNeutral!.toStringAsFixed(1)}°',
+              '${l10n.leanLabFrozenNeutral}: ${_frozenG0!.toString()} · ${snap?.pose.label ?? ''}',
               style: GoogleFonts.exo2(
                 color: AppTheme.line,
                 fontWeight: FontWeight.w700,
               ),
             ),
           const SizedBox(height: 12),
-          FilledButton.tonalIcon(
-            onPressed: _holding ? null : _runHold,
-            icon: Icon(_holding ? Icons.hourglass_top : Icons.vertical_align_center),
-            label: Text(
-              _holding ? l10n.leanLabCalibHolding : l10n.leanLabCalibHold,
-            ),
+          UprightFreezePanel(
+            controller: _freeze,
+            showPocket: _isPocket,
+            showTank: !_isPocket,
           ),
           const SizedBox(height: 20),
           FilledButton.icon(
-            onPressed: _frozenNeutral == null || _starting ? null : _startRide,
+            onPressed: _frozenNeutral == null || _starting || busy
+                ? null
+                : _startRide,
             icon: _starting
                 ? const SizedBox(
                     width: 18,
@@ -261,4 +281,52 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
         PhonePoseId.landscape => l10n.leanLabPoseLandscape,
         PhonePoseId.other => l10n.engineLabelMountOther,
       };
+}
+
+class _PoseBanner extends StatelessWidget {
+  const _PoseBanner({required this.snap, required this.frozen});
+
+  final LeanEngineSnapshot snap;
+  final bool frozen;
+
+  @override
+  Widget build(BuildContext context) {
+    final pose = snap.pose;
+    final warn = frozen &&
+        pose == PhonePoseClass.verticalY &&
+        snap.tilt > 8;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppTheme.asphaltElevated,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: warn ? AppTheme.signal : AppTheme.line.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${pose.label} · ${snap.winningChannel}  ·  ${snap.upAxis}'
+            '${snap.trackerConfidence > 0 ? '  ·  conf ${snap.trackerConfidence.toStringAsFixed(2)}' : ''}',
+            style: GoogleFonts.exo2(
+              color: AppTheme.mist,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+          if (warn)
+            Text(
+              context.l10n.leanLabFreezeRedo(snap.tilt.toStringAsFixed(0)),
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.signal,
+                fontSize: 12,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

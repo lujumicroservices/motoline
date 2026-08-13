@@ -21,6 +21,7 @@ import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
 import '../lean_lab/lean_lab_screen.dart';
 import '../ride_active/active_ride_screen.dart';
+import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../ride_detail/ride_rename.dart';
 import '../rodadas/models/rodada_models.dart';
@@ -322,9 +323,8 @@ class HomeScreen extends ConsumerWidget {
                   return;
                 }
                 try {
-                  // Routes/circuits paused — arm starts a plain Garage ride.
-                  await notifier.arm(routeId: null);
-                  if (!context.mounted) return;
+                  final ok = await freezeThenArm(context, ref);
+                  if (!ok || !context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.armAutoNoRouteHint)),
                   );

@@ -17,6 +17,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../compare/route_compare_screen.dart';
 import '../ride_active/active_ride_screen.dart';
+import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../ride_active/loop_mark_map_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 
@@ -147,6 +148,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ActiveRideScreen(
+          autoStart: false,
           mode: ActiveRideMode.loop,
           route: current,
           loop: loop,
@@ -159,10 +161,9 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
 
   Future<void> _armAutoForRoute() async {
     final l10n = context.l10n;
-    final notifier = ref.read(armedStateProvider.notifier);
     try {
-      await notifier.arm(routeId: route.id);
-      if (!mounted) return;
+      final ok = await freezeThenArm(context, ref, routeId: route.id);
+      if (!ok || !mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.armAutoRouteArmedNamed(route.name))),
       );
