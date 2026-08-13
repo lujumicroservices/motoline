@@ -1815,7 +1815,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bikeFamilyCruiser => 'Cruiser';
 
   @override
+  String get bikeFamilyOffroad => 'Off-road';
+
+  @override
   String get bikeFamilyOther => 'Other';
+
+  @override
+  String get bikeSearchHint => 'Search model or year';
 
   @override
   String get leanLabHomeCta => 'Lean Lab — Bugambilias';

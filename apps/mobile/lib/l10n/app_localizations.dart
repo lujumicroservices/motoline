@@ -3338,11 +3338,23 @@ abstract class AppLocalizations {
   /// **'Cruiser'**
   String get bikeFamilyCruiser;
 
+  /// No description provided for @bikeFamilyOffroad.
+  ///
+  /// In es, this message translates to:
+  /// **'Off-road'**
+  String get bikeFamilyOffroad;
+
   /// No description provided for @bikeFamilyOther.
   ///
   /// In es, this message translates to:
   /// **'Otra'**
   String get bikeFamilyOther;
+
+  /// No description provided for @bikeSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar modelo o año'**
+  String get bikeSearchHint;
 
   /// No description provided for @leanLabHomeCta.
   ///

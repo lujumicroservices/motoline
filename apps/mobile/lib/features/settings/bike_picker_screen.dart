@@ -10,11 +10,18 @@ import '../../theme/ride_viz_palette.dart';
 import '../home/home_nav_icons.dart';
 
 /// Pick the rider's Triumph (or other) from the garage catalog.
-class BikePickerScreen extends ConsumerWidget {
+class BikePickerScreen extends ConsumerStatefulWidget {
   const BikePickerScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BikePickerScreen> createState() => _BikePickerScreenState();
+}
+
+class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final selected = ref.watch(riderBikeProvider);
 
@@ -35,6 +42,21 @@ class BikePickerScreen extends ConsumerWidget {
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            onChanged: (v) => setState(() => _query = v),
+            style: GoogleFonts.exo2(),
+            decoration: InputDecoration(
+              hintText: l10n.bikeSearchHint,
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: AppTheme.asphaltElevated,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -69,7 +91,7 @@ class BikePickerScreen extends ConsumerWidget {
               ),
             ),
           for (final family in BikeFamily.values) ...[
-            if (TriumphCatalog.byFamily(family).isNotEmpty) ...[
+            if (TriumphCatalog.byFamily(family, query: _query).isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
                 _familyLabel(l10n, family),
@@ -80,7 +102,7 @@ class BikePickerScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              for (final bike in TriumphCatalog.byFamily(family))
+              for (final bike in TriumphCatalog.byFamily(family, query: _query))
                 _BikeTile(
                   bike: bike,
                   selected: selected?.id == bike.id,
@@ -102,6 +124,7 @@ class BikePickerScreen extends ConsumerWidget {
         BikeFamily.classic => l10n.bikeFamilyClassic,
         BikeFamily.sport => l10n.bikeFamilySport,
         BikeFamily.cruiser => l10n.bikeFamilyCruiser,
+        BikeFamily.offroad => l10n.bikeFamilyOffroad,
         BikeFamily.other => l10n.bikeFamilyOther,
       };
 }
@@ -128,7 +151,7 @@ class _BikeTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
+          onTap: () => onTap(),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
