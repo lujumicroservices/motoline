@@ -3287,7 +3287,7 @@ abstract class AppLocalizations {
   /// No description provided for @bikeSelectHelp.
   ///
   /// In es, this message translates to:
-  /// **'Catálogo Triumph — se usa en Lean Lab y contexto de recorridos'**
+  /// **'Se usa en Lean Lab y contexto de recorridos'**
   String get bikeSelectHelp;
 
   /// No description provided for @bikePickerTitle.
@@ -3299,7 +3299,7 @@ abstract class AppLocalizations {
   /// No description provided for @bikePickerHelp.
   ///
   /// In es, this message translates to:
-  /// **'Elige la Triumph que ruedas. Etiqueta Lean Lab y datos de entrenamiento.'**
+  /// **'Fabricante, luego año, luego modelo.'**
   String get bikePickerHelp;
 
   /// No description provided for @bikeClear.
@@ -3355,6 +3355,66 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Buscar modelo o año'**
   String get bikeSearchHint;
+
+  /// No description provided for @bikeStepMake.
+  ///
+  /// In es, this message translates to:
+  /// **'Fabricante'**
+  String get bikeStepMake;
+
+  /// No description provided for @bikeStepYear.
+  ///
+  /// In es, this message translates to:
+  /// **'Año'**
+  String get bikeStepYear;
+
+  /// No description provided for @bikeStepModel.
+  ///
+  /// In es, this message translates to:
+  /// **'Modelo'**
+  String get bikeStepModel;
+
+  /// No description provided for @bikeSearchMake.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar fabricante'**
+  String get bikeSearchMake;
+
+  /// No description provided for @bikeSearchYear.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar año'**
+  String get bikeSearchYear;
+
+  /// No description provided for @bikeSearchModel.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar modelo'**
+  String get bikeSearchModel;
+
+  /// No description provided for @bikePopularMakes.
+  ///
+  /// In es, this message translates to:
+  /// **'Populares'**
+  String get bikePopularMakes;
+
+  /// No description provided for @bikeAllMakes.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los fabricantes'**
+  String get bikeAllMakes;
+
+  /// No description provided for @bikeCustomModel.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro modelo…'**
+  String get bikeCustomModel;
+
+  /// No description provided for @bikeCustomModelHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre del modelo'**
+  String get bikeCustomModelHint;
 
   /// No description provided for @leanLabHomeCta.
   ///

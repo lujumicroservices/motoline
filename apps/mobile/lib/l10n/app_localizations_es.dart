@@ -1797,14 +1797,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bikeSelectHelp =>
-      'Catálogo Triumph — se usa en Lean Lab y contexto de recorridos';
+      'Se usa en Lean Lab y contexto de recorridos';
 
   @override
   String get bikePickerTitle => 'Garage';
 
   @override
-  String get bikePickerHelp =>
-      'Elige la Triumph que ruedas. Etiqueta Lean Lab y datos de entrenamiento.';
+  String get bikePickerHelp => 'Fabricante, luego año, luego modelo.';
 
   @override
   String get bikeClear => 'Quitar';
@@ -1832,6 +1831,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bikeSearchHint => 'Buscar modelo o año';
+
+  @override
+  String get bikeStepMake => 'Fabricante';
+
+  @override
+  String get bikeStepYear => 'Año';
+
+  @override
+  String get bikeStepModel => 'Modelo';
+
+  @override
+  String get bikeSearchMake => 'Buscar fabricante';
+
+  @override
+  String get bikeSearchYear => 'Buscar año';
+
+  @override
+  String get bikeSearchModel => 'Buscar modelo';
+
+  @override
+  String get bikePopularMakes => 'Populares';
+
+  @override
+  String get bikeAllMakes => 'Todos los fabricantes';
+
+  @override
+  String get bikeCustomModel => 'Otro modelo…';
+
+  @override
+  String get bikeCustomModelHint => 'Escribe el nombre del modelo';
 
   @override
   String get leanLabHomeCta => 'Lab de inclinación — Bugambilias';

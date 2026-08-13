@@ -18,6 +18,7 @@ class BikeModel {
     this.approxCc,
     this.yearFrom,
     this.yearTo,
+    this.year,
     this.aliases = const [],
   });
 
@@ -30,9 +31,11 @@ class BikeModel {
   final int? yearFrom;
   /// Last model year. Null = still current.
   final int? yearTo;
+  /// Year the rider picked in the garage wizard.
+  final int? year;
   final List<String> aliases;
 
-  String get label => brand == 'Triumph' ? name : '$brand $name';
+  String get label => '$brand $name';
 
   String get years {
     final from = yearFrom;
@@ -53,9 +56,15 @@ class BikeModel {
       BikeFamily.offroad => 'Off-road',
       BikeFamily.other => 'Other',
     };
-    final parts = <String>[fam];
+    final parts = <String>[];
+    if (year != null) {
+      parts.add('$year');
+    } else if (years.isNotEmpty) {
+      parts.add(years);
+    }
+    if (family != BikeFamily.other) parts.insert(0, fam);
     if (approxCc != null) parts.add('~$approxCc cc');
-    if (years.isNotEmpty) parts.add(years);
+    if (parts.isEmpty) return fam;
     return parts.join(' · ');
   }
 

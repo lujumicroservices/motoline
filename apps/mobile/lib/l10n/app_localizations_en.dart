@@ -1787,14 +1787,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bikeSelectHelp =>
-      'Triumph catalog — used for Lean Lab and ride context';
+      'Used for Lean Lab and ride context';
 
   @override
   String get bikePickerTitle => 'Garage';
 
   @override
-  String get bikePickerHelp =>
-      'Pick the Triumph you ride. This tags Lean Lab and training labels.';
+  String get bikePickerHelp => 'Manufacturer, then year, then model.';
 
   @override
   String get bikeClear => 'Clear';
@@ -1822,6 +1821,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bikeSearchHint => 'Search model or year';
+
+  @override
+  String get bikeStepMake => 'Manufacturer';
+
+  @override
+  String get bikeStepYear => 'Year';
+
+  @override
+  String get bikeStepModel => 'Model';
+
+  @override
+  String get bikeSearchMake => 'Search manufacturer';
+
+  @override
+  String get bikeSearchYear => 'Search year';
+
+  @override
+  String get bikeSearchModel => 'Search model';
+
+  @override
+  String get bikePopularMakes => 'Popular';
+
+  @override
+  String get bikeAllMakes => 'All manufacturers';
+
+  @override
+  String get bikeCustomModel => 'Other model…';
+
+  @override
+  String get bikeCustomModelHint => 'Type the model name';
 
   @override
   String get leanLabHomeCta => 'Lean Lab — Bugambilias';
