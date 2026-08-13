@@ -2032,6 +2032,50 @@ class AppLocalizationsEs extends AppLocalizations {
       'Protocolo Bugambilias · calib · elevación · verdad de curvas';
 
   @override
+  String get leanImuLabTitle => 'Lab IMU de inclinación';
+
+  @override
+  String get leanImuLabIntro =>
+      'Sensores en vivo para estudiar lean. Congela vertical, luego inclina el teléfono como contra una pared o en curva — compara roll, pitch, ángulo vectorial y fusión con giroscopio. Producción sigue usando App lean hasta elegir uno mejor.';
+
+  @override
+  String get leanImuLabSettingsTile => 'Sensores IMU de lean';
+
+  @override
+  String get leanImuLabSettingsHelp =>
+      'Estudia accel / gyro / mag / baro y candidatos de lean multi-eje';
+
+  @override
+  String get leanImuLabFreeze => 'Congelar vertical';
+
+  @override
+  String get leanImuLabReset => 'Reset';
+
+  @override
+  String get leanImuLabFrozenHint =>
+      'Vector lean es ahora el ángulo 3D desde este freeze. Quédate quieto y luego inclina en cualquier dirección.';
+
+  @override
+  String get leanImuLabAnglesTitle => 'Candidatos de ángulo';
+
+  @override
+  String get leanImuLabAnglesHelp =>
+      'Roll = izquierda/derecha (fórmula vieja). Pitch = pared / adelante-atrás. Tilt = clinómetro sin signo. Vector lean = ángulo 3D desde el freeze (mejor para “cualquier dirección”). Fused = gyro integrado, corregido con accel — lo que queremos en movimiento.';
+
+  @override
+  String get leanImuLabHistoryTitle => 'Últimos ~8 s';
+
+  @override
+  String get leanImuLabVectorsTitle => 'Capacidades crudas';
+
+  @override
+  String get leanImuLabNextTitle => 'Cómo leer esto para producción';
+
+  @override
+  String get leanImuLabNextHelp =>
+      'Prueba de pared: Vector lean y Tilt deben coincidir con otras apps de inclinación en los 3 teléfonos. En moto: App lean / Roll fallan si el teléfono no está en roll de retrato. Siguiente: congelar gravedad en calib, usar ángulo vectorial + roll/pitch fused, gyro para vibración. Mag (heading) es extra, no es lean de la moto.';
+
+  @override
   String get leanLabPastSessions => 'Sesiones anteriores';
 
   @override

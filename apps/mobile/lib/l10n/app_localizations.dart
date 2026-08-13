@@ -3710,6 +3710,84 @@ abstract class AppLocalizations {
   /// **'Protocolo Bugambilias · calib · elevación · verdad de curvas'**
   String get leanLabSettingsHelp;
 
+  /// No description provided for @leanImuLabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab IMU de inclinación'**
+  String get leanImuLabTitle;
+
+  /// No description provided for @leanImuLabIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Sensores en vivo para estudiar lean. Congela vertical, luego inclina el teléfono como contra una pared o en curva — compara roll, pitch, ángulo vectorial y fusión con giroscopio. Producción sigue usando App lean hasta elegir uno mejor.'**
+  String get leanImuLabIntro;
+
+  /// No description provided for @leanImuLabSettingsTile.
+  ///
+  /// In es, this message translates to:
+  /// **'Sensores IMU de lean'**
+  String get leanImuLabSettingsTile;
+
+  /// No description provided for @leanImuLabSettingsHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Estudia accel / gyro / mag / baro y candidatos de lean multi-eje'**
+  String get leanImuLabSettingsHelp;
+
+  /// No description provided for @leanImuLabFreeze.
+  ///
+  /// In es, this message translates to:
+  /// **'Congelar vertical'**
+  String get leanImuLabFreeze;
+
+  /// No description provided for @leanImuLabReset.
+  ///
+  /// In es, this message translates to:
+  /// **'Reset'**
+  String get leanImuLabReset;
+
+  /// No description provided for @leanImuLabFrozenHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Vector lean es ahora el ángulo 3D desde este freeze. Quédate quieto y luego inclina en cualquier dirección.'**
+  String get leanImuLabFrozenHint;
+
+  /// No description provided for @leanImuLabAnglesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Candidatos de ángulo'**
+  String get leanImuLabAnglesTitle;
+
+  /// No description provided for @leanImuLabAnglesHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Roll = izquierda/derecha (fórmula vieja). Pitch = pared / adelante-atrás. Tilt = clinómetro sin signo. Vector lean = ángulo 3D desde el freeze (mejor para “cualquier dirección”). Fused = gyro integrado, corregido con accel — lo que queremos en movimiento.'**
+  String get leanImuLabAnglesHelp;
+
+  /// No description provided for @leanImuLabHistoryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimos ~8 s'**
+  String get leanImuLabHistoryTitle;
+
+  /// No description provided for @leanImuLabVectorsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Capacidades crudas'**
+  String get leanImuLabVectorsTitle;
+
+  /// No description provided for @leanImuLabNextTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo leer esto para producción'**
+  String get leanImuLabNextTitle;
+
+  /// No description provided for @leanImuLabNextHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba de pared: Vector lean y Tilt deben coincidir con otras apps de inclinación en los 3 teléfonos. En moto: App lean / Roll fallan si el teléfono no está en roll de retrato. Siguiente: congelar gravedad en calib, usar ángulo vectorial + roll/pitch fused, gyro para vibración. Mag (heading) es extra, no es lean de la moto.'**
+  String get leanImuLabNextHelp;
+
   /// No description provided for @leanLabPastSessions.
   ///
   /// In es, this message translates to:

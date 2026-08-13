@@ -17,6 +17,7 @@ import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
 import '../home/home_nav_icons.dart';
+import '../lean_lab/lean_imu_lab_screen.dart';
 import '../lean_lab/lean_lab_screen.dart';
 import 'bike_picker_screen.dart';
 
@@ -119,6 +120,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const LeanLabScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.sensors, color: AppTheme.lineHot),
+            title: Text(
+              l10n.leanImuLabSettingsTile,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              l10n.leanImuLabSettingsHelp,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const LeanImuLabScreen(),
                 ),
               );
             },

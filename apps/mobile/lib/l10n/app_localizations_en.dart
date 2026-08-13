@@ -2021,6 +2021,50 @@ class AppLocalizationsEn extends AppLocalizations {
       'Bugambilias protocol · calib · elevation · corner ground truth';
 
   @override
+  String get leanImuLabTitle => 'IMU lean lab';
+
+  @override
+  String get leanImuLabIntro =>
+      'Live phone sensors for lean research. Freeze upright, then tilt the phone like a wall or a corner — compare roll, pitch, vector angle, and gyro fusion. Production still uses App lean until we pick a better one.';
+
+  @override
+  String get leanImuLabSettingsTile => 'IMU lean sensors';
+
+  @override
+  String get leanImuLabSettingsHelp =>
+      'Study accel / gyro / mag / baro and multi-axis lean candidates';
+
+  @override
+  String get leanImuLabFreeze => 'Freeze upright';
+
+  @override
+  String get leanImuLabReset => 'Reset';
+
+  @override
+  String get leanImuLabFrozenHint =>
+      'Vector lean is now the 3D angle from this freeze. Hold still, then lean in any direction.';
+
+  @override
+  String get leanImuLabAnglesTitle => 'Angle candidates';
+
+  @override
+  String get leanImuLabAnglesHelp =>
+      'Roll = left/right (old formula). Pitch = wall / fore-aft. Tilt = unsigned clinometer. Vector lean = full 3D angle from freeze (best for “any direction”). Fused = gyro integrated, accel corrected — what we want while moving.';
+
+  @override
+  String get leanImuLabHistoryTitle => 'Last ~8 s';
+
+  @override
+  String get leanImuLabVectorsTitle => 'Raw capabilities';
+
+  @override
+  String get leanImuLabNextTitle => 'How to read this for production';
+
+  @override
+  String get leanImuLabNextHelp =>
+      'Static wall test: Vector lean and Tilt should match other clinometer apps on all three phones. Riding: App lean / Roll break when the phone is not portrait-roll. Next implementation: freeze gravity at calib, use vector angle + fused roll/pitch, keep gyro for vibration. Mag heading is extra (yaw), not bike lean.';
+
+  @override
   String get leanLabPastSessions => 'Past sessions';
 
   @override

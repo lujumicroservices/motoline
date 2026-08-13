@@ -13,6 +13,7 @@ import '../../core/services/ride_sync_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
+import 'lean_imu_lab_screen.dart';
 import 'lean_lab_prep_screen.dart';
 import 'lean_lab_session_detail_screen.dart';
 
@@ -115,6 +116,52 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Material(
+            color: AppTheme.asphaltElevated,
+            borderRadius: BorderRadius.circular(14),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => const LeanImuLabScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    const Icon(Icons.sensors, color: AppTheme.lineHot),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.leanImuLabTitle,
+                            style: GoogleFonts.exo2(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            l10n.leanImuLabSettingsHelp,
+                            style: GoogleFonts.rajdhani(
+                              color: AppTheme.steel,
+                              fontSize: 12,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: AppTheme.steel),
+                  ],
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
