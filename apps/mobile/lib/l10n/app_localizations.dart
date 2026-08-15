@@ -3887,7 +3887,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanImuLabAnglesHelp.
   ///
   /// In es, this message translates to:
-  /// **'La inclinación (roja) es signo(canal ganador) × magnitud del vector. El vector (verde) es el inclinómetro 3D desde el 0°. Si inclinas como en una pared, el verde se mueve; el rojo solo si esa inclinación es lean de la moto para esa pose.'**
+  /// **'La inclinación (roja) sigue el canal fusionado ganador (mismo movimiento que morado/azul), limitada por el inclinómetro vector (verde). El verde puede moverse con cualquier tip desde 0°; el rojo sigue la lean de moto para esa pose — sin saltos de onda cuadrada.'**
   String get leanImuLabAnglesHelp;
 
   /// No description provided for @leanImuLabHistoryTitle.
@@ -3895,6 +3895,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Últimos ~8 s'**
   String get leanImuLabHistoryTitle;
+
+  /// No description provided for @leanImuLabStartRecord.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar gráfica'**
+  String get leanImuLabStartRecord;
+
+  /// No description provided for @leanImuLabStopRecord.
+  ///
+  /// In es, this message translates to:
+  /// **'Parar'**
+  String get leanImuLabStopRecord;
+
+  /// No description provided for @leanImuLabExportCsv.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar CSV'**
+  String get leanImuLabExportCsv;
+
+  /// No description provided for @leanImuLabRecordingHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando… {count} muestras (envíame el CSV tras Exportar)'**
+  String leanImuLabRecordingHint(int count);
+
+  /// No description provided for @leanImuLabExportDone.
+  ///
+  /// In es, this message translates to:
+  /// **'CSV guardado — ruta copiada:\n{path}'**
+  String leanImuLabExportDone(String path);
 
   /// No description provided for @leanImuLabVectorsTitle.
   ///

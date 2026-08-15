@@ -887,8 +887,23 @@
   "leanImuLabReset": "Reiniciar",
   "leanImuLabFrozenHint": "El 0° está guardado. La inclinación debe ser cerca de 0°. Inclina a cualquier lado — el número es el ángulo.",
   "leanImuLabAnglesTitle": "Ángulos",
-  "leanImuLabAnglesHelp": "La inclinación (roja) es signo(canal ganador) × magnitud del vector. El vector (verde) es el inclinómetro 3D desde el 0°. Si inclinas como en una pared, el verde se mueve; el rojo solo si esa inclinación es lean de la moto para esa pose.",
+  "leanImuLabAnglesHelp": "La inclinación (roja) sigue el canal fusionado ganador (mismo movimiento que morado/azul), limitada por el inclinómetro vector (verde). El verde puede moverse con cualquier tip desde 0°; el rojo sigue la lean de moto para esa pose — sin saltos de onda cuadrada.",
   "leanImuLabHistoryTitle": "Últimos ~8 s",
+  "leanImuLabStartRecord": "Grabar gráfica",
+  "leanImuLabStopRecord": "Parar",
+  "leanImuLabExportCsv": "Exportar CSV",
+  "leanImuLabRecordingHint": "Grabando… {count} muestras (envíame el CSV tras Exportar)",
+  "@leanImuLabRecordingHint": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "leanImuLabExportDone": "CSV guardado — ruta copiada:\n{path}",
+  "@leanImuLabExportDone": {
+    "placeholders": {
+      "path": {"type": "String"}
+    }
+  },
   "leanImuLabVectorsTitle": "Capacidades crudas",
   "leanImuLabNextTitle": "Cómo leer esto",
   "leanImuLabNextHelp": "Prueba en la pared: a unos 3° de un inclinómetro de verdad, en cualquier posición. Teléfono derecho: la inclinación sigue el roll. Teléfono plano: sigue el pitch. Si se mueve en el bolsillo, el letrero cambia en unos segundos.",

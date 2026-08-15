@@ -187,11 +187,16 @@ double flatLeanSign(Vec3 gravity, Vec3 g0) {
 
 double eulerSign(double degrees) => degrees == 0 ? 1.0 : degrees.sign;
 
-/// Production lean: vector magnitude × sign from the winning channel.
+/// Production lean for a locked pose.
 ///
-/// `bikeLean = sign(winning fused Euler) × angle(g, g0)`
-/// Near freeze, a tiny fused delta must not multiply a large vector tip
-/// (pitch/wall/brake) — deadzone returns the fused delta itself instead.
+/// Vertical / landscape: follow the **continuous** winning fused Euler
+/// (same motion as fused roll/pitch on the lab chart). Cap by vector
+/// magnitude so we never exceed the 3D clinometer tip from g0.
+///
+/// Using `sign(channel) × vector` alone square-waves ±mag whenever the
+/// fused channel crosses 0 while vector stays large (erratic red line).
+///
+/// Flat: still `sign(flat plane) × vector` (no continuous Euler in-plane).
 double signedBikeLean({
   required Vec3 gravity,
   required Vec3 g0,
@@ -213,11 +218,13 @@ double signedBikeLean({
     PhonePoseClass.landscapeX => fusedPitch - freezePitch,
     PhonePoseClass.flatZ || PhonePoseClass.unknown => 0.0,
   };
-  // Deadzone: avoid sign(chatter) × vector when the winning channel is ~0.
-  if (fusedDelta.abs() < 2.0) {
-    return (fusedDelta * signFlip).clamp(-70.0, 70.0);
+  final continuous = fusedDelta * signFlip;
+  // Prefer continuous channel; only fall back to signed vector when gyro
+  // fused Euler overshoots the clinometer magnitude.
+  if (continuous.abs() <= mag + 2.5) {
+    return continuous.clamp(-70.0, 70.0);
   }
-  return (eulerSign(fusedDelta) * mag * signFlip).clamp(-70.0, 70.0);
+  return (eulerSign(continuous) * mag).clamp(-70.0, 70.0);
 }
 
 /// GPS kinematic lean (coordinated turn): φ ≈ atan(v * ψ̇ / g).

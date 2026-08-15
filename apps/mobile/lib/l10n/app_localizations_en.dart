@@ -2118,10 +2118,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanImuLabAnglesHelp =>
-      'Bike lean (red) is sign(winning channel) × vector magnitude. Vector (green) is the 3D clinometer from 0°. A wall tip moves green; red only moves if that tilt is bike lean for this pose.';
+      'Bike lean (red) follows the winning fused channel (same motion as purple/blue), capped by the vector clinometer (green). Green can move on any tip from 0°; red tracks bike-lean motion for this pose — without square-wave flips.';
 
   @override
   String get leanImuLabHistoryTitle => 'Last ~8 s';
+
+  @override
+  String get leanImuLabStartRecord => 'Record chart';
+
+  @override
+  String get leanImuLabStopRecord => 'Stop';
+
+  @override
+  String get leanImuLabExportCsv => 'Export CSV';
+
+  @override
+  String leanImuLabRecordingHint(int count) {
+    return 'Recording… $count samples (send the CSV after Export)';
+  }
+
+  @override
+  String leanImuLabExportDone(String path) {
+    return 'CSV saved — path copied:\n$path';
+  }
 
   @override
   String get leanImuLabVectorsTitle => 'Raw capabilities';

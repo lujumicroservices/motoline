@@ -65,7 +65,8 @@ class LeanEngineSnapshot {
 
 /// Pose-aware lean: freeze g0, classify mount, output signed bike lean.
 ///
-/// `bikeLean = sign(winning fused Euler) × angle(g, g0)`
+/// Mount-aware lean: continuous winning fused Euler, capped by vector mag.
+/// `bikeLean ≈ clamp(fusedDelta, ±vector)` — not `sign × vector` alone.
 /// GPS kinematic lean is a confidence / fallback channel (not mag).
 class LeanEngine extends ChangeNotifier {
   LeanEngine();

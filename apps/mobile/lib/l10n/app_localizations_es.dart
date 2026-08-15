@@ -2134,10 +2134,29 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanImuLabAnglesHelp =>
-      'La inclinación (roja) es signo(canal ganador) × magnitud del vector. El vector (verde) es el inclinómetro 3D desde el 0°. Si inclinas como en una pared, el verde se mueve; el rojo solo si esa inclinación es lean de la moto para esa pose.';
+      'La inclinación (roja) sigue el canal fusionado ganador (mismo movimiento que morado/azul), limitada por el inclinómetro vector (verde). El verde puede moverse con cualquier tip desde 0°; el rojo sigue la lean de moto para esa pose — sin saltos de onda cuadrada.';
 
   @override
   String get leanImuLabHistoryTitle => 'Últimos ~8 s';
+
+  @override
+  String get leanImuLabStartRecord => 'Grabar gráfica';
+
+  @override
+  String get leanImuLabStopRecord => 'Parar';
+
+  @override
+  String get leanImuLabExportCsv => 'Exportar CSV';
+
+  @override
+  String leanImuLabRecordingHint(int count) {
+    return 'Grabando… $count muestras (envíame el CSV tras Exportar)';
+  }
+
+  @override
+  String leanImuLabExportDone(String path) {
+    return 'CSV guardado — ruta copiada:\n$path';
+  }
 
   @override
   String get leanImuLabVectorsTitle => 'Capacidades crudas';

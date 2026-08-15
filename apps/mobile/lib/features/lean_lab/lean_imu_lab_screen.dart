@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../../core/lean_lab/lean_imu_lab_sampler.dart';
 import '../../core/lean_lab/lean_imu_math.dart';
@@ -34,6 +38,24 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
 
   void _onTick() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _exportCsv() async {
+    final csv = _lab.exportCsv();
+    if (csv.trim().isEmpty) return;
+    final dir = await getApplicationDocumentsDirectory();
+    final name =
+        'lean_imu_${DateTime.now().toIso8601String().replaceAll(':', '-')}.csv';
+    final file = File(p.join(dir.path, name));
+    await file.writeAsString(csv);
+    await Clipboard.setData(ClipboardData(text: file.path));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.leanImuLabExportDone(file.path)),
+        duration: const Duration(seconds: 6),
+      ),
+    );
   }
 
   @override
@@ -122,6 +144,49 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                 _Note(l10n.leanImuLabAnglesHelp),
                 const SizedBox(height: 18),
                 _SectionTitle(l10n.leanImuLabHistoryTitle),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        onPressed: () {
+                          if (_lab.recording) {
+                            _lab.stopRecording();
+                          } else {
+                            _lab.startRecording();
+                          }
+                        },
+                        icon: Icon(
+                          _lab.recording ? Icons.stop : Icons.fiber_manual_record,
+                          color: _lab.recording ? Colors.redAccent : null,
+                        ),
+                        label: Text(
+                          _lab.recording
+                              ? l10n.leanImuLabStopRecord
+                              : l10n.leanImuLabStartRecord,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _lab.history.isEmpty ? null : _exportCsv,
+                        icon: const Icon(Icons.save_alt),
+                        label: Text(l10n.leanImuLabExportCsv),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_lab.recording) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.leanImuLabRecordingHint(_lab.history.length),
+                    style: GoogleFonts.rajdhani(
+                      color: Colors.redAccent,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 _HistoryChart(history: _lab.history.toList(growable: false)),
                 const SizedBox(height: 8),

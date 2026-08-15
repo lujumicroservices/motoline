@@ -110,6 +110,36 @@ void main() {
     expect(a * b, lessThan(0)); // signs follow fused, not ±20
   });
 
+  test('large fused zero-cross follows continuous roll, not ±vector jump', () {
+    const g0 = Vec3(0, 9.8, 0);
+    const deg = 35.0;
+    final rad = deg * math.pi / 180;
+    final g = Vec3(-9.8 * math.sin(rad), 9.8 * math.cos(rad), 0);
+    final pos = signedBikeLean(
+      gravity: g,
+      g0: g0,
+      pose: PhonePoseClass.verticalY,
+      fusedRoll: 12,
+      fusedPitch: 0,
+      freezeRoll: 0,
+      freezePitch: 0,
+    );
+    final neg = signedBikeLean(
+      gravity: g,
+      g0: g0,
+      pose: PhonePoseClass.verticalY,
+      fusedRoll: -12,
+      fusedPitch: 0,
+      freezeRoll: 0,
+      freezePitch: 0,
+    );
+    expect(pos, closeTo(12, 0.5));
+    expect(neg, closeTo(-12, 0.5));
+    // Old bug: would have been ≈ ±35 (sign × vector).
+    expect(pos.abs(), lessThan(20));
+    expect(neg.abs(), lessThan(20));
+  });
+
   test('flat 27° tip uses vector magnitude and flat-plane sign', () {
     const g0 = Vec3(0, 0, 9.8);
     const deg = 27.0;

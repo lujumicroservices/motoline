@@ -104,8 +104,51 @@ class LeanImuLabSampler extends ChangeNotifier {
   ImuSample? latest;
   ImuSample? frozen;
   bool running = false;
+  bool recording = false;
+
+  /// Longer buffer while recording (~3 min @ 30 Hz) for CSV export.
+  static const _recordCap = 5400;
 
   bool get hasFreeze => engine.hasFreeze;
+
+  void startRecording() {
+    recording = true;
+    history.clear();
+    notifyListeners();
+  }
+
+  void stopRecording() {
+    recording = false;
+    notifyListeners();
+  }
+
+  /// CSV of the ring buffer (or active recording). Columns match the chart.
+  String exportCsv() {
+    final buf = StringBuffer();
+    buf.writeln(
+      't_ms,bike_lean,vector,roll,pitch,fused_roll,fused_pitch,'
+      'pose,channel,confidence,gx,gy,gz,ax,ay,az',
+    );
+    for (final s in history) {
+      final g = s.gravity;
+      final a = s.accel;
+      buf.writeln(
+        '${s.at.millisecondsSinceEpoch},'
+        '${s.bikeLean?.toStringAsFixed(3) ?? ''},'
+        '${s.vectorLean.toStringAsFixed(3)},'
+        '${s.roll.toStringAsFixed(3)},'
+        '${s.pitch.toStringAsFixed(3)},'
+        '${s.fusedRoll.toStringAsFixed(3)},'
+        '${s.fusedPitch.toStringAsFixed(3)},'
+        '${s.pose.id},'
+        '${s.winningChannel},'
+        '${s.leanConfidence.toStringAsFixed(3)},'
+        '${g.x.toStringAsFixed(4)},${g.y.toStringAsFixed(4)},${g.z.toStringAsFixed(4)},'
+        '${a.x.toStringAsFixed(4)},${a.y.toStringAsFixed(4)},${a.z.toStringAsFixed(4)}',
+      );
+    }
+    return buf.toString();
+  }
 
   Future<void> start() async {
     if (running) return;
@@ -209,7 +252,8 @@ class LeanImuLabSampler extends ChangeNotifier {
     );
     latest = sample;
     history.addLast(sample);
-    while (history.length > _historyCap) {
+    final cap = recording ? _recordCap : _historyCap;
+    while (history.length > cap) {
       history.removeFirst();
     }
     notifyListeners();

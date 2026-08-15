@@ -816,8 +816,23 @@
   "leanImuLabReset": "Reset",
   "leanImuLabFrozenHint": "0° is saved. Lean should be about 0° now. Tilt any way — the number is the angle, left or right comes from how the phone sits.",
   "leanImuLabAnglesTitle": "Angle candidates",
-  "leanImuLabAnglesHelp": "Bike lean (red) is sign(winning channel) × vector magnitude. Vector (green) is the 3D clinometer from 0°. A wall tip moves green; red only moves if that tilt is bike lean for this pose.",
+  "leanImuLabAnglesHelp": "Bike lean (red) follows the winning fused channel (same motion as purple/blue), capped by the vector clinometer (green). Green can move on any tip from 0°; red tracks bike-lean motion for this pose — without square-wave flips.",
   "leanImuLabHistoryTitle": "Last ~8 s",
+  "leanImuLabStartRecord": "Record chart",
+  "leanImuLabStopRecord": "Stop",
+  "leanImuLabExportCsv": "Export CSV",
+  "leanImuLabRecordingHint": "Recording… {count} samples (send the CSV after Export)",
+  "@leanImuLabRecordingHint": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "leanImuLabExportDone": "CSV saved — path copied:\n{path}",
+  "@leanImuLabExportDone": {
+    "placeholders": {
+      "path": {"type": "String"}
+    }
+  },
   "leanImuLabVectorsTitle": "Raw capabilities",
   "leanImuLabNextTitle": "How to read this for production",
   "leanImuLabNextHelp": "Wall test: within about 3° of a real inclinometer, any position. Upright phone: lean follows roll. Flat phone: lean follows pitch. If the phone slips in a pocket, the banner changes in a few seconds.",
