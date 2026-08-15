@@ -2139,7 +2139,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String leanImuLabExportDone(String path) {
-    return 'CSV saved — path copied:\n$path';
+    return 'Share sheet opened for $path — pick Drive, WhatsApp, or Files';
   }
 
   @override

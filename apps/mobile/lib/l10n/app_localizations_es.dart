@@ -2155,7 +2155,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String leanImuLabExportDone(String path) {
-    return 'CSV guardado — ruta copiada:\n$path';
+    return 'Menú de compartir abierto para $path — elige Drive, WhatsApp o Archivos';
   }
 
   @override

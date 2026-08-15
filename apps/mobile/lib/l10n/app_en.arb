@@ -827,7 +827,7 @@
       "count": {"type": "int"}
     }
   },
-  "leanImuLabExportDone": "CSV saved — path copied:\n{path}",
+  "leanImuLabExportDone": "Share sheet opened for {path} — pick Drive, WhatsApp, or Files",
   "@leanImuLabExportDone": {
     "placeholders": {
       "path": {"type": "String"}

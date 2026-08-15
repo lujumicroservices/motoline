@@ -3923,7 +3923,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanImuLabExportDone.
   ///
   /// In es, this message translates to:
-  /// **'CSV guardado — ruta copiada:\n{path}'**
+  /// **'Menú de compartir abierto para {path} — elige Drive, WhatsApp o Archivos'**
   String leanImuLabExportDone(String path);
 
   /// No description provided for @leanImuLabVectorsTitle.

@@ -3,10 +3,10 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/lean_lab/lean_imu_lab_sampler.dart';
 import '../../core/lean_lab/lean_imu_math.dart';
@@ -43,17 +43,27 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
   Future<void> _exportCsv() async {
     final csv = _lab.exportCsv();
     if (csv.trim().isEmpty) return;
-    final dir = await getApplicationDocumentsDirectory();
-    final name =
-        'lean_imu_${DateTime.now().toIso8601String().replaceAll(':', '-')}.csv';
+    // Temp + system share sheet — app documents are invisible in Files.
+    final dir = await getTemporaryDirectory();
+    final stamp = DateTime.now()
+        .toIso8601String()
+        .replaceAll(':', '-')
+        .replaceAll('.', '-');
+    final name = 'lean_imu_$stamp.csv';
     final file = File(p.join(dir.path, name));
     await file.writeAsString(csv);
-    await Clipboard.setData(ClipboardData(text: file.path));
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: 'text/csv', name: name)],
+        subject: 'RiderLab lean IMU',
+        text: name,
+      ),
+    );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(context.l10n.leanImuLabExportDone(file.path)),
-        duration: const Duration(seconds: 6),
+        content: Text(context.l10n.leanImuLabExportDone(name)),
+        duration: const Duration(seconds: 4),
       ),
     );
   }

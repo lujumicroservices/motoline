@@ -898,7 +898,7 @@
       "count": {"type": "int"}
     }
   },
-  "leanImuLabExportDone": "CSV guardado — ruta copiada:\n{path}",
+  "leanImuLabExportDone": "Menú de compartir abierto para {path} — elige Drive, WhatsApp o Archivos",
   "@leanImuLabExportDone": {
     "placeholders": {
       "path": {"type": "String"}
