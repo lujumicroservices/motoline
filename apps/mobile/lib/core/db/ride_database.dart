@@ -29,8 +29,10 @@ class RideDatabase {
       version: 17,
       onConfigure: (db) async {
         // Outdoor-grade durability: survive kills mid-batch flush.
-        await db.execute('PRAGMA journal_mode=WAL');
-        await db.execute('PRAGMA synchronous=NORMAL');
+        // Android requires rawQuery for PRAGMAs that return a row
+        // (execute → SQLITE "query/rawQuery methods only").
+        await db.rawQuery('PRAGMA journal_mode=WAL');
+        await db.rawQuery('PRAGMA synchronous=NORMAL');
       },
       onCreate: (db, version) async {
         await db.execute('''
