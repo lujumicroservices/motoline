@@ -1,3 +1,4 @@
+import '../models/lean_sample.dart';
 import '../models/track_point.dart';
 import 'curva_analysis.dart';
 import 'road_kind_detection.dart';
@@ -68,6 +69,8 @@ class CornerSkillEngine {
     required List<TrackPoint> samples,
     required List<RoadStretch> stretches,
     required double neutralLeanDegrees,
+    List<LeanSample> leanSamples = const [],
+    String? mountMode,
   }) {
     final corners = <CornerSkill>[];
     for (final s in stretches) {
@@ -76,9 +79,10 @@ class CornerSkillEngine {
         samples: samples,
         stretch: s,
         neutralLeanDegrees: neutralLeanDegrees,
+        leanSamples: leanSamples,
       );
       if (analysis == null) continue;
-      corners.add(_scoreCorner(analysis, s));
+      corners.add(_scoreCorner(analysis, s, mountMode: mountMode));
     }
 
     if (corners.isEmpty) {
@@ -153,7 +157,11 @@ class CornerSkillEngine {
     return out;
   }
 
-  CornerSkill _scoreCorner(CurvaAnalysis a, RoadStretch stretch) {
+  CornerSkill _scoreCorner(
+    CurvaAnalysis a,
+    RoadStretch stretch, {
+    String? mountMode,
+  }) {
     final tips = <SkillTip>[];
     var score = 70.0;
 
@@ -162,7 +170,9 @@ class CornerSkillEngine {
     final entry = a.entrySpeedKmh;
     final apex = a.apexSpeedKmh;
     final maxLean = a.maxLeanDegrees;
-    final apexLean = a.apexLeanDegrees?.abs() ?? 0;
+    // Prefer high-rate lean apex when present.
+    final apexLean =
+        (a.leanApexDegrees?.abs() ?? a.apexLeanDegrees?.abs() ?? 0);
 
     // Entry control: huge drop → entered hot / braked hard late.
     if (drop > 35) {
@@ -192,7 +202,7 @@ class CornerSkillEngine {
       tips.add(const SkillTip(SkillTipId.weakExitDrive));
     }
 
-    // Lean commitment at apex vs peak.
+    // Lean commitment at lean-apex vs peak.
     if (maxLean >= 18) {
       score += 6;
       if (apexLean >= maxLean * 0.75) {
@@ -204,6 +214,11 @@ class CornerSkillEngine {
     } else if (stretch.headingChangeDeg.abs() > 50 && maxLean < 12) {
       score -= 10;
       tips.add(const SkillTip(SkillTipId.lowLeanBigHeading));
+    }
+
+    // Pocket rides: absolute degrees are noisier — soft-pedal extreme scores.
+    if (mountMode == 'pocket') {
+      score = 50 + (score - 50) * 0.85;
     }
 
     // Smoothness proxy: duration vs distance (jerky = short chaotic).

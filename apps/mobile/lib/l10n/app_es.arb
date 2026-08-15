@@ -226,6 +226,7 @@
   "mapLayerStartEnd": "Inicio/fin",
   "mapLayerPlayhead": "Marcador",
   "mapLayerLegend": "Leyenda",
+  "mapLayerGpsGaps": "Huecos GPS",
   "friends": "Amigos",
   "friendsSubtitle": "Grupo cerrado — quien tenga la app aparece aquí.",
   "friendsEmpty": "Aún no hay otros riders. Cuando un amigo instale RiderLab, aparece aquí.",
@@ -816,11 +817,11 @@
   "leanLabDirectionReturn": "Regreso",
   "leanLabCalibTitle": "Guardar 0° (moto derecha)",
   "leanLabCalibHelp": "Moto derecha, teléfono ya en su lugar. Sin tocarlo 4 segundos — así se guarda el 0°. La inclinación debe quedar cerca de 0°.",
-  "leanLabCalibHold": "Mantener derecha 4 s",
+  "leanLabCalibHold": "Sostener vertical 4 s",
   "leanLabCalibHolding": "Quédate quieto…",
-  "leanLabCalibPocket": "Colocar el teléfono",
-  "leanLabCalibPocketHelp": "Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado y el recorrido arrancó — no lo guardes en la mano.",
-  "leanLabCalibPocketCountdown": "Colócalo ahora · {n}s",
+  "leanLabCalibPocket": "Guardar en el bolsillo",
+  "leanLabCalibPocketHelp": "Toca, mételo del todo en el bolsillo, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado y el recorrido arrancó — no lo guardes en la mano.",
+  "leanLabCalibPocketCountdown": "Mételo ahora · {n}s",
   "@leanLabCalibPocketCountdown": {
     "placeholders": {
       "n": { "type": "int" }
@@ -886,7 +887,7 @@
   "leanImuLabReset": "Reiniciar",
   "leanImuLabFrozenHint": "El 0° está guardado. La inclinación debe ser cerca de 0°. Inclina a cualquier lado — el número es el ángulo.",
   "leanImuLabAnglesTitle": "Ángulos",
-  "leanImuLabAnglesHelp": "Inclinación de la moto es lo que usa el recorrido. El vector es el ángulo 3D desde el 0°. El roll se usa si el teléfono está derecho; el pitch si está plano.",
+  "leanImuLabAnglesHelp": "La inclinación (roja) es signo(canal ganador) × magnitud del vector. El vector (verde) es el inclinómetro 3D desde el 0°. Si inclinas como en una pared, el verde se mueve; el rojo solo si esa inclinación es lean de la moto para esa pose.",
   "leanImuLabHistoryTitle": "Últimos ~8 s",
   "leanImuLabVectorsTitle": "Capacidades crudas",
   "leanImuLabNextTitle": "Cómo leer esto",

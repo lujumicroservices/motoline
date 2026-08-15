@@ -83,7 +83,7 @@ class _ProUpsellSheet extends ConsumerWidget {
             else
               FilledButton(
                 onPressed: () async {
-                  await ref.read(isProProvider.notifier).setPro(true);
+                  await ref.read(isProProvider.notifier).purchasePro();
                   if (context.mounted) Navigator.of(context).pop();
                 },
                 child: Text(l10n.upgradeToPro),

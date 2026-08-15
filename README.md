@@ -2,29 +2,42 @@
 
 Motorcycle riding companion: record your ride, draw the **pilot line**, scrub any moment, improve corners.
 
-> Formerly branded CornerIQ — same app / package; product name is now **RiderLab**.
+> Formerly branded CornerIQ / Motoline — product name is **RiderLab** by RawThrottle.
+
+## Monorepo
+
+```text
+apps/mobile/          # Flutter app (Android first)
+packages/ride_core/   # Pure Dart: GPS gaps, smoothness, sync outbox models
+supabase/             # Migrations + scripts
+docs/                 # Architecture, store, partner decks, legal
+```
 
 ## MVP (this repo)
 
-- Start / end ride with phone GPS
-- Offline-first SQLite storage (survives disconnects & app restarts)
-- Crash recovery for unfinished rides
-- Post-ride map with speed-colored polyline (OpenStreetMap tiles)
-- Local ride history
-- Ride Lab: segment zoom, brakes, curvas, friends + same-area / route compare
+- Start / end ride with phone GPS + IMU lean (+ baro when available)
+- Offline-first SQLite with **WAL** batches and crash recovery
+- Durable **sync outbox** + Supabase cloud garage
+- Post-ride map (OpenStreetMap / flutter_map): speed-colored line, GPS gap markers, scrub
+- On-device insights: corners, brakes, skill coach cards
+- Friends / rodadas; Lean Lab pilots
+- Free / Pro gates (RevenueCat when `REVENUECAT_API_KEY` is set; local toggle otherwise)
 
 ## Run
 
 ```bash
-cd apps/mobile
+cd packages/ride_core && dart pub get && dart test
+cd ../../apps/mobile
+cp .env.example .env   # fill Supabase + optional RevenueCat
 flutter pub get
-flutter run
+flutter gen-l10n
+flutter run --flavor sideload --dart-define=DISTRIBUTION=sideload
 ```
 
 ## Install (friends)
 
 See [INSTALL.md](INSTALL.md) for Android APK sideload steps.
 
-**Google Play:** see **[docs/PLAY_STORE.md](docs/PLAY_STORE.md)** for signed App Bundle + Console checklist.
-
-Cloud backend: **[docs/SUPABASE.md](docs/SUPABASE.md)** — Supabase project under luju.nieves (dashboard still named CornerIQ; app is RiderLab).
+**Google Play:** [docs/PLAY_STORE.md](docs/PLAY_STORE.md)  
+**Store checklist + legal:** [docs/STORE_READINESS.md](docs/STORE_READINESS.md) · [docs/legal/](docs/legal/)  
+**Cloud:** [docs/SUPABASE.md](docs/SUPABASE.md)

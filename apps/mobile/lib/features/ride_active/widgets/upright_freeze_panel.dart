@@ -5,15 +5,17 @@ import '../../../core/lean_lab/upright_freeze_controller.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 
-/// One button: tap, mount the phone, freeze on stillness, then auto-start.
+/// One button: arm freeze (pocket place or hold-in-mount), then auto-start.
 class UprightFreezePanel extends StatelessWidget {
   const UprightFreezePanel({
     super.key,
     required this.controller,
+    this.mode = UprightFreezeMode.place,
     this.compact = false,
   });
 
   final UprightFreezeController controller;
+  final UprightFreezeMode mode;
   final bool compact;
 
   @override
@@ -21,15 +23,28 @@ class UprightFreezePanel extends StatelessWidget {
     final l10n = context.l10n;
     final c = controller;
     final busy = c.busy;
-    final status = switch (c.phase) {
-      UprightFreezePhase.countdown =>
-        l10n.leanLabCalibPocketCountdown(c.countdownLeft),
-      UprightFreezePhase.settle => l10n.leanLabCalibPocketSettle,
-      UprightFreezePhase.capture => l10n.leanLabCalibPocketCapture,
-      UprightFreezePhase.failed => l10n.leanLabCalibPocketFail,
-      UprightFreezePhase.done => l10n.leanLabFrozenNeutral,
-      UprightFreezePhase.idle => null,
-    };
+
+    String? status;
+    switch (c.phase) {
+      case UprightFreezePhase.countdown:
+        status = l10n.leanLabCalibPocketCountdown(c.countdownLeft);
+      case UprightFreezePhase.settle:
+        status = l10n.leanLabCalibPocketSettle;
+      case UprightFreezePhase.capture:
+        status = c.mode == UprightFreezeMode.hold
+            ? l10n.leanLabCalibHolding
+            : l10n.leanLabCalibPocketCapture;
+      case UprightFreezePhase.failed:
+        status = l10n.leanLabCalibPocketFail;
+      case UprightFreezePhase.done:
+        status = l10n.leanLabFrozenNeutral;
+      case UprightFreezePhase.idle:
+        status = null;
+    }
+
+    final label = mode == UprightFreezeMode.hold
+        ? l10n.leanLabCalibHold
+        : l10n.leanLabCalibPocket;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -49,12 +64,12 @@ class UprightFreezePanel extends StatelessWidget {
           const SizedBox(height: 10),
         ],
         FilledButton.icon(
-          onPressed: busy ? null : c.beginPlace,
+          onPressed: busy ? null : () => c.begin(mode),
           style: FilledButton.styleFrom(
             minimumSize: Size.fromHeight(compact ? 56 : 72),
           ),
           icon: Icon(busy ? Icons.hourglass_top : Icons.play_arrow_rounded),
-          label: Text(l10n.leanLabCalibPocket),
+          label: Text(label),
         ),
       ],
     );

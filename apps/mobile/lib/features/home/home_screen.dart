@@ -737,7 +737,10 @@ class _RecoveryBanner extends ConsumerWidget {
                         .read(rideRecorderProvider)
                         .finalizeRecovered(ride.id);
                     unawaited(
-                      ref.read(rideSyncServiceProvider).syncRide(completed.id),
+                      enqueueAndDrainRideSync(
+                        ref.read(syncOutboxServiceProvider),
+                        completed.id,
+                      ),
                     );
                     ref.invalidate(ridesListProvider);
                     ref.invalidate(incompleteRideProvider);

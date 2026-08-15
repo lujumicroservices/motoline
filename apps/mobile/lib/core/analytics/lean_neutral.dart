@@ -3,11 +3,24 @@ import 'dart:math' as math;
 import '../models/track_point.dart';
 import '../services/location_service.dart';
 
+double resolveNeutralLeanDegrees({
+  required List<TrackPoint> samples,
+  double? overrideNeutral,
+  bool uprightLocked = false,
+}) {
+  if (uprightLocked) return 0;
+  if (overrideNeutral != null) return overrideNeutral;
+  return inferNeutralLeanDegrees(samples);
+}
+
 /// Infers pocket/mount “upright” lean so 0° means bike upright, not phone absolute.
 ///
 /// Street rides spend most time near upright; phone-in-pocket adds a constant
 /// offset. We estimate that offset from slow / early samples, then fall back
 /// to the median lean of the whole ride.
+///
+/// **Do not use** when the ride froze upright gravity (g0) — lean on points is
+/// already bike-relative; call [resolveNeutralLeanDegrees] instead.
 double inferNeutralLeanDegrees(List<TrackPoint> samples) {
   final leans = samples
       .map((p) => p.leanDegrees)

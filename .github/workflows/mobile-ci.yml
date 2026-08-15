@@ -1,0 +1,40 @@
+name: mobile-ci
+
+on:
+  push:
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/ride_core/**'
+      - '.github/workflows/mobile-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/ride_core/**'
+      - '.github/workflows/mobile-ci.yml'
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: ride_core deps
+        working-directory: packages/ride_core
+        run: dart pub get
+      - name: ride_core tests
+        working-directory: packages/ride_core
+        run: dart test
+      - name: mobile deps
+        run: flutter pub get
+      - name: gen-l10n
+        run: flutter gen-l10n
+      - name: analyze
+        run: flutter analyze --no-fatal-infos
+      - name: test
+        run: flutter test

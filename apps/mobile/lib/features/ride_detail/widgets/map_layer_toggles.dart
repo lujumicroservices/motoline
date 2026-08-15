@@ -15,6 +15,7 @@ class MapLayerOptions {
     this.showStartEnd = true,
     this.showPlayhead = true,
     this.showLegend = true,
+    this.showGpsGaps = true,
   });
 
   final bool showSpeedColors;
@@ -23,6 +24,7 @@ class MapLayerOptions {
   final bool showStartEnd;
   final bool showPlayhead;
   final bool showLegend;
+  final bool showGpsGaps;
 
   MapLayerOptions copyWith({
     bool? showSpeedColors,
@@ -31,6 +33,7 @@ class MapLayerOptions {
     bool? showStartEnd,
     bool? showPlayhead,
     bool? showLegend,
+    bool? showGpsGaps,
   }) =>
       MapLayerOptions(
         showSpeedColors: showSpeedColors ?? this.showSpeedColors,
@@ -40,6 +43,7 @@ class MapLayerOptions {
         showStartEnd: showStartEnd ?? this.showStartEnd,
         showPlayhead: showPlayhead ?? this.showPlayhead,
         showLegend: showLegend ?? this.showLegend,
+        showGpsGaps: showGpsGaps ?? this.showGpsGaps,
       );
 }
 
@@ -98,6 +102,12 @@ class MapLayerToggles extends StatelessWidget {
             selected: options.showLegend,
             color: AppTheme.steel,
             onSelected: (v) => onChanged(options.copyWith(showLegend: v)),
+          ),
+          _chip(
+            label: l10n.mapLayerGpsGaps,
+            selected: options.showGpsGaps,
+            color: AppTheme.lineHot,
+            onSelected: (v) => onChanged(options.copyWith(showGpsGaps: v)),
           ),
         ],
       ),

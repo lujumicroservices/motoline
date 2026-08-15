@@ -42,6 +42,12 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
 
   int get _signFlip => _pose == PhonePoseId.portraitScreenIn ? -1 : 1;
 
+  bool get _isPocketMount =>
+      _mount == PhoneMountId.leftPocket || _mount == PhoneMountId.rightPocket;
+
+  UprightFreezeMode get _freezeMode =>
+      _isPocketMount ? UprightFreezeMode.place : UprightFreezeMode.hold;
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +88,9 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
     final recorder = ref.read(rideRecorderProvider);
     recorder.prepareLeanLabUpright(g0, signFlip: _signFlip);
     recorder.prepareLeanLabNeutral(0);
+    final mountMode =
+        _mount.toLowerCase().contains('pocket') ? 'pocket' : 'mount';
+    recorder.setLeanMountMode(mountMode);
     _sensor.stop();
     try {
       if (!mounted) return;
@@ -205,7 +214,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
               style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Text(
-            l10n.leanLabCalibPocketHelp,
+            _isPocketMount ? l10n.leanLabCalibPocketHelp : l10n.leanLabCalibHelp,
             style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 13,
@@ -237,7 +246,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
               ),
             ),
           const SizedBox(height: 12),
-          UprightFreezePanel(controller: _freeze),
+          UprightFreezePanel(controller: _freeze, mode: _freezeMode),
         ],
       ),
     );

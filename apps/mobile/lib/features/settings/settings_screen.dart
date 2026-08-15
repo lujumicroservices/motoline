@@ -36,7 +36,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() => _syncing = true);
     try {
       final sync = ref.read(rideSyncServiceProvider);
+      final outbox = ref.read(syncOutboxServiceProvider);
+      final drained = await outbox.drain(limit: 40);
       final result = await sync.syncAllCompletedRides();
+      final combinedOk = drained.ok + result.ok;
+      final combinedFail = drained.fail + result.fail;
       final pulled = await sync.pullMyCloudRides(
         policy: TrackPullPolicy.preferRicher,
       );
@@ -49,7 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         SnackBar(
           duration: Duration(seconds: err == null ? 4 : 10),
           content: Text(
-            '${l10n.syncCloudRidesDone(result.ok, result.fail)} · '
+            '${l10n.syncCloudRidesDone(combinedOk, combinedFail)} · '
             '${l10n.syncCloudRidesPulled(pulled, leanPulled)}'
             '$detail',
           ),
@@ -260,7 +264,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              l10n.proToggleHelp,
+              revenueCatConfigured
+                  ? 'Store billing via RevenueCat when configured. Local toggle is for sideload/dev.'
+                  : l10n.proToggleHelp,
               style: GoogleFonts.rajdhani(
                 color: AppTheme.steel,
                 fontSize: 12,
@@ -270,6 +276,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             activeThumbColor: RideVizPalette.leanLeft,
             onChanged: (v) => ref.read(isProProvider.notifier).setPro(v),
           ),
+          if (revenueCatConfigured) ...[
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () async {
+                await ref.read(isProProvider.notifier).restorePurchases();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.proUnlocked)),
+                );
+              },
+              child: const Text('Restore purchases'),
+            ),
+          ],
           const SizedBox(height: 8),
           if (!isPro)
             OutlinedButton(

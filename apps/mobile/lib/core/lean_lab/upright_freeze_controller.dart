@@ -16,7 +16,16 @@ enum UprightFreezePhase {
   done,
 }
 
-/// Tap once → rider mounts the phone → stillness locks g0 → caller starts.
+/// How the rider arms the upright freeze.
+///
+/// [place] — arm → pocket/mount → settle → capture (never freeze in hand).
+/// [hold] — phone already mounted; capture ~4 s of stillness.
+enum UprightFreezeMode {
+  place,
+  hold,
+}
+
+/// Tap once → phone in final mount → stillness locks g0 → caller starts.
 class UprightFreezeController extends ChangeNotifier {
   UprightFreezeController(
     this.engine, {
@@ -29,9 +38,11 @@ class UprightFreezeController extends ChangeNotifier {
   final void Function(Vec3 g0)? onFrozen;
 
   UprightFreezePhase phase = UprightFreezePhase.idle;
+  UprightFreezeMode mode = UprightFreezeMode.place;
   DateTime? _phaseAt;
   int _stillMs = 0;
   int countdownLeft = 5;
+  Duration _captureFor = const Duration(seconds: 3);
   Vec3? frozenG0;
   String? failId;
   Timer? _tick;
@@ -57,11 +68,13 @@ class UprightFreezeController extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Start the only ritual: place the phone, wait until still, freeze, go.
+  /// Pocket / place ritual: countdown → wait for stillness → capture g0.
   void beginPlace() {
+    mode = UprightFreezeMode.place;
     phase = UprightFreezePhase.countdown;
     _phaseAt = DateTime.now();
     countdownLeft = 5;
+    _captureFor = const Duration(seconds: 3);
     frozenG0 = null;
     failId = null;
     _stillMs = 0;
@@ -70,10 +83,33 @@ class UprightFreezeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Tank / already-mounted: capture ~4 s without moving the phone.
+  void beginHold() {
+    mode = UprightFreezeMode.hold;
+    phase = UprightFreezePhase.capture;
+    _phaseAt = DateTime.now();
+    countdownLeft = 0;
+    _captureFor = const Duration(seconds: 4);
+    frozenG0 = null;
+    failId = null;
+    _stillMs = 0;
+    engine.clearCalibBuffer();
+    HapticFeedback.mediumImpact();
+    notifyListeners();
+  }
+
+  void begin(UprightFreezeMode which) {
+    if (which == UprightFreezeMode.hold) {
+      beginHold();
+    } else {
+      beginPlace();
+    }
+  }
+
   void _fail() {
     unawaited(LockCue.fail());
     phase = UprightFreezePhase.failed;
-    failId = 'place_fail';
+    failId = mode == UprightFreezeMode.hold ? 'hold_fail' : 'place_fail';
     notifyListeners();
   }
 
@@ -110,14 +146,18 @@ class UprightFreezeController extends ChangeNotifier {
       }
       notifyListeners();
     } else if (phase == UprightFreezePhase.capture) {
-      if (now.difference(_phaseAt ?? now) >= const Duration(seconds: 3)) {
+      if (now.difference(_phaseAt ?? now) >= _captureFor) {
         _finish();
+      } else if (mode == UprightFreezeMode.hold) {
+        notifyListeners();
       }
     }
   }
 
   void _finish() {
-    final g0 = engine.peekCalibGravity(minSamples: 20) ?? engine.latest?.gravity;
+    final minSamples = mode == UprightFreezeMode.hold ? 25 : 20;
+    final g0 =
+        engine.peekCalibGravity(minSamples: minSamples) ?? engine.latest?.gravity;
     if (g0 == null) {
       _fail();
       return;

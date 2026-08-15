@@ -254,10 +254,13 @@ class _PoseEngineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conf = sample.trackerConfidence;
+    final conf = sample.leanConfidence;
+    final gps = sample.gpsLean;
+    final gpsTxt = gps == null ? '--' : '${gps.toStringAsFixed(0)}°';
     final text = frozen
         ? '${sample.pose.label} · ${sample.winningChannel}'
-            '${conf > 0 ? '  ·  conf ${conf.toStringAsFixed(2)}' : ''}'
+            '  ·  conf ${(conf * 100).round()}%'
+            '  ·  GPS $gpsTxt'
             '  ·  up ${sample.upAxis}'
         : '${context.l10n.leanImuLabFreeze}  ·  up ${sample.upAxis}  ·  ${sample.pose.label}';
     return Container(

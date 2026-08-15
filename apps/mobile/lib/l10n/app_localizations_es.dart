@@ -536,6 +536,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mapLayerLegend => 'Leyenda';
 
   @override
+  String get mapLayerGpsGaps => 'Huecos GPS';
+
+  @override
   String get friends => 'Amigos';
 
   @override
@@ -1966,21 +1969,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'Moto derecha, teléfono ya en su lugar. Sin tocarlo 4 segundos — así se guarda el 0°. La inclinación debe quedar cerca de 0°.';
 
   @override
-  String get leanLabCalibHold => 'Mantener derecha 4 s';
+  String get leanLabCalibHold => 'Sostener vertical 4 s';
 
   @override
   String get leanLabCalibHolding => 'Quédate quieto…';
 
   @override
-  String get leanLabCalibPocket => 'Colocar el teléfono';
+  String get leanLabCalibPocket => 'Guardar en el bolsillo';
 
   @override
   String get leanLabCalibPocketHelp =>
-      'Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado y el recorrido arrancó — no lo guardes en la mano.';
+      'Toca, mételo del todo en el bolsillo, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado y el recorrido arrancó — no lo guardes en la mano.';
 
   @override
   String leanLabCalibPocketCountdown(int n) {
-    return 'Colócalo ahora · ${n}s';
+    return 'Mételo ahora · ${n}s';
   }
 
   @override
@@ -2131,7 +2134,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanImuLabAnglesHelp =>
-      'Inclinación de la moto es lo que usa el recorrido. El vector es el ángulo 3D desde el 0°. El roll se usa si el teléfono está derecho; el pitch si está plano.';
+      'La inclinación (roja) es signo(canal ganador) × magnitud del vector. El vector (verde) es el inclinómetro 3D desde el 0°. Si inclinas como en una pared, el verde se mueve; el rojo solo si esa inclinación es lean de la moto para esa pose.';
 
   @override
   String get leanImuLabHistoryTitle => 'Últimos ~8 s';

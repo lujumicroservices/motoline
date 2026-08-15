@@ -25,6 +25,8 @@ class ImuSample {
     required this.fusedPitch,
     required this.vectorLean,
     required this.bikeLean,
+    required this.gpsLean,
+    required this.leanConfidence,
     required this.heading,
     required this.upAxis,
     required this.pose,
@@ -51,6 +53,8 @@ class ImuSample {
   final double fusedPitch;
   final double vectorLean;
   final double? bikeLean;
+  final double? gpsLean;
+  final double leanConfidence;
   final double? heading;
   final String upAxis;
   final PhonePoseClass pose;
@@ -191,6 +195,8 @@ class LeanImuLabSampler extends ChangeNotifier {
       fusedPitch: snap.fusedPitch,
       vectorLean: snap.vectorLean,
       bikeLean: snap.bikeLean,
+      gpsLean: snap.gpsLean,
+      leanConfidence: snap.leanConfidence,
       heading: _mag == null ? null : tiltCompensatedHeadingDeg(_mag!, snap.gravity),
       upAxis: snap.upAxis,
       pose: snap.pose,

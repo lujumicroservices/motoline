@@ -93,7 +93,7 @@ Supabase → Auth → Google: enable provider + **Manual linking**; paste Web cl
 | App icon 512×512 | Adaptive icon already in app; export a 512 PNG for store |
 | Feature graphic 1024×500 | Required banner |
 | Phone screenshots | ≥2 (home, Ride Lab map, active ride) |
-| Privacy policy URL | **Required** — host a page covering GPS, account, Supabase |
+| Privacy policy URL | **Required** — host [docs/legal/privacy.html](legal/privacy.html); see [STORE_READINESS.md](STORE_READINESS.md) |
 | App category | Health & fitness / Maps / Sports (pick closest) |
 | Content rating | IARC questionnaire |
 | Target audience | Typically 18+ (driving / motorcycle) |

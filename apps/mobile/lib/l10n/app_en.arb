@@ -180,6 +180,7 @@
   "mapLayerStartEnd": "Start/end",
   "mapLayerPlayhead": "Marker",
   "mapLayerLegend": "Legend",
+  "mapLayerGpsGaps": "GPS gaps",
   "friends": "Friends",
   "friendsSubtitle": "Closed group — anyone with the app shows up here.",
   "friendsEmpty": "No other riders yet. When a friend installs RiderLab, they appear here.",
@@ -747,9 +748,9 @@
   "leanLabCalibHelp": "Bike standing straight, phone already in place. Hands off for 4 seconds — this saves 0°. Lean should stay near 0°.",
   "leanLabCalibHold": "Hold upright 4s",
   "leanLabCalibHolding": "Hold still…",
-  "leanLabCalibPocket": "Place phone",
-  "leanLabCalibPocketHelp": "Tap, put the phone in a pocket or on the tank, stay still. A buzz and beep means 0° is saved and the ride started — don’t save 0° in your hand.",
-  "leanLabCalibPocketCountdown": "Place it now · {n}s",
+  "leanLabCalibPocket": "Save in pocket",
+  "leanLabCalibPocketHelp": "Tap, put the phone fully in the pocket, stay still. A buzz and beep means 0° is saved and the ride started — don’t save 0° in your hand.",
+  "leanLabCalibPocketCountdown": "Pocket it now · {n}s",
   "@leanLabCalibPocketCountdown": {
     "placeholders": {
       "n": { "type": "int" }
@@ -815,7 +816,7 @@
   "leanImuLabReset": "Reset",
   "leanImuLabFrozenHint": "0° is saved. Lean should be about 0° now. Tilt any way — the number is the angle, left or right comes from how the phone sits.",
   "leanImuLabAnglesTitle": "Angle candidates",
-  "leanImuLabAnglesHelp": "Bike lean is what the ride uses. Vector is the 3D angle from 0°. Roll is used when the phone is upright; pitch when it is flat.",
+  "leanImuLabAnglesHelp": "Bike lean (red) is sign(winning channel) × vector magnitude. Vector (green) is the 3D clinometer from 0°. A wall tip moves green; red only moves if that tilt is bike lean for this pose.",
   "leanImuLabHistoryTitle": "Last ~8 s",
   "leanImuLabVectorsTitle": "Raw capabilities",
   "leanImuLabNextTitle": "How to read this for production",

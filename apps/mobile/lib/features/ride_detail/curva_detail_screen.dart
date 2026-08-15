@@ -57,7 +57,7 @@ class _CurvaDetailScreenState extends ConsumerState<CurvaDetailScreen> {
       MaterialPageRoute(
         builder: (_) => FullscreenMapScreen(
           points: widget.samples,
-          scrubIndex: a.apexIndex,
+          scrubIndex: a.displayApexIndex,
           initialFocusStart: a.mapStartIndex,
           initialFocusEnd: a.mapEndIndex,
         ),
@@ -144,7 +144,7 @@ class _CurvaDetailScreenState extends ConsumerState<CurvaDetailScreen> {
                         MaterialPageRoute(
                           builder: (_) => FullscreenMapScreen(
                             points: widget.samples,
-                            scrubIndex: a.apexIndex,
+                            scrubIndex: a.displayApexIndex,
                             initialFocusStart: a.mapStartIndex,
                             initialFocusEnd: a.mapEndIndex,
                           ),

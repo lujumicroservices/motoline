@@ -578,8 +578,13 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final recorder = ref.read(rideRecorderProvider);
     try {
       final ride = await recorder.stop();
-      // Closed beta: share with friends (soft-fail offline).
-      unawaited(ref.read(rideSyncServiceProvider).syncRide(ride.id));
+      // Closed beta: durable outbox then drain (soft-fail offline).
+      unawaited(
+        enqueueAndDrainRideSync(
+          ref.read(syncOutboxServiceProvider),
+          ride.id,
+        ),
+      );
       final points =
           await ref.read(rideDatabaseProvider).getPoints(ride.id);
       await LeanLabService.instance.finalizeTrackStats(

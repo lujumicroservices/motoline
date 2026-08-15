@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../models/lean_sample.dart';
 import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
@@ -8,6 +9,7 @@ import 'corner_skill.dart';
 import 'lean_neutral.dart';
 import 'road_kind_detection.dart';
 import '../telemetry/curves/curves.dart';
+import '../lean_lab/lean_imu_math.dart';
 
 class RideAnalytics {
   RideAnalytics({
@@ -17,11 +19,15 @@ class RideAnalytics {
     double? neutralLeanOverride,
     DateTime? seriesOrigin,
     this.mapIndexOffset = 0,
+    this.leanSamples = const [],
   })  : samples = _dedupe(points),
         _distanceMetersOverride = distanceMetersOverride,
         _seriesOrigin = seriesOrigin {
-    neutralLeanDegrees =
-        neutralLeanOverride ?? inferNeutralLeanDegrees(samples);
+    neutralLeanDegrees = resolveNeutralLeanDegrees(
+      samples: samples,
+      overrideNeutral: neutralLeanOverride,
+      uprightLocked: ride.leanUprightLocked || ride.hasLeanUprightFreeze,
+    );
     leanSides = leanSideStats(
       samples: samples,
       neutralDegrees: neutralLeanDegrees,
@@ -39,11 +45,16 @@ class RideAnalytics {
       samples: samples,
       stretches: roadStretches,
       neutralLeanDegrees: neutralLeanDegrees,
+      leanSamples: leanSamples,
+      mountMode: ride.leanMountMode,
     );
   }
 
   final Ride ride;
   final List<TrackPoint> points;
+
+  /// High-rate lean series (~10 Hz) when available.
+  final List<LeanSample> leanSamples;
 
   /// One sample per unique timestamp (GPS sometimes emits duplicates).
   final List<TrackPoint> samples;
@@ -70,6 +81,15 @@ class RideAnalytics {
 
   /// Corner skill scores + short coach tips (technique, not GPS lock).
   late final RideSkillSummary skillSummary;
+
+  /// 0 = balanced L/R peaks; high = pocket/mount asymmetry (Bugambilias).
+  double get leanAsymmetry => leanSideAsymmetry(
+        maxLeftDegrees: leanSides.maxLeftDegrees,
+        maxRightDegrees: leanSides.maxRightDegrees,
+      );
+
+  bool get leanConfidenceLow =>
+      ride.leanMountMode == 'pocket' || leanAsymmetry > 0.35;
 
   bool get hasData => samples.isNotEmpty;
 
@@ -317,6 +337,7 @@ class RideAnalytics {
       neutralLeanOverride: neutralLeanDegrees,
       seriesOrigin: _origin,
       mapIndexOffset: mapIndexOffset + lo,
+      leanSamples: leanSamples,
     );
   }
 

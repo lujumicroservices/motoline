@@ -49,6 +49,7 @@ class RideDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rideAsync = ref.watch(rideProvider(rideId));
     final pointsAsync = ref.watch(ridePointsProvider(rideId));
+    final leanAsync = ref.watch(rideLeanSamplesProvider(rideId));
     final l10n = context.l10n;
 
     return Scaffold(
@@ -62,10 +63,17 @@ class RideDetailScreen extends ConsumerWidget {
           return pointsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('$e')),
-            data: (points) => _RideDashboard(
-              rideId: rideId,
-              analytics: RideAnalytics(ride: ride, points: points),
-            ),
+            data: (points) {
+              final leanSamples = leanAsync.asData?.value ?? const [];
+              return _RideDashboard(
+                rideId: rideId,
+                analytics: RideAnalytics(
+                  ride: ride,
+                  points: points,
+                  leanSamples: leanSamples,
+                ),
+              );
+            },
           );
         },
       ),

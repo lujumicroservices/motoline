@@ -47,4 +47,24 @@ void main() {
       closeTo(-25, 0.01),
     );
   });
+
+  test('upright locked skips post-hoc neutral inference', () {
+    final samples = <TrackPoint>[
+      for (var i = 0; i < 20; i++)
+        point(lean: 35 + (i.isEven ? 0.4 : -0.3), speedMps: 0.2, seconds: i),
+    ];
+    expect(inferNeutralLeanDegrees(samples), closeTo(35, 1.5));
+    expect(
+      resolveNeutralLeanDegrees(samples: samples, uprightLocked: true),
+      0,
+    );
+    expect(
+      resolveNeutralLeanDegrees(
+        samples: samples,
+        overrideNeutral: 12,
+        uprightLocked: false,
+      ),
+      12,
+    );
+  });
 }

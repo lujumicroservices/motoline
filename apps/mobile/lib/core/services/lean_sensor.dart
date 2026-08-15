@@ -27,6 +27,12 @@ class LeanSensor {
   bool get isStill => _engine.isStill;
   Vec3? get frozenGravity => _engine.frozenGravity;
 
+  void setMountMode(String mode) => _engine.setMountMode(mode);
+
+  double get leanConfidence => _engine.leanConfidence;
+  double? get gpsLeanDegrees => _engine.gpsLeanDegrees;
+  double? get imuLeanDegrees => _engine.imuLeanDegrees;
+
   void start() => _engine.start();
 
   void stop() => _engine.stop();

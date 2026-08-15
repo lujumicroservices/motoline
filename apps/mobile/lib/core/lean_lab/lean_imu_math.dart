@@ -163,8 +163,10 @@ PhonePoseClass poseFromGravity(Vec3 g) => poseFromUpAxis(dominantUpAxis(g));
         rollRate: gyroRad.z,
         pitchRate: gyroRad.y,
       ),
+    // Screen-up on the tank: bike lean is rotation around Y (phone long
+    // axis, along the frame). gyro.z is yaw and made fused roll wander.
     PhonePoseClass.flatZ => (
-        rollRate: gyroRad.z,
+        rollRate: gyroRad.y,
         pitchRate: gyroRad.x,
       ),
   };
@@ -185,8 +187,11 @@ double flatLeanSign(Vec3 gravity, Vec3 g0) {
 
 double eulerSign(double degrees) => degrees == 0 ? 1.0 : degrees.sign;
 
-/// Production lean: vector magnitude (clinometer) × sign from the winning
-/// fused Euler (or flat-plane gravity for screen-up mounts).
+/// Production lean: vector magnitude × sign from the winning channel.
+///
+/// `bikeLean = sign(winning fused Euler) × angle(g, g0)`
+/// Near freeze, a tiny fused delta must not multiply a large vector tip
+/// (pitch/wall/brake) — deadzone returns the fused delta itself instead.
 double signedBikeLean({
   required Vec3 gravity,
   required Vec3 g0,
@@ -199,18 +204,79 @@ double signedBikeLean({
 }) {
   if (pose == PhonePoseClass.unknown) return 0;
   final mag = gravityAngleDeg(gravity, g0);
-  final double signed;
-  switch (pose) {
-    case PhonePoseClass.verticalY:
-      signed = eulerSign(fusedRoll - freezeRoll) * mag;
-    case PhonePoseClass.landscapeX:
-      signed = eulerSign(fusedPitch - freezePitch) * mag;
-    case PhonePoseClass.flatZ:
-      signed = flatLeanSign(gravity, g0) * mag;
-    case PhonePoseClass.unknown:
-      signed = 0;
+  if (pose == PhonePoseClass.flatZ) {
+    if (mag < 1.5) return 0;
+    return (flatLeanSign(gravity, g0) * mag * signFlip).clamp(-70.0, 70.0);
   }
-  return (signed * signFlip).clamp(-70.0, 70.0);
+  final fusedDelta = switch (pose) {
+    PhonePoseClass.verticalY => fusedRoll - freezeRoll,
+    PhonePoseClass.landscapeX => fusedPitch - freezePitch,
+    PhonePoseClass.flatZ || PhonePoseClass.unknown => 0.0,
+  };
+  // Deadzone: avoid sign(chatter) × vector when the winning channel is ~0.
+  if (fusedDelta.abs() < 2.0) {
+    return (fusedDelta * signFlip).clamp(-70.0, 70.0);
+  }
+  return (eulerSign(fusedDelta) * mag * signFlip).clamp(-70.0, 70.0);
+}
+
+/// GPS kinematic lean (coordinated turn): φ ≈ atan(v * ψ̇ / g).
+///
+/// [headingRateDegPerSec] is signed yaw rate (deg/s). Positive = right turn.
+/// Returns null when speed is too low for a reliable estimate.
+double? gpsKinematicLeanDegrees({
+  required double speedMps,
+  required double headingRateDegPerSec,
+  double minSpeedMps = 6.94, // ~25 km/h
+}) {
+  if (!speedMps.isFinite || speedMps < minSpeedMps) return null;
+  if (!headingRateDegPerSec.isFinite) return null;
+  final yawRad = headingRateDegPerSec.abs() * math.pi / 180.0;
+  if (yawRad < 0.02) return 0; // essentially straight
+  const g = 9.80665;
+  final mag = math.atan(speedMps * yawRad / g) * 180.0 / math.pi;
+  final signed = headingRateDegPerSec >= 0 ? mag : -mag;
+  return signed.clamp(-70.0, 70.0);
+}
+
+/// Confidence 0..1 from tracker agreement + IMU/GPS disagreement.
+double leanConfidenceScore({
+  required bool frozen,
+  required PhonePoseClass pose,
+  required double trackerConfidence,
+  required bool uprightLocked,
+  required String mountMode,
+  double? imuLeanDeg,
+  double? gpsLeanDeg,
+  double disagreeThresholdDeg = 12,
+}) {
+  if (!frozen || pose == PhonePoseClass.unknown) return 0;
+  var c = 0.35 + 0.35 * trackerConfidence.clamp(0.0, 1.0);
+  if (uprightLocked) c += 0.15;
+  if (mountMode == 'mount') {
+    c += 0.1;
+  } else if (mountMode == 'pocket') {
+    c -= 0.08;
+  }
+  if (imuLeanDeg != null && gpsLeanDeg != null) {
+    final d = (imuLeanDeg - gpsLeanDeg).abs();
+    if (d > disagreeThresholdDeg) {
+      c -= ((d - disagreeThresholdDeg) / 30.0).clamp(0.0, 0.35);
+    } else if (imuLeanDeg.abs() > 15) {
+      c += 0.08;
+    }
+  }
+  return c.clamp(0.0, 1.0);
+}
+
+/// Left/right peak asymmetry 0..1 (0 = balanced). From Bugambilias pocket bias.
+double leanSideAsymmetry({
+  required double maxLeftDegrees,
+  required double maxRightDegrees,
+}) {
+  final peak = math.max(maxLeftDegrees, maxRightDegrees);
+  if (peak < 8) return 0;
+  return ((maxLeftDegrees - maxRightDegrees).abs() / peak).clamp(0.0, 1.0);
 }
 
 Vec3 medianVec3(List<Vec3> samples) {

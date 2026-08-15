@@ -102,7 +102,8 @@ class _PilotLineMapState extends State<PilotLineMap> {
         a.layers.showRoadKindContrast != b.layers.showRoadKindContrast ||
         a.layers.showBrakes != b.layers.showBrakes ||
         a.layers.showStartEnd != b.layers.showStartEnd ||
-        a.layers.showLegend != b.layers.showLegend;
+        a.layers.showLegend != b.layers.showLegend ||
+        a.layers.showGpsGaps != b.layers.showGpsGaps;
   }
 
   void _rebuildGeometry() {
@@ -173,7 +174,9 @@ class _PilotLineMapState extends State<PilotLineMap> {
       );
     } else {
       var cursor = 0;
-      for (final segment in splitByGpsGaps(points)) {
+      final segments = splitByGpsGaps(points);
+      for (var s = 0; s < segments.length; s++) {
+        final segment = segments[s];
         if (segment.length >= 2) {
           polylines.addAll(
             buildMergedStyledPolylines(
@@ -185,12 +188,68 @@ class _PilotLineMapState extends State<PilotLineMap> {
             ),
           );
         }
+        // Dashed connector across signal-loss gaps (honest line, not invented GPS).
+        if (widget.layers.showGpsGaps &&
+            s + 1 < segments.length &&
+            segments[s].isNotEmpty &&
+            segments[s + 1].isNotEmpty) {
+          final a = segments[s].last;
+          final b = segments[s + 1].first;
+          polylines.add(
+            Polyline(
+              points: [
+                LatLng(a.latitude, a.longitude),
+                LatLng(b.latitude, b.longitude),
+              ],
+              color: AppTheme.steel.withValues(alpha: 0.55),
+              strokeWidth: 3,
+              pattern: StrokePattern.dashed(segments: const [8, 8]),
+            ),
+          );
+        }
         cursor += segment.length;
       }
     }
     _polylines = polylines;
 
     final markers = <Marker>[];
+    if (widget.layers.showGpsGaps) {
+      final gapStarts = <int>[];
+      for (var i = 1; i < points.length; i++) {
+        final gap = points[i].timestamp.difference(points[i - 1].timestamp);
+        if (gap > const Duration(seconds: 8)) gapStarts.add(i);
+      }
+      for (final i in gapStarts) {
+        if (hasFocus && (i < focusLo || i > focusHi)) continue;
+        final before = points[i - 1];
+        final after = points[i];
+        for (final p in [before, after]) {
+          markers.add(
+            Marker(
+              point: LatLng(p.latitude, p.longitude),
+              width: 16,
+              height: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.asphalt,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFFFC107),
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.signal_cellular_connected_no_internet_0_bar,
+                  size: 9,
+                  color: Color(0xFFFFC107),
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    }
+
     if (widget.layers.showBrakes) {
       for (final brake in widget.brakeEvents) {
         final mid = ((brake.startIndex + brake.endIndex) / 2).round();
@@ -284,6 +343,7 @@ class _PilotLineMapState extends State<PilotLineMap> {
       widget.layers.showSpeedColors,
       widget.layers.showRoadKindContrast,
       widget.layers.showBrakes,
+      widget.layers.showGpsGaps,
     );
   }
 

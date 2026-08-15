@@ -534,6 +534,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLayerLegend => 'Legend';
 
   @override
+  String get mapLayerGpsGaps => 'GPS gaps';
+
+  @override
   String get friends => 'Friends';
 
   @override
@@ -1958,15 +1961,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabCalibHolding => 'Hold still…';
 
   @override
-  String get leanLabCalibPocket => 'Place phone';
+  String get leanLabCalibPocket => 'Save in pocket';
 
   @override
   String get leanLabCalibPocketHelp =>
-      'Tap, put the phone in a pocket or on the tank, stay still. A buzz and beep means 0° is saved and the ride started — don’t save 0° in your hand.';
+      'Tap, put the phone fully in the pocket, stay still. A buzz and beep means 0° is saved and the ride started — don’t save 0° in your hand.';
 
   @override
   String leanLabCalibPocketCountdown(int n) {
-    return 'Place it now · ${n}s';
+    return 'Pocket it now · ${n}s';
   }
 
   @override
@@ -2115,7 +2118,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanImuLabAnglesHelp =>
-      'Bike lean is what the ride uses. Vector is the 3D angle from 0°. Roll is used when the phone is upright; pitch when it is flat.';
+      'Bike lean (red) is sign(winning channel) × vector magnitude. Vector (green) is the 3D clinometer from 0°. A wall tip moves green; red only moves if that tilt is bike lean for this pose.';
 
   @override
   String get leanImuLabHistoryTitle => 'Last ~8 s';

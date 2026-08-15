@@ -16,6 +16,14 @@ class Ride {
     this.routeId,
     this.visibility = ShareVisibility.friends,
     this.title,
+    this.leanUprightLocked = false,
+    this.leanG0X,
+    this.leanG0Y,
+    this.leanG0Z,
+    this.leanPoseClass,
+    this.leanSignFlip = 1,
+    this.leanFreezeAtMs,
+    this.leanMountMode,
   });
 
   final String id;
@@ -38,6 +46,21 @@ class Ride {
 
   /// Human title, e.g. `Cañadas - Moyahua` (from start/end geocode).
   final String? title;
+
+  /// True when g0 was locked via guided freeze (do not re-infer neutral).
+  final bool leanUprightLocked;
+  final double? leanG0X;
+  final double? leanG0Y;
+  final double? leanG0Z;
+  final String? leanPoseClass;
+  final int leanSignFlip;
+  final int? leanFreezeAtMs;
+
+  /// `mount` | `pocket` | `unknown` | null
+  final String? leanMountMode;
+
+  bool get hasLeanUprightFreeze =>
+      leanUprightLocked || (leanG0X != null && leanG0Y != null && leanG0Z != null);
 
   /// Legacy: true only when [visibility] is public.
   bool get isShared => visibility.legacyIsShared;
@@ -77,6 +100,14 @@ class Ride {
         'is_shared': visibility.legacyIsShared ? 1 : 0,
         'visibility': visibility.dbValue,
         'title': title,
+        'lean_upright_locked': leanUprightLocked ? 1 : 0,
+        'lean_g0_x': leanG0X,
+        'lean_g0_y': leanG0Y,
+        'lean_g0_z': leanG0Z,
+        'lean_pose_class': leanPoseClass,
+        'lean_sign_flip': leanSignFlip,
+        'lean_freeze_at_ms': leanFreezeAtMs,
+        'lean_mount_mode': leanMountMode,
       };
 
   factory Ride.fromMap(Map<String, Object?> map) => Ride(
@@ -99,6 +130,14 @@ class Ride {
           legacyIsShared: (map['is_shared'] as int?) != 0,
         ),
         title: map['title'] as String?,
+        leanUprightLocked: (map['lean_upright_locked'] as int?) == 1,
+        leanG0X: (map['lean_g0_x'] as num?)?.toDouble(),
+        leanG0Y: (map['lean_g0_y'] as num?)?.toDouble(),
+        leanG0Z: (map['lean_g0_z'] as num?)?.toDouble(),
+        leanPoseClass: map['lean_pose_class'] as String?,
+        leanSignFlip: (map['lean_sign_flip'] as num?)?.toInt() ?? 1,
+        leanFreezeAtMs: (map['lean_freeze_at_ms'] as num?)?.toInt(),
+        leanMountMode: map['lean_mount_mode'] as String?,
       );
 
   Ride copyWith({
@@ -115,6 +154,14 @@ class Ride {
     ShareVisibility? visibility,
     String? title,
     bool clearTitle = false,
+    bool? leanUprightLocked,
+    double? leanG0X,
+    double? leanG0Y,
+    double? leanG0Z,
+    String? leanPoseClass,
+    int? leanSignFlip,
+    int? leanFreezeAtMs,
+    String? leanMountMode,
   }) {
     var nextVis = visibility ?? this.visibility;
     if (visibility == null && isShared != null) {
@@ -133,6 +180,14 @@ class Ride {
       routeId: clearRouteId ? null : (routeId ?? this.routeId),
       visibility: nextVis,
       title: clearTitle ? null : (title ?? this.title),
+      leanUprightLocked: leanUprightLocked ?? this.leanUprightLocked,
+      leanG0X: leanG0X ?? this.leanG0X,
+      leanG0Y: leanG0Y ?? this.leanG0Y,
+      leanG0Z: leanG0Z ?? this.leanG0Z,
+      leanPoseClass: leanPoseClass ?? this.leanPoseClass,
+      leanSignFlip: leanSignFlip ?? this.leanSignFlip,
+      leanFreezeAtMs: leanFreezeAtMs ?? this.leanFreezeAtMs,
+      leanMountMode: leanMountMode ?? this.leanMountMode,
     );
   }
 }

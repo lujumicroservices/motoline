@@ -1052,6 +1052,12 @@ abstract class AppLocalizations {
   /// **'Leyenda'**
   String get mapLayerLegend;
 
+  /// No description provided for @mapLayerGpsGaps.
+  ///
+  /// In es, this message translates to:
+  /// **'Huecos GPS'**
+  String get mapLayerGpsGaps;
+
   /// No description provided for @friends.
   ///
   /// In es, this message translates to:
@@ -3593,7 +3599,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCalibHold.
   ///
   /// In es, this message translates to:
-  /// **'Mantener derecha 4 s'**
+  /// **'Sostener vertical 4 s'**
   String get leanLabCalibHold;
 
   /// No description provided for @leanLabCalibHolding.
@@ -3605,19 +3611,19 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabCalibPocket.
   ///
   /// In es, this message translates to:
-  /// **'Colocar el teléfono'**
+  /// **'Guardar en el bolsillo'**
   String get leanLabCalibPocket;
 
   /// No description provided for @leanLabCalibPocketHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado y el recorrido arrancó — no lo guardes en la mano.'**
+  /// **'Toca, mételo del todo en el bolsillo, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado y el recorrido arrancó — no lo guardes en la mano.'**
   String get leanLabCalibPocketHelp;
 
   /// No description provided for @leanLabCalibPocketCountdown.
   ///
   /// In es, this message translates to:
-  /// **'Colócalo ahora · {n}s'**
+  /// **'Mételo ahora · {n}s'**
   String leanLabCalibPocketCountdown(int n);
 
   /// No description provided for @leanLabCalibPocketSettle.
@@ -3881,7 +3887,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanImuLabAnglesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inclinación de la moto es lo que usa el recorrido. El vector es el ángulo 3D desde el 0°. El roll se usa si el teléfono está derecho; el pitch si está plano.'**
+  /// **'La inclinación (roja) es signo(canal ganador) × magnitud del vector. El vector (verde) es el inclinómetro 3D desde el 0°. Si inclinas como en una pared, el verde se mueve; el rojo solo si esa inclinación es lean de la moto para esa pose.'**
   String get leanImuLabAnglesHelp;
 
   /// No description provided for @leanImuLabHistoryTitle.

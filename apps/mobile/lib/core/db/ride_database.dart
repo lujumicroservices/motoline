@@ -2,6 +2,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/lean_sample.dart';
 import '../models/ride.dart';
 import '../models/route_circuit.dart';
 import '../models/route_loop.dart';
@@ -25,7 +26,12 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 15,
+      version: 17,
+      onConfigure: (db) async {
+        // Outdoor-grade durability: survive kills mid-batch flush.
+        await db.execute('PRAGMA journal_mode=WAL');
+        await db.execute('PRAGMA synchronous=NORMAL');
+      },
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE rides (
@@ -41,7 +47,15 @@ class RideDatabase {
             route_id TEXT,
             is_shared INTEGER NOT NULL DEFAULT 0,
             visibility TEXT NOT NULL DEFAULT 'friends',
-            title TEXT
+            title TEXT,
+            lean_upright_locked INTEGER NOT NULL DEFAULT 0,
+            lean_g0_x REAL,
+            lean_g0_y REAL,
+            lean_g0_z REAL,
+            lean_pose_class TEXT,
+            lean_sign_flip INTEGER NOT NULL DEFAULT 1,
+            lean_freeze_at_ms INTEGER,
+            lean_mount_mode TEXT
           )
         ''');
         await db.execute('''
@@ -68,6 +82,8 @@ class RideDatabase {
         await _createCameraEventsTable(db);
         await _createRideEngineLabelsTable(db);
         await _createLeanLabSessionsTable(db);
+        await _createSyncOutboxTable(db);
+        await _createLeanSamplesTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -123,7 +139,77 @@ class RideDatabase {
         if (oldVersion < 15) {
           await _addPressureColumnIfMissing(db);
         }
+        if (oldVersion < 16) {
+          await _createSyncOutboxTable(db);
+        }
+        if (oldVersion < 17) {
+          await _addLeanFreezeColumnsIfMissing(db);
+          await _createLeanSamplesTable(db);
+        }
       },
+    );
+  }
+
+  Future<void> _createLeanSamplesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS lean_samples (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ride_id TEXT NOT NULL,
+        timestamp_ms INTEGER NOT NULL,
+        lean_degrees REAL NOT NULL,
+        gps_lean_degrees REAL,
+        speed_mps REAL,
+        confidence REAL,
+        FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_lean_samples_ride '
+      'ON lean_samples(ride_id, timestamp_ms)',
+    );
+  }
+
+  Future<void> _addLeanFreezeColumnsIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(rides)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    Future<void> add(String name, String sqlType) async {
+      if (!existing.contains(name)) {
+        await db.execute('ALTER TABLE rides ADD COLUMN $name $sqlType');
+      }
+    }
+
+    await add('lean_upright_locked', 'INTEGER NOT NULL DEFAULT 0');
+    await add('lean_g0_x', 'REAL');
+    await add('lean_g0_y', 'REAL');
+    await add('lean_g0_z', 'REAL');
+    await add('lean_pose_class', 'TEXT');
+    await add('lean_sign_flip', 'INTEGER NOT NULL DEFAULT 1');
+    await add('lean_freeze_at_ms', 'INTEGER');
+    await add('lean_mount_mode', 'TEXT');
+  }
+
+  Future<void> _createSyncOutboxTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_outbox (
+        id TEXT PRIMARY KEY,
+        kind TEXT NOT NULL,
+        ride_local_id TEXT NOT NULL,
+        payload_json TEXT NOT NULL,
+        status TEXT NOT NULL,
+        attempts INTEGER NOT NULL DEFAULT 0,
+        created_at_ms INTEGER NOT NULL,
+        next_attempt_at_ms INTEGER,
+        last_error TEXT,
+        chunk_index INTEGER
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_sync_outbox_pending '
+      'ON sync_outbox(status, next_attempt_at_ms, created_at_ms)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_sync_outbox_ride '
+      'ON sync_outbox(ride_local_id, kind)',
     );
   }
 
@@ -738,5 +824,106 @@ class RideDatabase {
   Future<void> deleteLoop(String id) async {
     final db = await database;
     await db.delete('route_loops', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // --- Sync outbox ---------------------------------------------------------
+
+  Future<List<Map<String, dynamic>>> listPendingSyncOutbox({
+    required int nowMs,
+    int limit = 20,
+  }) async {
+    final db = await database;
+    return db.query(
+      'sync_outbox',
+      where: "status IN ('pending', 'failed') AND "
+          '(next_attempt_at_ms IS NULL OR next_attempt_at_ms <= ?)',
+      whereArgs: [nowMs],
+      orderBy: 'created_at_ms ASC',
+      limit: limit,
+    );
+  }
+
+  Future<void> upsertSyncOutboxItem(Map<String, dynamic> row) async {
+    final db = await database;
+    await db.insert(
+      'sync_outbox',
+      row,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateSyncOutboxStatus({
+    required String id,
+    required String status,
+    int? attempts,
+    int? nextAttemptAtMs,
+    String? lastError,
+  }) async {
+    final db = await database;
+    await db.update(
+      'sync_outbox',
+      {
+        'status': status,
+        if (attempts != null) 'attempts': attempts,
+        'next_attempt_at_ms': nextAttemptAtMs,
+        'last_error': lastError,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteSyncOutboxItem(String id) async {
+    final db = await database;
+    await db.delete('sync_outbox', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteDoneSyncOutboxForRide(String rideLocalId) async {
+    final db = await database;
+    await db.delete(
+      'sync_outbox',
+      where: "ride_local_id = ? AND status = 'done'",
+      whereArgs: [rideLocalId],
+    );
+  }
+
+  Future<bool> hasPendingSyncOutboxForRide(String rideLocalId) async {
+    final db = await database;
+    final rows = await db.query(
+      'sync_outbox',
+      columns: ['id'],
+      where: "ride_local_id = ? AND status IN ('pending', 'in_flight', 'failed')",
+      whereArgs: [rideLocalId],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  // --- Lean samples (10 Hz series) ----------------------------------------
+
+  Future<void> insertLeanSamplesBatch(List<LeanSample> samples) async {
+    if (samples.isEmpty) return;
+    final db = await database;
+    final batch = db.batch();
+    for (final s in samples) {
+      batch.insert('lean_samples', s.toMap()..remove('id'));
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<List<LeanSample>> getLeanSamples(String rideId) async {
+    final db = await database;
+    final rows = await db.query(
+      'lean_samples',
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+      orderBy: 'timestamp_ms ASC',
+    );
+    return rows.map(LeanSample.fromMap).toList();
+  }
+
+  Future<void> deleteLeanSamplesForRide(String rideId) async {
+    final db = await database;
+    await db.delete('lean_samples', where: 'ride_id = ?', whereArgs: [rideId]);
   }
 }

@@ -4,12 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/db/ride_database.dart';
 import '../core/lean_lab/lean_lab_service.dart';
+import '../core/models/lean_sample.dart';
 import '../core/models/ride.dart';
 import '../core/models/track_point.dart';
 import '../core/services/loop_session_controller.dart';
 import '../core/services/ride_place_name_service.dart';
 import '../core/services/ride_recorder.dart';
 import '../core/services/ride_sync_service.dart';
+import '../core/services/sync_outbox_service.dart';
+
 
 final rideDatabaseProvider = Provider<RideDatabase>((ref) {
   return RideDatabase.instance;
@@ -18,6 +21,22 @@ final rideDatabaseProvider = Provider<RideDatabase>((ref) {
 final rideSyncServiceProvider = Provider<RideSyncService>((ref) {
   return RideSyncService(database: ref.watch(rideDatabaseProvider));
 });
+
+final syncOutboxServiceProvider = Provider<SyncOutboxService>((ref) {
+  return SyncOutboxService(
+    database: ref.watch(rideDatabaseProvider),
+    sync: ref.watch(rideSyncServiceProvider),
+  );
+});
+
+/// Enqueue + drain outbox (soft-fail). Prefer this after ride complete.
+Future<void> enqueueAndDrainRideSync(
+  SyncOutboxService outbox,
+  String rideLocalId,
+) async {
+  await outbox.enqueueRideUpload(rideLocalId);
+  await outbox.drain();
+}
 
 final rideRecorderProvider = Provider<RideRecorder>((ref) {
   final recorder = RideRecorder(database: ref.watch(rideDatabaseProvider));
@@ -168,6 +187,11 @@ final rideProvider =
 final ridePointsProvider =
     FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) {
   return ref.watch(rideDatabaseProvider).getPoints(id);
+});
+
+final rideLeanSamplesProvider =
+    FutureProvider.autoDispose.family<List<LeanSample>, String>((ref, id) {
+  return ref.watch(rideDatabaseProvider).getLeanSamples(id);
 });
 
 final ridesForRouteProvider =

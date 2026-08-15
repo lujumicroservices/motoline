@@ -24,12 +24,17 @@ class LeanEngineSnapshot {
     required this.fusedPitch,
     required this.vectorLean,
     required this.bikeLean,
+    required this.imuLean,
+    required this.gpsLean,
+    required this.leanConfidence,
+    required this.mountMode,
     required this.upAxis,
     required this.pose,
     required this.winningChannel,
     required this.trackerConfidence,
     required this.frozen,
     required this.freezeUpAxis,
+    required this.uprightLocked,
   });
 
   final DateTime at;
@@ -45,17 +50,23 @@ class LeanEngineSnapshot {
   final double fusedPitch;
   final double vectorLean;
   final double? bikeLean;
+  final double? imuLean;
+  final double? gpsLean;
+  final double leanConfidence;
+  final String mountMode;
   final String upAxis;
   final PhonePoseClass pose;
   final String winningChannel;
   final double trackerConfidence;
   final bool frozen;
   final String? freezeUpAxis;
+  final bool uprightLocked;
 }
 
 /// Pose-aware lean: freeze g0, classify mount, output signed bike lean.
 ///
 /// `bikeLean = sign(winning fused Euler) × angle(g, g0)`
+/// GPS kinematic lean is a confidence / fallback channel (not mag).
 class LeanEngine extends ChangeNotifier {
   LeanEngine();
 
@@ -70,13 +81,18 @@ class LeanEngine extends ChangeNotifier {
   Vec3 _accel = const Vec3(0, 0, 9.8);
   Vec3 _gyro = const Vec3(0, 0, 0);
   Vec3 _gravityLp = const Vec3(0, 9.8, 0);
+  double? _leanOut;
   Vec3? _g0;
   DateTime? _lastGyroAt;
   DateTime? _startedAt;
   DateTime? _lastHeadingAt;
+  DateTime? _freezeAt;
   double? _lastHeading;
+  double _headingRateSigned = 0;
   double _headingRateAbs = 0;
   double? _speedKmh;
+  double? _gpsLean;
+  String _mountMode = 'unknown';
 
   PhonePoseClass _pose = PhonePoseClass.unknown;
   String? _freezeUpAxis;
@@ -97,12 +113,16 @@ class LeanEngine extends ChangeNotifier {
   PhonePoseClass get pose => _pose;
   Vec3? get frozenGravity => _g0;
   int get signFlip => _signFlip;
+  DateTime? get freezeAt => _freezeAt;
+  String get mountMode => _mountMode;
 
-  /// Signed bike lean (0 = upright at freeze). Null until g0 exists.
+  /// Signed bike lean (fused output). Null until g0 exists (unless GPS fallback).
   double? get bikeLeanDegrees => latest?.bikeLean;
 
-  /// Same as [bikeLeanDegrees] once frozen — stored on GPS points.
   double? get leanDegrees => bikeLeanDegrees;
+  double? get imuLeanDegrees => latest?.imuLean;
+  double? get gpsLeanDegrees => latest?.gpsLean;
+  double get leanConfidence => latest?.leanConfidence ?? 0;
 
   double? get vectorLeanDegrees => latest?.vectorLean;
 
@@ -115,6 +135,15 @@ class LeanEngine extends ChangeNotifier {
     return g.gyroRad.mag * 180 / math.pi < 18 && g.linear.mag < 2.2;
   }
 
+  /// Hint for confidence: `mount` | `pocket` | `unknown`.
+  void setMountMode(String mode) {
+    _mountMode = switch (mode) {
+      'mount' || 'pocket' => mode,
+      _ => 'unknown',
+    };
+    if (latest != null) _emit(DateTime.now());
+  }
+
   Future<void> start() async {
     if (running) return;
     running = true;
@@ -125,9 +154,9 @@ class LeanEngine extends ChangeNotifier {
     _accelSub = accelerometerEventStream(samplingPeriod: period).listen((e) {
       _accel = Vec3(e.x, e.y, e.z);
       _gravityLp = Vec3(
-        _gravityLp.x * 0.9 + e.x * 0.1,
-        _gravityLp.y * 0.9 + e.y * 0.1,
-        _gravityLp.z * 0.9 + e.z * 0.1,
+        _gravityLp.x * 0.94 + e.x * 0.06,
+        _gravityLp.y * 0.94 + e.y * 0.06,
+        _gravityLp.z * 0.94 + e.z * 0.06,
       );
       if (!_locked && !_calibrated) {
         _calibGravity.addLast(_gravityLp);
@@ -136,7 +165,6 @@ class LeanEngine extends ChangeNotifier {
         }
         _maybeAutoFreeze();
       }
-      // If gyro is missing/late, still publish lean from gravity.
       final gyroAt = _lastGyroAt;
       if (gyroAt == null ||
           DateTime.now().difference(gyroAt) > const Duration(milliseconds: 80)) {
@@ -192,8 +220,6 @@ class LeanEngine extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Freeze current (or provided) gravity as upright. Stops auto-refine if
-  /// [lock] is true (Lean Lab guided hold).
   void freezeUpright({
     Vec3? g0,
     int signFlip = 1,
@@ -216,12 +242,15 @@ class LeanEngine extends ChangeNotifier {
     _freezeUpAxis = null;
     _freezeRoll = 0;
     _freezePitch = 0;
+    _freezeAt = null;
     _locked = false;
     _calibrated = false;
     _disagreeWindows = 0;
     _trackerConfidence = 0;
     _tracker.reset();
     _attitude.reset();
+    _leanOut = null;
+    _gpsLean = null;
     _calibGravity.clear();
     notifyListeners();
   }
@@ -242,7 +271,6 @@ class LeanEngine extends ChangeNotifier {
     _calibGravity.clear();
   }
 
-  /// While nearly stopped, keep refining g0 until locked (pocket settles).
   void observeForNeutral({required double? speedKmh}) {
     _speedKmh = speedKmh;
     if (_locked) return;
@@ -275,7 +303,16 @@ class LeanEngine extends ChangeNotifier {
     var d = headingDeg - prev;
     if (d > 180) d -= 360;
     if (d < -180) d += 360;
-    _headingRateAbs = d.abs() / dt;
+    final rate = d / dt;
+    _headingRateSigned = rate;
+    _headingRateAbs = rate.abs();
+    final speedMps = speedKmh == null ? null : speedKmh / 3.6;
+    if (speedMps != null) {
+      _gpsLean = gpsKinematicLeanDegrees(
+        speedMps: speedMps,
+        headingRateDegPerSec: _headingRateSigned,
+      );
+    }
   }
 
   void _resetRuntime({required bool keepLock}) {
@@ -283,16 +320,20 @@ class LeanEngine extends ChangeNotifier {
       _g0 = null;
       _pose = PhonePoseClass.unknown;
       _freezeUpAxis = null;
+      _freezeAt = null;
       _locked = false;
       _calibrated = false;
       _signFlip = 1;
     }
     _attitude.reset();
     _tracker.reset();
+    _leanOut = null;
+    _gpsLean = null;
     _calibGravity.clear();
     _disagreeWindows = 0;
     _trackerConfidence = 0;
     _headingRateAbs = 0;
+    _headingRateSigned = 0;
     _lastHeading = null;
     _lastHeadingAt = null;
     _lastGyroAt = null;
@@ -320,6 +361,7 @@ class LeanEngine extends ChangeNotifier {
     _freezeUpAxis = dominantUpAxis(g0);
     _freezeRoll = _attitude.seeded ? _attitude.roll : rollDeg(g0);
     _freezePitch = _attitude.seeded ? _attitude.pitch : pitchDeg(g0);
+    _freezeAt = DateTime.now();
     _calibrated = true;
     _locked = lock;
     _disagreeWindows = 0;
@@ -369,9 +411,9 @@ class LeanEngine extends ChangeNotifier {
       ),
     );
 
-    double? bike;
+    double? imu;
     if (_g0 != null && _pose != PhonePoseClass.unknown) {
-      bike = signedBikeLean(
+      imu = signedBikeLean(
         gravity: g,
         g0: _g0!,
         pose: _pose,
@@ -381,6 +423,36 @@ class LeanEngine extends ChangeNotifier {
         freezePitch: _freezePitch,
         signFlip: _signFlip,
       );
+      final prev = _leanOut;
+      _leanOut = prev == null ? imu : prev * 0.82 + imu * 0.18;
+      imu = _leanOut;
+    } else {
+      _leanOut = null;
+      imu = null;
+    }
+
+    final gps = _gpsLean;
+    final conf = leanConfidenceScore(
+      frozen: _g0 != null,
+      pose: _pose,
+      trackerConfidence: _trackerConfidence,
+      uprightLocked: _locked,
+      mountMode: _mountMode,
+      imuLeanDeg: imu,
+      gpsLeanDeg: gps,
+    );
+
+    // Fused output: prefer IMU when frozen; GPS fallback when no freeze.
+    double? bike = imu;
+    if (bike == null && gps != null && conf >= 0.2) {
+      bike = gps;
+    } else if (bike != null &&
+        gps != null &&
+        !_locked &&
+        conf < 0.35 &&
+        (bike - gps).abs() > 18) {
+      // Soft blend toward GPS when unlocked auto-freeze looks dubious.
+      bike = bike * 0.65 + gps * 0.35;
     }
 
     latest = LeanEngineSnapshot(
@@ -397,12 +469,17 @@ class LeanEngine extends ChangeNotifier {
       fusedPitch: fusedPitch,
       vectorLean: vector,
       bikeLean: bike,
+      imuLean: imu,
+      gpsLean: gps,
+      leanConfidence: conf,
+      mountMode: _mountMode,
       upAxis: dominantUpAxis(g),
       pose: _pose,
       winningChannel: _pose.winningChannel,
       trackerConfidence: _trackerConfidence,
       frozen: _g0 != null,
       freezeUpAxis: _freezeUpAxis,
+      uprightLocked: _locked,
     );
     if (hasListeners) notifyListeners();
   }

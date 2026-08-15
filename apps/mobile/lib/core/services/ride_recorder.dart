@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../db/ride_database.dart';
+import '../models/lean_sample.dart';
 import '../models/ride.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
@@ -88,6 +89,8 @@ class RideRecorder {
   final _uuid = const Uuid();
 
   final _pending = <TrackPoint>[];
+  final _pendingLeanSamples = <LeanSample>[];
+  DateTime? _lastLeanSampleAt;
   final _controller = StreamController<ActiveRideSnapshot>.broadcast();
   final _autoStartController = StreamController<Ride>.broadcast();
   final _fixAcceptTimes = <DateTime>[];
@@ -100,6 +103,7 @@ class RideRecorder {
   StreamSubscription<Position>? _sub;
   StreamSubscription<Position>? _armSub;
   Timer? _flushTimer;
+  Timer? _leanSampleTimer;
   Ride? _ride;
   bool _wasPaused = false;
   bool _wasSuggestEnd = false;
@@ -175,10 +179,21 @@ class RideRecorder {
     _pendingSignFlip = signFlip;
   }
 
+  /// Hint LeanEngine confidence: `mount` | `pocket` | `unknown`.
+  void setLeanMountMode(String mode) {
+    _lean.setMountMode(mode);
+    final ride = _ride;
+    if (ride != null) {
+      _ride = ride.copyWith(leanMountMode: mode);
+      unawaited(_persistLeanFreezeMeta());
+    }
+  }
+
   /// Lock lean zero during an active recording (Lean Lab).
   void lockLeanNeutral(double degrees) {
     _lean.lockNeutral(degrees);
     _pendingLeanNeutral = null;
+    unawaited(_persistLeanFreezeMeta());
   }
 
   /// Lock frozen g0 during an active recording (Lean Lab).
@@ -186,6 +201,7 @@ class RideRecorder {
     _lean.lockUpright(g0, signFlip: signFlip);
     _pendingG0 = null;
     _pendingLeanNeutral = 0;
+    unawaited(_persistLeanFreezeMeta());
   }
 
   void _applyPendingLeanLock() {
@@ -194,13 +210,36 @@ class RideRecorder {
       _lean.lockUpright(g0, signFlip: _pendingSignFlip);
       _pendingG0 = null;
       _pendingLeanNeutral = null;
+      unawaited(_persistLeanFreezeMeta());
       return;
     }
     final pendingNeutral = _pendingLeanNeutral;
     if (pendingNeutral != null) {
       _lean.lockNeutral(pendingNeutral);
       _pendingLeanNeutral = null;
+      unawaited(_persistLeanFreezeMeta());
     }
+  }
+
+  Future<void> _persistLeanFreezeMeta() async {
+    final ride = _ride;
+    if (ride == null) return;
+    final g0 = _lean.frozenGravity;
+    final snap = _lean.snapshot;
+    final updated = ride.copyWith(
+      leanUprightLocked: _lean.isLocked,
+      leanG0X: g0?.x,
+      leanG0Y: g0?.y,
+      leanG0Z: g0?.z,
+      leanPoseClass: snap?.pose.name,
+      leanSignFlip: _lean.engine.signFlip,
+      leanFreezeAtMs: _lean.engine.freezeAt?.millisecondsSinceEpoch,
+      leanMountMode: _lean.engine.mountMode,
+    );
+    _ride = updated;
+    try {
+      await _db.upsertRide(updated);
+    } catch (_) {}
   }
 
   double? get leanNeutralDegrees => _lean.neutralDegrees;
@@ -324,6 +363,7 @@ class RideRecorder {
       const Duration(seconds: 1),
       (_) => _flushPending(),
     );
+    _startLeanSampleTimer();
 
     _sub = _location.watchPositions().listen(
       _onPosition,
@@ -361,6 +401,7 @@ class RideRecorder {
     _sub = null;
     _flushTimer?.cancel();
     _flushTimer = null;
+    _stopLeanSampleTimer();
     _lean.stop();
     _baro.stop();
     _fixAcceptTimes.clear();
@@ -693,6 +734,7 @@ class RideRecorder {
       const Duration(seconds: 1),
       (_) => _flushPending(),
     );
+    _startLeanSampleTimer();
 
     await ArmForegroundService.updateNotification(
       title: 'RiderLab',
@@ -778,6 +820,9 @@ class RideRecorder {
     final speedKmh = position.speed.isNaN || position.speed < 0
         ? null
         : position.speed * 3.6;
+    final speedMps = position.speed.isNaN || position.speed < 0
+        ? null
+        : position.speed;
     _lean.observeForNeutral(speedKmh: speedKmh);
     _lean.observeGps(
       headingDeg: position.heading.isNaN ? null : position.heading,
@@ -787,9 +832,6 @@ class RideRecorder {
     // Signed bike lean (already relative to frozen g0).
     final rawLean = _lean.rawLeanDegrees;
     final relativeLean = _lean.leanDegrees;
-    final speedMps = position.speed.isNaN || position.speed < 0
-        ? null
-        : position.speed;
     final point = TrackPoint(
       id: null,
       rideId: ride.id,
@@ -951,12 +993,64 @@ class RideRecorder {
     }
   }
 
+  void _startLeanSampleTimer() {
+    _leanSampleTimer?.cancel();
+    _leanSampleTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      final ride = _ride;
+      if (ride == null || _motion.isPaused) return;
+      _maybeRecordLeanSample(ride.id, speedMps: _lastPoint?.speedMps);
+    });
+  }
+
+  void _stopLeanSampleTimer() {
+    _leanSampleTimer?.cancel();
+    _leanSampleTimer = null;
+  }
+
+  void _maybeRecordLeanSample(String rideId, {required double? speedMps}) {
+    final lean = _lean.leanDegrees;
+    if (lean == null) return;
+    final now = DateTime.now();
+    final prev = _lastLeanSampleAt;
+    if (prev != null && now.difference(prev) < const Duration(milliseconds: 100)) {
+      return;
+    }
+    _lastLeanSampleAt = now;
+    _pendingLeanSamples.add(
+      LeanSample(
+        rideId: rideId,
+        timestampMs: now.millisecondsSinceEpoch,
+        leanDegrees: lean,
+        gpsLeanDegrees: _lean.engine.gpsLeanDegrees,
+        speedMps: speedMps,
+        confidence: _lean.engine.leanConfidence,
+      ),
+    );
+    if (_pendingLeanSamples.length >= 20) {
+      unawaited(_flushLeanSamples());
+    }
+  }
+
+  Future<void> _flushLeanSamples() async {
+    if (_pendingLeanSamples.isEmpty) return;
+    final batch = List<LeanSample>.from(_pendingLeanSamples);
+    _pendingLeanSamples.clear();
+    try {
+      await _db.insertLeanSamplesBatch(batch);
+    } catch (_) {
+      _pendingLeanSamples.insertAll(0, batch);
+    }
+  }
+
   Future<void> _flushPending() async {
-    if (_pending.isEmpty) return;
+    if (_pending.isEmpty && _pendingLeanSamples.isEmpty) return;
     final batch = List<TrackPoint>.from(_pending);
     _pending.clear();
     try {
-      await _db.insertPointsBatch(batch);
+      if (batch.isNotEmpty) {
+        await _db.insertPointsBatch(batch);
+      }
+      await _flushLeanSamples();
       final ride = _ride;
       if (ride != null) {
         await _db.upsertRide(ride);
@@ -1026,6 +1120,7 @@ class RideRecorder {
     await _sub?.cancel();
     await _armSub?.cancel();
     _flushTimer?.cancel();
+    _stopLeanSampleTimer();
     _lean.stop();
     _baro.stop();
     _fixAcceptTimes.clear();
