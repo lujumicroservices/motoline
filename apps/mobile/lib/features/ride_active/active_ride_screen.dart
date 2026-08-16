@@ -27,6 +27,8 @@ import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
 import '../lean_lab/lean_lab_bootstrap.dart';
 import '../lean_lab/lean_lab_review_screen.dart';
 import '../ride_detail/pilot_line_map.dart';
+import '../watch/active_watch_panel.dart';
+import '../watch/watch_providers.dart';
 import '../telemetry/ride_engine_label_screen.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
@@ -290,6 +292,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                         child: snapshotAsync.when(
                           loading: () => _body(
                             context,
+                            localRideId: ride?.id,
                             distanceKm: ride?.distanceKm ?? 0,
                             duration: ride?.duration ?? Duration.zero,
                             points: const <TrackPoint>[],
@@ -309,6 +312,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                             final r = snap?.ride ?? ride;
                             return _body(
                               context,
+                              localRideId: r?.id,
                               distanceKm: r?.distanceKm ?? 0,
                               duration: r?.duration ?? Duration.zero,
                               points: snap?.points ?? const <TrackPoint>[],
@@ -335,6 +339,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
 
   Widget _body(
     BuildContext context, {
+    required String? localRideId,
     required double distanceKm,
     required Duration duration,
     required List<TrackPoint> points,
@@ -528,6 +533,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
+                if (localRideId != null)
+                  ActiveWatchPanel(localRideId: localRideId),
+                if (localRideId != null) const SizedBox(height: 8),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.signal,
@@ -577,6 +585,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   Future<void> _stop(BuildContext context) async {
     final recorder = ref.read(rideRecorderProvider);
     try {
+      await ref.read(activeWatchControllerProvider.notifier).end();
       final ride = await recorder.stop();
       // Closed beta: durable outbox then drain (soft-fail offline).
       unawaited(

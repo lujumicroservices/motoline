@@ -132,6 +132,9 @@ class RodadaLivePosition {
     this.displayName,
   });
 
+  /// After one missed 5‑min publish (+margin), treat pin as last-known / no signal.
+  static const Duration staleAfter = Duration(minutes: 6);
+
   final String rodadaId;
   final String userId;
   final double latitude;
@@ -151,6 +154,13 @@ class RodadaLivePosition {
     return 'Rider';
   }
 
+  /// True when [updatedAt] is older than [staleAfter] (last good GPS ping aged out).
+  bool isStale([DateTime? now]) {
+    final n = now ?? DateTime.now().toUtc();
+    final at = updatedAt.isUtc ? updatedAt : updatedAt.toUtc();
+    return n.difference(at) > staleAfter;
+  }
+
   factory RodadaLivePosition.fromMap(
     Map<String, dynamic> map, {
     String? displayName,
@@ -168,6 +178,33 @@ class RodadaLivePosition {
       displayName: displayName,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RodadaLivePosition &&
+        other.userId == userId &&
+        other.rodadaId == rodadaId &&
+        other.latitude == latitude &&
+        other.longitude == longitude &&
+        other.updatedAt == updatedAt &&
+        other.displayName == displayName &&
+        other.presence == presence &&
+        other.speedMps == speedMps &&
+        other.heading == heading;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        userId,
+        rodadaId,
+        latitude,
+        longitude,
+        updatedAt,
+        displayName,
+        presence,
+        speedMps,
+        heading,
+      );
 }
 
 class RodadaPhoto {

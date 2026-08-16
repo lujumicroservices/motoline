@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RiderLab Watch</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <style>
+    :root {
+      --bg: #12141a;
+      --card: #1c2030;
+      --text: #e8ecf4;
+      --muted: #9aa3b5;
+      --accent: #ff4d4d;
+      --ok: #3dd68c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 16px 18px 8px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+    }
+    .sub { color: var(--muted); font-size: 0.9rem; }
+    #map {
+      height: 52vh;
+      margin: 8px 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0a0c12;
+    }
+    .panel {
+      margin: 0 12px 24px;
+      padding: 14px;
+      background: var(--card);
+      border-radius: 12px;
+    }
+    .status {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .status.sos { color: var(--accent); }
+    .status.ok { color: var(--ok); }
+    .status.stale { color: var(--muted); }
+    ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.85rem; }
+    .err {
+      margin: 24px 16px;
+      padding: 16px;
+      background: var(--card);
+      border-radius: 12px;
+      color: var(--accent);
+    }
+    .disclaimer {
+      margin: 0 16px 24px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">RiderLab Watch</h1>
+    <div class="sub" id="subtitle">Cargando…</div>
+  </header>
+  <div id="map"></div>
+  <div class="panel">
+    <div class="status" id="status">—</div>
+    <ul id="events"></ul>
+  </div>
+  <p class="disclaimer">
+    Esto no es un servicio de emergencias (911). Es un aviso privado del rider
+    a su círculo. Si hay peligro real, llama a emergencias locales.
+  </p>
+  <div class="err" id="error" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const SUPABASE_URL = (window.RL_WATCH && window.RL_WATCH.supabaseUrl)
+      || localStorage.getItem('rl_supabase_url')
+      || '';
+    const SUPABASE_ANON_KEY = (window.RL_WATCH && window.RL_WATCH.supabaseAnonKey)
+      || localStorage.getItem('rl_supabase_anon')
+      || '';
+
+    const params = new URLSearchParams(location.search);
+    const token = params.get('t') || '';
+
+    const titleEl = document.getElementById('title');
+    const subtitleEl = document.getElementById('subtitle');
+    const statusEl = document.getElementById('status');
+    const eventsEl = document.getElementById('events');
+    const errorEl = document.getElementById('error');
+
+    let map, marker;
+
+    function showError(msg) {
+      document.getElementById('map').style.display = 'none';
+      document.querySelector('.panel').style.display = 'none';
+      errorEl.hidden = false;
+      errorEl.textContent = msg;
+      subtitleEl.textContent = '';
+    }
+
+    function fmtTime(iso) {
+      if (!iso) return '—';
+      try {
+        return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (_) {
+        return iso;
+      }
+    }
+
+    function ageMinutes(iso) {
+      if (!iso) return null;
+      return (Date.now() - new Date(iso).getTime()) / 60000;
+    }
+
+    async function load() {
+      if (!token || token.length < 16) {
+        showError('Link inválido. Pide un link nuevo al rider.');
+        return;
+      }
+      if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_PROJECT') || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('YOUR_ANON')) {
+        showError('Configura docs/watch/config.js con SUPABASE_URL y anon key, luego vuelve a publicar /watch/.');
+        return;
+      }
+
+      const res = await fetch(
+        SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/rpc/get_watch_public',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ p_token: token }),
+        }
+      );
+      if (!res.ok) {
+        showError('No se pudo cargar (' + res.status + ').');
+        return;
+      }
+      const data = await res.json();
+      if (!data || !data.ok) {
+        const err = (data && data.error) || 'error';
+        const mapErr = {
+          invalid_token: 'Link inválido.',
+          not_found: 'Sesión no encontrada.',
+          expired: 'Este link ya caducó o se revocó.',
+        };
+        showError(mapErr[err] || ('Error: ' + err));
+        return;
+      }
+
+      const sess = data.session || {};
+      const pos = data.position;
+      const events = data.events || [];
+      titleEl.textContent = sess.rider_display_name || 'Rider';
+      subtitleEl.textContent =
+        sess.status === 'active'
+          ? 'En ruta'
+          : sess.status === 'ended'
+            ? 'Terminó la salida · ' + fmtTime(sess.ended_at)
+            : String(sess.status || '');
+
+      let statusText = 'Sin ubicación aún';
+      let statusClass = 'stale';
+      if (pos) {
+        const mins = ageMinutes(pos.updated_at);
+        if (mins != null && mins > 6) {
+          statusText = 'Sin señal · última a las ' + fmtTime(pos.updated_at);
+          statusClass = 'stale';
+        } else {
+          statusText = 'Última señal ' + fmtTime(pos.updated_at);
+          statusClass = 'ok';
+        }
+      }
+      const lastKind = events[0] && events[0].kind;
+      if (lastKind === 'sos') {
+        statusText = 'Necesita ayuda · ' + fmtTime(events[0].created_at);
+        statusClass = 'sos';
+      } else if (lastKind === 'ok') {
+        statusText = 'Todo bien · ' + fmtTime(events[0].created_at);
+        statusClass = 'ok';
+      } else if (lastKind === 'stopped') {
+        statusText = 'Se detuvo · ' + fmtTime(events[0].created_at);
+      }
+      statusEl.textContent = statusText;
+      statusEl.className = 'status ' + statusClass;
+
+      eventsEl.innerHTML = events
+        .slice(0, 8)
+        .map(
+          (e) =>
+            '<li>' +
+            fmtTime(e.created_at) +
+            ' · ' +
+            e.kind +
+            '</li>'
+        )
+        .join('');
+
+      if (!map) {
+        map = L.map('map').setView([20.67, -103.35], 11);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap',
+        }).addTo(map);
+      }
+      if (pos) {
+        const latlng = [pos.latitude, pos.longitude];
+        if (marker) marker.setLatLng(latlng);
+        else marker = L.marker(latlng).addTo(map);
+        map.setView(latlng, 14);
+      }
+    }
+
+    load();
+    setInterval(load, 20000);
+  </script>
+</body>
+</html>

@@ -447,6 +447,51 @@
   "rodadasTitle": "Rodadas",
   "rodadasHomeSubtitle": "Create a group ride · invite · share live GPS",
   "friendsHelp": "Search riders, send friend requests, and invite accepted friends to a rodada.",
+  "familyCircleTitle": "Family circle",
+  "familyCircleHomeTile": "People who can see you’re OK while riding",
+  "familyCircleHelp": "Add family or friends. When you ride, share a live link (WhatsApp works — they don’t need the app). They see last location and OK / need-help pings.",
+  "familyAddContact": "Add contact",
+  "familyContactLabel": "Name",
+  "familyContactLabelHint": "Mom / Ana / …",
+  "familyOptionalFriend": "Optional: link a RiderLab friend",
+  "familyNoFriendsYet": "No friends yet — you can still add a name and share the link.",
+  "familySaveContact": "Save",
+  "familyMyCircle": "My circle",
+  "familyCircleEmpty": "No contacts yet. Add someone before your next ride.",
+  "familyLinkOnlyContact": "Gets the share link (no app account)",
+  "familyAppContact": "Can also watch in the app",
+  "familyWatchingNow": "Riding now",
+  "familyNoActiveWatches": "Nobody in your circle is sharing a ride right now.",
+  "familyTapToWatch": "Tap to open map",
+  "familyRiderFallback": "Rider",
+  "familyNotifyToggle": "Notify family",
+  "familyNotifyHelp": "Starts a watch session and opens share for WhatsApp.",
+  "familyNotifyStart": "Start",
+  "familyWatchActive": "Family watch on",
+  "familyWatchStop": "Stop",
+  "familyOk": "All good",
+  "familyStopped": "Stopped",
+  "familySos": "Need help",
+  "familyShareLink": "Share link",
+  "familyShareSubject": "RiderLab — I’m riding",
+  "familyShareMessage": "I’m on a ride. Open this link to see my last location (not 911):\n{url}",
+  "@familyShareMessage": {
+    "placeholders": {
+      "url": {"type": "String"}
+    }
+  },
+  "familyLastSeen": "Last signal {when}",
+  "@familyLastSeen": {
+    "placeholders": {
+      "when": {"type": "String"}
+    }
+  },
+  "familyNoSignalSince": "No signal · last at {when}",
+  "@familyNoSignalSince": {
+    "placeholders": {
+      "when": {"type": "String"}
+    }
+  },
   "findRiders": "Find riders",
   "searchByNameHint": "Search by name…",
   "noRidersFound": "No riders found",
@@ -582,6 +627,27 @@
   "liveMapViewOnly": "Live map is view-only. Enable sharing in Overview.",
   "shareLive": "Share live",
   "noLiveRidersYet": "No live riders yet. Opt-in riders appear here (~5s).",
+  "liveRiderLastSeen": "{name} · {when}",
+  "@liveRiderLastSeen": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "when": {"type": "String"}
+    }
+  },
+  "liveRiderNoSignal": "{name} · No signal · {when}",
+  "@liveRiderNoSignal": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "when": {"type": "String"}
+    }
+  },
+  "liveSeenJustNow": "just now",
+  "liveSeenMinutesAgo": "{minutes} min ago",
+  "@liveSeenMinutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
   "addStop": "Add stop",
   "stopFab": "Stop",
   "stopTitleLabel": "Title",

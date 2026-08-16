@@ -518,6 +518,51 @@
   "rodadasTitle": "Rodadas",
   "rodadasHomeSubtitle": "Crea una rodada · invita · comparte GPS en vivo",
   "friendsHelp": "Busca riders, envía solicitudes de amistad e invita amigos aceptados a una rodada.",
+  "familyCircleTitle": "Círculo familiar",
+  "familyCircleHomeTile": "Quién puede saber que estás bien al rodar",
+  "familyCircleHelp": "Agrega familia o amigos. Al salir, comparte un link en vivo (WhatsApp sirve — no necesitan la app). Ven última ubicación y avisos de todo bien / ayuda.",
+  "familyAddContact": "Agregar contacto",
+  "familyContactLabel": "Nombre",
+  "familyContactLabelHint": "Mamá / Ana / …",
+  "familyOptionalFriend": "Opcional: vincular un amigo de RiderLab",
+  "familyNoFriendsYet": "Aún no hay amigos — puedes poner un nombre y compartir el link.",
+  "familySaveContact": "Guardar",
+  "familyMyCircle": "Mi círculo",
+  "familyCircleEmpty": "Sin contactos. Agrega a alguien antes de la próxima salida.",
+  "familyLinkOnlyContact": "Recibe el link (sin cuenta en la app)",
+  "familyAppContact": "También puede ver en la app",
+  "familyWatchingNow": "Rodando ahora",
+  "familyNoActiveWatches": "Nadie de tu círculo está compartiendo una salida ahora.",
+  "familyTapToWatch": "Toca para abrir el mapa",
+  "familyRiderFallback": "Rider",
+  "familyNotifyToggle": "Avisar a familia",
+  "familyNotifyHelp": "Inicia una sesión de watch y abre compartir para WhatsApp.",
+  "familyNotifyStart": "Activar",
+  "familyWatchActive": "Watch familiar activo",
+  "familyWatchStop": "Parar",
+  "familyOk": "Todo bien",
+  "familyStopped": "Me detuve",
+  "familySos": "Necesito ayuda",
+  "familyShareLink": "Compartir link",
+  "familyShareSubject": "RiderLab — estoy rodando",
+  "familyShareMessage": "Estoy en una salida. Abre este link para ver mi última ubicación (no es 911):\n{url}",
+  "@familyShareMessage": {
+    "placeholders": {
+      "url": {"type": "String"}
+    }
+  },
+  "familyLastSeen": "Última señal {when}",
+  "@familyLastSeen": {
+    "placeholders": {
+      "when": {"type": "String"}
+    }
+  },
+  "familyNoSignalSince": "Sin señal · última a las {when}",
+  "@familyNoSignalSince": {
+    "placeholders": {
+      "when": {"type": "String"}
+    }
+  },
   "findRiders": "Buscar riders",
   "searchByNameHint": "Buscar por nombre…",
   "noRidersFound": "No se encontraron riders",
@@ -653,6 +698,27 @@
   "liveMapViewOnly": "Mapa en vivo solo lectura. Activa compartir en Resumen.",
   "shareLive": "Compartir en vivo",
   "noLiveRidersYet": "Aún no hay riders en vivo. Los que opten aparecen aquí (~5 s).",
+  "liveRiderLastSeen": "{name} · {when}",
+  "@liveRiderLastSeen": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "when": {"type": "String"}
+    }
+  },
+  "liveRiderNoSignal": "{name} · Sin señal · {when}",
+  "@liveRiderNoSignal": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "when": {"type": "String"}
+    }
+  },
+  "liveSeenJustNow": "ahora",
+  "liveSeenMinutesAgo": "hace {minutes} min",
+  "@liveSeenMinutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
   "addStop": "Añadir parada",
   "stopFab": "Parada",
   "stopTitleLabel": "Título",

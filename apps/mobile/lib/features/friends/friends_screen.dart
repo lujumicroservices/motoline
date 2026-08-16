@@ -11,6 +11,7 @@ import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../rodadas/rodada_providers.dart';
 import '../rodadas/rodadas_screen.dart';
+import '../watch/family_circle_screen.dart';
 
 class FriendsScreen extends ConsumerStatefulWidget {
   const FriendsScreen({super.key});
@@ -92,6 +93,24 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
+              title: Text(
+                l10n.familyCircleTitle,
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+              ),
+              subtitle: Text(l10n.familyCircleHomeTile),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const FamilyCircleScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
             Text(
               l10n.yourName,
               style: GoogleFonts.exo2(

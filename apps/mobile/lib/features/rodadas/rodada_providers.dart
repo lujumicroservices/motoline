@@ -40,6 +40,9 @@ final myRodadaMembershipProvider =
 });
 
 /// Live positions — polls while watched; stops when tab disposes.
+///
+/// Merges into a last-known cache so a failed poll or brief GPS gap does not
+/// wipe pins. Rows removed from the cloud (share-off) drop out of the cache.
 final rodadaLivePositionsProvider = StreamProvider.autoDispose
     .family<List<RodadaLivePosition>, String>((ref, rodadaId) {
   if (!SupabaseBootstrap.isReady) {
@@ -47,14 +50,44 @@ final rodadaLivePositionsProvider = StreamProvider.autoDispose
   }
   final repo = ref.watch(rodadaRepositoryProvider);
   final controller = StreamController<List<RodadaLivePosition>>();
+  final cache = <String, RodadaLivePosition>{};
+  List<RodadaLivePosition>? lastEmitted;
+
+  bool sameSnapshot(List<RodadaLivePosition> a, List<RodadaLivePosition> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  void emit(List<RodadaLivePosition> next) {
+    if (controller.isClosed) return;
+    final prev = lastEmitted;
+    if (prev != null && sameSnapshot(prev, next)) return;
+    lastEmitted = next;
+    controller.add(next);
+  }
 
   Future<void> tick() async {
     if (controller.isClosed) return;
     try {
-      controller.add(await repo.listLivePositions(rodadaId));
+      final fresh = await repo.listLivePositions(rodadaId);
+      final seen = <String>{};
+      for (final p in fresh) {
+        seen.add(p.userId);
+        cache[p.userId] = p;
+      }
+      // Successful fetch: drop riders who turned sharing off (row deleted).
+      cache.removeWhere((id, _) => !seen.contains(id));
+      final merged = cache.values.toList(growable: false)
+        ..sort((a, b) => a.label.compareTo(b.label));
+      emit(merged);
     } catch (_) {
-      if (!controller.isClosed) {
-        controller.add(const []);
+      // Keep last-known pins on network blips — never wipe to [].
+      if (cache.isNotEmpty) {
+        emit(cache.values.toList(growable: false));
       }
     }
   }

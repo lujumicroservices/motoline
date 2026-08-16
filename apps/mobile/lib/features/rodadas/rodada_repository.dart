@@ -301,8 +301,8 @@ class RodadaRepository {
         .eq('rodada_id', rodadaId);
     final list = (rows as List).cast<Map<String, dynamic>>();
     final names = await _namesFor(list.map((r) => r['user_id'] as String));
-    // Allow ~2 missed 5‑minute pings before dropping a rider from the map.
-    final cutoff = DateTime.now().toUtc().subtract(const Duration(minutes: 12));
+    // Keep last-known pins for the life of the rodada row (share-off deletes).
+    // UI marks stale via [RodadaLivePosition.isStale] + last-signal time.
     return list
         .map(
           (r) => RodadaLivePosition.fromMap(
@@ -310,7 +310,6 @@ class RodadaRepository {
             displayName: names[r['user_id'] as String],
           ),
         )
-        .where((p) => p.updatedAt.isAfter(cutoff))
         .toList();
   }
 

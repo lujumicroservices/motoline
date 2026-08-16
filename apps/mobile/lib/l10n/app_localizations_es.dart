@@ -1314,6 +1314,108 @@ class AppLocalizationsEs extends AppLocalizations {
       'Busca riders, envía solicitudes de amistad e invita amigos aceptados a una rodada.';
 
   @override
+  String get familyCircleTitle => 'Círculo familiar';
+
+  @override
+  String get familyCircleHomeTile =>
+      'Quién puede saber que estás bien al rodar';
+
+  @override
+  String get familyCircleHelp =>
+      'Agrega familia o amigos. Al salir, comparte un link en vivo (WhatsApp sirve — no necesitan la app). Ven última ubicación y avisos de todo bien / ayuda.';
+
+  @override
+  String get familyAddContact => 'Agregar contacto';
+
+  @override
+  String get familyContactLabel => 'Nombre';
+
+  @override
+  String get familyContactLabelHint => 'Mamá / Ana / …';
+
+  @override
+  String get familyOptionalFriend => 'Opcional: vincular un amigo de RiderLab';
+
+  @override
+  String get familyNoFriendsYet =>
+      'Aún no hay amigos — puedes poner un nombre y compartir el link.';
+
+  @override
+  String get familySaveContact => 'Guardar';
+
+  @override
+  String get familyMyCircle => 'Mi círculo';
+
+  @override
+  String get familyCircleEmpty =>
+      'Sin contactos. Agrega a alguien antes de la próxima salida.';
+
+  @override
+  String get familyLinkOnlyContact => 'Recibe el link (sin cuenta en la app)';
+
+  @override
+  String get familyAppContact => 'También puede ver en la app';
+
+  @override
+  String get familyWatchingNow => 'Rodando ahora';
+
+  @override
+  String get familyNoActiveWatches =>
+      'Nadie de tu círculo está compartiendo una salida ahora.';
+
+  @override
+  String get familyTapToWatch => 'Toca para abrir el mapa';
+
+  @override
+  String get familyRiderFallback => 'Rider';
+
+  @override
+  String get familyNotifyToggle => 'Avisar a familia';
+
+  @override
+  String get familyNotifyHelp =>
+      'Inicia una sesión de watch y abre compartir para WhatsApp.';
+
+  @override
+  String get familyNotifyStart => 'Activar';
+
+  @override
+  String get familyWatchActive => 'Watch familiar activo';
+
+  @override
+  String get familyWatchStop => 'Parar';
+
+  @override
+  String get familyOk => 'Todo bien';
+
+  @override
+  String get familyStopped => 'Me detuve';
+
+  @override
+  String get familySos => 'Necesito ayuda';
+
+  @override
+  String get familyShareLink => 'Compartir link';
+
+  @override
+  String get familyShareSubject => 'RiderLab — estoy rodando';
+
+  @override
+  String familyShareMessage(String url) {
+    return 'Estoy en una salida. Abre este link para ver mi última ubicación (no es 911):\n$url';
+  }
+
+  @override
+  String familyLastSeen(String when) {
+    return 'Última señal $when';
+  }
+
+  @override
+  String familyNoSignalSince(String when) {
+    return 'Sin señal · última a las $when';
+  }
+
+  @override
   String get findRiders => 'Buscar riders';
 
   @override
@@ -1595,6 +1697,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get noLiveRidersYet =>
       'Aún no hay riders en vivo. Los que opten aparecen aquí (~5 s).';
+
+  @override
+  String liveRiderLastSeen(String name, String when) {
+    return '$name · $when';
+  }
+
+  @override
+  String liveRiderNoSignal(String name, String when) {
+    return '$name · Sin señal · $when';
+  }
+
+  @override
+  String get liveSeenJustNow => 'ahora';
+
+  @override
+  String liveSeenMinutesAgo(int minutes) {
+    return 'hace $minutes min';
+  }
 
   @override
   String get addStop => 'Añadir parada';

@@ -45,6 +45,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
   @override
   void dispose() {
     stopLiveGps();
+    disposeLiveGpsListenable();
     super.dispose();
   }
 
@@ -269,7 +270,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                       ),
                   ],
                 ),
-                ...liveGpsLayers(),
+                liveGpsMapChild(),
               ],
             ),
           ),

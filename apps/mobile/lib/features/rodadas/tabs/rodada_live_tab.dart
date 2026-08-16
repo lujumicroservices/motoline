@@ -3,13 +3,15 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import '../models/rodada_models.dart';
 import '../rodada_providers.dart';
 
-/// Live pack map. Watching [rodadaLivePublisherProvider] starts GPS publish;
+/// Live pack map. Watching [rodadaLivePositionsProvider] starts GPS publish;
 /// leaving this tab disposes the publisher and clears your cloud position.
 class RodadaLiveTab extends ConsumerWidget {
   const RodadaLiveTab({super.key, required this.rodadaId});
@@ -19,18 +21,7 @@ class RodadaLiveTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    // Publishing runs app-wide via RodadaRouteShareBinder (5 min / retry 1 min).
-    final positions = ref.watch(rodadaLivePositionsProvider(rodadaId));
-    final stops = ref.watch(rodadaStopsProvider(rodadaId));
-    final overview = ref.watch(rodadaOverviewProvider(rodadaId));
     final membership = ref.watch(myRodadaMembershipProvider(rodadaId));
-
-    final meetup = overview.maybeWhen(
-      data: (r) => r != null && r.hasMeetup
-          ? LatLng(r.meetupLat!, r.meetupLng!)
-          : null,
-      orElse: () => null,
-    );
 
     return Column(
       children: [
@@ -40,7 +31,10 @@ class RodadaLiveTab extends ConsumerWidget {
               return Material(
                 color: AppTheme.line.withValues(alpha: 0.12),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       const Icon(Icons.sensors, color: AppTheme.line, size: 18),
@@ -59,13 +53,19 @@ class RodadaLiveTab extends ConsumerWidget {
             return Material(
               color: AppTheme.asphaltElevated,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
                         l10n.liveMapViewOnly,
-                        style: const TextStyle(fontSize: 13, color: AppTheme.steel),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.steel,
+                        ),
                       ),
                     ),
                     TextButton(
@@ -86,185 +86,350 @@ class RodadaLiveTab extends ConsumerWidget {
           orElse: () => const SizedBox.shrink(),
         ),
         Expanded(
-          child: positions.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
-            data: (list) {
-              final stopList = stops.maybeWhen(
-                data: (s) => s,
-                orElse: () => const [],
-              );
-              LatLng center = meetup ?? const LatLng(20.67, -103.35);
-              if (list.isNotEmpty) {
-                center = LatLng(list.first.latitude, list.first.longitude);
-              }
-              return Stack(
-                children: [
-                  FlutterMap(
-                    options: MapOptions(
-                      initialCenter: center,
-                      initialZoom: 13,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.motoline.motoline',
-                      ),
-                      if (meetup != null)
-                        MarkerLayer(
-                          markers: [
-                            Marker(
-                              point: meetup,
-                              width: 36,
-                              height: 36,
-                              child: const Icon(
-                                Icons.flag,
-                                color: AppTheme.lineHot,
-                              ),
-                            ),
-                          ],
-                        ),
-                      MarkerLayer(
-                        markers: [
-                          for (final s in stopList)
-                            Marker(
-                              point: LatLng(s.latitude, s.longitude),
-                              width: 40,
-                              height: 40,
-                              child: Tooltip(
-                                message: s.title,
-                                child: const Icon(
-                                  Icons.local_gas_station,
-                                  color: AppTheme.signal,
-                                ),
-                              ),
-                            ),
-                          for (final p in list)
-                            Marker(
-                              point: LatLng(p.latitude, p.longitude),
-                              width: 48,
-                              height: 48,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.asphalt,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      p.label.split(' ').first,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: AppTheme.line,
-                                      ),
-                                    ),
-                                  ),
-                                  const Icon(
-                                    Icons.navigation,
-                                    color: AppTheme.line,
-                                    size: 22,
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  if (list.isEmpty)
-                    Positioned(
-                      left: 16,
-                      right: 16,
-                      bottom: 24,
-                      child: Material(
-                        color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            l10n.noLiveRidersYet,
-                            style: GoogleFonts.rajdhani(
-                              color: AppTheme.steel,
-                              fontSize: 14,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
-                  Positioned(
-                    right: 12,
-                    bottom: 24,
-                    child: membership.maybeWhen(
-                      data: (m) {
-                        if (m == null || !m.isHost) {
-                          return const SizedBox.shrink();
-                        }
-                        return FloatingActionButton.extended(
-                          heroTag: 'rodada_stop',
-                          onPressed: () => _addStop(context, ref),
-                          icon: const Icon(Icons.add_location_alt),
-                          label: Text(l10n.stopFab),
-                        );
-                      },
-                      orElse: () => const SizedBox.shrink(),
-                    ),
-                  ),
-                ],
-              );
-            },
+          child: _RodadaLiveMapHost(
+            rodadaId: rodadaId,
+            isHost: membership.maybeWhen(
+              data: (m) => m?.isHost == true,
+              orElse: () => false,
+            ),
           ),
         ),
       ],
     );
   }
+}
 
-  Future<void> _addStop(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final titleCtrl = TextEditingController(text: l10n.gasBreakDefault);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.addStop),
-        content: TextField(
-          controller: titleCtrl,
-          decoration: InputDecoration(labelText: l10n.stopTitleLabel),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.dropAtMyGps),
-          ),
-        ],
-      ),
+/// Owns riverpod watches but keeps [FlutterMap] mounted in a child State.
+class _RodadaLiveMapHost extends ConsumerWidget {
+  const _RodadaLiveMapHost({
+    required this.rodadaId,
+    required this.isHost,
+  });
+
+  final String rodadaId;
+  final bool isHost;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final positions = ref.watch(rodadaLivePositionsProvider(rodadaId));
+    final stops = ref.watch(rodadaStopsProvider(rodadaId));
+    final overview = ref.watch(rodadaOverviewProvider(rodadaId));
+
+    final meetup = overview.maybeWhen(
+      data: (r) => r != null && r.hasMeetup
+          ? LatLng(r.meetupLat!, r.meetupLng!)
+          : null,
+      orElse: () => null,
     );
-    if (ok != true || !context.mounted) return;
-    try {
-      final pos = await Geolocator.getCurrentPosition();
-      await ref.read(rodadaRepositoryProvider).addStop(
-            rodadaId: rodadaId,
-            title: titleCtrl.text.trim().isEmpty
-                ? l10n.stopDefault
-                : titleCtrl.text.trim(),
-            latitude: pos.latitude,
-            longitude: pos.longitude,
-          );
-      ref.invalidate(rodadaStopsProvider(rodadaId));
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+    final stopList = stops.maybeWhen(
+      data: (s) => s,
+      orElse: () => const <RodadaStop>[],
+    );
+    final list = positions.maybeWhen(
+      data: (l) => l,
+      orElse: () => const <RodadaLivePosition>[],
+    );
+    final loading = positions.isLoading && list.isEmpty;
+    final Object? error = positions.hasError ? positions.error : null;
+
+    if (loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (error != null && list.isEmpty) {
+      return Center(child: Text('$error'));
+    }
+
+    return Stack(
+      children: [
+        _RodadaLiveMap(
+          meetup: meetup,
+          stops: stopList,
+          positions: list,
+        ),
+        if (list.isEmpty)
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 24,
+            child: Material(
+              color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  context.l10n.noLiveRidersYet,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        if (isHost)
+          Positioned(
+            right: 12,
+            bottom: 24,
+            child: FloatingActionButton.extended(
+              heroTag: 'rodada_stop',
+              onPressed: () => _addStop(context, ref, rodadaId),
+              icon: const Icon(Icons.add_location_alt),
+              label: Text(context.l10n.stopFab),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+Future<void> _addStop(
+  BuildContext context,
+  WidgetRef ref,
+  String rodadaId,
+) async {
+  final l10n = context.l10n;
+  final titleCtrl = TextEditingController(text: l10n.gasBreakDefault);
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.addStop),
+      content: TextField(
+        controller: titleCtrl,
+        decoration: InputDecoration(labelText: l10n.stopTitleLabel),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(l10n.dropAtMyGps),
+        ),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  try {
+    final pos = await Geolocator.getCurrentPosition();
+    await ref.read(rodadaRepositoryProvider).addStop(
+          rodadaId: rodadaId,
+          title: titleCtrl.text.trim().isEmpty
+              ? l10n.stopDefault
+              : titleCtrl.text.trim(),
+          latitude: pos.latitude,
+          longitude: pos.longitude,
+        );
+    ref.invalidate(rodadaStopsProvider(rodadaId));
+  } catch (e) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$e')),
+    );
+  }
+}
+
+/// Stable [FlutterMap] — tiles stay mounted; markers update without remount.
+class _RodadaLiveMap extends StatefulWidget {
+  const _RodadaLiveMap({
+    required this.meetup,
+    required this.stops,
+    required this.positions,
+  });
+
+  final LatLng? meetup;
+  final List<RodadaStop> stops;
+  final List<RodadaLivePosition> positions;
+
+  @override
+  State<_RodadaLiveMap> createState() => _RodadaLiveMapState();
+}
+
+class _RodadaLiveMapState extends State<_RodadaLiveMap> {
+  final MapController _map = MapController();
+  bool _gesturing = false;
+  List<RodadaLivePosition> _shown = const [];
+  List<RodadaLivePosition>? _pending;
+  bool _didCenter = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _shown = widget.positions;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeCenterOnce());
+  }
+
+  @override
+  void didUpdateWidget(covariant _RodadaLiveMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_samePositions(oldWidget.positions, widget.positions) &&
+        oldWidget.meetup == widget.meetup &&
+        identical(oldWidget.stops, widget.stops)) {
+      return;
+    }
+    if (_gesturing) {
+      _pending = widget.positions;
+    } else {
+      setState(() => _shown = widget.positions);
+      _maybeCenterOnce();
     }
   }
+
+  bool _samePositions(List<RodadaLivePosition> a, List<RodadaLivePosition> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  void _maybeCenterOnce() {
+    if (_didCenter || _shown.isEmpty) return;
+    _didCenter = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final p = _shown.first;
+      _map.move(LatLng(p.latitude, p.longitude), _map.camera.zoom);
+    });
+  }
+
+  void _onMapEvent(MapEvent event) {
+    if (event is MapEventMoveStart ||
+        event is MapEventFlingAnimationStart ||
+        event is MapEventDoubleTapZoomStart) {
+      _gesturing = true;
+      return;
+    }
+    if (event is MapEventMoveEnd ||
+        event is MapEventFlingAnimationEnd ||
+        event is MapEventDoubleTapZoomEnd) {
+      _gesturing = false;
+      final pending = _pending;
+      if (pending != null) {
+        _pending = null;
+        setState(() => _shown = pending);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final meetup = widget.meetup;
+    LatLng center = meetup ?? const LatLng(20.67, -103.35);
+    if (_shown.isNotEmpty && !_didCenter) {
+      center = LatLng(_shown.first.latitude, _shown.first.longitude);
+    }
+
+    return FlutterMap(
+      mapController: _map,
+      options: MapOptions(
+        initialCenter: center,
+        initialZoom: 13,
+        onMapEvent: _onMapEvent,
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.motoline.motoline',
+        ),
+        if (meetup != null)
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: meetup,
+                width: 36,
+                height: 36,
+                child: const Icon(Icons.flag, color: AppTheme.lineHot),
+              ),
+            ],
+          ),
+        MarkerLayer(
+          markers: [
+            for (final s in widget.stops)
+              Marker(
+                point: LatLng(s.latitude, s.longitude),
+                width: 40,
+                height: 40,
+                child: Tooltip(
+                  message: s.title,
+                  child: const Icon(
+                    Icons.local_gas_station,
+                    color: AppTheme.signal,
+                  ),
+                ),
+              ),
+            for (final p in _shown)
+              Marker(
+                point: LatLng(p.latitude, p.longitude),
+                width: 72,
+                height: 56,
+                child: _LiveRiderMarker(position: p),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _LiveRiderMarker extends StatelessWidget {
+  const _LiveRiderMarker({required this.position});
+
+  final RodadaLivePosition position;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final stale = position.isStale();
+    final when = _formatLastSeen(context, position.updatedAt);
+    final name = position.label.split(' ').first;
+    final caption = stale
+        ? l10n.liveRiderNoSignal(name, when)
+        : l10n.liveRiderLastSeen(name, when);
+    final color = stale ? AppTheme.steel : AppTheme.line;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: AppTheme.asphalt.withValues(alpha: stale ? 0.75 : 0.95),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            caption,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 9,
+              height: 1.15,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Icon(
+          stale ? Icons.location_off : Icons.navigation,
+          color: color,
+          size: 22,
+        ),
+      ],
+    );
+  }
+}
+
+String _formatLastSeen(BuildContext context, DateTime updatedAt) {
+  final local = updatedAt.toLocal();
+  final now = DateTime.now();
+  final delta = now.difference(local);
+  final l10n = context.l10n;
+  if (delta.inSeconds < 90) return l10n.liveSeenJustNow;
+  if (delta.inMinutes < 60) {
+    return l10n.liveSeenMinutesAgo(delta.inMinutes.clamp(1, 59));
+  }
+  return DateFormat.Hm().format(local);
 }

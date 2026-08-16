@@ -57,6 +57,7 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen>
   @override
   void dispose() {
     stopLiveGps();
+    disposeLiveGpsListenable();
     super.dispose();
   }
 
@@ -201,7 +202,7 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen>
                       ),
                   ],
                 ),
-                ...liveGpsLayers(),
+                liveGpsMapChild(),
               ],
             ),
           ),

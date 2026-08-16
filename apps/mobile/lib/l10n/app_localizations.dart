@@ -2426,6 +2426,186 @@ abstract class AppLocalizations {
   /// **'Busca riders, envía solicitudes de amistad e invita amigos aceptados a una rodada.'**
   String get friendsHelp;
 
+  /// No description provided for @familyCircleTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Círculo familiar'**
+  String get familyCircleTitle;
+
+  /// No description provided for @familyCircleHomeTile.
+  ///
+  /// In es, this message translates to:
+  /// **'Quién puede saber que estás bien al rodar'**
+  String get familyCircleHomeTile;
+
+  /// No description provided for @familyCircleHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrega familia o amigos. Al salir, comparte un link en vivo (WhatsApp sirve — no necesitan la app). Ven última ubicación y avisos de todo bien / ayuda.'**
+  String get familyCircleHelp;
+
+  /// No description provided for @familyAddContact.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar contacto'**
+  String get familyAddContact;
+
+  /// No description provided for @familyContactLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get familyContactLabel;
+
+  /// No description provided for @familyContactLabelHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Mamá / Ana / …'**
+  String get familyContactLabelHint;
+
+  /// No description provided for @familyOptionalFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Opcional: vincular un amigo de RiderLab'**
+  String get familyOptionalFriend;
+
+  /// No description provided for @familyNoFriendsYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay amigos — puedes poner un nombre y compartir el link.'**
+  String get familyNoFriendsYet;
+
+  /// No description provided for @familySaveContact.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get familySaveContact;
+
+  /// No description provided for @familyMyCircle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi círculo'**
+  String get familyMyCircle;
+
+  /// No description provided for @familyCircleEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin contactos. Agrega a alguien antes de la próxima salida.'**
+  String get familyCircleEmpty;
+
+  /// No description provided for @familyLinkOnlyContact.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibe el link (sin cuenta en la app)'**
+  String get familyLinkOnlyContact;
+
+  /// No description provided for @familyAppContact.
+  ///
+  /// In es, this message translates to:
+  /// **'También puede ver en la app'**
+  String get familyAppContact;
+
+  /// No description provided for @familyWatchingNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodando ahora'**
+  String get familyWatchingNow;
+
+  /// No description provided for @familyNoActiveWatches.
+  ///
+  /// In es, this message translates to:
+  /// **'Nadie de tu círculo está compartiendo una salida ahora.'**
+  String get familyNoActiveWatches;
+
+  /// No description provided for @familyTapToWatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para abrir el mapa'**
+  String get familyTapToWatch;
+
+  /// No description provided for @familyRiderFallback.
+  ///
+  /// In es, this message translates to:
+  /// **'Rider'**
+  String get familyRiderFallback;
+
+  /// No description provided for @familyNotifyToggle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar a familia'**
+  String get familyNotifyToggle;
+
+  /// No description provided for @familyNotifyHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia una sesión de watch y abre compartir para WhatsApp.'**
+  String get familyNotifyHelp;
+
+  /// No description provided for @familyNotifyStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar'**
+  String get familyNotifyStart;
+
+  /// No description provided for @familyWatchActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Watch familiar activo'**
+  String get familyWatchActive;
+
+  /// No description provided for @familyWatchStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Parar'**
+  String get familyWatchStop;
+
+  /// No description provided for @familyOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo bien'**
+  String get familyOk;
+
+  /// No description provided for @familyStopped.
+  ///
+  /// In es, this message translates to:
+  /// **'Me detuve'**
+  String get familyStopped;
+
+  /// No description provided for @familySos.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesito ayuda'**
+  String get familySos;
+
+  /// No description provided for @familyShareLink.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir link'**
+  String get familyShareLink;
+
+  /// No description provided for @familyShareSubject.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab — estoy rodando'**
+  String get familyShareSubject;
+
+  /// No description provided for @familyShareMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Estoy en una salida. Abre este link para ver mi última ubicación (no es 911):\n{url}'**
+  String familyShareMessage(String url);
+
+  /// No description provided for @familyLastSeen.
+  ///
+  /// In es, this message translates to:
+  /// **'Última señal {when}'**
+  String familyLastSeen(String when);
+
+  /// No description provided for @familyNoSignalSince.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin señal · última a las {when}'**
+  String familyNoSignalSince(String when);
+
   /// No description provided for @findRiders.
   ///
   /// In es, this message translates to:
@@ -2935,6 +3115,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Aún no hay riders en vivo. Los que opten aparecen aquí (~5 s).'**
   String get noLiveRidersYet;
+
+  /// No description provided for @liveRiderLastSeen.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} · {when}'**
+  String liveRiderLastSeen(String name, String when);
+
+  /// No description provided for @liveRiderNoSignal.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} · Sin señal · {when}'**
+  String liveRiderNoSignal(String name, String when);
+
+  /// No description provided for @liveSeenJustNow.
+  ///
+  /// In es, this message translates to:
+  /// **'ahora'**
+  String get liveSeenJustNow;
+
+  /// No description provided for @liveSeenMinutesAgo.
+  ///
+  /// In es, this message translates to:
+  /// **'hace {minutes} min'**
+  String liveSeenMinutesAgo(int minutes);
 
   /// No description provided for @addStop.
   ///
