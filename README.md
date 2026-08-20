@@ -2,7 +2,7 @@
 
 Motorcycle riding companion: record your ride, draw the **pilot line**, scrub any moment, improve corners.
 
-> Formerly branded CornerIQ / Motoline — product name is **RiderLab** by RawThrottle.
+> Product name is **RiderLab** by RawThrottle.
 
 ## Monorepo
 

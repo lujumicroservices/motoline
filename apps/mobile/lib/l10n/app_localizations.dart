@@ -2441,8 +2441,56 @@ abstract class AppLocalizations {
   /// No description provided for @familyCircleHelp.
   ///
   /// In es, this message translates to:
-  /// **'Agrega familia o amigos. Al salir, comparte un link en vivo (WhatsApp sirve — no necesitan la app). Ven última ubicación y avisos de todo bien / ayuda.'**
+  /// **'Agrega contactos aquí. El link WhatsApp se genera al Grabar o en una Rodada (En vivo / corazón). Puedes reenviarlo a más personas sin romper los anteriores.'**
   String get familyCircleHelp;
+
+  /// No description provided for @familyHowToShareTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo mandar el link'**
+  String get familyHowToShareTitle;
+
+  /// No description provided for @familyHowToShareSteps.
+  ///
+  /// In es, this message translates to:
+  /// **'1) En Grabar o en una Rodada (pestaña En vivo / corazón).\n2) Toca WhatsApp / Enviar a otro.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.'**
+  String get familyHowToShareSteps;
+
+  /// No description provided for @familyShareNeedsRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Primero inicia una grabación o abre una Rodada. Luego aparece el botón para compartir el link.'**
+  String get familyShareNeedsRide;
+
+  /// No description provided for @familyShareFromCircle.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir link ahora'**
+  String get familyShareFromCircle;
+
+  /// No description provided for @familyRodadaTipTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Link para familia (WhatsApp)?'**
+  String get familyRodadaTipTitle;
+
+  /// No description provided for @familyRodadaTipBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Pack = mapa de la rodada en la app. Familia sin app = corazón / Avisar a familia (mismo link se puede reenviar).'**
+  String get familyRodadaTipBody;
+
+  /// No description provided for @familyRodadaTipCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver círculo familiar'**
+  String get familyRodadaTipCta;
+
+  /// No description provided for @familyAppBarShareTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar a familia'**
+  String get familyAppBarShareTooltip;
 
   /// No description provided for @familyAddContact.
   ///
@@ -2537,19 +2585,25 @@ abstract class AppLocalizations {
   /// No description provided for @familyNotifyHelp.
   ///
   /// In es, this message translates to:
-  /// **'Inicia una sesión de watch y abre compartir para WhatsApp.'**
+  /// **'Genera un link y abre WhatsApp para mandárselo a tu familiar (no necesitan la app).'**
   String get familyNotifyHelp;
+
+  /// No description provided for @familyNotifyHelpRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.'**
+  String get familyNotifyHelpRodada;
 
   /// No description provided for @familyNotifyStart.
   ///
   /// In es, this message translates to:
-  /// **'Activar'**
+  /// **'WhatsApp'**
   String get familyNotifyStart;
 
   /// No description provided for @familyWatchActive.
   ///
   /// In es, this message translates to:
-  /// **'Watch familiar activo'**
+  /// **'Familia puede verte'**
   String get familyWatchActive;
 
   /// No description provided for @familyWatchStop.
@@ -2579,8 +2633,50 @@ abstract class AppLocalizations {
   /// No description provided for @familyShareLink.
   ///
   /// In es, this message translates to:
-  /// **'Compartir link'**
+  /// **'Reenviar link'**
   String get familyShareLink;
+
+  /// No description provided for @familyShareAgain.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar a otro'**
+  String get familyShareAgain;
+
+  /// No description provided for @familyShareAgainHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes mandar el mismo link a más personas; los anteriores siguen funcionando.'**
+  String get familyShareAgainHint;
+
+  /// No description provided for @familyRotateLink.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo link'**
+  String get familyRotateLink;
+
+  /// No description provided for @familyRotateLinkTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Invalidar links anteriores?'**
+  String get familyRotateLinkTitle;
+
+  /// No description provided for @familyRotateLinkBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se crea un link nuevo. Quien tenga el anterior dejará de ver tu ubicación. Úsalo si el link se filtró.'**
+  String get familyRotateLinkBody;
+
+  /// No description provided for @familyRotateLinkConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Invalidar y compartir'**
+  String get familyRotateLinkConfirm;
+
+  /// No description provided for @familyShareNeedsSignIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para compartir con familia.'**
+  String get familyShareNeedsSignIn;
 
   /// No description provided for @familyShareSubject.
   ///
@@ -3290,6 +3386,132 @@ abstract class AppLocalizations {
   /// **'Foto'**
   String get photoTitle;
 
+  /// No description provided for @photoNeedsActiveRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza un recorrido para ligar la foto a la ruta'**
+  String get photoNeedsActiveRide;
+
+  /// No description provided for @photoLinkedToRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto ligada a la ruta'**
+  String get photoLinkedToRoute;
+
+  /// No description provided for @photoCaptureTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto de la rodada'**
+  String get photoCaptureTooltip;
+
+  /// No description provided for @photoTake.
+  ///
+  /// In es, this message translates to:
+  /// **'Cámara'**
+  String get photoTake;
+
+  /// No description provided for @photoImportFromRoll.
+  ///
+  /// In es, this message translates to:
+  /// **'Del carrete'**
+  String get photoImportFromRoll;
+
+  /// No description provided for @photoImportTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotos de esta rodada'**
+  String get photoImportTitle;
+
+  /// No description provided for @photoImportHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Encontramos estas fotos en el carrete durante tu ruta. Nada se sube hasta que confirmes.'**
+  String get photoImportHelp;
+
+  /// No description provided for @photoImportSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir'**
+  String get photoImportSkip;
+
+  /// No description provided for @photoImportConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Ligar {count} fotos'**
+  String photoImportConfirm(int count);
+
+  /// No description provided for @reelTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reel de la rodada'**
+  String get reelTitle;
+
+  /// No description provided for @reelDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo'**
+  String get reelDone;
+
+  /// No description provided for @reelBuilding.
+  ///
+  /// In es, this message translates to:
+  /// **'Armando tu reel…'**
+  String get reelBuilding;
+
+  /// No description provided for @reelRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Regenerar'**
+  String get reelRetry;
+
+  /// No description provided for @reelShare.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir'**
+  String get reelShare;
+
+  /// No description provided for @reelHookSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Recostada'**
+  String get reelHookSub;
+
+  /// No description provided for @reelCurvesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Curvas'**
+  String get reelCurvesLabel;
+
+  /// No description provided for @reelRidersLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Riders'**
+  String get reelRidersLabel;
+
+  /// No description provided for @reelEndQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Tú cuánto te recuestas?'**
+  String get reelEndQuestion;
+
+  /// No description provided for @reelCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Graba tu línea en RiderLab'**
+  String get reelCta;
+
+  /// No description provided for @reelGenerate.
+  ///
+  /// In es, this message translates to:
+  /// **'Generar reel'**
+  String get reelGenerate;
+
+  /// No description provided for @reelOverviewCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparte el reel de la rodada'**
+  String get reelOverviewCta;
+
   /// No description provided for @skillCoach.
   ///
   /// In es, this message translates to:
@@ -3439,6 +3661,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{hz} Hz'**
   String gpsRateHz(String hz);
+
+  /// No description provided for @imuAzurePending.
+  ///
+  /// In es, this message translates to:
+  /// **'IMU pendiente de subir'**
+  String get imuAzurePending;
+
+  /// No description provided for @imuAzureUploading.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiendo IMU…'**
+  String get imuAzureUploading;
+
+  /// No description provided for @imuAzureUploaded.
+  ///
+  /// In es, this message translates to:
+  /// **'IMU en Azure'**
+  String get imuAzureUploaded;
+
+  /// No description provided for @imuAzureFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'Falló la subida de IMU'**
+  String get imuAzureFailed;
+
+  /// No description provided for @imuAzureRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar subida IMU'**
+  String get imuAzureRetry;
 
   /// No description provided for @pressure.
   ///
@@ -3743,7 +3995,7 @@ abstract class AppLocalizations {
   /// No description provided for @leanLabPrepHelp.
   ///
   /// In es, this message translates to:
-  /// **'Di cómo va el teléfono y guarda el 0° con él ya en su lugar. Después arranca la vuelta.'**
+  /// **'Teléfono ya en el soporte o la maleta de tanque. Guarda el 0° con la moto derecha y arranca la vuelta.'**
   String get leanLabPrepHelp;
 
   /// No description provided for @leanLabPoseQ.

@@ -111,6 +111,7 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                 UprightFreezePanel(
                   controller: _freeze,
                   compact: true,
+                  mode: UprightFreezeMode.hold,
                 ),
                 const SizedBox(height: 8),
                 Row(

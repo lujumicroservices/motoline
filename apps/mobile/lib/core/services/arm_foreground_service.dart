@@ -15,7 +15,7 @@ void armForegroundStartCallback() {
 class ArmLocationTaskHandler extends TaskHandler {
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
-    debugPrint('CornerIQ arm FGS onStart (${starter.name})');
+    debugPrint('RiderLab arm FGS onStart (${starter.name})');
   }
 
   @override
@@ -51,13 +51,13 @@ class ArmLocationTaskHandler extends TaskHandler {
         'ts': pos.timestamp.millisecondsSinceEpoch,
       });
     } catch (e) {
-      debugPrint('CornerIQ arm FGS GPS: $e');
+      debugPrint('RiderLab arm FGS GPS: $e');
     }
   }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
-    debugPrint('CornerIQ arm FGS onDestroy (timeout=$isTimeout)');
+    debugPrint('RiderLab arm FGS onDestroy (timeout=$isTimeout)');
   }
 
   @override

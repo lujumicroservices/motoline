@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'social_providers.dart';
 
+/// Historical prefs key — do not rename (would reset the rider alias).
 const _aliasKey = 'corneriq_alias';
 
 /// Rider alias shown across the app. Prefers cloud profile, falls back to local.

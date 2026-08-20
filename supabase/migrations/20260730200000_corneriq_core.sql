@@ -1,4 +1,4 @@
--- CornerIQ cloud schema (separate from Luju POS / auto).
+-- RiderLab cloud schema (separate from Luju POS / auto).
 -- Auth users own profiles; rides sync from device SQLite; shared rides enable peer compare.
 
 create extension if not exists "pgcrypto";

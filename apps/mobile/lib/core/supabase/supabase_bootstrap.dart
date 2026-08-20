@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Boots the CornerIQ Supabase project (not Luju POS / auto).
+/// Boots the RiderLab Supabase project (not Luju POS / auto).
 class SupabaseBootstrap {
   SupabaseBootstrap._();
 
@@ -66,11 +66,11 @@ class SupabaseBootstrap {
       return session;
     } on AuthException catch (e) {
       lastAuthError = e.message;
-      debugPrint('CornerIQ auth: ${e.message}');
+      debugPrint('RiderLab auth: ${e.message}');
       rethrow;
     } catch (e) {
       lastAuthError = '$e';
-      debugPrint('CornerIQ auth: $e');
+      debugPrint('RiderLab auth: $e');
       rethrow;
     }
   }
@@ -119,9 +119,9 @@ class SupabaseBootstrap {
         'display_name': name,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', user.id);
-      debugPrint('CornerIQ synced linked profile name: $name');
+      debugPrint('RiderLab synced linked profile name: $name');
     } catch (e) {
-      debugPrint('CornerIQ linked profile sync: $e');
+      debugPrint('RiderLab linked profile sync: $e');
     }
   }
 
@@ -145,7 +145,7 @@ class SupabaseBootstrap {
         }).eq('id', userId);
       }
     } catch (e) {
-      debugPrint('CornerIQ profile upsert: $e');
+      debugPrint('RiderLab profile upsert: $e');
     }
   }
 }

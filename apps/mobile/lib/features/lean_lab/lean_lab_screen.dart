@@ -226,11 +226,6 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
             onStart: () => _start(LeanLabSessionType.baselineReturn),
           ),
           _ProtocolCard(
-            title: l10n.leanLabProtoPocket,
-            subtitle: l10n.leanLabProtoPocketHelp,
-            onStart: () => _start(LeanLabSessionType.mountPocket),
-          ),
-          _ProtocolCard(
             title: l10n.leanLabProtoFree,
             subtitle: l10n.leanLabProtoFreeHelp,
             onStart: () => _start(LeanLabSessionType.free),

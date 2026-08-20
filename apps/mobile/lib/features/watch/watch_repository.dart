@@ -6,8 +6,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase/supabase_bootstrap.dart';
 import 'watch_models.dart';
+import 'watch_token_store.dart';
 
 class WatchRepository {
+  WatchRepository({WatchTokenStore? tokenStore})
+      : _tokens = tokenStore ?? WatchTokenStore();
+
+  final WatchTokenStore _tokens;
+
   SupabaseClient get _db => SupabaseBootstrap.client;
 
   String? get _uid => _db.auth.currentUser?.id;
@@ -22,6 +28,9 @@ class WatchRepository {
   }
 
   static String shareUrlForToken(String token) => '$shareBaseUrl?t=$token';
+
+  /// Stable key for rodada-scoped watch sessions (no solo ride required).
+  static String rodadaLocalRideId(String rodadaId) => 'rodada:$rodadaId';
 
   Future<List<TrustedContact>> listMyContacts() async {
     final me = _uid;
@@ -114,39 +123,56 @@ class WatchRepository {
       'kind': 'started',
     });
 
-    final token = await createShareToken(session.id);
+    final token = await createShareToken(session.id, revokeExisting: false);
     return WatchSession.fromMap(row, shareUrl: shareUrlForToken(token));
   }
 
-  Future<String> createShareToken(String sessionId) async {
+  /// Returns the same live URL for everyone. Does **not** revoke prior shares.
+  Future<String> ensureShareUrl(String sessionId) async {
+    final cached = await _tokens.load(sessionId);
+    if (cached != null && cached.length >= 16) {
+      return shareUrlForToken(cached);
+    }
+    final raw = await createShareToken(sessionId, revokeExisting: false);
+    return shareUrlForToken(raw);
+  }
+
+  /// Creates a token. When [revokeExisting] is true, old links stop working.
+  Future<String> createShareToken(
+    String sessionId, {
+    bool revokeExisting = false,
+  }) async {
     final me = _uid;
     if (me == null) throw StateError('Not signed in');
 
-    // Revoke previous tokens for this session.
-    await _db
-        .from('watch_share_tokens')
-        .update({'revoked_at': DateTime.now().toUtc().toIso8601String()})
-        .eq('session_id', sessionId)
-        .filter('revoked_at', 'is', null);
+    if (revokeExisting) {
+      await _db
+          .from('watch_share_tokens')
+          .update({'revoked_at': DateTime.now().toUtc().toIso8601String()})
+          .eq('session_id', sessionId)
+          .filter('revoked_at', 'is', null);
+    }
 
     final raw = _randomToken();
     final hash = sha256Hex(raw);
-    final expires = DateTime.now().toUtc().add(const Duration(hours: 24));
+    final expires = DateTime.now().toUtc().add(const Duration(hours: 12));
     await _db.from('watch_share_tokens').insert({
       'session_id': sessionId,
       'token_hash': hash,
       'expires_at': expires.toIso8601String(),
     });
+    await _tokens.save(sessionId, raw);
     return raw;
   }
 
+  /// Invalidates every prior magic link and issues a fresh one.
   Future<WatchSession> rotateShareLink(String sessionId) async {
     final row = await _db
         .from('watch_sessions')
         .select()
         .eq('id', sessionId)
         .single();
-    final token = await createShareToken(sessionId);
+    final token = await createShareToken(sessionId, revokeExisting: true);
     return WatchSession.fromMap(row, shareUrl: shareUrlForToken(token));
   }
 
@@ -188,6 +214,7 @@ class WatchRepository {
         .update({'revoked_at': DateTime.now().toUtc().toIso8601String()})
         .eq('session_id', sessionId)
         .filter('revoked_at', 'is', null);
+    await _tokens.clear(sessionId);
   }
 
   Future<WatchSession?> activeSessionForRide(String localRideId) async {
@@ -202,7 +229,42 @@ class WatchRepository {
         .limit(1);
     final list = rows as List;
     if (list.isEmpty) return null;
-    return WatchSession.fromMap(list.first as Map<String, dynamic>);
+    return attachShareUrl(
+      WatchSession.fromMap(list.first as Map<String, dynamic>),
+    );
+  }
+
+  Future<WatchSession?> activeSessionMine() async {
+    final me = _uid;
+    if (me == null) return null;
+    final rows = await _db
+        .from('watch_sessions')
+        .select()
+        .eq('rider_id', me)
+        .eq('status', 'active')
+        .order('started_at', ascending: false)
+        .limit(1);
+    final list = rows as List;
+    if (list.isEmpty) return null;
+    return attachShareUrl(
+      WatchSession.fromMap(list.first as Map<String, dynamic>),
+    );
+  }
+
+  Future<WatchSession> attachShareUrl(WatchSession session) async {
+    if (session.shareUrl != null) return session;
+    final url = await ensureShareUrl(session.id);
+    return WatchSession(
+      id: session.id,
+      riderId: session.riderId,
+      localRideId: session.localRideId,
+      cloudRideId: session.cloudRideId,
+      status: session.status,
+      startedAt: session.startedAt,
+      endedAt: session.endedAt,
+      riderDisplayName: session.riderDisplayName,
+      shareUrl: url,
+    );
   }
 
   /// Sessions of friends who added me to their circle (in-app viewer).

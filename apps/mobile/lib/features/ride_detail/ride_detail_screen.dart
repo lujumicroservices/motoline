@@ -31,6 +31,7 @@ import 'ride_rename.dart';
 import 'skill_lab_screen.dart';
 import 'widgets/brake_events_panel.dart';
 import 'widgets/gps_quality_chip.dart';
+import 'widgets/imu_azure_chip.dart';
 import 'widgets/lab_section.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
@@ -443,6 +444,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         ),
                         const SizedBox(height: 4),
                         GpsQualityChip(analytics: full),
+                        ImuAzureChip(rideId: ride.id),
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 10,

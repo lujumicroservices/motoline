@@ -46,7 +46,6 @@ class RideAnalytics {
       stretches: roadStretches,
       neutralLeanDegrees: neutralLeanDegrees,
       leanSamples: leanSamples,
-      mountMode: ride.leanMountMode,
     );
   }
 
@@ -88,8 +87,7 @@ class RideAnalytics {
         maxRightDegrees: leanSides.maxRightDegrees,
       );
 
-  bool get leanConfidenceLow =>
-      ride.leanMountMode == 'pocket' || leanAsymmetry > 0.35;
+  bool get leanConfidenceLow => leanAsymmetry > 0.35;
 
   bool get hasData => samples.isNotEmpty;
 

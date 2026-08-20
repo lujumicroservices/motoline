@@ -5,7 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
+import '../../reel/reel_preview_screen.dart';
+import '../../watch/family_circle_screen.dart';
 import '../rodada_providers.dart';
 
 class RodadaOverviewTab extends ConsumerWidget {
@@ -103,6 +106,37 @@ class RodadaOverviewTab extends ConsumerWidget {
               l10n.sharingDefaultsHelp,
               style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
             ),
+            const SizedBox(height: 12),
+            Card(
+              color: AppTheme.asphaltElevated,
+              child: ListTile(
+                leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
+                title: Text(l10n.familyRodadaTipTitle),
+                subtitle: Text(l10n.familyRodadaTipBody),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const FamilyCircleScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              color: AppTheme.asphaltElevated,
+              child: ListTile(
+                leading: const Icon(
+                  Icons.movie_creation_outlined,
+                  color: AppTheme.signal,
+                ),
+                title: Text(l10n.reelGenerate),
+                subtitle: Text(l10n.reelOverviewCta),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _openReel(context, ref),
+              ),
+            ),
             mine.when(
               loading: () => const LinearProgressIndicator(),
               error: (e, _) => Text('$e'),
@@ -188,6 +222,43 @@ class RodadaOverviewTab extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _openReel(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    try {
+      final repo = ref.read(rodadaRepositoryProvider);
+      final me = repo.currentUserId;
+      final rides = await ref.read(rodadaRidesProvider(rodadaId).future);
+      final mine = rides.where((r) => me == null || r.userId == me).toList();
+      String? rideId =
+          mine.isNotEmpty && mine.first.localId.isNotEmpty ? mine.first.localId : null;
+      if (rideId == null) {
+        final local = await ref.read(ridesListProvider.future);
+        final completed = local.where((r) => r.status.name == 'completed').toList();
+        rideId = completed.isEmpty ? null : completed.first.id;
+      }
+      if (rideId == null) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.noCompletedRidesToLink)),
+        );
+        return;
+      }
+      if (!context.mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => ReelPreviewScreen(
+            rideId: rideId!,
+            rodadaId: rodadaId,
+            replaceWithRideDetail: false,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    }
   }
 }
 

@@ -70,7 +70,6 @@ class CornerSkillEngine {
     required List<RoadStretch> stretches,
     required double neutralLeanDegrees,
     List<LeanSample> leanSamples = const [],
-    String? mountMode,
   }) {
     final corners = <CornerSkill>[];
     for (final s in stretches) {
@@ -82,7 +81,7 @@ class CornerSkillEngine {
         leanSamples: leanSamples,
       );
       if (analysis == null) continue;
-      corners.add(_scoreCorner(analysis, s, mountMode: mountMode));
+      corners.add(_scoreCorner(analysis, s));
     }
 
     if (corners.isEmpty) {
@@ -159,9 +158,8 @@ class CornerSkillEngine {
 
   CornerSkill _scoreCorner(
     CurvaAnalysis a,
-    RoadStretch stretch, {
-    String? mountMode,
-  }) {
+    RoadStretch stretch,
+  ) {
     final tips = <SkillTip>[];
     var score = 70.0;
 
@@ -214,11 +212,6 @@ class CornerSkillEngine {
     } else if (stretch.headingChangeDeg.abs() > 50 && maxLean < 12) {
       score -= 10;
       tips.add(const SkillTip(SkillTipId.lowLeanBigHeading));
-    }
-
-    // Pocket rides: absolute degrees are noisier — soft-pedal extreme scores.
-    if (mountMode == 'pocket') {
-      score = 50 + (score - 50) * 0.85;
     }
 
     // Smoothness proxy: duration vs distance (jerky = short chaotic).

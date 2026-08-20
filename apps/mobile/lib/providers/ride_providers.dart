@@ -8,6 +8,7 @@ import '../core/models/lean_sample.dart';
 import '../core/models/ride.dart';
 import '../core/models/track_point.dart';
 import '../core/services/loop_session_controller.dart';
+import '../core/services/imu_blob_upload_service.dart';
 import '../core/services/ride_place_name_service.dart';
 import '../core/services/ride_recorder.dart';
 import '../core/services/ride_sync_service.dart';
@@ -16,6 +17,10 @@ import '../core/services/sync_outbox_service.dart';
 
 final rideDatabaseProvider = Provider<RideDatabase>((ref) {
   return RideDatabase.instance;
+});
+
+final imuBlobUploadServiceProvider = Provider<ImuBlobUploadService>((ref) {
+  return ImuBlobUploadService(database: ref.watch(rideDatabaseProvider));
 });
 
 final rideSyncServiceProvider = Provider<RideSyncService>((ref) {

@@ -289,10 +289,9 @@ class LeanLabService {
   }
 
   /// Suggested default mount for a session type.
-  static String defaultMount(LeanLabSessionType type) =>
-      type == LeanLabSessionType.mountPocket
-          ? PhoneMountId.leftPocket
-          : PhoneMountId.centerMount;
+  static String defaultMount(LeanLabSessionType type) => switch (type) {
+        _ => PhoneMountId.centerMount,
+      };
 
   static LeanLabDirection defaultDirection(LeanLabSessionType type) =>
       switch (type) {

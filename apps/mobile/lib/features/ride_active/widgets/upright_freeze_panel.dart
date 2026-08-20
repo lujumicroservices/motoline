@@ -5,12 +5,12 @@ import '../../../core/lean_lab/upright_freeze_controller.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 
-/// One button: arm freeze (pocket place or hold-in-mount), then auto-start.
+/// One button: hold-in-mount freeze (phone already on the bike), then auto-start.
 class UprightFreezePanel extends StatelessWidget {
   const UprightFreezePanel({
     super.key,
     required this.controller,
-    this.mode = UprightFreezeMode.place,
+    this.mode = UprightFreezeMode.hold,
     this.compact = false,
   });
 

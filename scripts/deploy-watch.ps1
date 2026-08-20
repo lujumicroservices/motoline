@@ -1,5 +1,5 @@
 # One-shot deploy for Family Watch static page (run from repo root)
-# Requires: az login, supabase CLI linked to CornerIQ
+# Requires: az login, supabase CLI linked to RiderLab (project eabhnmlfsfibgwkspqwa)
 
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot\..

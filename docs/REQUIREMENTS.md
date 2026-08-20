@@ -265,7 +265,7 @@ flowchart LR
 | REQ-LEAN-COLOR | Lean L/R colors (not green/red) | In progress (gauge + lean chart) |
 | REQ-LOOP | Loop mode init/end + auto laps | In progress (recorder + HUD shipped; needs field testing) |
 | REQ-COMPARE | Compare metrics on same route (local then multi-user via Supabase) | Local done; cloud peer path exists |
-| REQ-SYNC | Supabase CornerIQ project + schema + Flutter client bootstrap | In progress |
+| REQ-SYNC | Supabase RiderLab project + schema + Flutter client bootstrap | In progress |
 | REQ-SEGMENT | Select/zoom road segment + segment metrics | In progress |
 | REQ-ROAD-KIND | Recta vs curva from heading (+ lean side) | In progress |
 

@@ -8,7 +8,10 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import '../../watch/active_watch_panel.dart';
+import '../../watch/watch_repository.dart';
 import '../models/rodada_models.dart';
+import '../photos/ride_photo_capture.dart';
 import '../rodada_providers.dart';
 
 /// Live pack map. Watching [rodadaLivePositionsProvider] starts GPS publish;
@@ -84,6 +87,10 @@ class RodadaLiveTab extends ConsumerWidget {
             );
           },
           orElse: () => const SizedBox.shrink(),
+        ),
+        ActiveWatchPanel(
+          localRideId: WatchRepository.rodadaLocalRideId(rodadaId),
+          compact: true,
         ),
         Expanded(
           child: _RodadaLiveMapHost(
@@ -167,6 +174,15 @@ class _RodadaLiveMapHost extends ConsumerWidget {
               ),
             ),
           ),
+        Positioned(
+          left: 12,
+          bottom: isHost ? 92 : 24,
+          child: RidePhotoShutterButton(
+            rodadaId: rodadaId,
+            fallbackLat: list.isEmpty ? null : list.first.latitude,
+            fallbackLng: list.isEmpty ? null : list.first.longitude,
+          ),
+        ),
         if (isHost)
           Positioned(
             right: 12,

@@ -2,8 +2,11 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/imu_sample.dart';
+import '../models/imu_upload.dart';
 import '../models/lean_sample.dart';
 import '../models/ride.dart';
+import '../models/ride_photo.dart';
 import '../models/route_circuit.dart';
 import '../models/route_loop.dart';
 import '../models/track_point.dart';
@@ -26,7 +29,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 17,
+      version: 20,
       onConfigure: (db) async {
         // Outdoor-grade durability: survive kills mid-batch flush.
         // Android requires rawQuery for PRAGMAs that return a row
@@ -86,6 +89,9 @@ class RideDatabase {
         await _createLeanLabSessionsTable(db);
         await _createSyncOutboxTable(db);
         await _createLeanSamplesTable(db);
+        await _createImuSamplesTable(db);
+        await _createImuUploadsTable(db);
+        await _createRidePhotosTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -148,6 +154,16 @@ class RideDatabase {
           await _addLeanFreezeColumnsIfMissing(db);
           await _createLeanSamplesTable(db);
         }
+        if (oldVersion < 18) {
+          await _createRidePhotosTable(db);
+        }
+        if (oldVersion < 19) {
+          await _addLeanSampleReplayColumnsIfMissing(db);
+          await _createImuSamplesTable(db);
+        }
+        if (oldVersion < 20) {
+          await _createImuUploadsTable(db);
+        }
       },
     );
   }
@@ -162,12 +178,52 @@ class RideDatabase {
         gps_lean_degrees REAL,
         speed_mps REAL,
         confidence REAL,
+        vector_lean REAL,
+        pose TEXT,
+        fused_roll REAL,
+        fused_pitch REAL,
         FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
       )
     ''');
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_lean_samples_ride '
       'ON lean_samples(ride_id, timestamp_ms)',
+    );
+  }
+
+  Future<void> _addLeanSampleReplayColumnsIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(lean_samples)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    Future<void> add(String name, String sqlType) async {
+      if (!existing.contains(name)) {
+        await db.execute('ALTER TABLE lean_samples ADD COLUMN $name $sqlType');
+      }
+    }
+
+    await add('vector_lean', 'REAL');
+    await add('pose', 'TEXT');
+    await add('fused_roll', 'REAL');
+    await add('fused_pitch', 'REAL');
+  }
+
+  Future<void> _createImuSamplesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS imu_samples (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ride_id TEXT NOT NULL,
+        timestamp_ms INTEGER NOT NULL,
+        ax REAL NOT NULL,
+        ay REAL NOT NULL,
+        az REAL NOT NULL,
+        gx REAL NOT NULL,
+        gy REAL NOT NULL,
+        gz REAL NOT NULL,
+        FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_imu_samples_ride '
+      'ON imu_samples(ride_id, timestamp_ms)',
     );
   }
 
@@ -717,6 +773,10 @@ class RideDatabase {
   Future<void> deleteRide(String id) async {
     final db = await database;
     await db.delete('track_points', where: 'ride_id = ?', whereArgs: [id]);
+    await db.delete('lean_samples', where: 'ride_id = ?', whereArgs: [id]);
+    await db.delete('imu_samples', where: 'ride_id = ?', whereArgs: [id]);
+    await db.delete('imu_uploads', where: 'ride_id = ?', whereArgs: [id]);
+    await db.delete('ride_photos', where: 'ride_id = ?', whereArgs: [id]);
     await db.delete('rides', where: 'id = ?', whereArgs: [id]);
   }
 
@@ -927,5 +987,177 @@ class RideDatabase {
   Future<void> deleteLeanSamplesForRide(String rideId) async {
     final db = await database;
     await db.delete('lean_samples', where: 'ride_id = ?', whereArgs: [rideId]);
+  }
+
+  // --- IMU samples (~50 Hz raw 6-axis, local replay) ----------------------
+
+  Future<void> insertImuSamplesBatch(List<RideImuSample> samples) async {
+    if (samples.isEmpty) return;
+    final db = await database;
+    final batch = db.batch();
+    for (final s in samples) {
+      batch.insert('imu_samples', s.toMap()..remove('id'));
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<List<RideImuSample>> getImuSamples(String rideId) async {
+    final db = await database;
+    final rows = await db.query(
+      'imu_samples',
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+      orderBy: 'timestamp_ms ASC',
+    );
+    return rows.map(RideImuSample.fromMap).toList();
+  }
+
+  Future<void> deleteImuSamplesForRide(String rideId) async {
+    final db = await database;
+    await db.delete('imu_samples', where: 'ride_id = ?', whereArgs: [rideId]);
+  }
+
+  Future<void> _createImuUploadsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS imu_uploads (
+        ride_id TEXT PRIMARY KEY,
+        status TEXT NOT NULL,
+        blob_path TEXT,
+        error TEXT,
+        updated_at_ms INTEGER NOT NULL,
+        FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  Future<void> upsertImuUpload(ImuUploadRow row) async {
+    final db = await database;
+    await db.insert(
+      'imu_uploads',
+      row.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<ImuUploadRow?> getImuUpload(String rideId) async {
+    final db = await database;
+    final rows = await db.query(
+      'imu_uploads',
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return ImuUploadRow.fromMap(rows.first);
+  }
+
+  // --- Ride photos (offline queue → rodada album) -------------------------
+
+  Future<void> _createRidePhotosTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ride_photos (
+        id TEXT PRIMARY KEY,
+        ride_id TEXT NOT NULL,
+        rodada_id TEXT,
+        local_path TEXT,
+        storage_path TEXT,
+        taken_at_ms INTEGER,
+        latitude REAL,
+        longitude REAL,
+        source TEXT,
+        content_hash TEXT,
+        uploaded INTEGER NOT NULL DEFAULT 0,
+        created_at_ms INTEGER NOT NULL,
+        FOREIGN KEY (ride_id) REFERENCES rides (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ride_photos_ride '
+      'ON ride_photos(ride_id, taken_at_ms)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ride_photos_pending '
+      'ON ride_photos(uploaded, ride_id)',
+    );
+  }
+
+  Future<void> upsertRidePhoto(RidePhoto photo) async {
+    final db = await database;
+    await db.insert(
+      'ride_photos',
+      photo.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<RidePhoto>> getRidePhotos(String rideId) async {
+    final db = await database;
+    final rows = await db.query(
+      'ride_photos',
+      where: 'ride_id = ?',
+      orderBy: 'taken_at_ms ASC, created_at_ms ASC',
+      whereArgs: [rideId],
+    );
+    return rows.map(RidePhoto.fromMap).toList();
+  }
+
+  Future<List<RidePhoto>> getPendingRidePhotos({String? rideId}) async {
+    final db = await database;
+    final rows = rideId == null
+        ? await db.query(
+            'ride_photos',
+            where: 'uploaded = 0',
+            orderBy: 'created_at_ms ASC',
+          )
+        : await db.query(
+            'ride_photos',
+            where: 'uploaded = 0 AND ride_id = ?',
+            whereArgs: [rideId],
+            orderBy: 'created_at_ms ASC',
+          );
+    return rows.map(RidePhoto.fromMap).toList();
+  }
+
+  Future<bool> ridePhotoHashExists(String contentHash) async {
+    final db = await database;
+    final rows = await db.query(
+      'ride_photos',
+      columns: ['id'],
+      where: 'content_hash = ?',
+      whereArgs: [contentHash],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  Future<void> markRidePhotoUploaded({
+    required String id,
+    required String storagePath,
+    String? rodadaId,
+  }) async {
+    final db = await database;
+    await db.update(
+      'ride_photos',
+      {
+        'uploaded': 1,
+        'storage_path': storagePath,
+        'rodada_id': ?rodadaId,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> setRidePhotosRodada({
+    required String rideId,
+    required String rodadaId,
+  }) async {
+    final db = await database;
+    await db.update(
+      'ride_photos',
+      {'rodada_id': rodadaId},
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+    );
   }
 }

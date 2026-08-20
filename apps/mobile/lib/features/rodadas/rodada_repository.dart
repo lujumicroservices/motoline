@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:math';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -81,7 +83,7 @@ class RodadaRepository {
         .map(RodadaSummary.fromMap)
         .toList();
 
-    // Prefer live / upcoming first.
+      // Prefer live / upcoming first.
     list.sort((a, b) {
       int rank(RodadaSummary r) {
         switch (r.status) {
@@ -102,6 +104,24 @@ class RodadaRepository {
       return bs.compareTo(as);
     });
     return list;
+  }
+
+  /// Live rodada first, then the most recent open one the rider belongs to.
+  Future<RodadaSummary?> findAttachableRodada() async {
+    final mine = await listMyRodadas(limit: 30);
+    final attachable = mine
+        .where((r) => r.status == 'live' || r.status == 'open')
+        .toList();
+    if (attachable.isEmpty) return null;
+    attachable.sort((a, b) {
+      int rank(RodadaSummary r) => r.status == 'live' ? 0 : 1;
+      final c = rank(a).compareTo(rank(b));
+      if (c != 0) return c;
+      final as = a.startsAt ?? a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bs = b.startsAt ?? b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bs.compareTo(as);
+    });
+    return attachable.first;
   }
 
   Future<RodadaSummary?> getRodada(String id) async {
@@ -459,7 +479,7 @@ class RodadaRepository {
         .from('rodada_photos')
         .select(
           'id, rodada_id, user_id, storage_path, caption, latitude, '
-          'longitude, created_at',
+          'longitude, created_at, taken_at, ride_id, source, content_hash',
         )
         .eq('rodada_id', rodadaId)
         .order('created_at', ascending: false)
@@ -491,10 +511,30 @@ class RodadaRepository {
     String? caption,
     double? latitude,
     double? longitude,
+    DateTime? takenAt,
+    String? rideId,
+    String? source,
+    String? contentHash,
   }) async {
     await _ensure();
     final me = currentUserId;
     if (me == null) throw StateError('Not signed in');
+    final hash = contentHash ?? sha256.convert(bytes).toString();
+    final existing = await _supabase
+        .from('rodada_photos')
+        .select('id')
+        .eq('rodada_id', rodadaId)
+        .eq('user_id', me)
+        .eq('content_hash', hash)
+        .maybeSingle();
+    if (existing != null) {
+      final row = await _supabase
+          .from('rodada_photos')
+          .select()
+          .eq('id', existing['id'] as String)
+          .single();
+      return RodadaPhoto.fromMap(Map<String, dynamic>.from(row));
+    }
     final ext = contentType.contains('png')
         ? 'png'
         : contentType.contains('webp')
@@ -516,10 +556,48 @@ class RodadaRepository {
           'caption': caption,
           'latitude': latitude,
           'longitude': longitude,
+          'taken_at': takenAt?.toUtc().toIso8601String(),
+          'ride_id': rideId,
+          'source': source,
+          'content_hash': hash,
         })
         .select()
         .single();
     return RodadaPhoto.fromMap(Map<String, dynamic>.from(row));
+  }
+
+  Future<String> signedReelUrl(String storagePath) async {
+    await _ensure();
+    return _supabase.storage
+        .from('rodada-reels')
+        .createSignedUrl(storagePath, 3600);
+  }
+
+  Future<void> uploadReel({
+    required String rodadaId,
+    required String localPath,
+    required int durationMs,
+    required String hookKind,
+    String? rideId,
+  }) async {
+    await _ensure();
+    final me = currentUserId;
+    if (me == null) throw StateError('Not signed in');
+    final path =
+        '$rodadaId/$me/${DateTime.now().millisecondsSinceEpoch}.mp4';
+    await _supabase.storage.from('rodada-reels').upload(
+          path,
+          File(localPath),
+          fileOptions: const FileOptions(contentType: 'video/mp4', upsert: false),
+        );
+    await _supabase.from('rodada_reels').insert({
+      'rodada_id': rodadaId,
+      'ride_id': rideId,
+      'user_id': me,
+      'storage_path': path,
+      'duration_ms': durationMs,
+      'hook_kind': hookKind,
+    });
   }
 
   Future<List<RodadaMessage>> listMessages(

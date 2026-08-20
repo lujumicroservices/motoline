@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../db/ride_database.dart';
+import '../models/imu_sample.dart';
 import '../models/lean_sample.dart';
 import '../models/ride.dart';
 import '../models/track_point.dart';
@@ -16,6 +17,7 @@ import 'barometer_sensor.dart';
 import '../lean_lab/lean_imu_math.dart';
 import 'lean_sensor.dart';
 import 'location_service.dart';
+import 'imu_blob_upload_service.dart';
 import 'motion_pattern_detector.dart';
 import 'ride_place_name_service.dart';
 import 'rider_telemetry_service.dart';
@@ -90,7 +92,9 @@ class RideRecorder {
 
   final _pending = <TrackPoint>[];
   final _pendingLeanSamples = <LeanSample>[];
+  final _pendingImuSamples = <RideImuSample>[];
   DateTime? _lastLeanSampleAt;
+  DateTime? _lastImuSampleAt;
   final _controller = StreamController<ActiveRideSnapshot>.broadcast();
   final _autoStartController = StreamController<Ride>.broadcast();
   final _fixAcceptTimes = <DateTime>[];
@@ -134,6 +138,7 @@ class RideRecorder {
   Vec3? _pendingG0;
   int _pendingSignFlip = 1;
 
+  // Historical SharedPreferences keys — do not rename (would reset settings).
   static const _autoPausePrefKey = 'corneriq_auto_pause';
   static const preferredArmRoutePrefKey = 'corneriq_arm_route_id';
 
@@ -358,6 +363,7 @@ class RideRecorder {
     _lean.start();
     _baro.start();
     _applyPendingLeanLock();
+    _beginLeanCapture();
 
     _flushTimer = Timer.periodic(
       const Duration(seconds: 1),
@@ -402,6 +408,7 @@ class RideRecorder {
     _flushTimer?.cancel();
     _flushTimer = null;
     _stopLeanSampleTimer();
+    _endLeanCapture();
     _lean.stop();
     _baro.stop();
     _fixAcceptTimes.clear();
@@ -440,6 +447,7 @@ class RideRecorder {
     _telemetry.bindRide(null);
     _ride = null;
     _emitCompleted(completed);
+    unawaited(ImuBlobUploadService().enqueueAndUpload(completed.id));
     return completed;
   }
 
@@ -453,9 +461,9 @@ class RideRecorder {
       if (title == null || title.trim().isEmpty) return;
       final named = ride.copyWith(title: title.trim());
       await _db.upsertRide(named);
-      debugPrint('CornerIQ ride title: $title');
+      debugPrint('RiderLab ride title: $title');
     } catch (e) {
-      debugPrint('CornerIQ ride title: $e');
+      debugPrint('RiderLab ride title: $e');
     }
   }
 
@@ -555,7 +563,7 @@ class RideRecorder {
         'disable battery restrictions for RiderLab, then try again.',
       );
     }
-    debugPrint('CornerIQ armed with foreground GPS isolate');
+    debugPrint('RiderLab armed with foreground GPS isolate');
     unawaited(
       _telemetry.log(
         category: TelemetryCategory.arm,
@@ -676,7 +684,7 @@ class RideRecorder {
       );
       _autoStartController.add(ride);
     } catch (e, st) {
-      debugPrint('CornerIQ auto-start failed: $e\n$st');
+      debugPrint('RiderLab auto-start failed: $e\n$st');
       unawaited(
         _telemetry.error(
           where: 'arm.auto_start',
@@ -729,6 +737,7 @@ class RideRecorder {
     _lean.start();
     _baro.start();
     _applyPendingLeanLock();
+    _beginLeanCapture();
     _flushTimer?.cancel();
     _flushTimer = Timer.periodic(
       const Duration(seconds: 1),
@@ -750,7 +759,7 @@ class RideRecorder {
           .listen(
             _onPosition,
             onError: (Object error, StackTrace stack) {
-              debugPrint('CornerIQ ride GPS: $error');
+              debugPrint('RiderLab ride GPS: $error');
               unawaited(
                 _telemetry.error(
                   where: 'ride.gps_stream_arm',
@@ -762,7 +771,7 @@ class RideRecorder {
           );
       await ArmForegroundService.stop();
     } catch (e, st) {
-      debugPrint('CornerIQ dense GPS start failed, keep arm FGS: $e\n$st');
+      debugPrint('RiderLab dense GPS start failed, keep arm FGS: $e\n$st');
       unawaited(
         _telemetry.error(
           where: 'ride.dense_gps_start',
@@ -773,7 +782,7 @@ class RideRecorder {
     }
 
     _emit();
-    debugPrint('CornerIQ promoted arm → recording ${ride.id}');
+    debugPrint('RiderLab promoted arm → recording ${ride.id}');
     _telemetry.bindRide(ride.id);
     unawaited(
       _telemetry.log(
@@ -812,7 +821,7 @@ class RideRecorder {
         );
       }
       debugPrint(
-        'CornerIQ GPS skip accuracy=${position.accuracy.toStringAsFixed(1)}m',
+        'RiderLab GPS skip accuracy=${position.accuracy.toStringAsFixed(1)}m',
       );
       return;
     }
@@ -938,7 +947,7 @@ class RideRecorder {
           ),
         );
         debugPrint(
-          'CornerIQ GPS skip teleport jump=${jump.toStringAsFixed(1)}m '
+          'RiderLab GPS skip teleport jump=${jump.toStringAsFixed(1)}m '
           'dt=${dtSec.toStringAsFixed(2)}s max=${maxJump.toStringAsFixed(1)}m',
         );
         return;
@@ -979,7 +988,7 @@ class RideRecorder {
     _emit();
 
     debugPrint(
-      'CornerIQ OK #${_sessionPoints.length} '
+      'RiderLab OK #${_sessionPoints.length} '
       'acc=${position.accuracy.toStringAsFixed(1)}m '
       'spd=${speedKmh == null ? "--" : speedKmh.toStringAsFixed(1)} '
       'lean=${relativeLean == null ? "--" : relativeLean.toStringAsFixed(1)}° '
@@ -1007,6 +1016,51 @@ class RideRecorder {
     _leanSampleTimer = null;
   }
 
+  void _beginLeanCapture() {
+    setLeanMountMode('mount');
+    _lean.engine.removeListener(_onImuTick);
+    _lean.engine.addListener(_onImuTick);
+  }
+
+  void _endLeanCapture() {
+    _lean.engine.removeListener(_onImuTick);
+  }
+
+  void _onImuTick() {
+    final ride = _ride;
+    if (ride == null) return;
+    _maybeRecordImuSample(ride.id);
+  }
+
+  void _maybeRecordImuSample(String rideId) {
+    final snap = _lean.snapshot;
+    if (snap == null) return;
+    final now = snap.at;
+    final prev = _lastImuSampleAt;
+    if (prev != null &&
+        now.difference(prev) < const Duration(milliseconds: 20)) {
+      return;
+    }
+    _lastImuSampleAt = now;
+    final a = snap.accel;
+    final g = snap.gyroRad;
+    _pendingImuSamples.add(
+      RideImuSample(
+        rideId: rideId,
+        timestampMs: now.millisecondsSinceEpoch,
+        ax: a.x,
+        ay: a.y,
+        az: a.z,
+        gx: g.x,
+        gy: g.y,
+        gz: g.z,
+      ),
+    );
+    if (_pendingImuSamples.length >= 50) {
+      unawaited(_flushImuSamples());
+    }
+  }
+
   void _maybeRecordLeanSample(String rideId, {required double? speedMps}) {
     final lean = _lean.leanDegrees;
     if (lean == null) return;
@@ -1016,6 +1070,7 @@ class RideRecorder {
       return;
     }
     _lastLeanSampleAt = now;
+    final snap = _lean.snapshot;
     _pendingLeanSamples.add(
       LeanSample(
         rideId: rideId,
@@ -1024,6 +1079,10 @@ class RideRecorder {
         gpsLeanDegrees: _lean.engine.gpsLeanDegrees,
         speedMps: speedMps,
         confidence: _lean.engine.leanConfidence,
+        vectorLean: snap?.vectorLean,
+        pose: snap?.pose.id,
+        fusedRoll: snap?.fusedRoll,
+        fusedPitch: snap?.fusedPitch,
       ),
     );
     if (_pendingLeanSamples.length >= 20) {
@@ -1042,8 +1101,23 @@ class RideRecorder {
     }
   }
 
+  Future<void> _flushImuSamples() async {
+    if (_pendingImuSamples.isEmpty) return;
+    final batch = List<RideImuSample>.from(_pendingImuSamples);
+    _pendingImuSamples.clear();
+    try {
+      await _db.insertImuSamplesBatch(batch);
+    } catch (_) {
+      _pendingImuSamples.insertAll(0, batch);
+    }
+  }
+
   Future<void> _flushPending() async {
-    if (_pending.isEmpty && _pendingLeanSamples.isEmpty) return;
+    if (_pending.isEmpty &&
+        _pendingLeanSamples.isEmpty &&
+        _pendingImuSamples.isEmpty) {
+      return;
+    }
     final batch = List<TrackPoint>.from(_pending);
     _pending.clear();
     try {
@@ -1051,6 +1125,7 @@ class RideRecorder {
         await _db.insertPointsBatch(batch);
       }
       await _flushLeanSamples();
+      await _flushImuSamples();
       final ride = _ride;
       if (ride != null) {
         await _db.upsertRide(ride);
@@ -1121,6 +1196,7 @@ class RideRecorder {
     await _armSub?.cancel();
     _flushTimer?.cancel();
     _stopLeanSampleTimer();
+    _endLeanCapture();
     _lean.stop();
     _baro.stop();
     _fixAcceptTimes.clear();

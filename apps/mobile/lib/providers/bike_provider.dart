@@ -6,6 +6,7 @@ import '../core/bikes/bike_catalog.dart';
 import '../core/bikes/triumph_catalog.dart';
 import 'social_providers.dart';
 
+/// Historical prefs key — do not rename (would reset the selected bike).
 const _bikePrefKey = 'corneriq_bike_id';
 
 /// Selected garage bike. Local + optional cloud profile sync.

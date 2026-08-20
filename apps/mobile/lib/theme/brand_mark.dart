@@ -198,6 +198,3 @@ class RiderLabMark extends StatelessWidget {
     );
   }
 }
-
-/// @Deprecated('Use RiderLabMark')
-typedef CornerIqMark = RiderLabMark;

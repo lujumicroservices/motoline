@@ -218,6 +218,10 @@ class RodadaPhoto {
     this.latitude,
     this.longitude,
     this.displayName,
+    this.takenAt,
+    this.rideId,
+    this.source,
+    this.contentHash,
   });
 
   final String id;
@@ -229,6 +233,10 @@ class RodadaPhoto {
   final double? longitude;
   final DateTime createdAt;
   final String? displayName;
+  final DateTime? takenAt;
+  final String? rideId;
+  final String? source;
+  final String? contentHash;
 
   factory RodadaPhoto.fromMap(
     Map<String, dynamic> map, {
@@ -245,6 +253,12 @@ class RodadaPhoto {
       createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ??
           DateTime.now().toUtc(),
       displayName: displayName,
+      takenAt: map['taken_at'] == null
+          ? null
+          : DateTime.tryParse(map['taken_at'] as String),
+      rideId: map['ride_id'] as String?,
+      source: map['source'] as String?,
+      contentHash: map['content_hash'] as String?,
     );
   }
 }

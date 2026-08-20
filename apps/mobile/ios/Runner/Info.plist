@@ -8,6 +8,12 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>RiderLab</string>
+	<key>NSCameraUsageDescription</key>
+	<string>RiderLab uses the camera so you can snap photos during a rodada and pin them to the route.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>RiderLab looks at photos taken during your ride so you can add them to the rodada album and reel. Nothing uploads until you confirm.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>RiderLab can save ride photos to your library if you choose.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>RiderLab uses your location to record the line you ride on the street and show it on the map after your ride.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

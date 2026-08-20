@@ -16,6 +16,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
   private val handler = Handler(Looper.getMainLooper())
   private var tone: ToneGenerator? = null
+  private val reelEncoder = ReelEncoderHandler()
 
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
@@ -35,9 +36,14 @@ class MainActivity : FlutterActivity() {
         else -> result.notImplemented()
       }
     }
+    MethodChannel(
+      flutterEngine.dartExecutor.binaryMessenger,
+      REEL_CHANNEL,
+    ).setMethodCallHandler(reelEncoder)
   }
 
   override fun onDestroy() {
+    reelEncoder.dispose()
     releaseTone()
     super.onDestroy()
   }
@@ -141,5 +147,6 @@ class MainActivity : FlutterActivity() {
 
   companion object {
     private const val CHANNEL = "com.motoline.motoline/lock_cue"
+    private const val REEL_CHANNEL = "com.motoline.motoline/reel_encoder"
   }
 }

@@ -60,7 +60,7 @@ class RideEngineLabelService {
     await save(
       RideEngineLabel(
         rideId: rideId,
-        phoneMount: PhoneMountId.other,
+        phoneMount: PhoneMountId.centerMount,
         skipped: true,
         createdAt: DateTime.now(),
       ),

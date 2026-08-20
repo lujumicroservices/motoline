@@ -38,7 +38,7 @@ class UprightFreezeController extends ChangeNotifier {
   final void Function(Vec3 g0)? onFrozen;
 
   UprightFreezePhase phase = UprightFreezePhase.idle;
-  UprightFreezeMode mode = UprightFreezeMode.place;
+  UprightFreezeMode mode = UprightFreezeMode.hold;
   DateTime? _phaseAt;
   int _stillMs = 0;
   int countdownLeft = 5;

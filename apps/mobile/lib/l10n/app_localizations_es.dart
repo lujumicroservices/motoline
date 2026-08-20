@@ -1322,7 +1322,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familyCircleHelp =>
-      'Agrega familia o amigos. Al salir, comparte un link en vivo (WhatsApp sirve — no necesitan la app). Ven última ubicación y avisos de todo bien / ayuda.';
+      'Agrega contactos aquí. El link WhatsApp se genera al Grabar o en una Rodada (En vivo / corazón). Puedes reenviarlo a más personas sin romper los anteriores.';
+
+  @override
+  String get familyHowToShareTitle => 'Cómo mandar el link';
+
+  @override
+  String get familyHowToShareSteps =>
+      '1) En Grabar o en una Rodada (pestaña En vivo / corazón).\n2) Toca WhatsApp / Enviar a otro.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.';
+
+  @override
+  String get familyShareNeedsRide =>
+      'Primero inicia una grabación o abre una Rodada. Luego aparece el botón para compartir el link.';
+
+  @override
+  String get familyShareFromCircle => 'Compartir link ahora';
+
+  @override
+  String get familyRodadaTipTitle => '¿Link para familia (WhatsApp)?';
+
+  @override
+  String get familyRodadaTipBody =>
+      'Pack = mapa de la rodada en la app. Familia sin app = corazón / Avisar a familia (mismo link se puede reenviar).';
+
+  @override
+  String get familyRodadaTipCta => 'Ver círculo familiar';
+
+  @override
+  String get familyAppBarShareTooltip => 'Avisar a familia';
 
   @override
   String get familyAddContact => 'Agregar contacto';
@@ -1374,13 +1401,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familyNotifyHelp =>
-      'Inicia una sesión de watch y abre compartir para WhatsApp.';
+      'Genera un link y abre WhatsApp para mandárselo a tu familiar (no necesitan la app).';
 
   @override
-  String get familyNotifyStart => 'Activar';
+  String get familyNotifyHelpRodada =>
+      'Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.';
 
   @override
-  String get familyWatchActive => 'Watch familiar activo';
+  String get familyNotifyStart => 'WhatsApp';
+
+  @override
+  String get familyWatchActive => 'Familia puede verte';
 
   @override
   String get familyWatchStop => 'Parar';
@@ -1395,7 +1426,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get familySos => 'Necesito ayuda';
 
   @override
-  String get familyShareLink => 'Compartir link';
+  String get familyShareLink => 'Reenviar link';
+
+  @override
+  String get familyShareAgain => 'Enviar a otro';
+
+  @override
+  String get familyShareAgainHint =>
+      'Puedes mandar el mismo link a más personas; los anteriores siguen funcionando.';
+
+  @override
+  String get familyRotateLink => 'Nuevo link';
+
+  @override
+  String get familyRotateLinkTitle => '¿Invalidar links anteriores?';
+
+  @override
+  String get familyRotateLinkBody =>
+      'Se crea un link nuevo. Quien tenga el anterior dejará de ver tu ubicación. Úsalo si el link se filtró.';
+
+  @override
+  String get familyRotateLinkConfirm => 'Invalidar y compartir';
+
+  @override
+  String get familyShareNeedsSignIn =>
+      'Inicia sesión para compartir con familia.';
 
   @override
   String get familyShareSubject => 'RiderLab — estoy rodando';
@@ -1796,6 +1851,73 @@ class AppLocalizationsEs extends AppLocalizations {
   String get photoTitle => 'Foto';
 
   @override
+  String get photoNeedsActiveRide =>
+      'Empieza un recorrido para ligar la foto a la ruta';
+
+  @override
+  String get photoLinkedToRoute => 'Foto ligada a la ruta';
+
+  @override
+  String get photoCaptureTooltip => 'Foto de la rodada';
+
+  @override
+  String get photoTake => 'Cámara';
+
+  @override
+  String get photoImportFromRoll => 'Del carrete';
+
+  @override
+  String get photoImportTitle => 'Fotos de esta rodada';
+
+  @override
+  String get photoImportHelp =>
+      'Encontramos estas fotos en el carrete durante tu ruta. Nada se sube hasta que confirmes.';
+
+  @override
+  String get photoImportSkip => 'Omitir';
+
+  @override
+  String photoImportConfirm(int count) {
+    return 'Ligar $count fotos';
+  }
+
+  @override
+  String get reelTitle => 'Reel de la rodada';
+
+  @override
+  String get reelDone => 'Listo';
+
+  @override
+  String get reelBuilding => 'Armando tu reel…';
+
+  @override
+  String get reelRetry => 'Regenerar';
+
+  @override
+  String get reelShare => 'Compartir';
+
+  @override
+  String get reelHookSub => 'Recostada';
+
+  @override
+  String get reelCurvesLabel => 'Curvas';
+
+  @override
+  String get reelRidersLabel => 'Riders';
+
+  @override
+  String get reelEndQuestion => '¿Tú cuánto te recuestas?';
+
+  @override
+  String get reelCta => 'Graba tu línea en RiderLab';
+
+  @override
+  String get reelGenerate => 'Generar reel';
+
+  @override
+  String get reelOverviewCta => 'Comparte el reel de la rodada';
+
+  @override
   String get skillCoach => 'Tips de manejo';
 
   @override
@@ -1893,6 +2015,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String gpsRateHz(String hz) {
     return '$hz Hz';
   }
+
+  @override
+  String get imuAzurePending => 'IMU pendiente de subir';
+
+  @override
+  String get imuAzureUploading => 'Subiendo IMU…';
+
+  @override
+  String get imuAzureUploaded => 'IMU en Azure';
+
+  @override
+  String get imuAzureFailed => 'Falló la subida de IMU';
+
+  @override
+  String get imuAzureRetry => 'Reintentar subida IMU';
 
   @override
   String get pressure => 'Presión';
@@ -2058,7 +2195,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanLabPrepHelp =>
-      'Di cómo va el teléfono y guarda el 0° con él ya en su lugar. Después arranca la vuelta.';
+      'Teléfono ya en el soporte o la maleta de tanque. Guarda el 0° con la moto derecha y arranca la vuelta.';
 
   @override
   String get leanLabPoseQ => '¿Cómo va el teléfono?';

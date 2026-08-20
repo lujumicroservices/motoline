@@ -260,11 +260,8 @@ double leanConfidenceScore({
   if (!frozen || pose == PhonePoseClass.unknown) return 0;
   var c = 0.35 + 0.35 * trackerConfidence.clamp(0.0, 1.0);
   if (uprightLocked) c += 0.15;
-  if (mountMode == 'mount') {
-    c += 0.1;
-  } else if (mountMode == 'pocket') {
-    c -= 0.08;
-  }
+  // Center-mount capture: pocket no longer lowers score.
+  c += mountMode == 'unknown' ? 0.08 : 0.1;
   if (imuLeanDeg != null && gpsLeanDeg != null) {
     final d = (imuLeanDeg - gpsLeanDeg).abs();
     if (d > disagreeThresholdDeg) {

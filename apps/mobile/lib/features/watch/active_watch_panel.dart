@@ -1,60 +1,88 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
+import 'family_share.dart';
 import 'watch_providers.dart';
 
-/// Compact safety panel on the active-ride screen.
-class ActiveWatchPanel extends ConsumerWidget {
+/// Compact safety panel on active ride / rodada screens.
+class ActiveWatchPanel extends ConsumerStatefulWidget {
   const ActiveWatchPanel({
     super.key,
     required this.localRideId,
     this.riderDisplayName,
+    this.compact = false,
   });
 
   final String localRideId;
   final String? riderDisplayName;
 
+  /// Tighter layout for embedding under rodada live map banners.
+  final bool compact;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ActiveWatchPanel> createState() => _ActiveWatchPanelState();
+}
+
+class _ActiveWatchPanelState extends ConsumerState<ActiveWatchPanel> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(activeWatchControllerProvider.notifier)
+          .resumeFor(localRideId: widget.localRideId);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant ActiveWatchPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.localRideId != widget.localRideId) {
+      ref
+          .read(activeWatchControllerProvider.notifier)
+          .resumeFor(localRideId: widget.localRideId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final session = ref.watch(activeWatchControllerProvider);
     final ctrl = ref.read(activeWatchControllerProvider.notifier);
+    final mine = session != null && session.localRideId == widget.localRideId
+        ? session
+        : null;
 
-    if (session == null) {
+    if (mine == null) {
       return Card(
         color: AppTheme.asphaltElevated,
+        margin: widget.compact
+            ? const EdgeInsets.fromLTRB(8, 0, 8, 8)
+            : null,
         child: ListTile(
-          leading: const Icon(Icons.favorite_border, color: AppTheme.lineHot),
-          title: Text(l10n.familyNotifyToggle),
-          subtitle: Text(l10n.familyNotifyHelp),
-          trailing: FilledButton(
-            onPressed: () async {
-              try {
-                final s = await ctrl.startForRide(
-                  localRideId: localRideId,
-                  riderDisplayName: riderDisplayName,
-                );
-                final url = s?.shareUrl;
-                if (url != null && context.mounted) {
-                  await SharePlus.instance.share(
-                    ShareParams(
-                      text: l10n.familyShareMessage(url),
-                      subject: l10n.familyShareSubject,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$e')),
-                );
-              }
-            },
-            child: Text(l10n.familyNotifyStart),
+          dense: widget.compact,
+          leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
+          title: Text(
+            l10n.familyNotifyToggle,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            widget.compact ? l10n.familyNotifyHelpRodada : l10n.familyNotifyHelp,
+          ),
+          trailing: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.lineHot,
+            ),
+            onPressed: () => shareFamilyWatchLink(
+              context,
+              ref,
+              localRideId: widget.localRideId,
+              riderDisplayName: widget.riderDisplayName,
+            ),
+            icon: const Icon(Icons.ios_share, size: 16),
+            label: Text(l10n.familyNotifyStart),
           ),
         ),
       );
@@ -62,6 +90,9 @@ class ActiveWatchPanel extends ConsumerWidget {
 
     return Card(
       color: AppTheme.asphaltElevated,
+      margin: widget.compact
+          ? const EdgeInsets.fromLTRB(8, 0, 8, 8)
+          : null,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
         child: Column(
@@ -85,6 +116,10 @@ class ActiveWatchPanel extends ConsumerWidget {
                 ),
               ],
             ),
+            Text(
+              l10n.familyShareAgainHint,
+              style: const TextStyle(color: AppTheme.steel, fontSize: 12),
+            ),
             const SizedBox(height: 6),
             Wrap(
               spacing: 8,
@@ -105,20 +140,46 @@ class ActiveWatchPanel extends ConsumerWidget {
                   onPressed: () => ctrl.postSos(),
                   child: Text(l10n.familySos),
                 ),
+                FilledButton.icon(
+                  onPressed: () => shareFamilyWatchLink(
+                    context,
+                    ref,
+                    localRideId: widget.localRideId,
+                    riderDisplayName: widget.riderDisplayName,
+                  ),
+                  icon: const Icon(Icons.person_add_alt_1, size: 16),
+                  label: Text(l10n.familyShareAgain),
+                ),
                 OutlinedButton.icon(
                   onPressed: () async {
-                    final url = session.shareUrl ?? await ctrl.rotateLink();
-                    if (url == null) return;
-                    await Clipboard.setData(ClipboardData(text: url));
-                    await SharePlus.instance.share(
-                      ShareParams(
-                        text: l10n.familyShareMessage(url),
-                        subject: l10n.familyShareSubject,
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.familyRotateLinkTitle),
+                        content: Text(l10n.familyRotateLinkBody),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(l10n.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(l10n.familyRotateLinkConfirm),
+                          ),
+                        ],
                       ),
                     );
+                    if (ok != true || !context.mounted) return;
+                    await shareFamilyWatchLink(
+                      context,
+                      ref,
+                      localRideId: widget.localRideId,
+                      riderDisplayName: widget.riderDisplayName,
+                      rotateFirst: true,
+                    );
                   },
-                  icon: const Icon(Icons.ios_share, size: 16),
-                  label: Text(l10n.familyShareLink),
+                  icon: const Icon(Icons.lock_reset, size: 16),
+                  label: Text(l10n.familyRotateLink),
                 ),
               ],
             ),

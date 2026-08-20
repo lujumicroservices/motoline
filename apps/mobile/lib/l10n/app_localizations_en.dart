@@ -1312,7 +1312,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyCircleHelp =>
-      'Add family or friends. When you ride, share a live link (WhatsApp works — they don’t need the app). They see last location and OK / need-help pings.';
+      'Add contacts here. The WhatsApp link is created while recording or on a Rodada (Live / heart). You can resend it to more people without breaking earlier links.';
+
+  @override
+  String get familyHowToShareTitle => 'How to send the link';
+
+  @override
+  String get familyHowToShareSteps =>
+      '1) On Record or on a Rodada (Live tab / heart).\n2) Tap WhatsApp / Send to another.\n3) Pick contacts — the same link works for everyone.\n\nPack “Share live” is separate: only riders with the app.';
+
+  @override
+  String get familyShareNeedsRide =>
+      'Start a recording or open a Rodada first. Then you can share the family link.';
+
+  @override
+  String get familyShareFromCircle => 'Share link now';
+
+  @override
+  String get familyRodadaTipTitle => 'Family link (WhatsApp)?';
+
+  @override
+  String get familyRodadaTipBody =>
+      'Pack = rodada map in the app. Family without the app = heart / Notify family (same link can be resent).';
+
+  @override
+  String get familyRodadaTipCta => 'Open family circle';
+
+  @override
+  String get familyAppBarShareTooltip => 'Notify family';
 
   @override
   String get familyAddContact => 'Add contact';
@@ -1364,13 +1391,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyNotifyHelp =>
-      'Starts a watch session and opens share for WhatsApp.';
+      'Creates a link and opens WhatsApp so you can send it (they don’t need the app).';
 
   @override
-  String get familyNotifyStart => 'Start';
+  String get familyNotifyHelpRodada =>
+      'Notify family/friends outside the pack. You can resend the same link to more people.';
 
   @override
-  String get familyWatchActive => 'Family watch on';
+  String get familyNotifyStart => 'WhatsApp';
+
+  @override
+  String get familyWatchActive => 'Family can see you';
 
   @override
   String get familyWatchStop => 'Stop';
@@ -1385,7 +1416,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familySos => 'Need help';
 
   @override
-  String get familyShareLink => 'Share link';
+  String get familyShareLink => 'Resend link';
+
+  @override
+  String get familyShareAgain => 'Send to another';
+
+  @override
+  String get familyShareAgainHint =>
+      'You can send the same link to more people; earlier recipients keep working.';
+
+  @override
+  String get familyRotateLink => 'New link';
+
+  @override
+  String get familyRotateLinkTitle => 'Invalidate previous links?';
+
+  @override
+  String get familyRotateLinkBody =>
+      'Creates a new link. Anyone with the old one will lose access. Use this if the link leaked.';
+
+  @override
+  String get familyRotateLinkConfirm => 'Invalidate and share';
+
+  @override
+  String get familyShareNeedsSignIn => 'Sign in to share with family.';
 
   @override
   String get familyShareSubject => 'RiderLab — I’m riding';
@@ -1783,6 +1837,73 @@ class AppLocalizationsEn extends AppLocalizations {
   String get photoTitle => 'Photo';
 
   @override
+  String get photoNeedsActiveRide =>
+      'Start a ride to pin the photo to the route';
+
+  @override
+  String get photoLinkedToRoute => 'Photo linked to the route';
+
+  @override
+  String get photoCaptureTooltip => 'Rodada photo';
+
+  @override
+  String get photoTake => 'Camera';
+
+  @override
+  String get photoImportFromRoll => 'From camera roll';
+
+  @override
+  String get photoImportTitle => 'Photos from this ride';
+
+  @override
+  String get photoImportHelp =>
+      'We found these camera-roll photos from your route. Nothing uploads until you confirm.';
+
+  @override
+  String get photoImportSkip => 'Skip';
+
+  @override
+  String photoImportConfirm(int count) {
+    return 'Link $count photos';
+  }
+
+  @override
+  String get reelTitle => 'Rodada reel';
+
+  @override
+  String get reelDone => 'Done';
+
+  @override
+  String get reelBuilding => 'Building your reel…';
+
+  @override
+  String get reelRetry => 'Regenerate';
+
+  @override
+  String get reelShare => 'Share';
+
+  @override
+  String get reelHookSub => 'Lean';
+
+  @override
+  String get reelCurvesLabel => 'Corners';
+
+  @override
+  String get reelRidersLabel => 'Riders';
+
+  @override
+  String get reelEndQuestion => 'How far did you lean?';
+
+  @override
+  String get reelCta => 'Record your line on RiderLab';
+
+  @override
+  String get reelGenerate => 'Make reel';
+
+  @override
+  String get reelOverviewCta => 'Share the rodada reel';
+
+  @override
   String get skillCoach => 'Riding tips';
 
   @override
@@ -1880,6 +2001,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String gpsRateHz(String hz) {
     return '$hz Hz';
   }
+
+  @override
+  String get imuAzurePending => 'IMU upload pending';
+
+  @override
+  String get imuAzureUploading => 'Uploading IMU…';
+
+  @override
+  String get imuAzureUploaded => 'IMU on Azure';
+
+  @override
+  String get imuAzureFailed => 'IMU upload failed';
+
+  @override
+  String get imuAzureRetry => 'Retry IMU upload';
 
   @override
   String get pressure => 'Pressure';
@@ -2044,7 +2180,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabPrepHelp =>
-      'Say how the phone sits, then save 0° with it already in place. After that, start the lap.';
+      'Phone already on the tank mount or tank bag. Save 0° with the bike standing straight, then start the lap.';
 
   @override
   String get leanLabPoseQ => 'How is the phone sitting?';

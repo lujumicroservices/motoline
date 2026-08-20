@@ -125,7 +125,7 @@ class RouteLoopService {
         'updated_at': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', routeId);
     } catch (e) {
-      debugPrint('CornerIQ loop clear cloud: $e');
+      debugPrint('RiderLab loop clear cloud: $e');
     }
   }
 
@@ -200,7 +200,7 @@ class RouteLoopService {
         'updated_at': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', route.id);
     } catch (e) {
-      debugPrint('CornerIQ loop anchors cloud: $e');
+      debugPrint('RiderLab loop anchors cloud: $e');
     }
   }
 

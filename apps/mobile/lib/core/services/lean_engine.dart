@@ -93,7 +93,7 @@ class LeanEngine extends ChangeNotifier {
   double _headingRateAbs = 0;
   double? _speedKmh;
   double? _gpsLean;
-  String _mountMode = 'unknown';
+  String _mountMode = 'mount';
 
   PhonePoseClass _pose = PhonePoseClass.unknown;
   String? _freezeUpAxis;
@@ -102,7 +102,6 @@ class LeanEngine extends ChangeNotifier {
   int _signFlip = 1;
   bool _locked = false;
   bool _calibrated = false;
-  int _disagreeWindows = 0;
   double _trackerConfidence = 0;
 
   LeanEngineSnapshot? latest;
@@ -246,7 +245,6 @@ class LeanEngine extends ChangeNotifier {
     _freezeAt = null;
     _locked = false;
     _calibrated = false;
-    _disagreeWindows = 0;
     _trackerConfidence = 0;
     _tracker.reset();
     _attitude.reset();
@@ -331,7 +329,6 @@ class LeanEngine extends ChangeNotifier {
     _leanOut = null;
     _gpsLean = null;
     _calibGravity.clear();
-    _disagreeWindows = 0;
     _trackerConfidence = 0;
     _headingRateAbs = 0;
     _headingRateSigned = 0;
@@ -365,7 +362,6 @@ class LeanEngine extends ChangeNotifier {
     _freezeAt = DateTime.now();
     _calibrated = true;
     _locked = lock;
-    _disagreeWindows = 0;
     _emit(DateTime.now());
   }
 
@@ -373,24 +369,8 @@ class LeanEngine extends ChangeNotifier {
     if (_g0 == null || _pose == PhonePoseClass.unknown) return;
     final r = _tracker.evaluate(locked: _pose);
     _trackerConfidence = r.confidence;
-    final live = poseFromGravity(_gravityLp);
-    final winner = r.pose;
-    if (winner == null || winner == _pose) {
-      _disagreeWindows = 0;
-      return;
-    }
-    final axisChanged = live != _pose && live != PhonePoseClass.unknown;
-    final allowFlip = r.inCurve || axisChanged;
-    if (!allowFlip) {
-      _disagreeWindows = 0;
-      return;
-    }
-    _disagreeWindows++;
-    if (_disagreeWindows >= 3) {
-      _pose = winner == PhonePoseClass.verticalY ? live : winner;
-      if (_pose == PhonePoseClass.unknown) _pose = winner;
-      _disagreeWindows = 0;
-    }
+    // Pose is locked at freeze (center mount / tank bag). Tracker is
+    // confidence-only so a mid-ride channel flip cannot retarget lean.
   }
 
   void _emit(DateTime now) {
@@ -444,6 +424,7 @@ class LeanEngine extends ChangeNotifier {
     );
 
     // Fused output: prefer IMU when frozen; GPS fallback when no freeze.
+    // Locked center-mount rides never blend IMU toward GPS.
     double? bike = imu;
     if (bike == null && gps != null && conf >= 0.2) {
       bike = gps;

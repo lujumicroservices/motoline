@@ -9,7 +9,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/bike_provider.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
-import '../ride_detail/ride_detail_screen.dart';
+import '../rodadas/rodada_post_ride_flow.dart';
 
 /// Beta post-ride survey — trains lean / curve / brake models.
 class RideEngineLabelScreen extends ConsumerStatefulWidget {
@@ -60,10 +60,10 @@ class _RideEngineLabelScreenState extends ConsumerState<RideEngineLabelScreen> {
         );
       }
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => RideDetailScreen(rideId: widget.rideId),
-        ),
+      await continueAfterRideToRodadaShare(
+        context: context,
+        ref: ref,
+        rideId: widget.rideId,
       );
     } catch (e) {
       if (!mounted) return;

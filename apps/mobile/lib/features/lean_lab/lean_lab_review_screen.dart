@@ -19,6 +19,7 @@ import '../../theme/ride_viz_palette.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../ride_detail/widgets/map_layer_toggles.dart';
 import '../ride_detail/widgets/motorcycle_lean_gauge.dart';
+import '../rodadas/rodada_post_ride_flow.dart';
 
 /// Label top corners after a Lean Lab lap — max lean + animated replay.
 class LeanLabReviewScreen extends ConsumerStatefulWidget {
@@ -343,7 +344,11 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
     );
     if (!mounted) return;
     setState(() => _saving = false);
-    Navigator.of(context).pop();
+    await continueAfterRideToRodadaShare(
+      context: context,
+      ref: ref,
+      rideId: widget.rideId,
+    );
   }
 
   @override

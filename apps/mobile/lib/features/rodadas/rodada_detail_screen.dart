@@ -8,6 +8,8 @@ import '../../core/supabase/supabase_bootstrap.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
+import '../watch/family_share.dart';
+import '../watch/watch_repository.dart';
 import 'rodada_providers.dart';
 import 'tabs/rodada_live_tab.dart';
 import 'tabs/rodada_messages_tab.dart';
@@ -79,6 +81,15 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
           error: (_, __) => Text(l10n.rodadaFallback),
         ),
         actions: [
+          IconButton(
+            tooltip: l10n.familyAppBarShareTooltip,
+            icon: const Icon(Icons.favorite, color: AppTheme.lineHot),
+            onPressed: () => shareFamilyWatchLink(
+              context,
+              ref,
+              localRideId: WatchRepository.rodadaLocalRideId(widget.rodadaId),
+            ),
+          ),
           overview.maybeWhen(
             data: (r) {
               if (r == null) return const SizedBox.shrink();

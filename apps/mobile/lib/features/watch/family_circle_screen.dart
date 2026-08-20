@@ -4,8 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/cloud_models.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/ride_providers.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
+import 'family_share.dart';
 import 'watch_providers.dart';
 import 'watch_viewer_screen.dart';
 
@@ -18,6 +20,9 @@ class FamilyCircleScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final contacts = ref.watch(trustedContactsProvider);
     final watching = ref.watch(visibleWatchSessionsProvider);
+    final activeRide = ref.watch(activeRideProvider).valueOrNull?.ride;
+    final watchSession = ref.watch(activeWatchControllerProvider);
+    final shareRideId = activeRide?.id ?? watchSession?.localRideId;
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
@@ -46,6 +51,57 @@ class FamilyCircleScreen extends ConsumerWidget {
                 color: AppTheme.steel,
                 fontSize: 14,
                 height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              color: AppTheme.asphaltElevated,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.familyHowToShareTitle,
+                      style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.familyHowToShareSteps,
+                      style: GoogleFonts.rajdhani(
+                        color: AppTheme.mist,
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (shareRideId != null)
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.lineHot,
+                        ),
+                        onPressed: () => shareFamilyWatchLink(
+                          context,
+                          ref,
+                          localRideId: shareRideId,
+                        ),
+                        icon: const Icon(Icons.ios_share),
+                        label: Text(
+                          watchSession != null
+                              ? l10n.familyShareAgain
+                              : l10n.familyShareFromCircle,
+                        ),
+                      )
+                    else
+                      Text(
+                        l10n.familyShareNeedsRide,
+                        style: const TextStyle(
+                          color: AppTheme.steel,
+                          fontSize: 13,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),

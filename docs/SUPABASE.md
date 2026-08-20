@@ -1,10 +1,10 @@
 # RiderLab cloud (Supabase)
 
-App brand: **RiderLab**. Cloud project in dashboard is still named **CornerIQ** (same org **luju.nieves** — not Luju POS / auto).
+App brand: **RiderLab** (org **luju.nieves** — not Luju POS / auto).
 
 | | |
 |---|---|
-| Project | **CornerIQ** |
+| Project | **RiderLab** |
 | Ref | `eabhnmlfsfibgwkspqwa` |
 | URL | https://eabhnmlfsfibgwkspqwa.supabase.co |
 | Dashboard | https://supabase.com/dashboard/project/eabhnmlfsfibgwkspqwa |
@@ -39,7 +39,7 @@ Tables: `profiles`, `routes`, `rides`, `track_points` with RLS:
 
 Enable **Anonymous** sign-ins in Dashboard → Authentication → Providers (still used for first-run guest + Friends / ride sync before Google).
 
-Direct link (CornerIQ project):  
+Direct link (RiderLab project):  
 https://supabase.com/dashboard/project/eabhnmlfsfibgwkspqwa/auth/providers
 
 Without Anonymous, the Amigos screen shows “nube no disponible” / a prompt to enable it.

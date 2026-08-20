@@ -83,7 +83,7 @@ class RouteService {
           id = _str(row['id']) ?? id;
         }
       } catch (e) {
-        debugPrint('CornerIQ route cloud create failed: $e');
+        debugPrint('RiderLab route cloud create failed: $e');
       }
     }
 
@@ -117,7 +117,7 @@ class RouteService {
           'updated_at': DateTime.now().toUtc().toIso8601String(),
         }).eq('id', routeId);
       } catch (e) {
-        debugPrint('CornerIQ route visibility sync: $e');
+        debugPrint('RiderLab route visibility sync: $e');
       }
     }
     return updated;
@@ -143,7 +143,7 @@ class RouteService {
           'updated_at': DateTime.now().toUtc().toIso8601String(),
         }).eq('id', routeId);
       } catch (e) {
-        debugPrint('CornerIQ route rename sync: $e');
+        debugPrint('RiderLab route rename sync: $e');
       }
     }
     return updated;
@@ -168,7 +168,7 @@ class RouteService {
           }).eq('owner_id', userId);
         }
       } catch (e) {
-        debugPrint('CornerIQ loop purge cloud: $e');
+        debugPrint('RiderLab loop purge cloud: $e');
       }
     }
 
@@ -244,12 +244,12 @@ class RouteService {
             await _db.upsertRoute(r);
           } catch (e) {
             upsertError ??= '$e';
-            debugPrint('CornerIQ owned route upsert: $e');
+            debugPrint('RiderLab owned route upsert: $e');
           }
           mine.add(r);
         } catch (e) {
           upsertError ??= '$e';
-          debugPrint('CornerIQ owned route parse: $e');
+          debugPrint('RiderLab owned route parse: $e');
         }
       }
 
@@ -266,11 +266,11 @@ class RouteService {
             if (r.ownerId == me) continue;
             await _db.upsertRoute(r);
           } catch (e) {
-            debugPrint('CornerIQ shared route cache: $e');
+            debugPrint('RiderLab shared route cache: $e');
           }
         }
       } catch (e) {
-        debugPrint('CornerIQ shared routes: $e');
+        debugPrint('RiderLab shared routes: $e');
       }
 
       final short = me.length > 8 ? me.substring(0, 8) : me;
@@ -291,7 +291,7 @@ class RouteService {
       return const [];
     } catch (e) {
       lastRefreshError = SupabaseBootstrap.lastAuthError ?? '$e';
-      debugPrint('CornerIQ routes refresh: $e');
+      debugPrint('RiderLab routes refresh: $e');
       return listLocal();
     }
   }
@@ -304,7 +304,7 @@ class RouteService {
       await SupabaseBootstrap.ensureSession();
       await _supabase.from('routes').delete().eq('id', routeId);
     } catch (e) {
-      debugPrint('CornerIQ route delete: $e');
+      debugPrint('RiderLab route delete: $e');
     }
   }
 }

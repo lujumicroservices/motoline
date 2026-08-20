@@ -308,12 +308,34 @@ void main() {
       pose: PhonePoseClass.verticalY,
       trackerConfidence: 0.8,
       uprightLocked: true,
-      mountMode: 'pocket',
+      mountMode: 'mount',
       imuLeanDeg: 55,
       gpsLeanDeg: 25,
     );
     expect(ok, greaterThan(bad));
     expect(ok, greaterThan(0.5));
+  });
+
+  test('pocket mount no longer lowers confidence vs center mount', () {
+    final mount = leanConfidenceScore(
+      frozen: true,
+      pose: PhonePoseClass.verticalY,
+      trackerConfidence: 0.8,
+      uprightLocked: true,
+      mountMode: 'mount',
+      imuLeanDeg: 35,
+      gpsLeanDeg: 32,
+    );
+    final pocket = leanConfidenceScore(
+      frozen: true,
+      pose: PhonePoseClass.verticalY,
+      trackerConfidence: 0.8,
+      uprightLocked: true,
+      mountMode: 'pocket',
+      imuLeanDeg: 35,
+      gpsLeanDeg: 32,
+    );
+    expect(pocket, closeTo(mount, 0.001));
   });
 
   test('lean side asymmetry flags pocket bias', () {

@@ -69,7 +69,7 @@ class RideSyncService {
         fail++;
       }
     }
-    debugPrint('CornerIQ syncAll: $ok ok, $fail failed');
+    debugPrint('RiderLab syncAll: $ok ok, $fail failed');
     try {
       await RiderTelemetryService.instance.log(
         category: TelemetryCategory.sync,
@@ -113,7 +113,7 @@ class RideSyncService {
         lastSyncError =
             'Skipped upload for $localRideId: local GPS empty but ride had ${ride.pointCount} points';
         lastSyncFailures.add(lastSyncError!);
-        debugPrint('CornerIQ sync skip empty wipe: $localRideId');
+        debugPrint('RiderLab sync skip empty wipe: $localRideId');
         return null;
       }
 
@@ -152,7 +152,7 @@ class RideSyncService {
         await _uploadTrackPointsSafe(cloudRideId, points);
       }
 
-      debugPrint('CornerIQ synced ride $localRideId → $cloudRideId');
+      debugPrint('RiderLab synced ride $localRideId → $cloudRideId');
       try {
         await RiderTelemetryService.instance.log(
           category: TelemetryCategory.sync,
@@ -170,7 +170,7 @@ class RideSyncService {
     } catch (e, st) {
       lastSyncError = '$e';
       lastSyncFailures.add('$localRideId: $e');
-      debugPrint('CornerIQ sync failed: $e\n$st');
+      debugPrint('RiderLab sync failed: $e\n$st');
       try {
         await RiderTelemetryService.instance.error(
           where: 'sync.ride',
@@ -223,7 +223,7 @@ class RideSyncService {
       final msg = '$e'.toLowerCase();
       if (!_omitPressureHpa && msg.contains('pressure_hpa')) {
         _omitPressureHpa = true;
-        debugPrint('CornerIQ: remote missing pressure_hpa — retrying without it');
+        debugPrint('RiderLab: remote missing pressure_hpa — retrying without it');
         await insertAll(withPressure: false);
       } else {
         rethrow;
@@ -344,7 +344,7 @@ class RideSyncService {
           )) {
             keptLocal++;
             debugPrint(
-              'CornerIQ pull keep local track $localId '
+              'RiderLab pull keep local track $localId '
               '(local ${localPoints.length}/${_leanCount(localPoints)} lean, '
               'cloud ${points.length}/${_leanCount(points)} lean, $policy)',
             );
@@ -353,7 +353,7 @@ class RideSyncService {
           }
           imported++;
         } catch (e) {
-          debugPrint('CornerIQ pull ride skip: $e');
+          debugPrint('RiderLab pull ride skip: $e');
           lastPullError = '$e';
         }
       }
@@ -363,7 +363,7 @@ class RideSyncService {
       return imported;
     } catch (e) {
       lastPullError = SupabaseBootstrap.lastAuthError ?? '$e';
-      debugPrint('CornerIQ pull rides: $e');
+      debugPrint('RiderLab pull rides: $e');
       return 0;
     }
   }
@@ -390,7 +390,7 @@ class RideSyncService {
         await _supabase.from('rides').delete().eq('id', cloudId);
       }
     } catch (e) {
-      debugPrint('CornerIQ ride cloud delete: $e');
+      debugPrint('RiderLab ride cloud delete: $e');
     }
   }
 

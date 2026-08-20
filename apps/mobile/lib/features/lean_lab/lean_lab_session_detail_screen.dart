@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import '../../core/lean_lab/lean_lab_circuit.dart';
 import '../../core/lean_lab/lean_lab_models.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
-import '../../core/telemetry/labels/ride_engine_label.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
@@ -34,8 +33,6 @@ class _LeanLabSessionDetailScreenState
 
   late LeanLabSessionType _sessionType;
   late LeanLabDirection _direction;
-  late String _mount;
-  late PhonePoseId _pose;
 
   @override
   void initState() {
@@ -58,8 +55,6 @@ class _LeanLabSessionDetailScreenState
       _session = session;
       _sessionType = session.sessionType;
       _direction = session.direction;
-      _mount = session.phoneMount;
-      _pose = session.phonePose;
       _loading = false;
     });
   }
@@ -68,9 +63,7 @@ class _LeanLabSessionDetailScreenState
     final s = _session;
     if (s == null) return false;
     return _sessionType != s.sessionType ||
-        _direction != s.direction ||
-        _mount != s.phoneMount ||
-        _pose != s.phonePose;
+        _direction != s.direction;
   }
 
   Future<void> _saveConfig() async {
@@ -79,8 +72,6 @@ class _LeanLabSessionDetailScreenState
       rideId: widget.rideId,
       sessionType: _sessionType,
       direction: _direction,
-      phoneMount: _mount,
-      phonePose: _pose,
     );
     if (!mounted) return;
     setState(() {
@@ -239,7 +230,11 @@ class _LeanLabSessionDetailScreenState
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final t in LeanLabSessionType.values)
+              for (final t in LeanLabSessionType.values.where(
+                (t) =>
+                    t != LeanLabSessionType.mountPocket ||
+                    _sessionType == LeanLabSessionType.mountPocket,
+              ))
                 ChoiceChip(
                   label: Text(_typeLabel(l10n, t)),
                   selected: _sessionType == t,
@@ -276,47 +271,6 @@ class _LeanLabSessionDetailScreenState
                 onSelected: (_) =>
                     setState(() => _direction = LeanLabDirection.returnTrip),
               ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            l10n.engineLabelMountQ,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final m in [
-                PhoneMountId.centerMount,
-                PhoneMountId.leftPocket,
-                PhoneMountId.rightPocket,
-                PhoneMountId.other,
-              ])
-                ChoiceChip(
-                  label: Text(_mountLabel(l10n, m)),
-                  selected: _mount == m,
-                  onSelected: (_) => setState(() => _mount = m),
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            l10n.leanLabPoseQ,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final p in PhonePoseId.values)
-                ChoiceChip(
-                  label: Text(_poseLabel(l10n, p)),
-                  selected: _pose == p,
-                  onSelected: (_) => setState(() => _pose = p),
-                ),
             ],
           ),
           const SizedBox(height: 16),
@@ -356,20 +310,6 @@ class _LeanLabSessionDetailScreenState
         LeanLabSessionType.baselineReturn => l10n.leanLabProtoReturn,
         LeanLabSessionType.mountPocket => l10n.leanLabProtoPocket,
         LeanLabSessionType.free => l10n.leanLabProtoFree,
-      };
-
-  String _mountLabel(AppLocalizations l10n, String id) => switch (id) {
-        PhoneMountId.centerMount => l10n.engineLabelMountCenter,
-        PhoneMountId.leftPocket => l10n.engineLabelMountLeftPocket,
-        PhoneMountId.rightPocket => l10n.engineLabelMountRightPocket,
-        _ => l10n.engineLabelMountOther,
-      };
-
-  String _poseLabel(AppLocalizations l10n, PhonePoseId p) => switch (p) {
-        PhonePoseId.portraitScreenOut => l10n.leanLabPoseScreenOut,
-        PhonePoseId.portraitScreenIn => l10n.leanLabPoseScreenIn,
-        PhonePoseId.landscape => l10n.leanLabPoseLandscape,
-        PhonePoseId.other => l10n.engineLabelMountOther,
       };
 }
 

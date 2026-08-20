@@ -28,7 +28,9 @@ import '../lean_lab/lean_lab_bootstrap.dart';
 import '../lean_lab/lean_lab_review_screen.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../watch/active_watch_panel.dart';
+import '../watch/family_share.dart';
 import '../watch/watch_providers.dart';
+import '../rodadas/photos/ride_photo_capture.dart';
 import '../telemetry/ride_engine_label_screen.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
@@ -231,6 +233,27 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                   onPressed: () => Navigator.of(context).pop(),
                 ),
           actions: [
+            if (!_starting && isRecording && ride != null)
+              RidePhotoShutterButton(
+                compact: true,
+                localRideId: ride.id,
+                lastPoint: snap?.lastPoint,
+              ),
+            if (!_starting && isRecording && ride != null)
+              IconButton(
+                tooltip: l10n.familyAppBarShareTooltip,
+                icon: Icon(
+                  ref.watch(activeWatchControllerProvider) != null
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: AppTheme.lineHot,
+                ),
+                onPressed: () => shareFamilyWatchLink(
+                  context,
+                  ref,
+                  localRideId: ride.id,
+                ),
+              ),
             if (!_starting && (isRecording || staging)) ...[
               const AdventureCameraStatusChip(),
               if (isRecording)
@@ -497,6 +520,11 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
             ),
           ),
         ),
+        if (localRideId != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+            child: ActiveWatchPanel(localRideId: localRideId),
+          ),
         if (_isLoop) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
@@ -533,9 +561,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
-                if (localRideId != null)
-                  ActiveWatchPanel(localRideId: localRideId),
-                if (localRideId != null) const SizedBox(height: 8),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.signal,
