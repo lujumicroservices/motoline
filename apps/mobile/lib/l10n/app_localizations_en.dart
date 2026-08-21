@@ -513,6 +513,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myLocation => 'My location';
 
   @override
+  String get myLocationUnavailable => 'Couldn\'t find your location.';
+
+  @override
   String get openFullscreenMap => 'Open full map';
 
   @override
@@ -769,6 +772,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get armedBannerBody =>
       'RiderLab will start recording by itself when you start moving.';
+
+  @override
+  String get armedSessionTitle => 'Armed route';
+
+  @override
+  String get armedSessionOpen => 'Open session';
+
+  @override
+  String get armedSessionMinimize => 'Minimize';
+
+  @override
+  String get armedSessionWatchRecording => 'Open recording';
+
+  @override
+  String get armedSessionEndArm => 'End armed session';
+
+  @override
+  String get armedSessionStretchesEmpty =>
+      'No stretches yet. They\'ll show up here when you start rolling.';
+
+  @override
+  String armedSessionStretchN(int n) {
+    return 'Stretch $n';
+  }
+
+  @override
+  String get armedSessionWaitingHelp =>
+      'GPS is ready. Recording starts by itself when you move.';
+
+  @override
+  String get armedSessionLiveHelp =>
+      'Recording. You can leave this screen — the ride keeps going.';
 
   @override
   String get loopMode => 'Lap mode';
@@ -1619,6 +1654,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap the map to set the meetup. Live GPS and photos stay off until each rider opts in.';
 
   @override
+  String get rodadaItinerary => 'Itinerary';
+
+  @override
+  String get rodadaPinStart => 'Start';
+
+  @override
+  String get rodadaPinFinish => 'Finish';
+
+  @override
+  String get rodadaPinStop => 'Stop';
+
+  @override
+  String get rodadaPinUnset => 'Not set';
+
+  @override
+  String rodadaStopN(int n) {
+    return 'Stop $n';
+  }
+
+  @override
+  String get rodadaItineraryHelp =>
+      'Tap the map to mark start, finish, or stops. Live GPS and photos stay off until each rider opts in.';
+
+  @override
   String get titleRequired => 'Title is required';
 
   @override
@@ -1902,6 +1961,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reelOverviewCta => 'Share the rodada reel';
+
+  @override
+  String get reelLengthShort => 'Short';
+
+  @override
+  String get reelLengthStandard => 'Reels';
+
+  @override
+  String get reelLengthLong => 'Full';
+
+  @override
+  String get reelLengthHint => 'Choose how long the video runs';
+
+  @override
+  String reelLengthSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String reelLengthCap(int pauses, int photos) {
+    return 'Up to $pauses stops · $photos photos';
+  }
+
+  @override
+  String reelStopLabel(int n) {
+    return 'Stop $n';
+  }
+
+  @override
+  String get reelOnRoute => 'On the road';
+
+  @override
+  String get reelNoStops => 'No long stops on this route';
+
+  @override
+  String reelPhotoCount(int count) {
+    return '$count photos';
+  }
+
+  @override
+  String get reelAddToStop => 'Add photo';
 
   @override
   String get skillCoach => 'Riding tips';

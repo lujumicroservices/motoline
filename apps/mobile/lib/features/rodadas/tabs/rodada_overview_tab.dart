@@ -7,8 +7,11 @@ import 'package:latlong2/latlong.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
-import '../../reel/reel_preview_screen.dart';
+import '../../reel/reel_compose_screen.dart';
 import '../../watch/family_circle_screen.dart';
+import '../models/rodada_models.dart';
+import '../rodada_itinerary.dart';
+import '../rodada_itinerary_map.dart';
 import '../rodada_providers.dart';
 
 class RodadaOverviewTab extends ConsumerWidget {
@@ -31,6 +34,7 @@ class RodadaOverviewTab extends ConsumerWidget {
     final overview = ref.watch(rodadaOverviewProvider(rodadaId));
     final members = ref.watch(rodadaMembersProvider(rodadaId));
     final mine = ref.watch(myRodadaMembershipProvider(rodadaId));
+    final stops = ref.watch(rodadaStopsProvider(rodadaId));
 
     return overview.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -51,52 +55,13 @@ class RodadaOverviewTab extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
             ],
-            if (rodada.hasMeetup) ...[
-              Text(
-                l10n.meetup,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            _ItineraryMap(
+              rodada: rodada,
+              stops: stops.maybeWhen(
+                data: (s) => s,
+                orElse: () => const <RodadaStop>[],
               ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 160,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: FlutterMap(
-                    options: MapOptions(
-                      initialCenter:
-                          LatLng(rodada.meetupLat!, rodada.meetupLng!),
-                      initialZoom: 14,
-                      interactionOptions: const InteractionOptions(
-                        flags: InteractiveFlag.none,
-                      ),
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.motoline.motoline',
-                      ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point:
-                                LatLng(rodada.meetupLat!, rodada.meetupLng!),
-                            width: 36,
-                            height: 36,
-                            child: const Icon(
-                              Icons.place,
-                              color: AppTheme.signal,
-                              size: 32,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
+            ),
             Text(
               l10n.yourSharing,
               style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
@@ -248,7 +213,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       if (!context.mounted) return;
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => ReelPreviewScreen(
+          builder: (_) => ReelComposeScreen(
             rideId: rideId!,
             rodadaId: rodadaId,
             replaceWithRideDetail: false,
@@ -259,6 +224,82 @@ class RodadaOverviewTab extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
     }
+  }
+}
+
+class _ItineraryMap extends StatelessWidget {
+  const _ItineraryMap({required this.rodada, required this.stops});
+
+  final RodadaSummary rodada;
+  final List<RodadaStop> stops;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final start = rodada.hasMeetup
+        ? LatLng(rodada.meetupLat!, rodada.meetupLng!)
+        : null;
+    final finish = rodada.hasFinish
+        ? LatLng(rodada.finishLat!, rodada.finishLng!)
+        : null;
+    final line = rodadaItineraryLine(
+      start: start,
+      stops: [for (final s in stops) LatLng(s.latitude, s.longitude)],
+      finish: finish,
+    );
+    if (line.isEmpty) return const SizedBox.shrink();
+    final bounds = rodadaItineraryBounds(line);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.rodadaItinerary,
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 180,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: FlutterMap(
+              options: MapOptions(
+                initialCenter: line.first,
+                initialZoom: 13,
+                initialCameraFit: bounds == null
+                    ? null
+                    : CameraFit.bounds(
+                        bounds: bounds,
+                        padding: const EdgeInsets.all(28),
+                        maxZoom: 14,
+                      ),
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                ),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.motoline.motoline',
+                ),
+                ...rodadaItineraryMapLayers(
+                  start: start,
+                  finish: finish,
+                  stops: [
+                    for (final s in stops)
+                      RodadaItineraryStopPin(
+                        point: LatLng(s.latitude, s.longitude),
+                        title: s.title,
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
   }
 }
 

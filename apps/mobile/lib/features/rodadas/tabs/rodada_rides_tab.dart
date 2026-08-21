@@ -8,6 +8,7 @@ import '../../../core/models/ride.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
+import '../../maps/live_gps_map_mixin.dart';
 import '../models/rodada_models.dart';
 import '../rodada_providers.dart';
 
@@ -152,26 +153,68 @@ class _RodadaRideTrackScreen extends ConsumerWidget {
             return Center(child: Text(l10n.noTrackPoints));
           }
           final center = LatLng(pts.first.lat, pts.first.lng);
-          return FlutterMap(
-            options: MapOptions(initialCenter: center, initialZoom: 12),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.motoline.motoline',
-              ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: [for (final p in pts) LatLng(p.lat, p.lng)],
-                    color: AppTheme.line,
-                    strokeWidth: 4,
-                  ),
-                ],
-              ),
-            ],
-          );
+          return _RodadaRideTrackMap(center: center, points: pts);
         },
       ),
+    );
+  }
+}
+
+class _RodadaRideTrackMap extends StatefulWidget {
+  const _RodadaRideTrackMap({
+    required this.center,
+    required this.points,
+  });
+
+  final LatLng center;
+  final List<({double lat, double lng})> points;
+
+  @override
+  State<_RodadaRideTrackMap> createState() => _RodadaRideTrackMapState();
+}
+
+class _RodadaRideTrackMapState extends State<_RodadaRideTrackMap>
+    with LiveGpsMapMixin {
+  final MapController _map = MapController();
+
+  @override
+  void dispose() {
+    stopLiveGps();
+    disposeLiveGpsListenable();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        FlutterMap(
+          mapController: _map,
+          options: MapOptions(
+            initialCenter: widget.center,
+            initialZoom: 12,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.motoline.motoline',
+            ),
+            PolylineLayer(
+              polylines: [
+                Polyline(
+                  points: [
+                    for (final p in widget.points) LatLng(p.lat, p.lng),
+                  ],
+                  color: AppTheme.line,
+                  strokeWidth: 4,
+                ),
+              ],
+            ),
+            liveGpsMapChild(),
+          ],
+        ),
+        myLocationOverlay(_map),
+      ],
     );
   }
 }

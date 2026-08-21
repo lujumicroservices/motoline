@@ -8,10 +8,13 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import '../../maps/live_gps_map_mixin.dart';
 import '../../watch/active_watch_panel.dart';
 import '../../watch/watch_repository.dart';
 import '../models/rodada_models.dart';
 import '../photos/ride_photo_capture.dart';
+import '../rodada_itinerary.dart';
+import '../rodada_itinerary_map.dart';
 import '../rodada_providers.dart';
 
 /// Live pack map. Watching [rodadaLivePositionsProvider] starts GPS publish;
@@ -128,6 +131,12 @@ class _RodadaLiveMapHost extends ConsumerWidget {
           : null,
       orElse: () => null,
     );
+    final finish = overview.maybeWhen(
+      data: (r) => r != null && r.hasFinish
+          ? LatLng(r.finishLat!, r.finishLng!)
+          : null,
+      orElse: () => null,
+    );
     final stopList = stops.maybeWhen(
       data: (s) => s,
       orElse: () => const <RodadaStop>[],
@@ -150,6 +159,7 @@ class _RodadaLiveMapHost extends ConsumerWidget {
       children: [
         _RodadaLiveMap(
           meetup: meetup,
+          finish: finish,
           stops: stopList,
           positions: list,
         ),
@@ -250,11 +260,13 @@ Future<void> _addStop(
 class _RodadaLiveMap extends StatefulWidget {
   const _RodadaLiveMap({
     required this.meetup,
+    required this.finish,
     required this.stops,
     required this.positions,
   });
 
   final LatLng? meetup;
+  final LatLng? finish;
   final List<RodadaStop> stops;
   final List<RodadaLivePosition> positions;
 
@@ -262,7 +274,7 @@ class _RodadaLiveMap extends StatefulWidget {
   State<_RodadaLiveMap> createState() => _RodadaLiveMapState();
 }
 
-class _RodadaLiveMapState extends State<_RodadaLiveMap> {
+class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
   final MapController _map = MapController();
   bool _gesturing = false;
   List<RodadaLivePosition> _shown = const [];
@@ -277,10 +289,18 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> {
   }
 
   @override
+  void dispose() {
+    stopLiveGps();
+    disposeLiveGpsListenable();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant _RodadaLiveMap oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_samePositions(oldWidget.positions, widget.positions) &&
         oldWidget.meetup == widget.meetup &&
+        oldWidget.finish == widget.finish &&
         identical(oldWidget.stops, widget.stops)) {
       return;
     }
@@ -333,58 +353,59 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> {
   @override
   Widget build(BuildContext context) {
     final meetup = widget.meetup;
-    LatLng center = meetup ?? const LatLng(20.67, -103.35);
+    final finish = widget.finish;
+    final line = rodadaItineraryLine(
+      start: meetup,
+      stops: [
+        for (final s in widget.stops) LatLng(s.latitude, s.longitude),
+      ],
+      finish: finish,
+    );
+    LatLng center = line.isNotEmpty ? line.first : const LatLng(20.67, -103.35);
     if (_shown.isNotEmpty && !_didCenter) {
       center = LatLng(_shown.first.latitude, _shown.first.longitude);
     }
 
-    return FlutterMap(
-      mapController: _map,
-      options: MapOptions(
-        initialCenter: center,
-        initialZoom: 13,
-        onMapEvent: _onMapEvent,
-      ),
+    return Stack(
       children: [
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.motoline.motoline',
-        ),
-        if (meetup != null)
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: meetup,
-                width: 36,
-                height: 36,
-                child: const Icon(Icons.flag, color: AppTheme.lineHot),
-              ),
-            ],
+        FlutterMap(
+          mapController: _map,
+          options: MapOptions(
+            initialCenter: center,
+            initialZoom: 13,
+            onMapEvent: _onMapEvent,
           ),
-        MarkerLayer(
-          markers: [
-            for (final s in widget.stops)
-              Marker(
-                point: LatLng(s.latitude, s.longitude),
-                width: 40,
-                height: 40,
-                child: Tooltip(
-                  message: s.title,
-                  child: const Icon(
-                    Icons.local_gas_station,
-                    color: AppTheme.signal,
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.motoline.motoline',
+            ),
+            ...rodadaItineraryMapLayers(
+              start: meetup,
+              finish: finish,
+              stops: [
+                for (final s in widget.stops)
+                  RodadaItineraryStopPin(
+                    point: LatLng(s.latitude, s.longitude),
+                    title: s.title,
                   ),
-                ),
-              ),
-            for (final p in _shown)
-              Marker(
-                point: LatLng(p.latitude, p.longitude),
-                width: 72,
-                height: 56,
-                child: _LiveRiderMarker(position: p),
-              ),
+              ],
+            ),
+            MarkerLayer(
+              markers: [
+                for (final p in _shown)
+                  Marker(
+                    point: LatLng(p.latitude, p.longitude),
+                    width: 72,
+                    height: 56,
+                    child: _LiveRiderMarker(position: p),
+                  ),
+              ],
+            ),
+            liveGpsMapChild(),
           ],
         ),
+        myLocationOverlay(_map),
       ],
     );
   }

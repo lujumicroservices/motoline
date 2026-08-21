@@ -12,6 +12,8 @@ class RodadaSummary {
     this.notes,
     this.meetupLat,
     this.meetupLng,
+    this.finishLat,
+    this.finishLng,
     this.startsAt,
     this.memberCount = 0,
     this.createdAt,
@@ -25,6 +27,8 @@ class RodadaSummary {
   final String? notes;
   final double? meetupLat;
   final double? meetupLng;
+  final double? finishLat;
+  final double? finishLng;
   final DateTime? startsAt;
   final String status;
   final String inviteCode;
@@ -35,6 +39,7 @@ class RodadaSummary {
   bool get isLive => status == 'live';
   bool get isEnded => status == 'ended';
   bool get hasMeetup => meetupLat != null && meetupLng != null;
+  bool get hasFinish => finishLat != null && finishLng != null;
 
   factory RodadaSummary.fromMap(Map<String, dynamic> map, {int? memberCount}) {
     return RodadaSummary(
@@ -47,6 +52,8 @@ class RodadaSummary {
       notes: map['notes'] as String?,
       meetupLat: (map['meetup_lat'] as num?)?.toDouble(),
       meetupLng: (map['meetup_lng'] as num?)?.toDouble(),
+      finishLat: (map['finish_lat'] as num?)?.toDouble(),
+      finishLng: (map['finish_lng'] as num?)?.toDouble(),
       startsAt: map['starts_at'] == null
           ? null
           : DateTime.tryParse(map['starts_at'] as String),
@@ -310,6 +317,7 @@ class RodadaStop {
     required this.latitude,
     required this.longitude,
     required this.createdAt,
+    this.sortOrder = 0,
   });
 
   final String id;
@@ -319,6 +327,7 @@ class RodadaStop {
   final double latitude;
   final double longitude;
   final DateTime createdAt;
+  final int sortOrder;
 
   factory RodadaStop.fromMap(Map<String, dynamic> map) {
     return RodadaStop(
@@ -330,6 +339,7 @@ class RodadaStop {
       longitude: (map['longitude'] as num).toDouble(),
       createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ??
           DateTime.now().toUtc(),
+      sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
     );
   }
 }

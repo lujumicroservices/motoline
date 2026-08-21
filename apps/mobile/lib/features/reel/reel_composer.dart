@@ -13,6 +13,7 @@ import '../rodadas/rodada_repository.dart';
 import 'reel_encoder.dart';
 import 'reel_highlights.dart';
 import 'reel_painter.dart';
+import 'reel_pauses.dart';
 import 'reel_timeline.dart';
 
 const reelWidth = 720;
@@ -22,16 +23,19 @@ const reelFps = 12;
 class ReelRenderResult {
   const ReelRenderResult({
     required this.highlights,
+    required this.totalSec,
     this.videoPath,
     this.imagePath,
   });
 
   final ReelHighlights highlights;
+  final double totalSec;
   final String? videoPath;
   final String? imagePath;
 
   String get sharePath => videoPath ?? imagePath!;
   bool get isVideo => videoPath != null;
+  int get durationMs => (totalSec * 1000).round();
 }
 
 class ReelComposer {
@@ -47,6 +51,9 @@ class ReelComposer {
     required String rideId,
     required String rodadaId,
     required AppLocalizations l10n,
+    ReelLength length = ReelLength.standard,
+    List<DetectedPause>? pauses,
+    List<String>? selectedPhotoIds,
     void Function(double progress)? onProgress,
   }) async {
     final ride = await db.getRide(rideId);
@@ -62,14 +69,79 @@ class ReelComposer {
     );
     final rodada = await rodadas.getRodada(rodadaId);
     final members = await rodadas.listMembers(rodadaId);
-    final photos = await _loadPhotos(rideId: rideId, rodadaId: rodadaId);
+    final album = await loadReelAlbum(
+      db: db,
+      rodadas: rodadas,
+      rideId: rideId,
+      rodadaId: rodadaId,
+    );
+    final cappedPauses = capPausesForLength(
+      pauses ?? detectRidePauses(points),
+      length,
+    );
+    final clustered = clusterAlbumToPauses(
+      pauses: cappedPauses,
+      photos: album,
+    );
+    final selectedIds = length.capPhotos(
+      selectedPhotoIds ??
+          defaultSelectedPhotoIds(
+            clustered: clustered,
+            maxPhotos: length.maxPhotos,
+          ),
+    );
+    final selectedSet = selectedIds.toSet();
+
+    final pauseModels = <ReelPause>[];
+    for (var i = 0; i < cappedPauses.length; i++) {
+      final pause = cappedPauses[i];
+      final photos = <ReelPhoto>[];
+      for (final item in clustered.photosByPause[i]) {
+        if (!selectedSet.contains(item.id)) continue;
+        if (photos.length >= 3) continue;
+        final photo = await _toReelPhoto(item);
+        if (photo != null) photos.add(photo);
+      }
+      pauseModels.add(
+        ReelPause(
+          index: pause.index,
+          latitude: pause.latitude,
+          longitude: pause.longitude,
+          startedAt: pause.startedAt,
+          endedAt: pause.endedAt,
+          label:
+              '${l10n.reelStopLabel(pause.index)} · ${formatPauseDuration(pause.duration)}',
+          photos: photos,
+        ),
+      );
+    }
+    final onRoute = <ReelPhoto>[];
+    for (final item in clustered.onRoute) {
+      if (!selectedSet.contains(item.id)) continue;
+      final photo = await _toReelPhoto(item);
+      if (photo != null) onRoute.add(photo);
+    }
+
+    final hasPhotos =
+        pauseModels.any((p) => p.photos.isNotEmpty) || onRoute.isNotEmpty;
+    final extraOnRoute =
+        pauseModels.isNotEmpty && onRoute.isNotEmpty ? 1 : 0;
+    final chapterCount = pauseModels.isNotEmpty
+        ? pauseModels.length + extraOnRoute
+        : (hasPhotos ? 1 : 0);
+    final timeline = ReelTimeline.fromLength(
+      length,
+      pauseCount: chapterCount,
+    );
 
     final highlights = buildReelHighlights(
       analytics: analytics,
       title: ride.displayTitle(),
       destination: rodada?.destination ?? rodada?.title,
       riderCount: members.isEmpty ? 1 : members.length,
-      photos: photos,
+      pauses: pauseModels,
+      onRoutePhotos: onRoute,
+      maxPhotos: length.maxPhotos,
     );
     final copy = ReelCopy(
       leanLabel: l10n.statPeakLean,
@@ -82,17 +154,31 @@ class ReelComposer {
       cta: l10n.reelCta,
     );
 
-    final images = <ui.Image>[];
-    for (final photo in highlights.photos) {
-      images.add(await decodeUiImage(photo.bytes, targetWidth: reelWidth));
+    final pauseImages = <List<ui.Image>>[];
+    for (final pause in highlights.pauses) {
+      final images = <ui.Image>[];
+      for (final photo in pause.photos) {
+        images.add(await decodeUiImage(photo.bytes, targetWidth: reelWidth));
+      }
+      pauseImages.add(images);
     }
+    final onRouteImages = <ui.Image>[];
+    for (final photo in highlights.onRoutePhotos) {
+      onRouteImages.add(await decodeUiImage(photo.bytes, targetWidth: reelWidth));
+    }
+    final images = <ui.Image>[
+      for (final group in pauseImages) ...group,
+      ...onRouteImages,
+    ];
 
     final painter = ReelFramePainter(
       highlights: highlights,
       copy: copy,
       photos: images,
+      pausePhotos: pauseImages,
+      onRoutePhotos: onRouteImages,
+      timeline: timeline,
     );
-    final timeline = painter.timeline;
     final dir = await getTemporaryDirectory();
     final stamp = DateTime.now().millisecondsSinceEpoch;
     final pngPath = p.join(dir.path, 'reel_$stamp.png');
@@ -136,12 +222,18 @@ class ReelComposer {
       }
     }
 
-    for (final img in images) {
+    for (final group in pauseImages) {
+      for (final img in group) {
+        img.dispose();
+      }
+    }
+    for (final img in onRouteImages) {
       img.dispose();
     }
 
     return ReelRenderResult(
       highlights: highlights,
+      totalSec: timeline.totalSec,
       videoPath: videoPath,
       imagePath: File(pngPath).existsSync() ? pngPath : null,
     );
@@ -161,56 +253,41 @@ class ReelComposer {
     return image;
   }
 
-  Future<List<ReelPhoto>> _loadPhotos({
-    required String rideId,
-    required String rodadaId,
-  }) async {
-    final out = <ReelPhoto>[];
-    final local = await db.getRidePhotos(rideId);
-    for (final p in local) {
-      final path = p.localPath;
-      if (path == null) continue;
+  Future<ReelPhoto?> _toReelPhoto(ReelAlbumItem item) async {
+    Uint8List? bytes;
+    final path = item.localPath;
+    if (path != null) {
       final file = File(path);
-      if (!file.existsSync()) continue;
-      out.add(
-        ReelPhoto(
-          bytes: await file.readAsBytes(),
-          latitude: p.latitude,
-          longitude: p.longitude,
-          takenAt: p.takenAt,
-        ),
-      );
-      if (out.length >= 3) return out;
+      if (file.existsSync()) {
+        bytes = await file.readAsBytes();
+      }
     }
-    try {
-      final cloud = await rodadas.listPhotos(rodadaId, limit: 24);
-      for (final p in cloud) {
-        if (out.length >= 3) break;
+    if (bytes == null && item.storagePath != null) {
+      try {
+        final url = await rodadas.signedPhotoUrl(item.storagePath!);
+        final client = HttpClient();
         try {
-          final url = await rodadas.signedPhotoUrl(p.storagePath);
-          final client = HttpClient();
-          try {
-            final req = await client.getUrl(Uri.parse(url));
-            final res = await req.close();
-            final bytes = await res.fold<List<int>>(
+          final req = await client.getUrl(Uri.parse(url));
+          final res = await req.close();
+          bytes = Uint8List.fromList(
+            await res.fold<List<int>>(
               <int>[],
               (prev, chunk) => prev..addAll(chunk),
-            );
-            out.add(
-              ReelPhoto(
-                bytes: Uint8List.fromList(bytes),
-                latitude: p.latitude,
-                longitude: p.longitude,
-                takenAt: p.takenAt ?? p.createdAt,
-              ),
-            );
-          } finally {
-            client.close(force: true);
-          }
-        } catch (_) {}
-      }
-    } catch (_) {}
-    return out;
+            ),
+          );
+        } finally {
+          client.close(force: true);
+        }
+      } catch (_) {}
+    }
+    if (bytes == null || bytes.isEmpty) return null;
+    return ReelPhoto(
+      id: item.id,
+      bytes: bytes,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      takenAt: item.takenAt,
+    );
   }
 }
 
@@ -219,3 +296,49 @@ ReelComposer reelComposerFor({
   required RodadaRepository rodadas,
 }) =>
     ReelComposer(db: db, rodadas: rodadas);
+
+Future<List<ReelAlbumItem>> loadReelAlbum({
+  required RideDatabase db,
+  required RodadaRepository rodadas,
+  required String rideId,
+  required String rodadaId,
+}) async {
+  final out = <ReelAlbumItem>[];
+  final seenHash = <String>{};
+  final seenPath = <String>{};
+  final local = await db.getRidePhotos(rideId);
+  for (final p in local) {
+    final hash = p.contentHash;
+    if (hash != null) seenHash.add(hash);
+    final storage = p.storagePath;
+    if (storage != null) seenPath.add(storage);
+    out.add(
+      ReelAlbumItem(
+        id: 'local:${p.id}',
+        localPath: p.localPath,
+        storagePath: p.storagePath,
+        takenAt: p.takenAt,
+        latitude: p.latitude,
+        longitude: p.longitude,
+      ),
+    );
+  }
+  try {
+    final cloud = await rodadas.listPhotos(rodadaId, limit: 48);
+    for (final p in cloud) {
+      final hash = p.contentHash;
+      if (hash != null && seenHash.contains(hash)) continue;
+      if (seenPath.contains(p.storagePath)) continue;
+      out.add(
+        ReelAlbumItem(
+          id: 'cloud:${p.id}',
+          storagePath: p.storagePath,
+          takenAt: p.takenAt ?? p.createdAt,
+          latitude: p.latitude,
+          longitude: p.longitude,
+        ),
+      );
+    }
+  } catch (_) {}
+  return out;
+}

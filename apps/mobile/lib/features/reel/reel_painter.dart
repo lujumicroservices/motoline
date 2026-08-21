@@ -12,12 +12,16 @@ class ReelFramePainter {
     required this.highlights,
     required this.copy,
     required this.photos,
+    this.pausePhotos = const [],
+    this.onRoutePhotos = const [],
     ReelTimeline? timeline,
   }) : timeline = timeline ?? ReelTimeline();
 
   final ReelHighlights highlights;
   final ReelCopy copy;
   final List<ui.Image> photos;
+  final List<List<ui.Image>> pausePhotos;
+  final List<ui.Image> onRoutePhotos;
   final ReelTimeline timeline;
 
   void paint(Canvas canvas, Size size, double timeSec) {
@@ -107,6 +111,13 @@ class ReelFramePainter {
     canvas.drawCircle(head, 11, Paint()..color = AppTheme.line);
     canvas.drawCircle(head, 5, Paint()..color = AppTheme.asphalt);
 
+    ReelPause? nearPause;
+    for (final pause in highlights.pauses) {
+      final o = proj.latLng(pause.latitude, pause.longitude);
+      _drawPausePin(canvas, o);
+      if ((o - head).distance < 36) nearPause = pause;
+    }
+
     for (final photo in highlights.photos) {
       final lat = photo.latitude;
       final lng = photo.longitude;
@@ -122,21 +133,54 @@ class ReelFramePainter {
         top: 56,
         text: '${highlights.maxLeanDeg.round()}°  ·  ${highlights.distanceKm.toStringAsFixed(1)} km',
       );
+      if (nearPause != null) {
+        _drawHudChip(canvas, size, top: 110, text: nearPause.label);
+      }
     }
   }
 
   void _paintPhotos(Canvas canvas, Size size, double t) {
-    if (photos.isEmpty) {
+    final pauses = highlights.pauses;
+    if (pauses.isEmpty) {
+      _paintPhotoSlideshow(canvas, size, t, photos);
+      return;
+    }
+    final extra = onRoutePhotos.isNotEmpty ? 1 : 0;
+    final n = pauses.length + extra;
+    final idx = n == 1 ? 0 : (t * n).floor().clamp(0, n - 1);
+    final local = n == 1 ? t : (t * n) - idx;
+    if (idx < pauses.length) {
+      final pause = pauses[idx];
+      final images = idx < pausePhotos.length ? pausePhotos[idx] : const <ui.Image>[];
+      _paintTrailZoomed(canvas, size, pause, t: local);
+      canvas.drawRect(
+        Offset.zero & size,
+        Paint()..color = const Color(0x660E1013),
+      );
+      if (images.isNotEmpty) {
+        _drawMosaic(canvas, size, images, local);
+      }
+      _drawHudChip(canvas, size, top: size.height - 88, text: pause.label);
+      return;
+    }
+    _paintPhotoSlideshow(canvas, size, local, onRoutePhotos);
+  }
+
+  void _paintPhotoSlideshow(
+    Canvas canvas,
+    Size size,
+    double t,
+    List<ui.Image> images,
+  ) {
+    if (images.isEmpty) {
       _paintTrail(canvas, size, 1, showHud: true);
       return;
     }
-    final idx = photos.length == 1
+    final idx = images.length == 1
         ? 0
-        : (t * photos.length).floor().clamp(0, photos.length - 1);
-    final local = photos.length == 1
-        ? t
-        : (t * photos.length) - idx;
-    _drawCoverPhoto(canvas, size, photos[idx], zoom: 1 + 0.12 * local);
+        : (t * images.length).floor().clamp(0, images.length - 1);
+    final local = images.length == 1 ? t : (t * images.length) - idx;
+    _drawCoverPhoto(canvas, size, images[idx], zoom: 1 + 0.12 * local);
     canvas.drawRect(
       Rect.fromLTWH(0, size.height - 220, size.width, 220),
       Paint()
@@ -152,6 +196,104 @@ class ReelFramePainter {
       top: size.height - 88,
       text: highlights.destination,
     );
+  }
+
+  void _paintTrailZoomed(
+    Canvas canvas,
+    Size size,
+    ReelPause pause, {
+    required double t,
+  }) {
+    final trail = highlights.trail;
+    if (trail.length < 2) return;
+    final proj = _MapProject.around(
+      trail,
+      pause.latitude,
+      pause.longitude,
+      size,
+      padding: 72,
+    );
+    final pathPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    for (var i = 1; i < trail.length; i++) {
+      pathPaint.color = leanTrailColor(trail[i].leanAbs);
+      canvas.drawLine(proj.offset(trail[i - 1]), proj.offset(trail[i]), pathPaint);
+    }
+    final pin = proj.latLng(pause.latitude, pause.longitude);
+    final pulse = 10 + 4 * t;
+    canvas.drawCircle(
+      pin,
+      pulse + 8,
+      Paint()..color = AppTheme.lineHot.withValues(alpha: 0.25),
+    );
+    _drawPausePin(canvas, pin);
+  }
+
+  void _drawMosaic(Canvas canvas, Size size, List<ui.Image> images, double t) {
+    final zoom = 1 + 0.06 * t;
+    if (images.length == 1) {
+      _drawCoverPhoto(canvas, size, images.first, zoom: zoom);
+      return;
+    }
+    const inset = 28.0;
+    final top = 140.0;
+    final bottom = size.height - 140;
+    final gap = 12.0;
+    if (images.length == 2) {
+      final w = (size.width - inset * 2 - gap) / 2;
+      final h = bottom - top;
+      _drawPhotoIn(canvas, images[0], Rect.fromLTWH(inset, top, w, h));
+      _drawPhotoIn(
+        canvas,
+        images[1],
+        Rect.fromLTWH(inset + w + gap, top, w, h),
+      );
+      return;
+    }
+    final leftW = (size.width - inset * 2 - gap) * 0.58;
+    final rightW = size.width - inset * 2 - gap - leftW;
+    final h = bottom - top;
+    _drawPhotoIn(canvas, images[0], Rect.fromLTWH(inset, top, leftW, h));
+    final halfH = (h - gap) / 2;
+    final rx = inset + leftW + gap;
+    _drawPhotoIn(canvas, images[1], Rect.fromLTWH(rx, top, rightW, halfH));
+    _drawPhotoIn(
+      canvas,
+      images[2],
+      Rect.fromLTWH(rx, top + halfH + gap, rightW, halfH),
+    );
+  }
+
+  void _drawPhotoIn(Canvas canvas, ui.Image image, Rect dest) {
+    final iw = image.width.toDouble();
+    final ih = image.height.toDouble();
+    if (iw <= 0 || ih <= 0) return;
+    final scale = math.max(dest.width / iw, dest.height / ih);
+    final dw = iw * scale;
+    final dh = ih * scale;
+    final src = Rect.fromLTWH(0, 0, iw, ih);
+    final drawn = Rect.fromCenter(
+      center: dest.center,
+      width: dw,
+      height: dh,
+    );
+    canvas.save();
+    canvas.clipRRect(RRect.fromRectAndRadius(dest, const Radius.circular(16)));
+    canvas.drawImageRect(
+      image,
+      src,
+      drawn,
+      Paint()..filterQuality = FilterQuality.medium,
+    );
+    canvas.restore();
+  }
+
+  void _drawPausePin(Canvas canvas, Offset o) {
+    canvas.drawCircle(o, 11, Paint()..color = AppTheme.lineHot);
+    canvas.drawCircle(o, 5, Paint()..color = AppTheme.asphalt);
   }
 
   void _paintStats(Canvas canvas, Size size, double t) {
@@ -380,6 +522,35 @@ class _MapProject {
     if ((maxLat - minLat).abs() < 0.0008) {
       minLat -= 0.004;
       maxLat += 0.004;
+    }
+    final rect = Rect.fromLTWH(
+      padding,
+      padding + 40,
+      size.width - padding * 2,
+      size.height - padding * 2 - 80,
+    );
+    return _MapProject(minLng, maxLng, minLat, maxLat, rect);
+  }
+
+  factory _MapProject.around(
+    List<ReelTrailPoint> trail,
+    double lat,
+    double lng,
+    Size size, {
+    double padding = 48,
+    double span = 0.006,
+  }) {
+    var minLat = lat - span;
+    var maxLat = lat + span;
+    var minLng = lng - span;
+    var maxLng = lng + span;
+    for (final p in trail) {
+      if ((p.lat - lat).abs() > span * 1.4) continue;
+      if ((p.lng - lng).abs() > span * 1.4) continue;
+      minLat = math.min(minLat, p.lat);
+      maxLat = math.max(maxLat, p.lat);
+      minLng = math.min(minLng, p.lng);
+      maxLng = math.max(maxLng, p.lng);
     }
     final rect = Rect.fromLTWH(
       padding,

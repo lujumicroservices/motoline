@@ -4,6 +4,7 @@ import '../analytics/bbox_utils.dart';
 import '../models/cloud_models.dart';
 import '../models/route_circuit.dart';
 import '../models/share_visibility.dart';
+import '../supabase/paged_select.dart';
 import '../supabase/supabase_bootstrap.dart';
 
 /// Friends (all profiles) + same-area peer rides for closed beta.
@@ -141,17 +142,15 @@ class SocialRepository {
 
   Future<List<CloudTrackPoint>> trackPoints(String cloudRideId) async {
     await _ensure();
-    final rows = await _supabase
-        .from('track_points')
-        .select(
-          'latitude, longitude, recorded_at, speed_mps, lean_degrees',
-        )
-        .eq('ride_id', cloudRideId)
-        .order('recorded_at');
-    return (rows as List)
-        .cast<Map<String, dynamic>>()
-        .map(CloudTrackPoint.fromMap)
-        .toList();
+    final rows = await pagedSelect(
+      client: _supabase,
+      table: 'track_points',
+      columns: 'latitude, longitude, recorded_at, speed_mps, lean_degrees',
+      eqColumn: 'ride_id',
+      eqValue: cloudRideId,
+      orderBy: 'recorded_at',
+    );
+    return rows.map(CloudTrackPoint.fromMap).toList();
   }
 
   Future<List<CloudRideSummary>> recentSharedRidesForUser(String userId) async {

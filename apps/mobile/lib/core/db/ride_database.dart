@@ -9,6 +9,7 @@ import '../models/ride.dart';
 import '../models/ride_photo.dart';
 import '../models/route_circuit.dart';
 import '../models/route_loop.dart';
+import '../analytics/track_lod.dart';
 import '../models/track_point.dart';
 
 class RideDatabase {
@@ -765,7 +766,53 @@ class RideDatabase {
       'track_points',
       where: 'ride_id = ?',
       whereArgs: [rideId],
-      orderBy: 'timestamp_ms ASC',
+      orderBy: 'timestamp_ms ASC, id ASC',
+    );
+    return rows.map(TrackPoint.fromMap).toList();
+  }
+
+  /// Downsampled GPS for map/charts. Always includes first and last sample.
+  Future<List<TrackPoint>> getPointsOverview(
+    String rideId, {
+    int maxPoints = 1000,
+  }) async {
+    final db = await database;
+    final idRows = await db.query(
+      'track_points',
+      columns: ['id'],
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+      orderBy: 'timestamp_ms ASC, id ASC',
+    );
+    if (idRows.isEmpty) return const [];
+    final ids = [for (final r in idRows) r['id'] as int];
+    final keep = overviewIndices(ids.length, maxPoints);
+    if (keep.length == ids.length) {
+      return getPoints(rideId);
+    }
+    final keepIds = [for (final i in keep) ids[i]];
+    final inList = keepIds.join(',');
+    final rows = await db.rawQuery(
+      'SELECT * FROM track_points WHERE id IN ($inList) '
+      'ORDER BY timestamp_ms ASC, id ASC',
+    );
+    return rows.map(TrackPoint.fromMap).toList();
+  }
+
+  /// Full-resolution GPS between [fromMs] and [toMs] (inclusive).
+  Future<List<TrackPoint>> getPointsWindow(
+    String rideId, {
+    required int fromMs,
+    required int toMs,
+  }) async {
+    final db = await database;
+    final lo = fromMs <= toMs ? fromMs : toMs;
+    final hi = fromMs <= toMs ? toMs : fromMs;
+    final rows = await db.query(
+      'track_points',
+      where: 'ride_id = ? AND timestamp_ms >= ? AND timestamp_ms <= ?',
+      whereArgs: [rideId, lo, hi],
+      orderBy: 'timestamp_ms ASC, id ASC',
     );
     return rows.map(TrackPoint.fromMap).toList();
   }
@@ -979,7 +1026,51 @@ class RideDatabase {
       'lean_samples',
       where: 'ride_id = ?',
       whereArgs: [rideId],
-      orderBy: 'timestamp_ms ASC',
+      orderBy: 'timestamp_ms ASC, id ASC',
+    );
+    return rows.map(LeanSample.fromMap).toList();
+  }
+
+  Future<List<LeanSample>> getLeanOverview(
+    String rideId, {
+    int maxPoints = 1000,
+  }) async {
+    final db = await database;
+    final idRows = await db.query(
+      'lean_samples',
+      columns: ['id'],
+      where: 'ride_id = ?',
+      whereArgs: [rideId],
+      orderBy: 'timestamp_ms ASC, id ASC',
+    );
+    if (idRows.isEmpty) return const [];
+    final ids = [for (final r in idRows) r['id'] as int];
+    final keep = overviewIndices(ids.length, maxPoints);
+    if (keep.length == ids.length) {
+      return getLeanSamples(rideId);
+    }
+    final keepIds = [for (final i in keep) ids[i]];
+    final inList = keepIds.join(',');
+    final rows = await db.rawQuery(
+      'SELECT * FROM lean_samples WHERE id IN ($inList) '
+      'ORDER BY timestamp_ms ASC, id ASC',
+    );
+    return rows.map(LeanSample.fromMap).toList();
+  }
+
+  Future<List<LeanSample>> getLeanWindow(
+    String rideId, {
+    required int fromMs,
+    required int toMs,
+  }) async {
+    final db = await database;
+    final lo = fromMs <= toMs ? fromMs : toMs;
+    final hi = fromMs <= toMs ? toMs : fromMs;
+    final rows = await db.query(
+      'lean_samples',
+      where: 'ride_id = ? AND timestamp_ms >= ? AND timestamp_ms <= ?',
+      whereArgs: [rideId, lo, hi],
+      orderBy: 'timestamp_ms ASC, id ASC',
     );
     return rows.map(LeanSample.fromMap).toList();
   }

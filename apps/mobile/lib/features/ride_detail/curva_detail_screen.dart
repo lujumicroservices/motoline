@@ -11,6 +11,7 @@ import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../maps/live_gps_map_mixin.dart';
 import '../pro/pro_upsell.dart';
 import 'fullscreen_map_screen.dart';
 import 'map_polyline_builder.dart';
@@ -530,8 +531,15 @@ class _CurvaMap extends StatefulWidget {
   State<_CurvaMap> createState() => _CurvaMapState();
 }
 
-class _CurvaMapState extends State<_CurvaMap> {
+class _CurvaMapState extends State<_CurvaMap> with LiveGpsMapMixin {
   final MapController _map = MapController();
+
+  @override
+  void dispose() {
+    stopLiveGps();
+    disposeLiveGpsListenable();
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(covariant _CurvaMap oldWidget) {
@@ -649,43 +657,49 @@ class _CurvaMapState extends State<_CurvaMap> {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: FlutterMap(
-        mapController: _map,
-        options: MapOptions(
-          initialCameraFit: CameraFit.bounds(
-            bounds: bounds,
-            padding: const EdgeInsets.all(40),
-            maxZoom: 19,
-          ),
-          interactionOptions: const InteractionOptions(
-            flags: InteractiveFlag.all,
-          ),
-        ),
+      child: Stack(
         children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.motoline.motoline',
-          ),
-          PolylineLayer(polylines: polylines),
-          MarkerLayer(
-            markers: [
-              pin(
-                analysis.entryIndex,
-                'E',
-                RideVizPalette.speedColor(analysis.entrySpeedKmh),
+          FlutterMap(
+            mapController: _map,
+            options: MapOptions(
+              initialCameraFit: CameraFit.bounds(
+                bounds: bounds,
+                padding: const EdgeInsets.all(40),
+                maxZoom: 19,
               ),
-              pin(
-                analysis.apexIndex,
-                'A',
-                RideVizPalette.speedColor(analysis.apexSpeedKmh),
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.all,
               ),
-              pin(
-                analysis.exitIndex,
-                'S',
-                RideVizPalette.speedColor(analysis.exitSpeedKmh),
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.motoline.motoline',
               ),
+              PolylineLayer(polylines: polylines),
+              MarkerLayer(
+                markers: [
+                  pin(
+                    analysis.entryIndex,
+                    'E',
+                    RideVizPalette.speedColor(analysis.entrySpeedKmh),
+                  ),
+                  pin(
+                    analysis.apexIndex,
+                    'A',
+                    RideVizPalette.speedColor(analysis.apexSpeedKmh),
+                  ),
+                  pin(
+                    analysis.exitIndex,
+                    'S',
+                    RideVizPalette.speedColor(analysis.exitSpeedKmh),
+                  ),
+                ],
+              ),
+              liveGpsMapChild(),
             ],
           ),
+          myLocationOverlay(_map),
         ],
       ),
     );

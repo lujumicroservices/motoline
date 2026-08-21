@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
+import '../maps/live_gps_map_mixin.dart';
 import 'watch_models.dart';
 import 'watch_providers.dart';
 
@@ -19,7 +20,9 @@ class WatchViewerScreen extends ConsumerStatefulWidget {
   ConsumerState<WatchViewerScreen> createState() => _WatchViewerScreenState();
 }
 
-class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen> {
+class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen>
+    with LiveGpsMapMixin {
+  final MapController _map = MapController();
   WatchPosition? _pos;
   List<WatchEvent> _events = const [];
   bool _loading = true;
@@ -28,6 +31,13 @@ class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen> {
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    stopLiveGps();
+    disposeLiveGpsListenable();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -81,35 +91,44 @@ class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen> {
                     ),
                   ),
                 Expanded(
-                  child: FlutterMap(
-                    options: MapOptions(
-                      initialCenter: center,
-                      initialZoom: pos == null ? 11 : 14,
-                    ),
+                  child: Stack(
                     children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.motoline.motoline',
-                      ),
-                      if (pos != null)
-                        MarkerLayer(
-                          markers: [
-                            Marker(
-                              point: LatLng(pos.latitude, pos.longitude),
-                              width: 40,
-                              height: 40,
-                              child: Icon(
-                                pos.isStale
-                                    ? Icons.location_off
-                                    : Icons.navigation,
-                                color: pos.isStale
-                                    ? AppTheme.steel
-                                    : AppTheme.line,
-                              ),
+                      Positioned.fill(
+                        child: FlutterMap(
+                          mapController: _map,
+                          options: MapOptions(
+                            initialCenter: center,
+                            initialZoom: pos == null ? 11 : 14,
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate:
+                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.motoline.motoline',
                             ),
+                            if (pos != null)
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: LatLng(pos.latitude, pos.longitude),
+                                    width: 40,
+                                    height: 40,
+                                    child: Icon(
+                                      pos.isStale
+                                          ? Icons.location_off
+                                          : Icons.navigation,
+                                      color: pos.isStale
+                                          ? AppTheme.steel
+                                          : AppTheme.line,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            liveGpsMapChild(),
                           ],
                         ),
+                      ),
+                      myLocationOverlay(_map),
                     ],
                   ),
                 ),

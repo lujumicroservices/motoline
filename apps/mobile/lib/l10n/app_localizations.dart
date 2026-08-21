@@ -1010,6 +1010,12 @@ abstract class AppLocalizations {
   /// **'Mi ubicación'**
   String get myLocation;
 
+  /// No description provided for @myLocationUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo obtener tu ubicación.'**
+  String get myLocationUnavailable;
+
   /// No description provided for @openFullscreenMap.
   ///
   /// In es, this message translates to:
@@ -1477,6 +1483,60 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'RiderLab empieza a grabar sola cuando te empiezas a mover.'**
   String get armedBannerBody;
+
+  /// No description provided for @armedSessionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ruta armada'**
+  String get armedSessionTitle;
+
+  /// No description provided for @armedSessionOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver sesión'**
+  String get armedSessionOpen;
+
+  /// No description provided for @armedSessionMinimize.
+  ///
+  /// In es, this message translates to:
+  /// **'Minimizar'**
+  String get armedSessionMinimize;
+
+  /// No description provided for @armedSessionWatchRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver grabación'**
+  String get armedSessionWatchRecording;
+
+  /// No description provided for @armedSessionEndArm.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminar armado'**
+  String get armedSessionEndArm;
+
+  /// No description provided for @armedSessionStretchesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay tramos. Cuando empieces a rodar, aparecerán aquí.'**
+  String get armedSessionStretchesEmpty;
+
+  /// No description provided for @armedSessionStretchN.
+  ///
+  /// In es, this message translates to:
+  /// **'Tramo {n}'**
+  String armedSessionStretchN(int n);
+
+  /// No description provided for @armedSessionWaitingHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'GPS listo. La grabación arranca sola al moverte.'**
+  String get armedSessionWaitingHelp;
+
+  /// No description provided for @armedSessionLiveHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando. Puedes salir de esta pantalla; el recorrido sigue.'**
+  String get armedSessionLiveHelp;
 
   /// No description provided for @loopMode.
   ///
@@ -2990,6 +3050,48 @@ abstract class AppLocalizations {
   /// **'Toca el mapa para fijar el punto de encuentro. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.'**
   String get meetupMapHelp;
 
+  /// No description provided for @rodadaItinerary.
+  ///
+  /// In es, this message translates to:
+  /// **'Itinerario'**
+  String get rodadaItinerary;
+
+  /// No description provided for @rodadaPinStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
+  String get rodadaPinStart;
+
+  /// No description provided for @rodadaPinFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Fin'**
+  String get rodadaPinFinish;
+
+  /// No description provided for @rodadaPinStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada'**
+  String get rodadaPinStop;
+
+  /// No description provided for @rodadaPinUnset.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin marcar'**
+  String get rodadaPinUnset;
+
+  /// No description provided for @rodadaStopN.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada {n}'**
+  String rodadaStopN(int n);
+
+  /// No description provided for @rodadaItineraryHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.'**
+  String get rodadaItineraryHelp;
+
   /// No description provided for @titleRequired.
   ///
   /// In es, this message translates to:
@@ -3511,6 +3613,72 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Comparte el reel de la rodada'**
   String get reelOverviewCta;
+
+  /// No description provided for @reelLengthShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Corto'**
+  String get reelLengthShort;
+
+  /// No description provided for @reelLengthStandard.
+  ///
+  /// In es, this message translates to:
+  /// **'Reels'**
+  String get reelLengthStandard;
+
+  /// No description provided for @reelLengthLong.
+  ///
+  /// In es, this message translates to:
+  /// **'Completo'**
+  String get reelLengthLong;
+
+  /// No description provided for @reelLengthHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige cuánto dura el video'**
+  String get reelLengthHint;
+
+  /// No description provided for @reelLengthSeconds.
+  ///
+  /// In es, this message translates to:
+  /// **'{seconds} s'**
+  String reelLengthSeconds(int seconds);
+
+  /// No description provided for @reelLengthCap.
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta {pauses} paradas · {photos} fotos'**
+  String reelLengthCap(int pauses, int photos);
+
+  /// No description provided for @reelStopLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada {n}'**
+  String reelStopLabel(int n);
+
+  /// No description provided for @reelOnRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'En ruta'**
+  String get reelOnRoute;
+
+  /// No description provided for @reelNoStops.
+  ///
+  /// In es, this message translates to:
+  /// **'No hubo paradas largas en esta ruta'**
+  String get reelNoStops;
+
+  /// No description provided for @reelPhotoCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} fotos'**
+  String reelPhotoCount(int count);
+
+  /// No description provided for @reelAddToStop.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar foto'**
+  String get reelAddToStop;
 
   /// No description provided for @skillCoach.
   ///

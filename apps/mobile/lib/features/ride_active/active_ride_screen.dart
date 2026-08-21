@@ -25,13 +25,13 @@ import '../../theme/ride_viz_palette.dart';
 import '../adventure_camera/widgets/adventure_camera_ride_controls.dart';
 import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
 import '../lean_lab/lean_lab_bootstrap.dart';
-import '../lean_lab/lean_lab_review_screen.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../watch/active_watch_panel.dart';
 import '../watch/family_share.dart';
 import '../watch/watch_providers.dart';
 import '../rodadas/photos/ride_photo_capture.dart';
-import '../telemetry/ride_engine_label_screen.dart';
+import 'armed_session_flow.dart';
+import 'armed_session_nav.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 import 'widgets/upright_freeze_panel.dart';
@@ -47,6 +47,7 @@ class ActiveRideScreen extends ConsumerStatefulWidget {
     this.route,
     this.loop,
     this.leanLabBootstrap,
+    this.allowMinimize = false,
   });
 
   /// When true, starts the recorder (with GPS warm-up UI) on open.
@@ -62,6 +63,9 @@ class ActiveRideScreen extends ConsumerStatefulWidget {
 
   /// When set, attaches a Lean Lab session after recording starts.
   final LeanLabRideBootstrap? leanLabBootstrap;
+
+  /// Armed-session HUD: system back minimizes without ending the ride.
+  final bool allowMinimize;
 
   @override
   ConsumerState<ActiveRideScreen> createState() => _ActiveRideScreenState();
@@ -83,6 +87,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       if (mounted) setState(() {});
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.allowMinimize) {
+        ref.read(armedSessionNavProvider.notifier).hudOpened();
+      }
       if (widget.autoStart) {
         unawaited(_bootstrap());
       } else {
@@ -180,6 +187,14 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   @override
   void dispose() {
     _tick?.cancel();
+    if (widget.allowMinimize) {
+      try {
+        final recording = ref.read(rideRecorderProvider).isRecording;
+        ref.read(armedSessionNavProvider.notifier).hudClosed(
+              stillRecording: recording,
+            );
+      } catch (_) {}
+    }
     super.dispose();
   }
 
@@ -206,13 +221,14 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         !isRecording &&
         !_starting &&
         _startError == null;
+    final lockNav = _starting || (isRecording && !widget.allowMinimize);
 
     return PopScope(
-      canPop: !_starting && !isRecording,
+      canPop: !lockNav,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (_starting) return;
-        // Recording: use End ride / End session.
+        // Locked recording: use End ride / End session.
       },
       child: Scaffold(
         appBar: AppBar(
@@ -226,10 +242,13 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                         : l10n.recording,
           ),
           automaticallyImplyLeading: false,
-          leading: (_starting || isRecording)
+          leading: lockNav
               ? null
               : IconButton(
                   icon: const Icon(Icons.arrow_back),
+                  tooltip: isRecording
+                      ? l10n.armedSessionMinimize
+                      : null,
                   onPressed: () => Navigator.of(context).pop(),
                 ),
           actions: [
@@ -608,47 +627,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   }
 
   Future<void> _stop(BuildContext context) async {
-    final recorder = ref.read(rideRecorderProvider);
-    try {
-      await ref.read(activeWatchControllerProvider.notifier).end();
-      final ride = await recorder.stop();
-      // Closed beta: durable outbox then drain (soft-fail offline).
-      unawaited(
-        enqueueAndDrainRideSync(
-          ref.read(syncOutboxServiceProvider),
-          ride.id,
-        ),
-      );
-      final points =
-          await ref.read(rideDatabaseProvider).getPoints(ride.id);
-      await LeanLabService.instance.finalizeTrackStats(
-        rideId: ride.id,
-        samples: points,
-      );
-      if (!context.mounted) return;
-      final leanSession =
-          await LeanLabService.instance.getSession(ride.id);
-      if (!context.mounted) return;
-      if (leanSession != null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (_) => LeanLabReviewScreen(rideId: ride.id),
-          ),
-        );
-        return;
-      }
-      // Beta: collect mount/lean/brake labels before Ride Lab.
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => RideEngineLabelScreen(rideId: ride.id),
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
-    }
+    await completeArmedOrActiveRide(context, ref);
   }
 
   Future<void> _endLoopSession(BuildContext context) async {

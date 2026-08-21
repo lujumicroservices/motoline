@@ -5,9 +5,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
+import 'map_control_chip.dart';
 
-/// Live GPS blue-dot for point-selection maps (camera zones, loop A/B).
+/// Live GPS blue-dot + recenter control for interactive maps.
 ///
 /// Use [liveGpsMapChild] as a [FlutterMap] child so only the GPS layer rebuilds
 /// on ticks — full-map `setState` was freezing pinch-zoom.
@@ -80,6 +82,45 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
     final p = liveGps;
     if (p == null) return;
     map.move(p, map.camera.zoom < 15 ? 16.5 : map.camera.zoom);
+  }
+
+  /// Starts GPS if needed, then pans the camera to the current fix.
+  ///
+  /// Returns false when location is unavailable (permission, services, error).
+  Future<bool> recenterToLiveGps(MapController map) async {
+    if (liveGps == null) {
+      await startLiveGps(map: map, centerOnce: true);
+    }
+    if (!mounted) return false;
+    if (liveGps == null) return false;
+    centerOnLiveGps(map);
+    return true;
+  }
+
+  Future<void> recenterToLiveGpsOrNotify(MapController map) async {
+    final ok = await recenterToLiveGps(map);
+    if (ok || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.myLocationUnavailable)),
+    );
+  }
+
+  Widget myLocationChip(MapController map) {
+    return MapMyLocationChip(
+      onPressed: () => recenterToLiveGpsOrNotify(map),
+    );
+  }
+
+  Widget myLocationOverlay(
+    MapController map, {
+    double top = 8,
+    double right = 8,
+  }) {
+    return Positioned(
+      top: top,
+      right: right,
+      child: myLocationChip(map),
+    );
   }
 
   /// Single map child — rebuilds only when the blue-dot moves.

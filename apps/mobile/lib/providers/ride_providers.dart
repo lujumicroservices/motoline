@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/analytics/ride_analytics.dart';
+import '../core/analytics/ride_lab_isolate.dart';
 import '../core/db/ride_database.dart';
 import '../core/lean_lab/lean_lab_service.dart';
 import '../core/models/lean_sample.dart';
@@ -189,14 +191,36 @@ final rideProvider =
   return ref.watch(rideDatabaseProvider).getRide(id);
 });
 
+/// Full GPS — sync, export, reel, compare. Not used to open Ride Lab.
 final ridePointsProvider =
     FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) {
   return ref.watch(rideDatabaseProvider).getPoints(id);
 });
 
+/// ~1k GPS vertices for map + charts (includes first/last).
+final rideOverviewPointsProvider =
+    FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) {
+  return ref.watch(rideDatabaseProvider).getPointsOverview(id);
+});
+
 final rideLeanSamplesProvider =
     FutureProvider.autoDispose.family<List<LeanSample>, String>((ref, id) {
   return ref.watch(rideDatabaseProvider).getLeanSamples(id);
+});
+
+/// Full-track curves / skill; loads in a background isolate.
+final rideLabAnalyticsProvider =
+    FutureProvider.autoDispose.family<RideAnalytics?, String>((ref, id) async {
+  final db = ref.watch(rideDatabaseProvider);
+  final ride = await db.getRide(id);
+  if (ride == null) return null;
+  final points = await db.getPoints(id);
+  final lean = await db.getLeanSamples(id);
+  return computeRideLabAnalytics(
+    ride: ride,
+    points: points,
+    leanSamples: lean,
+  );
 });
 
 final ridesForRouteProvider =

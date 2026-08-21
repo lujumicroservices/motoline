@@ -7,7 +7,7 @@ import '../../../core/models/ride.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
-import '../../reel/reel_preview_screen.dart';
+import '../../reel/reel_compose_screen.dart';
 import '../models/rodada_models.dart';
 import '../photos/ride_photo_capture.dart';
 import '../photos/ride_photo_gallery_scan.dart';
@@ -217,7 +217,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       if (!context.mounted) return;
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => ReelPreviewScreen(
+          builder: (_) => ReelComposeScreen(
             rideId: rideId,
             rodadaId: rodadaId,
             replaceWithRideDetail: false,

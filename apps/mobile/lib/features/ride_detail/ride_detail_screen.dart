@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/analytics/brake_detection.dart';
 import '../../core/analytics/curva_analysis.dart';
+import '../../core/demo_ids.dart';
 import '../../core/features.dart';
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/analytics/road_kind_detection.dart';
@@ -49,8 +50,8 @@ class RideDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rideAsync = ref.watch(rideProvider(rideId));
-    final pointsAsync = ref.watch(ridePointsProvider(rideId));
-    final leanAsync = ref.watch(rideLeanSamplesProvider(rideId));
+    final overviewAsync = ref.watch(rideOverviewPointsProvider(rideId));
+    final labAsync = ref.watch(rideLabAnalyticsProvider(rideId));
     final l10n = context.l10n;
 
     return Scaffold(
@@ -61,18 +62,19 @@ class RideDetailScreen extends ConsumerWidget {
           if (ride == null) {
             return Center(child: Text(l10n.rideNotFound));
           }
-          return pointsAsync.when(
+          return overviewAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('$e')),
             data: (points) {
-              final leanSamples = leanAsync.asData?.value ?? const [];
               return _RideDashboard(
                 rideId: rideId,
-                analytics: RideAnalytics(
+                overview: RideAnalytics(
                   ride: ride,
                   points: points,
-                  leanSamples: leanSamples,
+                  computeLab: false,
                 ),
+                lab: labAsync.asData?.value,
+                labLoading: labAsync.isLoading,
               );
             },
           );
@@ -85,11 +87,15 @@ class RideDetailScreen extends ConsumerWidget {
 class _RideDashboard extends ConsumerStatefulWidget {
   const _RideDashboard({
     required this.rideId,
-    required this.analytics,
+    required this.overview,
+    this.lab,
+    this.labLoading = false,
   });
 
   final String rideId;
-  final RideAnalytics analytics;
+  final RideAnalytics overview;
+  final RideAnalytics? lab;
+  final bool labLoading;
 
   @override
   ConsumerState<_RideDashboard> createState() => _RideDashboardState();
@@ -110,7 +116,11 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
     'loop',
   };
 
-  RideAnalytics get _full => widget.analytics;
+  RideAnalytics get _map => widget.overview;
+
+  RideAnalytics get _labOrOverview => widget.lab ?? widget.overview;
+
+  RideAnalytics get _full => _map;
 
   bool _isOpen(String id) => _expanded.contains(id);
 
@@ -178,8 +188,8 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
     await ref.read(rideSyncServiceProvider).deleteRideEverywhere(rideId);
     ref.invalidate(ridesListProvider);
     ref.invalidate(rideProvider(rideId));
-    if (widget.analytics.ride.routeId != null) {
-      ref.invalidate(ridesForRouteProvider(widget.analytics.ride.routeId!));
+    if (widget.overview.ride.routeId != null) {
+      ref.invalidate(ridesForRouteProvider(widget.overview.ride.routeId!));
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -189,8 +199,8 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
   }
 
   RideAnalytics get _view {
-    if (!_zoomed || _full.samples.length < 2) return _full;
-    return _full.segment(_segStart, _segEnd);
+    if (!_zoomed || _map.samples.length < 2) return _map;
+    return _map.segment(_segStart, _segEnd);
   }
 
   void _setScrubIndex(int index) {
@@ -210,20 +220,26 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
       showProUpsellSheet(context, ref);
       return;
     }
-    final full = _full;
-    if (full.samples.length < 2) return;
-    final view = _view;
-    final absStart = view.mapIndexOffset + event.startIndex;
-    final absEnd = view.mapIndexOffset + event.endIndex;
+    final lab = widget.lab;
+    final map = _map;
+    if (map.samples.length < 2) return;
+    var lo = event.startIndex;
+    var hi = event.endIndex;
+    if (lab != null && lab.samples.length >= 2) {
+      final t0 = lab.secondsForIndex(event.startIndex);
+      final t1 = lab.secondsForIndex(event.endIndex);
+      lo = map.indexForSeconds(t0);
+      hi = map.indexForSeconds(t1);
+    }
     const pad = 6;
-    final lo = (absStart - pad).clamp(0, full.samples.length - 2);
-    final hi = (absEnd + pad).clamp(lo + 1, full.samples.length - 1);
+    final start = (lo - pad).clamp(0, map.samples.length - 2);
+    final end = (hi + pad).clamp(start + 1, map.samples.length - 1);
     setState(() {
-      _segStart = lo;
-      _segEnd = hi;
+      _segStart = start;
+      _segEnd = end;
       _zoomed = true;
-      final len = hi - lo + 1;
-      final localMid = ((absStart + absEnd) ~/ 2) - lo;
+      final len = end - start + 1;
+      final localMid = ((lo + hi) ~/ 2) - start;
       _scrubIndex = localMid.clamp(0, len - 1);
       _expanded.addAll({'map', 'brakes', 'overview'});
     });
@@ -285,7 +301,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
   }
 
   Future<void> _openRoadStretch(int stretchIndex) async {
-    final a = _view;
+    final a = widget.lab ?? _view;
     if (stretchIndex < 0 || stretchIndex >= a.roadStretches.length) return;
     final stretch = a.roadStretches[stretchIndex];
     if (stretch.kind != RoadKind.curva) return;
@@ -306,7 +322,10 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
     }
 
     if (analyses.isEmpty) {
-      _setScrubIndex(stretch.startIndex);
+      final mapIdx = widget.lab == null
+          ? stretch.startIndex
+          : _map.indexForSeconds(a.secondsForIndex(stretch.startIndex));
+      _setScrubIndex(mapIdx);
       return;
     }
 
@@ -324,9 +343,15 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
       showProUpsellSheet(context, ref);
       return;
     }
+    final src = widget.lab ?? _map;
+    final lo = _map.indexForSeconds(src.secondsForIndex(result.startIndex));
+    final hi = _map.indexForSeconds(src.secondsForIndex(result.endIndex));
     setState(() {
-      _segStart = result.startIndex;
-      _segEnd = result.endIndex;
+      _segStart = lo <= hi ? lo : hi;
+      _segEnd = lo <= hi ? hi : lo;
+      if (_segEnd <= _segStart && _map.samples.length > 1) {
+        _segEnd = (_segStart + 1).clamp(0, _map.samples.length - 1);
+      }
       _zoomed = true;
       final len = _segEnd - _segStart + 1;
       _scrubIndex = (len ~/ 2).clamp(0, len - 1);
@@ -456,22 +481,33 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                           ],
                         ),
                         const SizedBox(height: 12),
-                        RideSkillCoachCard(
-                          summary: a.skillSummary,
-                          onOpenLab: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => SkillLabScreen(
-                                  samples: full.samples,
-                                  summary: full.skillSummary,
-                                  neutralLeanDegrees: full.neutralLeanDegrees,
-                                  brakeEvents: full.brakeEvents,
-                                  localRideId: ride.id,
+                        if (widget.labLoading && widget.lab == null)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: LinearProgressIndicator(),
+                          )
+                        else
+                          DemoTarget(
+                            id: DemoIds.skillLab,
+                            button: true,
+                            child: RideSkillCoachCard(
+                            summary: _labOrOverview.skillSummary,
+                            onOpenLab: () {
+                              final lab = widget.lab;
+                              if (lab == null) return;
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => SkillLabScreen(
+                                    samples: lab.samples,
+                                    summary: lab.skillSummary,
+                                    neutralLeanDegrees: lab.neutralLeanDegrees,
+                                    brakeEvents: lab.brakeEvents,
+                                    localRideId: ride.id,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          ),
                         const SizedBox(height: 12),
                         RideSharePanel(ride: ride),
                         const SizedBox(height: 16),
@@ -551,12 +587,15 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                     ),
                                     const SizedBox(width: 4),
                                   ],
-                                  IconButton.filledTonal(
+                                  DemoTarget(
+                                    id: DemoIds.mapFullscreen,
+                                    child: IconButton.filledTonal(
                                     onPressed: full.samples.length >= 2
                                         ? _openFullscreenMap
                                         : null,
                                     tooltip: l10n.openFullscreenMap,
                                     icon: const Icon(Icons.fullscreen),
+                                  ),
                                   ),
                                 ],
                               ),
@@ -616,28 +655,54 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                           title: l10n.sectionRoad,
                           subtitle: l10n.sectionRoadSub,
                           badge:
-                              '${a.roadStretches.where((s) => s.kind == RoadKind.curva).length}',
+                              '${_labOrOverview.roadStretches.where((s) => s.kind == RoadKind.curva).length}',
                           expanded: _isOpen('road'),
                           onToggle: () => _toggle('road'),
-                          child: RoadStretchesPanel(
-                            stretches: a.roadStretches,
-                            onSelectStretch: _openRoadStretch,
-                          ),
+                          child: widget.labLoading && widget.lab == null
+                              ? const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : RoadStretchesPanel(
+                                  stretches: _labOrOverview.roadStretches,
+                                  onSelectStretch: _openRoadStretch,
+                                ),
                         ),
                         LabSection(
                           title: l10n.sectionBrakes,
                           subtitle: l10n.sectionBrakesSub,
-                          badge: '${a.brakeEvents.length}',
+                          badge: '${_labOrOverview.brakeEvents.length}',
                           expanded: _isOpen('brakes'),
                           onToggle: () => _toggle('brakes'),
-                          child: BrakeEventsPanel(
-                            events: a.brakeEvents,
-                            secondsForIndex: a.secondsForIndex,
-                            isPro: isPro,
-                            onSelectIndex: _setScrubIndex,
-                            onZoomToBrake: isPro ? _zoomToBrake : null,
-                            onUpgrade: () => showProUpsellSheet(context, ref),
-                          ),
+                          child: widget.labLoading && widget.lab == null
+                              ? const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : BrakeEventsPanel(
+                                  events: _labOrOverview.brakeEvents,
+                                  secondsForIndex: _labOrOverview.secondsForIndex,
+                                  isPro: isPro,
+                                  onSelectIndex: (i) {
+                                    final lab = widget.lab;
+                                    final mapIdx = lab == null
+                                        ? i
+                                        : _map.indexForSeconds(
+                                            lab.secondsForIndex(i),
+                                          );
+                                    if (_zoomed) {
+                                      _setScrubIndex(mapIdx - _segStart);
+                                    } else {
+                                      _setScrubIndex(mapIdx);
+                                    }
+                                  },
+                                  onZoomToBrake: isPro ? _zoomToBrake : null,
+                                  onUpgrade: () => showProUpsellSheet(context, ref),
+                                ),
                         ),
                         LabSection(
                           title: l10n.sectionCharts,

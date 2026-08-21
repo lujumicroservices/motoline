@@ -15,17 +15,25 @@ import '../ride_detail/ride_detail_screen.dart';
 import '../rodadas/rodada_providers.dart';
 import 'reel_caption.dart';
 import 'reel_composer.dart';
+import 'reel_pauses.dart';
+import 'reel_timeline.dart';
 
 class ReelPreviewScreen extends ConsumerStatefulWidget {
   const ReelPreviewScreen({
     super.key,
     required this.rideId,
     required this.rodadaId,
+    this.length = ReelLength.standard,
+    this.pauses,
+    this.selectedPhotoIds,
     this.replaceWithRideDetail = true,
   });
 
   final String rideId;
   final String rodadaId;
+  final ReelLength length;
+  final List<DetectedPause>? pauses;
+  final List<String>? selectedPhotoIds;
   final bool replaceWithRideDetail;
 
   @override
@@ -70,6 +78,9 @@ class _ReelPreviewScreenState extends ConsumerState<ReelPreviewScreen> {
         rideId: widget.rideId,
         rodadaId: widget.rodadaId,
         l10n: l10n,
+        length: widget.length,
+        pauses: widget.pauses,
+        selectedPhotoIds: widget.selectedPhotoIds,
         onProgress: (p) {
           if (mounted) setState(() => _progress = p);
         },
@@ -123,7 +134,7 @@ class _ReelPreviewScreenState extends ConsumerState<ReelPreviewScreen> {
       await ref.read(rodadaRepositoryProvider).uploadReel(
             rodadaId: widget.rodadaId,
             localPath: result.sharePath,
-            durationMs: (20 * 1000),
+            durationMs: result.durationMs,
             hookKind: result.highlights.hookKind,
           );
     } catch (_) {}

@@ -10,15 +10,39 @@ import '../../theme/ride_viz_palette.dart';
 class ReelPhoto {
   const ReelPhoto({
     required this.bytes,
+    this.id,
     this.latitude,
     this.longitude,
     this.takenAt,
   });
 
+  final String? id;
   final Uint8List bytes;
   final double? latitude;
   final double? longitude;
   final DateTime? takenAt;
+}
+
+class ReelPause {
+  const ReelPause({
+    required this.index,
+    required this.latitude,
+    required this.longitude,
+    required this.startedAt,
+    required this.endedAt,
+    required this.label,
+    this.photos = const [],
+  });
+
+  final int index;
+  final double latitude;
+  final double longitude;
+  final DateTime startedAt;
+  final DateTime endedAt;
+  final String label;
+  final List<ReelPhoto> photos;
+
+  Duration get duration => endedAt.difference(startedAt);
 }
 
 class ReelTrailPoint {
@@ -46,6 +70,8 @@ class ReelHighlights {
     required this.duration,
     required this.trail,
     required this.photos,
+    this.pauses = const [],
+    this.onRoutePhotos = const [],
     this.maxSpeedKmh,
     this.hookKind = 'lean',
   });
@@ -61,6 +87,8 @@ class ReelHighlights {
   final String hookKind;
   final List<ReelTrailPoint> trail;
   final List<ReelPhoto> photos;
+  final List<ReelPause> pauses;
+  final List<ReelPhoto> onRoutePhotos;
 
   bool get hasPhotos => photos.isNotEmpty;
 }
@@ -71,12 +99,28 @@ ReelHighlights buildReelHighlights({
   String? destination,
   int riderCount = 1,
   List<ReelPhoto> photos = const [],
+  List<ReelPause> pauses = const [],
+  List<ReelPhoto> onRoutePhotos = const [],
   int maxTrailPoints = 180,
+  int maxPhotos = 6,
 }) {
   final samples = analytics.samples;
   final trail = _downsample(samples, maxTrailPoints);
   final lean = analytics.maxLeanAbs ?? 0;
-  final usePhotoHook = photos.isNotEmpty && lean < 18;
+  final flat = <ReelPhoto>[
+    ...photos,
+    for (final pause in pauses) ...pause.photos,
+    ...onRoutePhotos,
+  ];
+  final unique = <ReelPhoto>[];
+  final seen = <String>{};
+  for (final photo in flat) {
+    final key = photo.id ?? '${unique.length}';
+    if (photo.id != null && !seen.add(key)) continue;
+    unique.add(photo);
+    if (unique.length >= maxPhotos) break;
+  }
+  final usePhotoHook = unique.isNotEmpty && lean < 18;
   return ReelHighlights(
     title: title,
     destination: (destination ?? '').trim().isEmpty
@@ -90,7 +134,9 @@ ReelHighlights buildReelHighlights({
     maxSpeedKmh: analytics.maxSpeedKmh,
     hookKind: usePhotoHook ? 'photo' : 'lean',
     trail: trail,
-    photos: photos.take(3).toList(),
+    photos: unique,
+    pauses: pauses,
+    onRoutePhotos: onRoutePhotos,
   );
 }
 

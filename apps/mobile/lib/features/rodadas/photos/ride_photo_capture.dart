@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/models/ride_photo.dart';
 import '../../../core/models/track_point.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
@@ -19,24 +20,51 @@ final ridePhotoStoreProvider = Provider<RidePhotoStore>((ref) {
 /// One-tap camera that geotags with the latest track point / live GPS.
 Future<void> captureRidePhoto({
   required BuildContext context,
-  required WidgetRef ref, required String? localRideId,
+  required WidgetRef ref,
+  required String? localRideId,
   String? rodadaId,
   TrackPoint? lastPoint,
   double? fallbackLat,
   double? fallbackLng,
 }) async {
+  await pickAndSaveRidePhoto(
+    context: context,
+    ref: ref,
+    source: ImageSource.camera,
+    localRideId: localRideId,
+    rodadaId: rodadaId,
+    lastPoint: lastPoint,
+    fallbackLat: fallbackLat,
+    fallbackLng: fallbackLng,
+  );
+}
+
+/// Camera or gallery → local album + rodada upload. [fallbackLat]/[fallbackLng]
+/// pin the photo when EXIF is missing (e.g. adding from a reel stop).
+Future<RidePhoto?> pickAndSaveRidePhoto({
+  required BuildContext context,
+  required WidgetRef ref,
+  required ImageSource source,
+  required String? localRideId,
+  String? rodadaId,
+  TrackPoint? lastPoint,
+  double? fallbackLat,
+  double? fallbackLng,
+  DateTime? takenAt,
+  bool showSnackbars = true,
+}) async {
   final l10n = context.l10n;
   try {
     final picker = ImagePicker();
     final file = await picker.pickImage(
-      source: ImageSource.camera,
+      source: source,
       maxWidth: 1920,
       maxHeight: 1920,
       imageQuality: 82,
     );
-    if (file == null) return;
+    if (file == null) return null;
     final bytes = await file.readAsBytes();
-    final takenAt = DateTime.now();
+    final at = takenAt ?? DateTime.now();
 
     var rideId = localRideId;
     final db = ref.read(rideDatabaseProvider);
@@ -45,11 +73,13 @@ Future<void> captureRidePhoto({
       rideId = active?.id;
     }
     if (rideId == null) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.photoNeedsActiveRide)),
-      );
-      return;
+      if (!context.mounted) return null;
+      if (showSnackbars) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.photoNeedsActiveRide)),
+        );
+      }
+      return null;
     }
 
     var lat = lastPoint?.latitude ?? fallbackLat;
@@ -69,28 +99,34 @@ Future<void> captureRidePhoto({
       cloudRideId = await repo.cloudRideIdForLocal(rideId);
     } catch (_) {}
 
-    await ref.read(ridePhotoStoreProvider).saveCaptured(
+    final saved = await ref.read(ridePhotoStoreProvider).saveCaptured(
           rideId: rideId,
           bytes: bytes,
-          source: 'camera',
+          source: source == ImageSource.camera ? 'camera' : 'gallery',
           rodadaId: attachRodada,
           cloudRideId: cloudRideId,
-          takenAt: takenAt,
+          takenAt: at,
           latitude: lat,
           longitude: lng,
         );
     if (attachRodada != null) {
       ref.invalidate(rodadaPhotosProvider(attachRodada));
     }
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.photoLinkedToRoute)),
-    );
+    if (!context.mounted) return saved;
+    if (showSnackbars) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.photoLinkedToRoute)),
+      );
+    }
+    return saved;
   } catch (e) {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$e')),
-    );
+    if (!context.mounted) return null;
+    if (showSnackbars) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
+    return null;
   }
 }
 

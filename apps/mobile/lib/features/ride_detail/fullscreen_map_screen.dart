@@ -10,6 +10,8 @@ import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../maps/live_gps_map_mixin.dart';
+import '../maps/map_control_chip.dart';
 import 'map_polyline_builder.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/speed_legend.dart';
@@ -50,7 +52,8 @@ class FullscreenMapScreen extends StatefulWidget {
   State<FullscreenMapScreen> createState() => _FullscreenMapScreenState();
 }
 
-class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
+class _FullscreenMapScreenState extends State<FullscreenMapScreen>
+    with LiveGpsMapMixin {
   final MapController _map = MapController();
 
   /// Selection-rect drag only — avoids rebuilding the track on every pan frame.
@@ -98,6 +101,8 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
 
   @override
   void dispose() {
+    stopLiveGps();
+    disposeLiveGpsListenable();
     _dragRect.dispose();
     super.dispose();
   }
@@ -334,6 +339,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                 ),
                 PolylineLayer(polylines: _polylines),
                 MarkerLayer(markers: _markers),
+                liveGpsMapChild(),
                 if (_areaBounds != null)
                   PolygonLayer(
                     polygons: [
@@ -415,6 +421,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen> {
                     child: _ZoomControls(
                       onZoomIn: () => _zoomBy(1),
                       onZoomOut: () => _zoomBy(-1),
+                      onMyLocation: () => recenterToLiveGpsOrNotify(_map),
                       onFit: _fitRide,
                     ),
                   ),
@@ -713,39 +720,35 @@ class _ZoomControls extends StatelessWidget {
   const _ZoomControls({
     required this.onZoomIn,
     required this.onZoomOut,
+    required this.onMyLocation,
     required this.onFit,
   });
 
   final VoidCallback onZoomIn;
   final VoidCallback onZoomOut;
+  final VoidCallback onMyLocation;
   final VoidCallback onFit;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    Widget chip({
-      required IconData icon,
-      required VoidCallback onPressed,
-      required String tooltip,
-    }) {
-      return Material(
-        color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(12),
-        child: IconButton(
-          onPressed: onPressed,
-          icon: Icon(icon),
-          tooltip: tooltip,
-        ),
-      );
-    }
-
     return Column(
       children: [
-        chip(icon: Icons.add, onPressed: onZoomIn, tooltip: l10n.zoomIn),
+        MapControlChip(
+          icon: Icons.add,
+          onPressed: onZoomIn,
+          tooltip: l10n.zoomIn,
+        ),
         const SizedBox(height: 8),
-        chip(icon: Icons.remove, onPressed: onZoomOut, tooltip: l10n.zoomOut),
+        MapControlChip(
+          icon: Icons.remove,
+          onPressed: onZoomOut,
+          tooltip: l10n.zoomOut,
+        ),
         const SizedBox(height: 8),
-        chip(
+        MapMyLocationChip(onPressed: onMyLocation),
+        const SizedBox(height: 8),
+        MapControlChip(
           icon: Icons.fit_screen,
           onPressed: onFit,
           tooltip: l10n.fitRide,

@@ -20,6 +20,7 @@ class RideAnalytics {
     DateTime? seriesOrigin,
     this.mapIndexOffset = 0,
     this.leanSamples = const [],
+    this.computeLab = true,
   })  : samples = _dedupe(points),
         _distanceMetersOverride = distanceMetersOverride,
         _seriesOrigin = seriesOrigin {
@@ -32,21 +33,33 @@ class RideAnalytics {
       samples: samples,
       neutralDegrees: neutralLeanDegrees,
     );
-    brakeEvents = detectBrakeEvents(samples);
-    roadStretches = detectRoadStretches(
-      samples,
-      neutralLeanDegrees: neutralLeanDegrees,
-    );
-    curveEvents = CurveEngine().analyze(
-      samples,
-      neutralLeanDegrees: neutralLeanDegrees,
-    );
-    skillSummary = const CornerSkillEngine().evaluate(
-      samples: samples,
-      stretches: roadStretches,
-      neutralLeanDegrees: neutralLeanDegrees,
-      leanSamples: leanSamples,
-    );
+    if (computeLab) {
+      brakeEvents = detectBrakeEvents(samples);
+      roadStretches = detectRoadStretches(
+        samples,
+        neutralLeanDegrees: neutralLeanDegrees,
+      );
+      curveEvents = CurveEngine().analyze(
+        samples,
+        neutralLeanDegrees: neutralLeanDegrees,
+      );
+      skillSummary = const CornerSkillEngine().evaluate(
+        samples: samples,
+        stretches: roadStretches,
+        neutralLeanDegrees: neutralLeanDegrees,
+        leanSamples: leanSamples,
+      );
+    } else {
+      brakeEvents = const [];
+      roadStretches = const [];
+      curveEvents = const [];
+      skillSummary = const RideSkillSummary(
+        corners: [],
+        sessionScore: 0,
+        highlights: [],
+        focusTips: [],
+      );
+    }
   }
 
   final Ride ride;
@@ -54,6 +67,9 @@ class RideAnalytics {
 
   /// High-rate lean series (~10 Hz) when available.
   final List<LeanSample> leanSamples;
+
+  /// When false, skip curves / brakes / skill (overview paint).
+  final bool computeLab;
 
   /// One sample per unique timestamp (GPS sometimes emits duplicates).
   final List<TrackPoint> samples;
@@ -94,18 +110,18 @@ class RideAnalytics {
   bool get isSegment => mapIndexOffset > 0 || _distanceMetersOverride != null;
 
   Duration get duration {
-    if (samples.length < 2) {
-      return isSegment ? Duration.zero : ride.duration;
+    if (isSegment) {
+      if (samples.length < 2) return Duration.zero;
+      return samples.last.timestamp.difference(samples.first.timestamp);
     }
-    return samples.last.timestamp.difference(samples.first.timestamp);
+    return ride.duration;
   }
 
   double get distanceKm {
     final override = _distanceMetersOverride;
     if (override != null) return override / 1000.0;
-    if (samples.length >= 2) {
-      return pathDistanceMeters(samples) / 1000.0;
-    }
+    if (!isSegment && ride.distanceMeters > 0) return ride.distanceKm;
+    if (samples.length >= 2) return pathDistanceMeters(samples) / 1000.0;
     return ride.distanceKm;
   }
 
@@ -336,6 +352,7 @@ class RideAnalytics {
       seriesOrigin: _origin,
       mapIndexOffset: mapIndexOffset + lo,
       leanSamples: leanSamples,
+      computeLab: computeLab,
     );
   }
 

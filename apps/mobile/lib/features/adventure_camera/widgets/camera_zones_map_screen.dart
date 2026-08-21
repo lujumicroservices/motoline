@@ -296,8 +296,9 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                         ),
                       ),
                       IconButton.filledTonal(
-                        onPressed: () => centerOnLiveGps(_map),
+                        onPressed: () => recenterToLiveGpsOrNotify(_map),
                         icon: const Icon(Icons.my_location),
+                        tooltip: l10n.myLocation,
                       ),
                       const SizedBox(width: 4),
                       IconButton.filledTonal(

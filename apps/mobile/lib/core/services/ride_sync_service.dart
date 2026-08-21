@@ -9,12 +9,14 @@ import '../db/ride_database.dart';
 import '../models/ride.dart';
 import '../models/share_visibility.dart';
 import '../models/track_point.dart';
+import '../supabase/paged_select.dart';
 import '../supabase/supabase_bootstrap.dart';
 import 'rider_telemetry_service.dart';
 
 /// How aggressively cloud GPS may overwrite local SQLite tracks.
 enum TrackPullPolicy {
-  /// Auto Garage / Lean Lab open: never wipe a local track that still has samples.
+  /// Garage / Lean Lab open: keep local GPS unless cloud is denser
+  /// (a truncated PostgREST pull used to freeze ~1000 points on a long ride).
   fillGapsOnly,
 
   /// Settings sync: replace only when cloud is clearly richer (more lean + enough GPS).
@@ -115,6 +117,21 @@ class RideSyncService {
         lastSyncFailures.add(lastSyncError!);
         debugPrint('RiderLab sync skip empty wipe: $localRideId');
         return null;
+      }
+
+      final existingCloud = await _supabase
+          .from('rides')
+          .select('id, point_count')
+          .eq('user_id', userId)
+          .eq('local_id', ride.id)
+          .maybeSingle();
+      final cloudPointCount = (existingCloud?['point_count'] as num?)?.toInt() ?? 0;
+      if (cloudPointCount > points.length + 50) {
+        debugPrint(
+          'RiderLab skip short upload $localRideId '
+          'local=${points.length} cloud=$cloudPointCount',
+        );
+        return existingCloud!['id'] as String;
       }
 
       final analytics = RideAnalytics(ride: ride, points: points);
@@ -306,15 +323,17 @@ class RideSyncService {
           );
           await _db.upsertRide(ride);
 
-          final pointRows = await _supabase
-              .from('track_points')
-              .select()
-              .eq('ride_id', cloudId)
-              .order('recorded_at');
+          final pointRows = await pagedSelect(
+            client: _supabase,
+            table: 'track_points',
+            eqColumn: 'ride_id',
+            eqValue: cloudId,
+            orderBy: 'recorded_at',
+          );
 
           final points = <TrackPoint>[];
-          for (final pr in (pointRows as List)) {
-            final pm = Map<String, dynamic>.from(pr as Map);
+          for (final pr in pointRows) {
+            final pm = pr;
             final ts = DateTime.tryParse(_str(pm['recorded_at']) ?? '');
             final lat = (pm['latitude'] as num?)?.toDouble();
             final lng = (pm['longitude'] as num?)?.toDouble();
@@ -337,7 +356,7 @@ class RideSyncService {
           }
 
           final localPoints = await _db.getPoints(localId);
-          if (_shouldKeepLocalTrack(
+          if (shouldKeepLocalTrack(
             local: localPoints,
             cloud: points,
             policy: policy,
@@ -418,7 +437,8 @@ class RideSyncService {
       pts.where((p) => p.leanDegrees != null).length;
 
   /// Prefer denser / lean-richer local tracks so labeling keeps working.
-  static bool _shouldKeepLocalTrack({
+  @visibleForTesting
+  static bool shouldKeepLocalTrack({
     required List<TrackPoint> local,
     required List<TrackPoint> cloud,
     required TrackPullPolicy policy,
@@ -431,7 +451,8 @@ class RideSyncService {
 
     switch (policy) {
       case TrackPullPolicy.fillGapsOnly:
-        // Opening Garage / Lean Lab must never erase a ride that still has GPS.
+        // Keep local GPS unless cloud is denser (truncated 1000-row pulls).
+        if (cloud.length > local.length) return false;
         return true;
       case TrackPullPolicy.preferRicher:
         // Keep local whenever it still has lean and cloud has less.

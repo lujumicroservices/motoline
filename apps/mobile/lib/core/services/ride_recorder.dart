@@ -10,6 +10,7 @@ import '../db/ride_database.dart';
 import '../models/imu_sample.dart';
 import '../models/lean_sample.dart';
 import '../models/ride.dart';
+import '../models/ride_stretch.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
 import 'arm_foreground_service.dart';
@@ -65,6 +66,9 @@ class ActiveRideSnapshot {
 
   /// Latest barometer reading (hPa), when the phone has one.
   final double? pressureHpa;
+
+  /// Auto-pause gaps as first-class stretches for the armed-session hub.
+  List<RideStretch> get stretches => rideStretchesFrom(points);
 }
 
 /// Offline-first recorder: GPS + lean IMU, flushed to SQLite in batches.
@@ -153,6 +157,12 @@ class RideRecorder {
   Ride? get activeRide => _ride;
   bool get isRecording => _ride?.status == RideStatus.recording;
   bool get isArmed => _armed;
+
+  /// GPS stored this session (empty while armed and waiting for motion).
+  List<TrackPoint> get sessionPoints => List.unmodifiable(_sessionPoints);
+
+  List<RideStretch> get sessionStretches => rideStretchesFrom(_sessionPoints);
+
   /// Route id that will be applied when arm auto-starts (if any).
   String? get armedRouteId => _armedRouteId;
   bool get isPaused => isRecording && _motion.isPaused;

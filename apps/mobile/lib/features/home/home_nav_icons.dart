@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/demo_ids.dart';
 import '../../theme/app_theme.dart';
 
 /// Glove-friendly home nav button — asset glyph or Material fallback.
@@ -8,6 +9,7 @@ class HomeNavIconButton extends StatelessWidget {
     super.key,
     required this.tooltip,
     required this.onPressed,
+    this.semanticId,
     this.asset,
     this.icon,
     this.color = AppTheme.mist,
@@ -15,6 +17,7 @@ class HomeNavIconButton extends StatelessWidget {
 
   final String tooltip;
   final VoidCallback onPressed;
+  final String? semanticId;
   final String? asset;
   final IconData? icon;
   final Color color;
@@ -23,7 +26,7 @@ class HomeNavIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    final button = IconButton(
       tooltip: tooltip,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: hit, minHeight: hit),
@@ -32,6 +35,9 @@ class HomeNavIconButton extends StatelessWidget {
           ? Icon(icon, size: 28, color: color)
           : AppAssetIcon(asset: asset!, size: 34, color: color),
     );
+    final id = semanticId;
+    if (id == null) return button;
+    return DemoTarget(id: id, child: button);
   }
 }
 

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/ride.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../providers/ride_providers.dart';
-import '../reel/reel_preview_screen.dart';
+import '../reel/reel_compose_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import 'photos/ride_photo_capture.dart';
 import 'photos/ride_photo_gallery_scan.dart';
@@ -58,6 +58,7 @@ Future<void> continueAfterRideToRodadaShare({
   required BuildContext context,
   required WidgetRef ref,
   required String rideId,
+  bool replaceCurrent = true,
 }) async {
   LinkedRodadaRide? linked;
   try {
@@ -66,10 +67,10 @@ Future<void> continueAfterRideToRodadaShare({
 
   if (!context.mounted) return;
   if (linked == null) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => RideDetailScreen(rideId: rideId),
-      ),
+    _openAfterRide(
+      context,
+      RideDetailScreen(rideId: rideId),
+      replaceCurrent: replaceCurrent,
     );
     return;
   }
@@ -109,12 +110,25 @@ Future<void> continueAfterRideToRodadaShare({
   }
 
   if (!context.mounted) return;
-  Navigator.of(context).pushReplacement(
-    MaterialPageRoute<void>(
-      builder: (_) => ReelPreviewScreen(
-        rideId: rideId,
-        rodadaId: linked!.rodadaId,
-      ),
+  _openAfterRide(
+    context,
+    ReelComposeScreen(
+      rideId: rideId,
+      rodadaId: linked!.rodadaId,
     ),
+    replaceCurrent: replaceCurrent,
   );
+}
+
+void _openAfterRide(
+  BuildContext context,
+  Widget page, {
+  required bool replaceCurrent,
+}) {
+  final route = MaterialPageRoute<void>(builder: (_) => page);
+  if (replaceCurrent) {
+    Navigator.of(context).pushReplacement(route);
+  } else {
+    Navigator.of(context).push(route);
+  }
 }

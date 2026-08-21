@@ -9,6 +9,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../maps/live_gps_map_mixin.dart';
+import '../maps/map_control_chip.dart';
 
 enum _MarkStep { placeA, placeB, done }
 
@@ -250,25 +251,21 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen>
                     alignment: Alignment.centerRight,
                     child: Column(
                       children: [
-                        _ZoomChip(
+                        MapControlChip(
                           icon: Icons.add,
                           onPressed: () => _zoomBy(1),
                           tooltip: l10n.zoomIn,
                         ),
                         const SizedBox(height: 8),
-                        _ZoomChip(
+                        MapControlChip(
                           icon: Icons.remove,
                           onPressed: () => _zoomBy(-1),
                           tooltip: l10n.zoomOut,
                         ),
                         const SizedBox(height: 8),
-                        _ZoomChip(
-                          icon: Icons.my_location,
-                          onPressed: () => centerOnLiveGps(_map),
-                          tooltip: l10n.myLocation,
-                        ),
+                        myLocationChip(_map),
                         const SizedBox(height: 8),
-                        _ZoomChip(
+                        MapControlChip(
                           icon: Icons.fit_screen,
                           onPressed: _fitRide,
                           tooltip: l10n.fitRide,
@@ -376,31 +373,6 @@ class _AbMarker extends StatelessWidget {
           color: AppTheme.asphalt,
           fontSize: 16,
         ),
-      ),
-    );
-  }
-}
-
-class _ZoomChip extends StatelessWidget {
-  const _ZoomChip({
-    required this.icon,
-    required this.onPressed,
-    required this.tooltip,
-  });
-
-  final IconData icon;
-  final VoidCallback onPressed;
-  final String tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
-      borderRadius: BorderRadius.circular(12),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        tooltip: tooltip,
       ),
     );
   }

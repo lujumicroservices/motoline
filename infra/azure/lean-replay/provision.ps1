@@ -53,6 +53,17 @@ az storage account create `
   --tags project=riderlab `
   --output none
 
+# Keep prior blob if a ride re-uploads the same path.
+az storage account blob-service-properties update `
+  --account-name $Account `
+  --resource-group $Rg `
+  --enable-versioning true `
+  --enable-delete-retention true `
+  --delete-retention-days 30 `
+  --enable-container-delete-retention true `
+  --container-delete-retention-days 30 `
+  --output none
+
 $key = az storage account keys list --account-name $Account --resource-group $Rg --query '[0].value' -o tsv
 az storage container create `
   --name $Container `

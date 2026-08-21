@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/analytics/ride_analytics.dart';
+import '../../core/demo_ids.dart';
 import '../../core/features.dart';
 import '../../core/models/ride.dart';
 import '../../core/utils/geo_utils.dart';
@@ -21,6 +22,8 @@ import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
 import '../lean_lab/lean_lab_screen.dart';
 import '../ride_active/active_ride_screen.dart';
+import '../ride_active/armed_session_flow.dart';
+import '../ride_active/armed_session_nav.dart';
 import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../ride_detail/ride_rename.dart';
@@ -43,10 +46,12 @@ class HomeScreen extends ConsumerWidget {
     final incompleteAsync = ref.watch(incompleteRideProvider);
     final updateAsync = ref.watch(appUpdateCheckProvider);
     final armed = ref.watch(armedStateProvider);
+    final recording = ref.watch(rideRecorderProvider).isRecording;
+    final sessionLive = armed || recording;
 
     ref.listen(autoStartEventsProvider, (previous, next) {
-      next.whenData((ride) {
-        unawaited(_openAutoStartedRide(context, ref, ride));
+      next.whenData((_) {
+        openArmedSessionAfterAutoStart(context, ref);
       });
     });
 
@@ -105,6 +110,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       HomeNavIconButton(
                         tooltip: l10n.rodadasTitle,
+                        semanticId: DemoIds.navRodadas,
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
@@ -116,6 +122,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       HomeNavIconButton(
                         tooltip: l10n.friends,
+                        semanticId: DemoIds.navFriends,
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
@@ -131,7 +138,9 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
-                    child: FilledButton.tonalIcon(
+                    child: DemoTarget(
+                      id: DemoIds.ctaLeanLab,
+                      child: FilledButton.tonalIcon(
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -147,6 +156,7 @@ class HomeScreen extends ConsumerWidget {
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
+                    ),
                     ),
                   ),
                 ],
@@ -172,7 +182,7 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
             ),
-            if (armed) const _ArmedBanner(),
+            if (sessionLive) const _ArmedBanner(),
             ridesAsync.when(
               data: (rides) {
                 final summary = FleetSummary.fromRides(rides);
@@ -295,6 +305,9 @@ class HomeScreen extends ConsumerWidget {
                       final ride = (row as _GarageRideRow).ride;
                       return _RideTile(
                         ride: ride,
+                        demoId: ride.status == RideStatus.abandoned
+                            ? null
+                            : DemoIds.rideTile,
                         onDeleted: () {
                           ref.invalidate(ridesListProvider);
                         },
@@ -305,7 +318,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             _HomeActionDock(
-              armed: armed,
+              armed: sessionLive,
               onStart: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -317,14 +330,15 @@ class HomeScreen extends ConsumerWidget {
                 });
               },
               onArmToggle: () async {
-                final notifier = ref.read(armedStateProvider.notifier);
-                if (armed) {
-                  notifier.disarm();
+                if (sessionLive) {
+                  ensureArmedSessionHub(context, ref);
                   return;
                 }
                 try {
                   final ok = await freezeThenArm(context, ref);
                   if (!ok || !context.mounted) return;
+                  ref.read(armedSessionNavProvider.notifier).reset();
+                  ensureArmedSessionHub(context, ref);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.armAutoNoRouteHint)),
                   );
@@ -409,25 +423,7 @@ RodadaSummary? _pickHomeRodada(List<RodadaSummary> list) {
   return null;
 }
 
-Future<void> _openAutoStartedRide(
-  BuildContext context,
-  WidgetRef ref,
-  Ride ride,
-) async {
-  if (!context.mounted) return;
-  await Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => const ActiveRideScreen(
-        autoStart: false,
-        mode: ActiveRideMode.normal,
-      ),
-    ),
-  );
-  ref.invalidate(ridesListProvider);
-  ref.invalidate(incompleteRideProvider);
-}
-
-/// If arm auto-started while the screen was locked, open the active ride HUD
+/// If arm auto-started while the screen was locked, open the session hub
 /// when the user returns (broadcast stream events can be missed while paused).
 class _ArmAutoResumeOpener extends ConsumerStatefulWidget {
   const _ArmAutoResumeOpener();
@@ -466,9 +462,18 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
     final recorder = ref.read(rideRecorderProvider);
     final ride = recorder.activeRide;
     if (!recorder.isRecording || ride == null) return;
+    final nav = ref.read(armedSessionNavProvider);
     _opening = true;
     try {
-      await _openAutoStartedRide(context, ref, ride);
+      if (shouldResumeHubFromHome(
+        isRecording: true,
+        hubOnStack: nav.hubOnStack,
+      )) {
+        ensureArmedSessionHub(context, ref);
+      }
+      if (shouldAutoPushHud(nav, isRecording: true)) {
+        openArmedRecordingHud(context, ref);
+      }
     } finally {
       _opening = false;
     }
@@ -513,8 +518,10 @@ class _HomeActionDock extends StatelessWidget {
             children: [
               Expanded(
                 flex: 3,
-                child: FilledButton.icon(
-                  onPressed: onStart,
+                child: DemoTarget(
+                  id: DemoIds.ctaStart,
+                  child: FilledButton.icon(
+                  onPressed: armed ? null : onStart,
                   style: glove.copyWith(
                     backgroundColor:
                         const WidgetStatePropertyAll(AppTheme.mist),
@@ -524,11 +531,14 @@ class _HomeActionDock extends StatelessWidget {
                   icon: const Icon(Icons.play_arrow_rounded, size: 32),
                   label: Text(l10n.startRide),
                 ),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 flex: 2,
-                child: OutlinedButton.icon(
+                child: DemoTarget(
+                  id: DemoIds.ctaArm,
+                  child: OutlinedButton.icon(
                   onPressed: onArmToggle,
                   style: glove.copyWith(
                     foregroundColor: WidgetStatePropertyAll(
@@ -543,16 +553,17 @@ class _HomeActionDock extends StatelessWidget {
                   ),
                   icon: Icon(
                     armed
-                        ? Icons.motion_photos_off_outlined
+                        ? Icons.route_outlined
                         : Icons.motion_photos_auto_outlined,
                     size: 26,
                   ),
                   label: Text(
-                    armed ? l10n.disarmAutoRide : l10n.armAutoRide,
+                    armed ? l10n.armedSessionOpen : l10n.armAutoRide,
                     maxLines: 2,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
                 ),
               ),
             ],
@@ -638,12 +649,13 @@ class _RodadaHomeCard extends ConsumerWidget {
   }
 }
 
-class _ArmedBanner extends StatelessWidget {
+class _ArmedBanner extends ConsumerWidget {
   const _ArmedBanner();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final recording = ref.watch(rideRecorderProvider).isRecording;
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       padding: const EdgeInsets.all(16),
@@ -654,14 +666,17 @@ class _ArmedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.motion_photos_auto, color: AppTheme.lineHot),
+          Icon(
+            recording ? Icons.fiber_manual_record : Icons.motion_photos_auto,
+            color: AppTheme.lineHot,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.waitingForMotion,
+                  recording ? l10n.recording : l10n.waitingForMotion,
                   style: GoogleFonts.exo2(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
@@ -669,11 +684,17 @@ class _ArmedBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  l10n.armedBannerBody,
+                  recording
+                      ? l10n.armedSessionLiveHelp
+                      : l10n.armedBannerBody,
                   style: const TextStyle(color: AppTheme.steel, fontSize: 12),
                 ),
               ],
             ),
+          ),
+          TextButton(
+            onPressed: () => ensureArmedSessionHub(context, ref),
+            child: Text(l10n.armedSessionOpen),
           ),
         ],
       ),
@@ -766,10 +787,12 @@ class _RideTile extends ConsumerWidget {
   const _RideTile({
     required this.ride,
     required this.onDeleted,
+    this.demoId,
   });
 
   final Ride ride;
   final VoidCallback onDeleted;
+  final String? demoId;
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
@@ -809,7 +832,7 @@ class _RideTile extends ConsumerWidget {
     final abandoned = ride.status == RideStatus.abandoned;
     final l10n = context.l10n;
 
-    return Material(
+    final tile = Material(
       color: AppTheme.asphaltElevated,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
@@ -894,6 +917,9 @@ class _RideTile extends ConsumerWidget {
         ),
       ),
     );
+    final id = demoId;
+    if (id == null) return tile;
+    return DemoTarget(id: id, child: tile);
   }
 }
 

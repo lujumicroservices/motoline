@@ -5,8 +5,14 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/supabase/paged_select.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import 'models/rodada_models.dart';
+import 'rodada_itinerary.dart';
+
+const rodadaSelectColumns =
+    'id, host_id, title, destination, notes, meetup_lat, meetup_lng, '
+    'finish_lat, finish_lng, starts_at, status, invite_code, created_at, updated_at';
 
 /// Lazy cloud access for Rodadas. Call sites should use autoDispose providers
 /// so heavy tabs (live / photos / tracks) release when the user leaves.
@@ -71,8 +77,7 @@ class RodadaRepository {
     final rows = await _supabase
         .from('rodadas')
         .select(
-          'id, host_id, title, destination, notes, meetup_lat, meetup_lng, '
-          'starts_at, status, invite_code, created_at, updated_at, '
+          '$rodadaSelectColumns, '
           'rodada_members(user_id)',
         )
         .inFilter('id', ids)
@@ -129,8 +134,7 @@ class RodadaRepository {
     final row = await _supabase
         .from('rodadas')
         .select(
-          'id, host_id, title, destination, notes, meetup_lat, meetup_lng, '
-          'starts_at, status, invite_code, created_at, updated_at, '
+          '$rodadaSelectColumns, '
           'rodada_members(user_id)',
         )
         .eq('id', id)
@@ -145,6 +149,8 @@ class RodadaRepository {
     String? notes,
     double? meetupLat,
     double? meetupLng,
+    double? finishLat,
+    double? finishLng,
     DateTime? startsAt,
   }) async {
     await _ensure();
@@ -163,14 +169,13 @@ class RodadaRepository {
               'notes': notes?.trim(),
               'meetup_lat': meetupLat,
               'meetup_lng': meetupLng,
+              'finish_lat': finishLat,
+              'finish_lng': finishLng,
               'starts_at': startsAt?.toUtc().toIso8601String(),
               'status': 'open',
               'invite_code': code,
             })
-            .select(
-              'id, host_id, title, destination, notes, meetup_lat, meetup_lng, '
-              'starts_at, status, invite_code, created_at, updated_at',
-            )
+            .select(rodadaSelectColumns)
             .single();
         return RodadaSummary.fromMap(
           Map<String, dynamic>.from(row),
@@ -191,9 +196,12 @@ class RodadaRepository {
     String? notes,
     double? meetupLat,
     double? meetupLng,
+    double? finishLat,
+    double? finishLng,
     DateTime? startsAt,
     String? status,
     bool clearMeetup = false,
+    bool clearFinish = false,
   }) async {
     await _ensure();
     final patch = <String, dynamic>{
@@ -208,6 +216,13 @@ class RodadaRepository {
     } else {
       if (meetupLat != null) patch['meetup_lat'] = meetupLat;
       if (meetupLng != null) patch['meetup_lng'] = meetupLng;
+    }
+    if (clearFinish) {
+      patch['finish_lat'] = null;
+      patch['finish_lng'] = null;
+    } else {
+      if (finishLat != null) patch['finish_lat'] = finishLat;
+      if (finishLng != null) patch['finish_lng'] = finishLng;
     }
     if (startsAt != null) {
       patch['starts_at'] = startsAt.toUtc().toIso8601String();
@@ -396,12 +411,14 @@ class RodadaRepository {
     int maxPoints = 400,
   }) async {
     await _ensure();
-    final rows = await _supabase
-        .from('track_points')
-        .select('latitude, longitude')
-        .eq('ride_id', cloudRideId)
-        .order('recorded_at');
-    final list = (rows as List).cast<Map<String, dynamic>>();
+    final list = await pagedSelect(
+      client: _supabase,
+      table: 'track_points',
+      columns: 'latitude, longitude, recorded_at',
+      eqColumn: 'ride_id',
+      eqValue: cloudRideId,
+      orderBy: 'recorded_at',
+    );
     if (list.isEmpty) return const [];
     if (list.length <= maxPoints) {
       return [
@@ -652,6 +669,7 @@ class RodadaRepository {
         .from('rodada_stops')
         .select()
         .eq('rodada_id', rodadaId)
+        .order('sort_order')
         .order('created_at');
     return (rows as List)
         .cast<Map<String, dynamic>>()
@@ -659,15 +677,30 @@ class RodadaRepository {
         .toList();
   }
 
+  Future<int> _nextStopSortOrder(String rodadaId) async {
+    final rows = await _supabase
+        .from('rodada_stops')
+        .select('sort_order')
+        .eq('rodada_id', rodadaId)
+        .order('sort_order', ascending: false)
+        .limit(1);
+    final list = (rows as List).cast<Map<String, dynamic>>();
+    return nextStopSortOrder([
+      for (final r in list) (r['sort_order'] as num?)?.toInt() ?? 0,
+    ]);
+  }
+
   Future<RodadaStop> addStop({
     required String rodadaId,
     required String title,
     required double latitude,
     required double longitude,
+    int? sortOrder,
   }) async {
     await _ensure();
     final me = currentUserId;
     if (me == null) throw StateError('Not signed in');
+    final order = sortOrder ?? await _nextStopSortOrder(rodadaId);
     final row = await _supabase
         .from('rodada_stops')
         .insert({
@@ -676,6 +709,7 @@ class RodadaRepository {
           'title': title.trim(),
           'latitude': latitude,
           'longitude': longitude,
+          'sort_order': order,
         })
         .select()
         .single();

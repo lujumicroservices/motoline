@@ -6,7 +6,8 @@ enabled = true
 port = 54321
 schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
-max_rows = 1000
+# Long rides are ~1 Hz GPS; 2 h ≈ 7000+ rows. App also paginates.
+max_rows = 10000
 
 [db]
 port = 54322

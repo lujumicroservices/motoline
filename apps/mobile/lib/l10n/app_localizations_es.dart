@@ -515,6 +515,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get myLocation => 'Mi ubicación';
 
   @override
+  String get myLocationUnavailable => 'No se pudo obtener tu ubicación.';
+
+  @override
   String get openFullscreenMap => 'Abrir mapa completo';
 
   @override
@@ -775,6 +778,38 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get armedBannerBody =>
       'RiderLab empieza a grabar sola cuando te empiezas a mover.';
+
+  @override
+  String get armedSessionTitle => 'Ruta armada';
+
+  @override
+  String get armedSessionOpen => 'Ver sesión';
+
+  @override
+  String get armedSessionMinimize => 'Minimizar';
+
+  @override
+  String get armedSessionWatchRecording => 'Ver grabación';
+
+  @override
+  String get armedSessionEndArm => 'Terminar armado';
+
+  @override
+  String get armedSessionStretchesEmpty =>
+      'Aún no hay tramos. Cuando empieces a rodar, aparecerán aquí.';
+
+  @override
+  String armedSessionStretchN(int n) {
+    return 'Tramo $n';
+  }
+
+  @override
+  String get armedSessionWaitingHelp =>
+      'GPS listo. La grabación arranca sola al moverte.';
+
+  @override
+  String get armedSessionLiveHelp =>
+      'Grabando. Puedes salir de esta pantalla; el recorrido sigue.';
 
   @override
   String get loopMode => 'Modo vueltas';
@@ -1630,6 +1665,30 @@ class AppLocalizationsEs extends AppLocalizations {
       'Toca el mapa para fijar el punto de encuentro. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.';
 
   @override
+  String get rodadaItinerary => 'Itinerario';
+
+  @override
+  String get rodadaPinStart => 'Inicio';
+
+  @override
+  String get rodadaPinFinish => 'Fin';
+
+  @override
+  String get rodadaPinStop => 'Parada';
+
+  @override
+  String get rodadaPinUnset => 'Sin marcar';
+
+  @override
+  String rodadaStopN(int n) {
+    return 'Parada $n';
+  }
+
+  @override
+  String get rodadaItineraryHelp =>
+      'Toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.';
+
+  @override
   String get titleRequired => 'El título es obligatorio';
 
   @override
@@ -1916,6 +1975,47 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reelOverviewCta => 'Comparte el reel de la rodada';
+
+  @override
+  String get reelLengthShort => 'Corto';
+
+  @override
+  String get reelLengthStandard => 'Reels';
+
+  @override
+  String get reelLengthLong => 'Completo';
+
+  @override
+  String get reelLengthHint => 'Elige cuánto dura el video';
+
+  @override
+  String reelLengthSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String reelLengthCap(int pauses, int photos) {
+    return 'Hasta $pauses paradas · $photos fotos';
+  }
+
+  @override
+  String reelStopLabel(int n) {
+    return 'Parada $n';
+  }
+
+  @override
+  String get reelOnRoute => 'En ruta';
+
+  @override
+  String get reelNoStops => 'No hubo paradas largas en esta ruta';
+
+  @override
+  String reelPhotoCount(int count) {
+    return '$count fotos';
+  }
+
+  @override
+  String get reelAddToStop => 'Agregar foto';
 
   @override
   String get skillCoach => 'Tips de manejo';

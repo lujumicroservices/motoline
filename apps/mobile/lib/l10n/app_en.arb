@@ -173,6 +173,7 @@
   "zoomOut": "Zoom out",
   "fitRide": "Fit ride",
   "myLocation": "My location",
+  "myLocationUnavailable": "Couldn't find your location.",
   "openFullscreenMap": "Open full map",
   "mapLayerSpeed": "Speed",
   "mapLayerRoadKind": "Turns",
@@ -251,6 +252,20 @@
   "disarmAutoRide": "Cancel auto-start",
   "waitingForMotion": "Waiting for motion…",
   "armedBannerBody": "RiderLab will start recording by itself when you start moving.",
+  "armedSessionTitle": "Armed route",
+  "armedSessionOpen": "Open session",
+  "armedSessionMinimize": "Minimize",
+  "armedSessionWatchRecording": "Open recording",
+  "armedSessionEndArm": "End armed session",
+  "armedSessionStretchesEmpty": "No stretches yet. They'll show up here when you start rolling.",
+  "armedSessionStretchN": "Stretch {n}",
+  "@armedSessionStretchN": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "armedSessionWaitingHelp": "GPS is ready. Recording starts by itself when you move.",
+  "armedSessionLiveHelp": "Recording. You can leave this screen — the ride keeps going.",
   "loopMode": "Lap mode",
   "pausedLabel": "PAUSED",
   "suggestEndTitle": "Still riding?",
@@ -586,6 +601,18 @@
   "useMyGps": "Use my GPS",
   "clearPin": "Clear",
   "meetupMapHelp": "Tap the map to set the meetup. Live GPS and photos stay off until each rider opts in.",
+  "rodadaItinerary": "Itinerary",
+  "rodadaPinStart": "Start",
+  "rodadaPinFinish": "Finish",
+  "rodadaPinStop": "Stop",
+  "rodadaPinUnset": "Not set",
+  "rodadaStopN": "Stop {n}",
+  "@rodadaStopN": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "rodadaItineraryHelp": "Tap the map to mark start, finish, or stops. Live GPS and photos stay off until each rider opts in.",
   "titleRequired": "Title is required",
   "locationFailed": "Location failed: {error}",
   "@locationFailed": {
@@ -715,6 +742,38 @@
   "reelCta": "Record your line on RiderLab",
   "reelGenerate": "Make reel",
   "reelOverviewCta": "Share the rodada reel",
+  "reelLengthShort": "Short",
+  "reelLengthStandard": "Reels",
+  "reelLengthLong": "Full",
+  "reelLengthHint": "Choose how long the video runs",
+  "reelLengthSeconds": "{seconds} s",
+  "@reelLengthSeconds": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "reelLengthCap": "Up to {pauses} stops · {photos} photos",
+  "@reelLengthCap": {
+    "placeholders": {
+      "pauses": { "type": "int" },
+      "photos": { "type": "int" }
+    }
+  },
+  "reelStopLabel": "Stop {n}",
+  "@reelStopLabel": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "reelOnRoute": "On the road",
+  "reelNoStops": "No long stops on this route",
+  "reelPhotoCount": "{count} photos",
+  "@reelPhotoCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reelAddToStop": "Add photo",
   "skillCoach": "Riding tips",
   "skillCurvasRated": "{count} corners scored · good for comparing with friends",
   "@skillCurvasRated": {

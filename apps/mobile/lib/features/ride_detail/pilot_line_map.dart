@@ -9,6 +9,7 @@ import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../maps/live_gps_map_mixin.dart';
 import 'map_polyline_builder.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/speed_legend.dart';
@@ -68,7 +69,8 @@ class PilotLineMap extends StatefulWidget {
   State<PilotLineMap> createState() => _PilotLineMapState();
 }
 
-class _PilotLineMapState extends State<PilotLineMap> {
+class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
+  final MapController _map = MapController();
   List<Polyline> _polylines = const [];
   List<Marker> _baseMarkers = const [];
   LatLngBounds? _bounds;
@@ -79,6 +81,13 @@ class _PilotLineMapState extends State<PilotLineMap> {
   void initState() {
     super.initState();
     _rebuildGeometry();
+  }
+
+  @override
+  void dispose() {
+    stopLiveGps();
+    disposeLiveGpsListenable();
+    super.dispose();
   }
 
   @override
@@ -420,6 +429,7 @@ class _PilotLineMapState extends State<PilotLineMap> {
 
     final map = FlutterMap(
       key: ValueKey(_cacheIdentity),
+      mapController: _map,
       options: MapOptions(
         initialCenter: _center!,
         initialZoom: hasFocus ? 16 : 15,
@@ -455,12 +465,14 @@ class _PilotLineMapState extends State<PilotLineMap> {
         ),
         PolylineLayer(polylines: _polylines),
         MarkerLayer(markers: markers),
+        liveGpsMapChild(),
       ],
     );
 
     final stacked = Stack(
       children: [
         Positioned.fill(child: map),
+        if (widget.interactive) myLocationOverlay(_map),
         if (widget.layers.showLegend)
           Positioned(
             left: 12,

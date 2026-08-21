@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../core/demo_ids.dart';
 import '../features/friends/friends_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../l10n/l10n_ext.dart';
@@ -85,7 +86,9 @@ class RiderProfileButton extends ConsumerWidget {
 
     return Tooltip(
       message: label.isEmpty ? l10n.accountSection : label,
-      child: Material(
+      child: DemoTarget(
+        id: DemoIds.navProfile,
+        child: Material(
         color: AppTheme.asphaltElevated,
         shape: const CircleBorder(),
         child: InkWell(
@@ -125,6 +128,7 @@ class RiderProfileButton extends ConsumerWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

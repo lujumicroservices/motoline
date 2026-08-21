@@ -17,6 +17,8 @@ import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../compare/route_compare_screen.dart';
 import '../ride_active/active_ride_screen.dart';
+import '../ride_active/armed_session_flow.dart';
+import '../ride_active/armed_session_nav.dart';
 import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../ride_active/loop_mark_map_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
@@ -168,6 +170,9 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
         SnackBar(content: Text(l10n.armAutoRouteArmedNamed(route.name))),
       );
       Navigator.of(context).popUntil((r) => r.isFirst);
+      if (!mounted) return;
+      ref.read(armedSessionNavProvider.notifier).reset();
+      ensureArmedSessionHub(context, ref);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

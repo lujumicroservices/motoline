@@ -219,6 +219,7 @@
   "zoomOut": "Alejar",
   "fitRide": "Ajustar recorrido",
   "myLocation": "Mi ubicación",
+  "myLocationUnavailable": "No se pudo obtener tu ubicación.",
   "openFullscreenMap": "Abrir mapa completo",
   "mapLayerSpeed": "Velocidad",
   "mapLayerRoadKind": "Curvas",
@@ -317,6 +318,20 @@
   "disarmAutoRide": "Cancelar arranque auto",
   "waitingForMotion": "Esperando movimiento…",
   "armedBannerBody": "RiderLab empieza a grabar sola cuando te empiezas a mover.",
+  "armedSessionTitle": "Ruta armada",
+  "armedSessionOpen": "Ver sesión",
+  "armedSessionMinimize": "Minimizar",
+  "armedSessionWatchRecording": "Ver grabación",
+  "armedSessionEndArm": "Terminar armado",
+  "armedSessionStretchesEmpty": "Aún no hay tramos. Cuando empieces a rodar, aparecerán aquí.",
+  "armedSessionStretchN": "Tramo {n}",
+  "@armedSessionStretchN": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "armedSessionWaitingHelp": "GPS listo. La grabación arranca sola al moverte.",
+  "armedSessionLiveHelp": "Grabando. Puedes salir de esta pantalla; el recorrido sigue.",
   "loopMode": "Modo vueltas",
   "pausedLabel": "PAUSADO",
   "suggestEndTitle": "¿Sigues rodando?",
@@ -657,6 +672,18 @@
   "useMyGps": "Usar mi GPS",
   "clearPin": "Borrar",
   "meetupMapHelp": "Toca el mapa para fijar el punto de encuentro. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.",
+  "rodadaItinerary": "Itinerario",
+  "rodadaPinStart": "Inicio",
+  "rodadaPinFinish": "Fin",
+  "rodadaPinStop": "Parada",
+  "rodadaPinUnset": "Sin marcar",
+  "rodadaStopN": "Parada {n}",
+  "@rodadaStopN": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "rodadaItineraryHelp": "Toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.",
   "titleRequired": "El título es obligatorio",
   "locationFailed": "Falló la ubicación: {error}",
   "@locationFailed": {
@@ -786,6 +813,38 @@
   "reelCta": "Graba tu línea en RiderLab",
   "reelGenerate": "Generar reel",
   "reelOverviewCta": "Comparte el reel de la rodada",
+  "reelLengthShort": "Corto",
+  "reelLengthStandard": "Reels",
+  "reelLengthLong": "Completo",
+  "reelLengthHint": "Elige cuánto dura el video",
+  "reelLengthSeconds": "{seconds} s",
+  "@reelLengthSeconds": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "reelLengthCap": "Hasta {pauses} paradas · {photos} fotos",
+  "@reelLengthCap": {
+    "placeholders": {
+      "pauses": { "type": "int" },
+      "photos": { "type": "int" }
+    }
+  },
+  "reelStopLabel": "Parada {n}",
+  "@reelStopLabel": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "reelOnRoute": "En ruta",
+  "reelNoStops": "No hubo paradas largas en esta ruta",
+  "reelPhotoCount": "{count} fotos",
+  "@reelPhotoCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reelAddToStop": "Agregar foto",
   "skillCoach": "Tips de manejo",
   "skillCurvasRated": "{count} curvas calificadas · sirve para comparar con amigos",
   "@skillCurvasRated": {

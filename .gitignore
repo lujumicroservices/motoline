@@ -42,3 +42,11 @@ apps/mobile/android/*.jks
 apps/mobile/android/*.keystore
 apps/mobile/android/upload-keystore.jks
 
+
+# IronBee runtime artifacts
+.ironbee/sessions/
+.ironbee/otel/
+.ironbee/config.local.json
+.ironbee/codex-threads.json
+.ironbee/vcs-cache.json
+.claude/settings.local.json
