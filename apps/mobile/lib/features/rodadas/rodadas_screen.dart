@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/demo_ids.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
@@ -219,7 +220,9 @@ class _RodadaCard extends StatelessWidget {
     return Material(
       color: AppTheme.asphaltElevated,
       borderRadius: BorderRadius.circular(14),
-      child: InkWell(
+      child: DemoTarget(
+        id: DemoIds.rodadaCard,
+        child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Padding(
@@ -274,6 +277,7 @@ class _RodadaCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

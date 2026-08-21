@@ -508,6 +508,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                               );
                             },
                           ),
+                          ),
                         const SizedBox(height: 12),
                         RideSharePanel(ride: ride),
                         const SizedBox(height: 16),
