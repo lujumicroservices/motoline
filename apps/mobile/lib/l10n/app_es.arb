@@ -683,7 +683,22 @@
       "n": { "type": "int" }
     }
   },
-  "rodadaItineraryHelp": "Toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.",
+  "rodadaItineraryHelp": "Busca o toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.",
+  "routePrefTolls": "Casetas",
+  "routePrefHighway": "Autopista",
+  "routePrefStreet": "Calle",
+  "routePrefOffroad": "Terracería",
+  "routeSearchHint": "Buscar un lugar…",
+  "routeSummaryKmEta": "{distance} · {eta}",
+  "@routeSummaryKmEta": {
+    "placeholders": {
+      "distance": { "type": "String" },
+      "eta": { "type": "String" }
+    }
+  },
+  "routeFailedFallback": "No se pudo seguir las carreteras — se muestra línea recta.",
+  "offRouteBanner": "Fuera de ruta",
+  "routeRouting": "Trazando ruta…",
   "titleRequired": "El título es obligatorio",
   "locationFailed": "Falló la ubicación: {error}",
   "@locationFailed": {

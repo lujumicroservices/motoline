@@ -1686,7 +1686,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rodadaItineraryHelp =>
-      'Toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.';
+      'Busca o toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.';
+
+  @override
+  String get routePrefTolls => 'Casetas';
+
+  @override
+  String get routePrefHighway => 'Autopista';
+
+  @override
+  String get routePrefStreet => 'Calle';
+
+  @override
+  String get routePrefOffroad => 'Terracería';
+
+  @override
+  String get routeSearchHint => 'Buscar un lugar…';
+
+  @override
+  String routeSummaryKmEta(String distance, String eta) {
+    return '$distance · $eta';
+  }
+
+  @override
+  String get routeFailedFallback =>
+      'No se pudo seguir las carreteras — se muestra línea recta.';
+
+  @override
+  String get offRouteBanner => 'Fuera de ruta';
+
+  @override
+  String get routeRouting => 'Trazando ruta…';
 
   @override
   String get titleRequired => 'El título es obligatorio';

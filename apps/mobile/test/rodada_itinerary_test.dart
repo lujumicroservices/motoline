@@ -18,6 +18,18 @@ void main() {
     expect(rodadaItineraryLine(), isEmpty);
   });
 
+  test('display line prefers routed geometry and falls back to pins', () {
+    const pins = [LatLng(20, -103), LatLng(21, -104)];
+    const routed = [
+      LatLng(20, -103),
+      LatLng(20.5, -103.4),
+      LatLng(21, -104),
+    ];
+    expect(rodadaDisplayLine(pins: pins, routed: routed), routed);
+    expect(rodadaDisplayLine(pins: pins, routed: null), pins);
+    expect(rodadaDisplayLine(pins: pins, routed: const [LatLng(20, -103)]), pins);
+  });
+
   test('nextStopSortOrder is max plus one', () {
     expect(nextStopSortOrder(const <int>[]), 0);
     expect(nextStopSortOrder(const [0]), 1);

@@ -1675,7 +1675,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rodadaItineraryHelp =>
-      'Tap the map to mark start, finish, or stops. Live GPS and photos stay off until each rider opts in.';
+      'Search or tap the map to mark start, finish, or stops. Live GPS and photos stay off until each rider opts in.';
+
+  @override
+  String get routePrefTolls => 'Tolls';
+
+  @override
+  String get routePrefHighway => 'Highway';
+
+  @override
+  String get routePrefStreet => 'Street';
+
+  @override
+  String get routePrefOffroad => 'Off-road';
+
+  @override
+  String get routeSearchHint => 'Search a place…';
+
+  @override
+  String routeSummaryKmEta(String distance, String eta) {
+    return '$distance · $eta';
+  }
+
+  @override
+  String get routeFailedFallback =>
+      'Could not follow roads — showing a straight line.';
+
+  @override
+  String get offRouteBanner => 'Off route';
+
+  @override
+  String get routeRouting => 'Routing…';
 
   @override
   String get titleRequired => 'Title is required';

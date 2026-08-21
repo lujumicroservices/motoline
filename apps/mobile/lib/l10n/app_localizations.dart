@@ -3089,8 +3089,62 @@ abstract class AppLocalizations {
   /// No description provided for @rodadaItineraryHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.'**
+  /// **'Busca o toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.'**
   String get rodadaItineraryHelp;
+
+  /// No description provided for @routePrefTolls.
+  ///
+  /// In es, this message translates to:
+  /// **'Casetas'**
+  String get routePrefTolls;
+
+  /// No description provided for @routePrefHighway.
+  ///
+  /// In es, this message translates to:
+  /// **'Autopista'**
+  String get routePrefHighway;
+
+  /// No description provided for @routePrefStreet.
+  ///
+  /// In es, this message translates to:
+  /// **'Calle'**
+  String get routePrefStreet;
+
+  /// No description provided for @routePrefOffroad.
+  ///
+  /// In es, this message translates to:
+  /// **'Terracería'**
+  String get routePrefOffroad;
+
+  /// No description provided for @routeSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar un lugar…'**
+  String get routeSearchHint;
+
+  /// No description provided for @routeSummaryKmEta.
+  ///
+  /// In es, this message translates to:
+  /// **'{distance} · {eta}'**
+  String routeSummaryKmEta(String distance, String eta);
+
+  /// No description provided for @routeFailedFallback.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo seguir las carreteras — se muestra línea recta.'**
+  String get routeFailedFallback;
+
+  /// No description provided for @offRouteBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuera de ruta'**
+  String get offRouteBanner;
+
+  /// No description provided for @routeRouting.
+  ///
+  /// In es, this message translates to:
+  /// **'Trazando ruta…'**
+  String get routeRouting;
 
   /// No description provided for @titleRequired.
   ///

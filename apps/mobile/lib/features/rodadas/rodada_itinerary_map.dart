@@ -19,12 +19,14 @@ List<Widget> rodadaItineraryMapLayers({
   LatLng? start,
   LatLng? finish,
   List<RodadaItineraryStopPin> stops = const [],
+  List<LatLng>? routedLine,
 }) {
-  final line = rodadaItineraryLine(
+  final pins = rodadaItineraryLine(
     start: start,
     stops: [for (final s in stops) s.point],
     finish: finish,
   );
+  final line = rodadaDisplayLine(pins: pins, routed: routedLine);
   return [
     if (line.length >= 2)
       PolylineLayer(

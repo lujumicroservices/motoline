@@ -1,6 +1,11 @@
 /// Cloud models for group rides (Rodadas).
 library;
 
+import 'package:latlong2/latlong.dart';
+
+import '../../../core/routing/polyline_codec.dart';
+import '../../../core/routing/route_prefs.dart';
+
 class RodadaSummary {
   const RodadaSummary({
     required this.id,
@@ -18,6 +23,11 @@ class RodadaSummary {
     this.memberCount = 0,
     this.createdAt,
     this.updatedAt,
+    this.routeGeometry,
+    this.routeDistanceM,
+    this.routeDurationS,
+    this.routePrefs = RoutePrefs.defaults,
+    this.routeProvider,
   });
 
   final String id;
@@ -35,13 +45,27 @@ class RodadaSummary {
   final int memberCount;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? routeGeometry;
+  final double? routeDistanceM;
+  final double? routeDurationS;
+  final RoutePrefs routePrefs;
+  final String? routeProvider;
 
   bool get isLive => status == 'live';
   bool get isEnded => status == 'ended';
   bool get hasMeetup => meetupLat != null && meetupLng != null;
   bool get hasFinish => finishLat != null && finishLng != null;
+  bool get hasRoutedLine =>
+      routeGeometry != null && routeGeometry!.isNotEmpty;
+
+  List<LatLng> get decodedRoute {
+    final raw = routeGeometry;
+    if (raw == null || raw.isEmpty) return const [];
+    return decodePolyline(raw);
+  }
 
   factory RodadaSummary.fromMap(Map<String, dynamic> map, {int? memberCount}) {
+    final prefsRaw = map['route_prefs'];
     return RodadaSummary(
       id: map['id'] as String,
       hostId: map['host_id'] as String,
@@ -70,6 +94,13 @@ class RodadaSummary {
       updatedAt: map['updated_at'] == null
           ? null
           : DateTime.tryParse(map['updated_at'] as String),
+      routeGeometry: map['route_geometry'] as String?,
+      routeDistanceM: (map['route_distance_m'] as num?)?.toDouble(),
+      routeDurationS: (map['route_duration_s'] as num?)?.toDouble(),
+      routePrefs: RoutePrefs.fromMap(
+        prefsRaw is Map ? Map<String, dynamic>.from(prefsRaw) : null,
+      ),
+      routeProvider: map['route_provider'] as String?,
     );
   }
 }

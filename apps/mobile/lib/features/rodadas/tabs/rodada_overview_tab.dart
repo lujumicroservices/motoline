@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/services/directions_service.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
@@ -242,13 +243,17 @@ class _ItineraryMap extends StatelessWidget {
     final finish = rodada.hasFinish
         ? LatLng(rodada.finishLat!, rodada.finishLng!)
         : null;
-    final line = rodadaItineraryLine(
+    final pins = rodadaItineraryLine(
       start: start,
       stops: [for (final s in stops) LatLng(s.latitude, s.longitude)],
       finish: finish,
     );
+    final routed = rodada.decodedRoute;
+    final line = rodadaDisplayLine(pins: pins, routed: routed);
     if (line.isEmpty) return const SizedBox.shrink();
     final bounds = rodadaItineraryBounds(line);
+    final km = rodada.routeDistanceM;
+    final eta = rodada.routeDurationS;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -256,6 +261,20 @@ class _ItineraryMap extends StatelessWidget {
           l10n.rodadaItinerary,
           style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
+        if (km != null && km > 0 && eta != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.routeSummaryKmEta(
+              formatRouteDistance(km),
+              formatRouteEta(eta),
+            ),
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         SizedBox(
           height: 180,
@@ -285,6 +304,7 @@ class _ItineraryMap extends StatelessWidget {
                 ...rodadaItineraryMapLayers(
                   start: start,
                   finish: finish,
+                  routedLine: routed.length >= 2 ? routed : null,
                   stops: [
                     for (final s in stops)
                       RodadaItineraryStopPin(

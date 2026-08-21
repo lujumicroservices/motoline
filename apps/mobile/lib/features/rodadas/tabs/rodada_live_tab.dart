@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/routing/off_route.dart';
+import '../../../core/services/directions_service.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../maps/live_gps_map_mixin.dart';
@@ -162,6 +166,10 @@ class _RodadaLiveMapHost extends ConsumerWidget {
           finish: finish,
           stops: stopList,
           positions: list,
+          routedLine: overview.maybeWhen(
+            data: (r) => r?.decodedRoute ?? const <LatLng>[],
+            orElse: () => const <LatLng>[],
+          ),
         ),
         if (list.isEmpty)
           Positioned(
@@ -248,6 +256,14 @@ Future<void> _addStop(
           longitude: pos.longitude,
         );
     ref.invalidate(rodadaStopsProvider(rodadaId));
+    unawaited(
+      ref.read(rodadaRepositoryProvider).refreshStoredRoute(
+            rodadaId,
+            directions: ref.read(directionsServiceProvider),
+          ).then((_) {
+        ref.invalidate(rodadaOverviewProvider(rodadaId));
+      }),
+    );
   } catch (e) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -263,12 +279,14 @@ class _RodadaLiveMap extends StatefulWidget {
     required this.finish,
     required this.stops,
     required this.positions,
+    this.routedLine = const [],
   });
 
   final LatLng? meetup;
   final LatLng? finish;
   final List<RodadaStop> stops;
   final List<RodadaLivePosition> positions;
+  final List<LatLng> routedLine;
 
   @override
   State<_RodadaLiveMap> createState() => _RodadaLiveMapState();
@@ -280,28 +298,65 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
   List<RodadaLivePosition> _shown = const [];
   List<RodadaLivePosition>? _pending;
   bool _didCenter = false;
+  final _offRoute = OffRouteTracker();
+  bool _showOffRoute = false;
+
+  List<LatLng> get _corridor {
+    final pins = rodadaItineraryLine(
+      start: widget.meetup,
+      stops: [
+        for (final s in widget.stops) LatLng(s.latitude, s.longitude),
+      ],
+      finish: widget.finish,
+    );
+    return rodadaDisplayLine(pins: pins, routed: widget.routedLine);
+  }
 
   @override
   void initState() {
     super.initState();
     _shown = widget.positions;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeCenterOnce());
+    liveGpsListenable.addListener(_onGps);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeCenterOnce();
+      startLiveGps(map: _map, centerOnce: false);
+    });
   }
 
   @override
   void dispose() {
+    liveGpsListenable.removeListener(_onGps);
     stopLiveGps();
     disposeLiveGpsListenable();
     super.dispose();
   }
 
+  void _onGps() {
+    final p = liveGps;
+    final line = _corridor;
+    if (p == null || line.length < 2) {
+      if (_showOffRoute) setState(() => _showOffRoute = false);
+      return;
+    }
+    final d = distanceToPolylineMeters(p, line);
+    final off = _offRoute.update(distanceM: d, now: DateTime.now());
+    if (off != _showOffRoute && mounted) {
+      setState(() => _showOffRoute = off);
+    }
+  }
+
   @override
   void didUpdateWidget(covariant _RodadaLiveMap oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.routedLine != widget.routedLine) {
+      _offRoute.reset();
+      _onGps();
+    }
     if (_samePositions(oldWidget.positions, widget.positions) &&
         oldWidget.meetup == widget.meetup &&
         oldWidget.finish == widget.finish &&
-        identical(oldWidget.stops, widget.stops)) {
+        identical(oldWidget.stops, widget.stops) &&
+        identical(oldWidget.routedLine, widget.routedLine)) {
       return;
     }
     if (_gesturing) {
@@ -354,13 +409,7 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
   Widget build(BuildContext context) {
     final meetup = widget.meetup;
     final finish = widget.finish;
-    final line = rodadaItineraryLine(
-      start: meetup,
-      stops: [
-        for (final s in widget.stops) LatLng(s.latitude, s.longitude),
-      ],
-      finish: finish,
-    );
+    final line = _corridor;
     LatLng center = line.isNotEmpty ? line.first : const LatLng(20.67, -103.35);
     if (_shown.isNotEmpty && !_didCenter) {
       center = LatLng(_shown.first.latitude, _shown.first.longitude);
@@ -383,6 +432,8 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
             ...rodadaItineraryMapLayers(
               start: meetup,
               finish: finish,
+              routedLine:
+                  widget.routedLine.length >= 2 ? widget.routedLine : null,
               stops: [
                 for (final s in widget.stops)
                   RodadaItineraryStopPin(
@@ -406,6 +457,38 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
           ],
         ),
         myLocationOverlay(_map),
+        if (_showOffRoute)
+          Positioned(
+            left: 16,
+            right: 16,
+            top: 12,
+            child: Material(
+              color: AppTheme.signal.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.alt_route, color: AppTheme.mist, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        context.l10n.offRouteBanner,
+                        style: GoogleFonts.exo2(
+                          color: AppTheme.mist,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

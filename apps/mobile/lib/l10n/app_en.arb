@@ -612,7 +612,22 @@
       "n": { "type": "int" }
     }
   },
-  "rodadaItineraryHelp": "Tap the map to mark start, finish, or stops. Live GPS and photos stay off until each rider opts in.",
+  "rodadaItineraryHelp": "Search or tap the map to mark start, finish, or stops. Live GPS and photos stay off until each rider opts in.",
+  "routePrefTolls": "Tolls",
+  "routePrefHighway": "Highway",
+  "routePrefStreet": "Street",
+  "routePrefOffroad": "Off-road",
+  "routeSearchHint": "Search a place…",
+  "routeSummaryKmEta": "{distance} · {eta}",
+  "@routeSummaryKmEta": {
+    "placeholders": {
+      "distance": { "type": "String" },
+      "eta": { "type": "String" }
+    }
+  },
+  "routeFailedFallback": "Could not follow roads — showing a straight line.",
+  "offRouteBanner": "Off route",
+  "routeRouting": "Routing…",
   "titleRequired": "Title is required",
   "locationFailed": "Location failed: {error}",
   "@locationFailed": {

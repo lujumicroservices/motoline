@@ -22,6 +22,15 @@ List<LatLng> rodadaItineraryLine({
   ];
 }
 
+/// Prefer a snapped route; fall back to pin-to-pin when routing failed.
+List<LatLng> rodadaDisplayLine({
+  required List<LatLng> pins,
+  List<LatLng>? routed,
+}) {
+  if (routed != null && routed.length >= 2) return routed;
+  return pins;
+}
+
 /// Next `rodada_stops.sort_order` after the current set (empty → 0).
 int nextStopSortOrder(Iterable<int> existing) {
   var max = -1;

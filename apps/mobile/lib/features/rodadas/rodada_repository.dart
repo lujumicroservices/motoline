@@ -3,8 +3,11 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/routing/route_prefs.dart';
+import '../../core/services/directions_service.dart';
 import '../../core/supabase/paged_select.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import 'models/rodada_models.dart';
@@ -12,7 +15,8 @@ import 'rodada_itinerary.dart';
 
 const rodadaSelectColumns =
     'id, host_id, title, destination, notes, meetup_lat, meetup_lng, '
-    'finish_lat, finish_lng, starts_at, status, invite_code, created_at, updated_at';
+    'finish_lat, finish_lng, starts_at, status, invite_code, created_at, updated_at, '
+    'route_geometry, route_distance_m, route_duration_s, route_prefs, route_provider';
 
 /// Lazy cloud access for Rodadas. Call sites should use autoDispose providers
 /// so heavy tabs (live / photos / tracks) release when the user leaves.
@@ -152,6 +156,8 @@ class RodadaRepository {
     double? finishLat,
     double? finishLng,
     DateTime? startsAt,
+    DirectionsResult? route,
+    RoutePrefs prefs = RoutePrefs.defaults,
   }) async {
     await _ensure();
     final me = currentUserId;
@@ -174,6 +180,11 @@ class RodadaRepository {
               'starts_at': startsAt?.toUtc().toIso8601String(),
               'status': 'open',
               'invite_code': code,
+              'route_geometry': route?.encodedPolyline,
+              'route_distance_m': route?.distanceM,
+              'route_duration_s': route?.durationS,
+              'route_prefs': prefs.toMap(),
+              'route_provider': route?.provider,
             })
             .select(rodadaSelectColumns)
             .single();
@@ -202,6 +213,9 @@ class RodadaRepository {
     String? status,
     bool clearMeetup = false,
     bool clearFinish = false,
+    DirectionsResult? route,
+    RoutePrefs? routePrefs,
+    bool clearRoute = false,
   }) async {
     await _ensure();
     final patch = <String, dynamic>{
@@ -228,7 +242,55 @@ class RodadaRepository {
       patch['starts_at'] = startsAt.toUtc().toIso8601String();
     }
     if (status != null) patch['status'] = status;
+    if (clearRoute) {
+      patch['route_geometry'] = null;
+      patch['route_distance_m'] = null;
+      patch['route_duration_s'] = null;
+      patch['route_provider'] = null;
+    } else if (route != null) {
+      patch['route_geometry'] = route.encodedPolyline;
+      patch['route_distance_m'] = route.distanceM;
+      patch['route_duration_s'] = route.durationS;
+      patch['route_provider'] = route.provider;
+    }
+    if (routePrefs != null) patch['route_prefs'] = routePrefs.toMap();
     await _supabase.from('rodadas').update(patch).eq('id', id);
+  }
+
+  /// Recompute and store the road-follow line from current pins.
+  Future<void> refreshStoredRoute(
+    String rodadaId, {
+    required DirectionsService directions,
+  }) async {
+    final rodada = await getRodada(rodadaId);
+    if (rodada == null) return;
+    final stops = await listStops(rodadaId);
+    final pins = rodadaItineraryLine(
+      start: rodada.hasMeetup
+          ? LatLng(rodada.meetupLat!, rodada.meetupLng!)
+          : null,
+      stops: [for (final s in stops) LatLng(s.latitude, s.longitude)],
+      finish: rodada.hasFinish
+          ? LatLng(rodada.finishLat!, rodada.finishLng!)
+          : null,
+    );
+    if (pins.length < 2) {
+      await updateRodada(rodadaId, clearRoute: true, routePrefs: rodada.routePrefs);
+      return;
+    }
+    final result = await directions.route(
+      waypoints: pins,
+      prefs: rodada.routePrefs,
+    );
+    if (result == null) {
+      await updateRodada(rodadaId, clearRoute: true, routePrefs: rodada.routePrefs);
+      return;
+    }
+    await updateRodada(
+      rodadaId,
+      route: result,
+      routePrefs: rodada.routePrefs,
+    );
   }
 
   Future<String> joinByCode(String code) async {
