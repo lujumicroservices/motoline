@@ -73,6 +73,27 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
       rideId = active?.id;
     }
     if (rideId == null) {
+      final targetRodada = rodadaId;
+      if (targetRodada != null && targetRodada.isNotEmpty) {
+        final prepared = await prepareAlbumImage(bytes);
+        await ref.read(rodadaRepositoryProvider).uploadPhoto(
+              rodadaId: targetRodada,
+              bytes: prepared.bytes,
+              contentType: prepared.mime,
+              latitude: fallbackLat,
+              longitude: fallbackLng,
+              takenAt: at,
+              source: source == ImageSource.camera ? 'camera' : 'gallery',
+            );
+        ref.invalidate(rodadaPhotosProvider(targetRodada));
+        if (!context.mounted) return null;
+        if (showSnackbars) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.photoUploaded)),
+          );
+        }
+        return null;
+      }
       if (!context.mounted) return null;
       if (showSnackbars) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -183,14 +183,7 @@ class RodadaRepository {
         .where((r) => r.status == 'live' || r.status == 'open')
         .toList();
     if (attachable.isEmpty) return null;
-    attachable.sort((a, b) {
-      int rank(RodadaSummary r) => r.status == 'live' ? 0 : 1;
-      final c = rank(a).compareTo(rank(b));
-      if (c != 0) return c;
-      final as = a.startsAt ?? a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bs = b.startsAt ?? b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      return bs.compareTo(as);
-    });
+    attachable.sort(compareAttachableRodadas);
     return attachable.first;
   }
 

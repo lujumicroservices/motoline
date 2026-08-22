@@ -7,6 +7,7 @@ import {
   json,
   parseServiceAccount,
   sendFcmToTokens,
+  serviceAccountParseDetail,
 } from "../_shared/fcm.ts";
 
 function clip(text: string, max: number): string {
@@ -49,7 +50,10 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
   if (!sa?.project_id || !sa.client_email || !sa.private_key) {
-    return json(500, { error: "misconfigured", detail: "service_account" });
+    return json(500, {
+      error: "misconfigured",
+      detail: serviceAccountParseDetail(),
+    });
   }
   if (!supabaseUrl || !serviceKey) {
     return json(500, { error: "misconfigured", detail: "supabase" });

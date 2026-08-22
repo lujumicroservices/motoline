@@ -109,6 +109,31 @@ class RodadaSummary {
   }
 }
 
+/// Live first, then the start (or created) time closest to [now].
+/// Sorting by latest [startsAt] used to attach ride photos to a future
+/// open rodada instead of the one happening tonight.
+int compareAttachableRodadas(
+  RodadaSummary a,
+  RodadaSummary b, {
+  DateTime? now,
+}) {
+  final n = now ?? DateTime.now();
+  int rank(RodadaSummary r) => r.status == 'live' ? 0 : 1;
+  final byLive = rank(a).compareTo(rank(b));
+  if (byLive != 0) return byLive;
+  int closeness(RodadaSummary r) {
+    final t = r.startsAt ?? r.createdAt;
+    if (t == null) return 1 << 30;
+    return t.difference(n).inMilliseconds.abs();
+  }
+
+  final byWhen = closeness(a).compareTo(closeness(b));
+  if (byWhen != 0) return byWhen;
+  final ac = a.createdAt ?? n;
+  final bc = b.createdAt ?? n;
+  return bc.compareTo(ac);
+}
+
 class RodadaMember {
   const RodadaMember({
     required this.rodadaId,

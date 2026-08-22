@@ -22,19 +22,83 @@ export type ServiceAccount = {
   private_key?: string;
 };
 
+function looksLikeBase64(raw: string): boolean {
+  const t = raw.trim();
+  if (t.startsWith("{") || t.startsWith("[") || t.startsWith("\"")) return false;
+  const s = t.replace(/\s/g, "");
+  return s.length > 80 && s.length % 4 === 0 && /^[A-Za-z0-9+/]+=*$/.test(s);
+}
+
+function unwrapServiceAccount(input: unknown): ServiceAccount | null {
+  let cur: unknown = input;
+  for (let i = 0; i < 5; i++) {
+    if (typeof cur === "string") {
+      const t = cur.trim();
+      if (looksLikeBase64(t)) {
+        cur = atob(t.replace(/\s/g, ""));
+        continue;
+      }
+      cur = JSON.parse(t);
+      continue;
+    }
+    if (!cur || typeof cur !== "object" || Array.isArray(cur)) return null;
+    const o = cur as Record<string, unknown>;
+    if (
+      typeof o.project_id === "string" &&
+      typeof o.client_email === "string" &&
+      typeof o.private_key === "string"
+    ) {
+      return o as ServiceAccount;
+    }
+    const nested = o.FIREBASE_SERVICE_ACCOUNT ?? o.service_account ?? o.json;
+    if (nested !== undefined) {
+      cur = nested;
+      continue;
+    }
+    return null;
+  }
+  return null;
+}
+
+function rawShape(raw: string): string {
+  const c0 = raw[0] ?? "";
+  try {
+    let cur: unknown = raw;
+    if (looksLikeBase64(raw)) cur = atob(raw.replace(/\s/g, ""));
+    if (typeof cur === "string") cur = JSON.parse(cur.trim());
+    if (cur && typeof cur === "object" && !Array.isArray(cur)) {
+      const o = cur as Record<string, unknown>;
+      const types = ["project_id", "client_email", "private_key"]
+        .map((k) => `${k}:${typeof o[k]}`)
+        .join(",");
+      return `len=${raw.length};c0=${c0};keys=${
+        Object.keys(o).slice(0, 8).join("|")
+      };${types}`;
+    }
+    return `len=${raw.length};c0=${c0};typeof=${typeof cur}`;
+  } catch (e) {
+    const msg = e instanceof Error ? e.name : "err";
+    return `len=${raw.length};c0=${c0};parse=${msg}`;
+  }
+}
+
+/** Unwrap JSON / base64 / nested env wrapping. Never log secret values. */
 export function parseServiceAccount(): ServiceAccount | null {
   const raw = Deno.env.get("FIREBASE_SERVICE_ACCOUNT")?.trim();
   if (!raw) return null;
   try {
-    let parsed: unknown = JSON.parse(raw);
-    if (typeof parsed === "string") {
-      parsed = JSON.parse(parsed);
-    }
-    if (!parsed || typeof parsed !== "object") return null;
-    return parsed as ServiceAccount;
+    return unwrapServiceAccount(raw);
   } catch {
     return null;
   }
+}
+
+export function serviceAccountParseDetail(): string {
+  const raw = Deno.env.get("FIREBASE_SERVICE_ACCOUNT")?.trim();
+  if (!raw) return "service_account:empty";
+  const sa = parseServiceAccount();
+  if (sa?.project_id && sa.client_email && sa.private_key) return "ok";
+  return `service_account:missing_fields;${rawShape(raw)}`;
 }
 
 export async function fcmAccessToken(sa: ServiceAccount): Promise<string> {
