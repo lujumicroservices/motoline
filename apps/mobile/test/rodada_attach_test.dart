@@ -56,4 +56,33 @@ void main() {
       ..sort((a, b) => compareAttachableRodadas(a, b, now: now));
     expect(ranked.first.id, 'live');
   });
+
+  test('capture uses the rodada on screen, not another open group', () {
+    expect(
+      resolveCaptureRodadaId(
+        explicitRodadaId: 'test-1',
+        boundRodadaId: 'tapalpa',
+        stampedRodadaId: 'tapalpa',
+        cloudLinkedRodadaId: 'tapalpa',
+      ),
+      'test-1',
+    );
+    expect(
+      resolveCaptureRodadaId(
+        explicitRodadaId: null,
+        boundRodadaId: 'test-1',
+        cloudLinkedRodadaId: 'tapalpa',
+      ),
+      'test-1',
+    );
+    expect(
+      resolveCaptureRodadaId(
+        explicitRodadaId: '  ',
+        boundRodadaId: null,
+        stampedRodadaId: 'test-1',
+      ),
+      'test-1',
+    );
+    expect(resolveCaptureRodadaId(), isNull);
+  });
 }

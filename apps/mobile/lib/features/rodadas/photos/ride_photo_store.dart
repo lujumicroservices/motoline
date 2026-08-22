@@ -83,8 +83,9 @@ class RidePhotoStore {
           uploaded: true,
           rodadaId: rodadaId,
         );
-      } catch (_) {
-        // Stay queued locally.
+      } catch (e) {
+        // Local file stays queued; caller must not treat this as linked.
+        rethrow;
       }
     }
     return photo;

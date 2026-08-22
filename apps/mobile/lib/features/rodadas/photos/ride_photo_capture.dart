@@ -7,6 +7,7 @@ import '../../../core/models/track_point.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
+import '../models/rodada_models.dart';
 import '../rodada_providers.dart';
 import 'ride_photo_store.dart';
 
@@ -16,6 +17,26 @@ final ridePhotoStoreProvider = Provider<RidePhotoStore>((ref) {
     rodadas: ref.watch(rodadaRepositoryProvider),
   );
 });
+
+/// Ride id → rodada id for the recording you opened a rodada camera on.
+class RecordingRodadaBinding extends Notifier<Map<String, String>> {
+  @override
+  Map<String, String> build() => const {};
+
+  void bind({required String rideId, required String rodadaId}) {
+    final id = rodadaId.trim();
+    if (rideId.isEmpty || id.isEmpty) return;
+    if (state[rideId] == id) return;
+    state = {...state, rideId: id};
+  }
+
+  String? rodadaFor(String rideId) => state[rideId];
+}
+
+final recordingRodadaBindingProvider =
+    NotifierProvider<RecordingRodadaBinding, Map<String, String>>(
+  RecordingRodadaBinding.new,
+);
 
 /// One-tap camera that geotags with the latest track point / live GPS.
 Future<void> captureRidePhoto({
@@ -72,12 +93,24 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
       final active = await db.getActiveRide();
       rideId = active?.id;
     }
+
+    final attachRodada = await _resolveCaptureRodada(
+      ref,
+      explicitRodadaId: rodadaId,
+      localRideId: rideId,
+    );
+    if (rideId != null && attachRodada != null) {
+      ref.read(recordingRodadaBindingProvider.notifier).bind(
+            rideId: rideId,
+            rodadaId: attachRodada,
+          );
+    }
+
     if (rideId == null) {
-      final targetRodada = rodadaId;
-      if (targetRodada != null && targetRodada.isNotEmpty) {
+      if (attachRodada != null) {
         final prepared = await prepareAlbumImage(bytes);
         await ref.read(rodadaRepositoryProvider).uploadPhoto(
-              rodadaId: targetRodada,
+              rodadaId: attachRodada,
               bytes: prepared.bytes,
               contentType: prepared.mime,
               latitude: fallbackLat,
@@ -85,7 +118,7 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
               takenAt: at,
               source: source == ImageSource.camera ? 'camera' : 'gallery',
             );
-        ref.invalidate(rodadaPhotosProvider(targetRodada));
+        ref.invalidate(rodadaPhotosProvider(attachRodada));
         if (!context.mounted) return null;
         if (showSnackbars) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -113,11 +146,9 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     }
 
     String? cloudRideId;
-    String? attachRodada = rodadaId;
     try {
-      final repo = ref.read(rodadaRepositoryProvider);
-      attachRodada ??= (await repo.findAttachableRodada())?.id;
-      cloudRideId = await repo.cloudRideIdForLocal(rideId);
+      cloudRideId =
+          await ref.read(rodadaRepositoryProvider).cloudRideIdForLocal(rideId);
     } catch (_) {}
 
     final saved = await ref.read(ridePhotoStoreProvider).saveCaptured(
@@ -136,7 +167,13 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     if (!context.mounted) return saved;
     if (showSnackbars) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.photoLinkedToRoute)),
+        SnackBar(
+          content: Text(
+            attachRodada != null
+                ? l10n.photoUploaded
+                : l10n.photoLinkedToRoute,
+          ),
+        ),
       );
     }
     return saved;
@@ -149,6 +186,31 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     }
     return null;
   }
+}
+
+Future<String?> _resolveCaptureRodada(
+  WidgetRef ref, {
+  String? explicitRodadaId,
+  String? localRideId,
+}) async {
+  String? stamped;
+  String? linked;
+  if (localRideId != null && localRideId.isNotEmpty) {
+    stamped = await ref.read(rideDatabaseProvider).rodadaIdForRide(localRideId);
+    try {
+      linked = await ref
+          .read(rodadaRepositoryProvider)
+          .linkedRodadaIdForLocal(localRideId);
+    } catch (_) {}
+  }
+  return resolveCaptureRodadaId(
+    explicitRodadaId: explicitRodadaId,
+    boundRodadaId: localRideId == null
+        ? null
+        : ref.read(recordingRodadaBindingProvider.notifier).rodadaFor(localRideId),
+    stampedRodadaId: stamped,
+    cloudLinkedRodadaId: linked,
+  );
 }
 
 class RidePhotoShutterButton extends ConsumerWidget {
@@ -172,35 +234,50 @@ class RidePhotoShutterButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final explicit = rodadaId?.trim();
+    final hasExplicit = explicit != null && explicit.isNotEmpty;
+    final activeRideId = localRideId ??
+        ref.watch(activeRideProvider).asData?.value?.ride.id;
+    if (hasExplicit && activeRideId != null) {
+      final bound = ref.read(recordingRodadaBindingProvider)[activeRideId];
+      if (bound != explicit) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(recordingRodadaBindingProvider.notifier).bind(
+                rideId: activeRideId,
+                rodadaId: explicit,
+              );
+        });
+      }
+    }
+    final dest = hasExplicit
+        ? explicit
+        : (activeRideId == null
+            ? null
+            : ref.watch(recordingRodadaBindingProvider)[activeRideId]);
+
+    void shoot() => captureRidePhoto(
+          context: context,
+          ref: ref,
+          localRideId: localRideId ?? activeRideId,
+          rodadaId: dest,
+          lastPoint: lastPoint,
+          fallbackLat: fallbackLat,
+          fallbackLng: fallbackLng,
+        );
+
     if (compact) {
       return IconButton(
         tooltip: l10n.photoCaptureTooltip,
         icon: const Icon(Icons.photo_camera_outlined),
         color: AppTheme.mist,
-        onPressed: () => captureRidePhoto(
-          context: context,
-          ref: ref,
-          localRideId: localRideId,
-          rodadaId: rodadaId,
-          lastPoint: lastPoint,
-          fallbackLat: fallbackLat,
-          fallbackLng: fallbackLng,
-        ),
+        onPressed: shoot,
       );
     }
     return FloatingActionButton(
       heroTag: 'ride-photo-shutter',
       backgroundColor: AppTheme.asphaltElevated,
       foregroundColor: AppTheme.mist,
-      onPressed: () => captureRidePhoto(
-        context: context,
-        ref: ref,
-        localRideId: localRideId,
-        rodadaId: rodadaId,
-        lastPoint: lastPoint,
-        fallbackLat: fallbackLat,
-        fallbackLng: fallbackLng,
-      ),
+      onPressed: shoot,
       child: const Icon(Icons.photo_camera_outlined),
     );
   }

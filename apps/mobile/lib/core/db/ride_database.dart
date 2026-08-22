@@ -1221,6 +1221,20 @@ class RideDatabase {
     return rows.isNotEmpty;
   }
 
+  Future<String?> rodadaIdForRide(String rideId) async {
+    final db = await database;
+    final rows = await db.query(
+      'ride_photos',
+      columns: ['rodada_id'],
+      where: 'ride_id = ? AND rodada_id IS NOT NULL AND rodada_id != ?',
+      whereArgs: [rideId, ''],
+      orderBy: 'created_at_ms DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return rows.first['rodada_id'] as String?;
+  }
+
   Future<void> markRidePhotoUploaded({
     required String id,
     required String storagePath,

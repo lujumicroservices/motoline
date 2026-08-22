@@ -134,6 +134,26 @@ int compareAttachableRodadas(
   return bc.compareTo(ac);
 }
 
+/// Album destination for a capture. An explicit rodada (the screen you
+/// took it on) always wins. Never fall through to "some other open rodada".
+String? resolveCaptureRodadaId({
+  String? explicitRodadaId,
+  String? boundRodadaId,
+  String? stampedRodadaId,
+  String? cloudLinkedRodadaId,
+}) {
+  for (final raw in [
+    explicitRodadaId,
+    boundRodadaId,
+    stampedRodadaId,
+    cloudLinkedRodadaId,
+  ]) {
+    final id = raw?.trim();
+    if (id != null && id.isNotEmpty) return id;
+  }
+  return null;
+}
+
 class RodadaMember {
   const RodadaMember({
     required this.rodadaId,

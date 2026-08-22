@@ -613,6 +613,21 @@ class RodadaRepository {
     return row?['id'] as String?;
   }
 
+  Future<String?> linkedRodadaIdForLocal(String localId) async {
+    await _ensure();
+    final me = currentUserId;
+    if (me == null) return null;
+    final row = await _supabase
+        .from('rides')
+        .select('rodada_id')
+        .eq('user_id', me)
+        .eq('local_id', localId)
+        .maybeSingle();
+    final id = row?['rodada_id'] as String?;
+    if (id == null || id.isEmpty) return null;
+    return id;
+  }
+
   Future<void> linkRideToRodada({
     required String cloudRideId,
     required String rodadaId,
