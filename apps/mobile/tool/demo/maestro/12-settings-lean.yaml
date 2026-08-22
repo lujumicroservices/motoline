@@ -1,0 +1,9 @@
+appId: com.rawthrottle.riderlab
+---
+- launchApp
+- waitForAnimationToEnd
+- tapOn:
+    id: "demo.nav.profile"
+- wait: 2000
+- tapOn: "Lab de inclinación"
+- wait: 2000

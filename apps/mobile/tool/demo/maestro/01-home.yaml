@@ -1,0 +1,5 @@
+appId: com.rawthrottle.riderlab
+---
+- launchApp
+- waitForAnimationToEnd
+- wait: 2000

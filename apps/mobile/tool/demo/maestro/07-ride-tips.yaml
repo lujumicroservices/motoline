@@ -1,0 +1,15 @@
+appId: com.rawthrottle.riderlab
+---
+- launchApp
+- waitForAnimationToEnd
+- tapOn:
+    id: "demo.ride"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      id: "demo.skill.lab"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
+    id: "demo.skill.lab"
+- wait: 2500

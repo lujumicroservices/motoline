@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RiderLab — Pitch para socios (completa)</title>
+  <link rel="stylesheet" href="deck.css" />
+</head>
+<body class="deck-body">
+  <div class="deck">
+
+    <section class="slide on">
+      <div class="kicker">RiderLab · by RawThrottle <span class="es">· presentación completa</span></div>
+      <h1>Cada función<br/>que le damos al rider.</h1>
+      <p>Captura de calle. Ride Lab. Amigos y rodadas. Labs de investigación. Qué está vivo, qué es experimental, qué sigue.</p>
+      <img class="hero" src="img/hero.png" alt="RiderLab en la calle" />
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Quién <span class="es">· who</span></div>
+      <h2>Un lab para quien sí rueda.</h2>
+      <div class="grid3">
+        <div class="card">
+          <h3>Riders</h3>
+          <p>Guardan la línea del domingo. Ven inclinación, velocidad y dónde frenaron — en el teléfono que ya tienen.</p>
+        </div>
+        <div class="card">
+          <h3>Grupos</h3>
+          <p>Rodadas con código de invitación. Punto de reunión, fotos, radio corto. Compara el mismo cañón con un amigo.</p>
+        </div>
+        <div class="card">
+          <h3>Socios</h3>
+          <p>Clubes, coaches, talleres, marcas de cámara y moto que quieren producto en las manos del rider — no un kit de telemetría en PowerPoint.</p>
+        </div>
+      </div>
+      <p>Android primero · Español + inglés · Garaje Triumph-first para el grupo piloto actual.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">El problema <span class="es">· the problem</span></div>
+      <h2>Después del ride, el dato se pierde.</h2>
+      <ul class="steps">
+        <li><span>1</span> Las apps de pista asumen un loop y un transponder. La calle es de A a B, de noche, con lluvia, en un bolsillo.</li>
+        <li><span>2</span> La action cam graba video, no una línea que puedas recorrer por lean y frenos.</li>
+        <li><span>3</span> Un club no coachea lo que no ve. Una marca no aprende de un audio de WhatsApp.</li>
+      </ul>
+      <p>RiderLab es el <b>grabador + laboratorio</b> para ese hueco.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Captura <span class="es">· sensors</span></div>
+      <h2>Tres sensores. Un archivo de ride.</h2>
+      <div class="row">
+        <div>
+          <table>
+            <tr><th>Sensor</th><th>Qué guardamos</th></tr>
+            <tr><td>GPS</td><td>Línea de alta precisión, accuracy + Hz, calentamiento a ~10 m</td></tr>
+            <tr><td>IMU lean</td><td>Medidor izq / der del teléfono. El montaje pensado: vertical en tanque o manillar.</td></tr>
+            <tr><td>Barómetro</td><td>Presión (hPa) si el dispositivo lo tiene</td></tr>
+          </table>
+          <p class="fine" style="margin-top:12px">Un bolsillo suelto sesga la inclinación. Lo decimos en la app. Lean Lab existe para medir ese sesgo, no para esconderlo.</p>
+        </div>
+        <img class="hero" src="img/capture.png" alt="HUD de captura" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Cómo se graba <span class="es">· start</span></div>
+      <h2>Toca Iniciar — o arma y rueda.</h2>
+      <ul class="steps">
+        <li><span>Iniciar</span> Botón tamaño guante. Calentamiento GPS. Mapa en vivo, velocidad, lean, presión.</li>
+        <li><span>Armar</span> Espera en segundo plano. Cerca de <b>20 km/h</b> y un poco de movimiento, empieza a grabar. La pantalla puede quedar bloqueada.</li>
+        <li><span>Pausa</span> Auto-pausa al casi detenerte; reanuda al rodar. Opcional “¿sigues rodando?” después de una parada larga.</li>
+        <li><span>Recuperar</span> Si el teléfono se muere a mitad, conservas la línea o la descartas.</li>
+      </ul>
+      <p>SQLite offline en el dispositivo. Sync a la nube al terminar — si falla, el ride se queda en el teléfono.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Garaje <span class="es">· home</span></div>
+      <h2>Tu mes de líneas.</h2>
+      <div class="pills">
+        <span class="pill"><em>Lista</em> distancia · duración · máx. velocidad · lean pico</span>
+        <span class="pill"><em>Temporada</em> rides · km · top speed · lean pico</span>
+        <span class="pill"><em>Nombres</em> origen–destino del mapa</span>
+        <span class="pill"><em>Rodada</em> una tarjeta viva o próxima</span>
+        <span class="pill"><em>Updates</em> APK sideload desde GitHub</span>
+      </div>
+      <p>Renombra o borra. Un toque de vuelta a Ride Lab. Esta es la casa del rider — no un feed social.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Ride Lab <span class="es">· the product</span></div>
+      <h2>Abre un ride. Dueño de la curva.</h2>
+      <div class="row flip">
+        <img class="hero" src="img/map.png" alt="Mapa de Ride Lab" />
+        <div>
+          <p>Resumen: distancia, tiempo, máx. velocidad, máx. lean I/D, score de línea / skill.</p>
+          <p style="margin-top:12px">Mapa: polilínea por velocidad, puntos de freno, inicio / fin, playhead. Toca la línea para recorrer. Pantalla completa cuando hace falta.</p>
+          <p class="fine" style="margin-top:12px">Tiles de OpenStreetMap — sin dependencia de Google Maps.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Curvas + coach <span class="es">· turns</span></div>
+      <h2>Cada tramo. Primero las difíciles.</h2>
+      <ul class="steps">
+        <li><span>Curvas</span> Rumbo + lean → izquierda / derecha / recta. Toca para entrada, ápice, salida.</li>
+        <li><span>Replay</span> Play / pausa de lean + freno + velocidad en el mapa.</li>
+        <li><span>Skill</span> Score de sesión /100. Skill Lab ordena las peores curvas y sugiere drills.</li>
+        <li><span>Curva</span> Desliza entre vueltas. Free ve un teaser; el detalle completo es Pro.</li>
+      </ul>
+      <p class="fine">Los scores son algorítmicos — sirven para practicar, no son una licencia de pista.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Frenos + gráficas <span class="es">· brakes</span></div>
+      <h2>Recorre el tiempo. Ve la historia.</h2>
+      <div class="row eq">
+        <div class="card">
+          <h3>Frenado</h3>
+          <p>Inferido de la caída de velocidad GPS — suave / medio / fuerte. Salta el playhead a cada evento. Free: los primeros 3. El resto es Pro.</p>
+          <p class="fine" style="margin-top:10px">No es un sensor de presión de freno. Hay fallos y falsos positivos. No fingimos lo contrario.</p>
+        </div>
+        <div class="card">
+          <h3>Gráficas</h3>
+          <p>Velocidad, lean, precisión GPS, baro. Todo anclado al mismo playhead que el mapa y el medidor (cian izquierda, ámbar derecha).</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Comparar <span class="es">· compare</span></div>
+      <h2>Misma carretera. Dos riders.</h2>
+      <ul class="steps">
+        <li><span>●</span> Superpón el ride en la nube de un amigo sobre el mismo tramo geográfico.</li>
+        <li><span>●</span> Métricas + líneas lado a lado — no es un leaderboard público.</li>
+        <li><span>●</span> Visibilidad: <b>Solo yo</b> · <b>Amigos</b> · <b>Todos</b>.</li>
+      </ul>
+      <p>Es un grafo chico de amigos aceptados. Comparar asume gente con la que sí ruedas.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Amigos <span class="es">· friends</span></div>
+      <h2>Busca. Solicita. Rueda.</h2>
+      <div class="grid3">
+        <div class="card">
+          <h3>Identidad</h3>
+          <p>Nombre para mostrar. Google para un perfil permanente. Existe modo invitado; amigos necesitan nube + sesión.</p>
+        </div>
+        <div class="card">
+          <h3>Grafo</h3>
+          <p>Enviar, aceptar, rechazar. Ver rides compartidos. Invitar a una rodada. No es “todos en la app son amigos”.</p>
+        </div>
+        <div class="card">
+          <h3>Privacidad</h3>
+          <p>Tú eliges quién ve un ride. La ubicación en vivo de una rodada es un opt-in aparte.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Rodadas <span class="es">· group rides</span></div>
+      <h2>Rodadas con código de invitación.</h2>
+      <div class="row">
+        <div>
+          <ul class="steps">
+            <li><span>Host</span> Abierta · en vivo · terminada</li>
+            <li><span>Resumen</span> Pin de reunión, RSVP, compartir opt-in</li>
+            <li><span>En vivo</span> Puntos en el mapa ~5 min — no es tracking continuo</li>
+            <li><span>Después</span> Rides ligados, álbum de fotos, radio corto (frases + texto libre)</li>
+          </ul>
+        </div>
+        <img class="hero" src="img/rodada.png" alt="Rodada" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Moto y cuenta <span class="es">· garage</span></div>
+      <h2>Una moto. Dos idiomas. Sync cuando quieras.</h2>
+      <div class="pills">
+        <span class="pill"><em>Motos</em> catálogo Triumph-first + Otra</span>
+        <span class="pill"><em>Google</em> identidad permanente</span>
+        <span class="pill"><em>Sync</em> sube rides terminados, baja garaje + Lean Lab</span>
+        <span class="pill"><em>ES / EN</em> interruptor; español por default</span>
+      </div>
+      <p>El garaje piloto es pesado en Triumph a propósito. Profundidad multi-marca es una conversación después, no un claim hoy.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Lean Lab <span class="es">· inclinación</span></div>
+      <h2>Bugambilias — un cañón, protocolo duro.</h2>
+      <div class="row flip">
+        <img class="hero" src="img/lean.png" alt="Lean Lab" />
+        <div>
+          <p>Plaza Panorámica Bugambilias, Zapopan. Baseline ida / regreso, bolsillo A/B, vuelta libre.</p>
+          <p style="margin-top:12px">Prep: montaje, pose, sentido, 4 s de freeze derecho. Después: etiquetas de curva (sentí alto / OK / bajo) + pendiente.</p>
+          <p class="fine" style="margin-top:12px">R&amp;D piloto. Una carretera. No vendemos “lean validado en cada calle”. Quien quiera ground truth, tiene este módulo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Banco IMU <span class="es">· live sensors</span></div>
+      <h2>Estudiamos el teléfono antes de confiar el número.</h2>
+      <ul class="steps">
+        <li><span>●</span> Accel, gyro, mag, baro en vivo.</li>
+        <li><span>●</span> Roll vs pitch vs vector vs candidatos fused en pantalla.</li>
+        <li><span>●</span> Producción sigue usando el medidor de la app hasta que gane un mejor estimador.</li>
+      </ul>
+      <p>Así mantenemos el lean honesto entre bolsillo, tanque y distintos teléfonos — no es una feature para el rider.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Lab de cámara <span class="es">· camera</span></div>
+      <h2>Disparo GoPro — experimental, apagado por default.</h2>
+      <div class="row">
+        <div>
+          <p>BLE Open GoPro. Sync con el ride, sigue la auto-pausa, geocercas en el mapa, o auto-grabar “agresivo” (rápido + lean cambiando).</p>
+          <p style="margin-top:12px">Nunca bloquea la grabación GPS. Wake y shutter pueden fallar. Lo tratamos como módulo de testers, no como producto de cámara.</p>
+        </div>
+        <img class="hero" src="img/camera.png" alt="Lab de cámara" />
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Pro <span class="es">· pro</span></div>
+      <h2>Los candados existen. La tienda, todavía no.</h2>
+      <table>
+        <tr><th>Free hoy</th><th>Gated como Pro en la app</th></tr>
+        <tr><td>Garaje, captura, mapa, lista de curvas, skill score</td><td>Lista completa de frenos, detalle de curva, zoom de segmento</td></tr>
+        <tr><td>Primeros 3 eventos de freno</td><td>Notas de precisión, sin banner placeholder</td></tr>
+        <tr><td>Amigos, rodadas, Lean Lab (si está activo)</td><td>Toggle local hasta que exista billing</td></tr>
+      </table>
+      <p class="fine">No pitches suscripciones, Play Billing ni IAP de App Store. Los ads de Free son un placeholder, no AdMob en vivo.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Mapa de estado <span class="es">· what’s live</span></div>
+      <h2>Di esto en la sala. Nada más.</h2>
+      <div class="grid3">
+        <div class="card">
+          <div class="badge">Vivo</div>
+          <h3>Producto</h3>
+          <p>Captura · Ride Lab · Amigos · Rodadas · Garaje · Sync Google · ES/EN · Sideload Android</p>
+        </div>
+        <div class="card">
+          <div class="badge lab">Lab</div>
+          <h3>Investigación</h3>
+          <p>Lean Lab Bugambilias · banco IMU · disparo GoPro · etiquetas post-ride</p>
+        </div>
+        <div class="card">
+          <div class="badge next">Pausado / siguiente</div>
+          <h3>No se demuestra</h3>
+          <p>Rutas con nombre · auto-lap · Pro de pago · listing Play · identidad iOS · ads reales</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Distribución <span class="es">· how it ships</span></div>
+      <h2>Ya está en los bolsillos.</h2>
+      <ul class="steps">
+        <li><span>Ahora</span> Builds de amigos: APK en GitHub Releases. Check de update in-app en flavor sideload.</li>
+        <li><span>Play</span> El flavor AAB existe. El listing es lo siguiente — no es un claim hasta que esté vivo.</li>
+        <li><span>iOS</span> El proyecto existe. Android es el producto que ponemos en manos de socios hoy.</li>
+      </ul>
+      <p>v1.28 · el paquete todavía se llama motoline por debajo · nube: RiderLab / Supabase. La UI dice <b>RiderLab by RawThrottle</b>.</p>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Socios <span class="es">· the ask</span></div>
+      <h1>Primero rueda.<br/>Luego sociedad.</h1>
+      <ul class="steps">
+        <li><span>1</span> Sideload. Un cañón. Una rodada. Abran Ride Lab en el mismo tramo.</li>
+        <li><span>2</span> Si el lab sirve — clubes, coaches, talleres, marcas de cámara, moto regional — diseñamos la siguiente capa juntos.</li>
+        <li><span>3</span> Queremos pocos socios, en serio. No una splash page y un “luego vemos”.</li>
+      </ul>
+      <p>RawThrottle · RiderLab · <b>Own every corner.</b></p>
+    </section>
+
+  </div>
+  <div class="nav">
+    <span><a class="home" href="index.html">Hub</a><a class="home" href="full.html">EN</a><button type="button" id="prev">←</button></span>
+    <div class="dots" id="dots"></div>
+    <span id="pos">1 / 20</span>
+    <button type="button" id="next">→</button>
+  </div>
+  <script src="deck.js"></script>
+</body>
+</html>

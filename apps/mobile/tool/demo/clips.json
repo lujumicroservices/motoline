@@ -1,0 +1,76 @@
+{
+  "package": "com.rawthrottle.riderlab",
+  "outDir": "out",
+  "clips": [
+    {
+      "id": "01-home",
+      "title": "Home garage",
+      "seconds": 10,
+      "flow": "01-home.yaml",
+      "needs": []
+    },
+    {
+      "id": "02-ride-summary",
+      "title": "Ride Lab summary",
+      "seconds": 12,
+      "flow": "02-ride-summary.yaml",
+      "needs": ["ride"]
+    },
+    {
+      "id": "03-full-map",
+      "title": "Fullscreen map",
+      "seconds": 12,
+      "flow": "03-full-map.yaml",
+      "needs": ["ride"]
+    },
+    {
+      "id": "07-ride-tips",
+      "title": "Technique lab / coaching",
+      "seconds": 12,
+      "flow": "07-ride-tips.yaml",
+      "needs": ["ride"]
+    },
+    {
+      "id": "12-settings-lean",
+      "title": "Settings + Lean Lab",
+      "seconds": 12,
+      "flow": "12-settings-lean.yaml",
+      "needs": []
+    },
+    {
+      "id": "13-rodada",
+      "title": "Rodada list + detail",
+      "seconds": 12,
+      "flow": "13-rodada.yaml",
+      "needs": ["rodada"]
+    },
+    {
+      "id": "14-live-map",
+      "title": "Rodada live map",
+      "seconds": 12,
+      "flow": "14-live-map.yaml",
+      "needs": ["rodada"]
+    },
+    {
+      "id": "15-radio",
+      "title": "Rodada radio",
+      "seconds": 10,
+      "flow": "15-radio.yaml",
+      "needs": ["rodada"]
+    },
+    {
+      "id": "08-lean-lab",
+      "title": "Lean Lab home",
+      "seconds": 10,
+      "flow": "08-lean-lab.yaml",
+      "needs": []
+    },
+    {
+      "id": "11-friends",
+      "title": "Friends",
+      "seconds": 10,
+      "flow": "11-friends.yaml",
+      "needs": []
+    }
+  ]
+}

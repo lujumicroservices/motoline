@@ -1,0 +1,10 @@
+appId: com.rawthrottle.riderlab
+---
+- launchApp
+- waitForAnimationToEnd
+- tapOn:
+    id: "demo.ride"
+- waitForAnimationToEnd
+- tapOn:
+    id: "demo.map.fullscreen"
+- wait: 2500
