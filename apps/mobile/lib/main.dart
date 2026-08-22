@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/notifications/push_notification_service.dart';
 import 'core/services/arm_foreground_service.dart';
 import 'core/supabase/supabase_bootstrap.dart';
 import 'features/home/home_screen.dart';
@@ -18,6 +19,7 @@ Future<void> main() async {
   } catch (_) {
     // Auth provider may be off; app still works offline.
   }
+  await PushNotificationService.instance.init();
   runApp(const ProviderScope(child: RiderLabApp()));
 }
 
@@ -30,6 +32,7 @@ class RiderLabApp extends ConsumerWidget {
 
     return MaterialApp(
       title: 'RiderLab',
+      navigatorKey: appNavigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       locale: locale,
@@ -50,7 +53,27 @@ class RiderLabApp extends ConsumerWidget {
         }
         return const Locale('es');
       },
-      home: const HomeScreen(),
+      home: const _BootHome(),
     );
   }
+}
+
+class _BootHome extends StatefulWidget {
+  const _BootHome();
+
+  @override
+  State<_BootHome> createState() => _BootHomeState();
+}
+
+class _BootHomeState extends State<_BootHome> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PushNotificationService.openPendingRodadaIfAny();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const HomeScreen();
 }

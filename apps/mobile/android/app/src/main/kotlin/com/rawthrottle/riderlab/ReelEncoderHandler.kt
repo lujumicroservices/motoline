@@ -1,4 +1,4 @@
-package com.motoline.motoline
+package com.rawthrottle.riderlab
 
 import android.media.MediaCodec
 import android.media.MediaCodecInfo

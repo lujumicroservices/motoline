@@ -19,3 +19,9 @@ port = 54323
 
 [functions.valhalla-route]
 verify_jwt = true
+
+[functions.places-search]
+verify_jwt = true
+
+[functions.notify-rodada-invite]
+verify_jwt = true

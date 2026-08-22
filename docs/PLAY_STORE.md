@@ -1,6 +1,6 @@
 # Publish RiderLab to Google Play
 
-Package ID: `com.motoline.motoline`  
+Package ID: `com.rawthrottle.riderlab`  
 App name on device: **RiderLab**
 
 You cannot finish Play Console signup from this repo alone — Google needs your developer account, listing assets, and a one-time upload. This guide gets the **signed App Bundle** ready and lists every Console step.
@@ -70,7 +70,7 @@ In [Google Cloud Console](https://console.cloud.google.com/auth/clients):
 
 1. Keep your **Web** client ID in `.env` as `GOOGLE_WEB_CLIENT_ID`.
 2. Ensure an **Android** OAuth client exists for:
-   - Package name: `com.motoline.motoline`
+   - Package name: `com.rawthrottle.riderlab`
    - SHA-1 of your **upload** keystore **and** the **Play App Signing** certificate (Play Console → Setup → App signing — Google shows the app signing SHA-1 after first upload).
 
 Get upload SHA-1:

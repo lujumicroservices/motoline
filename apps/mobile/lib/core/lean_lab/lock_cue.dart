@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 class LockCue {
   LockCue._();
 
-  static const _ch = MethodChannel('com.motoline.motoline/lock_cue');
+  static const _ch = MethodChannel('com.rawthrottle.riderlab/lock_cue');
 
   static Future<void> ready() async {
     try {

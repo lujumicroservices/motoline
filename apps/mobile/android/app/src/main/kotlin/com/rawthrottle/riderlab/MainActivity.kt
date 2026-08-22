@@ -1,4 +1,4 @@
-package com.motoline.motoline
+package com.rawthrottle.riderlab
 
 import android.content.Context
 import android.media.AudioManager
@@ -146,7 +146,7 @@ class MainActivity : FlutterActivity() {
   }
 
   companion object {
-    private const val CHANNEL = "com.motoline.motoline/lock_cue"
-    private const val REEL_CHANNEL = "com.motoline.motoline/reel_encoder"
+    private const val CHANNEL = "com.rawthrottle.riderlab/lock_cue"
+    private const val REEL_CHANNEL = "com.rawthrottle.riderlab/reel_encoder"
   }
 }

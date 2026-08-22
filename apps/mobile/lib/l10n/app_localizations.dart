@@ -3119,7 +3119,7 @@ abstract class AppLocalizations {
   /// No description provided for @routeSearchHint.
   ///
   /// In es, this message translates to:
-  /// **'Buscar un lugar…'**
+  /// **'Busca un lugar, pueblo o dirección…'**
   String get routeSearchHint;
 
   /// No description provided for @routeSummaryKmEta.
@@ -3247,6 +3247,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Aún no hay amigos para invitar.'**
   String get noFriendsToInvite;
+
+  /// No description provided for @inviteFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitar amigos'**
+  String get inviteFriends;
+
+  /// No description provided for @rodadaInviteChip.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitación'**
+  String get rodadaInviteChip;
+
+  /// No description provided for @rodadaInviteBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Te invitaron a {title}'**
+  String rodadaInviteBanner(String title);
+
+  /// No description provided for @rsvpPending.
+  ///
+  /// In es, this message translates to:
+  /// **'pendiente'**
+  String get rsvpPending;
+
+  /// No description provided for @rsvpAccept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get rsvpAccept;
+
+  /// No description provided for @rsvpDecline.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazar'**
+  String get rsvpDecline;
 
   /// No description provided for @inviteSent.
   ///

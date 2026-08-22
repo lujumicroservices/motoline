@@ -266,15 +266,30 @@ class _RodadaCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                rodada.status.toUpperCase(),
-                style: GoogleFonts.exo2(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: statusColor,
-                  letterSpacing: 0.6,
+              if (rodada.isPendingInvite)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Chip(
+                    label: Text(l10n.rodadaInviteChip),
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: AppTheme.asphalt,
+                    labelStyle: GoogleFonts.exo2(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.lineHot,
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  rodada.status.toUpperCase(),
+                  style: GoogleFonts.exo2(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                    letterSpacing: 0.6,
+                  ),
                 ),
-              ),
             ],
           ),
         ),

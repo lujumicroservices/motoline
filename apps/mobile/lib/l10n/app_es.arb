@@ -688,7 +688,7 @@
   "routePrefHighway": "Autopista",
   "routePrefStreet": "Calle",
   "routePrefOffroad": "Terracería",
-  "routeSearchHint": "Buscar un lugar…",
+  "routeSearchHint": "Busca un lugar, pueblo o dirección…",
   "routeSummaryKmEta": "{distance} · {eta}",
   "@routeSummaryKmEta": {
     "placeholders": {
@@ -731,6 +731,17 @@
     }
   },
   "noFriendsToInvite": "Aún no hay amigos para invitar.",
+  "inviteFriends": "Invitar amigos",
+  "rodadaInviteChip": "Invitación",
+  "rodadaInviteBanner": "Te invitaron a {title}",
+  "@rodadaInviteBanner": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "rsvpPending": "pendiente",
+  "rsvpAccept": "Aceptar",
+  "rsvpDecline": "Rechazar",
   "inviteSent": "Invitación enviada",
   "rodadaCodeBanner": "código {code}",
   "@rodadaCodeBanner": {

@@ -184,7 +184,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                 TileLayer(
                   urlTemplate:
                       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.motoline.motoline',
+                  userAgentPackageName: 'com.rawthrottle.riderlab',
                 ),
                 if (track.length >= 2)
                   PolylineLayer(

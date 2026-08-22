@@ -401,6 +401,9 @@ RodadaSummary? _pickHomeRodada(List<RodadaSummary> list) {
   for (final r in list) {
     if (r.isLive) return r;
   }
+  for (final r in list) {
+    if (r.isPendingInvite) return r;
+  }
 
   final candidates = list.where((r) => !r.isEnded).toList();
   if (candidates.isEmpty) return null;
@@ -626,7 +629,7 @@ class _RodadaHomeCard extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            '${highlight.status.toUpperCase()} · ${l10n.rodadaRidersCount(highlight.memberCount)}'
+                            '${highlight.isPendingInvite ? l10n.rodadaInviteChip : highlight.status.toUpperCase()} · ${l10n.rodadaRidersCount(highlight.memberCount)}'
                             '${highlight.destination != null ? ' · ${highlight.destination}' : ''}',
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.steel,

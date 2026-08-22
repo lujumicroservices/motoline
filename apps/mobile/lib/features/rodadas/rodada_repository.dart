@@ -67,15 +67,20 @@ class RodadaRepository {
 
     final memberRows = await _supabase
         .from('rodada_members')
-        .select('rodada_id')
+        .select('rodada_id, rsvp')
         .eq('user_id', me)
         .order('joined_at', ascending: false)
         .limit(limit);
 
-    final ids = (memberRows as List)
-        .cast<Map<String, dynamic>>()
-        .map((r) => r['rodada_id'] as String)
-        .toList();
+    final ids = <String>[];
+    final rsvpById = <String, String>{};
+    for (final r in (memberRows as List).cast<Map<String, dynamic>>()) {
+      final id = r['rodada_id'] as String?;
+      if (id == null) continue;
+      ids.add(id);
+      final rsvp = r['rsvp'] as String?;
+      if (rsvp != null) rsvpById[id] = rsvp;
+    }
     if (ids.isEmpty) return const [];
 
     final rows = await _supabase
@@ -87,10 +92,13 @@ class RodadaRepository {
         .inFilter('id', ids)
         .order('starts_at', ascending: false);
 
-    final list = (rows as List)
-        .cast<Map<String, dynamic>>()
-        .map(RodadaSummary.fromMap)
-        .toList();
+    final list = (rows as List).cast<Map<String, dynamic>>().map((m) {
+      final id = m['id'] as String?;
+      return RodadaSummary.fromMap(
+        m,
+        myRsvp: id == null ? null : rsvpById[id],
+      );
+    }).toList();
 
       // Prefer live / upcoming first.
     list.sort((a, b) {
@@ -307,6 +315,16 @@ class RodadaRepository {
     required String userId,
   }) async {
     await _ensure();
+    final existing = await _supabase
+        .from('rodada_members')
+        .select('rsvp, role')
+        .eq('rodada_id', rodadaId)
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (existing != null) {
+      final rsvp = existing['rsvp'] as String?;
+      if (rsvp != null && rsvp != 'pending') return;
+    }
     await _supabase.from('rodada_members').upsert({
       'rodada_id': rodadaId,
       'user_id': userId,
@@ -314,6 +332,17 @@ class RodadaRepository {
       'rsvp': 'pending',
       'updated_at': DateTime.now().toUtc().toIso8601String(),
     });
+    try {
+      await _supabase.functions.invoke(
+        'notify-rodada-invite',
+        body: {
+          'rodada_id': rodadaId,
+          'user_id': userId,
+        },
+      );
+    } catch (e) {
+      debugPrint('notify-rodada-invite: $e');
+    }
   }
 
   Future<List<RodadaMember>> listMembers(String rodadaId) async {

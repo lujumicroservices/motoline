@@ -28,6 +28,7 @@ class RodadaSummary {
     this.routeDurationS,
     this.routePrefs = RoutePrefs.defaults,
     this.routeProvider,
+    this.myRsvp,
   });
 
   final String id;
@@ -50,7 +51,9 @@ class RodadaSummary {
   final double? routeDurationS;
   final RoutePrefs routePrefs;
   final String? routeProvider;
+  final String? myRsvp;
 
+  bool get isPendingInvite => myRsvp == 'pending';
   bool get isLive => status == 'live';
   bool get isEnded => status == 'ended';
   bool get hasMeetup => meetupLat != null && meetupLng != null;
@@ -64,7 +67,7 @@ class RodadaSummary {
     return decodePolyline(raw);
   }
 
-  factory RodadaSummary.fromMap(Map<String, dynamic> map, {int? memberCount}) {
+  factory RodadaSummary.fromMap(Map<String, dynamic> map, {int? memberCount, String? myRsvp}) {
     final prefsRaw = map['route_prefs'];
     return RodadaSummary(
       id: map['id'] as String,
@@ -101,6 +104,7 @@ class RodadaSummary {
         prefsRaw is Map ? Map<String, dynamic>.from(prefsRaw) : null,
       ),
       routeProvider: map['route_provider'] as String?,
+      myRsvp: myRsvp ?? map['my_rsvp'] as String?,
     );
   }
 }

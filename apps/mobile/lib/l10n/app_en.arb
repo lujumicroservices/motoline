@@ -617,7 +617,7 @@
   "routePrefHighway": "Highway",
   "routePrefStreet": "Street",
   "routePrefOffroad": "Off-road",
-  "routeSearchHint": "Search a place…",
+  "routeSearchHint": "Search a place, town, or address…",
   "routeSummaryKmEta": "{distance} · {eta}",
   "@routeSummaryKmEta": {
     "placeholders": {
@@ -660,6 +660,17 @@
     }
   },
   "noFriendsToInvite": "No friends to invite yet.",
+  "inviteFriends": "Invite friends",
+  "rodadaInviteChip": "Invite",
+  "rodadaInviteBanner": "You were invited to {title}",
+  "@rodadaInviteBanner": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "rsvpPending": "pending",
+  "rsvpAccept": "Accept",
+  "rsvpDecline": "Decline",
   "inviteSent": "Invite sent",
   "rodadaCodeBanner": "code {code}",
   "@rodadaCodeBanner": {

@@ -335,7 +335,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.motoline.motoline',
+                  userAgentPackageName: 'com.rawthrottle.riderlab',
                 ),
                 PolylineLayer(polylines: _polylines),
                 MarkerLayer(markers: _markers),

@@ -11,6 +11,7 @@ import '../../core/routing/route_prefs.dart';
 import '../../core/services/directions_service.dart';
 import '../../core/services/place_search_service.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../maps/live_gps_map_mixin.dart';
 import 'rodada_itinerary.dart';
@@ -48,6 +49,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
   Timer? _searchDebounce;
   List<PlaceSearchHit> _hits = [];
   bool _searching = false;
+  final Set<String> _inviteIds = {};
 
   List<LatLng> get _pins => rodadaItineraryLine(
         start: _start,
@@ -192,6 +194,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     final hits = await ref.read(placeSearchServiceProvider).search(
           q,
           viewBounds: bounds,
+          limit: 10,
         );
     if (!mounted) return;
     setState(() {
@@ -265,6 +268,9 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
           sortOrder: i,
         );
       }
+      for (final id in _inviteIds) {
+        await repo.inviteUser(rodadaId: rodada.id, userId: id);
+      }
       if (!mounted) return;
       Navigator.of(context).pop(rodada.id);
     } catch (e) {
@@ -288,6 +294,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final line = _displayLine;
+    final friendsAsync = ref.watch(friendsListProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -475,7 +482,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                       TileLayer(
                         urlTemplate:
                             'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.motoline.motoline',
+                        userAgentPackageName: 'com.rawthrottle.riderlab',
                       ),
                       ...rodadaItineraryMapLayers(
                         start: _start,
@@ -489,6 +496,30 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                             ),
                         ],
                       ),
+                      if (_hits.isNotEmpty)
+                        MarkerLayer(
+                          markers: [
+                            for (final hit in _hits)
+                              Marker(
+                                point: hit.point,
+                                width: 40,
+                                height: 40,
+                                alignment: Alignment.bottomCenter,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => _pickHit(hit),
+                                  child: Tooltip(
+                                    message: hit.title,
+                                    child: const Icon(
+                                      Icons.place,
+                                      color: Color(0xFF7C9CFF),
+                                      size: 34,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       liveGpsMapChild(),
                     ],
                   ),
@@ -537,6 +568,46 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                 _scheduleRoute();
               },
             ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.inviteFriends,
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          friendsAsync.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (e, _) => Text('$e'),
+            data: (friends) {
+              if (friends.isEmpty) {
+                return Text(
+                  l10n.noFriendsToInvite,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 13,
+                  ),
+                );
+              }
+              return Column(
+                children: [
+                  for (final f in friends)
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: _inviteIds.contains(f.id),
+                      title: Text(f.label),
+                      onChanged: (v) {
+                        setState(() {
+                          if (v == true) {
+                            _inviteIds.add(f.id);
+                          } else {
+                            _inviteIds.remove(f.id);
+                          }
+                        });
+                      },
+                    ),
+                ],
+              );
+            },
+          ),
           if (_error != null) ...[
             const SizedBox(height: 16),
             Text(_error!, style: const TextStyle(color: AppTheme.signal)),

@@ -1690,7 +1690,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routePrefOffroad => 'Off-road';
 
   @override
-  String get routeSearchHint => 'Search a place…';
+  String get routeSearchHint => 'Search a place, town, or address…';
 
   @override
   String routeSummaryKmEta(String distance, String eta) {
@@ -1763,6 +1763,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noFriendsToInvite => 'No friends to invite yet.';
+
+  @override
+  String get inviteFriends => 'Invite friends';
+
+  @override
+  String get rodadaInviteChip => 'Invite';
+
+  @override
+  String rodadaInviteBanner(String title) {
+    return 'You were invited to $title';
+  }
+
+  @override
+  String get rsvpPending => 'pending';
+
+  @override
+  String get rsvpAccept => 'Accept';
+
+  @override
+  String get rsvpDecline => 'Decline';
 
   @override
   String get inviteSent => 'Invite sent';

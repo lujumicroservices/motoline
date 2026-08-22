@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/services/directions_service.dart';
@@ -25,6 +26,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       'going' => l10n.rsvpGoing,
       'maybe' => l10n.rsvpMaybe,
       'declined' => l10n.rsvpDeclined,
+      'pending' => l10n.rsvpPending,
       _ => rsvp,
     };
   }
@@ -112,6 +114,13 @@ class RodadaOverviewTab extends ConsumerWidget {
                 }
                 return Column(
                   children: [
+                    if (m.rsvp == 'pending') ...[
+                      const SizedBox(height: 8),
+                      _PendingInviteBanner(
+                        rodadaId: rodadaId,
+                        rodada: rodada,
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     _RsvpRow(rodadaId: rodadaId, current: m.rsvp),
                     SwitchListTile(
@@ -299,7 +308,7 @@ class _ItineraryMap extends StatelessWidget {
                 TileLayer(
                   urlTemplate:
                       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.motoline.motoline',
+                  userAgentPackageName: 'com.rawthrottle.riderlab',
                 ),
                 ...rodadaItineraryMapLayers(
                   start: start,
@@ -319,6 +328,84 @@ class _ItineraryMap extends StatelessWidget {
         ),
         const SizedBox(height: 20),
       ],
+    );
+  }
+}
+
+class _PendingInviteBanner extends ConsumerWidget {
+  const _PendingInviteBanner({
+    required this.rodadaId,
+    required this.rodada,
+  });
+
+  final String rodadaId;
+  final RodadaSummary rodada;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final when = rodada.startsAt == null
+        ? null
+        : DateFormat('EEE d MMM · HH:mm').format(rodada.startsAt!.toLocal());
+    final bits = <String>[
+      if (rodada.destination != null && rodada.destination!.trim().isNotEmpty)
+        rodada.destination!.trim(),
+      ?when,
+    ];
+    return Card(
+      color: AppTheme.asphaltElevated,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.rodadaInviteBanner(rodada.title),
+              style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 16),
+            ),
+            if (bits.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                bits.join(' · '),
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.mist,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                FilledButton(
+                  onPressed: () async {
+                    await ref.read(rodadaRepositoryProvider).updateMySharing(
+                          rodadaId: rodadaId,
+                          rsvp: 'going',
+                        );
+                    ref.invalidate(myRodadaMembershipProvider(rodadaId));
+                    ref.invalidate(rodadaMembersProvider(rodadaId));
+                    ref.invalidate(myRodadasProvider);
+                  },
+                  child: Text(l10n.rsvpAccept),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: () async {
+                    await ref.read(rodadaRepositoryProvider).updateMySharing(
+                          rodadaId: rodadaId,
+                          rsvp: 'declined',
+                        );
+                    ref.invalidate(myRodadaMembershipProvider(rodadaId));
+                    ref.invalidate(rodadaMembersProvider(rodadaId));
+                    ref.invalidate(myRodadasProvider);
+                  },
+                  child: Text(l10n.rsvpDecline),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

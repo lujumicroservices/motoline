@@ -13,7 +13,7 @@ class ReelEncoderException implements Exception {
 class ReelEncoder {
   ReelEncoder._();
 
-  static const _ch = MethodChannel('com.motoline.motoline/reel_encoder');
+  static const _ch = MethodChannel('com.rawthrottle.riderlab/reel_encoder');
 
   static bool get isSupported => Platform.isAndroid || Platform.isIOS;
 

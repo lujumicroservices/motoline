@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../notifications/push_notification_service.dart';
 import '../supabase/supabase_bootstrap.dart';
 import 'auth_provider_kind.dart';
 
@@ -201,6 +202,11 @@ class AuthService {
 
   Future<void> signOut({bool restoreAnonymousGuest = true}) async {
     try {
+      await PushNotificationService.instance.clearToken();
+    } catch (e) {
+      debugPrint('FCM clear on signOut: $e');
+    }
+    try {
       await GoogleSignIn.instance.signOut();
     } catch (e) {
       debugPrint('Google signOut: $e');
@@ -211,6 +217,7 @@ class AuthService {
     if (restoreAnonymousGuest) {
       try {
         await SupabaseBootstrap.ensureSession();
+        await PushNotificationService.instance.syncToken();
       } catch (e) {
         debugPrint('Auth restore anonymous: $e');
       }
@@ -238,6 +245,7 @@ class AuthService {
       googleEmail: googleEmail,
       force: true,
     );
+    await PushNotificationService.instance.syncToken();
   }
 
   /// Writes Google (or other linked) name into `profiles.display_name` so

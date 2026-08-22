@@ -14,7 +14,7 @@ class RidePlaceNameService {
   final Map<String, String> _cache = {};
   DateTime? _lastRequestAt;
 
-  static const _userAgent = 'RiderLab/1.27 (com.motoline.motoline; ride titles)';
+  static const _userAgent = 'RiderLab/1.27 (com.rawthrottle.riderlab; ride titles)';
 
   /// Build `Origin - Destination` (e.g. Tesistán - Zapopan).
   Future<String?> titleFromTrack(List<TrackPoint> points) async {

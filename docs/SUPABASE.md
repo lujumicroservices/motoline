@@ -58,7 +58,7 @@ Settings → **Account** offers **Sign in with Google**. Anonymous guests are **
 
 1. Create a project (or reuse one) → [Clients](https://console.cloud.google.com/auth/clients)  
 2. **Web application** OAuth client — copy Client ID → `GOOGLE_WEB_CLIENT_ID` in `apps/mobile/.env`  
-3. **Android** OAuth client — package `com.motoline.motoline` + SHA-1 of your debug/release keystore  
+3. **Android** OAuth client — package `com.rawthrottle.riderlab` + SHA-1 of your debug/release keystore  
 4. **iOS** OAuth client (when shipping iOS) — bundle id + `GOOGLE_IOS_CLIENT_ID` + `CFBundleURLTypes` reversed client id in `Info.plist`
 
 **App `.env`**

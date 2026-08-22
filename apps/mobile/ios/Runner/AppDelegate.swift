@@ -17,7 +17,7 @@ import UIKit
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     let channel = FlutterMethodChannel(
-      name: "com.motoline.motoline/reel_encoder",
+      name: "com.rawthrottle.riderlab/reel_encoder",
       binaryMessenger: engineBridge.applicationRegistrar.messenger()
     )
     channel.setMethodCallHandler { [weak self] call, result in

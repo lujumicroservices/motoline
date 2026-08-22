@@ -427,7 +427,7 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.motoline.motoline',
+              userAgentPackageName: 'com.rawthrottle.riderlab',
             ),
             ...rodadaItineraryMapLayers(
               start: meetup,
