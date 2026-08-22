@@ -10,13 +10,16 @@ import 'package:latlong2/latlong.dart';
 import '../../core/routing/route_prefs.dart';
 import '../../core/services/directions_service.dart';
 import '../../core/services/place_search_service.dart';
+import '../../core/notifications/push_notification_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../maps/live_gps_map_mixin.dart';
 import 'rodada_itinerary.dart';
 import 'rodada_itinerary_map.dart';
+import 'invite_push_feedback.dart';
 import 'rodada_providers.dart';
+import 'rodada_repository.dart';
 import 'route_prefs_chips.dart';
 
 class CreateRodadaScreen extends ConsumerStatefulWidget {
@@ -268,11 +271,20 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
           sortOrder: i,
         );
       }
+      final inviteResults = <RodadaInviteResult>[];
       for (final id in _inviteIds) {
-        await repo.inviteUser(rodadaId: rodada.id, userId: id);
+        inviteResults.add(
+          await repo.inviteUser(rodadaId: rodada.id, userId: id),
+        );
       }
       if (!mounted) return;
+      final pushMsg = messageForInviteBatch(l10n, inviteResults);
       Navigator.of(context).pop(rodada.id);
+      if (pushMsg != null) {
+        appMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text(pushMsg)),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/notifications/push_diagnostics.dart';
 import '../../core/routing/route_prefs.dart';
 import '../../core/services/directions_service.dart';
 import '../../core/supabase/paged_select.dart';
@@ -17,6 +18,58 @@ const rodadaSelectColumns =
     'id, host_id, title, destination, notes, meetup_lat, meetup_lng, '
     'finish_lat, finish_lng, starts_at, status, invite_code, created_at, updated_at, '
     'route_geometry, route_distance_m, route_duration_s, route_prefs, route_provider';
+
+class RodadaInviteResult {
+  const RodadaInviteResult({
+    this.alreadyMember = false,
+    this.sent = 0,
+    this.skipped,
+    this.error,
+  });
+
+  final bool alreadyMember;
+  final int sent;
+  final String? skipped;
+  final String? error;
+
+  bool get pushDelivered => sent > 0;
+
+  factory RodadaInviteResult.fromFunctionData(dynamic data) {
+    if (data is Map) {
+      final err = data['error']?.toString();
+      final detail = data['detail']?.toString();
+      if (err != null && err.isNotEmpty) {
+        return RodadaInviteResult(
+          error: detail == null || detail.isEmpty ? err : '$err ($detail)',
+        );
+      }
+      final sentRaw = data['sent'];
+      final sent = sentRaw is int
+          ? sentRaw
+          : int.tryParse(sentRaw?.toString() ?? '') ?? 0;
+      return RodadaInviteResult(
+        sent: sent,
+        skipped: data['skipped']?.toString(),
+      );
+    }
+    return const RodadaInviteResult(error: 'bad_response');
+  }
+}
+
+String _invitePushError(Object e) {
+  if (e is FunctionException) {
+    final details = e.details;
+    if (details is Map) {
+      final err = details['error']?.toString();
+      final detail = details['detail']?.toString();
+      if (err != null && err.isNotEmpty) {
+        return detail == null || detail.isEmpty ? err : '$err ($detail)';
+      }
+    }
+    return 'http ${e.status}';
+  }
+  return e.toString();
+}
 
 /// Lazy cloud access for Rodadas. Call sites should use autoDispose providers
 /// so heavy tabs (live / photos / tracks) release when the user leaves.
@@ -310,7 +363,7 @@ class RodadaRepository {
     return rid as String;
   }
 
-  Future<void> inviteUser({
+  Future<RodadaInviteResult> inviteUser({
     required String rodadaId,
     required String userId,
   }) async {
@@ -323,7 +376,9 @@ class RodadaRepository {
         .maybeSingle();
     if (existing != null) {
       final rsvp = existing['rsvp'] as String?;
-      if (rsvp != null && rsvp != 'pending') return;
+      if (rsvp != null && rsvp != 'pending') {
+        return const RodadaInviteResult(alreadyMember: true);
+      }
     }
     await _supabase.from('rodada_members').upsert({
       'rodada_id': rodadaId,
@@ -333,15 +388,19 @@ class RodadaRepository {
       'updated_at': DateTime.now().toUtc().toIso8601String(),
     });
     try {
-      await _supabase.functions.invoke(
+      final res = await _supabase.functions.invoke(
         'notify-rodada-invite',
         body: {
           'rodada_id': rodadaId,
           'user_id': userId,
         },
       );
+      PushDiagnostics.recordFunctionData('notify-rodada-invite', res.data);
+      return RodadaInviteResult.fromFunctionData(res.data);
     } catch (e) {
       debugPrint('notify-rodada-invite: $e');
+      PushDiagnostics.recordError('notify-rodada-invite', e);
+      return RodadaInviteResult(error: _invitePushError(e));
     }
   }
 
@@ -414,6 +473,22 @@ class RodadaRepository {
           .eq('rodada_id', rodadaId)
           .eq('user_id', me);
     }
+  }
+
+  Future<void> leaveRodada(String rodadaId) async {
+    await _ensure();
+    final me = currentUserId;
+    if (me == null) throw StateError('Not signed in');
+    await _supabase
+        .from('rodada_live_positions')
+        .delete()
+        .eq('rodada_id', rodadaId)
+        .eq('user_id', me);
+    await _supabase
+        .from('rodada_members')
+        .delete()
+        .eq('rodada_id', rodadaId)
+        .eq('user_id', me);
   }
 
   Future<List<RodadaLivePosition>> listLivePositions(String rodadaId) async {
@@ -751,7 +826,21 @@ class RodadaRepository {
         })
         .select()
         .single();
-    return RodadaMessage.fromMap(Map<String, dynamic>.from(row));
+    final msg = RodadaMessage.fromMap(Map<String, dynamic>.from(row));
+    try {
+      final res = await _supabase.functions.invoke(
+        'notify-rodada-radio',
+        body: {
+          'rodada_id': rodadaId,
+          'message_id': msg.id,
+        },
+      );
+      PushDiagnostics.recordFunctionData('notify-rodada-radio', res.data);
+    } catch (e) {
+      debugPrint('notify-rodada-radio: $e');
+      PushDiagnostics.recordError('notify-rodada-radio', e);
+    }
+    return msg;
   }
 
   Future<List<RodadaStop>> listStops(String rodadaId) async {

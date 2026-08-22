@@ -2501,7 +2501,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyCircleHelp.
   ///
   /// In es, this message translates to:
-  /// **'Agrega contactos aquí. El link WhatsApp se genera al Grabar o en una Rodada (En vivo / corazón). Puedes reenviarlo a más personas sin romper los anteriores.'**
+  /// **'Agrega contactos aquí. El link se genera al Grabar o en una Rodada (En vivo). Puedes reenviarlo a más personas sin romper los anteriores.'**
   String get familyCircleHelp;
 
   /// No description provided for @familyHowToShareTitle.
@@ -2513,7 +2513,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyHowToShareSteps.
   ///
   /// In es, this message translates to:
-  /// **'1) En Grabar o en una Rodada (pestaña En vivo / corazón).\n2) Toca WhatsApp / Enviar a otro.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.'**
+  /// **'1) En Grabar o en una Rodada (pestaña En vivo).\n2) Toca el icono de compartir.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.'**
   String get familyHowToShareSteps;
 
   /// No description provided for @familyShareNeedsRide.
@@ -2531,13 +2531,13 @@ abstract class AppLocalizations {
   /// No description provided for @familyRodadaTipTitle.
   ///
   /// In es, this message translates to:
-  /// **'¿Link para familia (WhatsApp)?'**
+  /// **'¿Link para familia?'**
   String get familyRodadaTipTitle;
 
   /// No description provided for @familyRodadaTipBody.
   ///
   /// In es, this message translates to:
-  /// **'Pack = mapa de la rodada en la app. Familia sin app = corazón / Avisar a familia (mismo link se puede reenviar).'**
+  /// **'Pack = mapa de la rodada en la app. Familia sin app = compartir desde En vivo (mismo link se puede reenviar).'**
   String get familyRodadaTipBody;
 
   /// No description provided for @familyRodadaTipCta.
@@ -2645,7 +2645,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyNotifyHelp.
   ///
   /// In es, this message translates to:
-  /// **'Genera un link y abre WhatsApp para mandárselo a tu familiar (no necesitan la app).'**
+  /// **'Genera un link y abre el menú de compartir para mandárselo a tu familiar (no necesitan la app).'**
   String get familyNotifyHelp;
 
   /// No description provided for @familyNotifyHelpRodada.
@@ -2657,7 +2657,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyNotifyStart.
   ///
   /// In es, this message translates to:
-  /// **'WhatsApp'**
+  /// **'Compartir'**
   String get familyNotifyStart;
 
   /// No description provided for @familyWatchActive.
@@ -3197,8 +3197,32 @@ abstract class AppLocalizations {
   /// No description provided for @inviteFriend.
   ///
   /// In es, this message translates to:
-  /// **'Invitar amigo'**
+  /// **'Invitar amigos'**
   String get inviteFriend;
+
+  /// No description provided for @leaveRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir de la rodada'**
+  String get leaveRodada;
+
+  /// No description provided for @leaveRodadaConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Salir de esta rodada?'**
+  String get leaveRodadaConfirmTitle;
+
+  /// No description provided for @leaveRodadaConfirmBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Dejarás de verla en tu lista. El anfitrión no se borra.'**
+  String get leaveRodadaConfirmBody;
+
+  /// No description provided for @leaveRodadaDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Saliste de la rodada'**
+  String get leaveRodadaDone;
 
   /// No description provided for @rodadaTabOverview.
   ///
@@ -3289,6 +3313,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Invitación enviada'**
   String get inviteSent;
+
+  /// No description provided for @inviteAlreadyMember.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya está en esta rodada'**
+  String get inviteAlreadyMember;
+
+  /// No description provided for @inviteSentNoToken.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitado en la app. Ese teléfono aún no registró notificaciones — que abra RiderLab con su cuenta.'**
+  String get inviteSentNoToken;
+
+  /// No description provided for @inviteSentPushFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitado en la app, pero la notificación falló: {reason}'**
+  String inviteSentPushFailed(String reason);
+
+  /// No description provided for @invitePushAllOk.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} notificaciones enviadas'**
+  String invitePushAllOk(int count);
+
+  /// No description provided for @invitePushSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Invitados en la app. Notificaciones: {ok} enviadas, {failed} fallidas ({reason})'**
+  String invitePushSummary(int ok, int failed, String reason);
 
   /// No description provided for @rodadaCodeBanner.
   ///
@@ -3571,6 +3625,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Foto subida'**
   String get photoUploaded;
+
+  /// No description provided for @photosUploaded.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} fotos subidas'**
+  String photosUploaded(int count);
 
   /// No description provided for @photoTitle.
   ///
@@ -4147,6 +4207,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Lab de inclinación'**
   String get leanLabTitle;
+
+  /// No description provided for @labsSectionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pruebas / nuevas funciones'**
+  String get labsSectionTitle;
+
+  /// No description provided for @labsSectionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Herramientas experimentales. No forman parte del flujo diario.'**
+  String get labsSectionHelp;
+
+  /// No description provided for @pushDiagnosticsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Último envío de notificación'**
+  String get pushDiagnosticsTitle;
+
+  /// No description provided for @pushDiagnosticsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay un envío de notificación registrado.'**
+  String get pushDiagnosticsEmpty;
+
+  /// No description provided for @pushDiagnosticsCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Registro de notificaciones copiado'**
+  String get pushDiagnosticsCopied;
 
   /// No description provided for @leanLabIntro.
   ///

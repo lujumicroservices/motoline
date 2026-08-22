@@ -56,35 +56,110 @@ class _ActiveWatchPanelState extends ConsumerState<ActiveWatchPanel> {
         : null;
 
     if (mine == null) {
+      if (widget.compact) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.familyNotifyToggle,
+              style: const TextStyle(fontSize: 12),
+            ),
+            IconButton(
+              tooltip: l10n.familyNotifyToggle,
+              visualDensity: VisualDensity.compact,
+              icon: Icon(_shareIcon(context), size: 20),
+              onPressed: () => shareFamilyWatchLink(
+                context,
+                ref,
+                localRideId: widget.localRideId,
+                riderDisplayName: widget.riderDisplayName,
+              ),
+            ),
+          ],
+        );
+      }
       return Card(
         color: AppTheme.asphaltElevated,
-        margin: widget.compact
-            ? const EdgeInsets.fromLTRB(8, 0, 8, 8)
-            : null,
         child: ListTile(
-          dense: widget.compact,
-          leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
           title: Text(
             l10n.familyNotifyToggle,
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
-          subtitle: Text(
-            widget.compact ? l10n.familyNotifyHelpRodada : l10n.familyNotifyHelp,
-          ),
+          subtitle: Text(l10n.familyNotifyHelp),
           trailing: FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.lineHot,
-            ),
             onPressed: () => shareFamilyWatchLink(
               context,
               ref,
               localRideId: widget.localRideId,
               riderDisplayName: widget.riderDisplayName,
             ),
-            icon: const Icon(Icons.ios_share, size: 16),
+            icon: Icon(_shareIcon(context), size: 16),
             label: Text(l10n.familyNotifyStart),
           ),
         ),
+      );
+    }
+
+    if (widget.compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.familyWatchActive,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () async {
+                  await ctrl.end();
+                },
+                child: Text(l10n.familyWatchStop),
+              ),
+              IconButton(
+                tooltip: l10n.familyNotifyToggle,
+                visualDensity: VisualDensity.compact,
+                icon: Icon(_shareIcon(context), size: 20),
+                onPressed: () => shareFamilyWatchLink(
+                  context,
+                  ref,
+                  localRideId: widget.localRideId,
+                  riderDisplayName: widget.riderDisplayName,
+                ),
+              ),
+            ],
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              OutlinedButton(
+                onPressed: () => ctrl.postOk(),
+                child: Text(l10n.familyOk),
+              ),
+              OutlinedButton(
+                onPressed: () => ctrl.postStopped(),
+                child: Text(l10n.familyStopped),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.lineHot,
+                ),
+                onPressed: () => ctrl.postSos(),
+                child: Text(l10n.familySos),
+              ),
+            ],
+          ),
+        ],
       );
     }
 
@@ -188,4 +263,11 @@ class _ActiveWatchPanelState extends ConsumerState<ActiveWatchPanel> {
       ),
     );
   }
+}
+
+IconData _shareIcon(BuildContext context) {
+  final platform = Theme.of(context).platform;
+  return platform == TargetPlatform.iOS || platform == TargetPlatform.macOS
+      ? Icons.ios_share
+      : Icons.share;
 }

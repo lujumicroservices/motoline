@@ -11,6 +11,7 @@ import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../../reel/reel_compose_screen.dart';
 import '../../watch/family_circle_screen.dart';
+import '../leave_rodada.dart';
 import '../models/rodada_models.dart';
 import '../rodada_itinerary.dart';
 import '../rodada_itinerary_map.dart';
@@ -123,6 +124,23 @@ class RodadaOverviewTab extends ConsumerWidget {
                     ],
                     const SizedBox(height: 8),
                     _RsvpRow(rodadaId: rodadaId, current: m.rsvp),
+                    if (!m.isHost)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () async {
+                            final left = await confirmAndLeaveRodada(
+                              context,
+                              ref,
+                              rodadaId: rodadaId,
+                            );
+                            if (left && context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: Text(l10n.leaveRodada),
+                        ),
+                      ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.shareLocationOnRoute),

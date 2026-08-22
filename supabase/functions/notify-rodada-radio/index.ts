@@ -1,5 +1,5 @@
-// Sends FCM for a rodada invite. Secret: FIREBASE_SERVICE_ACCOUNT (JSON).
-// Uses service role to read invitee tokens; caller JWT must be host/cohost.
+// FCM for rodada radio. Alerts (kind=safety) use max-priority channel.
+// Caller JWT must be the message author and a member. Secret: FIREBASE_SERVICE_ACCOUNT.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
@@ -9,29 +9,10 @@ import {
   sendFcmToTokens,
 } from "../_shared/fcm.ts";
 
-function formatWhen(iso: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  try {
-    return new Intl.DateTimeFormat("es-MX", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "America/Mexico_City",
-    }).format(d);
-  } catch {
-    return d.toISOString();
-  }
-}
-
-function formatKm(meters: number | null): string | null {
-  if (meters == null || !Number.isFinite(meters) || meters <= 0) return null;
-  const km = meters / 1000;
-  if (km < 10) return `${km.toFixed(1)} km`;
-  return `${Math.round(km)} km`;
+function clip(text: string, max: number): string {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1)}…`;
 }
 
 Deno.serve(async (req) => {
@@ -57,18 +38,10 @@ Deno.serve(async (req) => {
   const rodadaId = typeof payload.rodada_id === "string"
     ? payload.rodada_id.trim()
     : "";
-  const userIdsRaw = payload.user_ids;
-  const single = typeof payload.user_id === "string"
-    ? payload.user_id.trim()
+  const messageId = typeof payload.message_id === "string"
+    ? payload.message_id.trim()
     : "";
-  const userIds = new Set<string>();
-  if (single) userIds.add(single);
-  if (Array.isArray(userIdsRaw)) {
-    for (const id of userIdsRaw) {
-      if (typeof id === "string" && id.trim()) userIds.add(id.trim());
-    }
-  }
-  if (!rodadaId || userIds.size === 0) {
+  if (!rodadaId || !messageId) {
     return json(400, { error: "invalid_payload" });
   }
 
@@ -97,55 +70,85 @@ Deno.serve(async (req) => {
 
   const { data: membership } = await admin
     .from("rodada_members")
-    .select("role")
+    .select("role, rsvp")
     .eq("rodada_id", rodadaId)
     .eq("user_id", callerId)
     .maybeSingle();
-  const role = (membership as { role?: string } | null)?.role;
-  if (role !== "host" && role !== "cohost") {
-    return json(403, { error: "forbidden" });
+  if (!membership) return json(403, { error: "forbidden" });
+
+  const { data: msg } = await admin
+    .from("rodada_messages")
+    .select("id, rodada_id, user_id, body, kind")
+    .eq("id", messageId)
+    .eq("rodada_id", rodadaId)
+    .maybeSingle();
+  if (!msg) return json(404, { error: "not_found" });
+  const rec = msg as {
+    user_id: string;
+    body?: string;
+    kind?: string;
+  };
+  if (rec.user_id !== callerId) return json(403, { error: "forbidden" });
+  const kind = rec.kind === "safety" ? "safety" : "text";
+  if (rec.kind === "system") {
+    return json(200, { sent: 0, skipped: "system" });
   }
 
   const { data: rodada } = await admin
     .from("rodadas")
-    .select("title, destination, starts_at, route_distance_m, host_id")
+    .select("title")
     .eq("id", rodadaId)
     .maybeSingle();
-  if (!rodada) return json(404, { error: "not_found" });
+  const title =
+    ((rodada as { title?: string } | null)?.title ?? "Rodada").trim() ||
+    "Rodada";
 
-  const rec = rodada as Record<string, unknown>;
-  const hostId = rec.host_id as string;
-  const { data: hostRow } = await admin
+  const { data: senderRow } = await admin
     .from("profiles")
     .select("display_name")
-    .eq("id", hostId)
+    .eq("id", callerId)
     .maybeSingle();
-  const hostName =
-    ((hostRow as { display_name?: string } | null)?.display_name ?? "").trim() ||
-    "Un rider";
-  const title = ((rec.title as string) ?? "Rodada").trim() || "Rodada";
-  const dest = (rec.destination as string | null)?.trim() || null;
-  const when = formatWhen(rec.starts_at as string | null);
-  const km = formatKm(
-    rec.route_distance_m == null ? null : Number(rec.route_distance_m),
-  );
-  const bodyParts = [dest, when, km].filter(Boolean);
-  const notifTitle = `${hostName} te invitó a ${title}`;
-  const notifBody = bodyParts.length > 0
-    ? bodyParts.join(" · ")
-    : "Abre RiderLab para aceptar o rechazar.";
+  const senderName =
+    ((senderRow as { display_name?: string } | null)?.display_name ?? "")
+      .trim() || "Un rider";
+
+  const bodyText = clip(rec.body ?? "", 180);
+  const isAlert = kind === "safety";
+  const notifTitle = isAlert
+    ? `ALERTA · ${title}`
+    : `${senderName} · radio`;
+  const notifBody = isAlert
+    ? `${senderName}: ${bodyText || "Necesito ayuda"}`
+    : (bodyText || title);
+
+  const { data: memberRows } = await admin
+    .from("rodada_members")
+    .select("user_id, rsvp")
+    .eq("rodada_id", rodadaId);
+  const recipientIds = (memberRows ?? [])
+    .map((r) => r as { user_id?: string; rsvp?: string })
+    .filter((r) =>
+      typeof r.user_id === "string" &&
+      r.user_id !== callerId &&
+      r.rsvp !== "declined"
+    )
+    .map((r) => r.user_id as string);
+  if (recipientIds.length === 0) {
+    return json(200, { sent: 0, skipped: "no_recipients" });
+  }
 
   const { data: tokenRows } = await admin
     .from("device_tokens")
     .select("token")
-    .in("user_id", [...userIds]);
+    .in("user_id", recipientIds);
   const tokens = (tokenRows ?? [])
     .map((r) => (r as { token?: string }).token)
     .filter((t): t is string => typeof t === "string" && t.length > 0);
   if (tokens.length === 0) {
-    console.log("notify-rodada-invite", JSON.stringify({
+    console.log("notify-rodada-radio", JSON.stringify({
       rodadaId,
-      invitees: userIds.size,
+      kind,
+      recipients: recipientIds.length,
       tokens: 0,
       skipped: "no_tokens",
     }));
@@ -161,23 +164,29 @@ Deno.serve(async (req) => {
         title: notifTitle,
         body: notifBody,
         data: {
-          type: "rodada_invite",
+          type: isAlert ? "rodada_alert" : "rodada_radio",
+          kind,
           rodada_id: rodadaId,
+          tab: "radio",
         },
-        channelId: "riderlab_rodada_invites",
+        channelId: isAlert
+          ? "riderlab_rodada_alerts"
+          : "riderlab_rodada_radio",
         androidPriority: "high",
+        interruptionLevel: isAlert ? "time-sensitive" : "active",
       },
     });
-    console.log("notify-rodada-invite", JSON.stringify({
+    console.log("notify-rodada-radio", JSON.stringify({
       rodadaId,
-      invitees: userIds.size,
+      kind,
+      recipients: recipientIds.length,
       tokens: tokens.length,
       sent,
     }));
     return json(200, { sent });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("notify-rodada-invite", msg);
-    return json(502, { error: "upstream_failed", detail: msg.slice(0, 80) });
+    const msgText = e instanceof Error ? e.message : String(e);
+    console.error("notify-rodada-radio", msgText);
+    return json(502, { error: "upstream_failed", detail: msgText.slice(0, 80) });
   }
 });

@@ -33,6 +33,7 @@ class RiderLabApp extends ConsumerWidget {
     return MaterialApp(
       title: 'RiderLab',
       navigatorKey: appNavigatorKey,
+      scaffoldMessengerKey: appMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       locale: locale,

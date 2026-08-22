@@ -535,13 +535,13 @@
   "friendsHelp": "Busca riders, envía solicitudes de amistad e invita amigos aceptados a una rodada.",
   "familyCircleTitle": "Círculo familiar",
   "familyCircleHomeTile": "Quién puede saber que estás bien al rodar",
-  "familyCircleHelp": "Agrega contactos aquí. El link WhatsApp se genera al Grabar o en una Rodada (En vivo / corazón). Puedes reenviarlo a más personas sin romper los anteriores.",
+  "familyCircleHelp": "Agrega contactos aquí. El link se genera al Grabar o en una Rodada (En vivo). Puedes reenviarlo a más personas sin romper los anteriores.",
   "familyHowToShareTitle": "Cómo mandar el link",
-  "familyHowToShareSteps": "1) En Grabar o en una Rodada (pestaña En vivo / corazón).\n2) Toca WhatsApp / Enviar a otro.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.",
+  "familyHowToShareSteps": "1) En Grabar o en una Rodada (pestaña En vivo).\n2) Toca el icono de compartir.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.",
   "familyShareNeedsRide": "Primero inicia una grabación o abre una Rodada. Luego aparece el botón para compartir el link.",
   "familyShareFromCircle": "Compartir link ahora",
-  "familyRodadaTipTitle": "¿Link para familia (WhatsApp)?",
-  "familyRodadaTipBody": "Pack = mapa de la rodada en la app. Familia sin app = corazón / Avisar a familia (mismo link se puede reenviar).",
+  "familyRodadaTipTitle": "¿Link para familia?",
+  "familyRodadaTipBody": "Pack = mapa de la rodada en la app. Familia sin app = compartir desde En vivo (mismo link se puede reenviar).",
   "familyRodadaTipCta": "Ver círculo familiar",
   "familyAppBarShareTooltip": "Avisar a familia",
   "familyAddContact": "Agregar contacto",
@@ -559,9 +559,9 @@
   "familyTapToWatch": "Toca para abrir el mapa",
   "familyRiderFallback": "Rider",
   "familyNotifyToggle": "Avisar a familia",
-  "familyNotifyHelp": "Genera un link y abre WhatsApp para mandárselo a tu familiar (no necesitan la app).",
+  "familyNotifyHelp": "Genera un link y abre el menú de compartir para mandárselo a tu familiar (no necesitan la app).",
   "familyNotifyHelpRodada": "Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.",
-  "familyNotifyStart": "WhatsApp",
+  "familyNotifyStart": "Compartir",
   "familyWatchActive": "Familia puede verte",
   "familyWatchStop": "Parar",
   "familyOk": "Todo bien",
@@ -717,7 +717,11 @@
   "markAsLive": "Marcar EN VIVO",
   "markAsOpen": "Marcar abierta",
   "endRodada": "Terminar rodada",
-  "inviteFriend": "Invitar amigo",
+  "inviteFriend": "Invitar amigos",
+  "leaveRodada": "Salir de la rodada",
+  "leaveRodadaConfirmTitle": "¿Salir de esta rodada?",
+  "leaveRodadaConfirmBody": "Dejarás de verla en tu lista. El anfitrión no se borra.",
+  "leaveRodadaDone": "Saliste de la rodada",
   "rodadaTabOverview": "Resumen",
   "rodadaTabLive": "En vivo",
   "rodadaTabRides": "Recorridos",
@@ -743,6 +747,28 @@
   "rsvpAccept": "Aceptar",
   "rsvpDecline": "Rechazar",
   "inviteSent": "Invitación enviada",
+  "inviteAlreadyMember": "Ya está en esta rodada",
+  "inviteSentNoToken": "Invitado en la app. Ese teléfono aún no registró notificaciones — que abra RiderLab con su cuenta.",
+  "inviteSentPushFailed": "Invitado en la app, pero la notificación falló: {reason}",
+  "@inviteSentPushFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "invitePushAllOk": "{count} notificaciones enviadas",
+  "@invitePushAllOk": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "invitePushSummary": "Invitados en la app. Notificaciones: {ok} enviadas, {failed} fallidas ({reason})",
+  "@invitePushSummary": {
+    "placeholders": {
+      "ok": { "type": "int" },
+      "failed": { "type": "int" },
+      "reason": { "type": "String" }
+    }
+  },
   "rodadaCodeBanner": "código {code}",
   "@rodadaCodeBanner": {
     "placeholders": {
@@ -812,6 +838,12 @@
   "photoAdd": "Añadir",
   "noPhotosYet": "Aún no hay fotos",
   "photoUploaded": "Foto subida",
+  "photosUploaded": "{count} fotos subidas",
+  "@photosUploaded": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "photoTitle": "Foto",
   "photoNeedsActiveRide": "Empieza un recorrido para ligar la foto a la ruta",
   "photoLinkedToRoute": "Foto ligada a la ruta",
@@ -976,6 +1008,11 @@
   "bikeCustomModelHint": "Escribe el nombre del modelo",
   "leanLabHomeCta": "Lab de inclinación — Bugambilias",
   "leanLabTitle": "Lab de inclinación",
+  "labsSectionTitle": "Pruebas / nuevas funciones",
+  "labsSectionHelp": "Herramientas experimentales. No forman parte del flujo diario.",
+  "pushDiagnosticsTitle": "Último envío de notificación",
+  "pushDiagnosticsEmpty": "Aún no hay un envío de notificación registrado.",
+  "pushDiagnosticsCopied": "Registro de notificaciones copiado",
   "leanLabIntro": "Bugambilias en ambos sentidos, con subidas. Guarda el 0° con la moto derecha, rueda y marca las curvas para mejorar la inclinación.",
   "leanLabCircuitName": "Circuito Bugambilias",
   "leanLabCircuitHelp": "Plaza Panorámica Bugambilias · ambos sentidos · abrir en Maps",

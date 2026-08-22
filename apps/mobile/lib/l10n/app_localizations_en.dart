@@ -1347,14 +1347,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyCircleHelp =>
-      'Add contacts here. The WhatsApp link is created while recording or on a Rodada (Live / heart). You can resend it to more people without breaking earlier links.';
+      'Add contacts here. The link is created while recording or on a Rodada (Live). You can resend it to more people without breaking earlier links.';
 
   @override
   String get familyHowToShareTitle => 'How to send the link';
 
   @override
   String get familyHowToShareSteps =>
-      '1) On Record or on a Rodada (Live tab / heart).\n2) Tap WhatsApp / Send to another.\n3) Pick contacts — the same link works for everyone.\n\nPack “Share live” is separate: only riders with the app.';
+      '1) On Record or on a Rodada (Live tab).\n2) Tap the share icon.\n3) Pick contacts — the same link works for everyone.\n\nPack “Share live” is separate: only riders with the app.';
 
   @override
   String get familyShareNeedsRide =>
@@ -1364,11 +1364,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyShareFromCircle => 'Share link now';
 
   @override
-  String get familyRodadaTipTitle => 'Family link (WhatsApp)?';
+  String get familyRodadaTipTitle => 'Family link?';
 
   @override
   String get familyRodadaTipBody =>
-      'Pack = rodada map in the app. Family without the app = heart / Notify family (same link can be resent).';
+      'Pack = rodada map in the app. Family without the app = share from Live (same link can be resent).';
 
   @override
   String get familyRodadaTipCta => 'Open family circle';
@@ -1426,14 +1426,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyNotifyHelp =>
-      'Creates a link and opens WhatsApp so you can send it (they don’t need the app).';
+      'Creates a link and opens the share sheet so you can send it (they don’t need the app).';
 
   @override
   String get familyNotifyHelpRodada =>
       'Notify family/friends outside the pack. You can resend the same link to more people.';
 
   @override
-  String get familyNotifyStart => 'WhatsApp';
+  String get familyNotifyStart => 'Share';
 
   @override
   String get familyWatchActive => 'Family can see you';
@@ -1736,7 +1736,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get endRodada => 'End rodada';
 
   @override
-  String get inviteFriend => 'Invite friend';
+  String get inviteFriend => 'Invite friends';
+
+  @override
+  String get leaveRodada => 'Leave rodada';
+
+  @override
+  String get leaveRodadaConfirmTitle => 'Leave this rodada?';
+
+  @override
+  String get leaveRodadaConfirmBody =>
+      'It will leave your list. The host is not removed.';
+
+  @override
+  String get leaveRodadaDone => 'You left the rodada';
 
   @override
   String get rodadaTabOverview => 'Overview';
@@ -1786,6 +1799,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteSent => 'Invite sent';
+
+  @override
+  String get inviteAlreadyMember => 'Already on this rodada';
+
+  @override
+  String get inviteSentNoToken =>
+      'Invited in the app. That phone has no notification token yet — ask them to open RiderLab signed in.';
+
+  @override
+  String inviteSentPushFailed(String reason) {
+    return 'Invited in the app, but the notification failed: $reason';
+  }
+
+  @override
+  String invitePushAllOk(int count) {
+    return '$count notifications sent';
+  }
+
+  @override
+  String invitePushSummary(int ok, int failed, String reason) {
+    return 'Invited in the app. Notifications: $ok sent, $failed failed ($reason)';
+  }
 
   @override
   String rodadaCodeBanner(String code) {
@@ -1941,6 +1976,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photoUploaded => 'Photo uploaded';
+
+  @override
+  String photosUploaded(int count) {
+    return '$count photos uploaded';
+  }
 
   @override
   String get photoTitle => 'Photo';
@@ -2266,6 +2306,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabTitle => 'Lean Lab';
+
+  @override
+  String get labsSectionTitle => 'Tests / new features';
+
+  @override
+  String get labsSectionHelp =>
+      'Experimental tools. Not part of the daily ride flow.';
+
+  @override
+  String get pushDiagnosticsTitle => 'Last notification send';
+
+  @override
+  String get pushDiagnosticsEmpty => 'No notification send recorded yet.';
+
+  @override
+  String get pushDiagnosticsCopied => 'Notification log copied';
 
   @override
   String get leanLabIntro =>

@@ -14,6 +14,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../maps/live_gps_map_mixin.dart';
 import '../../watch/active_watch_panel.dart';
+import '../../watch/watch_providers.dart';
 import '../../watch/watch_repository.dart';
 import '../models/rodada_models.dart';
 import '../photos/ride_photo_capture.dart';
@@ -33,71 +34,88 @@ class RodadaLiveTab extends ConsumerWidget {
     final l10n = context.l10n;
     final membership = ref.watch(myRodadaMembershipProvider(rodadaId));
 
+    final localRideId = WatchRepository.rodadaLocalRideId(rodadaId);
+    final session = ref.watch(activeWatchControllerProvider);
+    final familyOn =
+        session != null && session.localRideId == localRideId;
+
     return Column(
       children: [
-        membership.maybeWhen(
-          data: (m) {
-            if (m?.shareLive == true) {
-              return Material(
-                color: AppTheme.line.withValues(alpha: 0.12),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.sensors, color: AppTheme.line, size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          l10n.sharingLocationBanner,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return Material(
-              color: AppTheme.asphaltElevated,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: Row(
+        Material(
+          color: AppTheme.asphaltElevated,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 2, 4, 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        l10n.liveMapViewOnly,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.steel,
-                        ),
+                      child: membership.maybeWhen(
+                        data: (m) {
+                          final sharing = m?.shareLive == true;
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.sensors,
+                                color: sharing ? AppTheme.line : AppTheme.steel,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  sharing
+                                      ? l10n.sharingLocationBanner
+                                      : l10n.liveMapViewOnly,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: sharing ? null : AppTheme.steel,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (!sharing)
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    visualDensity: VisualDensity.compact,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  onPressed: () async {
+                                    await ref
+                                        .read(rodadaRepositoryProvider)
+                                        .updateMySharing(
+                                          rodadaId: rodadaId,
+                                          shareLive: true,
+                                        );
+                                    ref.invalidate(
+                                      myRodadaMembershipProvider(rodadaId),
+                                    );
+                                  },
+                                  child: Text(l10n.shareLive),
+                                ),
+                            ],
+                          );
+                        },
+                        orElse: () => const SizedBox.shrink(),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () async {
-                        await ref.read(rodadaRepositoryProvider).updateMySharing(
-                              rodadaId: rodadaId,
-                              shareLive: true,
-                            );
-                        ref.invalidate(myRodadaMembershipProvider(rodadaId));
-                      },
-                      child: Text(l10n.shareLive),
-                    ),
+                    if (!familyOn)
+                      ActiveWatchPanel(
+                        localRideId: localRideId,
+                        compact: true,
+                      ),
                   ],
                 ),
-              ),
-            );
-          },
-          orElse: () => const SizedBox.shrink(),
-        ),
-        ActiveWatchPanel(
-          localRideId: WatchRepository.rodadaLocalRideId(rodadaId),
-          compact: true,
+                if (familyOn)
+                  ActiveWatchPanel(
+                    localRideId: localRideId,
+                    compact: true,
+                  ),
+              ],
+            ),
+          ),
         ),
         Expanded(
           child: _RodadaLiveMapHost(

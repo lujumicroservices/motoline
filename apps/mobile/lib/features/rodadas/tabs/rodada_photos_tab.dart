@@ -111,29 +111,45 @@ class RodadaPhotosTab extends ConsumerWidget {
   }
 
   Future<void> _pickAndUpload(BuildContext context, WidgetRef ref) async {
+    final picker = ImagePicker();
+    final files = await picker.pickMultiImage(
+      maxWidth: 1920,
+      maxHeight: 1920,
+      imageQuality: 82,
+    );
+    if (files.isEmpty) return;
+    if (!context.mounted) return;
+    await _uploadPickedFiles(context, ref, files);
+  }
+
+  Future<void> _uploadPickedFiles(
+    BuildContext context,
+    WidgetRef ref,
+    List<XFile> files,
+  ) async {
     final l10n = context.l10n;
     try {
-      final picker = ImagePicker();
-      final file = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 82,
-      );
-      if (file == null) return;
-      final bytes = await file.readAsBytes();
-      final mime = file.mimeType ?? 'image/jpeg';
-      await ref.read(rodadaRepositoryProvider).uploadPhoto(
-            rodadaId: rodadaId,
-            bytes: bytes,
-            contentType: mime,
-            source: 'gallery',
-            takenAt: DateTime.now(),
-          );
+      var ok = 0;
+      for (final file in files) {
+        final bytes = await file.readAsBytes();
+        final mime = file.mimeType ?? 'image/jpeg';
+        await ref.read(rodadaRepositoryProvider).uploadPhoto(
+              rodadaId: rodadaId,
+              bytes: bytes,
+              contentType: mime,
+              source: 'gallery',
+              takenAt: DateTime.now(),
+            );
+        ok++;
+      }
       ref.invalidate(rodadaPhotosProvider(rodadaId));
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.photoUploaded)),
+        SnackBar(
+          content: Text(
+            ok == 1 ? l10n.photoUploaded : l10n.photosUploaded(ok),
+          ),
+        ),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -178,9 +194,14 @@ class RodadaPhotosTab extends ConsumerWidget {
       );
       if (!context.mounted) return;
       if (candidates.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.noPhotosYet)),
+        if (!context.mounted) return;
+        final files = await ImagePicker().pickMultiImage(
+          maxWidth: 1920,
+          maxHeight: 1920,
+          imageQuality: 82,
         );
+        if (files.isEmpty || !context.mounted) return;
+        await _uploadPickedFiles(context, ref, files);
         return;
       }
       final cloudId = await ref

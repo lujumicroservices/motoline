@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/lean_lab/lean_lab_service.dart';
+import '../../core/notifications/push_diagnostics.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/bike_provider.dart';
 import '../../providers/locale_provider.dart';
@@ -30,6 +32,14 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _syncing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    PushDiagnostics.hydrate().then((_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   Future<void> _syncCloud() async {
     final l10n = context.l10n;
@@ -98,10 +108,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            l10n.leanLabTitle,
+            l10n.labsSectionTitle,
             style: GoogleFonts.barlowCondensed(
               fontSize: 18,
               fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.labsSectionHelp,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 13,
+              height: 1.35,
             ),
           ),
           const SizedBox(height: 8),
@@ -150,6 +169,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               );
             },
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.notifications_outlined, color: AppTheme.mist),
+            title: Text(
+              l10n.pushDiagnosticsTitle,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: SelectableText(
+              PushDiagnostics.history.isEmpty
+                  ? l10n.pushDiagnosticsEmpty
+                  : PushDiagnostics.history.reversed.take(5).join('\n'),
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: PushDiagnostics.history.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: l10n.pushDiagnosticsTitle,
+                    icon: const Icon(Icons.copy, size: 18),
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        ClipboardData(
+                          text: PushDiagnostics.history.join('\n'),
+                        ),
+                      );
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.pushDiagnosticsCopied)),
+                      );
+                    },
+                  ),
           ),
           const SizedBox(height: 8),
           Text(

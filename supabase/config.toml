@@ -25,3 +25,6 @@ verify_jwt = true
 
 [functions.notify-rodada-invite]
 verify_jwt = true
+
+[functions.notify-rodada-radio]
+verify_jwt = true

@@ -9,6 +9,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/alias_provider.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
+import '../rodadas/invite_push_feedback.dart';
 import '../rodadas/rodada_providers.dart';
 import '../rodadas/rodadas_screen.dart';
 import '../watch/family_circle_screen.dart';
@@ -495,13 +496,13 @@ class _FriendTile extends ConsumerWidget {
     );
     if (picked == null) return;
     try {
-      await ref.read(rodadaRepositoryProvider).inviteUser(
+      final result = await ref.read(rodadaRepositoryProvider).inviteUser(
             rodadaId: picked,
             userId: friend.id,
           );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.friendInvited(friend.label))),
+        SnackBar(content: Text(messageForInviteResult(l10n, result))),
       );
     } catch (e) {
       if (!context.mounted) return;

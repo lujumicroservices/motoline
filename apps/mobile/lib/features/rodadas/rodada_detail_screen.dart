@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/models/cloud_models.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
-import '../watch/family_share.dart';
-import '../watch/watch_repository.dart';
+import 'invite_push_feedback.dart';
+import 'leave_rodada.dart';
 import 'rodada_providers.dart';
 import 'tabs/rodada_live_tab.dart';
 import 'tabs/rodada_messages_tab.dart';
@@ -20,9 +21,14 @@ import 'tabs/rodada_rides_tab.dart';
 /// Shell with lazy tabs: switching tabs destroys the previous body so
 /// autoDispose providers (live GPS, photos, tracks) release immediately.
 class RodadaDetailScreen extends ConsumerStatefulWidget {
-  const RodadaDetailScreen({super.key, required this.rodadaId});
+  const RodadaDetailScreen({
+    super.key,
+    required this.rodadaId,
+    this.initialTab = 0,
+  });
 
   final String rodadaId;
+  final int initialTab;
 
   @override
   ConsumerState<RodadaDetailScreen> createState() => _RodadaDetailScreenState();
@@ -35,7 +41,11 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 5, vsync: this);
+    _tabs = TabController(
+      length: 5,
+      vsync: this,
+      initialIndex: widget.initialTab.clamp(0, 4),
+    );
     _tabs.addListener(() {
       if (_tabs.indexIsChanging) return;
       setState(() {});
@@ -81,15 +91,6 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
           error: (_, __) => Text(l10n.rodadaFallback),
         ),
         actions: [
-          IconButton(
-            tooltip: l10n.familyAppBarShareTooltip,
-            icon: const Icon(Icons.favorite, color: AppTheme.lineHot),
-            onPressed: () => shareFamilyWatchLink(
-              context,
-              ref,
-              localRideId: WatchRepository.rodadaLocalRideId(widget.rodadaId),
-            ),
-          ),
           overview.maybeWhen(
             data: (r) {
               if (r == null) return const SizedBox.shrink();
@@ -109,14 +110,37 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
           ),
           membership.maybeWhen(
             data: (m) {
-              if (m == null || !m.isHost) return const SizedBox.shrink();
+              if (m == null) return const SizedBox.shrink();
+              if (m.isHost) {
+                return PopupMenuButton<String>(
+                  onSelected: _hostAction,
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'live', child: Text(l10n.markAsLive)),
+                    PopupMenuItem(value: 'open', child: Text(l10n.markAsOpen)),
+                    PopupMenuItem(value: 'ended', child: Text(l10n.endRodada)),
+                    PopupMenuItem(
+                      value: 'invite',
+                      child: Text(l10n.inviteFriend),
+                    ),
+                  ],
+                );
+              }
               return PopupMenuButton<String>(
-                onSelected: _hostAction,
+                onSelected: (value) async {
+                  if (value != 'leave') return;
+                  final left = await confirmAndLeaveRodada(
+                    context,
+                    ref,
+                    rodadaId: widget.rodadaId,
+                  );
+                  if (!left || !context.mounted) return;
+                  Navigator.of(context).pop();
+                },
                 itemBuilder: (_) => [
-                  PopupMenuItem(value: 'live', child: Text(l10n.markAsLive)),
-                  PopupMenuItem(value: 'open', child: Text(l10n.markAsOpen)),
-                  PopupMenuItem(value: 'ended', child: Text(l10n.endRodada)),
-                  PopupMenuItem(value: 'invite', child: Text(l10n.inviteFriend)),
+                  PopupMenuItem(
+                    value: 'leave',
+                    child: Text(l10n.leaveRodada),
+                  ),
                 ],
               );
             },
@@ -164,7 +188,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
     final repo = ref.read(rodadaRepositoryProvider);
     try {
       if (action == 'invite') {
-        await _inviteFriend();
+        await _inviteFriends();
         return;
       }
       await repo.updateRodada(widget.rodadaId, status: action);
@@ -182,41 +206,112 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
     }
   }
 
-  Future<void> _inviteFriend() async {
+  Future<void> _inviteFriends() async {
     final l10n = context.l10n;
     if (!SupabaseBootstrap.isReady) return;
     final friends = await ref.read(friendsListProvider.future);
+    final members = await ref.read(
+      rodadaMembersProvider(widget.rodadaId).future,
+    );
     if (!mounted) return;
-    final picked = await showModalBottomSheet<String>(
+    final taken = {
+      for (final m in members)
+        if (m.rsvp != 'pending') m.userId,
+    };
+    final invitable = friends.where((f) => !taken.contains(f.id)).toList();
+    final picked = await showModalBottomSheet<Set<String>>(
       context: context,
+      isScrollControlled: true,
       builder: (ctx) {
-        if (friends.isEmpty) {
+        if (invitable.isEmpty) {
           return Padding(
             padding: const EdgeInsets.all(24),
             child: Text(l10n.noFriendsToInvite),
           );
         }
-        return ListView.builder(
-          itemCount: friends.length,
-          itemBuilder: (_, i) {
-            final f = friends[i];
-            return ListTile(
-              title: Text(f.label),
-              onTap: () => Navigator.pop(ctx, f.id),
-            );
-          },
+        final height = MediaQuery.sizeOf(ctx).height * 0.55;
+        return SizedBox(
+          height: height,
+          child: _InviteFriendsSheet(friends: invitable),
         );
       },
     );
-    if (picked == null) return;
-    await ref.read(rodadaRepositoryProvider).inviteUser(
-          rodadaId: widget.rodadaId,
-          userId: picked,
-        );
+    if (picked == null || picked.isEmpty) return;
+    final repo = ref.read(rodadaRepositoryProvider);
+    final results = [
+      for (final id in picked)
+        await repo.inviteUser(rodadaId: widget.rodadaId, userId: id),
+    ];
     ref.invalidate(rodadaMembersProvider(widget.rodadaId));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.inviteSent)),
+    final msg = messageForInviteBatch(l10n, results);
+    if (msg == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+}
+
+class _InviteFriendsSheet extends StatefulWidget {
+  const _InviteFriendsSheet({required this.friends});
+
+  final List<RiderProfile> friends;
+
+  @override
+  State<_InviteFriendsSheet> createState() => _InviteFriendsSheetState();
+}
+
+class _InviteFriendsSheetState extends State<_InviteFriendsSheet> {
+  final Set<String> _ids = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                l10n.inviteFriend,
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              children: [
+                for (final f in widget.friends)
+                  CheckboxListTile(
+                    value: _ids.contains(f.id),
+                    title: Text(f.label),
+                    onChanged: (v) {
+                      setState(() {
+                        if (v == true) {
+                          _ids.add(f.id);
+                        } else {
+                          _ids.remove(f.id);
+                        }
+                      });
+                    },
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _ids.isEmpty
+                    ? null
+                    : () => Navigator.pop(context, Set<String>.from(_ids)),
+                child: Text(l10n.inviteFriends),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

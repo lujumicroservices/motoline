@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/notifications/push_diagnostics.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../rodada_providers.dart';
@@ -42,6 +43,18 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
           );
       _controller.clear();
       ref.invalidate(rodadaMessagesProvider(widget.rodadaId));
+      if (kind == 'safety' &&
+          PushDiagnostics.hasError &&
+          PushDiagnostics.lastLine != null &&
+          mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${l10n.pushDiagnosticsTitle}: ${PushDiagnostics.lastLine}',
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));

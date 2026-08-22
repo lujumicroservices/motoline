@@ -464,13 +464,13 @@
   "friendsHelp": "Search riders, send friend requests, and invite accepted friends to a rodada.",
   "familyCircleTitle": "Family circle",
   "familyCircleHomeTile": "People who can see you’re OK while riding",
-  "familyCircleHelp": "Add contacts here. The WhatsApp link is created while recording or on a Rodada (Live / heart). You can resend it to more people without breaking earlier links.",
+  "familyCircleHelp": "Add contacts here. The link is created while recording or on a Rodada (Live). You can resend it to more people without breaking earlier links.",
   "familyHowToShareTitle": "How to send the link",
-  "familyHowToShareSteps": "1) On Record or on a Rodada (Live tab / heart).\n2) Tap WhatsApp / Send to another.\n3) Pick contacts — the same link works for everyone.\n\nPack “Share live” is separate: only riders with the app.",
+  "familyHowToShareSteps": "1) On Record or on a Rodada (Live tab).\n2) Tap the share icon.\n3) Pick contacts — the same link works for everyone.\n\nPack “Share live” is separate: only riders with the app.",
   "familyShareNeedsRide": "Start a recording or open a Rodada first. Then you can share the family link.",
   "familyShareFromCircle": "Share link now",
-  "familyRodadaTipTitle": "Family link (WhatsApp)?",
-  "familyRodadaTipBody": "Pack = rodada map in the app. Family without the app = heart / Notify family (same link can be resent).",
+  "familyRodadaTipTitle": "Family link?",
+  "familyRodadaTipBody": "Pack = rodada map in the app. Family without the app = share from Live (same link can be resent).",
   "familyRodadaTipCta": "Open family circle",
   "familyAppBarShareTooltip": "Notify family",
   "familyAddContact": "Add contact",
@@ -488,9 +488,9 @@
   "familyTapToWatch": "Tap to open map",
   "familyRiderFallback": "Rider",
   "familyNotifyToggle": "Notify family",
-  "familyNotifyHelp": "Creates a link and opens WhatsApp so you can send it (they don’t need the app).",
+  "familyNotifyHelp": "Creates a link and opens the share sheet so you can send it (they don’t need the app).",
   "familyNotifyHelpRodada": "Notify family/friends outside the pack. You can resend the same link to more people.",
-  "familyNotifyStart": "WhatsApp",
+  "familyNotifyStart": "Share",
   "familyWatchActive": "Family can see you",
   "familyWatchStop": "Stop",
   "familyOk": "All good",
@@ -646,7 +646,11 @@
   "markAsLive": "Mark as LIVE",
   "markAsOpen": "Mark as open",
   "endRodada": "End rodada",
-  "inviteFriend": "Invite friend",
+  "inviteFriend": "Invite friends",
+  "leaveRodada": "Leave rodada",
+  "leaveRodadaConfirmTitle": "Leave this rodada?",
+  "leaveRodadaConfirmBody": "It will leave your list. The host is not removed.",
+  "leaveRodadaDone": "You left the rodada",
   "rodadaTabOverview": "Overview",
   "rodadaTabLive": "Live",
   "rodadaTabRides": "Rides",
@@ -672,6 +676,28 @@
   "rsvpAccept": "Accept",
   "rsvpDecline": "Decline",
   "inviteSent": "Invite sent",
+  "inviteAlreadyMember": "Already on this rodada",
+  "inviteSentNoToken": "Invited in the app. That phone has no notification token yet — ask them to open RiderLab signed in.",
+  "inviteSentPushFailed": "Invited in the app, but the notification failed: {reason}",
+  "@inviteSentPushFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "invitePushAllOk": "{count} notifications sent",
+  "@invitePushAllOk": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "invitePushSummary": "Invited in the app. Notifications: {ok} sent, {failed} failed ({reason})",
+  "@invitePushSummary": {
+    "placeholders": {
+      "ok": { "type": "int" },
+      "failed": { "type": "int" },
+      "reason": { "type": "String" }
+    }
+  },
   "rodadaCodeBanner": "code {code}",
   "@rodadaCodeBanner": {
     "placeholders": {
@@ -741,6 +767,12 @@
   "photoAdd": "Add",
   "noPhotosYet": "No photos yet",
   "photoUploaded": "Photo uploaded",
+  "photosUploaded": "{count} photos uploaded",
+  "@photosUploaded": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "photoTitle": "Photo",
   "photoNeedsActiveRide": "Start a ride to pin the photo to the route",
   "photoLinkedToRoute": "Photo linked to the route",
@@ -905,6 +937,11 @@
   "bikeCustomModelHint": "Type the model name",
   "leanLabHomeCta": "Lean Lab — Bugambilias",
   "leanLabTitle": "Lean Lab",
+  "labsSectionTitle": "Tests / new features",
+  "labsSectionHelp": "Experimental tools. Not part of the daily ride flow.",
+  "pushDiagnosticsTitle": "Last notification send",
+  "pushDiagnosticsEmpty": "No notification send recorded yet.",
+  "pushDiagnosticsCopied": "Notification log copied",
   "leanLabIntro": "Bugambilias both ways, with hills. Set 0° with the bike upright, ride, then mark corners so we can improve lean.",
   "leanLabCircuitName": "Bugambilias circuit",
   "leanLabCircuitHelp": "Plaza Panorámica Bugambilias · both directions · open in Maps",

@@ -1357,14 +1357,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familyCircleHelp =>
-      'Agrega contactos aquí. El link WhatsApp se genera al Grabar o en una Rodada (En vivo / corazón). Puedes reenviarlo a más personas sin romper los anteriores.';
+      'Agrega contactos aquí. El link se genera al Grabar o en una Rodada (En vivo). Puedes reenviarlo a más personas sin romper los anteriores.';
 
   @override
   String get familyHowToShareTitle => 'Cómo mandar el link';
 
   @override
   String get familyHowToShareSteps =>
-      '1) En Grabar o en una Rodada (pestaña En vivo / corazón).\n2) Toca WhatsApp / Enviar a otro.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.';
+      '1) En Grabar o en una Rodada (pestaña En vivo).\n2) Toca el icono de compartir.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.';
 
   @override
   String get familyShareNeedsRide =>
@@ -1374,11 +1374,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get familyShareFromCircle => 'Compartir link ahora';
 
   @override
-  String get familyRodadaTipTitle => '¿Link para familia (WhatsApp)?';
+  String get familyRodadaTipTitle => '¿Link para familia?';
 
   @override
   String get familyRodadaTipBody =>
-      'Pack = mapa de la rodada en la app. Familia sin app = corazón / Avisar a familia (mismo link se puede reenviar).';
+      'Pack = mapa de la rodada en la app. Familia sin app = compartir desde En vivo (mismo link se puede reenviar).';
 
   @override
   String get familyRodadaTipCta => 'Ver círculo familiar';
@@ -1436,14 +1436,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familyNotifyHelp =>
-      'Genera un link y abre WhatsApp para mandárselo a tu familiar (no necesitan la app).';
+      'Genera un link y abre el menú de compartir para mandárselo a tu familiar (no necesitan la app).';
 
   @override
   String get familyNotifyHelpRodada =>
       'Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.';
 
   @override
-  String get familyNotifyStart => 'WhatsApp';
+  String get familyNotifyStart => 'Compartir';
 
   @override
   String get familyWatchActive => 'Familia puede verte';
@@ -1747,7 +1747,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get endRodada => 'Terminar rodada';
 
   @override
-  String get inviteFriend => 'Invitar amigo';
+  String get inviteFriend => 'Invitar amigos';
+
+  @override
+  String get leaveRodada => 'Salir de la rodada';
+
+  @override
+  String get leaveRodadaConfirmTitle => '¿Salir de esta rodada?';
+
+  @override
+  String get leaveRodadaConfirmBody =>
+      'Dejarás de verla en tu lista. El anfitrión no se borra.';
+
+  @override
+  String get leaveRodadaDone => 'Saliste de la rodada';
 
   @override
   String get rodadaTabOverview => 'Resumen';
@@ -1797,6 +1810,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get inviteSent => 'Invitación enviada';
+
+  @override
+  String get inviteAlreadyMember => 'Ya está en esta rodada';
+
+  @override
+  String get inviteSentNoToken =>
+      'Invitado en la app. Ese teléfono aún no registró notificaciones — que abra RiderLab con su cuenta.';
+
+  @override
+  String inviteSentPushFailed(String reason) {
+    return 'Invitado en la app, pero la notificación falló: $reason';
+  }
+
+  @override
+  String invitePushAllOk(int count) {
+    return '$count notificaciones enviadas';
+  }
+
+  @override
+  String invitePushSummary(int ok, int failed, String reason) {
+    return 'Invitados en la app. Notificaciones: $ok enviadas, $failed fallidas ($reason)';
+  }
 
   @override
   String rodadaCodeBanner(String code) {
@@ -1955,6 +1990,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get photoUploaded => 'Foto subida';
+
+  @override
+  String photosUploaded(int count) {
+    return '$count fotos subidas';
+  }
 
   @override
   String get photoTitle => 'Foto';
@@ -2281,6 +2321,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanLabTitle => 'Lab de inclinación';
+
+  @override
+  String get labsSectionTitle => 'Pruebas / nuevas funciones';
+
+  @override
+  String get labsSectionHelp =>
+      'Herramientas experimentales. No forman parte del flujo diario.';
+
+  @override
+  String get pushDiagnosticsTitle => 'Último envío de notificación';
+
+  @override
+  String get pushDiagnosticsEmpty =>
+      'Aún no hay un envío de notificación registrado.';
+
+  @override
+  String get pushDiagnosticsCopied => 'Registro de notificaciones copiado';
 
   @override
   String get leanLabIntro =>
