@@ -114,7 +114,7 @@ Future<void> continueAfterRideToRodadaShare({
     context,
     ReelComposeScreen(
       rideId: rideId,
-      rodadaId: linked!.rodadaId,
+      rodadaId: linked.rodadaId,
     ),
     replaceCurrent: replaceCurrent,
   );
