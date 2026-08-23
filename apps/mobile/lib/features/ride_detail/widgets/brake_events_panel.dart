@@ -19,12 +19,23 @@ class BrakeEventsPanel extends StatelessWidget {
     required this.events,
     required this.secondsForIndex,
     required this.isPro,
+    this.totalCount,
+    this.densityHiddenCount = 0,
+    this.zoomed = false,
     this.onSelectIndex,
     this.onZoomToBrake,
     this.onUpgrade,
   });
 
   final List<BrakeEvent> events;
+
+  /// True ride total for the Pro teaser (badge). Defaults to [events].length.
+  final int? totalCount;
+
+  /// Events in the current pool that did not make the density cap.
+  final int densityHiddenCount;
+
+  final bool zoomed;
 
   /// Elapsed ride seconds for a local sample index (view-relative).
   final double Function(int index) secondsForIndex;
@@ -43,24 +54,27 @@ class BrakeEventsPanel extends StatelessWidget {
     final l10n = context.l10n;
     if (events.isEmpty) {
       return Text(
-        l10n.brakesEmpty,
+        zoomed ? l10n.brakesEmptyZoom : l10n.brakesEmpty,
         style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
       );
     }
 
+    final rideTotal = totalCount ?? events.length;
     final visibleCount =
         isPro ? events.length : freeBrakePreviewCount.clamp(0, events.length);
-    final hiddenCount = events.length - visibleCount;
+    // Pro lock is on this slice only; density cap is a separate line.
+    final lockedCount =
+        isPro ? 0 : (events.length - visibleCount).clamp(0, events.length);
     // Show a couple of blurred placeholders — not every locked row.
     const maxObfuscatedPlaceholders = 2;
     final obfuscatedShown =
-        hiddenCount.clamp(0, maxObfuscatedPlaceholders);
+        lockedCount.clamp(0, maxObfuscatedPlaceholders);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.brakesHelp,
+          zoomed ? l10n.brakesHelpZoom : l10n.brakesHelp,
           style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 12),
@@ -78,7 +92,7 @@ class BrakeEventsPanel extends StatelessWidget {
                 : () => onZoomToBrake!(events[i]),
           ),
         ],
-        if (hiddenCount > 0) ...[
+        if (lockedCount > 0) ...[
           const SizedBox(height: 8),
           for (var i = 0; i < obfuscatedShown; i++) ...[
             if (i > 0) const SizedBox(height: 8),
@@ -102,7 +116,7 @@ class BrakeEventsPanel extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        l10n.brakesProTeaser(visibleCount, events.length),
+                        l10n.brakesProTeaser(visibleCount, rideTotal),
                         style: GoogleFonts.rajdhani(
                           fontSize: 13,
                           height: 1.35,
@@ -117,6 +131,19 @@ class BrakeEventsPanel extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+        ],
+        if (isPro && densityHiddenCount > 0) ...[
+          const SizedBox(height: 12),
+          Text(
+            zoomed
+                ? l10n.brakesMoreInStretch(densityHiddenCount)
+                : l10n.brakesMoreOverview(densityHiddenCount),
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 13,
+              height: 1.35,
             ),
           ),
         ],

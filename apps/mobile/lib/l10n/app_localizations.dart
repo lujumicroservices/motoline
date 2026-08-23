@@ -521,8 +521,14 @@ abstract class AppLocalizations {
   /// No description provided for @sectionBrakesSub.
   ///
   /// In es, this message translates to:
-  /// **'Se calcula por qué tan rápido bajas de velocidad'**
+  /// **'Las más fuertes primero · acerca el mapa para ver un tramo'**
   String get sectionBrakesSub;
+
+  /// No description provided for @sectionBrakesSubZoom.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenadas de este tramo, en orden'**
+  String get sectionBrakesSubZoom;
 
   /// No description provided for @sectionCharts.
   ///
@@ -857,14 +863,38 @@ abstract class AppLocalizations {
   /// No description provided for @brakesHelp.
   ///
   /// In es, this message translates to:
-  /// **'Se calcula por qué tan rápido baja la velocidad — no es un sensor de freno. Toca una marca para ir ahí. El botón del mapa acerca ese freno.'**
+  /// **'Se calcula por qué tan rápido baja la velocidad — no es un sensor de freno. Las más fuertes primero. Toca una marca para ir ahí. Acerca el mapa para ver más en un tramo.'**
   String get brakesHelp;
+
+  /// No description provided for @brakesHelpZoom.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenadas de este tramo, en orden de tiempo. Toca una marca para ir ahí.'**
+  String get brakesHelpZoom;
 
   /// No description provided for @brakesEmpty.
   ///
   /// In es, this message translates to:
   /// **'No hay frenadas claras por GPS. Las paradas fuertes suelen verse amarillo, naranja o rojo.'**
   String get brakesEmpty;
+
+  /// No description provided for @brakesEmptyZoom.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay frenadas claras en este tramo.'**
+  String get brakesEmptyZoom;
+
+  /// No description provided for @brakesMoreOverview.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} más en este recorrido. Acerca el mapa para ver el resto de un tramo.'**
+  String brakesMoreOverview(int count);
+
+  /// No description provided for @brakesMoreInStretch.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} más en este tramo.'**
+  String brakesMoreInStretch(int count);
 
   /// No description provided for @brakeLight.
   ///
@@ -2005,6 +2035,90 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Sesión cerrada — modo invitado'**
   String get accountSignedOutSnack;
+
+  /// No description provided for @impersonateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver como rider'**
+  String get impersonateTitle;
+
+  /// No description provided for @impersonateTile.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver como otro rider'**
+  String get impersonateTile;
+
+  /// No description provided for @impersonateHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'La sesión en la nube pasa a ser ese rider (rodadas, amigos, recorridos en la nube). El Garage de este teléfono sigue siendo tuyo. No grabes ni sincronices. Salir restaura tu cuenta.'**
+  String get impersonateHelp;
+
+  /// No description provided for @impersonateSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre, correo o id'**
+  String get impersonateSearchHint;
+
+  /// No description provided for @impersonateEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Nadie coincide.'**
+  String get impersonateEmpty;
+
+  /// No description provided for @impersonateStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver como esa persona'**
+  String get impersonateStart;
+
+  /// No description provided for @impersonateExit.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir'**
+  String get impersonateExit;
+
+  /// No description provided for @impersonateBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Viendo como {name}'**
+  String impersonateBanner(String name);
+
+  /// No description provided for @impersonateConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cambiar la sesión en la nube?'**
+  String get impersonateConfirmTitle;
+
+  /// No description provided for @impersonateConfirmBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Este teléfono actuará como {name} en la nube hasta que salgas. El Garage local y el GPS siguen siendo tuyos y quedan bloqueados.'**
+  String impersonateConfirmBody(String name);
+
+  /// No description provided for @impersonateFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cambiar de cuenta.'**
+  String get impersonateFailed;
+
+  /// No description provided for @impersonateUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'otro rider'**
+  String get impersonateUnknown;
+
+  /// No description provided for @impersonateNoRide.
+  ///
+  /// In es, this message translates to:
+  /// **'No se graba mientras ves como otro rider.'**
+  String get impersonateNoRide;
+
+  /// No description provided for @impersonateNoSync.
+  ///
+  /// In es, this message translates to:
+  /// **'La sincronización está apagada mientras ves como otro rider.'**
+  String get impersonateNoSync;
 
   /// No description provided for @rideLoopHelp.
   ///
@@ -3169,6 +3283,96 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Copiar código de invitación'**
   String get copyInviteCode;
+
+  /// No description provided for @rodadaInviteShare.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir invitación'**
+  String get rodadaInviteShare;
+
+  /// No description provided for @rodadaInviteShareHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparte un resumen por WhatsApp u otra app.'**
+  String get rodadaInviteShareHint;
+
+  /// No description provided for @rodadaInviteShareSubject.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodada: {title}'**
+  String rodadaInviteShareSubject(String title);
+
+  /// No description provided for @rodadaInviteShareWhen.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuándo: {when}'**
+  String rodadaInviteShareWhen(String when);
+
+  /// No description provided for @rodadaInviteShareWhere.
+  ///
+  /// In es, this message translates to:
+  /// **'Dónde: {place}'**
+  String rodadaInviteShareWhere(String place);
+
+  /// No description provided for @rodadaInviteShareRoute.
+  ///
+  /// In es, this message translates to:
+  /// **'Ruta: {summary}'**
+  String rodadaInviteShareRoute(String summary);
+
+  /// No description provided for @rodadaInviteShareHost.
+  ///
+  /// In es, this message translates to:
+  /// **'Anfitrión: {name}'**
+  String rodadaInviteShareHost(String name);
+
+  /// No description provided for @rodadaInviteShareRiders.
+  ///
+  /// In es, this message translates to:
+  /// **'Riders ({count}): {names}'**
+  String rodadaInviteShareRiders(int count, String names);
+
+  /// No description provided for @rodadaInviteShareRidersMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Riders ({count}): {names} +{extra}'**
+  String rodadaInviteShareRidersMore(int count, String names, int extra);
+
+  /// No description provided for @rodadaInviteShareStops.
+  ///
+  /// In es, this message translates to:
+  /// **'Paradas: {names}'**
+  String rodadaInviteShareStops(String names);
+
+  /// No description provided for @rodadaInviteShareNotes.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas: {notes}'**
+  String rodadaInviteShareNotes(String notes);
+
+  /// No description provided for @rodadaInviteShareMeetup.
+  ///
+  /// In es, this message translates to:
+  /// **'Punto de encuentro: {url}'**
+  String rodadaInviteShareMeetup(String url);
+
+  /// No description provided for @rodadaInviteShareFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta: {url}'**
+  String rodadaInviteShareFinish(String url);
+
+  /// No description provided for @rodadaInviteShareCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Entra en RiderLab con el código {code}'**
+  String rodadaInviteShareCode(String code);
+
+  /// No description provided for @rodadaInviteShareHow.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodadas → Unirse con código'**
+  String get rodadaInviteShareHow;
 
   /// No description provided for @inviteCodeCopied.
   ///

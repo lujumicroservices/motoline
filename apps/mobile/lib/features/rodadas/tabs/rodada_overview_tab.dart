@@ -13,6 +13,7 @@ import '../../reel/reel_compose_screen.dart';
 import '../../watch/family_circle_screen.dart';
 import '../leave_rodada.dart';
 import '../models/rodada_models.dart';
+import '../rodada_invite_share.dart';
 import '../rodada_itinerary.dart';
 import '../rodada_itinerary_map.dart';
 import '../rodada_providers.dart';
@@ -59,6 +60,18 @@ class RodadaOverviewTab extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
             ],
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => shareRodadaInviteSummary(
+                context,
+                ref,
+                rodadaId: rodadaId,
+                rodada: rodada,
+              ),
+              icon: const Icon(Icons.ios_share),
+              label: Text(l10n.rodadaInviteShare),
+            ),
+            const SizedBox(height: 16),
             _ItineraryMap(
               rodada: rodada,
               stops: stops.maybeWhen(
@@ -403,6 +416,13 @@ class _PendingInviteBanner extends ConsumerWidget {
                     ref.invalidate(myRodadaMembershipProvider(rodadaId));
                     ref.invalidate(rodadaMembersProvider(rodadaId));
                     ref.invalidate(myRodadasProvider);
+                    if (!context.mounted) return;
+                    await shareRodadaInviteSummary(
+                      context,
+                      ref,
+                      rodadaId: rodadaId,
+                      rodada: rodada,
+                    );
                   },
                   child: Text(l10n.rsvpAccept),
                 ),

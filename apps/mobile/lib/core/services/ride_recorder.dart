@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import '../auth/impersonation_store.dart';
 import '../db/ride_database.dart';
 import '../models/imu_sample.dart';
 import '../models/lean_sample.dart';
@@ -279,6 +280,9 @@ class RideRecorder {
     bool skipWarmup = false,
     String? routeId,
   }) async {
+    if (ImpersonationStore.isActive) {
+      throw StateError('Recording is off while viewing as another rider.');
+    }
     if (_ride != null) {
       throw StateError('A ride is already recording');
     }
@@ -543,6 +547,9 @@ class RideRecorder {
   /// processed even with the screen locked. Geolocator FGS alone is not
   /// enough — native GPS can continue while Dart callbacks are frozen.
   Future<void> armForAutoStart({String? routeId}) async {
+    if (ImpersonationStore.isActive) {
+      throw StateError('Recording is off while viewing as another rider.');
+    }
     if (_armed || isRecording) return;
 
     final permission = await _location.ensurePermission();

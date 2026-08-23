@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/analytics/brake_detection.dart';
+import '../../core/analytics/brake_list.dart';
 import '../../core/analytics/curva_analysis.dart';
 import '../../core/demo_ids.dart';
 import '../../core/features.dart';
@@ -122,6 +123,58 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
 
   RideAnalytics get _full => _map;
 
+  /// Stable remapped brakes for the overview map. Recomputed only when lab
+  /// or overview samples change — not on scrub — so PilotLineMap keeps its
+  /// polyline cache from the 1.32 LOD split.
+  List<BrakeEvent> _mapBrakeEvents = const [];
+  List<TrackPoint>? _brakeMapSource;
+  List<TrackPoint>? _brakeMapTarget;
+  List<BrakeEvent>? _brakeMapRaw;
+
+  void _syncMapBrakeEvents() {
+    final lab = widget.lab;
+    final source = lab?.samples;
+    final raw = lab?.brakeEvents;
+    final target = _map.samples;
+    if (identical(source, _brakeMapSource) &&
+        identical(raw, _brakeMapRaw) &&
+        identical(target, _brakeMapTarget)) {
+      return;
+    }
+    _brakeMapSource = source;
+    _brakeMapRaw = raw;
+    _brakeMapTarget = target;
+    if (lab == null || source == null || raw == null || raw.isEmpty) {
+      _mapBrakeEvents = const [];
+      return;
+    }
+    _mapBrakeEvents = remapBrakeEvents(
+      events: raw,
+      source: source,
+      target: target,
+    );
+  }
+
+  /// List ranking only — map still paints every remapped brake dot.
+  BrakeListSlice get _brakeListSlice {
+    final all = _labOrOverview.brakeEvents;
+    if (!_zoomed || _map.samples.length < 2) {
+      return visibleBrakeEvents(
+        all,
+        cap: overviewBrakeListCap,
+        sort: BrakeListSort.strongestFirst,
+      );
+    }
+    return visibleBrakeEvents(
+      all,
+      cap: zoomedBrakeListCap,
+      sort: BrakeListSort.chronological,
+      secondsForIndex: _labOrOverview.secondsForIndex,
+      windowStartSeconds: _map.secondsForIndex(_segStart),
+      windowEndSeconds: _map.secondsForIndex(_segEnd),
+    );
+  }
+
   bool _isOpen(String id) => _expanded.contains(id);
 
   void _toggle(String id) {
@@ -150,6 +203,13 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
       _segStart = (samples.length * 0.2).floor().clamp(0, samples.length - 2);
       _segEnd = (samples.length * 0.8).ceil().clamp(_segStart + 1, samples.length - 1);
     }
+    _syncMapBrakeEvents();
+  }
+
+  @override
+  void didUpdateWidget(covariant _RideDashboard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncMapBrakeEvents();
   }
 
   @override
@@ -265,7 +325,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
         builder: (_) => FullscreenMapScreen(
           points: full.samples,
           scrubIndex: absoluteScrub,
-          brakeEvents: full.brakeEvents,
+          brakeEvents: _mapBrakeEvents,
           roadStretches: full.roadStretches,
           initialLayers: _mapLayers,
           initialFocusStart: _zoomed ? _segStart : null,
@@ -632,7 +692,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                         _zoomed ? _segStart : null,
                                     focusEndIndex:
                                         _zoomed ? _segEnd : null,
-                                    brakeEvents: full.brakeEvents,
+                                    brakeEvents: _mapBrakeEvents,
                                     roadStretches: full.roadStretches,
                                     layers: _mapLayers,
                                   ),
@@ -673,7 +733,9 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         ),
                         LabSection(
                           title: l10n.sectionBrakes,
-                          subtitle: l10n.sectionBrakesSub,
+                          subtitle: _zoomed
+                              ? l10n.sectionBrakesSubZoom
+                              : l10n.sectionBrakesSub,
                           badge: '${_labOrOverview.brakeEvents.length}',
                           expanded: _isOpen('brakes'),
                           onToggle: () => _toggle('brakes'),
@@ -685,8 +747,14 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                   ),
                                 )
                               : BrakeEventsPanel(
-                                  events: _labOrOverview.brakeEvents,
-                                  secondsForIndex: _labOrOverview.secondsForIndex,
+                                  events: _brakeListSlice.events,
+                                  totalCount:
+                                      _labOrOverview.brakeEvents.length,
+                                  densityHiddenCount:
+                                      _brakeListSlice.hiddenCount,
+                                  zoomed: _zoomed,
+                                  secondsForIndex:
+                                      _labOrOverview.secondsForIndex,
                                   isPro: isPro,
                                   onSelectIndex: (i) {
                                     final lab = widget.lab;

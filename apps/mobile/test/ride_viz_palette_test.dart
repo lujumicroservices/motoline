@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:motoline/core/analytics/brake_detection.dart';
+import 'package:motoline/core/analytics/track_lod.dart';
 import 'package:motoline/core/models/track_point.dart';
 import 'package:motoline/theme/ride_viz_palette.dart';
 
@@ -62,5 +63,43 @@ void main() {
     expect(events, isNotEmpty);
     expect(events.first.hardness, BrakeHardness.hard);
     expect(events.first.speedDropKmh, greaterThan(20));
+  });
+
+  test('remapBrakeEvents projects lab indices onto a downsampled map', () {
+    final t0 = DateTime.utc(2026, 8, 22, 12);
+    // Dense 1 Hz cruise with a hard stop around sample 1500.
+    final full = <TrackPoint>[
+      for (var i = 0; i < 2000; i++)
+        TrackPoint(
+          id: i,
+          rideId: 'r',
+          latitude: 25 + i * 0.00001,
+          longitude: -100,
+          timestamp: t0.add(Duration(seconds: i)),
+          speedMps: i >= 1495 && i <= 1505 ? 20 - (i - 1495) * 1.8 : 20,
+        ),
+    ];
+    final events = detectBrakeEvents(full);
+    expect(events, isNotEmpty);
+    expect(events.first.endIndex, greaterThan(1000));
+
+    final overview = pickOverview(full, 200);
+    expect(overview.length, lessThan(full.length));
+    expect(events.first.endIndex, greaterThanOrEqualTo(overview.length));
+
+    final mapped = remapBrakeEvents(
+      events: events,
+      source: full,
+      target: overview,
+    );
+    expect(mapped, hasLength(events.length));
+    final mid = ((mapped.first.startIndex + mapped.first.endIndex) / 2)
+        .round();
+    expect(mid, inInclusiveRange(0, overview.length - 1));
+    final mappedAt = overview[mid].timestamp;
+    final sourceMid =
+        ((events.first.startIndex + events.first.endIndex) / 2).round();
+    final delta = mappedAt.difference(full[sourceMid].timestamp).abs();
+    expect(delta.inSeconds, lessThan(20));
   });
 }

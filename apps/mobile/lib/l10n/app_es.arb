@@ -107,7 +107,8 @@
   "sectionLoop": "Vueltas",
   "sectionLoopSub": "Encuentra vueltas o marca inicio y fin",
   "sectionBrakes": "Frenado",
-  "sectionBrakesSub": "Se calcula por qué tan rápido bajas de velocidad",
+  "sectionBrakesSub": "Las más fuertes primero · acerca el mapa para ver un tramo",
+  "sectionBrakesSubZoom": "Frenadas de este tramo, en orden",
   "sectionCharts": "Gráficas",
   "sectionChartsSub": "Velocidad · inclinación · GPS",
   "sectionNotes": "Precisión + notas",
@@ -183,8 +184,22 @@
   },
   "roadStretchesEmpty": "Aún no hay suficiente giro en el GPS para detectar curvas.",
   "openDetail": "abrir detalle",
-  "brakesHelp": "Se calcula por qué tan rápido baja la velocidad — no es un sensor de freno. Toca una marca para ir ahí. El botón del mapa acerca ese freno.",
+  "brakesHelp": "Se calcula por qué tan rápido baja la velocidad — no es un sensor de freno. Las más fuertes primero. Toca una marca para ir ahí. Acerca el mapa para ver más en un tramo.",
+  "brakesHelpZoom": "Frenadas de este tramo, en orden de tiempo. Toca una marca para ir ahí.",
   "brakesEmpty": "No hay frenadas claras por GPS. Las paradas fuertes suelen verse amarillo, naranja o rojo.",
+  "brakesEmptyZoom": "No hay frenadas claras en este tramo.",
+  "brakesMoreOverview": "{count} más en este recorrido. Acerca el mapa para ver el resto de un tramo.",
+  "@brakesMoreOverview": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "brakesMoreInStretch": "{count} más en este tramo.",
+  "@brakesMoreInStretch": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "brakeLight": "Suave",
   "brakeMedium": "Medio",
   "brakeHard": "Fuerte",
@@ -426,6 +441,30 @@
   "signOut": "Cerrar sesión",
   "accountSignedInSnack": "Sesión iniciada — perfil sincronizado",
   "accountSignedOutSnack": "Sesión cerrada — modo invitado",
+  "impersonateTitle": "Ver como rider",
+  "impersonateTile": "Ver como otro rider",
+  "impersonateHelp": "La sesión en la nube pasa a ser ese rider (rodadas, amigos, recorridos en la nube). El Garage de este teléfono sigue siendo tuyo. No grabes ni sincronices. Salir restaura tu cuenta.",
+  "impersonateSearchHint": "Nombre, correo o id",
+  "impersonateEmpty": "Nadie coincide.",
+  "impersonateStart": "Ver como esa persona",
+  "impersonateExit": "Salir",
+  "impersonateBanner": "Viendo como {name}",
+  "@impersonateBanner": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "impersonateConfirmTitle": "¿Cambiar la sesión en la nube?",
+  "impersonateConfirmBody": "Este teléfono actuará como {name} en la nube hasta que salgas. El Garage local y el GPS siguen siendo tuyos y quedan bloqueados.",
+  "@impersonateConfirmBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "impersonateFailed": "No se pudo cambiar de cuenta.",
+  "impersonateUnknown": "otro rider",
+  "impersonateNoRide": "No se graba mientras ves como otro rider.",
+  "impersonateNoSync": "La sincronización está apagada mientras ves como otro rider.",
   "rideLoopHelp": "Encuentra vueltas cerradas en el GPS de este recorrido, o marca inicio (A) y fin (B) en el mapa. Al guardar se crea o usa una ruta para contar vueltas después.",
   "rideLoopEmpty": "Aún no hay vueltas guardadas en la ruta de este recorrido.",
   "rideLoopDetectedEmpty": "No hay vuelta cerrada en este recorrido. Prueba Marcar A / B en el mapa.",
@@ -708,6 +747,84 @@
   },
   "rodadaFallback": "Rodada",
   "copyInviteCode": "Copiar código de invitación",
+  "rodadaInviteShare": "Compartir invitación",
+  "rodadaInviteShareHint": "Comparte un resumen por WhatsApp u otra app.",
+  "rodadaInviteShareSubject": "Rodada: {title}",
+  "@rodadaInviteShareSubject": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareWhen": "Cuándo: {when}",
+  "@rodadaInviteShareWhen": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareWhere": "Dónde: {place}",
+  "@rodadaInviteShareWhere": {
+    "placeholders": {
+      "place": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareRoute": "Ruta: {summary}",
+  "@rodadaInviteShareRoute": {
+    "placeholders": {
+      "summary": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareHost": "Anfitrión: {name}",
+  "@rodadaInviteShareHost": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareRiders": "Riders ({count}): {names}",
+  "@rodadaInviteShareRiders": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "names": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareRidersMore": "Riders ({count}): {names} +{extra}",
+  "@rodadaInviteShareRidersMore": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "names": { "type": "String" },
+      "extra": { "type": "int" }
+    }
+  },
+  "rodadaInviteShareStops": "Paradas: {names}",
+  "@rodadaInviteShareStops": {
+    "placeholders": {
+      "names": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareNotes": "Notas: {notes}",
+  "@rodadaInviteShareNotes": {
+    "placeholders": {
+      "notes": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareMeetup": "Punto de encuentro: {url}",
+  "@rodadaInviteShareMeetup": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareFinish": "Meta: {url}",
+  "@rodadaInviteShareFinish": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareCode": "Entra en RiderLab con el código {code}",
+  "@rodadaInviteShareCode": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareHow": "Rodadas → Unirse con código",
   "inviteCodeCopied": "Código {code} copiado",
   "@inviteCodeCopied": {
     "placeholders": {

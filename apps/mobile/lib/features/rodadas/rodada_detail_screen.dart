@@ -11,6 +11,7 @@ import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import 'invite_push_feedback.dart';
 import 'leave_rodada.dart';
+import 'rodada_invite_share.dart';
 import 'rodada_providers.dart';
 import 'tabs/rodada_live_tab.dart';
 import 'tabs/rodada_messages_tab.dart';
@@ -25,10 +26,14 @@ class RodadaDetailScreen extends ConsumerStatefulWidget {
     super.key,
     required this.rodadaId,
     this.initialTab = 0,
+    this.promptShareInvite = false,
   });
 
   final String rodadaId;
   final int initialTab;
+
+  /// After create or join-by-code, nudge to share the invitation summary.
+  final bool promptShareInvite;
 
   @override
   ConsumerState<RodadaDetailScreen> createState() => _RodadaDetailScreenState();
@@ -50,6 +55,18 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       if (_tabs.indexIsChanging) return;
       setState(() {});
     });
+    if (widget.promptShareInvite) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          rodadaInviteShareSnackBar(
+            context,
+            ref,
+            rodadaId: widget.rodadaId,
+          ),
+        );
+      });
+    }
   }
 
   @override
@@ -94,16 +111,33 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
           overview.maybeWhen(
             data: (r) {
               if (r == null) return const SizedBox.shrink();
-              return IconButton(
-                tooltip: l10n.copyInviteCode,
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: r.inviteCode));
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.inviteCodeCopied(r.inviteCode))),
-                  );
-                },
-                icon: const Icon(Icons.copy),
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: l10n.rodadaInviteShare,
+                    onPressed: () => shareRodadaInviteSummary(
+                      context,
+                      ref,
+                      rodadaId: widget.rodadaId,
+                      rodada: r,
+                    ),
+                    icon: const Icon(Icons.ios_share),
+                  ),
+                  IconButton(
+                    tooltip: l10n.copyInviteCode,
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: r.inviteCode));
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.inviteCodeCopied(r.inviteCode)),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.copy),
+                  ),
+                ],
               );
             },
             orElse: () => const SizedBox.shrink(),
@@ -119,6 +153,10 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
                     PopupMenuItem(value: 'open', child: Text(l10n.markAsOpen)),
                     PopupMenuItem(value: 'ended', child: Text(l10n.endRodada)),
                     PopupMenuItem(
+                      value: 'share',
+                      child: Text(l10n.rodadaInviteShare),
+                    ),
+                    PopupMenuItem(
                       value: 'invite',
                       child: Text(l10n.inviteFriend),
                     ),
@@ -127,6 +165,14 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
               }
               return PopupMenuButton<String>(
                 onSelected: (value) async {
+                  if (value == 'share') {
+                    await shareRodadaInviteSummary(
+                      context,
+                      ref,
+                      rodadaId: widget.rodadaId,
+                    );
+                    return;
+                  }
                   if (value != 'leave') return;
                   final left = await confirmAndLeaveRodada(
                     context,
@@ -137,6 +183,10 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
                   Navigator.of(context).pop();
                 },
                 itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'share',
+                    child: Text(l10n.rodadaInviteShare),
+                  ),
                   PopupMenuItem(
                     value: 'leave',
                     child: Text(l10n.leaveRodada),
@@ -189,6 +239,14 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
     try {
       if (action == 'invite') {
         await _inviteFriends();
+        return;
+      }
+      if (action == 'share') {
+        await shareRodadaInviteSummary(
+          context,
+          ref,
+          rodadaId: widget.rodadaId,
+        );
         return;
       }
       await repo.updateRodada(widget.rodadaId, status: action);

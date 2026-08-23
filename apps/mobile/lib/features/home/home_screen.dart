@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/demo_ids.dart';
 import '../../core/features.dart';
+import '../../core/auth/impersonation_controller.dart';
 import '../../core/models/ride.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
@@ -295,6 +296,12 @@ class HomeScreen extends ConsumerWidget {
             _HomeActionDock(
               armed: sessionLive,
               onStart: () {
+                if (ref.read(impersonationProvider).active) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.impersonateNoRide)),
+                  );
+                  return;
+                }
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const ActiveRideScreen(autoStart: false),
@@ -305,6 +312,12 @@ class HomeScreen extends ConsumerWidget {
                 });
               },
               onArmToggle: () async {
+                if (ref.read(impersonationProvider).active) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.impersonateNoRide)),
+                  );
+                  return;
+                }
                 if (sessionLive) {
                   ensureArmedSessionHub(context, ref);
                   return;

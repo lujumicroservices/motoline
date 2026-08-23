@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../auth/impersonation_store.dart';
 import '../analytics/bbox_utils.dart';
 import '../analytics/ride_analytics.dart';
 import '../db/ride_database.dart';
@@ -57,6 +58,10 @@ class RideSyncService {
 
   /// Push every completed local ride (summary metrics + full GPS/lean track).
   Future<({int ok, int fail})> syncAllCompletedRides() async {
+    if (ImpersonationStore.isActive) {
+      lastSyncError = 'Cloud sync is off while viewing as another rider.';
+      return (ok: 0, fail: 0);
+    }
     var ok = 0;
     var fail = 0;
     lastSyncError = null;
@@ -91,6 +96,10 @@ class RideSyncService {
   /// until the new points are fully inserted.
   Future<String?> syncRide(String localRideId) async {
     try {
+      if (ImpersonationStore.isActive) {
+        lastSyncError = 'Cloud sync is off while viewing as another rider.';
+        return null;
+      }
       if (!SupabaseBootstrap.isReady) {
         lastSyncError = 'Cloud not configured';
         return null;
@@ -263,6 +272,10 @@ class RideSyncService {
   }) async {
     lastPullError = null;
     lastPullInfo = null;
+    if (ImpersonationStore.isActive) {
+      lastPullError = 'Cloud sync is off while viewing as another rider.';
+      return 0;
+    }
     if (!SupabaseBootstrap.isReady) {
       lastPullError = 'Cloud not configured';
       return 0;

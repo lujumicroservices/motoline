@@ -44,7 +44,10 @@ class RodadasScreen extends ConsumerWidget {
                 ref.invalidate(myRodadasProvider);
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => RodadaDetailScreen(rodadaId: id),
+                    builder: (_) => RodadaDetailScreen(
+                      rodadaId: id,
+                      promptShareInvite: true,
+                    ),
                   ),
                 );
                 ref.invalidate(myRodadasProvider);
@@ -105,8 +108,10 @@ class RodadasScreen extends ConsumerWidget {
                               ref.invalidate(myRodadasProvider);
                               await Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      RodadaDetailScreen(rodadaId: id),
+                                  builder: (_) => RodadaDetailScreen(
+                                    rodadaId: id,
+                                    promptShareInvite: true,
+                                  ),
                                 ),
                               );
                             }
@@ -187,7 +192,12 @@ class RodadasScreen extends ConsumerWidget {
       ref.invalidate(myRodadasProvider);
       if (!context.mounted) return;
       await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => RodadaDetailScreen(rodadaId: id)),
+        MaterialPageRoute(
+          builder: (_) => RodadaDetailScreen(
+            rodadaId: id,
+            promptShareInvite: true,
+          ),
+        ),
       );
     } catch (e) {
       if (!context.mounted) return;

@@ -86,7 +86,8 @@
   "sectionLoop": "Laps",
   "sectionLoopSub": "Find laps or mark start and finish",
   "sectionBrakes": "Braking",
-  "sectionBrakesSub": "Guessed from how fast you slow down",
+  "sectionBrakesSub": "Strongest first · zoom the map to see a stretch",
+  "sectionBrakesSubZoom": "Brakes on this stretch, in order",
   "sectionCharts": "Charts",
   "sectionChartsSub": "Speed · lean · GPS",
   "sectionNotes": "Precision + notes",
@@ -147,8 +148,22 @@
   },
   "roadStretchesEmpty": "Not enough turning on GPS yet to find corners.",
   "openDetail": "open detail",
-  "brakesHelp": "Guessed from how fast speed drops — not a brake sensor. Tap a mark to jump there. Map button zooms to that brake.",
+  "brakesHelp": "Guessed from how fast speed drops — not a brake sensor. Strongest first. Tap a mark to jump there. Zoom the map to see more on a stretch.",
+  "brakesHelpZoom": "Brakes on this stretch, in time order. Tap a mark to jump there.",
   "brakesEmpty": "No clear brakes from GPS speed. Hard stops usually show as yellow, orange, or red marks.",
+  "brakesEmptyZoom": "No clear brakes on this stretch.",
+  "brakesMoreOverview": "{count} more on this ride. Zoom the map to see the rest of a stretch.",
+  "@brakesMoreOverview": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "brakesMoreInStretch": "{count} more in this stretch.",
+  "@brakesMoreInStretch": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "brakeLight": "Light",
   "brakeMedium": "Medium",
   "brakeHard": "Hard",
@@ -355,6 +370,30 @@
   "signOut": "Sign out",
   "accountSignedInSnack": "Signed in — profile synced",
   "accountSignedOutSnack": "Signed out — back to guest mode",
+  "impersonateTitle": "View as rider",
+  "impersonateTile": "View as another rider",
+  "impersonateHelp": "Cloud session becomes that rider (rodadas, friends, cloud rides). This phone’s Garage stays yours. Don’t record or Sync. Exit restores your account.",
+  "impersonateSearchHint": "Name, email, or user id",
+  "impersonateEmpty": "No riders match.",
+  "impersonateStart": "View as them",
+  "impersonateExit": "Exit",
+  "impersonateBanner": "Viewing as {name}",
+  "@impersonateBanner": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "impersonateConfirmTitle": "Switch cloud session?",
+  "impersonateConfirmBody": "This phone will act as {name} in the cloud until you exit. Local Garage and GPS recording stay yours and stay blocked.",
+  "@impersonateConfirmBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "impersonateFailed": "Could not switch account.",
+  "impersonateUnknown": "another rider",
+  "impersonateNoRide": "Recording is off while viewing as another rider.",
+  "impersonateNoSync": "Cloud sync is off while viewing as another rider.",
   "rideLoopHelp": "Find closed laps on this ride’s GPS, or mark start (A) and finish (B) on the map. Saving creates or uses a route so you can count laps later.",
   "rideLoopEmpty": "No laps saved for this ride’s route yet.",
   "rideLoopDetectedEmpty": "No closed lap found on this ride. Try Mark A / B on the map.",
@@ -637,6 +676,84 @@
   },
   "rodadaFallback": "Rodada",
   "copyInviteCode": "Copy invite code",
+  "rodadaInviteShare": "Share invitation",
+  "rodadaInviteShareHint": "Share a summary on WhatsApp or another app.",
+  "rodadaInviteShareSubject": "Rodada: {title}",
+  "@rodadaInviteShareSubject": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareWhen": "When: {when}",
+  "@rodadaInviteShareWhen": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareWhere": "Where: {place}",
+  "@rodadaInviteShareWhere": {
+    "placeholders": {
+      "place": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareRoute": "Route: {summary}",
+  "@rodadaInviteShareRoute": {
+    "placeholders": {
+      "summary": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareHost": "Host: {name}",
+  "@rodadaInviteShareHost": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareRiders": "Riders ({count}): {names}",
+  "@rodadaInviteShareRiders": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "names": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareRidersMore": "Riders ({count}): {names} +{extra}",
+  "@rodadaInviteShareRidersMore": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "names": { "type": "String" },
+      "extra": { "type": "int" }
+    }
+  },
+  "rodadaInviteShareStops": "Stops: {names}",
+  "@rodadaInviteShareStops": {
+    "placeholders": {
+      "names": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareNotes": "Notes: {notes}",
+  "@rodadaInviteShareNotes": {
+    "placeholders": {
+      "notes": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareMeetup": "Meetup: {url}",
+  "@rodadaInviteShareMeetup": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareFinish": "Finish: {url}",
+  "@rodadaInviteShareFinish": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareCode": "Join in RiderLab with code {code}",
+  "@rodadaInviteShareCode": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "rodadaInviteShareHow": "Rodadas → Join with invite code",
   "inviteCodeCopied": "Code {code} copied",
   "@inviteCodeCopied": {
     "placeholders": {

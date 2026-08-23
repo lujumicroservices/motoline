@@ -45,20 +45,31 @@ List<T> filterTimeWindow<T>(
 }
 
 /// Nearest index by timestamp; empty list → 0.
+///
+/// [items] must be sorted by timestamp (overview / GPS series). Binary search
+/// so remapping lab events onto ~1k map vertices stays cheap.
 int nearestIndexByTime<T>(
   List<T> items,
   int Function(T item) timestampMs,
   int targetMs,
 ) {
   if (items.isEmpty) return 0;
-  var best = 0;
-  var bestDelta = 1 << 62;
-  for (var i = 0; i < items.length; i++) {
-    final d = (timestampMs(items[i]) - targetMs).abs();
-    if (d < bestDelta) {
-      bestDelta = d;
-      best = i;
+  var lo = 0;
+  var hi = items.length - 1;
+  while (lo < hi) {
+    final mid = (lo + hi) >> 1;
+    if (timestampMs(items[mid]) < targetMs) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
     }
   }
-  return best;
+  if (lo > 0) {
+    final left = timestampMs(items[lo - 1]);
+    final right = timestampMs(items[lo]);
+    if ((targetMs - left).abs() <= (right - targetMs).abs()) {
+      return lo - 1;
+    }
+  }
+  return lo;
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/auth/impersonation_gate.dart';
+import 'core/auth/impersonation_store.dart';
 import 'core/notifications/push_notification_service.dart';
 import 'core/services/arm_foreground_service.dart';
 import 'core/supabase/supabase_bootstrap.dart';
@@ -19,6 +21,7 @@ Future<void> main() async {
   } catch (_) {
     // Auth provider may be off; app still works offline.
   }
+  await ImpersonationStore.hydrate();
   await PushNotificationService.instance.init();
   runApp(const ProviderScope(child: RiderLabApp()));
 }
@@ -55,6 +58,11 @@ class RiderLabApp extends ConsumerWidget {
         return const Locale('es');
       },
       home: const _BootHome(),
+      builder: (context, child) {
+        return ImpersonationGate(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

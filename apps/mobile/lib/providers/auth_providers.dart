@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/auth/auth_provider_kind.dart';
 import '../core/auth/auth_service.dart';
+import '../core/auth/impersonation_controller.dart';
 import '../core/supabase/supabase_bootstrap.dart';
 import 'alias_provider.dart';
 import 'ride_providers.dart';
@@ -46,6 +47,7 @@ class AuthActions {
     ref.read(authErrorProvider.notifier).state = null;
     try {
       await _auth.signInWith(provider);
+      await ref.read(impersonationProvider.notifier).refreshStaff();
       final label = await _auth.syncLinkedProfile(force: true) ??
           _auth.displayLabel;
       if (label != null && label.isNotEmpty) {
@@ -75,6 +77,11 @@ class AuthActions {
     ref.read(authBusyProvider.notifier).state = true;
     ref.read(authErrorProvider.notifier).state = null;
     try {
+      final imp = ref.read(impersonationProvider);
+      if (imp.active) {
+        await ref.read(impersonationProvider.notifier).exit();
+        return;
+      }
       await _auth.signOut();
       ref.invalidate(myProfileProvider);
       ref.invalidate(friendsListProvider);

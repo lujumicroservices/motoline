@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/lean_lab/lean_lab_service.dart';
+import '../../core/auth/impersonation_controller.dart';
 import '../../core/notifications/push_diagnostics.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/bike_provider.dart';
@@ -22,6 +23,7 @@ import '../home/home_nav_icons.dart';
 import '../lean_lab/lean_imu_lab_screen.dart';
 import '../lean_lab/lean_lab_screen.dart';
 import 'bike_picker_screen.dart';
+import 'impersonate_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -43,6 +45,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _syncCloud() async {
     final l10n = context.l10n;
+    if (ref.read(impersonationProvider).active) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.impersonateNoSync)),
+      );
+      return;
+    }
     setState(() => _syncing = true);
     try {
       final sync = ref.read(rideSyncServiceProvider);
@@ -261,6 +269,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 28),
           const AccountAuthSection(),
+          if (ref.watch(impersonationProvider).staff &&
+              !ref.watch(impersonationProvider).active) ...[
+            const SizedBox(height: 16),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.visibility, color: AppTheme.signal),
+              title: Text(
+                l10n.impersonateTile,
+                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                l10n.impersonateHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ImpersonateScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
           const SizedBox(height: 28),
           const AdventureCameraSettingsSection(),
           const SizedBox(height: 28),
@@ -282,7 +317,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           FilledButton.icon(
-            onPressed: _syncing ? null : _syncCloud,
+            onPressed: _syncing || ref.watch(impersonationProvider).active
+                ? null
+                : _syncCloud,
             icon: _syncing
                 ? const SizedBox(
                     width: 18,

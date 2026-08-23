@@ -28,3 +28,6 @@ verify_jwt = true
 
 [functions.notify-rodada-radio]
 verify_jwt = true
+
+[functions.impersonate-user]
+verify_jwt = true

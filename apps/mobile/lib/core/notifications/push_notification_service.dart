@@ -8,6 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../features/rodadas/rodada_detail_screen.dart';
 import '../../features/rodadas/rodada_repository.dart';
+import '../auth/impersonation_store.dart';
 import '../supabase/supabase_bootstrap.dart';
 import 'device_token_repository.dart';
 import 'push_diagnostics.dart';
@@ -115,6 +116,10 @@ class PushNotificationService {
   }
 
   Future<void> syncToken() async {
+    if (ImpersonationStore.isActive) {
+      PushDiagnostics.record(fn: 'fcm_token', skipped: 'impersonating');
+      return;
+    }
     if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) return;
     if (Firebase.apps.isEmpty) {
       PushDiagnostics.record(fn: 'fcm_token', error: 'firebase_not_ready');
@@ -156,6 +161,7 @@ class PushNotificationService {
   }
 
   Future<void> _storeToken(String token) async {
+    if (ImpersonationStore.isActive) return;
     _cachedFcmToken = token;
     try {
       await _tokens.upsert(token: token, platform: pushPlatformName());

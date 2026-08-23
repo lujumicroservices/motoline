@@ -54,6 +54,29 @@ void main() {
     expect(window[nearest].timestamp.millisecondsSinceEpoch, ts);
   });
 
+  test('nearestIndexByTime binary search matches linear on a long series', () {
+    final items = [for (var i = 0; i < 2000; i++) 1_000_000 + i * 250];
+    int linear(int target) {
+      var best = 0;
+      var bestDelta = 1 << 62;
+      for (var i = 0; i < items.length; i++) {
+        final d = (items[i] - target).abs();
+        if (d < bestDelta) {
+          bestDelta = d;
+          best = i;
+        }
+      }
+      return best;
+    }
+
+    for (final target in [1_000_000, 1_000_100, 1_250_000, 1_499_875, 2_000_000]) {
+      expect(
+        nearestIndexByTime(items, (n) => n, target),
+        linear(target),
+      );
+    }
+  });
+
   test('overview analytics keeps stored ride distance', () {
     final ride = Ride(
       id: 'r1',

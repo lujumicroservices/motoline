@@ -73,7 +73,7 @@ class PlaceSearchService {
   DateTime? _lastNominatimAt;
 
   static const _userAgent =
-      'RiderLab/1.36 (com.rawthrottle.riderlab; place search)';
+      'RiderLab/1.37 (com.rawthrottle.riderlab; place search)';
 
   Future<List<PlaceSearchHit>> search(
     String query, {

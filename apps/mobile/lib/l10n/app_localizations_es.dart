@@ -240,7 +240,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sectionBrakesSub =>
-      'Se calcula por qué tan rápido bajas de velocidad';
+      'Las más fuertes primero · acerca el mapa para ver un tramo';
+
+  @override
+  String get sectionBrakesSubZoom => 'Frenadas de este tramo, en orden';
 
   @override
   String get sectionCharts => 'Gráficas';
@@ -430,11 +433,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get brakesHelp =>
-      'Se calcula por qué tan rápido baja la velocidad — no es un sensor de freno. Toca una marca para ir ahí. El botón del mapa acerca ese freno.';
+      'Se calcula por qué tan rápido baja la velocidad — no es un sensor de freno. Las más fuertes primero. Toca una marca para ir ahí. Acerca el mapa para ver más en un tramo.';
+
+  @override
+  String get brakesHelpZoom =>
+      'Frenadas de este tramo, en orden de tiempo. Toca una marca para ir ahí.';
 
   @override
   String get brakesEmpty =>
       'No hay frenadas claras por GPS. Las paradas fuertes suelen verse amarillo, naranja o rojo.';
+
+  @override
+  String get brakesEmptyZoom => 'No hay frenadas claras en este tramo.';
+
+  @override
+  String brakesMoreOverview(int count) {
+    return '$count más en este recorrido. Acerca el mapa para ver el resto de un tramo.';
+  }
+
+  @override
+  String brakesMoreInStretch(int count) {
+    return '$count más en este tramo.';
+  }
 
   @override
   String get brakeLight => 'Suave';
@@ -1067,6 +1087,54 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accountSignedOutSnack => 'Sesión cerrada — modo invitado';
+
+  @override
+  String get impersonateTitle => 'Ver como rider';
+
+  @override
+  String get impersonateTile => 'Ver como otro rider';
+
+  @override
+  String get impersonateHelp =>
+      'La sesión en la nube pasa a ser ese rider (rodadas, amigos, recorridos en la nube). El Garage de este teléfono sigue siendo tuyo. No grabes ni sincronices. Salir restaura tu cuenta.';
+
+  @override
+  String get impersonateSearchHint => 'Nombre, correo o id';
+
+  @override
+  String get impersonateEmpty => 'Nadie coincide.';
+
+  @override
+  String get impersonateStart => 'Ver como esa persona';
+
+  @override
+  String get impersonateExit => 'Salir';
+
+  @override
+  String impersonateBanner(String name) {
+    return 'Viendo como $name';
+  }
+
+  @override
+  String get impersonateConfirmTitle => '¿Cambiar la sesión en la nube?';
+
+  @override
+  String impersonateConfirmBody(String name) {
+    return 'Este teléfono actuará como $name en la nube hasta que salgas. El Garage local y el GPS siguen siendo tuyos y quedan bloqueados.';
+  }
+
+  @override
+  String get impersonateFailed => 'No se pudo cambiar de cuenta.';
+
+  @override
+  String get impersonateUnknown => 'otro rider';
+
+  @override
+  String get impersonateNoRide => 'No se graba mientras ves como otro rider.';
+
+  @override
+  String get impersonateNoSync =>
+      'La sincronización está apagada mientras ves como otro rider.';
 
   @override
   String get rideLoopHelp =>
@@ -1731,6 +1799,76 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get copyInviteCode => 'Copiar código de invitación';
+
+  @override
+  String get rodadaInviteShare => 'Compartir invitación';
+
+  @override
+  String get rodadaInviteShareHint =>
+      'Comparte un resumen por WhatsApp u otra app.';
+
+  @override
+  String rodadaInviteShareSubject(String title) {
+    return 'Rodada: $title';
+  }
+
+  @override
+  String rodadaInviteShareWhen(String when) {
+    return 'Cuándo: $when';
+  }
+
+  @override
+  String rodadaInviteShareWhere(String place) {
+    return 'Dónde: $place';
+  }
+
+  @override
+  String rodadaInviteShareRoute(String summary) {
+    return 'Ruta: $summary';
+  }
+
+  @override
+  String rodadaInviteShareHost(String name) {
+    return 'Anfitrión: $name';
+  }
+
+  @override
+  String rodadaInviteShareRiders(int count, String names) {
+    return 'Riders ($count): $names';
+  }
+
+  @override
+  String rodadaInviteShareRidersMore(int count, String names, int extra) {
+    return 'Riders ($count): $names +$extra';
+  }
+
+  @override
+  String rodadaInviteShareStops(String names) {
+    return 'Paradas: $names';
+  }
+
+  @override
+  String rodadaInviteShareNotes(String notes) {
+    return 'Notas: $notes';
+  }
+
+  @override
+  String rodadaInviteShareMeetup(String url) {
+    return 'Punto de encuentro: $url';
+  }
+
+  @override
+  String rodadaInviteShareFinish(String url) {
+    return 'Meta: $url';
+  }
+
+  @override
+  String rodadaInviteShareCode(String code) {
+    return 'Entra en RiderLab con el código $code';
+  }
+
+  @override
+  String get rodadaInviteShareHow => 'Rodadas → Unirse con código';
 
   @override
   String inviteCodeCopied(String code) {

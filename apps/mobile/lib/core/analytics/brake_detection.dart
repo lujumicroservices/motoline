@@ -1,5 +1,6 @@
 import '../models/track_point.dart';
 import '../../theme/ride_viz_palette.dart';
+import 'track_lod.dart';
 
 /// Inferred brake application from GPS speed drop (no brake sensor).
 class BrakeEvent {
@@ -149,4 +150,51 @@ BrakeHardness _hardnessFor(double peakDecelMps2) {
   if (peakDecelMps2 >= 5.0) return BrakeHardness.hard;
   if (peakDecelMps2 >= 3.0) return BrakeHardness.medium;
   return BrakeHardness.light;
+}
+
+/// Project brake events from [source] (full-rate lab) onto [target]
+/// (downsampled overview map). Does not copy GPS or re-run detection —
+/// only remaps indices, O(events × log overview).
+List<BrakeEvent> remapBrakeEvents({
+  required List<BrakeEvent> events,
+  required List<TrackPoint> source,
+  required List<TrackPoint> target,
+}) {
+  if (events.isEmpty || source.isEmpty || target.isEmpty) {
+    return const [];
+  }
+  if (identical(source, target)) return events;
+
+  int indexAt(DateTime t) => nearestIndexByTime(
+        target,
+        (p) => p.timestamp.millisecondsSinceEpoch,
+        t.millisecondsSinceEpoch,
+      );
+
+  final out = <BrakeEvent>[];
+  for (final e in events) {
+    final i0 = e.startIndex.clamp(0, source.length - 1);
+    final i1 = e.endIndex.clamp(0, source.length - 1);
+    var lo = indexAt(source[i0].timestamp);
+    var hi = indexAt(source[i1].timestamp);
+    if (hi < lo) {
+      final swap = lo;
+      lo = hi;
+      hi = swap;
+    }
+    out.add(
+      BrakeEvent(
+        startIndex: lo,
+        endIndex: hi,
+        peakDecelMps2: e.peakDecelMps2,
+        avgDecelMps2: e.avgDecelMps2,
+        speedDropKmh: e.speedDropKmh,
+        startSpeedKmh: e.startSpeedKmh,
+        endSpeedKmh: e.endSpeedKmh,
+        duration: e.duration,
+        hardness: e.hardness,
+      ),
+    );
+  }
+  return out;
 }
