@@ -76,5 +76,4 @@ jobs:
           releaseFiles: apps/mobile/build/app/outputs/bundle/playRelease/app-play-release.aab
           track: ${{ inputs.track }}
           status: completed
-          changesNotSentForReview: true
-          releaseName: RiderLab ${{ github.ref_name }}
+          releaseName: RiderLab 1.37.5
