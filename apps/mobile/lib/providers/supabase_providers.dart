@@ -12,7 +12,7 @@ final supabaseSessionProvider = StreamProvider<Session?>((ref) {
   return client.auth.onAuthStateChange.map((event) => event.session);
 });
 
-/// One-shot: create anonymous session if needed (for cloud sync / compare).
+/// One-shot: restore a permanent session if the rider is signed in.
 final ensureSupabaseSessionProvider = FutureProvider<Session?>((ref) async {
   return SupabaseBootstrap.ensureSession();
 });

@@ -23,7 +23,7 @@ App brand: **RiderLab** (org **luju.nieves** — not Luju POS / auto).
 Migrations:
 
 - `supabase/migrations/20260730200000_corneriq_core.sql` — core tables + RLS
-- `supabase/migrations/20260731010000_friends_bbox_compare.sql` — ride bbox + overlap RPC + closed-beta profile visibility
+- `supabase/migrations/20260824010000_pro_entitlements.sql` — Pro trial + partner codes (`promo_codes`, `entitlement_periods`)
 
 Tables: `profiles`, `routes`, `rides`, `track_points` with RLS:
 
@@ -32,26 +32,22 @@ Tables: `profiles`, `routes`, `rides`, `track_points` with RLS:
 - **Closed beta:** every authenticated user can read every `profiles` row (friends = all riders)
 - `rides` bbox columns (`min_lat` / `max_lat` / `min_lng` / `max_lng`) for same-area match
 - RPC `rides_overlapping(...)` — peer shared rides whose bbox intersects yours (with pad)
+- `promo_codes` / `entitlement_periods` — Pro trial + partner grants (select own rows; writes via RPCs)
 
 ## Auth
 
-### Anonymous (guest)
+RiderLab **requires a real account**. There is no guest / anonymous mode.
 
-Enable **Anonymous** sign-ins in Dashboard → Authentication → Providers (still used for first-run guest + Friends / ride sync before Google).
-
-Direct link (RiderLab project):  
-https://supabase.com/dashboard/project/eabhnmlfsfibgwkspqwa/auth/providers
-
-Without Anonymous, the Amigos screen shows “nube no disponible” / a prompt to enable it.
+On launch, unsigned riders see a full-screen gate (Google or email/password). Turn **Anonymous** off in Dashboard → Authentication → Providers.
 
 ### Google Sign-In
 
-Settings → **Account** offers **Sign in with Google**. Anonymous guests are **linked** to Google when possible (`linkIdentityWithIdToken`) so the same `auth.users` / ride IDs are kept.
+The launch gate and Settings → **Account** offer **Sign in with Google**.
 
 **Dashboard**
 
 1. Authentication → Providers → **Google** → Enable  
-2. Enable **Manual linking** (Authentication → Providers / Auth settings) so anonymous → Google works  
+2. Enable **Manual linking** only if you later add more providers to the same user  
 3. Paste Google **Web client ID** + **Client secret** (and list Android/iOS client IDs if prompted)
 
 **Google Cloud Console**
@@ -77,9 +73,26 @@ cd apps/mobile/android
 
 ### Future providers
 
-Auth is routed through `AuthProviderKind` + `AuthService.signInWith(...)` (`lib/core/auth/`). Add Apple / email as new enum cases and handlers; Settings already loops `availableProviders`.
+Apple Sign-In still needs its own provider before App Store if Google stays on iOS. Email/password is live (see below).
 
-Email / magic-link can be added the same way for named riders.
+### Email + password
+
+Enable **Email** in Dashboard → Authentication → Providers.
+
+Recommended for store review and riders who skip Google:
+
+1. Email provider **on**
+2. **Confirm email**: off for closed beta (or leave on and pre-create the review user as confirmed)
+3. Email provider is enough for review accounts; Anonymous should stay **off**
+
+**Create an App Store / Play review user** (do not commit the password):
+
+1. Authentication → Users → **Add user**
+2. Email like `review@riderlab.rawthrottle.com.mx`
+3. Auto-confirm the user
+4. Paste that email + password in Play Console **Sign in details** and App Store Connect **Demo account**
+
+Riders: first screen is sign-in (Google or email). Settings → Account signs out back to that screen.
 
 ## CLI
 
@@ -98,3 +111,4 @@ supabase db query --linked -f supabase/migrations/20260731010000_friends_bbox_co
 4. Ride Lab: assign ride to route + share this ride
 5. Friends list = all profiles (closed beta)
 6. Compare: peers on same `route_id` **or** overlapping bbox
+7. Entitlements: [FREE_VS_PRO.md](FREE_VS_PRO.md). Migration `supabase/migrations/20260824010000_pro_entitlements.sql` (`promo_codes`, `entitlement_periods`, trial/redeem RPCs).

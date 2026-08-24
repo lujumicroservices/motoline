@@ -14,9 +14,11 @@ import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../providers/update_providers.dart';
+import '../../providers/pro_entitlement_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../widgets/ad_banner.dart';
+import '../../widgets/partner_code_redeem.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
@@ -336,6 +338,34 @@ class HomeScreen extends ConsumerWidget {
                     SnackBar(content: Text('$e')),
                   );
                 }
+              },
+            ),
+            Builder(
+              builder: (context) {
+                final pro = ref.watch(proEntitlementProvider);
+                final remaining = proRemainingLabel(l10n, pro);
+                if (remaining == null && !pro.expiredAfterGrant) {
+                  return const SizedBox.shrink();
+                }
+                return Material(
+                  color: AppTheme.asphaltElevated,
+                  child: InkWell(
+                    onTap: () => showProUpsellSheet(context, ref),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                      child: Text(
+                        remaining ?? l10n.proExpiredKeepLab,
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: remaining != null
+                              ? AppTheme.line
+                              : AppTheme.signal,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
             FreeAdBanner(

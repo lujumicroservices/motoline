@@ -26,7 +26,7 @@ class SocialRepository {
     await SupabaseBootstrap.ensureSession();
   }
 
-  String? get currentUserId => _supabase.auth.currentUser?.id;
+  String? get currentUserId => SupabaseBootstrap.permanentUserId;
 
   Future<List<RiderProfile>> listFriends() async {
     await _ensure();

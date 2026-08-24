@@ -252,10 +252,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionChartsSub => 'Speed · lean · GPS';
 
   @override
-  String get sectionNotes => 'Precision + notes';
+  String get sectionNotes => 'GPS quality';
 
   @override
-  String get sectionNotesSub => 'GPS quality and notes';
+  String get sectionNotesSub => 'Sample rate and accuracy for this line';
 
   @override
   String get segment => 'STRETCH';
@@ -692,7 +692,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setYourAlias => 'Set your alias';
 
   @override
-  String get sectionNotesProOnly => 'Pro only — GPS precision and notes';
+  String get sectionNotesProOnly => 'Pro only — riding notes';
 
   @override
   String get proCurvaBannerTitle => 'Corner detail · Pro';
@@ -702,17 +702,17 @@ class AppLocalizationsEn extends AppLocalizations {
       '0.5 s preview. Pro unlocks entry, middle, exit, and the map with no lock.';
 
   @override
-  String get proNotesBannerTitle => 'Precision + notes · Pro';
+  String get proNotesBannerTitle => 'Riding notes · Pro';
 
   @override
   String get proNotesBannerBody =>
-      'GPS quality and riding tips stay in RiderLab Pro.';
+      'Coach notes for this ride stay in RiderLab Pro.';
 
   @override
   String get proFeatureCurva => 'Full corner detail (no banner)';
 
   @override
-  String get proFeatureNotes => 'GPS accuracy + riding notes';
+  String get proFeatureNotes => 'Riding notes';
 
   @override
   String get myRoutes => 'Your routes';
@@ -912,7 +912,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proUnlockBody =>
-      'Pick any stretch, full corner detail, GPS notes, full brakes, and no ads.';
+      'Pick any stretch, full corner detail, and the full brake list.';
 
   @override
   String get proFeatureSegment => 'Zoom any part of the ride';
@@ -937,6 +937,75 @@ class AppLocalizationsEn extends AppLocalizations {
       'Temporary unlock until store billing is ready. Turn off to see the free version.';
 
   @override
+  String proTrialDaysLeft(int days) {
+    return 'Pro trial · $days days left';
+  }
+
+  @override
+  String proPartnerDaysLeft(int days) {
+    return 'Partner Pro · $days days left';
+  }
+
+  @override
+  String get proExpiredKeepLab =>
+      'Your Pro access ended — keep segment zoom and full corners.';
+
+  @override
+  String get partnerProCode => 'Partner Pro code';
+
+  @override
+  String get partnerProCodeHint => 'PRO-7K4M2Q';
+
+  @override
+  String get partnerProCodeHelp =>
+      'A personal code from a RiderLab partner. Not a rodada invite.';
+
+  @override
+  String get redeemPartnerCode => 'Redeem';
+
+  @override
+  String get partnerCodeInvalid => 'That code is not valid.';
+
+  @override
+  String get partnerCodeUsed => 'That code was already used.';
+
+  @override
+  String get partnerCodeAlreadyRedeemed =>
+      'This account already used a partner code.';
+
+  @override
+  String get partnerCodeAlreadyPaying =>
+      'You already have Pro. Give this code to someone else.';
+
+  @override
+  String get partnerCodeRedeemed => 'Partner Pro is active.';
+
+  @override
+  String get restorePurchases => 'Restore purchases';
+
+  @override
+  String get havePartnerCode => 'Have a partner code?';
+
+  @override
+  String get createPartnerCode => 'Create partner code';
+
+  @override
+  String get createPartnerCodeHelp =>
+      'Single-use 90-day Pro for one partner rider.';
+
+  @override
+  String get partnerLabelHint => 'Partner name (optional)';
+
+  @override
+  String partnerCodeCopied(String code) {
+    return 'Copied $code';
+  }
+
+  @override
+  String get startTrialHelp =>
+      'Full Pro starts when you finish your first ride.';
+
+  @override
   String brakesProTeaser(int shown, int total) {
     return 'Showing $shown of $total. Unlock Pro for the full brake list.';
   }
@@ -948,7 +1017,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adPlaceholder => 'Ad';
 
   @override
-  String get removeAdsWithPro => 'Upgrade to Pro to remove ads';
+  String get removeAdsWithPro => 'Upgrade to Pro for full Ride Lab';
 
   @override
   String get routeTabLaps => 'Laps';
@@ -1059,14 +1128,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountGuestBody =>
-      'You\'re a guest. Sign in to keep your profile on other phones — your rides stay linked when we can.';
+      'Create an account to use RiderLab. Recording, friends, and cloud sync need a signed-in rider.';
 
   @override
   String get accountSignedIn => 'Signed in';
 
   @override
   String get accountSignedInBody =>
-      'Your Google account is linked. Sign out returns you to a guest session on this phone.';
+      'Your account is linked. Sign out returns you to the sign-in screen.';
+
+  @override
+  String get authGateTitle => 'Sign in to ride';
+
+  @override
+  String get authGateBody =>
+      'RiderLab needs an account. Use Google or email and password — guest mode is off. This is also how store review signs in.';
 
   @override
   String signInWith(String provider) {
@@ -1080,7 +1156,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountSignedInSnack => 'Signed in — profile synced';
 
   @override
-  String get accountSignedOutSnack => 'Signed out — back to guest mode';
+  String get accountSignedOutSnack => 'Signed out';
+
+  @override
+  String get authEmailLabel => 'Email';
+
+  @override
+  String get authPasswordLabel => 'Password';
+
+  @override
+  String get authOrEmail => 'or email and password';
+
+  @override
+  String get authSignInEmail => 'Sign in with email';
+
+  @override
+  String get authCreateAccount => 'Create account';
+
+  @override
+  String get authInvalidEmail => 'Enter a valid email address.';
+
+  @override
+  String get authShortPassword => 'Password must be at least 6 characters.';
+
+  @override
+  String get authInvalidCredentials => 'Wrong email or password.';
+
+  @override
+  String get authConfirmEmailThenSignIn =>
+      'Confirm the email we sent, then sign in.';
+
+  @override
+  String get authEmailAlreadyRegistered =>
+      'That account already exists. Sign in with email and password.';
 
   @override
   String get impersonateTitle => 'View as rider';

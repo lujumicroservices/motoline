@@ -12,6 +12,27 @@ $androidDir = (Resolve-Path (Join-Path $PSScriptRoot "..\android")).Path
 $keystore = Join-Path $androidDir "upload-keystore.jks"
 $props = Join-Path $androidDir "key.properties"
 
+function Resolve-Keytool {
+  $cmd = Get-Command keytool -ErrorAction SilentlyContinue
+  if ($cmd) { return $cmd.Source }
+
+  $candidates = [System.Collections.Generic.List[string]]::new()
+  if ($env:JAVA_HOME) {
+    $candidates.Add((Join-Path $env:JAVA_HOME "bin\keytool.exe"))
+  }
+  $candidates.Add("$env:ProgramFiles\Android\Android Studio\jbr\bin\keytool.exe")
+  $candidates.Add("${env:ProgramFiles(x86)}\Android\Android Studio\jbr\bin\keytool.exe")
+  $candidates.Add("$env:LOCALAPPDATA\Android\Sdk\jbr\bin\keytool.exe")
+  foreach ($c in $candidates) {
+    if ($c -and (Test-Path $c)) { return $c }
+  }
+
+  throw "keytool not found. Install Android Studio (JBR) or add a JDK to PATH / JAVA_HOME."
+}
+
+$keytool = Resolve-Keytool
+Write-Host "Using keytool: $keytool"
+
 if (Test-Path $keystore) {
   Write-Host "Keystore already exists: $keystore"
   Write-Host "Aborting so we do not overwrite your upload key."
@@ -27,7 +48,7 @@ $keyPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
   [Runtime.InteropServices.Marshal]::SecureStringToBSTR($keyPass)
 )
 
-keytool -genkey -v `
+& $keytool -genkey -v `
   -keystore $keystore `
   -storetype JKS `
   -keyalg RSA `
@@ -38,12 +59,13 @@ keytool -genkey -v `
   -keypass $keyPlain `
   -dname $DName
 
-@"
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($props, @"
 storePassword=$storePlain
 keyPassword=$keyPlain
 keyAlias=$Alias
 storeFile=upload-keystore.jks
-"@ | Set-Content -Path $props -Encoding UTF8
+"@, $utf8NoBom)
 
 Write-Host ""
 Write-Host "Created:"

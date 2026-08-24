@@ -92,7 +92,7 @@ class RodadaRepository {
     await SupabaseBootstrap.ensureSession();
   }
 
-  String? get currentUserId => _supabase.auth.currentUser?.id;
+  String? get currentUserId => SupabaseBootstrap.permanentUserId;
 
   String _inviteCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';

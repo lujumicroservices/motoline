@@ -25,7 +25,6 @@ import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../compare/ride_compare_screen.dart';
 import '../compare/route_compare_screen.dart';
-import '../pro/pro_upsell.dart';
 import 'curva_detail_screen.dart';
 import 'fullscreen_map_screen.dart';
 import 'pilot_line_map.dart';
@@ -827,18 +826,10 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         ),
                         LabSection(
                           title: l10n.sectionNotes,
-                          subtitle: isPro
-                              ? l10n.sectionNotesSub
-                              : l10n.sectionNotesProOnly,
-                          badge: isPro ? null : l10n.pro,
+                          subtitle: l10n.sectionNotesSub,
                           expanded: _isOpen('notes'),
                           onToggle: () => _toggle('notes'),
-                          child: isPro
-                              ? _PrecisionPanel(analytics: a)
-                              : ProUpsellBanner(
-                                  title: l10n.proNotesBannerTitle,
-                                  body: l10n.proNotesBannerBody,
-                                ),
+                          child: _PrecisionPanel(analytics: a),
                         ),
                       ],
                     ),

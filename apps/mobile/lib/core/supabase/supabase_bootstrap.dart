@@ -9,8 +9,18 @@ class SupabaseBootstrap {
   static bool _ready = false;
   static bool get isReady => _ready;
 
-  /// Last session error (e.g. Anonymous provider disabled) for UI.
+  /// Last session error (e.g. not signed in) for UI.
   static String? lastAuthError;
+
+  /// Signed-in user with a real identity (Google / email).
+  static User? get permanentUser {
+    if (!_ready) return null;
+    final user = client.auth.currentUser;
+    if (user == null || user.isAnonymous) return null;
+    return user;
+  }
+
+  static String? get permanentUserId => permanentUser?.id;
 
   static Future<void> init() async {
     if (_ready) return;
@@ -35,6 +45,18 @@ class SupabaseBootstrap {
       publishableKey: key,
     );
     _ready = true;
+    await _dropAnonymousSession();
+  }
+
+  /// Closed beta: leftover guest sessions are discarded. Riders sign in fresh.
+  static Future<void> _dropAnonymousSession() async {
+    final user = client.auth.currentUser;
+    if (user == null || !user.isAnonymous) return;
+    try {
+      await client.auth.signOut();
+    } catch (e) {
+      debugPrint('RiderLab drop anonymous session: $e');
+    }
   }
 
   static SupabaseClient get client {
@@ -44,35 +66,23 @@ class SupabaseBootstrap {
     return Supabase.instance.client;
   }
 
-  /// Ensures a session exists (anonymous) so RLS-backed sync can run.
+  /// Restores a permanent (Google / email) session. Never creates anonymous
+  /// guests. Cloud callers must treat `null` as signed out.
   static Future<Session?> ensureSession() async {
     lastAuthError = null;
     final auth = client.auth;
     final existing = auth.currentSession;
-    if (existing != null) {
-      await ensureProfileForUser(existing.user.id);
-      await _syncLinkedNameIfNeeded(existing.user);
-      return existing;
+    if (existing == null) {
+      lastAuthError = 'Sign in required';
+      return null;
     }
-
-    try {
-      final response = await auth.signInAnonymously();
-      final session = response.session;
-      if (session == null) {
-        lastAuthError = 'Anonymous sign-in returned no session';
-        return null;
-      }
-      await ensureProfileForUser(session.user.id);
-      return session;
-    } on AuthException catch (e) {
-      lastAuthError = e.message;
-      debugPrint('RiderLab auth: ${e.message}');
-      rethrow;
-    } catch (e) {
-      lastAuthError = '$e';
-      debugPrint('RiderLab auth: $e');
-      rethrow;
+    if (existing.user.isAnonymous) {
+      lastAuthError = 'Sign in required';
+      return null;
     }
+    await ensureProfileForUser(existing.user.id);
+    await _syncLinkedNameIfNeeded(existing.user);
+    return existing;
   }
 
   /// If already linked to Google, push name into profiles (fixes pre-sync users).

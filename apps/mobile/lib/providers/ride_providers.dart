@@ -15,6 +15,7 @@ import '../core/services/ride_place_name_service.dart';
 import '../core/services/ride_recorder.dart';
 import '../core/services/ride_sync_service.dart';
 import '../core/services/sync_outbox_service.dart';
+import 'pro_entitlement_provider.dart';
 
 
 final rideDatabaseProvider = Provider<RideDatabase>((ref) {
@@ -46,7 +47,12 @@ Future<void> enqueueAndDrainRideSync(
 }
 
 final rideRecorderProvider = Provider<RideRecorder>((ref) {
-  final recorder = RideRecorder(database: ref.watch(rideDatabaseProvider));
+  final recorder = RideRecorder(
+    database: ref.watch(rideDatabaseProvider),
+    onRideCompleted: (_) {
+      unawaited(ref.read(proEntitlementProvider.notifier).onRideCompleted());
+    },
+  );
   ref.onDispose(recorder.dispose);
   return recorder;
 });

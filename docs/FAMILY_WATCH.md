@@ -14,12 +14,12 @@ supabase db push
 1. Edit [`docs/watch/config.js`](watch/config.js) with RiderLab `SUPABASE_URL` + anon key.
 2. Upload `docs/watch/` to the static host (e.g. Azure alongside the partner deck) so the URL is:
 
-`https://riderlabdeck.z21.web.core.windows.net/watch/?t=TOKEN`
+`https://riderlab.rawthrottle.com.mx/watch/?t=TOKEN`
 
 3. Optional in `apps/mobile/.env`:
 
 ```
-WATCH_SHARE_BASE_URL=https://riderlabdeck.z21.web.core.windows.net/watch/
+WATCH_SHARE_BASE_URL=https://riderlab.rawthrottle.com.mx/watch/
 ```
 
 ## App flow

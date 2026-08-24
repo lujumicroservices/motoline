@@ -6,10 +6,12 @@ import '../l10n/l10n_ext.dart';
 import '../providers/pro_entitlement_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/ride_viz_palette.dart';
+import 'partner_code_redeem.dart';
 
 Future<void> showProUpsellSheet(BuildContext context, WidgetRef ref) {
   return showModalBottomSheet<void>(
     context: context,
+    isScrollControlled: true,
     backgroundColor: AppTheme.asphaltElevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -24,80 +26,109 @@ class _ProUpsellSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isPro = ref.watch(isProProvider);
+    final status = ref.watch(proEntitlementProvider);
+    final remaining = proRemainingLabel(l10n, status);
+    final inset = MediaQuery.viewInsetsOf(context).bottom;
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppTheme.mist.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
+        padding: EdgeInsets.fromLTRB(24, 16, 24, 24 + inset),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.mist.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.proUnlock,
-              style: GoogleFonts.barlowCondensed(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.proUnlockBody,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 15,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _FeatureRow(text: l10n.proFeatureSegment),
-            const SizedBox(height: 10),
-            _FeatureRow(text: l10n.proFeatureBrakes),
-            const SizedBox(height: 10),
-            _FeatureRow(text: l10n.proFeatureCurva),
-            const SizedBox(height: 10),
-            _FeatureRow(text: l10n.proFeatureNotes),
-            const SizedBox(height: 10),
-            _FeatureRow(text: l10n.proFeatureNoAds),
-            const SizedBox(height: 24),
-            if (isPro)
+              const SizedBox(height: 20),
               Text(
-                l10n.proUnlocked,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.rajdhani(
-                  color: RideVizPalette.leanLeft,
-                  fontWeight: FontWeight.w700,
+                l10n.proUnlock,
+                style: GoogleFonts.barlowCondensed(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
                 ),
-              )
-            else
-              FilledButton(
-                onPressed: () async {
-                  await ref.read(isProProvider.notifier).purchasePro();
-                  if (context.mounted) Navigator.of(context).pop();
-                },
-                child: Text(l10n.upgradeToPro),
               ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.proToggleHelp,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
+              const SizedBox(height: 8),
+              Text(
+                l10n.proUnlockBody,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 15,
+                  height: 1.4,
+                ),
               ),
-            ),
-          ],
+              if (remaining != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  remaining,
+                  style: GoogleFonts.rajdhani(
+                    color: RideVizPalette.leanLeft,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+              if (status.expiredAfterGrant) ...[
+                const SizedBox(height: 10),
+                Text(
+                  l10n.proExpiredKeepLab,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.signal,
+                    fontSize: 14,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              _FeatureRow(text: l10n.proFeatureSegment),
+              const SizedBox(height: 10),
+              _FeatureRow(text: l10n.proFeatureBrakes),
+              const SizedBox(height: 10),
+              _FeatureRow(text: l10n.proFeatureCurva),
+              const SizedBox(height: 24),
+              if (status.isPro)
+                Text(
+                  remaining ?? l10n.proUnlocked,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.rajdhani(
+                    color: RideVizPalette.leanLeft,
+                    fontWeight: FontWeight.w700,
+                  ),
+                )
+              else ...[
+                FilledButton(
+                  onPressed: () async {
+                    await ref.read(proEntitlementProvider.notifier).purchasePro();
+                    if (context.mounted) Navigator.of(context).pop();
+                  },
+                  child: Text(l10n.upgradeToPro),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.havePartnerCode,
+                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                const PartnerCodeRedeemField(compact: true),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.startTrialHelp,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

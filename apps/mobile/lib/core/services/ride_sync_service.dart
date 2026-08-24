@@ -105,7 +105,7 @@ class RideSyncService {
         return null;
       }
       await SupabaseBootstrap.ensureSession();
-      final userId = _supabase.auth.currentUser?.id;
+      final userId = SupabaseBootstrap.permanentUserId;
       if (userId == null) {
         lastSyncError =
             SupabaseBootstrap.lastAuthError ?? 'Not signed in to cloud';
@@ -283,7 +283,7 @@ class RideSyncService {
 
     try {
       final session = await SupabaseBootstrap.ensureSession();
-      final me = _str(session?.user.id ?? _supabase.auth.currentUser?.id);
+      final me = _str(session?.user.id ?? SupabaseBootstrap.permanentUserId);
       if (me == null) {
         lastPullError =
             SupabaseBootstrap.lastAuthError ?? 'Not signed in to cloud';
@@ -407,7 +407,7 @@ class RideSyncService {
     if (!SupabaseBootstrap.isReady) return;
     try {
       await SupabaseBootstrap.ensureSession();
-      final userId = _supabase.auth.currentUser?.id;
+      final userId = SupabaseBootstrap.permanentUserId;
       if (userId == null) return;
 
       final rows = await _supabase

@@ -21,7 +21,7 @@ docs/                 # Architecture, store, partner decks, legal
 - Post-ride map (OpenStreetMap / flutter_map): speed-colored line, GPS gap markers, scrub
 - On-device insights: corners, brakes, skill coach cards
 - Friends / rodadas; Lean Lab pilots
-- Free / Pro gates (RevenueCat when `REVENUECAT_API_KEY` is set; local toggle otherwise)
+- Free / Pro gates (RevenueCat when `REVENUECAT_API_KEY` is set; local toggle otherwise). Contract: [docs/FREE_VS_PRO.md](docs/FREE_VS_PRO.md) — recording + social free; Ride Lab depth Pro; 1-month trial; 3-month partner codes
 
 ## Run
 

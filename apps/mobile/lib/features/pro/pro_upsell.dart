@@ -100,7 +100,7 @@ class ProUpsellBanner extends ConsumerWidget {
             FilledButton(
               onPressed: () async {
                 final ok =
-                    await ref.read(isProProvider.notifier).purchasePro();
+                    await ref.read(proEntitlementProvider.notifier).purchasePro();
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

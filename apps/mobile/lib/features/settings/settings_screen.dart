@@ -16,6 +16,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../../widgets/account_auth_section.dart';
+import '../../widgets/partner_code_redeem.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
@@ -87,6 +88,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isPro = ref.watch(isProProvider);
+    final pro = ref.watch(proEntitlementProvider);
     final locale = ref.watch(localeProvider);
     final bike = ref.watch(riderBikeProvider);
 
@@ -295,6 +297,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
+            const SizedBox(height: 8),
+            const _StaffPartnerCodeTile(),
           ],
           const SizedBox(height: 28),
           const AdventureCameraSettingsSection(),
@@ -346,39 +350,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              l10n.proToggleDev,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              revenueCatConfigured
-                  ? 'Store billing via RevenueCat when configured. Local toggle is for sideload/dev.'
-                  : l10n.proToggleHelp,
+          if (proRemainingLabel(l10n, pro) != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              proRemainingLabel(l10n, pro)!,
               style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
+                color: RideVizPalette.leanLeft,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            value: isPro,
-            activeThumbColor: RideVizPalette.leanLeft,
-            onChanged: (v) => ref.read(isProProvider.notifier).setPro(v),
-          ),
+          ],
+          if (pro.expiredAfterGrant) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.proExpiredKeepLab,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.signal,
+                fontSize: 13,
+                height: 1.35,
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          if (allowLocalProToggle)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                l10n.proToggleDev,
+                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                l10n.proToggleHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                ),
+              ),
+              value: isPro,
+              activeThumbColor: RideVizPalette.leanLeft,
+              onChanged: (v) =>
+                  ref.read(proEntitlementProvider.notifier).setPro(v),
+            ),
           if (revenueCatConfigured) ...[
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () async {
-                await ref.read(isProProvider.notifier).restorePurchases();
+                await ref
+                    .read(proEntitlementProvider.notifier)
+                    .restorePurchases();
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(l10n.proUnlocked)),
                 );
               },
-              child: const Text('Restore purchases'),
+              child: Text(l10n.restorePurchases),
             ),
           ],
+          const SizedBox(height: 12),
+          const PartnerCodeRedeemField(),
           const SizedBox(height: 8),
           if (!isPro)
             OutlinedButton(
@@ -390,17 +419,103 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 Icon(Icons.verified, color: RideVizPalette.leanLeft, size: 18),
                 const SizedBox(width: 8),
-                Text(
-                  l10n.proUnlocked,
-                  style: GoogleFonts.rajdhani(
-                    color: RideVizPalette.leanLeft,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    proRemainingLabel(l10n, pro) ?? l10n.proUnlocked,
+                    style: GoogleFonts.rajdhani(
+                      color: RideVizPalette.leanLeft,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
         ],
       ),
+    );
+  }
+}
+
+class _StaffPartnerCodeTile extends ConsumerStatefulWidget {
+  const _StaffPartnerCodeTile();
+  @override
+  ConsumerState<_StaffPartnerCodeTile> createState() =>
+      _StaffPartnerCodeTileState();
+}
+
+class _StaffPartnerCodeTileState extends ConsumerState<_StaffPartnerCodeTile> {
+  final _label = TextEditingController();
+  bool _busy = false;
+  String? _lastCode;
+
+  @override
+  void dispose() {
+    _label.dispose();
+    super.dispose();
+  }
+
+  Future<void> _create() async {
+    final l10n = context.l10n;
+    setState(() => _busy = true);
+    final result = await ref
+        .read(proEntitlementProvider.notifier)
+        .staffCreatePartnerCode(label: _label.text);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (!result.ok || result.code == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.partnerCodeInvalid)),
+      );
+      return;
+    }
+    setState(() => _lastCode = result.code);
+    await Clipboard.setData(ClipboardData(text: result.code!));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.partnerCodeCopied(result.code!))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.createPartnerCode,
+          style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.createPartnerCodeHelp,
+          style: GoogleFonts.rajdhani(
+            color: AppTheme.steel,
+            fontSize: 12,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _label,
+          decoration: InputDecoration(
+            hintText: l10n.partnerLabelHint,
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: _busy ? null : _create,
+          child: Text(l10n.createPartnerCode),
+        ),
+        if (_lastCode != null) ...[
+          const SizedBox(height: 8),
+          SelectableText(
+            _lastCode!,
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          ),
+        ],
+      ],
     );
   }
 }

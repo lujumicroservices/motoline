@@ -84,10 +84,14 @@ class RideRecorder {
     LocationService? locationService,
     LeanSensor? leanSensor,
     BarometerSensor? barometerSensor,
+    this.onRideCompleted,
   })  : _db = database ?? RideDatabase.instance,
         _location = locationService ?? LocationService(),
         _lean = leanSensor ?? LeanSensor(),
         _baro = barometerSensor ?? BarometerSensor();
+
+  /// Fired after a ride is marked completed (stop or recover).
+  final void Function(Ride ride)? onRideCompleted;
 
   final RideDatabase _db;
   final LocationService _location;
@@ -462,6 +466,7 @@ class RideRecorder {
     _ride = null;
     _emitCompleted(completed);
     unawaited(ImuBlobUploadService().enqueueAndUpload(completed.id));
+    onRideCompleted?.call(completed);
     return completed;
   }
 
@@ -525,6 +530,7 @@ class RideRecorder {
     );
     await _db.upsertRide(completed);
     unawaited(_assignPlaceTitle(completed));
+    onRideCompleted?.call(completed);
     return completed;
   }
 

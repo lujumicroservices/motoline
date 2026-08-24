@@ -16,7 +16,7 @@ class WatchRepository {
 
   SupabaseClient get _db => SupabaseBootstrap.client;
 
-  String? get _uid => _db.auth.currentUser?.id;
+  String? get _uid => SupabaseBootstrap.permanentUserId;
 
   /// Public watch page base, e.g. https://host/watch/
   static String get shareBaseUrl {
@@ -24,7 +24,7 @@ class WatchRepository {
     if (fromEnv.isNotEmpty) {
       return fromEnv.endsWith('/') ? fromEnv : '$fromEnv/';
     }
-    return 'https://riderlabdeck.z21.web.core.windows.net/watch/';
+    return 'https://riderlab.rawthrottle.com.mx/watch/';
   }
 
   static String shareUrlForToken(String token) => '$shareBaseUrl?t=$token';

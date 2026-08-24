@@ -7,7 +7,7 @@ import 'core/auth/impersonation_store.dart';
 import 'core/notifications/push_notification_service.dart';
 import 'core/services/arm_foreground_service.dart';
 import 'core/supabase/supabase_bootstrap.dart';
-import 'features/home/home_screen.dart';
+import 'features/auth/auth_gate.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'theme/app_theme.dart';
@@ -16,11 +16,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   ArmForegroundService.ensureInitialized();
   await SupabaseBootstrap.init();
-  try {
-    await SupabaseBootstrap.ensureSession();
-  } catch (_) {
-    // Auth provider may be off; app still works offline.
-  }
   await ImpersonationStore.hydrate();
   await PushNotificationService.instance.init();
   runApp(const ProviderScope(child: RiderLabApp()));
@@ -84,5 +79,5 @@ class _BootHomeState extends State<_BootHome> {
   }
 
   @override
-  Widget build(BuildContext context) => const HomeScreen();
+  Widget build(BuildContext context) => const AuthGate();
 }

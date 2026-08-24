@@ -9,6 +9,8 @@ import '../theme/ride_viz_palette.dart';
 
 /// Banner slot for Free users. Hidden when Pro is active.
 /// Placeholder until AdMob (or another network) is wired.
+/// Do not pitch “no ads” as a Pro benefit until a real ads SDK is live
+/// (see docs/FREE_VS_PRO.md). Copy here upgrades Ride Lab, not ad removal.
 class FreeAdBanner extends ConsumerWidget {
   const FreeAdBanner({
     super.key,

@@ -4,6 +4,8 @@ Living requirements for features beyond the current MVP. Status: **Planned** unl
 
 Related shipped MVP: GPS ride recorder, Ride Lab (map + scrubber + charts), in-app GitHub APK updates. See root [README](../README.md).
 
+**Free vs Pro** (trial, partner codes, paid `pro` entitlement): **[FREE_VS_PRO.md](FREE_VS_PRO.md)** · resumen ES **[FREE_VS_PRO.es.md](FREE_VS_PRO.es.md)**. Recording, garage, friends, rodadas, and Family Watch stay Free. Segment zoom, full brakes, and full corner detail are Pro. Named routes / loop auto-lap / deep compare are Pro **when unpaused**.
+
 ---
 
 ## 1. Unified speed color scale
@@ -209,6 +211,7 @@ flowchart LR
 - [ ] Map zooms / focuses on the selected stretch (outside dimmed or hidden)
 - [ ] Metric cards + speed/lean charts reflect the segment only
 - [ ] Clear returns to full-ride view
+- [x] Free vs Pro: segment zoom is Pro ([FREE_VS_PRO.md](FREE_VS_PRO.md))
 
 ---
 
@@ -268,6 +271,7 @@ flowchart LR
 | REQ-SYNC | Supabase RiderLab project + schema + Flutter client bootstrap | In progress |
 | REQ-SEGMENT | Select/zoom road segment + segment metrics | In progress |
 | REQ-ROAD-KIND | Recta vs curva from heading (+ lean side) | In progress |
+| REQ-FREE-PRO | Free vs Pro matrix, 30-day trial, 90-day partner codes | Contract: [FREE_VS_PRO.md](FREE_VS_PRO.md) |
 
 ### Brand typography & chrome
 

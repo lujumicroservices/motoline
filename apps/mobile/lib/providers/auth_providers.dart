@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -9,6 +11,7 @@ import 'alias_provider.dart';
 import 'ride_providers.dart';
 import 'social_providers.dart';
 import 'supabase_providers.dart';
+import 'pro_entitlement_provider.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
@@ -42,11 +45,27 @@ class AuthActions {
 
   AuthService get _auth => ref.read(authServiceProvider);
 
-  Future<bool> signIn(AuthProviderKind provider) async {
+  Future<bool> signIn(AuthProviderKind provider) {
+    return _complete(() => _auth.signInWith(provider));
+  }
+
+  Future<bool> signInWithEmail(String email, String password) {
+    return _complete(
+      () => _auth.signInWithEmail(email: email, password: password),
+    );
+  }
+
+  Future<bool> signUpWithEmail(String email, String password) {
+    return _complete(
+      () => _auth.signUpWithEmail(email: email, password: password),
+    );
+  }
+
+  Future<bool> _complete(Future<void> Function() action) async {
     ref.read(authBusyProvider.notifier).state = true;
     ref.read(authErrorProvider.notifier).state = null;
     try {
-      await _auth.signInWith(provider);
+      await action();
       await ref.read(impersonationProvider.notifier).refreshStaff();
       final label = await _auth.syncLinkedProfile(force: true) ??
           _auth.displayLabel;
@@ -57,12 +76,9 @@ class AuthActions {
       ref.invalidate(friendsListProvider);
       // Pull this account's cloud rides into Garage after identity change.
       ref.invalidate(ridesListProvider);
+      unawaited(ref.read(proEntitlementProvider.notifier).refresh());
       return true;
     } on AuthException catch (e) {
-      if (e.message.toLowerCase().contains('cancel')) {
-        ref.read(authErrorProvider.notifier).state = null;
-        return false;
-      }
       ref.read(authErrorProvider.notifier).state = e.message;
       return false;
     } catch (e) {
@@ -85,6 +101,7 @@ class AuthActions {
       await _auth.signOut();
       ref.invalidate(myProfileProvider);
       ref.invalidate(friendsListProvider);
+      unawaited(ref.read(proEntitlementProvider.notifier).onSignedOut());
     } catch (e) {
       ref.read(authErrorProvider.notifier).state = '$e';
     } finally {

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../core/auth/auth_provider_kind.dart';
+import '../features/auth/sign_in_form.dart';
 import '../l10n/l10n_ext.dart';
 import '../providers/auth_providers.dart';
 import '../theme/app_theme.dart';
 
-/// Account / identity block for Settings — Google now, more providers later.
+/// Account block in Settings. Signed-in riders can sign out (returns to the
+/// auth gate). Leftover guests see the same sign-in form as launch.
 class AccountAuthSection extends ConsumerWidget {
   const AccountAuthSection({super.key});
 
@@ -17,7 +18,6 @@ class AccountAuthSection extends ConsumerWidget {
     final auth = ref.watch(authServiceProvider);
     final permanent = ref.watch(hasPermanentIdentityProvider);
     final busy = ref.watch(authBusyProvider);
-    final error = ref.watch(authErrorProvider);
     final label = auth.displayLabel;
     final email = auth.currentUser?.email;
 
@@ -33,7 +33,7 @@ class AccountAuthSection extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          permanent ? l10n.accountSignedInBody : l10n.accountGuestBody,
+          permanent ? l10n.accountSignedInBody : l10n.authGateBody,
           style: GoogleFonts.rajdhani(
             color: AppTheme.steel,
             fontSize: 14,
@@ -70,7 +70,7 @@ class AccountAuthSection extends ConsumerWidget {
                         Text(
                           permanent
                               ? (label ?? l10n.accountSignedIn)
-                              : l10n.accountGuest,
+                              : l10n.authGateTitle,
                           style: GoogleFonts.exo2(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
@@ -101,32 +101,14 @@ class AccountAuthSection extends ConsumerWidget {
                     ),
                   ),
                 )
-              else if (!permanent) ...[
-                for (final provider in auth.availableProviders) ...[
-                  FilledButton.icon(
-                    onPressed: () async {
-                      final ok = await ref
-                          .read(authActionsProvider)
-                          .signIn(provider);
-                      if (!context.mounted || !ok) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.accountSignedInSnack)),
-                      );
-                    },
-                    icon: Icon(_iconFor(provider)),
-                    label: Text(l10n.signInWith(provider.label)),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.mist,
-                      foregroundColor: AppTheme.asphalt,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ] else
+              else if (!permanent)
+                const SignInForm()
+              else
                 OutlinedButton(
                   onPressed: () async {
                     await ref.read(authActionsProvider).signOut();
                     if (!context.mounted) return;
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(l10n.accountSignedOutSnack)),
                     );
@@ -136,24 +118,7 @@ class AccountAuthSection extends ConsumerWidget {
             ],
           ),
         ),
-        if (error != null && error.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(
-            error,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.signal,
-              fontSize: 13,
-              height: 1.35,
-            ),
-          ),
-        ],
       ],
     );
-  }
-
-  IconData _iconFor(AuthProviderKind provider) {
-    return switch (provider) {
-      AuthProviderKind.google => Icons.g_mobiledata_rounded,
-    };
   }
 }

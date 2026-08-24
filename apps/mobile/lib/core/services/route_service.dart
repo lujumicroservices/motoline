@@ -64,7 +64,7 @@ class RouteService {
     if (SupabaseBootstrap.isReady) {
       try {
         await SupabaseBootstrap.ensureSession();
-        final userId = _supabase.auth.currentUser?.id;
+        final userId = SupabaseBootstrap.permanentUserId;
         if (userId != null) {
           ownerId = userId;
           final row = await _supabase
@@ -156,7 +156,7 @@ class RouteService {
     if (SupabaseBootstrap.isReady) {
       try {
         await SupabaseBootstrap.ensureSession();
-        final userId = _supabase.auth.currentUser?.id;
+        final userId = SupabaseBootstrap.permanentUserId;
         if (userId != null) {
           await _supabase.from('routes').update({
             'init_lat': null,
@@ -219,7 +219,7 @@ class RouteService {
 
     try {
       final session = await SupabaseBootstrap.ensureSession();
-      final me = _str(session?.user.id ?? _supabase.auth.currentUser?.id);
+      final me = _str(session?.user.id ?? SupabaseBootstrap.permanentUserId);
       if (me == null) {
         lastRefreshError =
             SupabaseBootstrap.lastAuthError ?? 'Not signed in to cloud';

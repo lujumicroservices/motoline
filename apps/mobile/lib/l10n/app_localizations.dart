@@ -545,13 +545,13 @@ abstract class AppLocalizations {
   /// No description provided for @sectionNotes.
   ///
   /// In es, this message translates to:
-  /// **'Precisión + notas'**
+  /// **'Calidad GPS'**
   String get sectionNotes;
 
   /// No description provided for @sectionNotesSub.
   ///
   /// In es, this message translates to:
-  /// **'Calidad del GPS y notas'**
+  /// **'Tasa de muestreo y precisión de esta línea'**
   String get sectionNotesSub;
 
   /// No description provided for @segment.
@@ -1325,7 +1325,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionNotesProOnly.
   ///
   /// In es, this message translates to:
-  /// **'Solo Pro — precisión GPS y notas'**
+  /// **'Solo Pro — notas de manejo'**
   String get sectionNotesProOnly;
 
   /// No description provided for @proCurvaBannerTitle.
@@ -1343,13 +1343,13 @@ abstract class AppLocalizations {
   /// No description provided for @proNotesBannerTitle.
   ///
   /// In es, this message translates to:
-  /// **'Precisión + notas · Pro'**
+  /// **'Notas de manejo · Pro'**
   String get proNotesBannerTitle;
 
   /// No description provided for @proNotesBannerBody.
   ///
   /// In es, this message translates to:
-  /// **'La calidad del GPS y los tips de manejo están en RiderLab Pro.'**
+  /// **'Las notas de coaching de este ride están en RiderLab Pro.'**
   String get proNotesBannerBody;
 
   /// No description provided for @proFeatureCurva.
@@ -1361,7 +1361,7 @@ abstract class AppLocalizations {
   /// No description provided for @proFeatureNotes.
   ///
   /// In es, this message translates to:
-  /// **'Precisión GPS + notas de manejo'**
+  /// **'Notas de manejo'**
   String get proFeatureNotes;
 
   /// No description provided for @myRoutes.
@@ -1727,7 +1727,7 @@ abstract class AppLocalizations {
   /// No description provided for @proUnlockBody.
   ///
   /// In es, this message translates to:
-  /// **'Elige cualquier tramo, detalle completo de curvas, notas de GPS, frenadas completas y sin anuncios.'**
+  /// **'Elige cualquier tramo, detalle completo de curvas y el historial completo de frenadas.'**
   String get proUnlockBody;
 
   /// No description provided for @proFeatureSegment.
@@ -1772,6 +1772,120 @@ abstract class AppLocalizations {
   /// **'Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión gratis.'**
   String get proToggleHelp;
 
+  /// No description provided for @proTrialDaysLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba Pro · {days} días restantes'**
+  String proTrialDaysLeft(int days);
+
+  /// No description provided for @proPartnerDaysLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'Pro de socio · {days} días restantes'**
+  String proPartnerDaysLeft(int days);
+
+  /// No description provided for @proExpiredKeepLab.
+  ///
+  /// In es, this message translates to:
+  /// **'Se acabó tu Pro — conserva el zoom de segmento y el detalle de curvas.'**
+  String get proExpiredKeepLab;
+
+  /// No description provided for @partnerProCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Código Pro de socio'**
+  String get partnerProCode;
+
+  /// No description provided for @partnerProCodeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'PRO-7K4M2Q'**
+  String get partnerProCodeHint;
+
+  /// No description provided for @partnerProCodeHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Un código personal de un socio RiderLab. No es el código de una rodada.'**
+  String get partnerProCodeHelp;
+
+  /// No description provided for @redeemPartnerCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Canjear'**
+  String get redeemPartnerCode;
+
+  /// No description provided for @partnerCodeInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese código no es válido.'**
+  String get partnerCodeInvalid;
+
+  /// No description provided for @partnerCodeUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese código ya se usó.'**
+  String get partnerCodeUsed;
+
+  /// No description provided for @partnerCodeAlreadyRedeemed.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cuenta ya canjeó un código de socio.'**
+  String get partnerCodeAlreadyRedeemed;
+
+  /// No description provided for @partnerCodeAlreadyPaying.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes Pro. Dale este código a otra persona.'**
+  String get partnerCodeAlreadyPaying;
+
+  /// No description provided for @partnerCodeRedeemed.
+  ///
+  /// In es, this message translates to:
+  /// **'Pro de socio activo.'**
+  String get partnerCodeRedeemed;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In es, this message translates to:
+  /// **'Restaurar compras'**
+  String get restorePurchases;
+
+  /// No description provided for @havePartnerCode.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Tienes un código de socio?'**
+  String get havePartnerCode;
+
+  /// No description provided for @createPartnerCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear código de socio'**
+  String get createPartnerCode;
+
+  /// No description provided for @createPartnerCodeHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Pro de 90 días, un solo uso, para un rider socio.'**
+  String get createPartnerCodeHelp;
+
+  /// No description provided for @partnerLabelHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del socio (opcional)'**
+  String get partnerLabelHint;
+
+  /// No description provided for @partnerCodeCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiado {code}'**
+  String partnerCodeCopied(String code);
+
+  /// No description provided for @startTrialHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'El Pro completo empieza cuando terminas tu primer ride.'**
+  String get startTrialHelp;
+
   /// No description provided for @brakesProTeaser.
   ///
   /// In es, this message translates to:
@@ -1793,7 +1907,7 @@ abstract class AppLocalizations {
   /// No description provided for @removeAdsWithPro.
   ///
   /// In es, this message translates to:
-  /// **'Pasa a Pro para quitar anuncios'**
+  /// **'Pasa a Pro para el Ride Lab completo'**
   String get removeAdsWithPro;
 
   /// No description provided for @routeTabLaps.
@@ -1997,7 +2111,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountGuestBody.
   ///
   /// In es, this message translates to:
-  /// **'Estás como invitado. Inicia sesión para guardar tu perfil en otros teléfonos — tus recorridos se vinculan cuando se puede.'**
+  /// **'Crea una cuenta para usar RiderLab. Grabar, amigos y la nube requieren un rider con sesión.'**
   String get accountGuestBody;
 
   /// No description provided for @accountSignedIn.
@@ -2009,8 +2123,20 @@ abstract class AppLocalizations {
   /// No description provided for @accountSignedInBody.
   ///
   /// In es, this message translates to:
-  /// **'Tu cuenta de Google está vinculada. Cerrar sesión vuelve a modo invitado en este teléfono.'**
+  /// **'Tu cuenta está vinculada. Cerrar sesión vuelve a la pantalla de inicio de sesión.'**
   String get accountSignedInBody;
+
+  /// No description provided for @authGateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entra para rodar'**
+  String get authGateTitle;
+
+  /// No description provided for @authGateBody.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab necesita una cuenta. Usa Google o correo y contraseña — el modo invitado está apagado. Así también entra la revisión de las tiendas.'**
+  String get authGateBody;
 
   /// No description provided for @signInWith.
   ///
@@ -2033,8 +2159,68 @@ abstract class AppLocalizations {
   /// No description provided for @accountSignedOutSnack.
   ///
   /// In es, this message translates to:
-  /// **'Sesión cerrada — modo invitado'**
+  /// **'Sesión cerrada'**
   String get accountSignedOutSnack;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Correo'**
+  String get authEmailLabel;
+
+  /// No description provided for @authPasswordLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña'**
+  String get authPasswordLabel;
+
+  /// No description provided for @authOrEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'o correo y contraseña'**
+  String get authOrEmail;
+
+  /// No description provided for @authSignInEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrar con correo'**
+  String get authSignInEmail;
+
+  /// No description provided for @authCreateAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear cuenta'**
+  String get authCreateAccount;
+
+  /// No description provided for @authInvalidEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un correo válido.'**
+  String get authInvalidEmail;
+
+  /// No description provided for @authShortPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña debe tener al menos 6 caracteres.'**
+  String get authShortPassword;
+
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In es, this message translates to:
+  /// **'Correo o contraseña incorrectos.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authConfirmEmailThenSignIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirma el correo que te enviamos y luego entra.'**
+  String get authConfirmEmailThenSignIn;
+
+  /// No description provided for @authEmailAlreadyRegistered.
+  ///
+  /// In es, this message translates to:
+  /// **'Esa cuenta ya existe. Entra con correo y contraseña.'**
+  String get authEmailAlreadyRegistered;
 
   /// No description provided for @impersonateTitle.
   ///

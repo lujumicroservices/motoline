@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -6,18 +9,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../notifications/push_notification_service.dart';
 import '../supabase/supabase_bootstrap.dart';
 import 'auth_provider_kind.dart';
+import 'email_password.dart';
+import 'google_id_token.dart';
 
 /// Tokens obtained from a native OAuth SDK (Google today; Apple later).
 class NativeIdTokens {
   const NativeIdTokens({
     required this.idToken,
     this.accessToken,
+    this.nonce,
     this.displayName,
     this.email,
   });
 
   final String idToken;
   final String? accessToken;
+  /// Matches the nonce claim in [idToken] for Supabase verification.
+  final String? nonce;
   /// From the native SDK (more reliable than waiting for Supabase metadata).
   final String? displayName;
   final String? email;
@@ -25,13 +33,14 @@ class NativeIdTokens {
 
 /// Extensible auth facade over Supabase.
 ///
-/// - Soft guest: [SupabaseBootstrap.ensureSession] (anonymous)
-/// - Permanent: [signInWith] — links Google onto the anonymous user when possible
-///   so rides / profile `id` stay the same
+/// The app requires a permanent identity (Google or email). Guest sessions
+/// are not used.
 class AuthService {
   AuthService();
 
-  bool _googleReady = false;
+  /// Deep link registered in AndroidManifest / Info.plist. Also add it in
+  /// Supabase → Authentication → URL Configuration → Redirect URLs.
+  static const googleOAuthRedirect = 'com.rawthrottle.riderlab://login-callback';
 
   User? get currentUser =>
       SupabaseBootstrap.isReady ? SupabaseBootstrap.client.auth.currentUser : null;
@@ -110,35 +119,78 @@ class AuthService {
     };
   }
 
+  /// Existing email account.
+  Future<AuthResponse> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    _assertEmailPassword(email, password);
+    if (!SupabaseBootstrap.isReady) {
+      throw AuthException('Cloud is not configured');
+    }
+    final auth = SupabaseBootstrap.client.auth;
+    final signedIn = await auth.signInWithPassword(
+      email: email.trim(),
+      password: password,
+    );
+    await _afterIdentity(signedIn.user ?? auth.currentUser);
+    return signedIn;
+  }
+
+  /// New email account.
+  Future<AuthResponse> signUpWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    _assertEmailPassword(email, password);
+    if (!SupabaseBootstrap.isReady) {
+      throw AuthException('Cloud is not configured');
+    }
+    final auth = SupabaseBootstrap.client.auth;
+    final signedUp = await auth.signUp(
+      email: email.trim(),
+      password: password,
+    );
+    if (signedUp.session == null) {
+      throw AuthException(
+        'Confirm the email we sent, then sign in.',
+      );
+    }
+    await _afterIdentity(signedUp.user ?? auth.currentUser);
+    return signedUp;
+  }
+
+  void _assertEmailPassword(String email, String password) {
+    final issue = validateEmailPassword(email: email, password: password);
+    if (issue == null) return;
+    throw AuthException(switch (issue) {
+      EmailPasswordIssue.emptyEmail ||
+      EmailPasswordIssue.invalidEmail =>
+        'Enter a valid email address.',
+      EmailPasswordIssue.shortPassword =>
+        'Password must be at least $kMinAuthPasswordLength characters.',
+    });
+  }
+
   Future<AuthResponse> _signInWithGoogle() async {
+    try {
+      return await _signInWithGoogleNative();
+    } on AuthException catch (e) {
+      if (!isGoogleReauthFailure(e.message)) rethrow;
+      debugPrint('Native Google [16], falling back to browser OAuth: ${e.message}');
+      return _signInWithGoogleBrowser();
+    }
+  }
+
+  Future<AuthResponse> _signInWithGoogleNative() async {
     final tokens = await _obtainGoogleTokens();
     final auth = SupabaseBootstrap.client.auth;
-    final user = auth.currentUser;
-
-    // Prefer linking so anonymous rides / profile UUID stay intact.
-    if (user != null && user.isAnonymous) {
-      try {
-        final linked = await auth.linkIdentityWithIdToken(
-          provider: OAuthProvider.google,
-          idToken: tokens.idToken,
-          accessToken: tokens.accessToken,
-        );
-        await _afterIdentity(
-          linked.user ?? auth.currentUser,
-          googleDisplayName: tokens.displayName,
-          googleEmail: tokens.email,
-        );
-        return linked;
-      } on AuthException catch (e) {
-        // Identity already belongs to another account → fall through to sign-in.
-        debugPrint('Auth link Google: ${e.message}');
-      }
-    }
 
     final signedIn = await auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: tokens.idToken,
       accessToken: tokens.accessToken,
+      nonce: tokens.nonce,
     );
     await _afterIdentity(
       signedIn.user ?? auth.currentUser,
@@ -148,41 +200,104 @@ class AuthService {
     return signedIn;
   }
 
+  /// Browser OAuth uses the Web client (already in Supabase). It does not
+  /// check the Play APK SHA-1, so it works when Credential Manager returns [16].
+  Future<AuthResponse> _signInWithGoogleBrowser() async {
+    final auth = SupabaseBootstrap.client.auth;
+    final completer = Completer<AuthResponse>();
+    final sub = auth.onAuthStateChange.listen((data) {
+      if (completer.isCompleted) return;
+      final session = data.session;
+      final signedIn = session?.user;
+      if (signedIn == null || signedIn.isAnonymous) return;
+      completer.complete(AuthResponse(session: session, user: signedIn));
+    });
+
+    try {
+      final opened = await auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: googleOAuthRedirect,
+      );
+      if (!opened) {
+        throw AuthException('Could not open Google sign-in in the browser');
+      }
+      final result = await completer.future.timeout(
+        const Duration(minutes: 3),
+        onTimeout: () => throw AuthException(
+          'Google browser sign-in timed out. Add redirect URL '
+          '$googleOAuthRedirect in Supabase → Auth → URL configuration.',
+        ),
+      );
+      await _afterIdentity(result.user ?? auth.currentUser);
+      return result;
+    } finally {
+      await sub.cancel();
+    }
+  }
+
   Future<NativeIdTokens> _obtainGoogleTokens() async {
-    await _ensureGoogleInitialized();
+    final rawNonce = newGoogleNonce();
+    await _ensureGoogleInitialized(nonce: rawNonce);
 
     final scopes = ['email', 'profile'];
     final googleSignIn = GoogleSignIn.instance;
+
+    // Sideload (upload key) then Play (app-signing key) leaves a cached
+    // Google session. Credential Manager then fails with [16] reauth.
+    try {
+      await googleSignIn.signOut();
+    } catch (e) {
+      debugPrint('Google signOut before authenticate: $e');
+    }
 
     late final GoogleSignInAccount googleUser;
     try {
       googleUser = await googleSignIn.authenticate(scopeHint: scopes);
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        throw AuthException('Sign-in canceled');
-      }
-      throw AuthException('Google sign-in failed: ${e.description ?? e.code}');
+      throw AuthException(_googleSignInMessage(e));
     }
-
-    final authorization = await googleUser.authorizationClient
-            .authorizationForScopes(scopes) ??
-        await googleUser.authorizationClient.authorizeScopes(scopes);
 
     final idToken = googleUser.authentication.idToken;
     if (idToken == null || idToken.isEmpty) {
       throw AuthException('No Google ID token — check GOOGLE_WEB_CLIENT_ID');
     }
 
+    // ID token is enough for Supabase. A second Google consent sheet
+    // (authorizeScopes) is often reported as "canceled" on Play-signed builds.
+    String? accessToken;
+    try {
+      final existing =
+          await googleUser.authorizationClient.authorizationForScopes(scopes);
+      accessToken = existing?.accessToken;
+    } on GoogleSignInException catch (e) {
+      debugPrint('Google access token skipped: ${_googleSignInMessage(e)}');
+    }
+
     return NativeIdTokens(
       idToken: idToken,
-      accessToken: authorization.accessToken,
+      accessToken: accessToken,
+      nonce: nonceClaimFromIdToken(idToken) ?? rawNonce,
       displayName: googleUser.displayName,
       email: googleUser.email,
     );
   }
 
-  Future<void> _ensureGoogleInitialized() async {
-    if (_googleReady) return;
+  static String _googleSignInMessage(GoogleSignInException e) {
+    final details = [
+      e.code.name,
+      e.description,
+      e.details?.toString(),
+    ].whereType<String>().where((s) => s.trim().isNotEmpty).join(' — ');
+    if (e.code == GoogleSignInExceptionCode.canceled) {
+      return 'Google sign-in did not finish ($details). '
+          'If you did not tap Back: Play quantum-ready signing needs an Android '
+          'OAuth client for the deployment/previous SHA-1 (Download certificates), '
+          'not only Classical/PQC. Package com.rawthrottle.riderlab, project riderlab-7b183.';
+    }
+    return 'Google sign-in failed: $details';
+  }
+
+  Future<void> _ensureGoogleInitialized({String? nonce}) async {
     final webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID']?.trim() ?? '';
     if (webClientId.isEmpty) {
       throw AuthException(
@@ -191,16 +306,18 @@ class AuthService {
       );
     }
     final iosClientId = dotenv.env['GOOGLE_IOS_CLIENT_ID']?.trim();
+    final useIosClient = !kIsWeb &&
+        Platform.isIOS &&
+        iosClientId != null &&
+        iosClientId.isNotEmpty;
     await GoogleSignIn.instance.initialize(
       serverClientId: webClientId,
-      clientId: (iosClientId != null && iosClientId.isNotEmpty)
-          ? iosClientId
-          : null,
+      clientId: useIosClient ? iosClientId : null,
+      nonce: nonce,
     );
-    _googleReady = true;
   }
 
-  Future<void> signOut({bool restoreAnonymousGuest = true}) async {
+  Future<void> signOut() async {
     try {
       await PushNotificationService.instance.clearToken();
     } catch (e) {
@@ -213,14 +330,6 @@ class AuthService {
     }
     if (SupabaseBootstrap.isReady) {
       await SupabaseBootstrap.client.auth.signOut();
-    }
-    if (restoreAnonymousGuest) {
-      try {
-        await SupabaseBootstrap.ensureSession();
-        await PushNotificationService.instance.syncToken();
-      } catch (e) {
-        debugPrint('Auth restore anonymous: $e');
-      }
     }
   }
 

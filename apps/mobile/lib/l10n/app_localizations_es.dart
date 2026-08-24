@@ -252,10 +252,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sectionChartsSub => 'Velocidad · inclinación · GPS';
 
   @override
-  String get sectionNotes => 'Precisión + notas';
+  String get sectionNotes => 'Calidad GPS';
 
   @override
-  String get sectionNotesSub => 'Calidad del GPS y notas';
+  String get sectionNotesSub => 'Tasa de muestreo y precisión de esta línea';
 
   @override
   String get segment => 'TRAMO';
@@ -695,7 +695,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setYourAlias => 'Pon tu alias';
 
   @override
-  String get sectionNotesProOnly => 'Solo Pro — precisión GPS y notas';
+  String get sectionNotesProOnly => 'Solo Pro — notas de manejo';
 
   @override
   String get proCurvaBannerTitle => 'Detalle de curva · Pro';
@@ -705,17 +705,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'Vista previa de 0,5 s. Con Pro ves entrada, centro, salida y el mapa sin bloqueo.';
 
   @override
-  String get proNotesBannerTitle => 'Precisión + notas · Pro';
+  String get proNotesBannerTitle => 'Notas de manejo · Pro';
 
   @override
   String get proNotesBannerBody =>
-      'La calidad del GPS y los tips de manejo están en RiderLab Pro.';
+      'Las notas de coaching de este ride están en RiderLab Pro.';
 
   @override
   String get proFeatureCurva => 'Detalle completo de curvas (sin banner)';
 
   @override
-  String get proFeatureNotes => 'Precisión GPS + notas de manejo';
+  String get proFeatureNotes => 'Notas de manejo';
 
   @override
   String get myRoutes => 'Tus rutas';
@@ -916,7 +916,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get proUnlockBody =>
-      'Elige cualquier tramo, detalle completo de curvas, notas de GPS, frenadas completas y sin anuncios.';
+      'Elige cualquier tramo, detalle completo de curvas y el historial completo de frenadas.';
 
   @override
   String get proFeatureSegment => 'Acercar cualquier parte del recorrido';
@@ -942,6 +942,75 @@ class AppLocalizationsEs extends AppLocalizations {
       'Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión gratis.';
 
   @override
+  String proTrialDaysLeft(int days) {
+    return 'Prueba Pro · $days días restantes';
+  }
+
+  @override
+  String proPartnerDaysLeft(int days) {
+    return 'Pro de socio · $days días restantes';
+  }
+
+  @override
+  String get proExpiredKeepLab =>
+      'Se acabó tu Pro — conserva el zoom de segmento y el detalle de curvas.';
+
+  @override
+  String get partnerProCode => 'Código Pro de socio';
+
+  @override
+  String get partnerProCodeHint => 'PRO-7K4M2Q';
+
+  @override
+  String get partnerProCodeHelp =>
+      'Un código personal de un socio RiderLab. No es el código de una rodada.';
+
+  @override
+  String get redeemPartnerCode => 'Canjear';
+
+  @override
+  String get partnerCodeInvalid => 'Ese código no es válido.';
+
+  @override
+  String get partnerCodeUsed => 'Ese código ya se usó.';
+
+  @override
+  String get partnerCodeAlreadyRedeemed =>
+      'Esta cuenta ya canjeó un código de socio.';
+
+  @override
+  String get partnerCodeAlreadyPaying =>
+      'Ya tienes Pro. Dale este código a otra persona.';
+
+  @override
+  String get partnerCodeRedeemed => 'Pro de socio activo.';
+
+  @override
+  String get restorePurchases => 'Restaurar compras';
+
+  @override
+  String get havePartnerCode => '¿Tienes un código de socio?';
+
+  @override
+  String get createPartnerCode => 'Crear código de socio';
+
+  @override
+  String get createPartnerCodeHelp =>
+      'Pro de 90 días, un solo uso, para un rider socio.';
+
+  @override
+  String get partnerLabelHint => 'Nombre del socio (opcional)';
+
+  @override
+  String partnerCodeCopied(String code) {
+    return 'Copiado $code';
+  }
+
+  @override
+  String get startTrialHelp =>
+      'El Pro completo empieza cuando terminas tu primer ride.';
+
+  @override
   String brakesProTeaser(int shown, int total) {
     return 'Mostrando $shown de $total. Desbloquea Pro para el historial completo de frenadas.';
   }
@@ -954,7 +1023,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adPlaceholder => 'Anuncio';
 
   @override
-  String get removeAdsWithPro => 'Pasa a Pro para quitar anuncios';
+  String get removeAdsWithPro => 'Pasa a Pro para el Ride Lab completo';
 
   @override
   String get routeTabLaps => 'Vueltas';
@@ -1065,14 +1134,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accountGuestBody =>
-      'Estás como invitado. Inicia sesión para guardar tu perfil en otros teléfonos — tus recorridos se vinculan cuando se puede.';
+      'Crea una cuenta para usar RiderLab. Grabar, amigos y la nube requieren un rider con sesión.';
 
   @override
   String get accountSignedIn => 'Sesión iniciada';
 
   @override
   String get accountSignedInBody =>
-      'Tu cuenta de Google está vinculada. Cerrar sesión vuelve a modo invitado en este teléfono.';
+      'Tu cuenta está vinculada. Cerrar sesión vuelve a la pantalla de inicio de sesión.';
+
+  @override
+  String get authGateTitle => 'Entra para rodar';
+
+  @override
+  String get authGateBody =>
+      'RiderLab necesita una cuenta. Usa Google o correo y contraseña — el modo invitado está apagado. Así también entra la revisión de las tiendas.';
 
   @override
   String signInWith(String provider) {
@@ -1086,7 +1162,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accountSignedInSnack => 'Sesión iniciada — perfil sincronizado';
 
   @override
-  String get accountSignedOutSnack => 'Sesión cerrada — modo invitado';
+  String get accountSignedOutSnack => 'Sesión cerrada';
+
+  @override
+  String get authEmailLabel => 'Correo';
+
+  @override
+  String get authPasswordLabel => 'Contraseña';
+
+  @override
+  String get authOrEmail => 'o correo y contraseña';
+
+  @override
+  String get authSignInEmail => 'Entrar con correo';
+
+  @override
+  String get authCreateAccount => 'Crear cuenta';
+
+  @override
+  String get authInvalidEmail => 'Escribe un correo válido.';
+
+  @override
+  String get authShortPassword =>
+      'La contraseña debe tener al menos 6 caracteres.';
+
+  @override
+  String get authInvalidCredentials => 'Correo o contraseña incorrectos.';
+
+  @override
+  String get authConfirmEmailThenSignIn =>
+      'Confirma el correo que te enviamos y luego entra.';
+
+  @override
+  String get authEmailAlreadyRegistered =>
+      'Esa cuenta ya existe. Entra con correo y contraseña.';
 
   @override
   String get impersonateTitle => 'Ver como rider';
