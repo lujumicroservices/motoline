@@ -51,6 +51,18 @@ bool shouldResumeHubFromHome({
   return isRecording;
 }
 
+/// Whether Home should push the armed hub again.
+///
+/// If [homeIsVisible], a leftover [hubOnStack] is stale (user popped with
+/// the back arrow and dispose could not clear the flag).
+bool shouldPushArmedHub({
+  required bool hubOnStack,
+  required bool homeIsVisible,
+}) {
+  if (!hubOnStack) return true;
+  return homeIsVisible;
+}
+
 class ArmedSessionNav extends StateNotifier<ArmedSessionNavState> {
   ArmedSessionNav() : super(const ArmedSessionNavState());
 

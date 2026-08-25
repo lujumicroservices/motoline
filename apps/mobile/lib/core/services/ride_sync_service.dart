@@ -16,7 +16,7 @@ import 'rider_telemetry_service.dart';
 
 /// How aggressively cloud GPS may overwrite local SQLite tracks.
 enum TrackPullPolicy {
-  /// Garage / Lean Lab open: keep local GPS unless cloud is denser
+  /// Keep local GPS unless cloud is denser
   /// (a truncated PostgREST pull used to freeze ~1000 points on a long ride).
   fillGapsOnly,
 
@@ -266,18 +266,33 @@ class RideSyncService {
     }
   }
 
-  /// Download this account's cloud rides (+ GPS points) into local Garage.
+  /// Download this account's cloud rides into local Garage.
+  ///
+  /// When [tracksOnlyIfLocalEmpty] is true (home), only ride summaries are
+  /// fetched first; GPS is downloaded later and only for rides with no local
+  /// track. [afterSummaries] runs once summaries are upserted, before GPS.
   Future<int> pullMyCloudRides({
     TrackPullPolicy policy = TrackPullPolicy.preferRicher,
+    bool tracksOnlyIfLocalEmpty = false,
+    void Function(int summariesChanged)? afterSummaries,
   }) async {
     lastPullError = null;
     lastPullInfo = null;
+    var summariesNotified = false;
+    void notifySummaries(int changed) {
+      if (summariesNotified) return;
+      summariesNotified = true;
+      afterSummaries?.call(changed);
+    }
+
     if (ImpersonationStore.isActive) {
       lastPullError = 'Cloud sync is off while viewing as another rider.';
+      notifySummaries(0);
       return 0;
     }
     if (!SupabaseBootstrap.isReady) {
       lastPullError = 'Cloud not configured';
+      notifySummaries(0);
       return 0;
     }
 
@@ -287,6 +302,7 @@ class RideSyncService {
       if (me == null) {
         lastPullError =
             SupabaseBootstrap.lastAuthError ?? 'Not signed in to cloud';
+        notifySummaries(0);
         return 0;
       }
 
@@ -298,6 +314,9 @@ class RideSyncService {
 
       var imported = 0;
       var keptLocal = 0;
+      var summariesChanged = 0;
+      final needGps = <({String localId, String cloudId})>[];
+
       for (final raw in (rows as List)) {
         try {
           final map = Map<String, dynamic>.from(raw as Map);
@@ -305,70 +324,48 @@ class RideSyncService {
           final localId = _str(map['local_id']) ?? cloudId;
           if (localId == null || cloudId == null) continue;
 
-          final started = DateTime.tryParse(_str(map['started_at']) ?? '');
-          if (started == null) continue;
-          final ended = DateTime.tryParse(_str(map['ended_at']) ?? '');
-
-          final leanL = (map['max_lean_left_deg'] as num?)?.toDouble();
-          final leanR = (map['max_lean_right_deg'] as num?)?.toDouble();
-          double? maxLean;
-          if (leanL != null || leanR != null) {
-            maxLean = math.max(leanL?.abs() ?? 0, leanR?.abs() ?? 0);
+          final localCount = await _db.countPoints(localId);
+          if (skipTrackDownload(
+            localPointCount: localCount,
+            tracksOnlyIfLocalEmpty: tracksOnlyIfLocalEmpty,
+          )) {
+            continue;
           }
 
-          final ride = Ride(
-            id: localId,
-            startedAt: started.toLocal(),
-            endedAt: ended?.toLocal(),
-            status: RideStatus.completed,
-            distanceMeters: (map['distance_meters'] as num?)?.toDouble() ?? 0,
-            pointCount: (map['point_count'] as num?)?.toInt() ?? 0,
-            maxSpeedMps: (map['max_speed_mps'] as num?)?.toDouble(),
-            avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
-            maxLeanDegrees: maxLean,
-            routeId: _str(map['route_id']),
-            visibility: ShareVisibility.fromDb(
-              map['visibility'],
-              legacyIsShared:
-                  map['is_shared'] == true || map['is_shared'] == 1,
-            ),
-            title: _str(map['title']),
-          );
+          final existing = await _db.getRide(localId);
+          final ride = _rideFromCloudRow(map, localId, existing: existing);
+          if (ride == null) continue;
+
           await _db.upsertRide(ride);
+          if (_summaryChanged(existing, ride)) summariesChanged++;
 
-          final pointRows = await pagedSelect(
-            client: _supabase,
-            table: 'track_points',
-            eqColumn: 'ride_id',
-            eqValue: cloudId,
-            orderBy: 'recorded_at',
-          );
-
-          final points = <TrackPoint>[];
-          for (final pr in pointRows) {
-            final pm = pr;
-            final ts = DateTime.tryParse(_str(pm['recorded_at']) ?? '');
-            final lat = (pm['latitude'] as num?)?.toDouble();
-            final lng = (pm['longitude'] as num?)?.toDouble();
-            if (ts == null || lat == null || lng == null) continue;
-            points.add(
-              TrackPoint(
-                id: null,
-                rideId: localId,
-                latitude: lat,
-                longitude: lng,
-                timestamp: ts.toLocal(),
-                altitude: (pm['altitude'] as num?)?.toDouble(),
-                speedMps: (pm['speed_mps'] as num?)?.toDouble(),
-                accuracyMeters: (pm['accuracy_meters'] as num?)?.toDouble(),
-                heading: (pm['heading'] as num?)?.toDouble(),
-                leanDegrees: (pm['lean_degrees'] as num?)?.toDouble(),
-                pressureHpa: (pm['pressure_hpa'] as num?)?.toDouble(),
-              ),
-            );
+          if (localCount == 0 && ride.pointCount <= 0 && tracksOnlyIfLocalEmpty) {
+            imported++;
+            continue;
           }
+          needGps.add((localId: localId, cloudId: cloudId));
+          imported++;
+        } catch (e) {
+          debugPrint('RiderLab pull ride skip: $e');
+          lastPullError = '$e';
+        }
+      }
 
-          final localPoints = await _db.getPoints(localId);
+      notifySummaries(summariesChanged);
+
+      for (final item in needGps) {
+        try {
+          final points = await _fetchCloudTrackPoints(
+            cloudId: item.cloudId,
+            localId: item.localId,
+          );
+          if (tracksOnlyIfLocalEmpty) {
+            if (points.isNotEmpty) {
+              await _db.replacePointsForRide(item.localId, points);
+            }
+            continue;
+          }
+          final localPoints = await _db.getPoints(item.localId);
           if (shouldKeepLocalTrack(
             local: localPoints,
             cloud: points,
@@ -376,16 +373,15 @@ class RideSyncService {
           )) {
             keptLocal++;
             debugPrint(
-              'RiderLab pull keep local track $localId '
+              'RiderLab pull keep local track ${item.localId} '
               '(local ${localPoints.length}/${_leanCount(localPoints)} lean, '
               'cloud ${points.length}/${_leanCount(points)} lean, $policy)',
             );
           } else {
-            await _db.replacePointsForRide(localId, points);
+            await _db.replacePointsForRide(item.localId, points);
           }
-          imported++;
         } catch (e) {
-          debugPrint('RiderLab pull ride skip: $e');
+          debugPrint('RiderLab pull track skip ${item.localId}: $e');
           lastPullError = '$e';
         }
       }
@@ -396,8 +392,150 @@ class RideSyncService {
     } catch (e) {
       lastPullError = SupabaseBootstrap.lastAuthError ?? '$e';
       debugPrint('RiderLab pull rides: $e');
+      notifySummaries(0);
       return 0;
     }
+  }
+
+  /// Fill GPS for one ride when local SQLite has none (Ride Lab / detail).
+  Future<bool> pullTrackIfLocalEmpty(String localRideId) async {
+    if (ImpersonationStore.isActive) return false;
+    if (!SupabaseBootstrap.isReady) return false;
+    if (await _db.countPoints(localRideId) > 0) return false;
+
+    try {
+      final session = await SupabaseBootstrap.ensureSession();
+      final me = _str(session?.user.id ?? SupabaseBootstrap.permanentUserId);
+      if (me == null) return false;
+
+      var rows = await _supabase
+          .from('rides')
+          .select('id, point_count')
+          .eq('user_id', me)
+          .eq('local_id', localRideId);
+      if ((rows as List).isEmpty) {
+        rows = await _supabase
+            .from('rides')
+            .select('id, point_count')
+            .eq('user_id', me)
+            .eq('id', localRideId);
+      }
+      if ((rows as List).isEmpty) return false;
+
+      final map = Map<String, dynamic>.from(rows.first as Map);
+      final cloudId = _str(map['id']);
+      if (cloudId == null) return false;
+      final cloudCount = (map['point_count'] as num?)?.toInt() ?? 0;
+      if (cloudCount <= 0) return false;
+
+      final points = await _fetchCloudTrackPoints(
+        cloudId: cloudId,
+        localId: localRideId,
+      );
+      if (points.isEmpty) return false;
+      await _db.replacePointsForRide(localRideId, points);
+      return true;
+    } catch (e) {
+      debugPrint('RiderLab pullTrackIfLocalEmpty $localRideId: $e');
+      return false;
+    }
+  }
+
+  Ride? _rideFromCloudRow(
+    Map<String, dynamic> map,
+    String localId, {
+    Ride? existing,
+  }) {
+    final started = DateTime.tryParse(_str(map['started_at']) ?? '');
+    if (started == null) return null;
+    final ended = DateTime.tryParse(_str(map['ended_at']) ?? '');
+
+    final leanL = (map['max_lean_left_deg'] as num?)?.toDouble();
+    final leanR = (map['max_lean_right_deg'] as num?)?.toDouble();
+    double? maxLean;
+    if (leanL != null || leanR != null) {
+      maxLean = math.max(leanL?.abs() ?? 0, leanR?.abs() ?? 0);
+    }
+
+    return Ride(
+      id: localId,
+      startedAt: started.toLocal(),
+      endedAt: ended?.toLocal(),
+      status: RideStatus.completed,
+      distanceMeters: (map['distance_meters'] as num?)?.toDouble() ?? 0,
+      pointCount: (map['point_count'] as num?)?.toInt() ?? 0,
+      maxSpeedMps: (map['max_speed_mps'] as num?)?.toDouble(),
+      avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
+      maxLeanDegrees: maxLean ?? existing?.maxLeanDegrees,
+      routeId: _str(map['route_id']),
+      visibility: ShareVisibility.fromDb(
+        map['visibility'],
+        legacyIsShared: map['is_shared'] == true || map['is_shared'] == 1,
+      ),
+      title: _str(map['title']) ?? existing?.title,
+      leanUprightLocked: existing?.leanUprightLocked ?? false,
+      leanG0X: existing?.leanG0X,
+      leanG0Y: existing?.leanG0Y,
+      leanG0Z: existing?.leanG0Z,
+      leanPoseClass: existing?.leanPoseClass,
+      leanSignFlip: existing?.leanSignFlip ?? 1,
+      leanFreezeAtMs: existing?.leanFreezeAtMs,
+      leanMountMode: existing?.leanMountMode,
+    );
+  }
+
+  Future<List<TrackPoint>> _fetchCloudTrackPoints({
+    required String cloudId,
+    required String localId,
+  }) async {
+    final pointRows = await pagedSelect(
+      client: _supabase,
+      table: 'track_points',
+      eqColumn: 'ride_id',
+      eqValue: cloudId,
+      orderBy: 'recorded_at',
+    );
+
+    final points = <TrackPoint>[];
+    for (final pm in pointRows) {
+      final ts = DateTime.tryParse(_str(pm['recorded_at']) ?? '');
+      final lat = (pm['latitude'] as num?)?.toDouble();
+      final lng = (pm['longitude'] as num?)?.toDouble();
+      if (ts == null || lat == null || lng == null) continue;
+      points.add(
+        TrackPoint(
+          id: null,
+          rideId: localId,
+          latitude: lat,
+          longitude: lng,
+          timestamp: ts.toLocal(),
+          altitude: (pm['altitude'] as num?)?.toDouble(),
+          speedMps: (pm['speed_mps'] as num?)?.toDouble(),
+          accuracyMeters: (pm['accuracy_meters'] as num?)?.toDouble(),
+          heading: (pm['heading'] as num?)?.toDouble(),
+          leanDegrees: (pm['lean_degrees'] as num?)?.toDouble(),
+          pressureHpa: (pm['pressure_hpa'] as num?)?.toDouble(),
+        ),
+      );
+    }
+    return points;
+  }
+
+  static bool _summaryChanged(Ride? existing, Ride ride) {
+    if (existing == null) return true;
+    return existing.pointCount != ride.pointCount ||
+        existing.distanceMeters != ride.distanceMeters ||
+        existing.title != ride.title ||
+        existing.maxLeanDegrees != ride.maxLeanDegrees;
+  }
+
+  /// Garage pull: skip the GPS download when local already has a track.
+  @visibleForTesting
+  static bool skipTrackDownload({
+    required int localPointCount,
+    required bool tracksOnlyIfLocalEmpty,
+  }) {
+    return tracksOnlyIfLocalEmpty && localPointCount > 0;
   }
 
   /// Delete a ride locally and, when online, its cloud copy (by `local_id`).

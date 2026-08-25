@@ -23,4 +23,4 @@ $key = az storage account keys list --account-name riderlabdeck --resource-group
 az storage blob upload --account-name riderlabdeck --account-key $key --container-name '$web' --name 'watch/index.html' --file "$deploy\index.html" --content-type 'text/html' --overwrite true
 az storage blob upload --account-name riderlabdeck --account-key $key --container-name '$web' --name 'watch/config.js' --file "$deploy\config.js" --content-type 'application/javascript' --overwrite true
 Remove-Item $deploy -Recurse -Force
-Write-Host 'Deployed https://riderlabdeck.z21.web.core.windows.net/watch/'
+Write-Host 'Deployed https://riderlab.rawthrottle.com.mx/watch/'

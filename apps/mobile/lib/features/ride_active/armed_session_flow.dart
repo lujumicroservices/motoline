@@ -16,14 +16,32 @@ import 'armed_session_screen.dart';
 
 void ensureArmedSessionHub(BuildContext context, WidgetRef ref) {
   if (!context.mounted) return;
-  if (ref.read(armedSessionNavProvider).hubOnStack) return;
+  final hubClaimed = ref.read(armedSessionNavProvider).hubOnStack;
+  final route = ModalRoute.of(context);
+  final homeIsVisible =
+      route != null && route.isCurrent && route.isFirst;
+  if (!shouldPushArmedHub(
+    hubOnStack: hubClaimed,
+    homeIsVisible: homeIsVisible,
+  )) {
+    return;
+  }
+  if (hubClaimed) {
+    ref.read(armedSessionNavProvider.notifier).hubClosed();
+  }
   ref.read(armedSessionNavProvider.notifier).hubOpened();
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      settings: const RouteSettings(name: kArmedSessionRoute),
-      builder: (_) => const ArmedSessionScreen(),
-    ),
-  );
+  Navigator.of(context)
+      .push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: kArmedSessionRoute),
+          builder: (_) => const ArmedSessionScreen(),
+        ),
+      )
+      .whenComplete(() {
+        try {
+          ref.read(armedSessionNavProvider.notifier).hubClosed();
+        } catch (_) {}
+      });
 }
 
 void openArmedRecordingHud(BuildContext context, WidgetRef ref) {

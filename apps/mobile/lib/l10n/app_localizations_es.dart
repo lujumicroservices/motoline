@@ -1198,6 +1198,36 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esa cuenta ya existe. Entra con correo y contraseña.';
 
   @override
+  String get authForgotPassword => '¿Olvidé mi contraseña?';
+
+  @override
+  String get authResetEmailSent =>
+      'Revisa tu correo. Abre el enlace en el teléfono o la computadora.';
+
+  @override
+  String get authSetPasswordTitle => 'Nueva contraseña';
+
+  @override
+  String get authSetPasswordBody =>
+      'Elige una nueva contraseña para esta cuenta de RiderLab.';
+
+  @override
+  String get authNewPasswordLabel => 'Nueva contraseña';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirmar contraseña';
+
+  @override
+  String get authPasswordMismatch => 'Las contraseñas no coinciden.';
+
+  @override
+  String get authSavePassword => 'Guardar contraseña';
+
+  @override
+  String get authPasswordUpdated =>
+      'Contraseña actualizada. Ya puedes iniciar sesión.';
+
+  @override
   String get impersonateTitle => 'Ver como rider';
 
   @override

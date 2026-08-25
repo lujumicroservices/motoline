@@ -45,15 +45,37 @@ class RodadaRidesTab extends ConsumerWidget {
           ),
         ),
         Expanded(
-          child: rides.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
-            data: (list) {
-              if (list.isEmpty) {
-                return Center(child: Text(l10n.noSharedRidesYet));
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(rodadaRidesProvider(rodadaId));
+              await ref.read(rodadaRidesProvider(rodadaId).future);
+            },
+            child: rides.when(
+              loading: () => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 80),
+                  Center(child: CircularProgressIndicator()),
+                ],
+              ),
+              error: (e, _) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(24),
+                children: [Text('$e')],
+              ),
+              data: (list) {
+                if (list.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 80),
+                      Center(child: Text(l10n.noSharedRidesYet)),
+                    ],
+                  );
+                }
+                return ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 itemCount: list.length,
                 separatorBuilder: (_, __) => const Divider(height: 1),
                 itemBuilder: (context, i) {
@@ -77,6 +99,7 @@ class RodadaRidesTab extends ConsumerWidget {
                 },
               );
             },
+          ),
           ),
         ),
       ],

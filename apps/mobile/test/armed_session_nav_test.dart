@@ -69,6 +69,21 @@ void main() {
       expect(shouldAutoPushHud(onHud, isRecording: true), isFalse);
     });
 
+    test('Home reopens hub when back-arrow left a stale hubOnStack', () {
+      expect(
+        shouldPushArmedHub(hubOnStack: true, homeIsVisible: true),
+        isTrue,
+      );
+      expect(
+        shouldPushArmedHub(hubOnStack: true, homeIsVisible: false),
+        isFalse,
+      );
+      expect(
+        shouldPushArmedHub(hubOnStack: false, homeIsVisible: true),
+        isTrue,
+      );
+    });
+
     test('Home resumes hub when recording and hub was popped', () {
       expect(
         shouldResumeHubFromHome(isRecording: true, hubOnStack: false),

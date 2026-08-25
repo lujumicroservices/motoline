@@ -85,6 +85,29 @@ Recommended for store review and riders who skip Google:
 2. **Confirm email**: off for closed beta (or leave on and pre-create the review user as confirmed)
 3. Email provider is enough for review accounts; Anonymous should stay **off**
 
+#### Password reset (computer + phone)
+
+Recovery emails must open a **web page**, not only the app deep link. Deep-link Site URL breaks desktop browsers and the app had no set-password screen.
+
+1. Deploy the static page (from repo root):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/deploy-auth-reset.ps1
+```
+
+Public URL: `https://riderlab.rawthrottle.com.mx/auth/reset-password/`
+
+2. Supabase → Authentication → **URL Configuration**:
+   - **Site URL:** `https://riderlab.rawthrottle.com.mx/auth/reset-password/`
+   - **Redirect URLs** (keep both):
+     - `https://riderlab.rawthrottle.com.mx/auth/reset-password/**`
+     - `com.rawthrottle.riderlab://login-callback` (Google Sign-In)
+   - Remove `http://127.0.0.1:3000` / `https://127.0.0.1:3000` unless you still need local web auth
+
+3. In the app: sign-in → **Forgot password?** sends `resetPasswordForEmail` with `redirectTo` set to that page. Open the email link on any device → set password in the browser → sign in on RiderLab.
+
+If an old deep-link recovery still opens the app, RiderLab shows **New password** via `PASSWORD_RECOVERY`.
+
 **Create an App Store / Play review user** (do not commit the password):
 
 1. Authentication → Users → **Add user**

@@ -74,15 +74,37 @@ class RodadaPhotosTab extends ConsumerWidget {
           ),
         ),
         Expanded(
-          child: photos.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
-            data: (list) {
-              if (list.isEmpty) {
-                return Center(child: Text(l10n.noPhotosYet));
-              }
-              return GridView.builder(
-                padding: const EdgeInsets.all(12),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(rodadaPhotosProvider(rodadaId));
+              await ref.read(rodadaPhotosProvider(rodadaId).future);
+            },
+            child: photos.when(
+              loading: () => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 80),
+                  Center(child: CircularProgressIndicator()),
+                ],
+              ),
+              error: (e, _) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(24),
+                children: [Text('$e')],
+              ),
+              data: (list) {
+                if (list.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 80),
+                      Center(child: Text(l10n.noPhotosYet)),
+                    ],
+                  );
+                }
+                return GridView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(12),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   mainAxisSpacing: 8,
@@ -104,6 +126,7 @@ class RodadaPhotosTab extends ConsumerWidget {
                 },
               );
             },
+          ),
           ),
         ),
       ],

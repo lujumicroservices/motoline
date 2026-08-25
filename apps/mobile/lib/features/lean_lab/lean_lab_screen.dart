@@ -35,12 +35,13 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
     unawaited(_reload());
   }
 
-  Future<void> _reload() async {
-    setState(() => _loading = true);
-    // Soft fill only — never wipe local GPS/lean by opening Lean Lab.
+  Future<void> _reload({bool showSpinner = true}) async {
+    if (showSpinner && mounted) setState(() => _loading = true);
+    // Recover missing tracks only — home already listed summaries.
     try {
       await ref.read(rideSyncServiceProvider).pullMyCloudRides(
             policy: TrackPullPolicy.fillGapsOnly,
+            tracksOnlyIfLocalEmpty: true,
           );
     } catch (_) {}
     try {
@@ -107,7 +108,10 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
           style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
         ),
       ),
-      body: ListView(
+      body: RefreshIndicator(
+        onRefresh: () => _reload(showSpinner: false),
+        child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           Text(
@@ -278,6 +282,7 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
             ],
           ],
         ],
+      ),
       ),
     );
   }

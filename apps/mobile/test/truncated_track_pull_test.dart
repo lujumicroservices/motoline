@@ -34,6 +34,30 @@ void main() {
     expect(a.duration.inMinutes, greaterThan(90));
   });
 
+  test('garage pull skips GPS when local already has a track', () {
+    expect(
+      RideSyncService.skipTrackDownload(
+        localPointCount: 12,
+        tracksOnlyIfLocalEmpty: true,
+      ),
+      isTrue,
+    );
+    expect(
+      RideSyncService.skipTrackDownload(
+        localPointCount: 0,
+        tracksOnlyIfLocalEmpty: true,
+      ),
+      isFalse,
+    );
+    expect(
+      RideSyncService.skipTrackDownload(
+        localPointCount: 12,
+        tracksOnlyIfLocalEmpty: false,
+      ),
+      isFalse,
+    );
+  });
+
   test('fillGapsOnly replaces local when cloud GPS is denser', () {
     final local = [_pt(0, lat: 21.26, lng: -103.16)];
     final cloud = [

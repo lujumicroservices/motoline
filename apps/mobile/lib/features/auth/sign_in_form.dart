@@ -44,6 +44,22 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     if (ok) await _afterOk();
   }
 
+  Future<void> _forgotPassword() async {
+    final l10n = context.l10n;
+    final email = _email.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      ref.read(authErrorProvider.notifier).state = l10n.authInvalidEmail;
+      return;
+    }
+    final ok = await ref.read(authActionsProvider).requestPasswordReset(email);
+    if (!mounted) return;
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.authResetEmailSent)),
+      );
+    }
+  }
+
   Future<void> _submit({required bool create}) async {
     final l10n = context.l10n;
     final issue = validateEmailPassword(
@@ -135,7 +151,13 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           onPressed: () => _submit(create: false),
           child: Text(l10n.authSignInEmail),
         ),
-        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: busy ? null : _forgotPassword,
+            child: Text(l10n.authForgotPassword),
+          ),
+        ),
         TextButton(
           onPressed: () => _submit(create: true),
           child: Text(l10n.authCreateAccount),

@@ -23,7 +23,6 @@ import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
-import '../ride_active/active_ride_screen.dart';
 import '../ride_active/armed_session_flow.dart';
 import '../ride_active/armed_session_nav.dart';
 import '../ride_active/widgets/upright_freeze_sheet.dart';
@@ -187,6 +186,15 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  if (ref.watch(garageCloudSyncProvider))
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
                   ridesAsync.maybeWhen(
                     data: (rides) {
                       final untitled = rides
@@ -240,79 +248,86 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: ridesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text(l10n.couldNotLoadRides('$e'))),
-                data: (rides) {
-                  final completed = rides
-                      .where((r) => r.status != RideStatus.recording)
-                      .toList();
-                  if (completed.isEmpty) {
-                    return const _EmptyState();
-                  }
-                  final rows = _garageRowsByMonth(completed, l10n.localeName);
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                    itemCount: rows.length,
-                    separatorBuilder: (_, i) {
-                      final next = i + 1 < rows.length ? rows[i + 1] : null;
-                      if (next is _GarageMonthHeader) {
-                        return const SizedBox(height: 4);
-                      }
-                      return const SizedBox(height: 8);
-                    },
-                    itemBuilder: (context, index) {
-                      final row = rows[index];
-                      if (row is _GarageMonthHeader) {
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            top: index == 0 ? 0 : 10,
-                            bottom: 4,
-                          ),
-                          child: Text(
-                            row.label,
-                            style: GoogleFonts.exo2(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.6,
-                              color: AppTheme.steel,
-                            ),
-                          ),
-                        );
-                      }
-                      final ride = (row as _GarageRideRow).ride;
-                      return _RideTile(
-                        ride: ride,
-                        demoId: ride.status == RideStatus.abandoned
-                            ? null
-                            : DemoIds.rideTile,
-                        onDeleted: () {
-                          ref.invalidate(ridesListProvider);
-                        },
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(garageCloudSyncProvider.notifier).refresh(),
+                child: ridesAsync.when(
+                  loading: () => ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 120),
+                      Center(child: CircularProgressIndicator()),
+                    ],
+                  ),
+                  error: (e, _) => ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(24),
+                    children: [
+                      Text(l10n.couldNotLoadRides('$e')),
+                    ],
+                  ),
+                  data: (rides) {
+                    final completed = rides
+                        .where((r) => r.status != RideStatus.recording)
+                        .toList();
+                    if (completed.isEmpty) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: 48),
+                          _EmptyState(),
+                        ],
                       );
-                    },
-                  );
-                },
+                    }
+                    final rows = _garageRowsByMonth(completed, l10n.localeName);
+                    return ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                      itemCount: rows.length,
+                      separatorBuilder: (_, i) {
+                        final next = i + 1 < rows.length ? rows[i + 1] : null;
+                        if (next is _GarageMonthHeader) {
+                          return const SizedBox(height: 4);
+                        }
+                        return const SizedBox(height: 8);
+                      },
+                      itemBuilder: (context, index) {
+                        final row = rows[index];
+                        if (row is _GarageMonthHeader) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              top: index == 0 ? 0 : 10,
+                              bottom: 4,
+                            ),
+                            child: Text(
+                              row.label,
+                              style: GoogleFonts.exo2(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.6,
+                                color: AppTheme.steel,
+                              ),
+                            ),
+                          );
+                        }
+                        final ride = (row as _GarageRideRow).ride;
+                        return _RideTile(
+                          ride: ride,
+                          demoId: ride.status == RideStatus.abandoned
+                              ? null
+                              : DemoIds.rideTile,
+                          onDeleted: () {
+                            ref.invalidate(ridesListProvider);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
             _HomeActionDock(
               armed: sessionLive,
-              onStart: () {
-                if (ref.read(impersonationProvider).active) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.impersonateNoRide)),
-                  );
-                  return;
-                }
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ActiveRideScreen(autoStart: false),
-                  ),
-                ).then((_) {
-                  ref.invalidate(ridesListProvider);
-                  ref.invalidate(incompleteRideProvider);
-                });
-              },
               onArmToggle: () async {
                 if (ref.read(impersonationProvider).active) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -486,12 +501,7 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
     final nav = ref.read(armedSessionNavProvider);
     _opening = true;
     try {
-      if (shouldResumeHubFromHome(
-        isRecording: true,
-        hubOnStack: nav.hubOnStack,
-      )) {
-        ensureArmedSessionHub(context, ref);
-      }
+      ensureArmedSessionHub(context, ref);
       if (shouldAutoPushHud(nav, isRecording: true)) {
         openArmedRecordingHud(context, ref);
       }
@@ -507,12 +517,10 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
 class _HomeActionDock extends StatelessWidget {
   const _HomeActionDock({
     required this.armed,
-    required this.onStart,
     required this.onArmToggle,
   });
 
   final bool armed;
-  final VoidCallback onStart;
   final VoidCallback onArmToggle;
 
   @override
@@ -535,59 +543,40 @@ class _HomeActionDock extends StatelessWidget {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: DemoTarget(
-                  id: DemoIds.ctaStart,
-                  child: FilledButton.icon(
-                  onPressed: armed ? null : onStart,
-                  style: glove.copyWith(
-                    backgroundColor:
-                        const WidgetStatePropertyAll(AppTheme.mist),
-                    foregroundColor:
-                        const WidgetStatePropertyAll(AppTheme.asphalt),
+          child: DemoTarget(
+            id: DemoIds.ctaArm,
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onArmToggle,
+                style: glove.copyWith(
+                  backgroundColor: WidgetStatePropertyAll(
+                    armed ? AppTheme.asphalt : AppTheme.mist,
                   ),
-                  icon: const Icon(Icons.play_arrow_rounded, size: 32),
-                  label: Text(l10n.startRide),
-                ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: DemoTarget(
-                  id: DemoIds.ctaArm,
-                  child: OutlinedButton.icon(
-                  onPressed: onArmToggle,
-                  style: glove.copyWith(
-                    foregroundColor: WidgetStatePropertyAll(
-                      armed ? AppTheme.lineHot : AppTheme.mist,
-                    ),
-                    side: WidgetStatePropertyAll(
-                      BorderSide(
-                        width: 2,
-                        color: armed ? AppTheme.lineHot : AppTheme.steel,
-                      ),
+                  foregroundColor: WidgetStatePropertyAll(
+                    armed ? AppTheme.lineHot : AppTheme.asphalt,
+                  ),
+                  side: WidgetStatePropertyAll(
+                    BorderSide(
+                      width: armed ? 2 : 0,
+                      color: armed ? AppTheme.lineHot : Colors.transparent,
                     ),
                   ),
-                  icon: Icon(
-                    armed
-                        ? Icons.route_outlined
-                        : Icons.motion_photos_auto_outlined,
-                    size: 26,
-                  ),
-                  label: Text(
-                    armed ? l10n.armedSessionOpen : l10n.armAutoRide,
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
                 ),
+                icon: Icon(
+                  armed
+                      ? Icons.route_outlined
+                      : Icons.motion_photos_auto_outlined,
+                  size: 32,
+                ),
+                label: Text(
+                  armed ? l10n.armedSessionOpen : l10n.armAutoRide,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -677,47 +666,64 @@ class _ArmedBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final recording = ref.watch(rideRecorderProvider).isRecording;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      child: Material(
         color: AppTheme.asphaltElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.lineHot.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            recording ? Icons.fiber_manual_record : Icons.motion_photos_auto,
-            color: AppTheme.lineHot,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => ensureArmedSessionHub(context, ref),
+          child: Ink(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppTheme.lineHot.withValues(alpha: 0.5)),
+            ),
+            child: Row(
               children: [
-                Text(
-                  recording ? l10n.recording : l10n.waitingForMotion,
-                  style: GoogleFonts.exo2(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
+                Icon(
+                  recording
+                      ? Icons.fiber_manual_record
+                      : Icons.motion_photos_auto,
+                  color: AppTheme.lineHot,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        recording ? l10n.recording : l10n.waitingForMotion,
+                        style: GoogleFonts.exo2(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        recording
+                            ? l10n.armedSessionLiveHelp
+                            : l10n.armedBannerBody,
+                        style: const TextStyle(
+                          color: AppTheme.steel,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 2),
                 Text(
-                  recording
-                      ? l10n.armedSessionLiveHelp
-                      : l10n.armedBannerBody,
-                  style: const TextStyle(color: AppTheme.steel, fontSize: 12),
+                  l10n.armedSessionOpen,
+                  style: GoogleFonts.exo2(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.line,
+                  ),
                 ),
               ],
             ),
           ),
-          TextButton(
-            onPressed: () => ensureArmedSessionHub(context, ref),
-            child: Text(l10n.armedSessionOpen),
-          ),
-        ],
+        ),
       ),
     );
   }

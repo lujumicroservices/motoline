@@ -15,6 +15,7 @@ import '../core/services/ride_place_name_service.dart';
 import '../core/services/ride_recorder.dart';
 import '../core/services/ride_sync_service.dart';
 import '../core/services/sync_outbox_service.dart';
+import '../core/supabase/supabase_bootstrap.dart';
 import 'pro_entitlement_provider.dart';
 
 
@@ -57,18 +58,93 @@ final rideRecorderProvider = Provider<RideRecorder>((ref) {
   return recorder;
 });
 
-final ridesListProvider = FutureProvider.autoDispose<List<Ride>>((ref) async {
-  // Soft cloud fill: never wipe local GPS/lean just by opening Garage.
-  try {
-    await ref.read(rideSyncServiceProvider).pullMyCloudRides(
-          policy: TrackPullPolicy.fillGapsOnly,
-        );
-  } catch (_) {}
-  try {
-    await LeanLabService.instance.pullMyCloudSessions();
-  } catch (_) {}
+/// True while home is filling ride summaries from the cloud in the background.
+class GarageCloudSyncNotifier extends StateNotifier<bool> {
+  GarageCloudSyncNotifier(this._ref) : super(false);
+
+  final Ref _ref;
+  Future<void>? _running;
+  DateTime? _lastAt;
+  String? _lastUser;
+
+  /// Pull ride summaries (and GPS only for empty local tracks) without
+  /// blocking the garage list. Safe to call after leaving/returning home.
+  Future<void> ensureStarted({bool force = false}) async {
+    final existing = _running;
+    if (existing != null) {
+      if (force) await existing;
+      return;
+    }
+    final uid = SupabaseBootstrap.permanentUserId;
+    if (!force &&
+        uid != null &&
+        uid == _lastUser &&
+        _lastAt != null &&
+        DateTime.now().difference(_lastAt!) < const Duration(seconds: 20)) {
+      return;
+    }
+    await _startPull(invalidateAlways: force);
+  }
+
+  /// Pull-to-refresh: re-read SQLite immediately, then force a cloud pull.
+  Future<void> refresh() async {
+    _ref.invalidate(ridesListProvider);
+    final existing = _running;
+    if (existing != null) {
+      await existing;
+      _ref.invalidate(ridesListProvider);
+      return;
+    }
+    await _startPull(invalidateAlways: true);
+  }
+
+  Future<void> _startPull({required bool invalidateAlways}) {
+    final future = _doPull(invalidateAlways: invalidateAlways);
+    _running = future;
+    return future;
+  }
+
+  Future<void> _doPull({required bool invalidateAlways}) async {
+    final uid = SupabaseBootstrap.permanentUserId;
+    state = true;
+    try {
+      await _ref.read(rideSyncServiceProvider).pullMyCloudRides(
+            policy: TrackPullPolicy.fillGapsOnly,
+            tracksOnlyIfLocalEmpty: true,
+            afterSummaries: (changed) {
+              state = false;
+              if (changed > 0 || invalidateAlways) {
+                _ref.invalidate(ridesListProvider);
+              }
+              unawaited(() async {
+                try {
+                  await LeanLabService.instance.pullMyCloudSessions();
+                } catch (_) {}
+              }());
+            },
+          );
+      if (invalidateAlways) {
+        _ref.invalidate(ridesListProvider);
+      }
+    } catch (_) {
+    } finally {
+      _running = null;
+      _lastAt = DateTime.now();
+      _lastUser = uid;
+      state = false;
+    }
+  }
+}
+
+final garageCloudSyncProvider =
+    StateNotifierProvider<GarageCloudSyncNotifier, bool>((ref) {
+  return GarageCloudSyncNotifier(ref);
+});
+
+final ridesListProvider = FutureProvider<List<Ride>>((ref) async {
   final db = ref.watch(rideDatabaseProvider);
   final rides = await db.listRides();
+  unawaited(ref.read(garageCloudSyncProvider.notifier).ensureStarted());
   // Soft backfill start→end place titles; refresh list when any are written.
   unawaited(() async {
     final named = await nameUntitledRides(
@@ -197,15 +273,27 @@ final rideProvider =
   return ref.watch(rideDatabaseProvider).getRide(id);
 });
 
+/// Download GPS for this ride if local SQLite has none (recovered ride).
+final rideTrackReadyProvider =
+    FutureProvider.autoDispose.family<void, String>((ref, id) async {
+  final db = ref.watch(rideDatabaseProvider);
+  if (await db.countPoints(id) > 0) return;
+  try {
+    await ref.read(rideSyncServiceProvider).pullTrackIfLocalEmpty(id);
+  } catch (_) {}
+});
+
 /// Full GPS — sync, export, reel, compare. Not used to open Ride Lab.
 final ridePointsProvider =
-    FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) {
+    FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) async {
+  await ref.watch(rideTrackReadyProvider(id).future);
   return ref.watch(rideDatabaseProvider).getPoints(id);
 });
 
 /// ~1k GPS vertices for map + charts (includes first/last).
 final rideOverviewPointsProvider =
-    FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) {
+    FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) async {
+  await ref.watch(rideTrackReadyProvider(id).future);
   return ref.watch(rideDatabaseProvider).getPointsOverview(id);
 });
 
@@ -217,6 +305,7 @@ final rideLeanSamplesProvider =
 /// Full-track curves / skill; loads in a background isolate.
 final rideLabAnalyticsProvider =
     FutureProvider.autoDispose.family<RideAnalytics?, String>((ref, id) async {
+  await ref.watch(rideTrackReadyProvider(id).future);
   final db = ref.watch(rideDatabaseProvider);
   final ride = await db.getRide(id);
   if (ride == null) return null;

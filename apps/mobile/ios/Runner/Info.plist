@@ -32,6 +32,16 @@
 				<string>$(GID_URL_SCHEME)</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.rawthrottle.riderlab.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.rawthrottle.riderlab</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>

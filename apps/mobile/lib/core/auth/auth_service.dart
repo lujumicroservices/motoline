@@ -42,6 +42,11 @@ class AuthService {
   /// Supabase → Authentication → URL Configuration → Redirect URLs.
   static const googleOAuthRedirect = 'com.rawthrottle.riderlab://login-callback';
 
+  /// Hosted password-reset page (computer + phone browser).
+  /// Site URL / Redirect URLs must include this path.
+  static const passwordResetRedirect =
+      'https://riderlab.rawthrottle.com.mx/auth/reset-password/';
+
   User? get currentUser =>
       SupabaseBootstrap.isReady ? SupabaseBootstrap.client.auth.currentUser : null;
 
@@ -135,6 +140,36 @@ class AuthService {
     );
     await _afterIdentity(signedIn.user ?? auth.currentUser);
     return signedIn;
+  }
+
+  /// Sends the Supabase recovery email. Opens the hosted reset page on any device.
+  Future<void> requestPasswordReset(String email) async {
+    final trimmed = email.trim();
+    if (trimmed.isEmpty || !trimmed.contains('@')) {
+      throw AuthException('Enter a valid email address.');
+    }
+    if (!SupabaseBootstrap.isReady) {
+      throw AuthException('Cloud is not configured');
+    }
+    await SupabaseBootstrap.client.auth.resetPasswordForEmail(
+      trimmed,
+      redirectTo: passwordResetRedirect,
+    );
+  }
+
+  /// Completes recovery after [AuthChangeEvent.passwordRecovery] (deep link).
+  Future<void> updatePassword(String password) async {
+    if (password.length < kMinAuthPasswordLength) {
+      throw AuthException(
+        'Password must be at least $kMinAuthPasswordLength characters.',
+      );
+    }
+    if (!SupabaseBootstrap.isReady) {
+      throw AuthException('Cloud is not configured');
+    }
+    await SupabaseBootstrap.client.auth.updateUser(
+      UserAttributes(password: password),
+    );
   }
 
   /// New email account.

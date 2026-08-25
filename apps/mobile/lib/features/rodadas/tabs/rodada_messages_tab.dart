@@ -114,15 +114,37 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
           ),
         ),
         Expanded(
-          child: messages.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
-            data: (list) {
-              if (list.isEmpty) {
-                return Center(child: Text(l10n.noMessagesYet));
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(rodadaMessagesProvider(widget.rodadaId));
+              await ref.read(rodadaMessagesProvider(widget.rodadaId).future);
+            },
+            child: messages.when(
+              loading: () => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 80),
+                  Center(child: CircularProgressIndicator()),
+                ],
+              ),
+              error: (e, _) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(24),
+                children: [Text('$e')],
+              ),
+              data: (list) {
+                if (list.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 80),
+                      Center(child: Text(l10n.noMessagesYet)),
+                    ],
+                  );
+                }
+                return ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 itemCount: list.length,
                 itemBuilder: (context, i) {
                   final m = list[i];
@@ -160,6 +182,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                 },
               );
             },
+          ),
           ),
         ),
         SafeArea(

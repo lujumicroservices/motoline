@@ -2222,6 +2222,60 @@ abstract class AppLocalizations {
   /// **'Esa cuenta ya existe. Entra con correo y contraseña.'**
   String get authEmailAlreadyRegistered;
 
+  /// No description provided for @authForgotPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Olvidé mi contraseña?'**
+  String get authForgotPassword;
+
+  /// No description provided for @authResetEmailSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa tu correo. Abre el enlace en el teléfono o la computadora.'**
+  String get authResetEmailSent;
+
+  /// No description provided for @authSetPasswordTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva contraseña'**
+  String get authSetPasswordTitle;
+
+  /// No description provided for @authSetPasswordBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una nueva contraseña para esta cuenta de RiderLab.'**
+  String get authSetPasswordBody;
+
+  /// No description provided for @authNewPasswordLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva contraseña'**
+  String get authNewPasswordLabel;
+
+  /// No description provided for @authConfirmPasswordLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar contraseña'**
+  String get authConfirmPasswordLabel;
+
+  /// No description provided for @authPasswordMismatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Las contraseñas no coinciden.'**
+  String get authPasswordMismatch;
+
+  /// No description provided for @authSavePassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar contraseña'**
+  String get authSavePassword;
+
+  /// No description provided for @authPasswordUpdated.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña actualizada. Ya puedes iniciar sesión.'**
+  String get authPasswordUpdated;
+
   /// No description provided for @impersonateTitle.
   ///
   /// In es, this message translates to:

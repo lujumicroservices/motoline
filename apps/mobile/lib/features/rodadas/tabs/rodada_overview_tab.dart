@@ -46,7 +46,16 @@ class RodadaOverviewTab extends ConsumerWidget {
       error: (e, _) => Center(child: Text('$e')),
       data: (rodada) {
         if (rodada == null) return const SizedBox.shrink();
-        return ListView(
+        return RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(rodadaOverviewProvider(rodadaId));
+            ref.invalidate(rodadaMembersProvider(rodadaId));
+            ref.invalidate(rodadaStopsProvider(rodadaId));
+            ref.invalidate(myRodadaMembershipProvider(rodadaId));
+            await ref.read(rodadaOverviewProvider(rodadaId).future);
+          },
+          child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
           children: [
             if (rodada.notes != null && rodada.notes!.trim().isNotEmpty) ...[
@@ -225,6 +234,7 @@ class RodadaOverviewTab extends ConsumerWidget {
               },
             ),
           ],
+        ),
         );
       },
     );

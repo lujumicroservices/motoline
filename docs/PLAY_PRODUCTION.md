@@ -4,7 +4,7 @@ Operator runbook. Use with [PLAY_STORE.md](PLAY_STORE.md) and [STORE_READINESS.m
 
 **Package:** `com.rawthrottle.riderlab`  
 **Cloud project:** `riderlab-7b183`  
-**Current Play binary:** `1.37.4+79` (play flavor AAB)
+**Current Play binary:** `1.37.6+81` (play flavor AAB)
 
 Play Console URLs (paste as-is):
 
@@ -73,7 +73,7 @@ Auth → Providers → Google: enabled, **Web** client ID + secret, Manual linki
 ### 0.5 Verify on a Play install
 
 1. Wait ~10 minutes after saving clients.
-2. Uninstall RiderLab. Install **1.37.4** from Internal testing.
+2. Uninstall RiderLab. Install **1.37.6** from Internal testing.
 3. Settings → Sign in with Google.
 4. Native picker should work. If `[16]` still appears, the **browser** sheet should complete sign-in.
 
@@ -211,7 +211,7 @@ When dashboard is 100% and closed-test eligibility is met:
 
 1. **Test and release** → **Production** → **Create new release**.
 2. Add from library the **same** closed-test AAB (no extra native features).
-3. Release name: `RiderLab 1.37.4`.
+3. Release name: `RiderLab 1.37.6`.
 4. Review notes for Google:
 
 ```

@@ -760,6 +760,15 @@ class RideDatabase {
     return Ride.fromMap(rows.first);
   }
 
+  Future<int> countPoints(String rideId) async {
+    final db = await database;
+    final rows = await db.rawQuery(
+      'SELECT COUNT(*) AS c FROM track_points WHERE ride_id = ?',
+      [rideId],
+    );
+    return Sqflite.firstIntValue(rows) ?? 0;
+  }
+
   Future<List<TrackPoint>> getPoints(String rideId) async {
     final db = await database;
     final rows = await db.query(

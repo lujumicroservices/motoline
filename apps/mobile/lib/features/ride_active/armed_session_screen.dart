@@ -35,15 +35,6 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
   }
 
   @override
-  void dispose() {
-    // Provider may already be disposed if the whole tree is gone.
-    try {
-      ref.read(armedSessionNavProvider.notifier).hubClosed();
-    } catch (_) {}
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final recorder = ref.watch(rideRecorderProvider);

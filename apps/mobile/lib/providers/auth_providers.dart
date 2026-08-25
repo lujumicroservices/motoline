@@ -37,6 +37,9 @@ final authBusyProvider = StateProvider<bool>((ref) => false);
 
 final authErrorProvider = StateProvider<String?>((ref) => null);
 
+/// True while a password-recovery deep link session is active.
+final passwordRecoveryActiveProvider = StateProvider<bool>((ref) => false);
+
 /// Controllers for sign-in / sign-out with shared busy + error state.
 class AuthActions {
   AuthActions(this.ref);
@@ -61,6 +64,27 @@ class AuthActions {
     );
   }
 
+  Future<bool> requestPasswordReset(String email) async {
+    ref.read(authBusyProvider.notifier).state = true;
+    ref.read(authErrorProvider.notifier).state = null;
+    try {
+      await _auth.requestPasswordReset(email);
+      return true;
+    } on AuthException catch (e) {
+      ref.read(authErrorProvider.notifier).state = e.message;
+      return false;
+    } catch (e) {
+      ref.read(authErrorProvider.notifier).state = '$e';
+      return false;
+    } finally {
+      ref.read(authBusyProvider.notifier).state = false;
+    }
+  }
+
+  Future<void> updatePassword(String password) async {
+    await _auth.updatePassword(password);
+  }
+
   Future<bool> _complete(Future<void> Function() action) async {
     ref.read(authBusyProvider.notifier).state = true;
     ref.read(authErrorProvider.notifier).state = null;
@@ -74,8 +98,11 @@ class AuthActions {
       }
       ref.invalidate(myProfileProvider);
       ref.invalidate(friendsListProvider);
-      // Pull this account's cloud rides into Garage after identity change.
+      // Show local garage immediately; metadata pull runs in the background.
       ref.invalidate(ridesListProvider);
+      unawaited(
+        ref.read(garageCloudSyncProvider.notifier).ensureStarted(force: true),
+      );
       unawaited(ref.read(proEntitlementProvider.notifier).refresh());
       return true;
     } on AuthException catch (e) {

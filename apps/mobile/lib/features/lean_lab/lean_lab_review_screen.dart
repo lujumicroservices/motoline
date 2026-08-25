@@ -11,7 +11,6 @@ import '../../core/lean_lab/lean_lab_models.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/lean_lab/max_lean_locator.dart';
 import '../../core/models/track_point.dart';
-import '../../core/services/ride_sync_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
@@ -63,11 +62,9 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
   }
 
   Future<void> _load() async {
-    // Soft fill gaps only — never erase a good local track by opening label UI.
+    // Fill this ride's GPS if local is empty — never pull every garage track.
     try {
-      await ref.read(rideSyncServiceProvider).pullMyCloudRides(
-            policy: TrackPullPolicy.fillGapsOnly,
-          );
+      await ref.read(rideSyncServiceProvider).pullTrackIfLocalEmpty(widget.rideId);
     } catch (_) {}
     final session = await LeanLabService.instance.getSession(widget.rideId);
     final ride = await ref.read(rideProvider(widget.rideId).future);

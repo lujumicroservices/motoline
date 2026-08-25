@@ -1191,6 +1191,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'That account already exists. Sign in with email and password.';
 
   @override
+  String get authForgotPassword => 'Forgot password?';
+
+  @override
+  String get authResetEmailSent =>
+      'Check your email for a reset link. Open it on phone or computer.';
+
+  @override
+  String get authSetPasswordTitle => 'New password';
+
+  @override
+  String get authSetPasswordBody =>
+      'Choose a new password for this RiderLab account.';
+
+  @override
+  String get authNewPasswordLabel => 'New password';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get authPasswordMismatch => 'Passwords do not match.';
+
+  @override
+  String get authSavePassword => 'Save password';
+
+  @override
+  String get authPasswordUpdated => 'Password updated. You can sign in now.';
+
+  @override
   String get impersonateTitle => 'View as rider';
 
   @override
