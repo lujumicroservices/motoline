@@ -8,6 +8,7 @@ import '../../../core/services/lean_sensor.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
+import '../location_permission_gate.dart';
 import 'upright_freeze_panel.dart';
 
 /// Tap while the phone is still in hand, pocket it, freeze g0, then arm.
@@ -31,6 +32,11 @@ Future<bool> freezeThenArm(
   String? routeId,
 }) async {
   final l10n = context.l10n;
+  if (!await LocationPermissionGate.requestForRecording(context)) {
+    return false;
+  }
+  if (!context.mounted) return false;
+
   final g0 = await showUprightFreezeSheet(
     context,
     title: l10n.armAutoRide,

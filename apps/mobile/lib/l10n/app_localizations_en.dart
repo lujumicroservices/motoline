@@ -1153,6 +1153,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signOut => 'Sign out';
 
   @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete account permanently?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'This removes your RiderLab account and associated cloud data (rides, profile, friends, rodadas you own). Local garage data on this phone is also cleared. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirmAction => 'Delete forever';
+
+  @override
+  String get deleteAccountFailed =>
+      'Could not delete account. Try again or use the support email on the Play listing.';
+
+  @override
+  String get deleteAccountDoneSnack => 'Account deleted';
+
+  @override
   String get accountSignedInSnack => 'Signed in — profile synced';
 
   @override
@@ -3116,6 +3136,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enable location in Settings, then try again.';
 
   @override
+  String get locationDisclosureTitle => 'Location for ride recording';
+
+  @override
+  String get locationDisclosureBody =>
+      'RiderLab records your GPS line during an active ride.\n\n• Location is used only while you are recording\n• A persistent notification stays visible while recording\n• Recording continues with the screen locked or the phone in your pocket\n• Location stops when you end the ride\n\nNext, your phone will ask for location permission. Choose Allow all the time (or Always allow) so recording works with the screen off.';
+
+  @override
+  String get locationDisclosureContinue => 'Continue';
+
+  @override
   String leanAtPlayhead(String degrees) {
     return 'At marker · 0° offset $degrees°';
   }
@@ -3146,4 +3176,111 @@ class AppLocalizationsEn extends AppLocalizations {
   String curvaMetaTurnLean(String turn, String lean) {
     return 'turn $turn° · lean $lean°';
   }
+
+  @override
+  String get ugcGuidelinesTitle => 'Rodada rules';
+
+  @override
+  String get ugcGuidelinesBanner =>
+      'Abuse of radio or photos can get you banned. Tap for the rules.';
+
+  @override
+  String get ugcGuidelinesBody =>
+      'Rodada radio and photos are for riding with your group.\n\nDo not post sexual content, hate, harassment, threats, spam, or anything illegal.\n\nAnyone can report a message or photo. Staff can hide it and ban the account.\n\nIf you break these rules, you lose access to radio, photos, and other group features.';
+
+  @override
+  String get ugcGuidelinesAccept => 'I understand';
+
+  @override
+  String get ugcReportTitle => 'Report';
+
+  @override
+  String get ugcReportHelp =>
+      'Staff will review this. False reports can also lead to a ban.';
+
+  @override
+  String get ugcReportSubmit => 'Send report';
+
+  @override
+  String get ugcReportThanks => 'Report sent. Thank you.';
+
+  @override
+  String get ugcReasonSexual => 'Sexual or nude content';
+
+  @override
+  String get ugcReasonHate => 'Hate or slurs';
+
+  @override
+  String get ugcReasonHarassment => 'Harassment or threats';
+
+  @override
+  String get ugcReasonSpam => 'Spam or scam';
+
+  @override
+  String get ugcReasonOther => 'Other';
+
+  @override
+  String get ugcBanned => 'This account is banned from radio and photos.';
+
+  @override
+  String get ugcStaffQueueTitle => 'Reported content';
+
+  @override
+  String get ugcStaffQueueHelp =>
+      'Hide posts or ban accounts that break rodada rules.';
+
+  @override
+  String get ugcStaffQueueEmpty => 'No open reports.';
+
+  @override
+  String get ugcStaffRefresh => 'Refresh';
+
+  @override
+  String ugcStaffTarget(String target, String reporter, String when) {
+    return '$target · reported by $reporter · $when';
+  }
+
+  @override
+  String get ugcStaffAlreadyBanned => 'This rider is already banned.';
+
+  @override
+  String get ugcStaffDismiss => 'Dismiss';
+
+  @override
+  String get ugcStaffHide => 'Hide post';
+
+  @override
+  String get ugcStaffBan => 'Ban rider';
+
+  @override
+  String get ugcStaffUnban => 'Lift ban';
+
+  @override
+  String get ugcStaffDone => 'Updated.';
+
+  @override
+  String get termsTitle => 'Terms of use';
+
+  @override
+  String get privacyTitle => 'Privacy policy';
+
+  @override
+  String get legalOpenInBrowser => 'Opens in the browser';
+
+  @override
+  String get authLegalFooter =>
+      'By continuing you agree to the Terms of use and Privacy policy.';
+
+  @override
+  String get termsAcceptTitle => 'Terms of use';
+
+  @override
+  String get termsAcceptBody =>
+      'By using RiderLab you agree to the Terms of use and Privacy policy.\n\nDo not use the phone while riding. Radio and photos must stay about riding with your group. Sexual content, hate, harassment, spam, or illegal posts can get you banned.\n\nOpen the full documents below. You can read them again later in Settings.';
+
+  @override
+  String get termsAcceptAgree => 'I agree';
+
+  @override
+  String get termsAcceptDecline => 'Not now';
 }

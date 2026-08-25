@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 import '../../../core/notifications/push_diagnostics.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import '../../moderation/content_guidelines.dart';
+import '../../moderation/content_moderation_repository.dart';
+import '../../moderation/report_content_sheet.dart';
 import '../rodada_providers.dart';
 
 /// Short radio / safety pings — tiny payloads, no media.
@@ -32,6 +35,8 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
     final l10n = context.l10n;
     final body = _controller.text.trim();
     if (body.isEmpty && kind == 'text') return;
+    if (!await ensureUgcGuidelinesAccepted(context)) return;
+    if (!mounted) return;
     setState(() => _sending = true);
     try {
       await ref.read(rodadaRepositoryProvider).sendMessage(
@@ -57,9 +62,31 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(isUgcBannedError(e) ? l10n.ugcBanned : '$e')),
+      );
     } finally {
       if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _sendCanned(String body) async {
+    if (!await ensureUgcGuidelinesAccepted(context)) return;
+    if (!mounted) return;
+    try {
+      await ref.read(rodadaRepositoryProvider).sendMessage(
+            rodadaId: widget.rodadaId,
+            body: body,
+            kind: 'text',
+          );
+      ref.invalidate(rodadaMessagesProvider(widget.rodadaId));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isUgcBannedError(e) ? context.l10n.ugcBanned : '$e'),
+        ),
+      );
     }
   }
 
@@ -77,33 +104,13 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
             children: [
               ActionChip(
                 label: Text(l10n.radioAllGood),
-                onPressed: _sending
-                    ? null
-                    : () async {
-                        await ref.read(rodadaRepositoryProvider).sendMessage(
-                              rodadaId: widget.rodadaId,
-                              body: l10n.radioAllGood,
-                              kind: 'text',
-                            );
-                        ref.invalidate(
-                          rodadaMessagesProvider(widget.rodadaId),
-                        );
-                      },
+                onPressed: _sending ? null : () => _sendCanned(l10n.radioAllGood),
               ),
               ActionChip(
                 label: Text(l10n.radioStoppingFiveMin),
                 onPressed: _sending
                     ? null
-                    : () async {
-                        await ref.read(rodadaRepositoryProvider).sendMessage(
-                              rodadaId: widget.rodadaId,
-                              body: l10n.radioStoppingFiveMin,
-                              kind: 'text',
-                            );
-                        ref.invalidate(
-                          rodadaMessagesProvider(widget.rodadaId),
-                        );
-                      },
+                    : () => _sendCanned(l10n.radioStoppingFiveMin),
               ),
               ActionChip(
                 avatar: const Icon(Icons.warning_amber, size: 16),
@@ -150,7 +157,17 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                   final m = list[i];
                   final time =
                       DateFormat('HH:mm').format(m.createdAt.toLocal());
-                  return Container(
+                  final mine = m.userId ==
+                      ref.read(rodadaRepositoryProvider).currentUserId;
+                  return InkWell(
+                    onLongPress: mine
+                        ? null
+                        : () => showReportContentSheet(
+                              context,
+                              kind: 'message',
+                              messageId: m.id,
+                            ),
+                    child: Container(
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -162,14 +179,33 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${m.displayName ?? l10n.riderFallback} · $time'
-                          '${m.isSafety ? ' · ${l10n.safetyTag}' : ''}',
-                          style: GoogleFonts.exo2(
-                            fontSize: 12,
-                            color: m.isSafety ? AppTheme.signal : AppTheme.steel,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${m.displayName ?? l10n.riderFallback} · $time'
+                                '${m.isSafety ? ' · ${l10n.safetyTag}' : ''}',
+                                style: GoogleFonts.exo2(
+                                  fontSize: 12,
+                                  color: m.isSafety
+                                      ? AppTheme.signal
+                                      : AppTheme.steel,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (!mine)
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                tooltip: l10n.ugcReportTitle,
+                                icon: const Icon(Icons.flag_outlined, size: 18),
+                                onPressed: () => showReportContentSheet(
+                                  context,
+                                  kind: 'message',
+                                  messageId: m.id,
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -178,6 +214,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                         ),
                       ],
                     ),
+                  ),
                   );
                 },
               );

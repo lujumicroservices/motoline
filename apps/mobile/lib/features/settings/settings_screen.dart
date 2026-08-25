@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/auth/impersonation_controller.dart';
+import '../../core/legal/legal_urls.dart';
 import '../../core/notifications/push_diagnostics.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/bike_provider.dart';
@@ -23,6 +24,8 @@ import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
 import '../home/home_nav_icons.dart';
 import '../lean_lab/lean_imu_lab_screen.dart';
 import '../lean_lab/lean_lab_screen.dart';
+import '../moderation/content_guidelines.dart';
+import '../moderation/staff_reports_screen.dart';
 import 'bike_picker_screen.dart';
 import 'impersonate_screen.dart';
 
@@ -271,6 +274,58 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 28),
           const AccountAuthSection(),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.description_outlined, color: AppTheme.line),
+            title: Text(
+              l10n.termsTitle,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              l10n.legalOpenInBrowser,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => openLegalUrlOrSnack(context, LegalUrls.terms),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.privacy_tip_outlined, color: AppTheme.line),
+            title: Text(
+              l10n.privacyTitle,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              l10n.legalOpenInBrowser,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => openLegalUrlOrSnack(context, LegalUrls.privacy),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.gavel_outlined, color: AppTheme.line),
+            title: Text(
+              l10n.ugcGuidelinesTitle,
+              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              l10n.ugcGuidelinesBanner,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 12,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showUgcGuidelinesDialog(context),
+          ),
           if (ref.watch(impersonationProvider).staff &&
               !ref.watch(impersonationProvider).active) ...[
             const SizedBox(height: 16),
@@ -299,6 +354,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 8),
             const _StaffPartnerCodeTile(),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.flag_outlined, color: AppTheme.signal),
+              title: Text(
+                l10n.ugcStaffQueueTitle,
+                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                l10n.ugcStaffQueueHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const StaffReportsScreen(),
+                  ),
+                );
+              },
+            ),
           ],
           const SizedBox(height: 28),
           const AdventureCameraSettingsSection(),

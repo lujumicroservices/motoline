@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
+import '../../core/legal/legal_urls.dart';
 import 'sign_in_form.dart';
 
 /// Full-screen gate: nothing in RiderLab works until a real account exists.
@@ -56,6 +57,31 @@ class SignInScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const SignInForm(),
+            const SizedBox(height: 20),
+            Text(
+              l10n.authLegalFooter,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.rajdhani(
+                fontSize: 13,
+                height: 1.35,
+                color: AppTheme.steel,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () =>
+                      openLegalUrlOrSnack(context, LegalUrls.terms),
+                  child: Text(l10n.termsTitle),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      openLegalUrlOrSnack(context, LegalUrls.privacy),
+                  child: Text(l10n.privacyTitle),
+                ),
+              ],
+            ),
           ],
         ),
       ),

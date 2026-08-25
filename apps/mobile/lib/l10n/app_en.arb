@@ -404,6 +404,12 @@
     }
   },
   "signOut": "Sign out",
+  "deleteAccount": "Delete account",
+  "deleteAccountConfirmTitle": "Delete account permanently?",
+  "deleteAccountConfirmBody": "This removes your RiderLab account and associated cloud data (rides, profile, friends, rodadas you own). Local garage data on this phone is also cleared. This cannot be undone.",
+  "deleteAccountConfirmAction": "Delete forever",
+  "deleteAccountFailed": "Could not delete account. Try again or use the support email on the Play listing.",
+  "deleteAccountDoneSnack": "Account deleted",
   "accountSignedInSnack": "Signed in — profile synced",
   "accountSignedOutSnack": "Signed out",
   "authEmailLabel": "Email",
@@ -1331,6 +1337,9 @@
   "locationServicesOff": "Turn on location services to record your line.",
   "locationPermissionDenied": "Location permission is needed to draw your line.",
   "locationPermissionDeniedForever": "Enable location in Settings, then try again.",
+  "locationDisclosureTitle": "Location for ride recording",
+  "locationDisclosureBody": "RiderLab records your GPS line during an active ride.\n\n• Location is used only while you are recording\n• A persistent notification stays visible while recording\n• Recording continues with the screen locked or the phone in your pocket\n• Location stops when you end the ride\n\nNext, your phone will ask for location permission. Choose Allow all the time (or Always allow) so recording works with the screen off.",
+  "locationDisclosureContinue": "Continue",
   "leanAtPlayhead": "At marker · 0° offset {degrees}°",
   "@leanAtPlayhead": {
     "placeholders": {
@@ -1365,5 +1374,45 @@
       "turn": { "type": "String" },
       "lean": { "type": "String" }
     }
-  }
+  },
+  "ugcGuidelinesTitle": "Rodada rules",
+  "ugcGuidelinesBanner": "Abuse of radio or photos can get you banned. Tap for the rules.",
+  "ugcGuidelinesBody": "Rodada radio and photos are for riding with your group.\n\nDo not post sexual content, hate, harassment, threats, spam, or anything illegal.\n\nAnyone can report a message or photo. Staff can hide it and ban the account.\n\nIf you break these rules, you lose access to radio, photos, and other group features.",
+  "ugcGuidelinesAccept": "I understand",
+  "ugcReportTitle": "Report",
+  "ugcReportHelp": "Staff will review this. False reports can also lead to a ban.",
+  "ugcReportSubmit": "Send report",
+  "ugcReportThanks": "Report sent. Thank you.",
+  "ugcReasonSexual": "Sexual or nude content",
+  "ugcReasonHate": "Hate or slurs",
+  "ugcReasonHarassment": "Harassment or threats",
+  "ugcReasonSpam": "Spam or scam",
+  "ugcReasonOther": "Other",
+  "ugcBanned": "This account is banned from radio and photos.",
+  "ugcStaffQueueTitle": "Reported content",
+  "ugcStaffQueueHelp": "Hide posts or ban accounts that break rodada rules.",
+  "ugcStaffQueueEmpty": "No open reports.",
+  "ugcStaffRefresh": "Refresh",
+  "ugcStaffTarget": "{target} · reported by {reporter} · {when}",
+  "@ugcStaffTarget": {
+    "placeholders": {
+      "target": { "type": "String" },
+      "reporter": { "type": "String" },
+      "when": { "type": "String" }
+    }
+  },
+  "ugcStaffAlreadyBanned": "This rider is already banned.",
+  "ugcStaffDismiss": "Dismiss",
+  "ugcStaffHide": "Hide post",
+  "ugcStaffBan": "Ban rider",
+  "ugcStaffUnban": "Lift ban",
+  "ugcStaffDone": "Updated.",
+  "termsTitle": "Terms of use",
+  "privacyTitle": "Privacy policy",
+  "legalOpenInBrowser": "Opens in the browser",
+  "authLegalFooter": "By continuing you agree to the Terms of use and Privacy policy.",
+  "termsAcceptTitle": "Terms of use",
+  "termsAcceptBody": "By using RiderLab you agree to the Terms of use and Privacy policy.\n\nDo not use the phone while riding. Radio and photos must stay about riding with your group. Sexual content, hate, harassment, spam, or illegal posts can get you banned.\n\nOpen the full documents below. You can read them again later in Settings.",
+  "termsAcceptAgree": "I agree",
+  "termsAcceptDecline": "Not now"
 }

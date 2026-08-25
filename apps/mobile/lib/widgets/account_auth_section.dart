@@ -104,16 +104,67 @@ class AccountAuthSection extends ConsumerWidget {
               else if (!permanent)
                 const SignInForm()
               else
-                OutlinedButton(
-                  onPressed: () async {
-                    await ref.read(authActionsProvider).signOut();
-                    if (!context.mounted) return;
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.accountSignedOutSnack)),
-                    );
-                  },
-                  child: Text(l10n.signOut),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () async {
+                        await ref.read(authActionsProvider).signOut();
+                        if (!context.mounted) return;
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.accountSignedOutSnack)),
+                        );
+                      },
+                      child: Text(l10n.signOut),
+                    ),
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () async {
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(l10n.deleteAccountConfirmTitle),
+                            content: Text(l10n.deleteAccountConfirmBody),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text(l10n.cancel),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppTheme.signal,
+                                ),
+                                child: Text(l10n.deleteAccountConfirmAction),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (ok != true || !context.mounted) return;
+                        final deleted =
+                            await ref.read(authActionsProvider).deleteAccount();
+                        if (!context.mounted) return;
+                        if (!deleted) {
+                          final err = ref.read(authErrorProvider);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(err ?? l10n.deleteAccountFailed),
+                            ),
+                          );
+                          return;
+                        }
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.deleteAccountDoneSnack)),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.signal,
+                      ),
+                      child: Text(l10n.deleteAccount),
+                    ),
+                  ],
                 ),
             ],
           ),

@@ -32,6 +32,7 @@ import '../watch/watch_providers.dart';
 import '../rodadas/photos/ride_photo_capture.dart';
 import 'armed_session_flow.dart';
 import 'armed_session_nav.dart';
+import 'location_permission_gate.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 import 'widgets/upright_freeze_panel.dart';
@@ -134,6 +135,17 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     });
 
     try {
+      if (!await LocationPermissionGate.requestForRecording(context)) {
+        if (!mounted) return;
+        setState(() {
+          _starting = false;
+          _startError = LocationDeniedException(
+            LocationPermissionDenyReason.denied,
+          );
+        });
+        return;
+      }
+
       await recorder.start(
         onWarmup: (status) {
           if (!mounted) return;

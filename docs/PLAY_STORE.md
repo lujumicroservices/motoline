@@ -106,6 +106,7 @@ Full paste-ready text: [PLAY_PRODUCTION.md](PLAY_PRODUCTION.md) §1. Assets: [do
 | Feature graphic 1024×500 | Required banner |
 | Phone screenshots | ≥2 (home, Ride Lab map, active ride) |
 | Privacy policy URL | **Required** — `https://riderlab.rawthrottle.com.mx/legal/privacy.html` |
+| Delete account URL | **Required** (Data safety) — `https://riderlab.rawthrottle.com.mx/legal/delete-account.html` |
 | App category | Health & fitness / Maps / Sports (pick closest) |
 | Content rating | IARC questionnaire |
 | Target audience | Typically 18+ (driving / motorcycle) |

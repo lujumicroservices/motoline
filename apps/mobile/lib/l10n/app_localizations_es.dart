@@ -1159,6 +1159,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signOut => 'Cerrar sesión';
 
   @override
+  String get deleteAccount => 'Eliminar cuenta';
+
+  @override
+  String get deleteAccountConfirmTitle => '¿Eliminar la cuenta para siempre?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'Se borrará tu cuenta de RiderLab y los datos en la nube asociados (recorridos, perfil, amigos, rodadas que creaste). También se limpia el garaje en este teléfono. No se puede deshacer.';
+
+  @override
+  String get deleteAccountConfirmAction => 'Eliminar para siempre';
+
+  @override
+  String get deleteAccountFailed =>
+      'No se pudo eliminar la cuenta. Intenta de nuevo o usa el correo de soporte del listado de Play.';
+
+  @override
+  String get deleteAccountDoneSnack => 'Cuenta eliminada';
+
+  @override
   String get accountSignedInSnack => 'Sesión iniciada — perfil sincronizado';
 
   @override
@@ -3135,6 +3155,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'Activa la ubicación en Ajustes e inténtalo de nuevo.';
 
   @override
+  String get locationDisclosureTitle => 'Ubicación para grabar recorridos';
+
+  @override
+  String get locationDisclosureBody =>
+      'RiderLab graba tu línea GPS durante un recorrido activo.\n\n• La ubicación se usa solo mientras grabas\n• Una notificación permanece visible al grabar\n• La grabación continúa con la pantalla bloqueada o el teléfono en el bolsillo\n• La ubicación se detiene cuando terminas el recorrido\n\nA continuación, el teléfono pedirá permiso de ubicación. Elige Permitir todo el tiempo para que funcione con la pantalla apagada.';
+
+  @override
+  String get locationDisclosureContinue => 'Continuar';
+
+  @override
   String leanAtPlayhead(String degrees) {
     return 'En el marcador · desfase de 0° $degrees°';
   }
@@ -3165,4 +3195,111 @@ class AppLocalizationsEs extends AppLocalizations {
   String curvaMetaTurnLean(String turn, String lean) {
     return 'giro $turn° · incl. $lean°';
   }
+
+  @override
+  String get ugcGuidelinesTitle => 'Reglas de la rodada';
+
+  @override
+  String get ugcGuidelinesBanner =>
+      'Abusar del radio o las fotos puede banearte. Toca para ver las reglas.';
+
+  @override
+  String get ugcGuidelinesBody =>
+      'El radio y las fotos de la rodada son para ir con tu grupo.\n\nNo publiques contenido sexual, odio, acoso, amenazas, spam ni nada ilegal.\n\nCualquiera puede reportar un mensaje o una foto. El staff puede ocultarlo y banear la cuenta.\n\nSi rompes estas reglas, pierdes radio, fotos y otras funciones de grupo.';
+
+  @override
+  String get ugcGuidelinesAccept => 'Entendido';
+
+  @override
+  String get ugcReportTitle => 'Reportar';
+
+  @override
+  String get ugcReportHelp =>
+      'El staff lo revisará. Un reporte falso también puede causar baneo.';
+
+  @override
+  String get ugcReportSubmit => 'Enviar reporte';
+
+  @override
+  String get ugcReportThanks => 'Reporte enviado. Gracias.';
+
+  @override
+  String get ugcReasonSexual => 'Contenido sexual o desnudos';
+
+  @override
+  String get ugcReasonHate => 'Odio o insultos';
+
+  @override
+  String get ugcReasonHarassment => 'Acoso o amenazas';
+
+  @override
+  String get ugcReasonSpam => 'Spam o estafa';
+
+  @override
+  String get ugcReasonOther => 'Otro';
+
+  @override
+  String get ugcBanned => 'Esta cuenta está baneada del radio y las fotos.';
+
+  @override
+  String get ugcStaffQueueTitle => 'Contenido reportado';
+
+  @override
+  String get ugcStaffQueueHelp =>
+      'Oculta publicaciones o banea cuentas que rompan las reglas.';
+
+  @override
+  String get ugcStaffQueueEmpty => 'No hay reportes abiertos.';
+
+  @override
+  String get ugcStaffRefresh => 'Actualizar';
+
+  @override
+  String ugcStaffTarget(String target, String reporter, String when) {
+    return '$target · reportó $reporter · $when';
+  }
+
+  @override
+  String get ugcStaffAlreadyBanned => 'Este rider ya está baneado.';
+
+  @override
+  String get ugcStaffDismiss => 'Descartar';
+
+  @override
+  String get ugcStaffHide => 'Ocultar';
+
+  @override
+  String get ugcStaffBan => 'Banear';
+
+  @override
+  String get ugcStaffUnban => 'Quitar baneo';
+
+  @override
+  String get ugcStaffDone => 'Actualizado.';
+
+  @override
+  String get termsTitle => 'Términos de uso';
+
+  @override
+  String get privacyTitle => 'Aviso de privacidad';
+
+  @override
+  String get legalOpenInBrowser => 'Se abre en el navegador';
+
+  @override
+  String get authLegalFooter =>
+      'Al continuar aceptas los Términos de uso y el Aviso de privacidad.';
+
+  @override
+  String get termsAcceptTitle => 'Términos de uso';
+
+  @override
+  String get termsAcceptBody =>
+      'Al usar RiderLab aceptas los Términos de uso y el Aviso de privacidad.\n\nNo uses el teléfono mientras conduces. El radio y las fotos son para ir con tu grupo. Contenido sexual, odio, acoso, spam o publicaciones ilegales pueden banearte.\n\nAbre los documentos completos abajo. Después los puedes leer otra vez en Ajustes.';
+
+  @override
+  String get termsAcceptAgree => 'Acepto';
+
+  @override
+  String get termsAcceptDecline => 'Ahora no';
 }

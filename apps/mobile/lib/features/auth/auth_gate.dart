@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/legal/legal_acceptance.dart';
+import '../../features/legal/terms_accept_screen.dart';
 import '../../providers/auth_providers.dart';
 import 'set_password_screen.dart';
 import 'sign_in_screen.dart';
@@ -47,6 +49,14 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     if (!ref.watch(hasPermanentIdentityProvider)) {
       return const SignInScreen();
     }
-    return const HomeScreen();
+    final terms = ref.watch(termsAcceptedProvider);
+    return terms.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, _) => const TermsAcceptScreen(),
+      data: (accepted) =>
+          accepted ? const HomeScreen() : const TermsAcceptScreen(),
+    );
   }
 }

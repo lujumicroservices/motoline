@@ -7,6 +7,9 @@ import '../../../core/models/ride.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
+import '../../moderation/content_guidelines.dart';
+import '../../moderation/content_moderation_repository.dart';
+import '../../moderation/report_content_sheet.dart';
 import '../../reel/reel_compose_screen.dart';
 import '../models/rodada_models.dart';
 import '../photos/ride_photo_capture.dart';
@@ -44,27 +47,43 @@ class RodadaPhotosTab extends ConsumerWidget {
                 runSpacing: 8,
                 children: [
                   FilledButton.tonalIcon(
-                    onPressed: () => captureRidePhoto(
-                      context: context,
-                      ref: ref,
-                      localRideId: null,
-                      rodadaId: rodadaId,
-                    ),
+                    onPressed: () async {
+                      if (!await ensureUgcGuidelinesAccepted(context)) return;
+                      if (!context.mounted) return;
+                      await captureRidePhoto(
+                        context: context,
+                        ref: ref,
+                        localRideId: null,
+                        rodadaId: rodadaId,
+                      );
+                    },
                     icon: const Icon(Icons.photo_camera_outlined, size: 18),
                     label: Text(l10n.photoTake),
                   ),
                   FilledButton.tonalIcon(
-                    onPressed: () => _pickAndUpload(context, ref),
+                    onPressed: () async {
+                      if (!await ensureUgcGuidelinesAccepted(context)) return;
+                      if (!context.mounted) return;
+                      await _pickAndUpload(context, ref);
+                    },
                     icon: const Icon(Icons.add_a_photo_outlined, size: 18),
                     label: Text(l10n.photoAdd),
                   ),
                   OutlinedButton.icon(
-                    onPressed: () => _importFromRoll(context, ref),
+                    onPressed: () async {
+                      if (!await ensureUgcGuidelinesAccepted(context)) return;
+                      if (!context.mounted) return;
+                      await _importFromRoll(context, ref);
+                    },
                     icon: const Icon(Icons.photo_library_outlined, size: 18),
                     label: Text(l10n.photoImportFromRoll),
                   ),
                   FilledButton.icon(
-                    onPressed: () => _openReel(context, ref),
+                    onPressed: () async {
+                      if (!await ensureUgcGuidelinesAccepted(context)) return;
+                      if (!context.mounted) return;
+                      await _openReel(context, ref);
+                    },
                     icon: const Icon(Icons.movie_creation_outlined, size: 18),
                     label: Text(l10n.reelGenerate),
                   ),
@@ -177,7 +196,9 @@ class RodadaPhotosTab extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
+        SnackBar(
+          content: Text(isUgcBannedError(e) ? l10n.ugcBanned : '$e'),
+        ),
       );
     }
   }
@@ -290,7 +311,7 @@ class _PhotoThumb extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
         child: url.when(
           loading: () => Container(color: AppTheme.asphaltElevated),
-          error: (_, __) => Container(
+          error: (_, _) => Container(
             color: AppTheme.asphaltElevated,
             child: const Icon(Icons.broken_image),
           ),
@@ -318,6 +339,18 @@ class _PhotoViewer extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(photo.displayName ?? l10n.photoTitle),
+        actions: [
+          if (photo.userId != ref.read(rodadaRepositoryProvider).currentUserId)
+            IconButton(
+              tooltip: l10n.ugcReportTitle,
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: () => showReportContentSheet(
+                context,
+                kind: 'photo',
+                photoId: photo.id,
+              ),
+            ),
+        ],
       ),
       body: url.when(
         loading: () => const Center(child: CircularProgressIndicator()),

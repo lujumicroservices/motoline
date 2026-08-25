@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../db/ride_database.dart';
 import '../notifications/push_notification_service.dart';
 import '../supabase/supabase_bootstrap.dart';
 import 'auth_provider_kind.dart';
@@ -366,6 +367,33 @@ class AuthService {
     if (SupabaseBootstrap.isReady) {
       await SupabaseBootstrap.client.auth.signOut();
     }
+  }
+
+  /// Permanently delete the signed-in auth user (cloud cascade) via edge fn.
+  Future<void> deleteAccount() async {
+    if (!SupabaseBootstrap.isReady) {
+      throw AuthException('Cloud is not configured');
+    }
+    final session = SupabaseBootstrap.client.auth.currentSession;
+    if (session == null) {
+      throw AuthException('Not signed in');
+    }
+    final res = await SupabaseBootstrap.client.functions.invoke(
+      'delete-account',
+    );
+    if (res.status >= 400) {
+      final data = res.data;
+      final detail = data is Map ? (data['detail'] ?? data['error']) : null;
+      throw AuthException(
+        detail != null ? 'Account deletion failed: $detail' : 'Account deletion failed',
+      );
+    }
+    try {
+      await RideDatabase.instance.wipeAllLocalUserData();
+    } catch (e) {
+      debugPrint('Local wipe after deleteAccount: $e');
+    }
+    await signOut();
   }
 
   Future<void> _afterIdentity(

@@ -475,6 +475,12 @@
     }
   },
   "signOut": "Cerrar sesión",
+  "deleteAccount": "Eliminar cuenta",
+  "deleteAccountConfirmTitle": "¿Eliminar la cuenta para siempre?",
+  "deleteAccountConfirmBody": "Se borrará tu cuenta de RiderLab y los datos en la nube asociados (recorridos, perfil, amigos, rodadas que creaste). También se limpia el garaje en este teléfono. No se puede deshacer.",
+  "deleteAccountConfirmAction": "Eliminar para siempre",
+  "deleteAccountFailed": "No se pudo eliminar la cuenta. Intenta de nuevo o usa el correo de soporte del listado de Play.",
+  "deleteAccountDoneSnack": "Cuenta eliminada",
   "accountSignedInSnack": "Sesión iniciada — perfil sincronizado",
   "accountSignedOutSnack": "Sesión cerrada",
   "authEmailLabel": "Correo",
@@ -1402,6 +1408,9 @@
   "locationServicesOff": "Activa la ubicación para grabar tu línea.",
   "locationPermissionDenied": "Se necesita permiso de ubicación para dibujar tu línea.",
   "locationPermissionDeniedForever": "Activa la ubicación en Ajustes e inténtalo de nuevo.",
+  "locationDisclosureTitle": "Ubicación para grabar recorridos",
+  "locationDisclosureBody": "RiderLab graba tu línea GPS durante un recorrido activo.\n\n• La ubicación se usa solo mientras grabas\n• Una notificación permanece visible al grabar\n• La grabación continúa con la pantalla bloqueada o el teléfono en el bolsillo\n• La ubicación se detiene cuando terminas el recorrido\n\nA continuación, el teléfono pedirá permiso de ubicación. Elige Permitir todo el tiempo para que funcione con la pantalla apagada.",
+  "locationDisclosureContinue": "Continuar",
   "leanAtPlayhead": "En el marcador · desfase de 0° {degrees}°",
   "@leanAtPlayhead": {
     "placeholders": {
@@ -1436,5 +1445,45 @@
       "turn": { "type": "String" },
       "lean": { "type": "String" }
     }
-  }
+  },
+  "ugcGuidelinesTitle": "Reglas de la rodada",
+  "ugcGuidelinesBanner": "Abusar del radio o las fotos puede banearte. Toca para ver las reglas.",
+  "ugcGuidelinesBody": "El radio y las fotos de la rodada son para ir con tu grupo.\n\nNo publiques contenido sexual, odio, acoso, amenazas, spam ni nada ilegal.\n\nCualquiera puede reportar un mensaje o una foto. El staff puede ocultarlo y banear la cuenta.\n\nSi rompes estas reglas, pierdes radio, fotos y otras funciones de grupo.",
+  "ugcGuidelinesAccept": "Entendido",
+  "ugcReportTitle": "Reportar",
+  "ugcReportHelp": "El staff lo revisará. Un reporte falso también puede causar baneo.",
+  "ugcReportSubmit": "Enviar reporte",
+  "ugcReportThanks": "Reporte enviado. Gracias.",
+  "ugcReasonSexual": "Contenido sexual o desnudos",
+  "ugcReasonHate": "Odio o insultos",
+  "ugcReasonHarassment": "Acoso o amenazas",
+  "ugcReasonSpam": "Spam o estafa",
+  "ugcReasonOther": "Otro",
+  "ugcBanned": "Esta cuenta está baneada del radio y las fotos.",
+  "ugcStaffQueueTitle": "Contenido reportado",
+  "ugcStaffQueueHelp": "Oculta publicaciones o banea cuentas que rompan las reglas.",
+  "ugcStaffQueueEmpty": "No hay reportes abiertos.",
+  "ugcStaffRefresh": "Actualizar",
+  "ugcStaffTarget": "{target} · reportó {reporter} · {when}",
+  "@ugcStaffTarget": {
+    "placeholders": {
+      "target": { "type": "String" },
+      "reporter": { "type": "String" },
+      "when": { "type": "String" }
+    }
+  },
+  "ugcStaffAlreadyBanned": "Este rider ya está baneado.",
+  "ugcStaffDismiss": "Descartar",
+  "ugcStaffHide": "Ocultar",
+  "ugcStaffBan": "Banear",
+  "ugcStaffUnban": "Quitar baneo",
+  "ugcStaffDone": "Actualizado.",
+  "termsTitle": "Términos de uso",
+  "privacyTitle": "Aviso de privacidad",
+  "legalOpenInBrowser": "Se abre en el navegador",
+  "authLegalFooter": "Al continuar aceptas los Términos de uso y el Aviso de privacidad.",
+  "termsAcceptTitle": "Términos de uso",
+  "termsAcceptBody": "Al usar RiderLab aceptas los Términos de uso y el Aviso de privacidad.\n\nNo uses el teléfono mientras conduces. El radio y las fotos son para ir con tu grupo. Contenido sexual, odio, acoso, spam o publicaciones ilegales pueden banearte.\n\nAbre los documentos completos abajo. Después los puedes leer otra vez en Ajustes.",
+  "termsAcceptAgree": "Acepto",
+  "termsAcceptDecline": "Ahora no"
 }

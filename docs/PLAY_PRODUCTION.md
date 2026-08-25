@@ -13,6 +13,7 @@ Play Console URLs (paste as-is):
 | Website | https://riderlab.rawthrottle.com.mx/ |
 | Privacy policy | https://riderlab.rawthrottle.com.mx/legal/privacy.html |
 | Terms | https://riderlab.rawthrottle.com.mx/legal/terms.html |
+| **Delete account URL** (Data safety) | https://riderlab.rawthrottle.com.mx/legal/delete-account.html |
 
 Store art (upload these): [docs/store/play/](store/play/) — `icon-512.png`, `feature-graphic-1024x500.png`, `phone-01-home.png` … `phone-05-full-map.png`.
 
@@ -156,7 +157,8 @@ Privacy: https://riderlab.rawthrottle.com.mx/legal/privacy.html
 
 ### Content rating / audience
 
-- IARC questionnaire: **18+** (motor vehicles). No user-generated social for kids.  
+- IARC questionnaire: **18+** (motor vehicles). Not designed for children.  
+- User-generated content (rodada radio + photos): in-app **rules**, **report**, and **staff hide/ban**. Declare UGC as user-generated; users can flag; you moderate.  
 - Target age: **18 and over**. Not designed for children.
 
 ### Data safety (answers)
@@ -172,7 +174,9 @@ Privacy: https://riderlab.rawthrottle.com.mx/legal/privacy.html
 
 - **Ephemeral:** No  
 - **Encrypted in transit:** Yes  
-- **Users can request deletion:** Yes (privacy policy)  
+- **Users can request deletion:** Yes — in-app Settings → Delete account, and store URL `https://riderlab.rawthrottle.com.mx/legal/delete-account.html`
+- **Partial data deletion (without account delete):** No
+- **Account deletion form:** leave “My app does not allow users to create an account” unchecked; paste the Delete account URL above  
 - **Contains ads:** **No** (Free upsell is in-app, not an ads SDK)  
 - **In-app purchases:** No until RevenueCat / Play Billing is live  
 

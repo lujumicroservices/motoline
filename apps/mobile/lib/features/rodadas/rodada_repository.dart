@@ -710,6 +710,7 @@ class RodadaRepository {
     await _ensure();
     final me = currentUserId;
     if (me == null) throw StateError('Not signed in');
+    await _assertNotBanned(me);
     final hash = contentHash ?? sha256.convert(bytes).toString();
     final existing = await _supabase
         .from('rodada_photos')
@@ -774,6 +775,7 @@ class RodadaRepository {
     await _ensure();
     final me = currentUserId;
     if (me == null) throw StateError('Not signed in');
+    await _assertNotBanned(me);
     final path =
         '$rodadaId/$me/${DateTime.now().millisecondsSinceEpoch}.mp4';
     await _supabase.storage.from('rodada-reels').upload(
@@ -824,6 +826,7 @@ class RodadaRepository {
     await _ensure();
     final me = currentUserId;
     if (me == null) throw StateError('Not signed in');
+    await _assertNotBanned(me);
     final row = await _supabase
         .from('rodada_messages')
         .insert({
@@ -907,5 +910,16 @@ class RodadaRepository {
   Future<void> deleteStop(String stopId) async {
     await _ensure();
     await _supabase.from('rodada_stops').delete().eq('id', stopId);
+  }
+
+  Future<void> _assertNotBanned(String userId) async {
+    final row = await _supabase
+        .from('user_bans')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (row != null) {
+      throw StateError('ugc_banned');
+    }
   }
 }

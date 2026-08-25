@@ -77,7 +77,18 @@ class LocationService {
   /// Prefer starting once horizontal accuracy is at least this good.
   static const double warmTargetAccuracyMeters = 10;
 
+  /// True when location services are on and background ("always") is granted.
+  Future<bool> hasRecordingPermission() async {
+    if (!await Geolocator.isLocationServiceEnabled()) return false;
+    final permission = await Geolocator.checkPermission();
+    return permission == LocationPermission.always;
+  }
+
   Future<LocationPermissionResult> ensurePermission() async {
+    if (await hasRecordingPermission()) {
+      return const LocationPermissionResult(granted: true);
+    }
+
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return const LocationPermissionResult(

@@ -135,6 +135,32 @@ class AuthActions {
       ref.read(authBusyProvider.notifier).state = false;
     }
   }
+
+  /// Permanently deletes the cloud account + local garage. Irreversible.
+  Future<bool> deleteAccount() async {
+    ref.read(authBusyProvider.notifier).state = true;
+    ref.read(authErrorProvider.notifier).state = null;
+    try {
+      final imp = ref.read(impersonationProvider);
+      if (imp.active) {
+        await ref.read(impersonationProvider.notifier).exit();
+      }
+      await _auth.deleteAccount();
+      ref.invalidate(myProfileProvider);
+      ref.invalidate(friendsListProvider);
+      ref.invalidate(ridesListProvider);
+      unawaited(ref.read(proEntitlementProvider.notifier).onSignedOut());
+      return true;
+    } on AuthException catch (e) {
+      ref.read(authErrorProvider.notifier).state = e.message;
+      return false;
+    } catch (e) {
+      ref.read(authErrorProvider.notifier).state = '$e';
+      return false;
+    } finally {
+      ref.read(authBusyProvider.notifier).state = false;
+    }
+  }
 }
 
 final authActionsProvider = Provider<AuthActions>((ref) => AuthActions(ref));

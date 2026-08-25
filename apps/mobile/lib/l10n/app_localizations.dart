@@ -2150,6 +2150,42 @@ abstract class AppLocalizations {
   /// **'Cerrar sesión'**
   String get signOut;
 
+  /// No description provided for @deleteAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar cuenta'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar la cuenta para siempre?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrará tu cuenta de RiderLab y los datos en la nube asociados (recorridos, perfil, amigos, rodadas que creaste). También se limpia el garaje en este teléfono. No se puede deshacer.'**
+  String get deleteAccountConfirmBody;
+
+  /// No description provided for @deleteAccountConfirmAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar para siempre'**
+  String get deleteAccountConfirmAction;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo eliminar la cuenta. Intenta de nuevo o usa el correo de soporte del listado de Play.'**
+  String get deleteAccountFailed;
+
+  /// No description provided for @deleteAccountDoneSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta eliminada'**
+  String get deleteAccountDoneSnack;
+
   /// No description provided for @accountSignedInSnack.
   ///
   /// In es, this message translates to:
@@ -5600,6 +5636,24 @@ abstract class AppLocalizations {
   /// **'Activa la ubicación en Ajustes e inténtalo de nuevo.'**
   String get locationPermissionDeniedForever;
 
+  /// No description provided for @locationDisclosureTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicación para grabar recorridos'**
+  String get locationDisclosureTitle;
+
+  /// No description provided for @locationDisclosureBody.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab graba tu línea GPS durante un recorrido activo.\n\n• La ubicación se usa solo mientras grabas\n• Una notificación permanece visible al grabar\n• La grabación continúa con la pantalla bloqueada o el teléfono en el bolsillo\n• La ubicación se detiene cuando terminas el recorrido\n\nA continuación, el teléfono pedirá permiso de ubicación. Elige Permitir todo el tiempo para que funcione con la pantalla apagada.'**
+  String get locationDisclosureBody;
+
+  /// No description provided for @locationDisclosureContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get locationDisclosureContinue;
+
   /// No description provided for @leanAtPlayhead.
   ///
   /// In es, this message translates to:
@@ -5641,6 +5695,204 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'giro {turn}° · incl. {lean}°'**
   String curvaMetaTurnLean(String turn, String lean);
+
+  /// No description provided for @ugcGuidelinesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reglas de la rodada'**
+  String get ugcGuidelinesTitle;
+
+  /// No description provided for @ugcGuidelinesBanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Abusar del radio o las fotos puede banearte. Toca para ver las reglas.'**
+  String get ugcGuidelinesBanner;
+
+  /// No description provided for @ugcGuidelinesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El radio y las fotos de la rodada son para ir con tu grupo.\n\nNo publiques contenido sexual, odio, acoso, amenazas, spam ni nada ilegal.\n\nCualquiera puede reportar un mensaje o una foto. El staff puede ocultarlo y banear la cuenta.\n\nSi rompes estas reglas, pierdes radio, fotos y otras funciones de grupo.'**
+  String get ugcGuidelinesBody;
+
+  /// No description provided for @ugcGuidelinesAccept.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get ugcGuidelinesAccept;
+
+  /// No description provided for @ugcReportTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar'**
+  String get ugcReportTitle;
+
+  /// No description provided for @ugcReportHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'El staff lo revisará. Un reporte falso también puede causar baneo.'**
+  String get ugcReportHelp;
+
+  /// No description provided for @ugcReportSubmit.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar reporte'**
+  String get ugcReportSubmit;
+
+  /// No description provided for @ugcReportThanks.
+  ///
+  /// In es, this message translates to:
+  /// **'Reporte enviado. Gracias.'**
+  String get ugcReportThanks;
+
+  /// No description provided for @ugcReasonSexual.
+  ///
+  /// In es, this message translates to:
+  /// **'Contenido sexual o desnudos'**
+  String get ugcReasonSexual;
+
+  /// No description provided for @ugcReasonHate.
+  ///
+  /// In es, this message translates to:
+  /// **'Odio o insultos'**
+  String get ugcReasonHate;
+
+  /// No description provided for @ugcReasonHarassment.
+  ///
+  /// In es, this message translates to:
+  /// **'Acoso o amenazas'**
+  String get ugcReasonHarassment;
+
+  /// No description provided for @ugcReasonSpam.
+  ///
+  /// In es, this message translates to:
+  /// **'Spam o estafa'**
+  String get ugcReasonSpam;
+
+  /// No description provided for @ugcReasonOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get ugcReasonOther;
+
+  /// No description provided for @ugcBanned.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cuenta está baneada del radio y las fotos.'**
+  String get ugcBanned;
+
+  /// No description provided for @ugcStaffQueueTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Contenido reportado'**
+  String get ugcStaffQueueTitle;
+
+  /// No description provided for @ugcStaffQueueHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Oculta publicaciones o banea cuentas que rompan las reglas.'**
+  String get ugcStaffQueueHelp;
+
+  /// No description provided for @ugcStaffQueueEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay reportes abiertos.'**
+  String get ugcStaffQueueEmpty;
+
+  /// No description provided for @ugcStaffRefresh.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar'**
+  String get ugcStaffRefresh;
+
+  /// No description provided for @ugcStaffTarget.
+  ///
+  /// In es, this message translates to:
+  /// **'{target} · reportó {reporter} · {when}'**
+  String ugcStaffTarget(String target, String reporter, String when);
+
+  /// No description provided for @ugcStaffAlreadyBanned.
+  ///
+  /// In es, this message translates to:
+  /// **'Este rider ya está baneado.'**
+  String get ugcStaffAlreadyBanned;
+
+  /// No description provided for @ugcStaffDismiss.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar'**
+  String get ugcStaffDismiss;
+
+  /// No description provided for @ugcStaffHide.
+  ///
+  /// In es, this message translates to:
+  /// **'Ocultar'**
+  String get ugcStaffHide;
+
+  /// No description provided for @ugcStaffBan.
+  ///
+  /// In es, this message translates to:
+  /// **'Banear'**
+  String get ugcStaffBan;
+
+  /// No description provided for @ugcStaffUnban.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar baneo'**
+  String get ugcStaffUnban;
+
+  /// No description provided for @ugcStaffDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizado.'**
+  String get ugcStaffDone;
+
+  /// No description provided for @termsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Términos de uso'**
+  String get termsTitle;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Aviso de privacidad'**
+  String get privacyTitle;
+
+  /// No description provided for @legalOpenInBrowser.
+  ///
+  /// In es, this message translates to:
+  /// **'Se abre en el navegador'**
+  String get legalOpenInBrowser;
+
+  /// No description provided for @authLegalFooter.
+  ///
+  /// In es, this message translates to:
+  /// **'Al continuar aceptas los Términos de uso y el Aviso de privacidad.'**
+  String get authLegalFooter;
+
+  /// No description provided for @termsAcceptTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Términos de uso'**
+  String get termsAcceptTitle;
+
+  /// No description provided for @termsAcceptBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Al usar RiderLab aceptas los Términos de uso y el Aviso de privacidad.\n\nNo uses el teléfono mientras conduces. El radio y las fotos son para ir con tu grupo. Contenido sexual, odio, acoso, spam o publicaciones ilegales pueden banearte.\n\nAbre los documentos completos abajo. Después los puedes leer otra vez en Ajustes.'**
+  String get termsAcceptBody;
+
+  /// No description provided for @termsAcceptAgree.
+  ///
+  /// In es, this message translates to:
+  /// **'Acepto'**
+  String get termsAcceptAgree;
+
+  /// No description provided for @termsAcceptDecline.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get termsAcceptDecline;
 }
 
 class _AppLocalizationsDelegate

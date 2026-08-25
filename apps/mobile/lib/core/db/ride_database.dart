@@ -836,6 +836,23 @@ class RideDatabase {
     await db.delete('rides', where: 'id = ?', whereArgs: [id]);
   }
 
+  /// Wipe local garage after cloud account deletion (Play data-deletion).
+  Future<void> wipeAllLocalUserData() async {
+    final db = await database;
+    await db.delete('track_points');
+    await db.delete('lean_samples');
+    await db.delete('imu_samples');
+    await db.delete('imu_uploads');
+    await db.delete('ride_photos');
+    await db.delete('ride_engine_labels');
+    await db.delete('camera_events');
+    await db.delete('lean_lab_sessions');
+    await db.delete('sync_outbox');
+    await db.delete('rides');
+    await db.delete('route_loops');
+    await db.delete('routes');
+  }
+
   Future<void> upsertRoute(RouteCircuit route) async {
     final db = await database;
     await db.insert(

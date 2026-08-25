@@ -4,16 +4,18 @@ Use with [PLAY_STORE.md](PLAY_STORE.md). Hosted legal pages (host these URLs in 
 
 - Privacy: ship `docs/legal/privacy.html`
 - Terms: ship `docs/legal/terms.html`
+- Delete account: ship `docs/legal/delete-account.html`
 
 Suggested public paths (hosted on `riderlab.rawthrottle.com.mx`):
 
 ```text
 https://riderlab.rawthrottle.com.mx/legal/privacy.html
 https://riderlab.rawthrottle.com.mx/legal/terms.html
+https://riderlab.rawthrottle.com.mx/legal/delete-account.html
 ```
 
-Source files: `docs/legal/privacy.html`, `docs/legal/terms.html`.
----
+Source files: `docs/legal/privacy.html`, `docs/legal/terms.html`, `docs/legal/delete-account.html`.
+Deploy: `scripts/deploy-legal.ps1`
 
 ## Google Play (internal → production)
 
