@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RiderLab — Privacy Policy</title>
+  <title>RiderLab — Aviso de privacidad</title>
   <style>
     :root { --bg:#0e1013; --text:#f1f5f8; --muted:#9ba4ae; --line:#00d4aa; }
     body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.55; }
@@ -13,48 +13,106 @@
     p, li { color:var(--muted); }
     a { color:var(--line); }
     .meta { font-size:0.9rem; color:var(--muted); margin-bottom:28px; }
+    .brand { color:var(--line); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; font-size:0.8rem; margin-bottom:10px; }
+    .lang { font-size:0.85rem; margin-bottom:24px; }
+    .lang a { margin-right:12px; }
+    hr.sep { border:0; border-top:1px solid #2a3038; margin:48px 0 32px; }
   </style>
 </head>
 <body>
   <main>
-    <h1>Privacy Policy</h1>
-    <p class="meta">RiderLab by RawThrottle · Last updated: 24 August 2026</p>
+    <div class="brand">RiderLab by RawThrottle</div>
+    <p class="lang"><a href="#es">Español</a><a href="#en">English</a></p>
 
-    <p>RiderLab records motorcycle rides on your phone so you can review the line you took and improve technique. This policy explains what we collect and why.</p>
+    <section id="es">
+      <h1>Aviso de privacidad</h1>
+      <p class="meta">RiderLab · RawThrottle · Actualizado: 25 agosto 2026</p>
 
-    <h2>What we collect</h2>
-    <ul>
-      <li><b>Location (precise, including background while a ride is active)</b> — to draw your GPS line with the screen off or phone in a pocket. We do not sell location data.</li>
-      <li><b>Motion sensors</b> — accelerometer / gyroscope (and barometer when present) for lean and ride quality metrics stored with your track.</li>
-      <li><b>Account</b> — optional Google Sign-In for a durable profile, friends, and cloud sync. Guest mode uses an anonymous cloud session.</li>
-      <li><b>Ride content you create</b> — tracks, titles, share visibility, optional photos and radio messages on group rides (rodadas), and labels you submit to help train the product.</li>
-      <li><b>Reports</b> — if you flag a message or photo, we store the report, who sent it, and enough of the content for staff to review.</li>
-      <li><b>Device / diagnostics</b> — app version and soft-fail sync/error events so we can fix crashes (not advertising profiles).</li>
-    </ul>
+      <p>RiderLab graba recorridos de moto en tu teléfono para que puedas revisar la línea que tomaste y mejorar la técnica. Este aviso explica qué datos recopilamos y para qué.</p>
 
-    <h2>How we use it</h2>
-    <ul>
-      <li>Show your rides on-device (offline-first SQLite) and, when you sync, in your cloud garage.</li>
-      <li>Friends, compare, and rodadas — only with people you connect to and rides you choose to share.</li>
-      <li>Review reports of radio messages and photos so we can hide abuse and ban accounts that break the rules.</li>
-      <li>Improve lean sensing and coaching using labels you explicitly submit.</li>
-    </ul>
+      <h2>Qué recopilamos</h2>
+      <ul>
+        <li><b>Ubicación (precisa, también en segundo plano mientras hay un recorrido activo)</b> — para dibujar tu línea GPS con la pantalla apagada o el teléfono en el bolsillo. No vendemos datos de ubicación.</li>
+        <li><b>Sensores de movimiento</b> — acelerómetro / giroscopio (y barómetro si existe) para inclinación y métricas del recorrido junto a tu traza.</li>
+        <li><b>Cuenta</b> — Google o correo/contraseña para perfil, amigos y sincronización en la nube.</li>
+        <li><b>Contenido que creas</b> — recorridos, títulos, visibilidad al compartir, fotos y mensajes de radio opcionales en rodadas, y etiquetas que envías para mejorar el producto.</li>
+        <li><b>Reportes</b> — si marcas un mensaje o una foto, guardamos el reporte, quién lo envió y lo necesario para que el staff lo revise.</li>
+        <li><b>Dispositivo / diagnósticos</b> — versión de la app y errores de sincronización para corregir fallos (no perfiles publicitarios).</li>
+        <li><b>Tokens de notificación</b> — para avisos de la app (invitaciones, radio, etc.) si das permiso.</li>
+      </ul>
 
-    <h2>Where it is stored</h2>
-    <p>On your device by default. Cloud sync uses Supabase (hosted Postgres). Processing may occur in the United States or other regions where our providers operate.</p>
+      <h2>Cómo lo usamos</h2>
+      <ul>
+        <li>Mostrar tus recorridos en el dispositivo (SQLite, primero offline) y, al sincronizar, en tu garaje en la nube.</li>
+        <li>Amigos, comparar y rodadas — solo con personas que conectas y recorridos que eliges compartir.</li>
+        <li>Revisar reportes de radio y fotos para ocultar abuso y banear cuentas que rompan las reglas.</li>
+        <li>Mejorar la inclinación y el coaching con etiquetas que envías de forma explícita.</li>
+      </ul>
 
-    <h2>Sharing</h2>
-    <p>We do not sell personal data. We share only with infrastructure providers needed to run the app (e.g. Supabase, Google Sign-In, and — when enabled — RevenueCat / store billing), and when you choose Friends / Everyone visibility or join a rodada.</p>
+      <h2>Dónde se guarda</h2>
+      <p>Por defecto en tu dispositivo. La sincronización en la nube usa Supabase (Postgres alojado). El procesamiento puede ocurrir en Estados Unidos u otras regiones donde operan nuestros proveedores.</p>
 
-    <h2>Retention &amp; deletion</h2>
-    <p>Local rides remain until you delete them or delete your account in the app. Cloud rides and profile data follow your account.</p>
-    <p>To delete your account and associated cloud data: open RiderLab → Settings → Account → <b>Delete account</b>, or follow the steps at <a href="delete-account.html">Delete account / Eliminar cuenta</a>. After deletion, account data is removed from active systems; infrastructure backups may retain residual copies for up to 30 days, then purge. We do not offer partial cloud data deletion without deleting the account.</p>
+      <h2>Compartir</h2>
+      <p>No vendemos datos personales. Solo compartimos con proveedores de infraestructura necesarios para operar la app (por ejemplo Supabase, Google Sign-In y — cuando esté activo — RevenueCat / facturación de la tienda), y cuando eliges visibilidad Amigos / Todos o te unes a una rodada.</p>
 
-    <h2>Children</h2>
-    <p>RiderLab is intended for adults who ride motorcycles (typically 18+). We do not knowingly collect data from children.</p>
+      <h2>Retención y eliminación</h2>
+      <p>Los recorridos locales permanecen hasta que los borres o elimines tu cuenta en la app. Los recorridos y el perfil en la nube siguen a tu cuenta.</p>
+      <p>Para eliminar tu cuenta y los datos asociados en la nube: abre RiderLab → Ajustes → Cuenta → <b>Eliminar cuenta</b>, o sigue los pasos en <a href="delete-account.html">Eliminar cuenta</a>. Tras la eliminación, los datos se quitan de los sistemas activos; las copias de respaldo de infraestructura pueden conservar residuos hasta 30 días y luego se purgan. No ofrecemos borrado parcial en la nube sin eliminar la cuenta.</p>
 
-    <h2>Contact</h2>
-    <p>RawThrottle / RiderLab — use the support email listed on the Play / App Store listing, or the contact on the partner deck site.</p>
+      <h2>Menores</h2>
+      <p>RiderLab está pensado para adultos que conducen motocicleta (en general 18+). No recopilamos datos de menores a sabiendas.</p>
+
+      <h2>Contacto</h2>
+      <p>RawThrottle / RiderLab — usa el correo de soporte del listado de Play / App Store, o el contacto del sitio de partners.</p>
+
+      <p style="margin-top:28px"><a href="terms.html">Términos de uso</a> · <a href="delete-account.html">Eliminar cuenta</a></p>
+    </section>
+
+    <hr class="sep" />
+
+    <section id="en">
+      <h1>Privacy policy</h1>
+      <p class="meta">RiderLab · RawThrottle · Last updated: 25 August 2026</p>
+
+      <p>RiderLab records motorcycle rides on your phone so you can review the line you took and improve technique. This policy explains what we collect and why.</p>
+
+      <h2>What we collect</h2>
+      <ul>
+        <li><b>Location (precise, including background while a ride is active)</b> — to draw your GPS line with the screen off or phone in a pocket. We do not sell location data.</li>
+        <li><b>Motion sensors</b> — accelerometer / gyroscope (and barometer when present) for lean and ride quality metrics stored with your track.</li>
+        <li><b>Account</b> — Google or email/password for profile, friends, and cloud sync.</li>
+        <li><b>Ride content you create</b> — tracks, titles, share visibility, optional photos and radio messages on group rides (rodadas), and labels you submit to help train the product.</li>
+        <li><b>Reports</b> — if you flag a message or photo, we store the report, who sent it, and enough of the content for staff to review.</li>
+        <li><b>Device / diagnostics</b> — app version and soft-fail sync/error events so we can fix crashes (not advertising profiles).</li>
+        <li><b>Push tokens</b> — for in-app notifications when you allow them.</li>
+      </ul>
+
+      <h2>How we use it</h2>
+      <ul>
+        <li>Show your rides on-device (offline-first SQLite) and, when you sync, in your cloud garage.</li>
+        <li>Friends, compare, and rodadas — only with people you connect to and rides you choose to share.</li>
+        <li>Review reports of radio messages and photos so we can hide abuse and ban accounts that break the rules.</li>
+        <li>Improve lean sensing and coaching using labels you explicitly submit.</li>
+      </ul>
+
+      <h2>Where it is stored</h2>
+      <p>On your device by default. Cloud sync uses Supabase (hosted Postgres). Processing may occur in the United States or other regions where our providers operate.</p>
+
+      <h2>Sharing</h2>
+      <p>We do not sell personal data. We share only with infrastructure providers needed to run the app (e.g. Supabase, Google Sign-In, and — when enabled — RevenueCat / store billing), and when you choose Friends / Everyone visibility or join a rodada.</p>
+
+      <h2>Retention &amp; deletion</h2>
+      <p>Local rides remain until you delete them or delete your account in the app. Cloud rides and profile data follow your account.</p>
+      <p>To delete your account and associated cloud data: open RiderLab → Settings → Account → <b>Delete account</b>, or follow <a href="delete-account.html">Delete account</a>. After deletion, account data is removed from active systems; infrastructure backups may retain residual copies for up to 30 days, then purge. We do not offer partial cloud data deletion without deleting the account.</p>
+
+      <h2>Children</h2>
+      <p>RiderLab is intended for adults who ride motorcycles (typically 18+). We do not knowingly collect data from children.</p>
+
+      <h2>Contact</h2>
+      <p>RawThrottle / RiderLab — use the support email on the Play / App Store listing, or the contact on the partner deck site.</p>
+
+      <p style="margin-top:28px"><a href="terms.html">Terms of use</a> · <a href="delete-account.html">Delete account</a></p>
+    </section>
   </main>
 </body>
 </html>
