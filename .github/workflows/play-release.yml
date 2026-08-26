@@ -13,6 +13,13 @@ on:
           - alpha
           - beta
         default: internal
+      status:
+        description: Release status (draft required while the app is still Draft)
+        type: choice
+        options:
+          - draft
+          - completed
+        default: draft
 
 jobs:
   bundle-and-upload:
@@ -75,6 +82,6 @@ jobs:
           packageName: com.rawthrottle.riderlab
           releaseFiles: apps/mobile/build/app/outputs/bundle/playRelease/app-play-release.aab
           track: ${{ inputs.track }}
-          status: completed
+          status: ${{ inputs.status }}
           releaseName: RiderLab 1.37.7
           whatsNewDirectory: apps/mobile/play/whatsnew
