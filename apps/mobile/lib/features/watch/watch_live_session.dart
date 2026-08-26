@@ -25,13 +25,11 @@ class WatchLiveSession {
 
   Future<void> start() async {
     if (_disposed) return;
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      debugPrint('WatchLiveSession: location denied');
+    // Do not call requestPermission — Play requires an in-app disclosure first.
+    final permission = await Geolocator.checkPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      debugPrint('WatchLiveSession: location not granted');
       return;
     }
     unawaited(_tick());

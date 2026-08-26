@@ -25,17 +25,75 @@ import '../rodada_providers.dart';
 
 /// Live pack map. Watching [rodadaLivePositionsProvider] starts GPS publish;
 /// leaving this tab disposes the publisher and clears your cloud position.
-class RodadaLiveTab extends ConsumerWidget {
+class RodadaLiveTab extends ConsumerStatefulWidget {
   const RodadaLiveTab({super.key, required this.rodadaId});
 
   final String rodadaId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final membership = ref.watch(myRodadaMembershipProvider(rodadaId));
+  ConsumerState<RodadaLiveTab> createState() => _RodadaLiveTabState();
+}
 
-    final localRideId = WatchRepository.rodadaLocalRideId(rodadaId);
+class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
+  /// null = still checking; false = show disclosure; true = location OK.
+  bool? _locationOk;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkLocation());
+  }
+
+  Future<void> _checkLocation() async {
+    final ok = await LocationPermissionGate.hasWhileInUsePermission();
+    if (!mounted) return;
+    setState(() => _locationOk = ok);
+  }
+
+  Future<void> _acceptDisclosure() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      // Disclosure is already on screen — only fire the system prompt now.
+      final permission = await Geolocator.requestPermission();
+      final ok = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+      if (!mounted) return;
+      setState(() => _locationOk = ok);
+      if (!ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.locationPermissionDenied)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final membership = ref.watch(myRodadaMembershipProvider(widget.rodadaId));
+
+    if (_locationOk == null) {
+      return const Center(
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (_locationOk == false) {
+      return _RodadaLiveLocationDisclosure(
+        busy: _busy,
+        onContinue: _acceptDisclosure,
+      );
+    }
+
+    final localRideId = WatchRepository.rodadaLocalRideId(widget.rodadaId);
     final session = ref.watch(activeWatchControllerProvider);
     final familyOn =
         session != null && session.localRideId == localRideId;
@@ -90,11 +148,13 @@ class RodadaLiveTab extends ConsumerWidget {
                                     await ref
                                         .read(rodadaRepositoryProvider)
                                         .updateMySharing(
-                                          rodadaId: rodadaId,
+                                          rodadaId: widget.rodadaId,
                                           shareLive: true,
                                         );
                                     ref.invalidate(
-                                      myRodadaMembershipProvider(rodadaId),
+                                      myRodadaMembershipProvider(
+                                        widget.rodadaId,
+                                      ),
                                     );
                                   },
                                   child: Text(l10n.shareLive),
@@ -123,7 +183,7 @@ class RodadaLiveTab extends ConsumerWidget {
         ),
         Expanded(
           child: _RodadaLiveMapHost(
-            rodadaId: rodadaId,
+            rodadaId: widget.rodadaId,
             isHost: membership.maybeWhen(
               data: (m) => m?.isHost == true,
               orElse: () => false,
@@ -131,6 +191,65 @@ class RodadaLiveTab extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Full-tab Play disclosure before any GPS / system permission prompt.
+class _RodadaLiveLocationDisclosure extends StatelessWidget {
+  const _RodadaLiveLocationDisclosure({
+    required this.busy,
+    required this.onContinue,
+  });
+
+  final bool busy;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Icon(Icons.location_on, color: AppTheme.line, size: 40),
+            const SizedBox(height: 16),
+            Text(
+              l10n.locationRodadaLiveDisclosureTitle,
+              style: GoogleFonts.exo2(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Text(
+                  l10n.locationRodadaLiveDisclosureBody,
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 16,
+                    height: 1.45,
+                    color: AppTheme.mist,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: busy ? null : onContinue,
+              child: busy
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.locationDisclosureContinue),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

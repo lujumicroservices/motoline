@@ -32,7 +32,9 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
       if (!serviceOn) return;
 
       var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
+      final granted = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+      if (!granted) {
         if (ensurePermission != null) {
           final ok = await ensurePermission(context);
           if (!ok || !mounted) return;
@@ -41,8 +43,8 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
           permission = await Geolocator.requestPermission();
         }
       }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
         return;
       }
 

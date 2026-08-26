@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../l10n/l10n_ext.dart';
+import '../ride_active/location_permission_gate.dart';
 import 'watch_providers.dart';
 
 /// Starts (or reuses) a family watch session and opens the system share sheet.
@@ -20,6 +21,9 @@ Future<void> shareFamilyWatchLink(
   final l10n = context.l10n;
   final ctrl = ref.read(activeWatchControllerProvider.notifier);
   try {
+    final gated = await LocationPermissionGate.requestForRodadaLive(context);
+    if (!gated || !context.mounted) return;
+
     var session = ref.read(activeWatchControllerProvider);
     if (session == null || session.localRideId != localRideId) {
       await ctrl.resumeFor(localRideId: localRideId);

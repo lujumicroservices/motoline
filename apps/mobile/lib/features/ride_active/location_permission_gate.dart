@@ -61,6 +61,7 @@ class LocationPermissionGate {
     final accepted = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
+      useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.asphaltElevated,
         title: Row(
