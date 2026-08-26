@@ -32,10 +32,8 @@ class RodadaLiveSession {
 
   Future<void> start() async {
     if (_disposed) return;
-    final permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      await Geolocator.requestPermission();
-    }
+    // Do not call requestPermission here — Play requires an in-app disclosure
+    // first (see LocationPermissionGate.requestForRodadaLive).
     final ok = await Geolocator.checkPermission();
     if (ok == LocationPermission.denied ||
         ok == LocationPermission.deniedForever) {

@@ -1411,6 +1411,8 @@
   "locationDisclosureTitle": "Ubicación para grabar recorridos",
   "locationDisclosureBody": "RiderLab graba tu línea GPS durante un recorrido activo.\n\n• La ubicación se usa solo mientras grabas\n• Una notificación permanece visible al grabar\n• La grabación continúa con la pantalla bloqueada o el teléfono en el bolsillo\n• La ubicación se detiene cuando terminas el recorrido\n\nA continuación, el teléfono pedirá permiso de ubicación. Elige Permitir todo el tiempo para que funcione con la pantalla apagada.",
   "locationDisclosureContinue": "Continuar",
+  "locationRodadaLiveDisclosureTitle": "Ubicación para En vivo",
+  "locationRodadaLiveDisclosureBody": "RiderLab usa tu ubicación en el mapa En vivo para mostrar dónde estás.\n\n• Si activas compartir, tu posición se envía al grupo cada pocos minutos mientras la rodada está abierta\n• La ubicación solo se usa para esta función — no para anuncios\n• Puedes apagar el compartir cuando quieras\n\nA continuación, el teléfono pedirá permiso de ubicación.",
   "leanAtPlayhead": "En el marcador · desfase de 0° {degrees}°",
   "@leanAtPlayhead": {
     "placeholders": {

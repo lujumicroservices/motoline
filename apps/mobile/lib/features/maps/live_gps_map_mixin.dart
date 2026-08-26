@@ -24,6 +24,8 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
   Future<void> startLiveGps({
     MapController? map,
     bool centerOnce = true,
+    /// When set, called before the system permission dialog (Play disclosure).
+    Future<bool> Function(BuildContext context)? ensurePermission,
   }) async {
     try {
       final serviceOn = await Geolocator.isLocationServiceEnabled();
@@ -31,7 +33,13 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
 
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+        if (ensurePermission != null) {
+          final ok = await ensurePermission(context);
+          if (!ok || !mounted) return;
+          permission = await Geolocator.checkPermission();
+        } else {
+          permission = await Geolocator.requestPermission();
+        }
       }
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {

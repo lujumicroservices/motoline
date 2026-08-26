@@ -83,5 +83,5 @@ jobs:
           releaseFiles: apps/mobile/build/app/outputs/bundle/playRelease/app-play-release.aab
           track: ${{ inputs.track }}
           status: ${{ inputs.status }}
-          releaseName: RiderLab 1.37.7
+          releaseName: RiderLab 1.37.8
           whatsNewDirectory: apps/mobile/play/whatsnew

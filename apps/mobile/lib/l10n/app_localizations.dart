@@ -5654,6 +5654,18 @@ abstract class AppLocalizations {
   /// **'Continuar'**
   String get locationDisclosureContinue;
 
+  /// No description provided for @locationRodadaLiveDisclosureTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicación para En vivo'**
+  String get locationRodadaLiveDisclosureTitle;
+
+  /// No description provided for @locationRodadaLiveDisclosureBody.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab usa tu ubicación en el mapa En vivo para mostrar dónde estás.\n\n• Si activas compartir, tu posición se envía al grupo cada pocos minutos mientras la rodada está abierta\n• La ubicación solo se usa para esta función — no para anuncios\n• Puedes apagar el compartir cuando quieras\n\nA continuación, el teléfono pedirá permiso de ubicación.'**
+  String get locationRodadaLiveDisclosureBody;
+
   /// No description provided for @leanAtPlayhead.
   ///
   /// In es, this message translates to:

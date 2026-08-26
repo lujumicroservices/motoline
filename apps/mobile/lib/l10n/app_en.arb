@@ -1340,6 +1340,8 @@
   "locationDisclosureTitle": "Location for ride recording",
   "locationDisclosureBody": "RiderLab records your GPS line during an active ride.\n\n• Location is used only while you are recording\n• A persistent notification stays visible while recording\n• Recording continues with the screen locked or the phone in your pocket\n• Location stops when you end the ride\n\nNext, your phone will ask for location permission. Choose Allow all the time (or Always allow) so recording works with the screen off.",
   "locationDisclosureContinue": "Continue",
+  "locationRodadaLiveDisclosureTitle": "Location for rodada live",
+  "locationRodadaLiveDisclosureBody": "RiderLab uses your location on the En vivo map to show where you are.\n\n• If you turn on sharing, your position is sent to the group every few minutes while the rodada is open\n• Location is only used for this feature — not for ads\n• You can turn sharing off anytime\n\nNext, your phone will ask for location permission.",
   "leanAtPlayhead": "At marker · 0° offset {degrees}°",
   "@leanAtPlayhead": {
     "placeholders": {

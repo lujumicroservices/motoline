@@ -16,6 +16,7 @@ import '../../maps/live_gps_map_mixin.dart';
 import '../../watch/active_watch_panel.dart';
 import '../../watch/watch_providers.dart';
 import '../../watch/watch_repository.dart';
+import '../../ride_active/location_permission_gate.dart';
 import '../models/rodada_models.dart';
 import '../photos/ride_photo_capture.dart';
 import '../rodada_itinerary.dart';
@@ -83,6 +84,9 @@ class RodadaLiveTab extends ConsumerWidget {
                                         MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: () async {
+                                    final ok = await LocationPermissionGate
+                                        .requestForRodadaLive(context);
+                                    if (!ok || !context.mounted) return;
                                     await ref
                                         .read(rodadaRepositoryProvider)
                                         .updateMySharing(
@@ -335,9 +339,14 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
     super.initState();
     _shown = widget.positions;
     liveGpsListenable.addListener(_onGps);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _maybeCenterOnce();
-      startLiveGps(map: _map, centerOnce: false);
+      if (!mounted) return;
+      await startLiveGps(
+        map: _map,
+        centerOnce: false,
+        ensurePermission: LocationPermissionGate.requestForRodadaLive,
+      );
     });
   }
 

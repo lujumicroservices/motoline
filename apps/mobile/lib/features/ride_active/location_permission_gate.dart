@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/location_service.dart';
@@ -11,19 +12,51 @@ class LocationPermissionGate {
 
   static final _location = LocationService();
 
-  /// Shows disclosure (when needed) then requests location permissions.
+  /// Shows disclosure (when needed) then requests location permissions for rides.
   static Future<bool> requestForRecording(BuildContext context) async {
     if (await _location.hasRecordingPermission()) return true;
     if (!context.mounted) return false;
 
-    final accepted = await showLocationDisclosure(context);
+    final accepted = await _showDisclosure(
+      context,
+      title: context.l10n.locationDisclosureTitle,
+      body: context.l10n.locationDisclosureBody,
+    );
     if (!accepted || !context.mounted) return false;
 
     final result = await _location.ensurePermission();
     return result.granted;
   }
 
-  static Future<bool> showLocationDisclosure(BuildContext context) async {
+  /// While-in-use location for rodada En vivo (map + optional pack sharing).
+  static Future<bool> requestForRodadaLive(BuildContext context) async {
+    if (await hasWhileInUsePermission()) return true;
+    if (!context.mounted) return false;
+
+    final accepted = await _showDisclosure(
+      context,
+      title: context.l10n.locationRodadaLiveDisclosureTitle,
+      body: context.l10n.locationRodadaLiveDisclosureBody,
+    );
+    if (!accepted || !context.mounted) return false;
+
+    final permission = await Geolocator.requestPermission();
+    return permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always;
+  }
+
+  static Future<bool> hasWhileInUsePermission() async {
+    if (!await Geolocator.isLocationServiceEnabled()) return false;
+    final permission = await Geolocator.checkPermission();
+    return permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always;
+  }
+
+  static Future<bool> _showDisclosure(
+    BuildContext context, {
+    required String title,
+    required String body,
+  }) async {
     final l10n = context.l10n;
     final accepted = await showDialog<bool>(
       context: context,
@@ -36,7 +69,7 @@ class LocationPermissionGate {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                l10n.locationDisclosureTitle,
+                title,
                 style: GoogleFonts.exo2(fontWeight: FontWeight.w800),
               ),
             ),
@@ -44,7 +77,7 @@ class LocationPermissionGate {
         ),
         content: SingleChildScrollView(
           child: Text(
-            l10n.locationDisclosureBody,
+            body,
             style: GoogleFonts.rajdhani(
               fontSize: 15,
               height: 1.45,

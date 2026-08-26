@@ -10,6 +10,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../../reel/reel_compose_screen.dart';
+import '../../ride_active/location_permission_gate.dart';
 import '../../watch/family_circle_screen.dart';
 import '../leave_rodada.dart';
 import '../models/rodada_models.dart';
@@ -169,6 +170,11 @@ class RodadaOverviewTab extends ConsumerWidget {
                       subtitle: Text(l10n.shareLocationEvery5Min),
                       value: m.shareLive,
                       onChanged: (v) async {
+                        if (v) {
+                          final ok = await LocationPermissionGate
+                              .requestForRodadaLive(context);
+                          if (!ok || !context.mounted) return;
+                        }
                         await ref
                             .read(rodadaRepositoryProvider)
                             .updateMySharing(

@@ -3165,6 +3165,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get locationDisclosureContinue => 'Continuar';
 
   @override
+  String get locationRodadaLiveDisclosureTitle => 'Ubicación para En vivo';
+
+  @override
+  String get locationRodadaLiveDisclosureBody =>
+      'RiderLab usa tu ubicación en el mapa En vivo para mostrar dónde estás.\n\n• Si activas compartir, tu posición se envía al grupo cada pocos minutos mientras la rodada está abierta\n• La ubicación solo se usa para esta función — no para anuncios\n• Puedes apagar el compartir cuando quieras\n\nA continuación, el teléfono pedirá permiso de ubicación.';
+
+  @override
   String leanAtPlayhead(String degrees) {
     return 'En el marcador · desfase de 0° $degrees°';
   }
