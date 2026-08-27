@@ -155,6 +155,24 @@ Privacy: https://riderlab.rawthrottle.com.mx/legal/privacy.html
 - **Privacy policy:** `https://riderlab.rawthrottle.com.mx/legal/privacy.html`  
 - **Graphics:** upload files in `docs/store/play/`
 
+### Location permissions form (Play)
+
+Paste into **App content → Location permissions**. One feature only: **ride recording**.
+
+**App purpose** (280 / 500):
+
+```
+RiderLab is a motorcycle GPS app for adults. Riders start a ride, put the phone away, and later review the GPS line, lean, and braking. Recording, garage, friends, and group rides require an account. The app has no ads. Location is used to draw the ride line, not for advertising.
+```
+
+**Location access** (391 / 500):
+
+```
+Ride recording. After the rider starts a ride, RiderLab continues precise GPS in the background so the line is captured with the screen off or the phone in a pocket. A persistent notification stays visible for the whole recording. Location collection stops when the rider ends the ride. The in-app disclosure before the system prompt explains this and asks them to choose Allow all the time.
+```
+
+**Video:** unlisted YouTube, ≤30s. Must show the in-app disclosure **before** the Android permission. Flow: sign in → start a ride → dialog “Location for ride recording” → Continue → Allow all the time → persistent recording notification → lock screen / pocket → end ride (notification gone).
+
 ### Content rating / audience
 
 - IARC questionnaire: **18+** (motor vehicles). Not designed for children.  
