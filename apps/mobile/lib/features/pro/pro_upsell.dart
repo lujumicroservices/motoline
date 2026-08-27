@@ -99,13 +99,14 @@ class ProUpsellBanner extends ConsumerWidget {
             SizedBox(height: compact ? 10 : 14),
             FilledButton(
               onPressed: () async {
-                final ok =
-                    await ref.read(proEntitlementProvider.notifier).purchasePro();
+                final ok = await ref
+                    .read(proEntitlementProvider.notifier)
+                    .purchasePro();
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      ok ? l10n.proUnlocked : l10n.upgradeToPro,
+                      ok ? l10n.proUnlocked : l10n.proStoreNotReady,
                     ),
                   ),
                 );

@@ -1,6 +1,6 @@
 # RiderLab — Free vs Pro
 
-Product contract. Recording and social stay free. Ride Lab depth is Pro. Every rider gets a 1-month full-Pro trial. Partners get 3 months via a single-use invitation code.
+Product contract. Recording and social stay free. Ride Lab depth is Pro. Every rider gets a 1-month full-Pro trial **when they first sign in**. Partners get 3 months via a single-use invitation code.
 
 Resumen en español (Gratis, Pro, prueba, socio): **[FREE_VS_PRO.es.md](FREE_VS_PRO.es.md)**.
 
@@ -61,9 +61,7 @@ No payment method. Full Pro for 30 days, then drop to Free. Store intro-offers (
 
 **Clock**
 
-- Starts on **first completed ride** (not install, not sign-in).
-- If they never ride, they never burn the trial.
-- Hard cap: trial must start within **90 days of account creation** so abandoned accounts do not sit on an infinite pending trial.
+- Starts on **first sign-in** (server `my_pro_status` / `start_pro_trial`). Not install-only, not first ride.
 - One trial per account. Restore / new phone does not reset it (server-backed).
 - During trial: quiet badge “Pro trial · N days left”. Hard paywall only after expiry, at the same Ride Lab taps that already gate today.
 - After expiry: same screens, same teasers. Copy: keep segment zoom and full corners. Rides are never deleted.
@@ -108,7 +106,7 @@ Logical periods (any active ⇒ Pro):
 
 | source | duration | starts |
 |---|---|---|
-| `trial` | 30 days | first completed ride |
+| `trial` | 30 days | first sign-in |
 | `partner` | 90 days | redeem |
 | `revenuecat` | store period | purchase / restore |
 
@@ -123,6 +121,6 @@ RevenueCat **promotional entitlements** can mirror partner/trial grants so Play 
 Implemented in-app + Supabase (apply migration `20260824010000_pro_entitlements.sql`):
 
 1. Tables `promo_codes` + `entitlement_periods`; RPCs `my_pro_status`, `start_pro_trial`, `redeem_partner_code`, `staff_create_partner_code`
-2. Trial clock on first completed ride (local garage); 90-day signup cap on the server
+2. Trial clock on first **sign-in**; one trial row per account
 3. Settings redeem UI + remaining-days copy; staff can mint single-use codes
 4. RevenueCat packages (yearly first) when `REVENUECAT_API_KEY` is set — Play IAP still optional

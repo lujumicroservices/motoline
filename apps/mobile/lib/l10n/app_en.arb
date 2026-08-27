@@ -348,7 +348,8 @@
       "code": { "type": "String" }
     }
   },
-  "startTrialHelp": "Full Pro starts when you finish your first ride.",
+  "startTrialHelp": "Every signed-in account gets 30 days of Pro. After that, Ride Lab depth is paid. Partner codes add 90 days.",
+  "proStoreNotReady": "Paid upgrade is not in the store yet. Sign in for a 30-day Pro trial, or redeem a partner code.",
   "brakesProTeaser": "Showing {shown} of {total}. Unlock Pro for the full brake list.",
   "@brakesProTeaser": {
     "placeholders": {

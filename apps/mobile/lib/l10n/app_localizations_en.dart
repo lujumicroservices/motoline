@@ -1003,7 +1003,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startTrialHelp =>
-      'Full Pro starts when you finish your first ride.';
+      'Every signed-in account gets 30 days of Pro. After that, Ride Lab depth is paid. Partner codes add 90 days.';
+
+  @override
+  String get proStoreNotReady =>
+      'Paid upgrade is not in the store yet. Sign in for a 30-day Pro trial, or redeem a partner code.';
 
   @override
   String brakesProTeaser(int shown, int total) {

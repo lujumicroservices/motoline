@@ -105,8 +105,17 @@ class _ProUpsellSheet extends ConsumerWidget {
               else ...[
                 FilledButton(
                   onPressed: () async {
-                    await ref.read(proEntitlementProvider.notifier).purchasePro();
-                    if (context.mounted) Navigator.of(context).pop();
+                    final ok = await ref
+                        .read(proEntitlementProvider.notifier)
+                        .purchasePro();
+                    if (!context.mounted) return;
+                    if (ok) {
+                      Navigator.of(context).pop();
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.proStoreNotReady)),
+                    );
                   },
                   child: Text(l10n.upgradeToPro),
                 ),

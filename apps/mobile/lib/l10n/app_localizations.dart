@@ -1883,8 +1883,14 @@ abstract class AppLocalizations {
   /// No description provided for @startTrialHelp.
   ///
   /// In es, this message translates to:
-  /// **'El Pro completo empieza cuando terminas tu primer ride.'**
+  /// **'Toda cuenta con sesión inicia 30 días de Pro. Después, el detalle de Ride Lab es de pago. Un código de socio suma 90 días.'**
   String get startTrialHelp;
+
+  /// No description provided for @proStoreNotReady.
+  ///
+  /// In es, this message translates to:
+  /// **'La compra aún no está en la tienda. Entra con tu cuenta para 30 días de Pro, o canjea un código de socio.'**
+  String get proStoreNotReady;
 
   /// No description provided for @brakesProTeaser.
   ///

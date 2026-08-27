@@ -51,9 +51,7 @@ Después de que expire Pro: **no se borran rides**. El análisis vuelve a profun
 ## Prueba — 30 días de Pro completo
 
 - **Sin tarjeta.** 30 días de Pro, luego Gratis.
-- El reloj **empieza al terminar el primer ride**, no al instalar ni al crear cuenta.
-- Si nunca rueda, **no gasta** la prueba.
-- Tope: la prueba debe arrancar en los **90 días** desde que se creó la cuenta.
+- El reloj **empieza al iniciar sesión** (no hay que terminar un ride).
 - **Una prueba por cuenta.** Restaurar o cambiar de teléfono no la reinicia.
 - Durante la prueba: badge “Prueba Pro · N días”. El candado duro solo **después** de que expire, en los mismos toques del Ride Lab.
 - No usamos prueba de 7 días de la tienda: hace falta un par de fines de semana para sentir zoom y curvas.

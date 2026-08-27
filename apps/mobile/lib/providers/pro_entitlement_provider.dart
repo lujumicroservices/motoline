@@ -8,9 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/db/ride_database.dart';
 import '../core/distribution.dart';
-import '../core/models/ride.dart';
 import '../core/pro/pro_entitlement.dart';
 import '../core/pro/pro_entitlement_repository.dart';
 import '../core/supabase/supabase_bootstrap.dart';
@@ -204,8 +202,11 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
     }
   }
 
-  /// Present store packages (yearly first), or no-op when billing is off.
+  /// Present store packages (yearly first). If billing is off, start the
+  /// no-card 30-day trial instead of a dead checkout.
   Future<bool> purchasePro() async {
+    await startTrialIfEligible();
+    if (state.isPro) return true;
     if (_rcReady) {
       try {
         final offerings = await Purchases.getOfferings();
@@ -225,7 +226,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
         return state.isPro;
       } catch (e) {
         debugPrint('RevenueCat purchase failed: $e');
-        return false;
+        return state.isPro;
       }
     }
     return state.isPro;
@@ -249,25 +250,12 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   Future<void> toggle() => setPro(!state.isPro);
 
-  Future<bool> _hasCompletedRide() async {
-    try {
-      final rides = await RideDatabase.instance.listRides();
-      return rides.any(
-        (r) => r.status == RideStatus.completed && r.endedAt != null,
-      );
-    } catch (e) {
-      debugPrint('Pro trial ride check: $e');
-      return false;
-    }
-  }
-
-  /// First completed ride starts a 30-day trial (server enforces one + 90-day cap).
+  /// First sign-in starts a 30-day trial (server enforces one per account).
   Future<void> startTrialIfEligible() async {
-    if (state.trialUsed) return;
+    if (state.trialUsed && state.isPro) return;
     if (SupabaseBootstrap.permanentUser == null) return;
-    if (!await _hasCompletedRide()) return;
     final result = await _repo.startTrial();
-    if (result.ok || result.status.trialUsed) {
+    if (result.ok || result.status.trialUsed || result.status.isPro) {
       state = _merge(result.status);
       await _persist();
     }

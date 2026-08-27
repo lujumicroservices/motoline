@@ -419,7 +419,8 @@
       "code": { "type": "String" }
     }
   },
-  "startTrialHelp": "El Pro completo empieza cuando terminas tu primer ride.",
+  "startTrialHelp": "Toda cuenta con sesión inicia 30 días de Pro. Después, el detalle de Ride Lab es de pago. Un código de socio suma 90 días.",
+  "proStoreNotReady": "La compra aún no está en la tienda. Entra con tu cuenta para 30 días de Pro, o canjea un código de socio.",
   "brakesProTeaser": "Mostrando {shown} de {total}. Desbloquea Pro para el historial completo de frenadas.",
   "@brakesProTeaser": {
     "placeholders": {
