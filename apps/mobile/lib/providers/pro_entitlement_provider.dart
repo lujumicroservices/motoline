@@ -217,8 +217,10 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
           debugPrint('RevenueCat: no packages in current offering');
           return state.isPro;
         }
-        final info = await Purchases.purchasePackage(package);
-        _applyRevenueCat(info);
+        final purchase = await Purchases.purchase(
+          PurchaseParams.package(package),
+        );
+        _applyRevenueCat(purchase.customerInfo);
         await refresh(fromStoreOnly: true);
         return state.isPro;
       } catch (e) {
