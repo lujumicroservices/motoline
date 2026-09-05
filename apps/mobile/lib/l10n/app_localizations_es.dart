@@ -28,6 +28,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get endRide => 'Terminar recorrido';
 
   @override
+  String get stopRecording => 'Detener grabación';
+
+  @override
+  String get recordingRec => 'REC';
+
+  @override
   String get recording => 'Grabando';
 
   @override
@@ -787,7 +793,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get curvaZoomLab => 'Zoom Lab';
 
   @override
-  String get armAutoRide => 'Empezar al rodar';
+  String get armAutoRide => 'Empezar a Rodar';
 
   @override
   String get disarmAutoRide => 'Cancelar arranque auto';
@@ -812,7 +818,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get armedSessionWatchRecording => 'Ver grabación';
 
   @override
-  String get armedSessionEndArm => 'Terminar armado';
+  String get armedSessionEndArm => 'Terminar ruta';
 
   @override
   String get armedSessionStretchesEmpty =>
@@ -2042,6 +2048,34 @@ class AppLocalizationsEs extends AppLocalizations {
   String get markAsLive => 'Marcar EN VIVO';
 
   @override
+  String get startRodada => 'Iniciar rodada';
+
+  @override
+  String get startRodadaConfirmTitle => '¿Iniciar la rodada?';
+
+  @override
+  String get startRodadaConfirmBody =>
+      'Se avisará a todos los miembros. Si activaste armar ruta o compartir ubicación, eso arranca ahora.';
+
+  @override
+  String get rodadaStartedSnack => 'Rodada iniciada. Se avisó a los miembros.';
+
+  @override
+  String get autoArmOnRodadaStart => 'Armar ruta al iniciar la rodada';
+
+  @override
+  String get autoArmOnRodadaStartHelp =>
+      'Cuando un administrador inicie la rodada, RiderLab espera movimiento y empieza a grabar.';
+
+  @override
+  String get autoShareFamilyOnRodada =>
+      'Compartir ubicación con mi círculo familiar';
+
+  @override
+  String get autoShareFamilyOnRodadaHelp =>
+      'Activa el watch familiar automáticamente mientras esta rodada esté en vivo.';
+
+  @override
   String get markAsOpen => 'Marcar abierta';
 
   @override
@@ -2147,17 +2181,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sharingDefaultsHelp =>
-      'Apagado hasta que lo actives. Luego se envía tu ubicación cada 5 minutos durante toda la rodada (reintenta cada 1 minuto si falla).';
+      'Apagado hasta que lo actives. Al iniciar la rodada, RiderLab usa lo que hayas marcado abajo.';
 
   @override
   String get notRodadaMember => 'No eres miembro.';
 
   @override
-  String get shareLocationOnRoute => 'Compartir ubicación en ruta';
+  String get shareLocationOnRoute => 'Compartir ubicación con la rodada';
 
   @override
   String get shareLocationEvery5Min =>
-      'Cada 5 min mientras la rodada está abierta/en vivo';
+      'Cada 5 min mientras la rodada está en vivo';
 
   @override
   String get shareTrackAfterRides => 'Compartir mi línea después de recorrer';

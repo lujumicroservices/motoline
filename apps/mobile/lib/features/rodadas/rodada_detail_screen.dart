@@ -59,11 +59,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          rodadaInviteShareSnackBar(
-            context,
-            ref,
-            rodadaId: widget.rodadaId,
-          ),
+          rodadaInviteShareSnackBar(context, ref, rodadaId: widget.rodadaId),
         );
       });
     }
@@ -127,7 +123,9 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
                   IconButton(
                     tooltip: l10n.copyInviteCode,
                     onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: r.inviteCode));
+                      await Clipboard.setData(
+                        ClipboardData(text: r.inviteCode),
+                      );
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -149,7 +147,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
                 return PopupMenuButton<String>(
                   onSelected: _hostAction,
                   itemBuilder: (_) => [
-                    PopupMenuItem(value: 'live', child: Text(l10n.markAsLive)),
+                    PopupMenuItem(value: 'live', child: Text(l10n.startRodada)),
                     PopupMenuItem(value: 'open', child: Text(l10n.markAsOpen)),
                     PopupMenuItem(value: 'ended', child: Text(l10n.endRodada)),
                     PopupMenuItem(
@@ -187,10 +185,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
                     value: 'share',
                     child: Text(l10n.rodadaInviteShare),
                   ),
-                  PopupMenuItem(
-                    value: 'leave',
-                    child: Text(l10n.leaveRodada),
-                  ),
+                  PopupMenuItem(value: 'leave', child: Text(l10n.leaveRodada)),
                 ],
               );
             },
@@ -242,25 +237,29 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
         return;
       }
       if (action == 'share') {
-        await shareRodadaInviteSummary(
-          context,
-          ref,
-          rodadaId: widget.rodadaId,
-        );
+        await shareRodadaInviteSummary(context, ref, rodadaId: widget.rodadaId);
         return;
       }
-      await repo.updateRodada(widget.rodadaId, status: action);
+      if (action == 'live') {
+        await repo.startRodada(widget.rodadaId);
+      } else {
+        await repo.updateRodada(widget.rodadaId, status: action);
+      }
       ref.invalidate(rodadaOverviewProvider(widget.rodadaId));
       ref.invalidate(myRodadasProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.rodadaStatusChanged(action))),
+        SnackBar(
+          content: Text(
+            action == 'live'
+                ? l10n.rodadaStartedSnack
+                : l10n.rodadaStatusChanged(action),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
     }
   }
 
@@ -401,10 +400,7 @@ class _StatusBanner extends ConsumerWidget {
               if (when != null) when,
               l10n.rodadaCodeBanner(r.inviteCode),
             ].join(' · '),
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 13,
-            ),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
         );
       },

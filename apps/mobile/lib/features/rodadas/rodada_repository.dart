@@ -19,6 +19,10 @@ const rodadaSelectColumns =
     'finish_lat, finish_lng, starts_at, status, invite_code, created_at, updated_at, '
     'route_geometry, route_distance_m, route_duration_s, route_prefs, route_provider';
 
+const rodadaMemberSelectColumns =
+    'rodada_id, user_id, role, rsvp, share_live, share_track, '
+    'auto_arm_on_start, auto_share_family, presence, joined_at';
+
 class RodadaInviteResult {
   const RodadaInviteResult({
     this.alreadyMember = false,
@@ -147,13 +151,10 @@ class RodadaRepository {
 
     final list = (rows as List).cast<Map<String, dynamic>>().map((m) {
       final id = m['id'] as String?;
-      return RodadaSummary.fromMap(
-        m,
-        myRsvp: id == null ? null : rsvpById[id],
-      );
+      return RodadaSummary.fromMap(m, myRsvp: id == null ? null : rsvpById[id]);
     }).toList();
 
-      // Prefer live / upcoming first.
+    // Prefer live / upcoming first.
     list.sort((a, b) {
       int rank(RodadaSummary r) {
         switch (r.status) {
@@ -169,8 +170,10 @@ class RodadaRepository {
 
       final c = rank(a).compareTo(rank(b));
       if (c != 0) return c;
-      final as = a.startsAt ?? a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bs = b.startsAt ?? b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final as =
+          a.startsAt ?? a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bs =
+          b.startsAt ?? b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
       return bs.compareTo(as);
     });
     return list;
@@ -311,6 +314,23 @@ class RodadaRepository {
     await _supabase.from('rodadas').update(patch).eq('id', id);
   }
 
+  /// Host/cohost: mark live and ping every member.
+  Future<void> startRodada(String id) async {
+    final current = await getRodada(id);
+    if (current == null || current.isLive) return;
+    await updateRodada(id, status: 'live');
+    try {
+      final res = await _supabase.functions.invoke(
+        'notify-rodada-started',
+        body: {'rodada_id': id},
+      );
+      PushDiagnostics.recordFunctionData('notify-rodada-started', res.data);
+    } catch (e) {
+      debugPrint('notify-rodada-started: $e');
+      PushDiagnostics.recordError('notify-rodada-started', e);
+    }
+  }
+
   /// Recompute and store the road-follow line from current pins.
   Future<void> refreshStoredRoute(
     String rodadaId, {
@@ -329,7 +349,11 @@ class RodadaRepository {
           : null,
     );
     if (pins.length < 2) {
-      await updateRodada(rodadaId, clearRoute: true, routePrefs: rodada.routePrefs);
+      await updateRodada(
+        rodadaId,
+        clearRoute: true,
+        routePrefs: rodada.routePrefs,
+      );
       return;
     }
     final result = await directions.route(
@@ -337,14 +361,14 @@ class RodadaRepository {
       prefs: rodada.routePrefs,
     );
     if (result == null) {
-      await updateRodada(rodadaId, clearRoute: true, routePrefs: rodada.routePrefs);
+      await updateRodada(
+        rodadaId,
+        clearRoute: true,
+        routePrefs: rodada.routePrefs,
+      );
       return;
     }
-    await updateRodada(
-      rodadaId,
-      route: result,
-      routePrefs: rodada.routePrefs,
-    );
+    await updateRodada(rodadaId, route: result, routePrefs: rodada.routePrefs);
   }
 
   Future<String> joinByCode(String code) async {
@@ -383,10 +407,7 @@ class RodadaRepository {
     try {
       final res = await _supabase.functions.invoke(
         'notify-rodada-invite',
-        body: {
-          'rodada_id': rodadaId,
-          'user_id': userId,
-        },
+        body: {'rodada_id': rodadaId, 'user_id': userId},
       );
       PushDiagnostics.recordFunctionData('notify-rodada-invite', res.data);
       return RodadaInviteResult.fromFunctionData(res.data);
@@ -401,10 +422,7 @@ class RodadaRepository {
     await _ensure();
     final rows = await _supabase
         .from('rodada_members')
-        .select(
-          'rodada_id, user_id, role, rsvp, share_live, share_track, '
-          'presence, joined_at',
-        )
+        .select(rodadaMemberSelectColumns)
         .eq('rodada_id', rodadaId)
         .order('joined_at');
     final list = (rows as List).cast<Map<String, dynamic>>();
@@ -425,10 +443,7 @@ class RodadaRepository {
     if (me == null) return null;
     final row = await _supabase
         .from('rodada_members')
-        .select(
-          'rodada_id, user_id, role, rsvp, share_live, share_track, '
-          'presence, joined_at',
-        )
+        .select(rodadaMemberSelectColumns)
         .eq('rodada_id', rodadaId)
         .eq('user_id', me)
         .maybeSingle();
@@ -440,6 +455,8 @@ class RodadaRepository {
     required String rodadaId,
     bool? shareLive,
     bool? shareTrack,
+    bool? autoArmOnStart,
+    bool? autoShareFamily,
     String? rsvp,
     String? presence,
   }) async {
@@ -451,6 +468,10 @@ class RodadaRepository {
     };
     if (shareLive != null) patch['share_live'] = shareLive;
     if (shareTrack != null) patch['share_track'] = shareTrack;
+    if (autoArmOnStart != null) patch['auto_arm_on_start'] = autoArmOnStart;
+    if (autoShareFamily != null) {
+      patch['auto_share_family'] = autoShareFamily;
+    }
     if (rsvp != null) patch['rsvp'] = rsvp;
     if (presence != null) patch['presence'] = presence;
     await _supabase
@@ -730,11 +751,12 @@ class RodadaRepository {
     final ext = contentType.contains('png')
         ? 'png'
         : contentType.contains('webp')
-            ? 'webp'
-            : 'jpg';
-    final path =
-        '$rodadaId/$me/${DateTime.now().millisecondsSinceEpoch}.$ext';
-    await _supabase.storage.from('rodada-photos').uploadBinary(
+        ? 'webp'
+        : 'jpg';
+    final path = '$rodadaId/$me/${DateTime.now().millisecondsSinceEpoch}.$ext';
+    await _supabase.storage
+        .from('rodada-photos')
+        .uploadBinary(
           path,
           bytes,
           fileOptions: FileOptions(contentType: contentType, upsert: false),
@@ -776,12 +798,16 @@ class RodadaRepository {
     final me = currentUserId;
     if (me == null) throw StateError('Not signed in');
     await _assertNotBanned(me);
-    final path =
-        '$rodadaId/$me/${DateTime.now().millisecondsSinceEpoch}.mp4';
-    await _supabase.storage.from('rodada-reels').upload(
+    final path = '$rodadaId/$me/${DateTime.now().millisecondsSinceEpoch}.mp4';
+    await _supabase.storage
+        .from('rodada-reels')
+        .upload(
           path,
           File(localPath),
-          fileOptions: const FileOptions(contentType: 'video/mp4', upsert: false),
+          fileOptions: const FileOptions(
+            contentType: 'video/mp4',
+            upsert: false,
+          ),
         );
     await _supabase.from('rodada_reels').insert({
       'rodada_id': rodadaId,
@@ -841,10 +867,7 @@ class RodadaRepository {
     try {
       final res = await _supabase.functions.invoke(
         'notify-rodada-radio',
-        body: {
-          'rodada_id': rodadaId,
-          'message_id': msg.id,
-        },
+        body: {'rodada_id': rodadaId, 'message_id': msg.id},
       );
       PushDiagnostics.recordFunctionData('notify-rodada-radio', res.data);
     } catch (e) {

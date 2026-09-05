@@ -10,7 +10,10 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../../reel/reel_compose_screen.dart';
+import '../../ride_active/armed_session_flow.dart';
+import '../../ride_active/armed_session_nav.dart';
 import '../../ride_active/location_permission_gate.dart';
+import '../../ride_active/widgets/upright_freeze_sheet.dart';
 import '../../watch/family_circle_screen.dart';
 import '../leave_rodada.dart';
 import '../models/rodada_models.dart';
@@ -56,194 +59,343 @@ class RodadaOverviewTab extends ConsumerWidget {
             await ref.read(rodadaOverviewProvider(rodadaId).future);
           },
           child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-          children: [
-            if (rodada.notes != null && rodada.notes!.trim().isNotEmpty) ...[
-              Text(
-                rodada.notes!,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.mist,
-                  fontSize: 15,
-                  height: 1.35,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: [
+              if (rodada.notes != null && rodada.notes!.trim().isNotEmpty) ...[
+                Text(
+                  rodada.notes!,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.mist,
+                    fontSize: 15,
+                    height: 1.35,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () => shareRodadaInviteSummary(
-                context,
-                ref,
-                rodadaId: rodadaId,
-                rodada: rodada,
-              ),
-              icon: const Icon(Icons.ios_share),
-              label: Text(l10n.rodadaInviteShare),
-            ),
-            const SizedBox(height: 16),
-            _ItineraryMap(
-              rodada: rodada,
-              stops: stops.maybeWhen(
-                data: (s) => s,
-                orElse: () => const <RodadaStop>[],
-              ),
-            ),
-            Text(
-              l10n.yourSharing,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.sharingDefaultsHelp,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              color: AppTheme.asphaltElevated,
-              child: ListTile(
-                leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
-                title: Text(l10n.familyRodadaTipTitle),
-                subtitle: Text(l10n.familyRodadaTipBody),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const FamilyCircleScreen(),
+                const SizedBox(height: 16),
+              ],
+              mine.maybeWhen(
+                data: (m) {
+                  if (m == null || !m.isHost || rodada.isEnded) {
+                    return const SizedBox.shrink();
+                  }
+                  if (rodada.isLive) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.signal,
+                          minimumSize: const Size.fromHeight(52),
+                        ),
+                        onPressed: () => _endRodada(context, ref),
+                        icon: const Icon(Icons.stop),
+                        label: Text(l10n.endRodada),
+                      ),
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52),
+                      ),
+                      onPressed: () => _startRodada(context, ref, member: m),
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(l10n.startRodada),
                     ),
                   );
                 },
+                orElse: () => const SizedBox.shrink(),
               ),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              color: AppTheme.asphaltElevated,
-              child: ListTile(
-                leading: const Icon(
-                  Icons.movie_creation_outlined,
-                  color: AppTheme.signal,
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => shareRodadaInviteSummary(
+                  context,
+                  ref,
+                  rodadaId: rodadaId,
+                  rodada: rodada,
                 ),
-                title: Text(l10n.reelGenerate),
-                subtitle: Text(l10n.reelOverviewCta),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _openReel(context, ref),
+                icon: const Icon(Icons.ios_share),
+                label: Text(l10n.rodadaInviteShare),
               ),
-            ),
-            mine.when(
-              loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text('$e'),
-              data: (m) {
-                if (m == null) {
-                  return Text(l10n.notRodadaMember);
-                }
-                return Column(
-                  children: [
-                    if (m.rsvp == 'pending') ...[
-                      const SizedBox(height: 8),
-                      _PendingInviteBanner(
-                        rodadaId: rodadaId,
-                        rodada: rodada,
+              const SizedBox(height: 16),
+              _ItineraryMap(
+                rodada: rodada,
+                stops: stops.maybeWhen(
+                  data: (s) => s,
+                  orElse: () => const <RodadaStop>[],
+                ),
+              ),
+              Text(
+                l10n.yourSharing,
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.sharingDefaultsHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                color: AppTheme.asphaltElevated,
+                child: ListTile(
+                  leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
+                  title: Text(l10n.familyRodadaTipTitle),
+                  subtitle: Text(l10n.familyRodadaTipBody),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const FamilyCircleScreen(),
                       ),
-                    ],
-                    const SizedBox(height: 8),
-                    _RsvpRow(rodadaId: rodadaId, current: m.rsvp),
-                    if (!m.isHost)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: () async {
-                            final left = await confirmAndLeaveRodada(
-                              context,
-                              ref,
-                              rodadaId: rodadaId,
-                            );
-                            if (left && context.mounted) {
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          child: Text(l10n.leaveRodada),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              Card(
+                color: AppTheme.asphaltElevated,
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.movie_creation_outlined,
+                    color: AppTheme.signal,
+                  ),
+                  title: Text(l10n.reelGenerate),
+                  subtitle: Text(l10n.reelOverviewCta),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _openReel(context, ref),
+                ),
+              ),
+              mine.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (e, _) => Text('$e'),
+                data: (m) {
+                  if (m == null) {
+                    return Text(l10n.notRodadaMember);
+                  }
+                  return Column(
+                    children: [
+                      if (m.rsvp == 'pending') ...[
+                        const SizedBox(height: 8),
+                        _PendingInviteBanner(
+                          rodadaId: rodadaId,
+                          rodada: rodada,
                         ),
-                      ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.shareLocationOnRoute),
-                      subtitle: Text(l10n.shareLocationEvery5Min),
-                      value: m.shareLive,
-                      onChanged: (v) async {
-                        if (v) {
-                          final ok = await LocationPermissionGate
-                              .requestForRodadaLive(context);
-                          if (!ok || !context.mounted) return;
-                        }
-                        await ref
-                            .read(rodadaRepositoryProvider)
-                            .updateMySharing(
-                              rodadaId: rodadaId,
-                              shareLive: v,
-                            );
-                        ref.invalidate(myRodadaMembershipProvider(rodadaId));
-                        ref.invalidate(myRodadasProvider);
-                      },
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.shareTrackAfterRides),
-                      value: m.shareTrack,
-                      onChanged: (v) async {
-                        await ref
-                            .read(rodadaRepositoryProvider)
-                            .updateMySharing(
-                              rodadaId: rodadaId,
-                              shareTrack: v,
-                            );
-                        ref.invalidate(myRodadaMembershipProvider(rodadaId));
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.rodadaRiders,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            members.when(
-              loading: () => const CircularProgressIndicator(),
-              error: (e, _) => Text('$e'),
-              data: (list) {
-                if (list.isEmpty) {
-                  return Text(l10n.noMembersYet);
-                }
-                return Column(
-                  children: [
-                    for (final m in list)
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: CircleAvatar(
-                          backgroundColor: AppTheme.asphalt,
-                          child: Text(
-                            m.label.isNotEmpty ? m.label[0].toUpperCase() : '?',
-                            style: const TextStyle(color: AppTheme.line),
+                      ],
+                      const SizedBox(height: 8),
+                      _RsvpRow(rodadaId: rodadaId, current: m.rsvp),
+                      if (!m.isHost)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: () async {
+                              final left = await confirmAndLeaveRodada(
+                                context,
+                                ref,
+                                rodadaId: rodadaId,
+                              );
+                              if (left && context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: Text(l10n.leaveRodada),
                           ),
                         ),
-                        title: Text(m.label),
-                        subtitle: Text(
-                          '${m.role} · ${_rsvpLabel(l10n, m.rsvp)}'
-                          '${m.shareLive ? ' · ${l10n.memberLiveOn}' : ''}'
-                          '${m.shareTrack ? ' · ${l10n.memberTrackOn}' : ''}',
-                        ),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.autoArmOnRodadaStart),
+                        subtitle: Text(l10n.autoArmOnRodadaStartHelp),
+                        value: m.autoArmOnStart,
+                        onChanged: (v) async {
+                          if (v) {
+                            final ok =
+                                await LocationPermissionGate.requestForRecording(
+                                  context,
+                                );
+                            if (!ok || !context.mounted) return;
+                          }
+                          await ref
+                              .read(rodadaRepositoryProvider)
+                              .updateMySharing(
+                                rodadaId: rodadaId,
+                                autoArmOnStart: v,
+                              );
+                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
+                          ref.invalidate(myRodadasProvider);
+                        },
                       ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.shareLocationOnRoute),
+                        subtitle: Text(l10n.shareLocationEvery5Min),
+                        value: m.shareLive,
+                        onChanged: (v) async {
+                          if (v) {
+                            final ok =
+                                await LocationPermissionGate.requestForRodadaLive(
+                                  context,
+                                );
+                            if (!ok || !context.mounted) return;
+                          }
+                          await ref
+                              .read(rodadaRepositoryProvider)
+                              .updateMySharing(
+                                rodadaId: rodadaId,
+                                shareLive: v,
+                              );
+                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
+                          ref.invalidate(myRodadasProvider);
+                        },
+                      ),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.autoShareFamilyOnRodada),
+                        subtitle: Text(l10n.autoShareFamilyOnRodadaHelp),
+                        value: m.autoShareFamily,
+                        onChanged: (v) async {
+                          if (v) {
+                            final ok =
+                                await LocationPermissionGate.requestForRodadaLive(
+                                  context,
+                                );
+                            if (!ok || !context.mounted) return;
+                          }
+                          await ref
+                              .read(rodadaRepositoryProvider)
+                              .updateMySharing(
+                                rodadaId: rodadaId,
+                                autoShareFamily: v,
+                              );
+                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
+                          ref.invalidate(myRodadasProvider);
+                        },
+                      ),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.shareTrackAfterRides),
+                        value: m.shareTrack,
+                        onChanged: (v) async {
+                          await ref
+                              .read(rodadaRepositoryProvider)
+                              .updateMySharing(
+                                rodadaId: rodadaId,
+                                shareTrack: v,
+                              );
+                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.rodadaRiders,
+                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              members.when(
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text('$e'),
+                data: (list) {
+                  if (list.isEmpty) {
+                    return Text(l10n.noMembersYet);
+                  }
+                  return Column(
+                    children: [
+                      for (final m in list)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: CircleAvatar(
+                            backgroundColor: AppTheme.asphalt,
+                            child: Text(
+                              m.label.isNotEmpty
+                                  ? m.label[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(color: AppTheme.line),
+                            ),
+                          ),
+                          title: Text(m.label),
+                          subtitle: Text(
+                            '${m.role} · ${_rsvpLabel(l10n, m.rsvp)}'
+                            '${m.shareLive ? ' · ${l10n.memberLiveOn}' : ''}'
+                            '${m.shareTrack ? ' · ${l10n.memberTrackOn}' : ''}',
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  Future<void> _startRodada(
+    BuildContext context,
+    WidgetRef ref, {
+    required RodadaMember member,
+  }) async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.asphaltElevated,
+        title: Text(l10n.startRodadaConfirmTitle),
+        content: Text(l10n.startRodadaConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.startRodada),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await ref.read(rodadaRepositoryProvider).startRodada(rodadaId);
+      ref.invalidate(rodadaOverviewProvider(rodadaId));
+      ref.invalidate(myRodadasProvider);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.rodadaStartedSnack)));
+      if (member.autoArmOnStart) {
+        final armed = await freezeThenArm(context, ref);
+        if (!armed || !context.mounted) return;
+        ref.read(armedSessionNavProvider.notifier).reset();
+        ensureArmedSessionHub(context, ref);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    }
+  }
+
+  Future<void> _endRodada(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    try {
+      await ref
+          .read(rodadaRepositoryProvider)
+          .updateRodada(rodadaId, status: 'ended');
+      ref.invalidate(rodadaOverviewProvider(rodadaId));
+      ref.invalidate(myRodadasProvider);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rodadaStatusChanged('ended'))),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    }
   }
 
   Future<void> _openReel(BuildContext context, WidgetRef ref) async {
@@ -253,18 +405,21 @@ class RodadaOverviewTab extends ConsumerWidget {
       final me = repo.currentUserId;
       final rides = await ref.read(rodadaRidesProvider(rodadaId).future);
       final mine = rides.where((r) => me == null || r.userId == me).toList();
-      String? rideId =
-          mine.isNotEmpty && mine.first.localId.isNotEmpty ? mine.first.localId : null;
+      String? rideId = mine.isNotEmpty && mine.first.localId.isNotEmpty
+          ? mine.first.localId
+          : null;
       if (rideId == null) {
         final local = await ref.read(ridesListProvider.future);
-        final completed = local.where((r) => r.status.name == 'completed').toList();
+        final completed = local
+            .where((r) => r.status.name == 'completed')
+            .toList();
         rideId = completed.isEmpty ? null : completed.first.id;
       }
       if (rideId == null) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.noCompletedRidesToLink)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.noCompletedRidesToLink)));
         return;
       }
       if (!context.mounted) return;
@@ -353,8 +508,7 @@ class _ItineraryMap extends StatelessWidget {
               ),
               children: [
                 TileLayer(
-                  urlTemplate:
-                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.rawthrottle.riderlab',
                 ),
                 ...rodadaItineraryMapLayers(
@@ -380,10 +534,7 @@ class _ItineraryMap extends StatelessWidget {
 }
 
 class _PendingInviteBanner extends ConsumerWidget {
-  const _PendingInviteBanner({
-    required this.rodadaId,
-    required this.rodada,
-  });
+  const _PendingInviteBanner({required this.rodadaId, required this.rodada});
 
   final String rodadaId;
   final RodadaSummary rodada;
@@ -408,16 +559,16 @@ class _PendingInviteBanner extends ConsumerWidget {
           children: [
             Text(
               l10n.rodadaInviteBanner(rodada.title),
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 16),
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
             ),
             if (bits.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 bits.join(' · '),
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.mist,
-                  fontSize: 14,
-                ),
+                style: GoogleFonts.rajdhani(color: AppTheme.mist, fontSize: 14),
               ),
             ],
             const SizedBox(height: 12),
@@ -425,10 +576,9 @@ class _PendingInviteBanner extends ConsumerWidget {
               children: [
                 FilledButton(
                   onPressed: () async {
-                    await ref.read(rodadaRepositoryProvider).updateMySharing(
-                          rodadaId: rodadaId,
-                          rsvp: 'going',
-                        );
+                    await ref
+                        .read(rodadaRepositoryProvider)
+                        .updateMySharing(rodadaId: rodadaId, rsvp: 'going');
                     ref.invalidate(myRodadaMembershipProvider(rodadaId));
                     ref.invalidate(rodadaMembersProvider(rodadaId));
                     ref.invalidate(myRodadasProvider);
@@ -445,10 +595,9 @@ class _PendingInviteBanner extends ConsumerWidget {
                 const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: () async {
-                    await ref.read(rodadaRepositoryProvider).updateMySharing(
-                          rodadaId: rodadaId,
-                          rsvp: 'declined',
-                        );
+                    await ref
+                        .read(rodadaRepositoryProvider)
+                        .updateMySharing(rodadaId: rodadaId, rsvp: 'declined');
                     ref.invalidate(myRodadaMembershipProvider(rodadaId));
                     ref.invalidate(rodadaMembersProvider(rodadaId));
                     ref.invalidate(myRodadasProvider);
@@ -475,11 +624,11 @@ class _RsvpRow extends ConsumerWidget {
     final l10n = context.l10n;
     const options = ['going', 'maybe', 'declined'];
     String labelFor(String o) => switch (o) {
-          'going' => l10n.rsvpGoing,
-          'maybe' => l10n.rsvpMaybe,
-          'declined' => l10n.rsvpDeclined,
-          _ => o,
-        };
+      'going' => l10n.rsvpGoing,
+      'maybe' => l10n.rsvpMaybe,
+      'declined' => l10n.rsvpDeclined,
+      _ => o,
+    };
     return Wrap(
       spacing: 8,
       children: [
@@ -488,10 +637,9 @@ class _RsvpRow extends ConsumerWidget {
             label: Text(labelFor(o)),
             selected: current == o,
             onSelected: (_) async {
-              await ref.read(rodadaRepositoryProvider).updateMySharing(
-                    rodadaId: rodadaId,
-                    rsvp: o,
-                  );
+              await ref
+                  .read(rodadaRepositoryProvider)
+                  .updateMySharing(rodadaId: rodadaId, rsvp: o);
               ref.invalidate(myRodadaMembershipProvider(rodadaId));
               ref.invalidate(rodadaMembersProvider(rodadaId));
             },

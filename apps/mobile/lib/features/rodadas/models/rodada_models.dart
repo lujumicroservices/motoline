@@ -58,8 +58,7 @@ class RodadaSummary {
   bool get isEnded => status == 'ended';
   bool get hasMeetup => meetupLat != null && meetupLng != null;
   bool get hasFinish => finishLat != null && finishLng != null;
-  bool get hasRoutedLine =>
-      routeGeometry != null && routeGeometry!.isNotEmpty;
+  bool get hasRoutedLine => routeGeometry != null && routeGeometry!.isNotEmpty;
 
   List<LatLng> get decodedRoute {
     final raw = routeGeometry;
@@ -67,7 +66,11 @@ class RodadaSummary {
     return decodePolyline(raw);
   }
 
-  factory RodadaSummary.fromMap(Map<String, dynamic> map, {int? memberCount, String? myRsvp}) {
+  factory RodadaSummary.fromMap(
+    Map<String, dynamic> map, {
+    int? memberCount,
+    String? myRsvp,
+  }) {
     final prefsRaw = map['route_prefs'];
     return RodadaSummary(
       id: map['id'] as String,
@@ -86,7 +89,8 @@ class RodadaSummary {
           : DateTime.tryParse(map['starts_at'] as String),
       status: map['status'] as String? ?? 'open',
       inviteCode: map['invite_code'] as String? ?? '',
-      memberCount: memberCount ??
+      memberCount:
+          memberCount ??
           (map['member_count'] as int?) ??
           ((map['rodada_members'] is List)
               ? (map['rodada_members'] as List).length
@@ -163,6 +167,8 @@ class RodadaMember {
     required this.shareLive,
     required this.shareTrack,
     required this.presence,
+    this.autoArmOnStart = false,
+    this.autoShareFamily = false,
     this.displayName,
     this.joinedAt,
   });
@@ -173,6 +179,8 @@ class RodadaMember {
   final String rsvp;
   final bool shareLive;
   final bool shareTrack;
+  final bool autoArmOnStart;
+  final bool autoShareFamily;
   final String presence;
   final String? displayName;
   final DateTime? joinedAt;
@@ -197,6 +205,8 @@ class RodadaMember {
       rsvp: map['rsvp'] as String? ?? 'going',
       shareLive: map['share_live'] == true,
       shareTrack: map['share_track'] == true,
+      autoArmOnStart: map['auto_arm_on_start'] == true,
+      autoShareFamily: map['auto_share_family'] == true,
       presence: map['presence'] as String? ?? 'offline',
       displayName: displayName ?? map['display_name'] as String?,
       joinedAt: map['joined_at'] == null
@@ -260,7 +270,8 @@ class RodadaLivePosition {
       speedMps: (map['speed_mps'] as num?)?.toDouble(),
       heading: (map['heading'] as num?)?.toDouble(),
       presence: map['presence'] as String? ?? 'riding',
-      updatedAt: DateTime.tryParse(map['updated_at'] as String? ?? '') ??
+      updatedAt:
+          DateTime.tryParse(map['updated_at'] as String? ?? '') ??
           DateTime.now().toUtc(),
       displayName: displayName,
     );
@@ -282,16 +293,16 @@ class RodadaLivePosition {
 
   @override
   int get hashCode => Object.hash(
-        userId,
-        rodadaId,
-        latitude,
-        longitude,
-        updatedAt,
-        displayName,
-        presence,
-        speedMps,
-        heading,
-      );
+    userId,
+    rodadaId,
+    latitude,
+    longitude,
+    updatedAt,
+    displayName,
+    presence,
+    speedMps,
+    heading,
+  );
 }
 
 class RodadaPhoto {
@@ -325,10 +336,7 @@ class RodadaPhoto {
   final String? source;
   final String? contentHash;
 
-  factory RodadaPhoto.fromMap(
-    Map<String, dynamic> map, {
-    String? displayName,
-  }) {
+  factory RodadaPhoto.fromMap(Map<String, dynamic> map, {String? displayName}) {
     return RodadaPhoto(
       id: map['id'] as String,
       rodadaId: map['rodada_id'] as String,
@@ -337,7 +345,8 @@ class RodadaPhoto {
       caption: map['caption'] as String?,
       latitude: (map['latitude'] as num?)?.toDouble(),
       longitude: (map['longitude'] as num?)?.toDouble(),
-      createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(map['created_at'] as String? ?? '') ??
           DateTime.now().toUtc(),
       displayName: displayName,
       takenAt: map['taken_at'] == null
@@ -381,7 +390,8 @@ class RodadaMessage {
       userId: map['user_id'] as String,
       body: map['body'] as String? ?? '',
       kind: map['kind'] as String? ?? 'text',
-      createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(map['created_at'] as String? ?? '') ??
           DateTime.now().toUtc(),
       displayName: displayName,
     );
@@ -417,7 +427,8 @@ class RodadaStop {
       title: map['title'] as String? ?? 'Stop',
       latitude: (map['latitude'] as num).toDouble(),
       longitude: (map['longitude'] as num).toDouble(),
-      createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(map['created_at'] as String? ?? '') ??
           DateTime.now().toUtc(),
       sortOrder: (map['sort_order'] as num?)?.toInt() ?? 0,
     );
@@ -450,8 +461,7 @@ class RodadaRideSummary {
   final String? displayName;
 
   double get distanceKm => distanceMeters / 1000;
-  double? get maxSpeedKmh =>
-      maxSpeedMps == null ? null : maxSpeedMps! * 3.6;
+  double? get maxSpeedKmh => maxSpeedMps == null ? null : maxSpeedMps! * 3.6;
 
   String get riderLabel {
     final name = displayName?.trim();

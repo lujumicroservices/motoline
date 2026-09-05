@@ -28,6 +28,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get endRide => 'End ride';
 
   @override
+  String get stopRecording => 'Stop recording';
+
+  @override
+  String get recordingRec => 'REC';
+
+  @override
   String get recording => 'Recording';
 
   @override
@@ -782,7 +788,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get curvaZoomLab => 'Zoom Ride Lab';
 
   @override
-  String get armAutoRide => 'Start when I roll';
+  String get armAutoRide => 'Start Rolling';
 
   @override
   String get disarmAutoRide => 'Cancel auto-start';
@@ -807,7 +813,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get armedSessionWatchRecording => 'Open recording';
 
   @override
-  String get armedSessionEndArm => 'End armed session';
+  String get armedSessionEndArm => 'End route';
 
   @override
   String get armedSessionStretchesEmpty =>
@@ -2031,6 +2037,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markAsLive => 'Mark as LIVE';
 
   @override
+  String get startRodada => 'Start rodada';
+
+  @override
+  String get startRodadaConfirmTitle => 'Start this rodada?';
+
+  @override
+  String get startRodadaConfirmBody =>
+      'Everyone in the group will get a notification. Arm-on-start and location sharing kick in if you enabled them.';
+
+  @override
+  String get rodadaStartedSnack => 'Rodada started. Members were notified.';
+
+  @override
+  String get autoArmOnRodadaStart => 'Arm route when the rodada starts';
+
+  @override
+  String get autoArmOnRodadaStartHelp =>
+      'When an admin starts the group ride, RiderLab waits for motion and starts recording.';
+
+  @override
+  String get autoShareFamilyOnRodada => 'Share location with my family circle';
+
+  @override
+  String get autoShareFamilyOnRodadaHelp =>
+      'Starts family watch automatically while this rodada is live.';
+
+  @override
   String get markAsOpen => 'Mark as open';
 
   @override
@@ -2136,16 +2169,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sharingDefaultsHelp =>
-      'Off until you turn it on. Then your location is sent every 5 minutes for the whole group ride (tries again every 1 minute if a send fails).';
+      'Off until you turn it on. When the rodada starts, RiderLab uses whatever you enabled below.';
 
   @override
   String get notRodadaMember => 'You are not a member.';
 
   @override
-  String get shareLocationOnRoute => 'Share location on route';
+  String get shareLocationOnRoute => 'Share location with the pack';
 
   @override
-  String get shareLocationEvery5Min => 'Every 5 min while rodada is open/live';
+  String get shareLocationEvery5Min => 'Every 5 min while the rodada is live';
 
   @override
   String get shareTrackAfterRides => 'Share my line after rides';

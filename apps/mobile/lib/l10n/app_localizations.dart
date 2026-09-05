@@ -134,6 +134,18 @@ abstract class AppLocalizations {
   /// **'Terminar recorrido'**
   String get endRide;
 
+  /// No description provided for @stopRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Detener grabación'**
+  String get stopRecording;
+
+  /// No description provided for @recordingRec.
+  ///
+  /// In es, this message translates to:
+  /// **'REC'**
+  String get recordingRec;
+
   /// No description provided for @recording.
   ///
   /// In es, this message translates to:
@@ -1493,7 +1505,7 @@ abstract class AppLocalizations {
   /// No description provided for @armAutoRide.
   ///
   /// In es, this message translates to:
-  /// **'Empezar al rodar'**
+  /// **'Empezar a Rodar'**
   String get armAutoRide;
 
   /// No description provided for @disarmAutoRide.
@@ -1541,7 +1553,7 @@ abstract class AppLocalizations {
   /// No description provided for @armedSessionEndArm.
   ///
   /// In es, this message translates to:
-  /// **'Terminar armado'**
+  /// **'Terminar ruta'**
   String get armedSessionEndArm;
 
   /// No description provided for @armedSessionStretchesEmpty.
@@ -3668,6 +3680,54 @@ abstract class AppLocalizations {
   /// **'Marcar EN VIVO'**
   String get markAsLive;
 
+  /// No description provided for @startRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar rodada'**
+  String get startRodada;
+
+  /// No description provided for @startRodadaConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Iniciar la rodada?'**
+  String get startRodadaConfirmTitle;
+
+  /// No description provided for @startRodadaConfirmBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se avisará a todos los miembros. Si activaste armar ruta o compartir ubicación, eso arranca ahora.'**
+  String get startRodadaConfirmBody;
+
+  /// No description provided for @rodadaStartedSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodada iniciada. Se avisó a los miembros.'**
+  String get rodadaStartedSnack;
+
+  /// No description provided for @autoArmOnRodadaStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Armar ruta al iniciar la rodada'**
+  String get autoArmOnRodadaStart;
+
+  /// No description provided for @autoArmOnRodadaStartHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando un administrador inicie la rodada, RiderLab espera movimiento y empieza a grabar.'**
+  String get autoArmOnRodadaStartHelp;
+
+  /// No description provided for @autoShareFamilyOnRodada.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir ubicación con mi círculo familiar'**
+  String get autoShareFamilyOnRodada;
+
+  /// No description provided for @autoShareFamilyOnRodadaHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa el watch familiar automáticamente mientras esta rodada esté en vivo.'**
+  String get autoShareFamilyOnRodadaHelp;
+
   /// No description provided for @markAsOpen.
   ///
   /// In es, this message translates to:
@@ -3851,7 +3911,7 @@ abstract class AppLocalizations {
   /// No description provided for @sharingDefaultsHelp.
   ///
   /// In es, this message translates to:
-  /// **'Apagado hasta que lo actives. Luego se envía tu ubicación cada 5 minutos durante toda la rodada (reintenta cada 1 minuto si falla).'**
+  /// **'Apagado hasta que lo actives. Al iniciar la rodada, RiderLab usa lo que hayas marcado abajo.'**
   String get sharingDefaultsHelp;
 
   /// No description provided for @notRodadaMember.
@@ -3863,13 +3923,13 @@ abstract class AppLocalizations {
   /// No description provided for @shareLocationOnRoute.
   ///
   /// In es, this message translates to:
-  /// **'Compartir ubicación en ruta'**
+  /// **'Compartir ubicación con la rodada'**
   String get shareLocationOnRoute;
 
   /// No description provided for @shareLocationEvery5Min.
   ///
   /// In es, this message translates to:
-  /// **'Cada 5 min mientras la rodada está abierta/en vivo'**
+  /// **'Cada 5 min mientras la rodada está en vivo'**
   String get shareLocationEvery5Min;
 
   /// No description provided for @shareTrackAfterRides.

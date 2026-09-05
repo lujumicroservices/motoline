@@ -4,7 +4,7 @@ Operator runbook. Use with [PLAY_STORE.md](PLAY_STORE.md) and [STORE_READINESS.m
 
 **Package:** `com.rawthrottle.riderlab`  
 **Cloud project:** `riderlab-7b183`  
-**Current Play binary:** `1.37.11+86` (play flavor AAB; Billing Library 8 via RevenueCat 9)
+**Current Play binary:** `1.37.12+87` (play flavor AAB; Billing Library 8 via RevenueCat 9)
 
 Play Console URLs (paste as-is):
 

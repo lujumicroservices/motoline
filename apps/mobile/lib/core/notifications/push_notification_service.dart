@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -16,6 +17,7 @@ import 'push_diagnostics.dart';
 const _inviteChannelId = 'riderlab_rodada_invites';
 const _radioChannelId = 'riderlab_rodada_radio';
 const _alertChannelId = 'riderlab_rodada_alerts';
+const _startedChannelId = 'riderlab_rodada_started';
 const _acceptAction = 'rodada_accept';
 const _declineAction = 'rodada_decline';
 const _radioTabIndex = 4;
@@ -27,6 +29,7 @@ final GlobalKey<ScaffoldMessengerState> appMessengerKey =
 String? _pendingRodadaId;
 int _pendingTab = 0;
 String? _cachedFcmToken;
+final _rodadaStarted = StreamController<String>.broadcast();
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -38,6 +41,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class PushNotificationService {
   PushNotificationService._();
   static final instance = PushNotificationService._();
+
+  /// Live rodada ids from FCM `rodada_started` (foreground).
+  static Stream<String> get rodadaStarted => _rodadaStarted.stream;
 
   final _local = FlutterLocalNotificationsPlugin();
   final _tokens = DeviceTokenRepository();
@@ -62,8 +68,10 @@ class PushNotificationService {
       const InitializationSettings(android: androidInit, iOS: iosInit),
       onDidReceiveNotificationResponse: _onLocalResponse,
     );
-    final androidPlugin = _local.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = _local
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await androidPlugin?.createNotificationChannel(
       const AndroidNotificationChannel(
         _inviteChannelId,
@@ -88,6 +96,14 @@ class PushNotificationService {
         importance: Importance.max,
         playSound: true,
         enableVibration: true,
+      ),
+    );
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _startedChannelId,
+        'Rodada iniciada',
+        description: 'Avisos cuando un admin inicia la rodada',
+        importance: Importance.high,
       ),
     );
     await androidPlugin?.requestNotificationsPermission();
@@ -175,25 +191,36 @@ class PushNotificationService {
     final n = message.notification;
     final type = _typeFromData(message.data);
     final rodadaId = message.data['rodada_id']?.toString();
+    if (type == 'rodada_started' && rodadaId != null && rodadaId.isNotEmpty) {
+      _rodadaStarted.add(rodadaId);
+    }
     final isAlert = type == 'rodada_alert';
     final isRadio = type == 'rodada_radio' || isAlert;
-    final title = n?.title ??
+    final isStarted = type == 'rodada_started';
+    final title =
+        n?.title ??
         (isAlert
             ? 'ALERTA de radio'
             : isRadio
-                ? 'Radio'
-                : 'Invitación a rodada');
+            ? 'Radio'
+            : isStarted
+            ? 'Rodada iniciada'
+            : 'Invitación a rodada');
     final body = n?.body ?? '';
     final channelId = isAlert
         ? _alertChannelId
         : isRadio
-            ? _radioChannelId
-            : _inviteChannelId;
+        ? _radioChannelId
+        : isStarted
+        ? _startedChannelId
+        : _inviteChannelId;
     final channelName = isAlert
         ? 'Alertas de radio'
         : isRadio
-            ? 'Radio de rodada'
-            : 'Invitaciones a rodada';
+        ? 'Radio de rodada'
+        : isStarted
+        ? 'Rodada iniciada'
+        : 'Invitaciones a rodada';
     _local.show(
       message.hashCode,
       title,
@@ -205,13 +232,15 @@ class PushNotificationService {
           channelDescription: isAlert
               ? 'Pedidos de ayuda en la rodada'
               : isRadio
-                  ? 'Mensajes de radio del grupo'
-                  : 'Invites to group rides',
+              ? 'Mensajes de radio del grupo'
+              : isStarted
+              ? 'Avisos cuando un admin inicia la rodada'
+              : 'Invites to group rides',
           importance: isAlert ? Importance.max : Importance.high,
           priority: isAlert ? Priority.max : Priority.high,
           playSound: true,
           enableVibration: true,
-          actions: isRadio
+          actions: isRadio || isStarted
               ? const []
               : const [
                   AndroidNotificationAction(_acceptAction, 'Aceptar'),
@@ -231,10 +260,12 @@ class PushNotificationService {
   }
 
   void _onOpened(RemoteMessage message) {
-    _queueRodada(
-      message.data['rodada_id']?.toString(),
-      tab: _tabFromData(message.data),
-    );
+    final type = _typeFromData(message.data);
+    final rodadaId = message.data['rodada_id']?.toString();
+    if (type == 'rodada_started' && rodadaId != null && rodadaId.isNotEmpty) {
+      _rodadaStarted.add(rodadaId);
+    }
+    _queueRodada(rodadaId, tab: _tabFromData(message.data));
   }
 
   void _onLocalResponse(NotificationResponse response) {
@@ -257,7 +288,10 @@ class PushNotificationService {
       try {
         if (!SupabaseBootstrap.isReady) return;
         await SupabaseBootstrap.ensureSession();
-        await RodadaRepository().updateMySharing(rodadaId: rodadaId, rsvp: rsvp);
+        await RodadaRepository().updateMySharing(
+          rodadaId: rodadaId,
+          rsvp: rsvp,
+        );
       } catch (e) {
         debugPrint('RSVP from notification: $e');
         _queueRodada(rodadaId);
@@ -273,6 +307,7 @@ class PushNotificationService {
     if (type == 'rodada_radio' || data['tab']?.toString() == 'radio') {
       return 'rodada_radio';
     }
+    if (type == 'rodada_started') return 'rodada_started';
     return type.isEmpty ? 'rodada_invite' : type;
   }
 
@@ -289,6 +324,8 @@ class PushNotificationService {
         return 'rodada_alert:$rodadaId';
       case 'rodada_radio':
         return 'rodada_radio:$rodadaId';
+      case 'rodada_started':
+        return 'rodada_started:$rodadaId';
       default:
         return 'rodada_invite:$rodadaId';
     }
@@ -296,7 +333,12 @@ class PushNotificationService {
 
   static String? _rodadaIdFrom(String? payload) {
     if (payload == null || payload.isEmpty) return null;
-    for (final prefix in ['rodada_invite:', 'rodada_radio:', 'rodada_alert:']) {
+    for (final prefix in [
+      'rodada_invite:',
+      'rodada_radio:',
+      'rodada_alert:',
+      'rodada_started:',
+    ]) {
       if (payload.startsWith(prefix)) return payload.substring(prefix.length);
     }
     return payload;

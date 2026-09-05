@@ -10,6 +10,7 @@ import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import 'armed_session_flow.dart';
 import 'armed_session_nav.dart';
+import 'widgets/recording_rec_badge.dart';
 
 /// Session hub while armed: stretches, enter/leave the recording HUD, end ride.
 class ArmedSessionScreen extends ConsumerStatefulWidget {
@@ -58,13 +59,13 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
     final statusLabel = !recording
         ? l10n.waitingForMotion
         : paused
-            ? l10n.pausedLabel
-            : l10n.recording;
+        ? l10n.pausedLabel
+        : l10n.recording;
     final statusColor = !recording
         ? AppTheme.lineHot
         : paused
-            ? AppTheme.lineHot
-            : AppTheme.signal;
+        ? AppTheme.lineHot
+        : AppTheme.signal;
 
     return Scaffold(
       appBar: AppBar(
@@ -92,14 +93,14 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        recording
-                            ? (paused
-                                ? Icons.pause_circle_outline
-                                : Icons.fiber_manual_record)
-                            : Icons.motion_photos_auto,
-                        color: statusColor,
-                      ),
+                      if (recording)
+                        RecordingRecBadge(
+                          label: paused ? l10n.pausedLabel : l10n.recordingRec,
+                          paused: paused,
+                          compact: true,
+                        )
+                      else
+                        Icon(Icons.motion_photos_auto, color: statusColor),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
