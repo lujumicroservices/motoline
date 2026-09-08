@@ -23,8 +23,8 @@ import '../rodada_itinerary.dart';
 import '../rodada_itinerary_map.dart';
 import '../rodada_providers.dart';
 
-/// Live pack map. Watching [rodadaLivePositionsProvider] starts GPS publish;
-/// leaving this tab disposes the publisher and clears your cloud position.
+/// Live pack map. Pack GPS is published by [RodadaRouteShareBinder] for the
+/// whole live rodada, not only while this tab is open.
 class RodadaLiveTab extends ConsumerStatefulWidget {
   const RodadaLiveTab({super.key, required this.rodadaId});
 
@@ -57,7 +57,8 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
     try {
       // Disclosure is already on screen — only fire the system prompt now.
       final permission = await Geolocator.requestPermission();
-      final ok = permission == LocationPermission.whileInUse ||
+      final ok =
+          permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
       if (!mounted) return;
       setState(() => _locationOk = ok);
@@ -95,8 +96,7 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
 
     final localRideId = WatchRepository.rodadaLocalRideId(widget.rodadaId);
     final session = ref.watch(activeWatchControllerProvider);
-    final familyOn =
-        session != null && session.localRideId == localRideId;
+    final familyOn = session != null && session.localRideId == localRideId;
 
     return Column(
       children: [
@@ -142,8 +142,10 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                                         MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: () async {
-                                    final ok = await LocationPermissionGate
-                                        .requestForRodadaLive(context);
+                                    final ok =
+                                        await LocationPermissionGate.requestForRodadaLive(
+                                          context,
+                                        );
                                     if (!ok || !context.mounted) return;
                                     await ref
                                         .read(rodadaRepositoryProvider)
@@ -166,17 +168,11 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                       ),
                     ),
                     if (!familyOn)
-                      ActiveWatchPanel(
-                        localRideId: localRideId,
-                        compact: true,
-                      ),
+                      ActiveWatchPanel(localRideId: localRideId, compact: true),
                   ],
                 ),
                 if (familyOn)
-                  ActiveWatchPanel(
-                    localRideId: localRideId,
-                    compact: true,
-                  ),
+                  ActiveWatchPanel(localRideId: localRideId, compact: true),
               ],
             ),
           ),
@@ -256,10 +252,7 @@ class _RodadaLiveLocationDisclosure extends StatelessWidget {
 
 /// Owns riverpod watches but keeps [FlutterMap] mounted in a child State.
 class _RodadaLiveMapHost extends ConsumerWidget {
-  const _RodadaLiveMapHost({
-    required this.rodadaId,
-    required this.isHost,
-  });
+  const _RodadaLiveMapHost({required this.rodadaId, required this.isHost});
 
   final String rodadaId;
   final bool isHost;
@@ -271,15 +264,13 @@ class _RodadaLiveMapHost extends ConsumerWidget {
     final overview = ref.watch(rodadaOverviewProvider(rodadaId));
 
     final meetup = overview.maybeWhen(
-      data: (r) => r != null && r.hasMeetup
-          ? LatLng(r.meetupLat!, r.meetupLng!)
-          : null,
+      data: (r) =>
+          r != null && r.hasMeetup ? LatLng(r.meetupLat!, r.meetupLng!) : null,
       orElse: () => null,
     );
     final finish = overview.maybeWhen(
-      data: (r) => r != null && r.hasFinish
-          ? LatLng(r.finishLat!, r.finishLng!)
-          : null,
+      data: (r) =>
+          r != null && r.hasFinish ? LatLng(r.finishLat!, r.finishLng!) : null,
       orElse: () => null,
     );
     final stopList = stops.maybeWhen(
@@ -388,7 +379,9 @@ Future<void> _addStop(
   if (ok != true || !context.mounted) return;
   try {
     final pos = await Geolocator.getCurrentPosition();
-    await ref.read(rodadaRepositoryProvider).addStop(
+    await ref
+        .read(rodadaRepositoryProvider)
+        .addStop(
           rodadaId: rodadaId,
           title: titleCtrl.text.trim().isEmpty
               ? l10n.stopDefault
@@ -398,18 +391,19 @@ Future<void> _addStop(
         );
     ref.invalidate(rodadaStopsProvider(rodadaId));
     unawaited(
-      ref.read(rodadaRepositoryProvider).refreshStoredRoute(
+      ref
+          .read(rodadaRepositoryProvider)
+          .refreshStoredRoute(
             rodadaId,
             directions: ref.read(directionsServiceProvider),
-          ).then((_) {
-        ref.invalidate(rodadaOverviewProvider(rodadaId));
-      }),
+          )
+          .then((_) {
+            ref.invalidate(rodadaOverviewProvider(rodadaId));
+          }),
     );
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$e')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
   }
 }
 
@@ -445,9 +439,7 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
   List<LatLng> get _corridor {
     final pins = rodadaItineraryLine(
       start: widget.meetup,
-      stops: [
-        for (final s in widget.stops) LatLng(s.latitude, s.longitude),
-      ],
+      stops: [for (final s in widget.stops) LatLng(s.latitude, s.longitude)],
       finish: widget.finish,
     );
     return rodadaDisplayLine(pins: pins, routed: widget.routedLine);
@@ -578,8 +570,9 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
             ...rodadaItineraryMapLayers(
               start: meetup,
               finish: finish,
-              routedLine:
-                  widget.routedLine.length >= 2 ? widget.routedLine : null,
+              routedLine: widget.routedLine.length >= 2
+                  ? widget.routedLine
+                  : null,
               stops: [
                 for (final s in widget.stops)
                   RodadaItineraryStopPin(

@@ -3170,6 +3170,12 @@ abstract class AppLocalizations {
   /// **'Sin señal · última a las {when}'**
   String familyNoSignalSince(String when);
 
+  /// No description provided for @familyWatchReconnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin señal. Reintentando…'**
+  String get familyWatchReconnect;
+
   /// No description provided for @findRiders.
   ///
   /// In es, this message translates to:

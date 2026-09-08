@@ -40,7 +40,7 @@ Pack **Compartir en vivo** (rodada map) is separate from the family WhatsApp lin
 | Control | Behavior |
 |--------|----------|
 | Token storage | Raw token only on device; DB stores SHA-256 hash |
-| Expiry | 12 hours from issue |
+| Expiry | 36 hours from issue (extended while the rider still pings) |
 | End ride / Parar | Revokes all tokens for the session |
 | Ended session | Public RPC returns `ended` (no position) |
 | Rate limit | ~60 polls/min per token |

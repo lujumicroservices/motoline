@@ -10,7 +10,7 @@ import 'watch_token_store.dart';
 
 class WatchRepository {
   WatchRepository({WatchTokenStore? tokenStore})
-      : _tokens = tokenStore ?? WatchTokenStore();
+    : _tokens = tokenStore ?? WatchTokenStore();
 
   final WatchTokenStore _tokens;
 
@@ -82,10 +82,13 @@ class WatchRepository {
   }
 
   Future<void> revokeContact(String id) async {
-    await _db.from('trusted_contacts').update({
-      'status': 'revoked',
-      'updated_at': DateTime.now().toUtc().toIso8601String(),
-    }).eq('id', id);
+    await _db
+        .from('trusted_contacts')
+        .update({
+          'status': 'revoked',
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', id);
   }
 
   Future<WatchSession> startSession({
@@ -95,16 +98,10 @@ class WatchRepository {
     final me = _uid;
     if (me == null) throw StateError('Not signed in');
 
-    // End any prior active session for this rider.
-    await _db
-        .from('watch_sessions')
-        .update({
-          'status': 'ended',
-          'ended_at': DateTime.now().toUtc().toIso8601String(),
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        })
-        .eq('rider_id', me)
-        .eq('status', 'active');
+    final existingRide = await activeSessionForRide(localRideId);
+    if (existingRide != null) return existingRide;
+    final anyActive = await activeSessionMine();
+    if (anyActive != null) return anyActive;
 
     final row = await _db
         .from('watch_sessions')
@@ -125,6 +122,18 @@ class WatchRepository {
 
     final token = await createShareToken(session.id, revokeExisting: false);
     return WatchSession.fromMap(row, shareUrl: shareUrlForToken(token));
+  }
+
+  /// Keep the same magic links alive through a long ride / signal drop.
+  Future<void> extendShareTokens(String sessionId) async {
+    final me = _uid;
+    if (me == null) return;
+    final expires = DateTime.now().toUtc().add(const Duration(hours: 36));
+    await _db
+        .from('watch_share_tokens')
+        .update({'expires_at': expires.toIso8601String()})
+        .eq('session_id', sessionId)
+        .filter('revoked_at', 'is', null);
   }
 
   /// Returns the same live URL for everyone. Does **not** revoke prior shares.
@@ -155,7 +164,7 @@ class WatchRepository {
 
     final raw = _randomToken();
     final hash = sha256Hex(raw);
-    final expires = DateTime.now().toUtc().add(const Duration(hours: 12));
+    final expires = DateTime.now().toUtc().add(const Duration(hours: 36));
     await _db.from('watch_share_tokens').insert({
       'session_id': sessionId,
       'token_hash': hash,
@@ -203,11 +212,14 @@ class WatchRepository {
 
   Future<void> endSession(String sessionId, {bool cancelled = false}) async {
     final status = cancelled ? 'cancelled' : 'ended';
-    await _db.from('watch_sessions').update({
-      'status': status,
-      'ended_at': DateTime.now().toUtc().toIso8601String(),
-      'updated_at': DateTime.now().toUtc().toIso8601String(),
-    }).eq('id', sessionId);
+    await _db
+        .from('watch_sessions')
+        .update({
+          'status': status,
+          'ended_at': DateTime.now().toUtc().toIso8601String(),
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', sessionId);
     await postEvent(sessionId, status);
     await _db
         .from('watch_share_tokens')

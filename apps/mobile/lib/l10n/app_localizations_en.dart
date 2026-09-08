@@ -1732,6 +1732,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get familyWatchReconnect => 'No signal. Retrying…';
+
+  @override
   String get findRiders => 'Find riders';
 
   @override

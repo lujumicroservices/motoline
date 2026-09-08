@@ -1743,6 +1743,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get familyWatchReconnect => 'Sin señal. Reintentando…';
+
+  @override
   String get findRiders => 'Buscar riders';
 
   @override

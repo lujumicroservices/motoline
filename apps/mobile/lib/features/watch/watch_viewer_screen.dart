@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,30 +28,43 @@ class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen>
   WatchPosition? _pos;
   List<WatchEvent> _events = const [];
   bool _loading = true;
+  String? _transientError;
+  Timer? _poll;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _poll = Timer.periodic(const Duration(seconds: 20), (_) => _load());
   }
 
   @override
   void dispose() {
+    _poll?.cancel();
     stopLiveGps();
     disposeLiveGpsListenable();
     super.dispose();
   }
 
   Future<void> _load() async {
-    final repo = ref.read(watchRepositoryProvider);
-    final pos = await repo.getPosition(widget.session.id);
-    final events = await repo.listEvents(widget.session.id);
-    if (!mounted) return;
-    setState(() {
-      _pos = pos;
-      _events = events;
-      _loading = false;
-    });
+    try {
+      final repo = ref.read(watchRepositoryProvider);
+      final pos = await repo.getPosition(widget.session.id);
+      final events = await repo.listEvents(widget.session.id);
+      if (!mounted) return;
+      setState(() {
+        if (pos != null) _pos = pos;
+        _events = events;
+        _loading = false;
+        _transientError = null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _transientError = context.l10n.familyWatchReconnect;
+      });
+    }
   }
 
   @override
@@ -73,6 +88,17 @@ class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen>
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                if (_transientError != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Text(
+                      _transientError!,
+                      style: GoogleFonts.rajdhani(
+                        color: AppTheme.lineHot,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
                 if (pos != null)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),

@@ -3,95 +3,57 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../../core/services/live_share_loop.dart';
 import 'rodada_repository.dart';
 
 /// Coarse location share for the whole rodada route.
 ///
-/// Cadence: success → wait **5 minutes**; failure → retry every **1 minute**
-/// until a send succeeds, then return to the 5‑minute cadence.
-/// Uses one-shot GPS (not a high-rate stream) to stay light on battery.
+/// Cadence: success → [shareInterval]; failure → 15s / 30s / 60s until a send
+/// succeeds. Uses one-shot GPS (last-known fallback) to stay light on battery.
 class RodadaLiveSession {
   RodadaLiveSession({
     required this.rodadaId,
     required RodadaRepository repository,
     this.presence = 'riding',
     this.shareInterval = const Duration(minutes: 5),
-    this.retryInterval = const Duration(minutes: 1),
   }) : _repo = repository;
 
   final String rodadaId;
   final RodadaRepository _repo;
   final String presence;
   final Duration shareInterval;
-  final Duration retryInterval;
 
-  Timer? _timer;
-  bool _disposed = false;
-  bool _sending = false;
-  int _failStreak = 0;
+  LiveShareLoop? _loop;
+  bool _cleared = false;
 
   Future<void> start() async {
-    if (_disposed) return;
-    // Do not call requestPermission here — Play requires an in-app disclosure
-    // first (see LocationPermissionGate / RodadaLiveTab disclosure).
-    final permission = await Geolocator.checkPermission();
-    if (permission != LocationPermission.whileInUse &&
-        permission != LocationPermission.always) {
-      debugPrint('RodadaLiveSession: location not granted');
-      return;
-    }
-
-    // First ping ASAP so the pack sees you, then follow cadence.
-    unawaited(_tick());
-    _armTimer(retry: false);
+    _loop?.dispose();
+    _loop = LiveShareLoop(
+      shareInterval: shareInterval,
+      publish: _publish,
+      onTickError: (e) => debugPrint('RodadaLiveSession share fail: $e'),
+    );
+    await _loop!.start();
   }
 
-  void _armTimer({required bool retry}) {
-    _timer?.cancel();
-    if (_disposed) return;
-    final delay = retry ? retryInterval : shareInterval;
-    _timer = Timer(delay, () {
-      unawaited(_tick());
-    });
-  }
+  void kick() => _loop?.kick();
 
-  Future<void> _tick() async {
-    if (_disposed || _sending) return;
-    _sending = true;
-    try {
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 20),
-        ),
-      );
-      if (_disposed) return;
-      await _repo.upsertLivePosition(
-        rodadaId: rodadaId,
-        latitude: pos.latitude,
-        longitude: pos.longitude,
-        speedMps: pos.speed.isNaN ? null : pos.speed,
-        heading: pos.heading.isNaN ? null : pos.heading,
-        presence: presence,
-      );
-      _failStreak = 0;
-      _armTimer(retry: false);
-    } catch (e) {
-      _failStreak++;
-      debugPrint(
-        'RodadaLiveSession share fail (#$_failStreak), retry in '
-        '${retryInterval.inMinutes}m: $e',
-      );
-      _armTimer(retry: true);
-    } finally {
-      _sending = false;
-    }
+  Future<void> _publish(Position pos) async {
+    await _repo.upsertLivePosition(
+      rodadaId: rodadaId,
+      latitude: pos.latitude,
+      longitude: pos.longitude,
+      speedMps: pos.speed.isNaN ? null : pos.speed,
+      heading: pos.heading.isNaN ? null : pos.heading,
+      presence: presence,
+    );
   }
 
   Future<void> dispose() async {
-    _disposed = true;
-    _timer?.cancel();
-    _timer = null;
+    _loop?.dispose();
+    _loop = null;
+    if (_cleared) return;
+    _cleared = true;
     try {
       await _repo.clearMyLivePosition(rodadaId);
     } catch (e) {

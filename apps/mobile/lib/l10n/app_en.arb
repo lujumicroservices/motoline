@@ -626,6 +626,7 @@
       "when": {"type": "String"}
     }
   },
+  "familyWatchReconnect": "No signal. Retrying…",
   "findRiders": "Find riders",
   "searchByNameHint": "Search by name…",
   "noRidersFound": "No riders found",

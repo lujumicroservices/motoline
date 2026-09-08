@@ -697,6 +697,7 @@
       "when": {"type": "String"}
     }
   },
+  "familyWatchReconnect": "Sin señal. Reintentando…",
   "findRiders": "Buscar riders",
   "searchByNameHint": "Buscar por nombre…",
   "noRidersFound": "No se encontraron riders",
