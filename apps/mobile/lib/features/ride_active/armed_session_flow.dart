@@ -7,6 +7,7 @@ import '../../core/lean_lab/lean_lab_service.dart';
 import '../../l10n/gps_warmup_l10n.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
+import '../../widgets/app_snack.dart';
 import '../lean_lab/lean_lab_review_screen.dart';
 import '../rodadas/rodada_post_ride_flow.dart';
 import '../watch/watch_providers.dart';
@@ -129,7 +130,7 @@ Future<void> completeArmedOrActiveRide(
   } catch (e) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.userFacingError(e))),
+      appSnackBar(l10n.userFacingError(e)),
     );
   }
 }

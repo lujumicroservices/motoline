@@ -36,4 +36,44 @@ void main() {
     expect(nextStopSortOrder(const [0, 2, 1]), 3);
     expect(nextStopSortOrder(const [4]), 5);
   });
+
+  test('auto title is start - finish', () {
+    expect(
+      rodadaAutoTitle(startName: 'Guadalajara', finishName: 'Tapalpa'),
+      'Guadalajara - Tapalpa',
+    );
+    expect(rodadaAutoTitle(startName: '  A  ', finishName: 'B'), 'A - B');
+    expect(rodadaAutoTitle(startName: 'Solo', finishName: ''), 'Solo');
+    expect(rodadaAutoTitle(startName: '', finishName: 'Destino'), 'Destino');
+  });
+
+  test('round-trip waypoints reverse outbound without duplicating finish', () {
+    const start = LatLng(20, -103);
+    const stop = LatLng(20.5, -103.5);
+    const finish = LatLng(21, -104);
+    expect(
+      rodadaRouteWaypoints(start: start, finish: finish),
+      [start, finish],
+    );
+    expect(
+      rodadaRouteWaypoints(
+        start: start,
+        stops: const [stop],
+        finish: finish,
+        roundTrip: true,
+      ),
+      [start, stop, finish, stop, start],
+    );
+    expect(
+      rodadaRouteWaypoints(start: start, finish: finish, roundTrip: true),
+      [start, finish, start],
+    );
+  });
+
+  test('stop letters are A B C then numbers', () {
+    expect(rodadaStopLetter(0), 'A');
+    expect(rodadaStopLetter(1), 'B');
+    expect(rodadaStopLetter(25), 'Z');
+    expect(rodadaStopLetter(26), '27');
+  });
 }

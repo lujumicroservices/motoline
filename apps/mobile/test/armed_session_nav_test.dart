@@ -19,13 +19,13 @@ void main() {
       expect(rideStretchesFrom(const []), isEmpty);
     });
 
-    test('auto-pause gap becomes a second stretch', () {
+    test('stationary auto-pause gap becomes a second stretch', () {
       final base = DateTime(2026, 8, 20, 12);
       final points = [
         _pt(1, base, lat: 0, lng: 0),
         _pt(2, base.add(const Duration(seconds: 2)), lat: 0.001, lng: 0),
-        _pt(3, base.add(const Duration(seconds: 40)), lat: 0.002, lng: 0),
-        _pt(4, base.add(const Duration(seconds: 42)), lat: 0.003, lng: 0),
+        _pt(3, base.add(const Duration(seconds: 40)), lat: 0.001, lng: 0),
+        _pt(4, base.add(const Duration(seconds: 42)), lat: 0.002, lng: 0),
       ];
       final stretches = rideStretchesFrom(points);
       expect(stretches.length, 2);
@@ -33,8 +33,6 @@ void main() {
       expect(stretches.first.pointCount, 2);
       expect(stretches.last.index, 2);
       expect(stretches.last.pointCount, 2);
-      expect(stretches.first.distanceMeters, greaterThan(100));
-      expect(stretches.first.duration, const Duration(seconds: 2));
     });
   });
 

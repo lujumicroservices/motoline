@@ -18,6 +18,7 @@ import '../../providers/pro_entitlement_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../widgets/ad_banner.dart';
+import '../../widgets/app_snack.dart';
 import '../../widgets/partner_code_redeem.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
@@ -330,9 +331,7 @@ class HomeScreen extends ConsumerWidget {
               armed: sessionLive,
               onArmToggle: () async {
                 if (ref.read(impersonationProvider).active) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.impersonateNoRide)),
-                  );
+                  showAppSnack(context, l10n.impersonateNoRide);
                   return;
                 }
                 if (sessionLive) {
@@ -344,14 +343,10 @@ class HomeScreen extends ConsumerWidget {
                   if (!ok || !context.mounted) return;
                   ref.read(armedSessionNavProvider.notifier).reset();
                   ensureArmedSessionHub(context, ref);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.armAutoNoRouteHint)),
-                  );
+                  showAppSnack(context, l10n.armAutoNoRouteHint);
                 } catch (e) {
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$e')),
-                  );
+                  showAppSnackError(context, '$e');
                 }
               },
             ),

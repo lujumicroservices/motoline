@@ -68,7 +68,7 @@ class ActiveRideSnapshot {
   /// Latest barometer reading (hPa), when the phone has one.
   final double? pressureHpa;
 
-  /// Auto-pause gaps as first-class stretches for the armed-session hub.
+  /// Stop-like GPS gaps as first-class stretches for the armed-session hub.
   List<RideStretch> get stretches => rideStretchesFrom(points);
 }
 
@@ -687,6 +687,19 @@ class RideRecorder {
     }
   }
 
+  /// Dev-only override: start recording while armed even if the bike is still.
+  /// Production still waits for motion via [_handleArmedSampleCoords].
+  Future<void> forceStartFromArm() async {
+    if (kReleaseMode) return;
+    if (!_armed || isRecording || _promotingArm) return;
+    _promotingArm = true;
+    try {
+      await _autoStart(routeId: _armedRouteId);
+    } finally {
+      _promotingArm = false;
+    }
+  }
+
   Future<void> _autoStart({String? routeId}) async {
     try {
       unawaited(
@@ -885,6 +898,7 @@ class RideRecorder {
       latitude: position.latitude,
       longitude: position.longitude,
       timestamp: position.timestamp,
+      accuracyMeters: position.accuracy,
     );
 
     final paused = _motion.isPaused;
@@ -952,8 +966,12 @@ class RideRecorder {
         accuracyMeters: position.accuracy,
         previousAccuracyMeters: previous.accuracyMeters ?? 10,
       );
-      // Only drop true teleports — do NOT drop fast moto hops / roundabout arcs.
-      if (jump > maxJump) {
+      final verdict = classifyGpsJump(
+        jumpMeters: jump,
+        dtSeconds: dtSec,
+        maxJumpMeters: maxJump,
+      );
+      if (verdict == GpsJumpVerdict.teleport) {
         _gpsSkipTeleport++;
         unawaited(
           _telemetry.log(
@@ -975,7 +993,25 @@ class RideRecorder {
         );
         return;
       }
-      _distanceMeters += jump;
+      final impliedMps = dtSec > 0 ? jump / dtSec : 0.0;
+      if (verdict == GpsJumpVerdict.withinPlausible ||
+          impliedMps <= maxPlausibleGpsSpeedMps) {
+        _distanceMeters += jump;
+      } else {
+        unawaited(
+          _telemetry.log(
+            category: TelemetryCategory.gps,
+            eventType: 'gps_recovered_anchor',
+            latitude: point.latitude,
+            longitude: point.longitude,
+            payload: {
+              'jump_m': jump,
+              'dt_s': dtSec,
+              'implied_mps': impliedMps,
+            },
+          ),
+        );
+      }
     }
 
     final speed = point.speedMps;

@@ -32,7 +32,7 @@ class UprightFreezePanel extends StatelessWidget {
         status = l10n.leanLabCalibPocketSettle;
       case UprightFreezePhase.capture:
         status = c.mode == UprightFreezeMode.hold
-            ? l10n.leanLabCalibHolding
+            ? l10n.leanLabCalibHoldCountdown(c.countdownLeft)
             : l10n.leanLabCalibPocketCapture;
       case UprightFreezePhase.failed:
         status = l10n.leanLabCalibPocketFail;
@@ -61,6 +61,20 @@ class UprightFreezePanel extends StatelessWidget {
               fontSize: compact ? 16 : 18,
             ),
           ),
+          if (c.phase == UprightFreezePhase.capture &&
+              c.mode == UprightFreezeMode.hold) ...[
+            const SizedBox(height: 8),
+            Text(
+              '${c.countdownLeft}',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.exo2(
+                color: AppTheme.mist,
+                fontWeight: FontWeight.w800,
+                fontSize: compact ? 40 : 52,
+                height: 1,
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
         ],
         FilledButton.icon(

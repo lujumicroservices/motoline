@@ -16,43 +16,67 @@ Future<Vec3?> showUprightFreezeSheet(
   BuildContext context, {
   required String title,
   required String help,
+  bool autoBeginHold = false,
 }) {
   return showModalBottomSheet<Vec3>(
     context: context,
     isScrollControlled: true,
     backgroundColor: AppTheme.asphaltElevated,
-    builder: (_) => _UprightFreezeSheet(title: title, help: help),
+    builder: (_) => _UprightFreezeSheet(
+      title: title,
+      help: help,
+      autoBeginHold: autoBeginHold,
+    ),
   );
 }
 
+bool freezeThenArmInProgress = false;
+
 /// Arm auto-start only after a pocket/tank freeze so 0° is captured in-mount.
+///
+/// [autoBeginHold] presses the 4 s hold immediately (rodada auto-arm).
 Future<bool> freezeThenArm(
   BuildContext context,
   WidgetRef ref, {
   String? routeId,
+  bool autoBeginHold = false,
 }) async {
-  final l10n = context.l10n;
-  if (!await LocationPermissionGate.requestForRecording(context)) {
-    return false;
-  }
-  if (!context.mounted) return false;
+  if (freezeThenArmInProgress) return false;
+  freezeThenArmInProgress = true;
+  try {
+    final recorder = ref.read(rideRecorderProvider);
+    if (recorder.isArmed || recorder.isRecording) return true;
+    final l10n = context.l10n;
+    if (!await LocationPermissionGate.requestForRecording(context)) {
+      return false;
+    }
+    if (!context.mounted) return false;
 
-  final g0 = await showUprightFreezeSheet(
-    context,
-    title: l10n.armAutoRide,
-    help: l10n.freezeThenArmHelp,
-  );
-  if (g0 == null || !context.mounted) return false;
-  ref.read(rideRecorderProvider).prepareLeanLabUpright(g0);
-  await ref.read(armedStateProvider.notifier).arm(routeId: routeId);
-  return true;
+    final g0 = await showUprightFreezeSheet(
+      context,
+      title: l10n.armAutoRide,
+      help: l10n.freezeThenArmHelp,
+      autoBeginHold: autoBeginHold,
+    );
+    if (g0 == null || !context.mounted) return false;
+    ref.read(rideRecorderProvider).prepareLeanLabUpright(g0);
+    await ref.read(armedStateProvider.notifier).arm(routeId: routeId);
+    return true;
+  } finally {
+    freezeThenArmInProgress = false;
+  }
 }
 
 class _UprightFreezeSheet extends StatefulWidget {
-  const _UprightFreezeSheet({required this.title, required this.help});
+  const _UprightFreezeSheet({
+    required this.title,
+    required this.help,
+    this.autoBeginHold = false,
+  });
 
   final String title;
   final String help;
+  final bool autoBeginHold;
 
   @override
   State<_UprightFreezeSheet> createState() => _UprightFreezeSheetState();
@@ -74,6 +98,12 @@ class _UprightFreezeSheetState extends State<_UprightFreezeSheet> {
       },
     )..attach();
     _freeze.addListener(_onTick);
+    if (widget.autoBeginHold) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _freeze.busy) return;
+        _freeze.beginHold();
+      });
+    }
   }
 
   void _onTick() {

@@ -834,6 +834,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'GPS listo. La grabación arranca sola al moverte.';
 
   @override
+  String get armedSessionForceStart => 'Forzar grabación (dev)';
+
+  @override
   String get armedSessionLiveHelp =>
       'Grabando. Puedes salir de esta pantalla; el recorrido sigue.';
 
@@ -1926,7 +1929,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rodadaItineraryHelp =>
-      'Busca o toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.';
+      'Busca un lugar: los resultados salen como puntos en el mapa. Toca uno para elegirlo. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.';
+
+  @override
+  String get rodadaAskStart => '¿Dónde arrancan?';
+
+  @override
+  String get rodadaAskFinish => '¿A dónde van?';
+
+  @override
+  String get rodadaAskStops => 'Paradas opcionales';
+
+  @override
+  String get rodadaSearchStartHint => 'Busca el punto de inicio…';
+
+  @override
+  String get rodadaSearchFinishHint => 'Busca el destino…';
+
+  @override
+  String get rodadaSearchStopHint => 'Busca una parada (gas, comida…)…';
+
+  @override
+  String get rodadaRoundTrip => 'Misma ruta de regreso';
+
+  @override
+  String get rodadaRoundTripHelp =>
+      'Al llegar al destino, la ruta vuelve por los mismos puntos hasta el inicio.';
+
+  @override
+  String get rodadaMapPoint => 'Punto en el mapa';
+
+  @override
+  String get rodadaMyLocation => 'Mi ubicación';
 
   @override
   String get routePrefTolls => 'Casetas';
@@ -2257,13 +2291,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addStop => 'Añadir parada';
 
   @override
+  String get addStopHelp =>
+      'El pack verá este pin en el mapa. Se coloca en tu ubicación actual (gas, descanso, punto de reunión).';
+
+  @override
+  String get stopDroppedSnack => 'Parada marcada en el mapa';
+
+  @override
   String get stopFab => 'Parada';
 
   @override
   String get stopTitleLabel => 'Título';
 
   @override
-  String get dropAtMyGps => 'Soltar en mi GPS';
+  String get dropAtMyGps => 'Poner parada aquí';
 
   @override
   String get gasBreakDefault => 'Gas / descanso';
@@ -2775,6 +2816,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanLabCalibHolding => 'Quédate quieto…';
+
+  @override
+  String leanLabCalibHoldCountdown(int n) {
+    return 'Quédate quieto · ${n}s';
+  }
 
   @override
   String get leanLabCalibPocket => 'Guardar en el bolsillo';

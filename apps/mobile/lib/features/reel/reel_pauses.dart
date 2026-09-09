@@ -60,7 +60,7 @@ class ClusteredReelPhotos {
 List<DetectedPause> detectRidePauses(
   List<TrackPoint> points, {
   Duration minDuration = reelMinPauseDuration,
-  Duration gapThreshold = const Duration(seconds: 8),
+  Duration gapThreshold = rideStretchDefaultMaxGap,
 }) {
   final stretches = rideStretchesFrom(points, maxGap: gapThreshold);
   if (stretches.length < 2) return const [];

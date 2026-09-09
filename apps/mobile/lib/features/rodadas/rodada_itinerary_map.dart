@@ -15,6 +15,74 @@ class RodadaItineraryStopPin {
   final String title;
 }
 
+/// Tappable numbered/lettered pin for search hits or confirmed stops.
+class RodadaChoiceMarker extends StatelessWidget {
+  const RodadaChoiceMarker({
+    super.key,
+    required this.label,
+    required this.color,
+    this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final badge = Container(
+      width: 32,
+      height: 32,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: AppTheme.asphalt, width: 2),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppTheme.asphalt,
+          fontWeight: FontWeight.w800,
+          fontSize: 13,
+          height: 1,
+        ),
+      ),
+    );
+    if (onTap == null) return badge;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: badge,
+    );
+  }
+}
+
+List<Marker> rodadaSearchHitMarkers({
+  required List<LatLng> points,
+  required List<String> titles,
+  required ValueChanged<int> onSelect,
+}) {
+  final n = points.length < titles.length ? points.length : titles.length;
+  return [
+    for (var i = 0; i < n; i++)
+      Marker(
+        point: points[i],
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        child: Tooltip(
+          message: titles[i],
+          child: RodadaChoiceMarker(
+            label: '${i + 1}',
+            color: const Color(0xFF7C9CFF),
+            onTap: () => onSelect(i),
+          ),
+        ),
+      ),
+  ];
+}
+
 List<Widget> rodadaItineraryMapLayers({
   LatLng? start,
   LatLng? finish,
@@ -47,17 +115,17 @@ List<Widget> rodadaItineraryMapLayers({
             height: 40,
             child: const Icon(Icons.flag, color: AppTheme.lineHot, size: 32),
           ),
-        for (final s in stops)
+        for (var i = 0; i < stops.length; i++)
           Marker(
-            point: s.point,
-            width: 40,
-            height: 40,
+            point: stops[i].point,
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
             child: Tooltip(
-              message: s.title,
-              child: const Icon(
-                Icons.local_gas_station,
+              message: stops[i].title,
+              child: RodadaChoiceMarker(
+                label: rodadaStopLetter(i),
                 color: AppTheme.signal,
-                size: 30,
               ),
             ),
           ),

@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/features.dart';
 import '../../core/models/ride_stretch.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snack.dart';
 import 'armed_session_flow.dart';
 import 'armed_session_nav.dart';
 import 'widgets/recording_rec_badge.dart';
@@ -168,6 +170,27 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (!recording && AppFeatures.forceStartArmedRecording) ...[
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        try {
+                          await ref
+                              .read(rideRecorderProvider)
+                              .forceStartFromArm();
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          showAppSnackError(context, '$e');
+                        }
+                      },
+                      icon: const Icon(Icons.bug_report_outlined, size: 18),
+                      label: Text(l10n.armedSessionForceStart),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(44),
+                        foregroundColor: AppTheme.steel,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                   if (recording)
                     FilledButton.tonalIcon(
                       onPressed: () => openArmedRecordingHud(context, ref),

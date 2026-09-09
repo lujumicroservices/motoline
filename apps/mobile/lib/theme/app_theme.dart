@@ -48,6 +48,16 @@ class AppTheme {
         bodyColor: mist,
         displayColor: mist,
       ),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        elevation: 2,
+        insetPadding: EdgeInsets.fromLTRB(48, 0, 48, 20),
+        contentTextStyle: TextStyle(
+          fontSize: 13,
+          height: 1.25,
+          color: mist,
+        ),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: asphalt,
         foregroundColor: mist,

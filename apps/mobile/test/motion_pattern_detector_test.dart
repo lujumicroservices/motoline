@@ -123,6 +123,103 @@ void main() {
       );
       expect(detector.isPaused, isFalse);
     });
+
+    test('GPS wander inside accuracy circle does not resume', () {
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base,
+      );
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 13)),
+      );
+      expect(detector.isPaused, isTrue);
+
+      // ~20 m hop, but 40 m accuracy — typical red-light jitter.
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10.00018,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 20)),
+        accuracyMeters: 40,
+      );
+      expect(detector.isPaused, isTrue);
+    });
+
+    test('walking the bike beyond accuracy still resumes', () {
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base,
+      );
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 13)),
+      );
+      expect(detector.isPaused, isTrue);
+
+      detector.feedRideSample(
+        speedMps: null,
+        latitude: 10.0002,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 20)),
+        accuracyMeters: 5,
+      );
+      expect(detector.isPaused, isFalse);
+    });
+
+    test('does not pause when GPS speed is 0 but pin is clearly moving', () {
+      // Tesistán: Doppler missing, ~34 m / 6 s (~20 km/h), accuracy 16 m.
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+      const startLat = 20.798604;
+      const lng = -103.466847;
+      // 34 m of latitude ≈ 34 / 111_320 degrees.
+      const stepDeg = 34 / 111320;
+
+      for (var i = 0; i <= 4; i++) {
+        detector.feedRideSample(
+          speedMps: 0.0,
+          latitude: startLat - stepDeg * i,
+          longitude: lng,
+          timestamp: base.add(Duration(seconds: i * 6)),
+          accuracyMeters: 16,
+        );
+      }
+      expect(detector.isPaused, isFalse);
+    });
+
+    test('still pauses when speed is 0 and hop is inside accuracy', () {
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+      const startLat = 20.8;
+      // 4 m wander, well inside a 16 m circle.
+      const stepDeg = 4 / 111320;
+
+      for (var i = 0; i <= 7; i++) {
+        detector.feedRideSample(
+          speedMps: 0.0,
+          latitude: startLat + stepDeg * (i.isEven ? 0 : 1),
+          longitude: -103.47,
+          timestamp: base.add(Duration(seconds: i * 2)),
+          accuracyMeters: 16,
+        );
+      }
+      expect(detector.isPaused, isTrue);
+    });
   });
 
   group('suggest end', () {

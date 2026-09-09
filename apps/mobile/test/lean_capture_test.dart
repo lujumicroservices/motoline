@@ -7,9 +7,58 @@ import 'package:motoline/core/services/lean_engine.dart';
 import 'package:motoline/features/ride_active/widgets/upright_freeze_panel.dart';
 
 void main() {
-  test('UprightFreezePanel defaults to hold', () {
-    final panel = UprightFreezePanel(controller: UprightFreezeController(LeanEngine()));
-    expect(panel.mode, UprightFreezeMode.hold);
+  test('hold freeze starts a 4s countdown', () {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final c = UprightFreezeController(LeanEngine())..attach();
+    c.beginHold();
+    expect(c.phase, UprightFreezePhase.capture);
+    expect(c.countdownLeft, 4);
+    c.dispose();
+  });
+
+  test('hold capture seconds left decrease each second', () {
+    final start = DateTime(2026, 1, 1, 12);
+    const cap = Duration(seconds: 4);
+    expect(
+      holdCaptureSecondsLeft(
+        now: start,
+        startedAt: start,
+        captureFor: cap,
+      ),
+      4,
+    );
+    expect(
+      holdCaptureSecondsLeft(
+        now: start.add(const Duration(milliseconds: 1)),
+        startedAt: start,
+        captureFor: cap,
+      ),
+      4,
+    );
+    expect(
+      holdCaptureSecondsLeft(
+        now: start.add(const Duration(seconds: 1)),
+        startedAt: start,
+        captureFor: cap,
+      ),
+      3,
+    );
+    expect(
+      holdCaptureSecondsLeft(
+        now: start.add(const Duration(seconds: 3)),
+        startedAt: start,
+        captureFor: cap,
+      ),
+      1,
+    );
+    expect(
+      holdCaptureSecondsLeft(
+        now: start.add(const Duration(seconds: 4)),
+        startedAt: start,
+        captureFor: cap,
+      ),
+      0,
+    );
   });
 
   test('LeanSample round-trips replay columns', () {

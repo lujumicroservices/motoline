@@ -24,6 +24,37 @@ void main() {
     expect(500 > maxJump, isTrue);
   });
 
+  test('classifyGpsJump recovers after a long hole instead of locking the ride', () {
+    final maxJump = maxPlausibleJumpMeters(
+      dtSeconds: 120,
+      accuracyMeters: 10,
+      previousAccuracyMeters: 10,
+    );
+    expect(
+      classifyGpsJump(
+        jumpMeters: 5000,
+        dtSeconds: 120,
+        maxJumpMeters: maxJump,
+      ),
+      isNot(GpsJumpVerdict.teleport),
+    );
+    expect(
+      classifyGpsJump(
+        jumpMeters: 20000,
+        dtSeconds: 120,
+        maxJumpMeters: maxJump,
+      ),
+      GpsJumpVerdict.recoveredAfterGap,
+    );
+  });
+
+  test('classifyGpsJump drops a 1s continent hop', () {
+    expect(
+      classifyGpsJump(jumpMeters: 500, dtSeconds: 1, maxJumpMeters: 90),
+      GpsJumpVerdict.teleport,
+    );
+  });
+
   test('leanFromAccelerometer is near zero when upright on Y', () {
     final lean = leanFromAccelerometer(x: 0, y: 9.8, z: 0);
     expect(lean.abs(), lessThan(1));

@@ -1574,6 +1574,12 @@ abstract class AppLocalizations {
   /// **'GPS listo. La grabación arranca sola al moverte.'**
   String get armedSessionWaitingHelp;
 
+  /// No description provided for @armedSessionForceStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Forzar grabación (dev)'**
+  String get armedSessionForceStart;
+
   /// No description provided for @armedSessionLiveHelp.
   ///
   /// In es, this message translates to:
@@ -3503,8 +3509,68 @@ abstract class AppLocalizations {
   /// No description provided for @rodadaItineraryHelp.
   ///
   /// In es, this message translates to:
-  /// **'Busca o toca el mapa para marcar inicio, fin o paradas. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.'**
+  /// **'Busca un lugar: los resultados salen como puntos en el mapa. Toca uno para elegirlo. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.'**
   String get rodadaItineraryHelp;
+
+  /// No description provided for @rodadaAskStart.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dónde arrancan?'**
+  String get rodadaAskStart;
+
+  /// No description provided for @rodadaAskFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'¿A dónde van?'**
+  String get rodadaAskFinish;
+
+  /// No description provided for @rodadaAskStops.
+  ///
+  /// In es, this message translates to:
+  /// **'Paradas opcionales'**
+  String get rodadaAskStops;
+
+  /// No description provided for @rodadaSearchStartHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca el punto de inicio…'**
+  String get rodadaSearchStartHint;
+
+  /// No description provided for @rodadaSearchFinishHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca el destino…'**
+  String get rodadaSearchFinishHint;
+
+  /// No description provided for @rodadaSearchStopHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca una parada (gas, comida…)…'**
+  String get rodadaSearchStopHint;
+
+  /// No description provided for @rodadaRoundTrip.
+  ///
+  /// In es, this message translates to:
+  /// **'Misma ruta de regreso'**
+  String get rodadaRoundTrip;
+
+  /// No description provided for @rodadaRoundTripHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Al llegar al destino, la ruta vuelve por los mismos puntos hasta el inicio.'**
+  String get rodadaRoundTripHelp;
+
+  /// No description provided for @rodadaMapPoint.
+  ///
+  /// In es, this message translates to:
+  /// **'Punto en el mapa'**
+  String get rodadaMapPoint;
+
+  /// No description provided for @rodadaMyLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi ubicación'**
+  String get rodadaMyLocation;
 
   /// No description provided for @routePrefTolls.
   ///
@@ -4040,6 +4106,18 @@ abstract class AppLocalizations {
   /// **'Añadir parada'**
   String get addStop;
 
+  /// No description provided for @addStopHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'El pack verá este pin en el mapa. Se coloca en tu ubicación actual (gas, descanso, punto de reunión).'**
+  String get addStopHelp;
+
+  /// No description provided for @stopDroppedSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Parada marcada en el mapa'**
+  String get stopDroppedSnack;
+
   /// No description provided for @stopFab.
   ///
   /// In es, this message translates to:
@@ -4055,7 +4133,7 @@ abstract class AppLocalizations {
   /// No description provided for @dropAtMyGps.
   ///
   /// In es, this message translates to:
-  /// **'Soltar en mi GPS'**
+  /// **'Poner parada aquí'**
   String get dropAtMyGps;
 
   /// No description provided for @gasBreakDefault.
@@ -4963,6 +5041,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Quédate quieto…'**
   String get leanLabCalibHolding;
+
+  /// No description provided for @leanLabCalibHoldCountdown.
+  ///
+  /// In es, this message translates to:
+  /// **'Quédate quieto · {n}s'**
+  String leanLabCalibHoldCountdown(int n);
 
   /// No description provided for @leanLabCalibPocket.
   ///

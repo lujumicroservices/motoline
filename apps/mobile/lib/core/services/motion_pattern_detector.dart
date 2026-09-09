@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../utils/geo_utils.dart';
 
 /// Coarse motion phase — informational only, derived from the same
@@ -66,6 +68,10 @@ class MotionPatternDetector {
   double? _armLastLng;
   double _armCumulativeMeters = 0;
 
+  double? _lastLat;
+  double? _lastLng;
+  DateTime? _lastTs;
+
   bool get isPaused => _isPaused;
   bool get suggestEnd => _suggestEnd;
 
@@ -89,6 +95,9 @@ class MotionPatternDetector {
     _stillSince = null;
     _stillAnchorLat = null;
     _stillAnchorLng = null;
+    _lastLat = null;
+    _lastLng = null;
+    _lastTs = null;
   }
 
   /// Clear auto-pause without resetting suggest-end / arm state.
@@ -111,23 +120,89 @@ class MotionPatternDetector {
 
   /// Feed a location sample while a ride is recording (or auto-paused).
   /// Updates [isPaused] and [suggestEnd] as a side effect.
+  ///
+  /// [accuracyMeters] gates resume-by-distance so GPS wander at a red light
+  /// does not look like rolling off.
+  ///
+  /// Android often reports [speedMps] = 0 when Doppler is missing. Pause
+  /// then uses implied speed (meters / dt) when the hop is larger than the
+  /// accuracy circle — otherwise 0 is treated as stopped.
   void feedRideSample({
     required double? speedMps,
     required double latitude,
     required double longitude,
     required DateTime timestamp,
+    double? accuracyMeters,
   }) {
-    _updatePause(speedMps, latitude, longitude, timestamp);
-    _updateSuggestEnd(speedMps, latitude, longitude, timestamp);
+    final speed = _effectiveSpeedMps(
+      speedMps,
+      latitude,
+      longitude,
+      timestamp,
+      accuracyMeters,
+    );
+    _updatePause(speed, latitude, longitude, timestamp, accuracyMeters);
+    _updateSuggestEnd(speed, latitude, longitude, timestamp);
+    _lastLat = latitude;
+    _lastLng = longitude;
+    _lastTs = timestamp;
   }
 
-  void _updatePause(double? speedMps, double lat, double lng, DateTime ts) {
+  /// Below ~1 km/h Android's 0.0 usually means "no speed", not parked.
+  static const _usableGpsSpeedMps = 0.3;
+
+  /// Wander smaller than this is not a ride, even with a tight accuracy.
+  static const _impliedMinJumpMeters = 5.0;
+
+  double _effectiveSpeedMps(
+    double? speedMps,
+    double lat,
+    double lng,
+    DateTime ts,
+    double? accuracyMeters,
+  ) {
+    final implied = _credibleImpliedMps(lat, lng, ts, accuracyMeters);
+    final gpsUsable =
+        speedMps != null && speedMps > _usableGpsSpeedMps;
+    if (gpsUsable && implied != null) {
+      return math.max(speedMps, implied);
+    }
+    if (gpsUsable) return speedMps;
+    if (implied != null) return implied;
+    return speedMps ?? -1;
+  }
+
+  /// Implied m/s from the previous sample, or 0 when the hop is inside the
+  /// error circle. Null on the first sample.
+  double? _credibleImpliedMps(
+    double lat,
+    double lng,
+    DateTime ts,
+    double? accuracyMeters,
+  ) {
+    final prevLat = _lastLat;
+    final prevLng = _lastLng;
+    final prevTs = _lastTs;
+    if (prevLat == null || prevLng == null || prevTs == null) return null;
+    final dtSec = ts.difference(prevTs).inMilliseconds / 1000.0;
+    if (dtSec < 0.05) return null;
+    final jump = haversineMeters(prevLat, prevLng, lat, lng);
+    final floor = math.max(accuracyMeters ?? 0, _impliedMinJumpMeters);
+    if (jump <= floor) return 0;
+    return jump / dtSec;
+  }
+
+  void _updatePause(
+    double speed,
+    double lat,
+    double lng,
+    DateTime ts,
+    double? accuracyMeters,
+  ) {
     if (!autoPauseEnabled) {
       if (_isPaused) clearPause();
       return;
     }
-
-    final speed = speedMps ?? -1;
     if (!_isPaused) {
       if (speed >= 0 && speed < pauseSpeedThresholdMps) {
         _slowSince ??= ts;
@@ -159,7 +234,9 @@ class MotionPatternDetector {
 
     final sustainedFast =
         _fastSince != null && ts.difference(_fastSince!) >= resumeAfter;
-    final movedEnough = movedMeters > resumeDistanceMeters;
+    // Wander inside the fix's error circle is not "walking the bike out".
+    final movedEnough = movedMeters > resumeDistanceMeters &&
+        (accuracyMeters == null || movedMeters > accuracyMeters);
 
     if (sustainedFast || movedEnough) {
       _isPaused = false;

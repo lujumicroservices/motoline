@@ -54,10 +54,16 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
   bool _searching = false;
   final Set<String> _inviteIds = {};
 
-  List<LatLng> get _pins => rodadaItineraryLine(
+  String? _startTitle;
+  String? _finishTitle;
+  bool _titleLocked = false;
+  bool _roundTrip = false;
+
+  List<LatLng> get _pins => rodadaRouteWaypoints(
         start: _start,
         stops: [for (final s in _stops) s.point],
         finish: _finish,
+        roundTrip: _roundTrip,
       );
 
   List<LatLng> get _displayLine =>
@@ -103,27 +109,52 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
 
   void _place(LatLng point, {String? title}) {
     final l10n = context.l10n;
+    final label = (title != null && title.trim().isNotEmpty)
+        ? title.trim()
+        : l10n.rodadaMapPoint;
     setState(() {
+      _hits = [];
       switch (_mode) {
         case RodadaPinMode.start:
           _start = point;
+          _startTitle = label;
+          _mode = RodadaPinMode.finish;
         case RodadaPinMode.finish:
           _finish = point;
+          _finishTitle = label;
+          _mode = RodadaPinMode.stop;
         case RodadaPinMode.stop:
           _stops.add(
             DraftRodadaStop(
               point: point,
-              title: (title != null && title.trim().isNotEmpty)
+              title: title != null && title.trim().isNotEmpty
                   ? title.trim()
                   : l10n.rodadaStopN(_stops.length + 1),
             ),
           );
       }
+      _syncAutoTitle();
     });
-    try {
-      _map.move(point, _map.camera.zoom < 14 ? 16 : _map.camera.zoom);
-    } catch (_) {}
+    // Search / GPS picks may be off-screen. A map tap is already under the
+    // finger — moving the camera here fights the next pan and freezes flutter_map.
+    if (title != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        try {
+          _map.move(point, _map.camera.zoom < 14 ? 16 : _map.camera.zoom);
+        } catch (_) {}
+      });
+    }
     _scheduleRoute();
+  }
+
+  void _syncAutoTitle() {
+    if (_titleLocked) return;
+    _title.text = rodadaAutoTitle(
+      startName: _startTitle ?? '',
+      finishName: _finishTitle ?? '',
+    );
+    _destination.text = _finishTitle ?? '';
   }
 
   void _scheduleRoute() {
@@ -135,6 +166,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     final pins = _pins;
     if (pins.length < 2) {
       if (!mounted) return;
+      if (_route == null && !_routing && !_routeFailed) return;
       setState(() {
         _route = null;
         _routeFailed = false;
@@ -159,18 +191,21 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     });
     final points = result?.points;
     if (points == null || points.length < 2) return;
-    try {
-      final bounds = rodadaItineraryBounds(points);
-      if (bounds != null) {
-        _map.fitCamera(
-          CameraFit.bounds(
-            bounds: bounds,
-            padding: const EdgeInsets.all(28),
-            maxZoom: 14,
-          ),
-        );
-      }
-    } catch (_) {}
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || gen != _routeGen) return;
+      try {
+        final bounds = rodadaItineraryBounds(points);
+        if (bounds != null) {
+          _map.fitCamera(
+            CameraFit.bounds(
+              bounds: bounds,
+              padding: const EdgeInsets.all(28),
+              maxZoom: 14,
+            ),
+          );
+        }
+      } catch (_) {}
+    });
   }
 
   void _onSearchChanged(String q) {
@@ -204,6 +239,28 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
       _searching = false;
       _hits = hits;
     });
+    _fitSearchHits(hits);
+  }
+
+  void _fitSearchHits(List<PlaceSearchHit> hits) {
+    if (hits.isEmpty) return;
+    try {
+      final pts = <LatLng>[
+        for (final h in hits) h.point,
+        if (_start != null) _start!,
+        if (_finish != null) _finish!,
+        for (final s in _stops) s.point,
+      ];
+      final bounds = rodadaItineraryBounds(pts);
+      if (bounds == null) return;
+      _map.fitCamera(
+        CameraFit.bounds(
+          bounds: bounds,
+          padding: const EdgeInsets.all(48),
+          maxZoom: 15,
+        ),
+      );
+    } catch (_) {}
   }
 
   void _pickHit(PlaceSearchHit hit) {
@@ -221,7 +278,10 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
         ),
       );
       if (!mounted) return;
-      _place(LatLng(pos.latitude, pos.longitude));
+      _place(
+        LatLng(pos.latitude, pos.longitude),
+        title: l10n.rodadaMyLocation,
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -247,11 +307,12 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     }
     try {
       final repo = ref.read(rodadaRepositoryProvider);
+      final dest = _destination.text.trim().isNotEmpty
+          ? _destination.text.trim()
+          : _finishTitle?.trim();
       final rodada = await repo.createRodada(
         title: title,
-        destination: _destination.text.trim().isEmpty
-            ? null
-            : _destination.text.trim(),
+        destination: (dest == null || dest.isEmpty) ? null : dest,
         notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
         meetupLat: _start?.latitude,
         meetupLng: _start?.longitude,
@@ -302,12 +363,29 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     };
   }
 
+  String _modePrompt(AppLocalizations l10n) {
+    return switch (_mode) {
+      RodadaPinMode.start => l10n.rodadaAskStart,
+      RodadaPinMode.finish => l10n.rodadaAskFinish,
+      RodadaPinMode.stop => l10n.rodadaAskStops,
+    };
+  }
+
+  String _searchHint(AppLocalizations l10n) {
+    return switch (_mode) {
+      RodadaPinMode.start => l10n.rodadaSearchStartHint,
+      RodadaPinMode.finish => l10n.rodadaSearchFinishHint,
+      RodadaPinMode.stop => l10n.rodadaSearchStopHint,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final line = _displayLine;
     final friendsAsync = ref.watch(friendsListProvider);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           l10n.newRodada,
@@ -326,60 +404,151 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextField(
-            controller: _title,
-            decoration: InputDecoration(
-              labelText: l10n.rodadaTitleLabel,
-              hintText: l10n.rodadaTitleHint,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  _modePrompt(l10n),
+                  style: GoogleFonts.exo2(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.rodadaItineraryHelp,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SegmentedButton<RodadaPinMode>(
+                  showSelectedIcon: false,
+                  segments: [
+                    for (final mode in RodadaPinMode.values)
+                      ButtonSegment(
+                        value: mode,
+                        label: Text(_modeLabel(l10n, mode)),
+                      ),
+                  ],
+                  selected: {_mode},
+                  onSelectionChanged: (set) {
+                    if (set.isEmpty) return;
+                    setState(() {
+                      _mode = set.first;
+                      _hits = [];
+                      _search.clear();
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                ListenableBuilder(
+                  listenable: _search,
+                  builder: (context, _) {
+                    return TextField(
+                      controller: _search,
+                      decoration: InputDecoration(
+                        hintText: _searchHint(l10n),
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searching
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : (_search.text.isEmpty
+                                ? null
+                                : IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _search.clear();
+                                      setState(() => _hits = []);
+                                    },
+                                  )),
+                      ),
+                      textInputAction: TextInputAction.search,
+                      onChanged: _onSearchChanged,
+                    );
+                  },
+                ),
+                Row(
+                  children: [
+                    const Spacer(),
+                    TextButton(
+                      onPressed: _useMyLocation,
+                      child: Text(l10n.useMyGps),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            textCapitalization: TextCapitalization.sentences,
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _destination,
-            decoration: InputDecoration(
-              labelText: l10n.rodadaDestinationLabel,
-              hintText: l10n.rodadaDestinationHint,
+          Expanded(
+            flex: 5,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: _CreateRodadaMap(
+                  map: _map,
+                  line: line,
+                  start: _start,
+                  finish: _finish,
+                  stops: _stops,
+                  routedLine: _route?.points,
+                  hits: _hits,
+                  liveGps: liveGpsMapChild(),
+                  locationOverlay: myLocationOverlay(_map),
+                  onTap: _place,
+                  onSelectHit: _pickHit,
+                ),
+              ),
             ),
-            textCapitalization: TextCapitalization.words,
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _notes,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: l10n.rodadaNotesLabel,
-              hintText: l10n.rodadaNotesHint,
+          Expanded(
+            flex: 4,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              children: [
+          if (_hits.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var i = 0; i < _hits.length; i++)
+                  ActionChip(
+                    avatar: CircleAvatar(
+                      backgroundColor: const Color(0xFF7C9CFF),
+                      foregroundColor: AppTheme.asphalt,
+                      child: Text(
+                        '${i + 1}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    label: Text(
+                      _hits[i].title,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onPressed: () => _pickHit(_hits[i]),
+                  ),
+              ],
             ),
-          ),
-          const SizedBox(height: 16),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.rodadaStartsAt),
-            subtitle: Text(
-              _startsAt == null
-                  ? l10n.rodadaPickDateTime
-                  : _startsAt!.toLocal().toString().substring(0, 16),
-            ),
-            trailing: const Icon(Icons.schedule),
-            onTap: _pickStartsAt,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.rodadaItinerary,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          RoutePrefsChips(
-            prefs: _prefs,
-            onChanged: (next) {
-              setState(() => _prefs = next);
-              _scheduleRoute();
-            },
-          ),
+          ],
           const SizedBox(height: 8),
           if (_routing)
             Text(
@@ -404,157 +573,44 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
               style: GoogleFonts.rajdhani(color: AppTheme.signal, fontSize: 13),
             ),
           const SizedBox(height: 8),
-          SegmentedButton<RodadaPinMode>(
-            showSelectedIcon: false,
-            segments: [
-              for (final mode in RodadaPinMode.values)
-                ButtonSegment(
-                  value: mode,
-                  label: Text(_modeLabel(l10n, mode)),
+          RoutePrefsChips(
+            prefs: _prefs,
+            onChanged: (next) {
+              setState(() => _prefs = next);
+              _scheduleRoute();
+            },
+          ),
+          if (_start != null && _finish != null)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.rodadaRoundTrip),
+              subtitle: Text(
+                l10n.rodadaRoundTripHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 13,
                 ),
-            ],
-            selected: {_mode},
-            onSelectionChanged: (set) {
-              if (set.isEmpty) return;
-              setState(() => _mode = set.first);
-            },
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _search,
-            decoration: InputDecoration(
-              hintText: l10n.routeSearchHint,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searching
-                  ? const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  : (_search.text.isEmpty
-                      ? null
-                      : IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _search.clear();
-                            setState(() => _hits = []);
-                          },
-                        )),
-            ),
-            textInputAction: TextInputAction.search,
-            onChanged: (q) {
-              setState(() {});
-              _onSearchChanged(q);
-            },
-          ),
-          if (_hits.isNotEmpty)
-            Card(
-              color: AppTheme.asphaltElevated,
-              child: Column(
-                children: [
-                  for (final hit in _hits)
-                    ListTile(
-                      dense: true,
-                      leading: const Icon(Icons.place, color: AppTheme.line),
-                      title: Text(hit.title),
-                      subtitle: hit.subtitle == null ? null : Text(hit.subtitle!),
-                      onTap: () => _pickHit(hit),
-                    ),
-                ],
               ),
+              value: _roundTrip,
+              onChanged: (v) {
+                setState(() => _roundTrip = v);
+                _scheduleRoute();
+              },
             ),
-          Row(
-            children: [
-              const Spacer(),
-              TextButton(
-                onPressed: _useMyLocation,
-                child: Text(l10n.useMyGps),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 280,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Stack(
-                children: [
-                  FlutterMap(
-                    mapController: _map,
-                    options: MapOptions(
-                      initialCenter: line.isNotEmpty
-                          ? line.first
-                          : const LatLng(20.67, -103.35),
-                      initialZoom: line.isEmpty ? 10 : 14,
-                      onTap: (_, p) => _place(p),
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.rawthrottle.riderlab',
-                      ),
-                      ...rodadaItineraryMapLayers(
-                        start: _start,
-                        finish: _finish,
-                        routedLine: _route?.points,
-                        stops: [
-                          for (final s in _stops)
-                            RodadaItineraryStopPin(
-                              point: s.point,
-                              title: s.title,
-                            ),
-                        ],
-                      ),
-                      if (_hits.isNotEmpty)
-                        MarkerLayer(
-                          markers: [
-                            for (final hit in _hits)
-                              Marker(
-                                point: hit.point,
-                                width: 40,
-                                height: 40,
-                                alignment: Alignment.bottomCenter,
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => _pickHit(hit),
-                                  child: Tooltip(
-                                    message: hit.title,
-                                    child: const Icon(
-                                      Icons.place,
-                                      color: Color(0xFF7C9CFF),
-                                      size: 34,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      liveGpsMapChild(),
-                    ],
-                  ),
-                  myLocationOverlay(_map),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.rodadaItineraryHelp,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
-          ),
-          const SizedBox(height: 8),
           _PinRow(
             icon: Icons.flag,
             color: AppTheme.lineHot,
             label: l10n.rodadaPinStart,
-            value: _start == null ? l10n.rodadaPinUnset : null,
+            value: _start == null ? l10n.rodadaPinUnset : _startTitle,
             onClear: _start == null
                 ? null
                 : () {
-                    setState(() => _start = null);
+                    setState(() {
+                      _start = null;
+                      _startTitle = null;
+                      _mode = RodadaPinMode.start;
+                      _syncAutoTitle();
+                    });
                     _scheduleRoute();
                   },
           ),
@@ -562,11 +618,16 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
             icon: Icons.sports_score,
             color: AppTheme.line,
             label: l10n.rodadaPinFinish,
-            value: _finish == null ? l10n.rodadaPinUnset : null,
+            value: _finish == null ? l10n.rodadaPinUnset : _finishTitle,
             onClear: _finish == null
                 ? null
                 : () {
-                    setState(() => _finish = null);
+                    setState(() {
+                      _finish = null;
+                      _finishTitle = null;
+                      _mode = RodadaPinMode.finish;
+                      _syncAutoTitle();
+                    });
                     _scheduleRoute();
                   },
           ),
@@ -574,12 +635,43 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
             _PinRow(
               icon: Icons.local_gas_station,
               color: AppTheme.signal,
-              label: _stops[i].title,
+              label: '${rodadaStopLetter(i)} · ${_stops[i].title}',
               onClear: () {
                 setState(() => _stops.removeAt(i));
                 _scheduleRoute();
               },
             ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _title,
+            decoration: InputDecoration(
+              labelText: l10n.rodadaTitleLabel,
+              hintText: l10n.rodadaTitleHint,
+            ),
+            textCapitalization: TextCapitalization.sentences,
+            onChanged: (_) => _titleLocked = true,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _notes,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: l10n.rodadaNotesLabel,
+              hintText: l10n.rodadaNotesHint,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.rodadaStartsAt),
+            subtitle: Text(
+              _startsAt == null
+                  ? l10n.rodadaPickDateTime
+                  : _startsAt!.toLocal().toString().substring(0, 16),
+            ),
+            trailing: const Icon(Icons.schedule),
+            onTap: _pickStartsAt,
+          ),
           const SizedBox(height: 16),
           Text(
             l10n.inviteFriends,
@@ -624,8 +716,94 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
             const SizedBox(height: 16),
             Text(_error!, style: const TextStyle(color: AppTheme.signal)),
           ],
+              ],
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Own [State] so form `setState` updates markers without remounting tiles.
+class _CreateRodadaMap extends StatefulWidget {
+  const _CreateRodadaMap({
+    required this.map,
+    required this.line,
+    required this.start,
+    required this.finish,
+    required this.stops,
+    required this.routedLine,
+    required this.hits,
+    required this.liveGps,
+    required this.locationOverlay,
+    required this.onTap,
+    required this.onSelectHit,
+  });
+
+  final MapController map;
+  final List<LatLng> line;
+  final LatLng? start;
+  final LatLng? finish;
+  final List<DraftRodadaStop> stops;
+  final List<LatLng>? routedLine;
+  final List<PlaceSearchHit> hits;
+  final Widget liveGps;
+  final Widget locationOverlay;
+  final ValueChanged<LatLng> onTap;
+  final ValueChanged<PlaceSearchHit> onSelectHit;
+
+  @override
+  State<_CreateRodadaMap> createState() => _CreateRodadaMapState();
+}
+
+class _CreateRodadaMapState extends State<_CreateRodadaMap> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        FlutterMap(
+          mapController: widget.map,
+          options: MapOptions(
+            initialCenter: widget.line.isNotEmpty
+                ? widget.line.first
+                : const LatLng(20.67, -103.35),
+            initialZoom: widget.line.isEmpty ? 10 : 14,
+            onTap: (_, p) => widget.onTap(p),
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.all,
+            ),
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.rawthrottle.riderlab',
+            ),
+            ...rodadaItineraryMapLayers(
+              start: widget.start,
+              finish: widget.finish,
+              routedLine: widget.routedLine,
+              stops: [
+                for (final s in widget.stops)
+                  RodadaItineraryStopPin(
+                    point: s.point,
+                    title: s.title,
+                  ),
+              ],
+            ),
+            if (widget.hits.isNotEmpty)
+              MarkerLayer(
+                markers: rodadaSearchHitMarkers(
+                  points: [for (final h in widget.hits) h.point],
+                  titles: [for (final h in widget.hits) h.title],
+                  onSelect: (i) => widget.onSelectHit(widget.hits[i]),
+                ),
+              ),
+            widget.liveGps,
+          ],
+        ),
+        widget.locationOverlay,
+      ],
     );
   }
 }

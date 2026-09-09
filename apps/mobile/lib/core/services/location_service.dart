@@ -243,16 +243,51 @@ class LocationService {
   }
 }
 
+/// Hard ceiling used only to reject GPS teleports (≈ 252 km/h).
+const maxPlausibleGpsSpeedMps = 70.0;
+
+/// After this many seconds without a stored fix, a huge jump is treated as
+/// GNSS recovery (new anchor) instead of dropping every later point.
+const gpsRecoveryMinSeconds = 8.0;
+
+/// How to treat a hop from the last stored point.
+enum GpsJumpVerdict {
+  /// Within motorcycle + accuracy budget — add to distance.
+  withinPlausible,
+
+  /// Instant teleport — drop this sample, keep the previous anchor.
+  teleport,
+
+  /// Long gap then a far fix — store as a new anchor; credit distance only
+  /// when implied speed is still motorcycle-like.
+  recoveredAfterGap,
+}
+
+GpsJumpVerdict classifyGpsJump({
+  required double jumpMeters,
+  required double dtSeconds,
+  required double maxJumpMeters,
+  double recoveryMinSeconds = gpsRecoveryMinSeconds,
+}) {
+  if (jumpMeters <= maxJumpMeters) return GpsJumpVerdict.withinPlausible;
+  if (dtSeconds >= recoveryMinSeconds) {
+    return GpsJumpVerdict.recoveredAfterGap;
+  }
+  return GpsJumpVerdict.teleport;
+}
+
 /// Max plausible motorcycle displacement for [dtSeconds], plus GPS error pad.
 double maxPlausibleJumpMeters({
   required double dtSeconds,
   required double accuracyMeters,
   double previousAccuracyMeters = 10,
 }) {
-  final dt = dtSeconds.clamp(0.05, 45.0);
-  // 70 m/s ≈ 252 km/h hard ceiling for filtering teleports only.
-  const maxSpeedMps = 70.0;
-  return maxSpeedMps * dt + accuracyMeters + previousAccuracyMeters + 15;
+  // 3 min covers long tunnels; longer holes go through [classifyGpsJump].
+  final dt = dtSeconds.clamp(0.05, 180.0);
+  return maxPlausibleGpsSpeedMps * dt +
+      accuracyMeters +
+      previousAccuracyMeters +
+      15;
 }
 
 double clampLeanDegrees(double lean) => lean.clamp(-70.0, 70.0);

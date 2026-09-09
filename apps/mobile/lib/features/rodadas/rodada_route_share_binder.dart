@@ -9,6 +9,7 @@ import '../../core/services/location_service.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../providers/ride_providers.dart';
 import '../ride_active/armed_session_flow.dart';
+import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../watch/watch_providers.dart';
 import '../watch/watch_repository.dart';
 import 'rodada_live_session.dart';
@@ -135,10 +136,18 @@ class _RodadaRouteShareBinderState
       _armedFor.add(rodadaId);
       return;
     }
-    if (!await _location.hasRecordingPermission()) return;
+    if (freezeThenArmInProgress) {
+      _armedFor.add(rodadaId);
+      return;
+    }
+    if (!mounted) return;
     _armedFor.add(rodadaId);
     try {
-      await ref.read(armedStateProvider.notifier).arm();
+      final ok = await freezeThenArm(context, ref, autoBeginHold: true);
+      if (!ok) {
+        if (!freezeThenArmInProgress) _armedFor.remove(rodadaId);
+        return;
+      }
       if (!mounted) return;
       ensureArmedSessionHub(context, ref);
     } catch (e) {
@@ -178,7 +187,7 @@ class _RodadaRouteShareBinderState
         ref.invalidate(myRodadasProvider);
         unawaited(_reconcile());
       });
-      _poll = Timer.periodic(const Duration(seconds: 20), (_) {
+      _poll = Timer.periodic(const Duration(seconds: 8), (_) {
         ref.invalidate(myRodadasProvider);
         unawaited(_reconcile());
       });

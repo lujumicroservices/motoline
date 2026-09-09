@@ -73,7 +73,8 @@ int? nearestTrackIndex(
   return best;
 }
 
-/// Marks gaps where consecutive samples are farther apart in time than [maxGap].
+/// Marks **signal-loss** holes for map dashes (any time gap > [maxGap]).
+/// Ride hub tramos use [splitByStopGaps] — a moving tunnel is not a new tramo.
 List<List<TrackPoint>> splitByGpsGaps(
   List<TrackPoint> points, {
   Duration maxGap = const Duration(seconds: 8),

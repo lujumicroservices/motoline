@@ -12,6 +12,7 @@ import '../../../core/routing/off_route.dart';
 import '../../../core/services/directions_service.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import '../../../widgets/app_snack.dart';
 import '../../maps/live_gps_map_mixin.dart';
 import '../../watch/active_watch_panel.dart';
 import '../../watch/watch_providers.dart';
@@ -360,9 +361,24 @@ Future<void> _addStop(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(l10n.addStop),
-      content: TextField(
-        controller: titleCtrl,
-        decoration: InputDecoration(labelText: l10n.stopTitleLabel),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.addStopHelp,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 14,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: titleCtrl,
+            decoration: InputDecoration(labelText: l10n.stopTitleLabel),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -376,16 +392,32 @@ Future<void> _addStop(
       ],
     ),
   );
+  final title = titleCtrl.text.trim();
+  titleCtrl.dispose();
   if (ok != true || !context.mounted) return;
+
+  if (!await LocationPermissionGate.requestForRodadaLive(context)) {
+    if (context.mounted) showAppSnack(context, l10n.myLocationUnavailable);
+    return;
+  }
+  if (!context.mounted) return;
+
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+  var loading = true;
   try {
-    final pos = await Geolocator.getCurrentPosition();
-    await ref
-        .read(rodadaRepositoryProvider)
-        .addStop(
+    final pos = await _positionForStop();
+    if (!context.mounted) return;
+    if (pos == null) {
+      showAppSnack(context, l10n.myLocationUnavailable);
+      return;
+    }
+    await ref.read(rodadaRepositoryProvider).addStop(
           rodadaId: rodadaId,
-          title: titleCtrl.text.trim().isEmpty
-              ? l10n.stopDefault
-              : titleCtrl.text.trim(),
+          title: title.isEmpty ? l10n.stopDefault : title,
           latitude: pos.latitude,
           longitude: pos.longitude,
         );
@@ -401,10 +433,32 @@ Future<void> _addStop(
             ref.invalidate(rodadaOverviewProvider(rodadaId));
           }),
     );
+    if (!context.mounted) return;
+    showAppSnack(context, l10n.stopDroppedSnack);
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    showAppSnackError(context, l10n.locationFailed('$e'));
+  } finally {
+    if (loading && context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
   }
+}
+
+Future<Position?> _positionForStop() async {
+  Position? pos;
+  try {
+    pos = await Geolocator.getLastKnownPosition();
+  } catch (_) {}
+  try {
+    pos = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.medium,
+        timeLimit: Duration(seconds: 8),
+      ),
+    );
+  } catch (_) {}
+  return pos;
 }
 
 /// Stable [FlutterMap] — tiles stay mounted; markers update without remount.
@@ -486,9 +540,18 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
   @override
   void didUpdateWidget(covariant _RodadaLiveMap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.routedLine != widget.routedLine) {
-      _offRoute.reset();
-      _onGps();
+    if (widget.stops.length > oldWidget.stops.length &&
+        widget.stops.isNotEmpty) {
+      final s = widget.stops.last;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        try {
+          _map.move(
+            LatLng(s.latitude, s.longitude),
+            _map.camera.zoom < 14 ? 16 : _map.camera.zoom,
+          );
+        } catch (_) {}
+      });
     }
     if (_samePositions(oldWidget.positions, widget.positions) &&
         oldWidget.meetup == widget.meetup &&

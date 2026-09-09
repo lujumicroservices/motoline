@@ -7,6 +7,17 @@ import '../services/lean_engine.dart';
 import 'lean_imu_math.dart';
 import 'lock_cue.dart';
 
+int holdCaptureSecondsLeft({
+  required DateTime now,
+  required DateTime startedAt,
+  required Duration captureFor,
+}) {
+  final remainingMs =
+      captureFor.inMilliseconds - now.difference(startedAt).inMilliseconds;
+  if (remainingMs <= 0) return 0;
+  return (remainingMs + 999) ~/ 1000;
+}
+
 enum UprightFreezePhase {
   idle,
   countdown,
@@ -88,7 +99,7 @@ class UprightFreezeController extends ChangeNotifier {
     mode = UprightFreezeMode.hold;
     phase = UprightFreezePhase.capture;
     _phaseAt = DateTime.now();
-    countdownLeft = 0;
+    countdownLeft = 4;
     _captureFor = const Duration(seconds: 4);
     frozenG0 = null;
     failId = null;
@@ -146,9 +157,15 @@ class UprightFreezeController extends ChangeNotifier {
       }
       notifyListeners();
     } else if (phase == UprightFreezePhase.capture) {
-      if (now.difference(_phaseAt ?? now) >= _captureFor) {
+      final elapsed = now.difference(_phaseAt ?? now);
+      countdownLeft = holdCaptureSecondsLeft(
+        now: now,
+        startedAt: _phaseAt ?? now,
+        captureFor: _captureFor,
+      );
+      if (elapsed >= _captureFor) {
         _finish();
-      } else if (mode == UprightFreezeMode.hold) {
+      } else {
         notifyListeners();
       }
     }

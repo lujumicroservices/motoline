@@ -282,6 +282,7 @@
     }
   },
   "armedSessionWaitingHelp": "GPS is ready. Recording starts by itself when you move.",
+  "armedSessionForceStart": "Force recording (dev)",
   "armedSessionLiveHelp": "Recording. You can leave this screen — the ride keeps going.",
   "loopMode": "Lap mode",
   "pausedLabel": "PAUSED",
@@ -716,7 +717,17 @@
       "n": { "type": "int" }
     }
   },
-  "rodadaItineraryHelp": "Search or tap the map to mark start, finish, or stops. Live GPS and photos stay off until each rider opts in.",
+  "rodadaItineraryHelp": "Search a place: results show as points on the map. Tap one to pick it. Live GPS and photos stay off until each rider opts in.",
+  "rodadaAskStart": "Where do you start?",
+  "rodadaAskFinish": "Where are you going?",
+  "rodadaAskStops": "Optional stops",
+  "rodadaSearchStartHint": "Search the start point…",
+  "rodadaSearchFinishHint": "Search the destination…",
+  "rodadaSearchStopHint": "Search a stop (gas, food…)…",
+  "rodadaRoundTrip": "Same route back",
+  "rodadaRoundTripHelp": "After the destination, the route returns along the same points to the start.",
+  "rodadaMapPoint": "Map point",
+  "rodadaMyLocation": "My location",
   "routePrefTolls": "Tolls",
   "routePrefHighway": "Highway",
   "routePrefStreet": "Street",
@@ -934,9 +945,11 @@
     }
   },
   "addStop": "Add stop",
+  "addStopHelp": "The pack will see this pin on the map. It is placed at your current location (gas, rest, meetup).",
+  "stopDroppedSnack": "Stop marked on the map",
   "stopFab": "Stop",
   "stopTitleLabel": "Title",
-  "dropAtMyGps": "Drop at my GPS",
+  "dropAtMyGps": "Place stop here",
   "gasBreakDefault": "Gas / break",
   "stopDefault": "Stop",
   "sharedTracksHelp": "Lines from riders who turned sharing on. Detailed GPS stays on each phone.",
@@ -1173,6 +1186,12 @@
   "leanLabCalibHelp": "Bike standing straight, phone already in place. Hands off for 4 seconds — this saves 0°. Lean should stay near 0°.",
   "leanLabCalibHold": "Hold upright 4s",
   "leanLabCalibHolding": "Hold still…",
+  "leanLabCalibHoldCountdown": "Hold still · {n}s",
+  "@leanLabCalibHoldCountdown": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
   "leanLabCalibPocket": "Save in pocket",
   "leanLabCalibPocketHelp": "Tap, put the phone fully in the pocket, stay still. A buzz and beep means 0° is saved and the ride started — don’t save 0° in your hand.",
   "leanLabCalibPocketCountdown": "Pocket it now · {n}s",

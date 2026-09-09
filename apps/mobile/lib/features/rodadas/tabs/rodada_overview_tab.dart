@@ -9,6 +9,7 @@ import '../../../core/services/directions_service.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
+import '../../../widgets/app_snack.dart';
 import '../../reel/reel_compose_screen.dart';
 import '../../ride_active/armed_session_flow.dart';
 import '../../ride_active/armed_session_nav.dart';
@@ -362,17 +363,21 @@ class RodadaOverviewTab extends ConsumerWidget {
     if (ok != true || !context.mounted) return;
     try {
       await ref.read(rodadaRepositoryProvider).startRodada(rodadaId);
+      Future<bool>? armFuture;
+      if (member.autoArmOnStart) {
+        armFuture = freezeThenArm(context, ref, autoBeginHold: true);
+      }
       ref.invalidate(rodadaOverviewProvider(rodadaId));
       ref.invalidate(myRodadasProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.rodadaStartedSnack)));
-      if (member.autoArmOnStart) {
-        final armed = await freezeThenArm(context, ref);
+      if (armFuture != null) {
+        final armed = await armFuture;
         if (!armed || !context.mounted) return;
         ref.read(armedSessionNavProvider.notifier).reset();
         ensureArmedSessionHub(context, ref);
+        showAppSnack(context, l10n.armAutoRouteArmed);
+      } else {
+        showAppSnack(context, l10n.rodadaStartedSnack);
       }
     } catch (e) {
       if (!context.mounted) return;
