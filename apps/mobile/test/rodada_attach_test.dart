@@ -85,4 +85,11 @@ void main() {
     );
     expect(resolveCaptureRodadaId(), isNull);
   });
+
+  test('attachable live rodada is a valid capture dest when HUD has none', () {
+    expect(
+      resolveCaptureRodadaId(cloudLinkedRodadaId: 'live-tesistan'),
+      'live-tesistan',
+    );
+  });
 }

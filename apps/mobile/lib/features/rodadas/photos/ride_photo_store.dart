@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -5,11 +6,13 @@ import 'dart:ui' as ui;
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/db/ride_database.dart';
 import '../../../core/models/ride_photo.dart';
 import '../../../core/models/track_point.dart';
+import '../../../core/services/rider_telemetry_service.dart';
 import '../rodada_repository.dart';
 
 class RidePhotoStore {
@@ -124,7 +127,77 @@ class RidePhotoStore {
           rodadaId: rodadaId,
         );
         ok++;
-      } catch (_) {}
+      } catch (e) {
+        unawaited(
+          RiderTelemetryService.instance.log(
+            category: TelemetryCategory.camera,
+            eventType: 'ride_photo_upload_fail',
+            rideLocalId: rideId,
+            payload: {'error': '$e', 'photo_id': photo.id},
+          ),
+        );
+      }
+    }
+    return ok;
+  }
+
+  /// Copy a camera JPEG/PNG into DCIM/Pictures so it survives the ImagePicker
+  /// cache. Best-effort: a permission denial must not fail the ride save.
+  Future<bool> persistBytesToGallery({
+    required Uint8List bytes,
+    required String filename,
+    DateTime? takenAt,
+    double? latitude,
+    double? longitude,
+  }) async {
+    try {
+      final perm = await PhotoManager.requestPermissionExtend(
+        requestOption: const PermissionRequestOption(
+          iosAccessLevel: IosAccessLevel.addOnly,
+          androidPermission: AndroidPermission(
+            type: RequestType.image,
+            mediaLocation: true,
+          ),
+        ),
+      );
+      if (!perm.hasAccess && !Platform.isAndroid) return false;
+      await PhotoManager.editor.saveImage(
+        bytes,
+        filename: filename,
+        title: filename,
+        relativePath: 'Pictures/RiderLab',
+        latitude: latitude,
+        longitude: longitude,
+        creationDate: takenAt,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Push leftover app-sandbox shots (this morning's in-app camera) into the
+  /// device gallery so they show up in Google Photos.
+  Future<int> exportLocalPhotosToGallery({String? rideId}) async {
+    final photos = rideId == null
+        ? await _db.getAllRidePhotos()
+        : await _db.getRidePhotos(rideId);
+    var ok = 0;
+    for (final photo in photos) {
+      final path = photo.localPath;
+      if (path == null) continue;
+      final file = File(path);
+      if (!file.existsSync()) continue;
+      final bytes = await file.readAsBytes();
+      final name = p.basename(path);
+      final saved = await persistBytesToGallery(
+        bytes: bytes,
+        filename: name,
+        takenAt: photo.takenAt,
+        latitude: photo.latitude,
+        longitude: photo.longitude,
+      );
+      if (saved) ok++;
     }
     return ok;
   }

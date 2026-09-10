@@ -2383,6 +2383,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'Empieza un recorrido para ligar la foto a la ruta';
 
   @override
+  String get photoSavedToGallery => 'Foto guardada en tu galería';
+
+  @override
+  String get photoLibraryLimited =>
+      'Android limitó el acceso a fotos. Elige Permitir todas para importar el carrete.';
+
+  @override
+  String get ridePhotosTitle => 'Fotos de este recorrido';
+
+  @override
   String get photoLinkedToRoute => 'Foto ligada a la ruta';
 
   @override

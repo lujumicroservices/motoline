@@ -2368,6 +2368,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Start a ride to pin the photo to the route';
 
   @override
+  String get photoSavedToGallery => 'Photo saved to your gallery';
+
+  @override
+  String get photoLibraryLimited =>
+      'Photo access is limited. Choose Allow all to import from the camera roll.';
+
+  @override
+  String get ridePhotosTitle => 'Photos from this ride';
+
+  @override
   String get photoLinkedToRoute => 'Photo linked to the route';
 
   @override

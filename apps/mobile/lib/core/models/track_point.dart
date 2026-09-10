@@ -74,6 +74,7 @@ class TrackPoint {
     int? id,
     double? leanDegrees,
     double? pressureHpa,
+    double? speedMps,
   }) =>
       TrackPoint(
         id: id ?? this.id,
@@ -82,7 +83,7 @@ class TrackPoint {
         longitude: longitude,
         timestamp: timestamp,
         altitude: altitude,
-        speedMps: speedMps,
+        speedMps: speedMps ?? this.speedMps,
         accuracyMeters: accuracyMeters,
         heading: heading,
         leanDegrees: leanDegrees ?? this.leanDegrees,

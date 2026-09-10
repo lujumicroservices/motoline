@@ -62,7 +62,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>RiderLab uses your location to record the line you ride on the street and show it on the map after your ride.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>RiderLab can save ride photos to your library if you choose.</string>
+	<string>RiderLab saves photos you take in the app to your library so they are not lost if upload fails.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>RiderLab looks at photos taken during your ride so you can add them to the rodada album and reel. Nothing uploads until you confirm.</string>
 	<key>UIApplicationSceneManifest</key>

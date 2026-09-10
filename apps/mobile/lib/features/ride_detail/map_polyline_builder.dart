@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/road_kind_detection.dart';
 import '../../core/models/track_point.dart';
+import '../../core/utils/geo_utils.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 
@@ -21,6 +22,7 @@ List<Polyline> buildMergedStyledPolylines({
 }) {
   if (segment.length < 2) return const [];
 
+  final displayMps = showSpeedColors ? displaySpeedsMps(segment) : null;
   final result = <Polyline>[];
   List<LatLng>? run;
   Color? runColor;
@@ -42,6 +44,7 @@ List<Polyline> buildMergedStyledPolylines({
     final a = segment[i - 1];
     final b = segment[i];
     final absIndex = indexOffset + i;
+    final speeds = displayMps;
     final style = strokeStyleForTrackIndex(
       absIndex: absIndex,
       point: b,
@@ -49,6 +52,7 @@ List<Polyline> buildMergedStyledPolylines({
       showRoadKindContrast: showRoadKindContrast,
       showSpeedColors: showSpeedColors,
       speedBucketKmh: speedBucketKmh,
+      displaySpeedKmh: speeds == null ? null : (speeds[i] ?? 0) * 3.6,
     );
 
     final aLatLng = LatLng(a.latitude, a.longitude);
@@ -74,6 +78,7 @@ List<Polyline> buildMergedStyledPolylines({
   required bool showRoadKindContrast,
   required bool showSpeedColors,
   double speedBucketKmh = 5,
+  double? displaySpeedKmh,
 }) {
   if (showRoadKindContrast &&
       absIndex >= 0 &&
@@ -93,7 +98,7 @@ List<Polyline> buildMergedStyledPolylines({
   }
 
   if (showSpeedColors) {
-    final raw = point.speedKmh ?? 0;
+    final raw = displaySpeedKmh ?? point.speedKmh ?? 0;
     final bucket = speedBucketKmh <= 0
         ? raw
         : (raw / speedBucketKmh).round() * speedBucketKmh;

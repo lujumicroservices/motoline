@@ -4274,6 +4274,24 @@ abstract class AppLocalizations {
   /// **'Empieza un recorrido para ligar la foto a la ruta'**
   String get photoNeedsActiveRide;
 
+  /// No description provided for @photoSavedToGallery.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto guardada en tu galería'**
+  String get photoSavedToGallery;
+
+  /// No description provided for @photoLibraryLimited.
+  ///
+  /// In es, this message translates to:
+  /// **'Android limitó el acceso a fotos. Elige Permitir todas para importar el carrete.'**
+  String get photoLibraryLimited;
+
+  /// No description provided for @ridePhotosTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotos de este recorrido'**
+  String get ridePhotosTitle;
+
   /// No description provided for @photoLinkedToRoute.
   ///
   /// In es, this message translates to:

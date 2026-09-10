@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/ride.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../reel/reel_compose_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
@@ -80,14 +81,22 @@ Future<void> continueAfterRideToRodadaShare({
   if (!context.mounted) return;
   if (ride != null && ride.status == RideStatus.completed) {
     List<GalleryPhotoCandidate> candidates = const [];
+    var limited = false;
     try {
-      candidates = await scanRideGalleryPhotos(
+      final scan = await scanRideGalleryPhotos(
         rideStart: ride.startedAt,
         rideEnd: ride.endedAt ?? DateTime.now(),
         points: points,
       );
+      candidates = scan.candidates;
+      limited = scan.limited || scan.denied;
     } catch (_) {}
     if (!context.mounted) return;
+    if (candidates.isEmpty && limited) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.photoLibraryLimited)),
+      );
+    }
     if (candidates.isNotEmpty) {
       await Navigator.of(context).push<bool>(
         MaterialPageRoute(

@@ -60,4 +60,85 @@ void main() {
     ];
     expect(pathDistanceMeters(points), greaterThan(100));
   });
+
+  test('displaySpeedsMps fills Android GPS speed 0 from a real hop', () {
+    final base = DateTime.utc(2026, 9, 8);
+    // ~11.1 m north per 0.0001 deg. 20 m in 1 s ≈ 72 km/h.
+    final points = [
+      TrackPoint(
+        id: 1,
+        rideId: 'r',
+        latitude: 0,
+        longitude: 0,
+        timestamp: base,
+        speedMps: 0,
+        accuracyMeters: 8,
+      ),
+      TrackPoint(
+        id: 2,
+        rideId: 'r',
+        latitude: 0.0002,
+        longitude: 0,
+        timestamp: base.add(const Duration(seconds: 1)),
+        speedMps: 0,
+        accuracyMeters: 8,
+      ),
+    ];
+    final speeds = displaySpeedsMps(points);
+    expect(speeds[1], isNotNull);
+    expect(speeds[1]! * 3.6, greaterThan(50));
+    expect(speeds[1]! * 3.6, lessThan(90));
+    expect(speeds[0], speeds[1]);
+  });
+
+  test('displaySpeedsMps keeps GPS Doppler when it is real', () {
+    final base = DateTime.utc(2026, 9, 8);
+    final points = [
+      TrackPoint(
+        id: 1,
+        rideId: 'r',
+        latitude: 0,
+        longitude: 0,
+        timestamp: base,
+        speedMps: 20,
+      ),
+      TrackPoint(
+        id: 2,
+        rideId: 'r',
+        latitude: 0.00002,
+        longitude: 0,
+        timestamp: base.add(const Duration(seconds: 1)),
+        speedMps: 20,
+        accuracyMeters: 8,
+      ),
+    ];
+    final speeds = displaySpeedsMps(points);
+    expect(speeds[1], 20);
+  });
+
+  test('displaySpeedsMps does not invent speed from GPS wander', () {
+    final base = DateTime.utc(2026, 9, 8);
+    final points = [
+      TrackPoint(
+        id: 1,
+        rideId: 'r',
+        latitude: 0,
+        longitude: 0,
+        timestamp: base,
+        speedMps: 0,
+        accuracyMeters: 15,
+      ),
+      TrackPoint(
+        id: 2,
+        rideId: 'r',
+        latitude: 0.00001,
+        longitude: 0,
+        timestamp: base.add(const Duration(seconds: 1)),
+        speedMps: 0,
+        accuracyMeters: 15,
+      ),
+    ];
+    final speeds = displaySpeedsMps(points);
+    expect(speeds[1], 0);
+  });
 }

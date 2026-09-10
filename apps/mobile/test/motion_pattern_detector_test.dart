@@ -220,6 +220,26 @@ void main() {
       }
       expect(detector.isPaused, isTrue);
     });
+
+    test('does not pause at 1 Hz street speed with Doppler 0', () {
+      // 20 km/h → 5.6 m/s. One sample per second is a 5.6 m hop, inside a
+      // 16 m accuracy circle — the old floor treated that as stopped.
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+      const startLat = 20.75;
+      const stepDeg = 5.6 / 111320;
+
+      for (var i = 0; i <= 20; i++) {
+        detector.feedRideSample(
+          speedMps: 0.0,
+          latitude: startLat - stepDeg * i,
+          longitude: -103.46,
+          timestamp: base.add(Duration(seconds: i)),
+          accuracyMeters: 16,
+        );
+      }
+      expect(detector.isPaused, isFalse);
+    });
   });
 
   group('suggest end', () {

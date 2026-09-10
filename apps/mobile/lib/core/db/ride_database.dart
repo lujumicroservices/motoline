@@ -1218,6 +1218,15 @@ class RideDatabase {
     return rows.map(RidePhoto.fromMap).toList();
   }
 
+  Future<List<RidePhoto>> getAllRidePhotos() async {
+    final db = await database;
+    final rows = await db.query(
+      'ride_photos',
+      orderBy: 'created_at_ms ASC',
+    );
+    return rows.map(RidePhoto.fromMap).toList();
+  }
+
   Future<List<RidePhoto>> getPendingRidePhotos({String? rideId}) async {
     final db = await database;
     final rows = rideId == null

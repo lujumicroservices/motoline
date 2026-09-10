@@ -95,6 +95,11 @@ class RodadaPhotosTab extends ConsumerWidget {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
+              try {
+                await ref
+                    .read(ridePhotoStoreProvider)
+                    .exportLocalPhotosToGallery();
+              } catch (_) {}
               ref.invalidate(rodadaPhotosProvider(rodadaId));
               await ref.read(rodadaPhotosProvider(rodadaId).future);
             },
@@ -203,65 +208,80 @@ class RodadaPhotosTab extends ConsumerWidget {
     }
   }
 
-  Future<String?> _localRideId(WidgetRef ref) async {
+  Future<List<String>> _localRideIds(WidgetRef ref) async {
     final repo = ref.read(rodadaRepositoryProvider);
     final me = repo.currentUserId;
     final rides = await ref.read(rodadaRidesProvider(rodadaId).future);
     final mine = rides.where((r) => me == null || r.userId == me).toList();
-    if (mine.isNotEmpty && mine.first.localId.isNotEmpty) {
-      return mine.first.localId;
-    }
+    final ids = [
+      for (final r in mine)
+        if (r.localId.isNotEmpty) r.localId,
+    ];
+    if (ids.isNotEmpty) return ids;
     final local = await ref.read(ridesListProvider.future);
     final completed =
         local.where((r) => r.status == RideStatus.completed).toList();
-    return completed.isEmpty ? null : completed.first.id;
+    return completed.isEmpty ? const [] : [completed.first.id];
+  }
+
+  Future<String?> _localRideId(WidgetRef ref) async {
+    final ids = await _localRideIds(ref);
+    return ids.isEmpty ? null : ids.first;
   }
 
   Future<void> _importFromRoll(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
     try {
-      final rideId = await _localRideId(ref);
-      if (rideId == null) {
+      final rideIds = await _localRideIds(ref);
+      if (rideIds.isEmpty) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.noCompletedRidesToLink)),
         );
         return;
       }
-      final ride = await ref.read(rideDatabaseProvider).getRide(rideId);
-      final points = await ref.read(rideDatabaseProvider).getPoints(rideId);
-      if (ride == null) return;
-      final candidates = await scanRideGalleryPhotos(
-        rideStart: ride.startedAt,
-        rideEnd: ride.endedAt ?? DateTime.now(),
-        points: points,
-      );
-      if (!context.mounted) return;
-      if (candidates.isEmpty) {
-        if (!context.mounted) return;
-        final files = await ImagePicker().pickMultiImage(
-          maxWidth: 1920,
-          maxHeight: 1920,
-          imageQuality: 82,
+      var imported = false;
+      for (final rideId in rideIds) {
+        final ride = await ref.read(rideDatabaseProvider).getRide(rideId);
+        final points = await ref.read(rideDatabaseProvider).getPoints(rideId);
+        if (ride == null) continue;
+        final scan = await scanRideGalleryPhotos(
+          rideStart: ride.startedAt,
+          rideEnd: ride.endedAt ?? DateTime.now(),
+          points: points,
         );
-        if (files.isEmpty || !context.mounted) return;
-        await _uploadPickedFiles(context, ref, files);
-        return;
-      }
-      final cloudId = await ref
-          .read(rodadaRepositoryProvider)
-          .cloudRideIdForLocal(rideId);
-      if (!context.mounted) return;
-      await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => RidePhotoImportSheet(
-            rideId: rideId,
-            rodadaId: rodadaId,
-            cloudRideId: cloudId,
-            candidates: candidates,
+        if (!context.mounted) return;
+        if (scan.denied || (scan.limited && scan.candidates.isEmpty)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.photoLibraryLimited)),
+          );
+          if (scan.denied) return;
+        }
+        if (scan.candidates.isEmpty) continue;
+        imported = true;
+        final cloudId = await ref
+            .read(rodadaRepositoryProvider)
+            .cloudRideIdForLocal(rideId);
+        if (!context.mounted) return;
+        await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => RidePhotoImportSheet(
+              rideId: rideId,
+              rodadaId: rodadaId,
+              cloudRideId: cloudId,
+              candidates: scan.candidates,
+            ),
           ),
-        ),
+        );
+      }
+      if (imported || !context.mounted) return;
+      final files = await ImagePicker().pickMultiImage(
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 82,
       );
+      if (files.isEmpty || !context.mounted) return;
+      await _uploadPickedFiles(context, ref, files);
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));

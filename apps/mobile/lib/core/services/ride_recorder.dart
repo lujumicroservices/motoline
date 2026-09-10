@@ -85,6 +85,7 @@ class RideRecorder {
     LeanSensor? leanSensor,
     BarometerSensor? barometerSensor,
     this.onRideCompleted,
+    this.onSuggestEnd,
   })  : _db = database ?? RideDatabase.instance,
         _location = locationService ?? LocationService(),
         _lean = leanSensor ?? LeanSensor(),
@@ -92,6 +93,9 @@ class RideRecorder {
 
   /// Fired after a ride is marked completed (stop or recover).
   final void Function(Ride ride)? onRideCompleted;
+
+  /// Fired once when auto-pause has been sitting still long enough.
+  final void Function(String rideId)? onSuggestEnd;
 
   final RideDatabase _db;
   final LocationService _location;
@@ -877,7 +881,7 @@ class RideRecorder {
     // Signed bike lean (already relative to frozen g0).
     final rawLean = _lean.rawLeanDegrees;
     final relativeLean = _lean.leanDegrees;
-    final point = TrackPoint(
+    var point = TrackPoint(
       id: null,
       rideId: ride.id,
       latitude: position.latitude,
@@ -928,6 +932,8 @@ class RideRecorder {
             longitude: position.longitude,
           ),
         );
+        final rideId = _ride?.id;
+        if (rideId != null) onSuggestEnd?.call(rideId);
       }
     }
 
@@ -1014,6 +1020,26 @@ class RideRecorder {
       }
     }
 
+    if (previous != null) {
+      final implied = impliedSpeedMps(
+        fromLat: previous.latitude,
+        fromLng: previous.longitude,
+        fromTs: previous.timestamp,
+        toLat: point.latitude,
+        toLng: point.longitude,
+        toTs: point.timestamp,
+        accuracyMeters: point.accuracyMeters,
+      );
+      final stored = preferGpsOrImpliedMps(
+        gpsSpeedMps: point.speedMps,
+        impliedMps: implied,
+      );
+      if (stored != null && stored != point.speedMps) {
+        point = point.copyWith(speedMps: stored);
+        _lastPoint = point;
+      }
+    }
+
     final speed = point.speedMps;
     if (speed != null) {
       _maxSpeedMps =
@@ -1049,7 +1075,7 @@ class RideRecorder {
     debugPrint(
       'RiderLab OK #${_sessionPoints.length} '
       'acc=${position.accuracy.toStringAsFixed(1)}m '
-      'spd=${speedKmh == null ? "--" : speedKmh.toStringAsFixed(1)} '
+      'spd=${point.speedKmh == null ? "--" : point.speedKmh!.toStringAsFixed(1)} '
       'lean=${relativeLean == null ? "--" : relativeLean.toStringAsFixed(1)}° '
       'raw=${rawLean == null ? "--" : rawLean.toStringAsFixed(1)}° '
       'n=${_lean.neutralDegrees?.toStringAsFixed(1) ?? "--"} '

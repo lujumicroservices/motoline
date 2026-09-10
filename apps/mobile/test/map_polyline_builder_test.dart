@@ -79,4 +79,36 @@ void main() {
       isEmpty,
     );
   });
+
+  test('speed colors use implied hop when GPS speed is 0', () {
+    final base = DateTime.utc(2026, 9, 8);
+    TrackPoint pt(int i, double lat) => TrackPoint(
+          id: i,
+          rideId: 'r',
+          latitude: lat,
+          longitude: 0,
+          timestamp: base.add(Duration(seconds: i)),
+          speedMps: 0,
+          accuracyMeters: 6,
+        );
+
+    final moving = buildMergedStyledPolylines(
+      segment: [pt(0, 0), pt(1, 0.0002), pt(2, 0.0004)],
+      indexOffset: 0,
+      kindByIndex: emptyKinds(3),
+      showRoadKindContrast: false,
+      showSpeedColors: true,
+    );
+    final parked = buildMergedStyledPolylines(
+      segment: [pt(0, 0), pt(1, 0.00001), pt(2, 0.00002)],
+      indexOffset: 0,
+      kindByIndex: emptyKinds(3),
+      showRoadKindContrast: false,
+      showSpeedColors: true,
+    );
+
+    expect(moving, isNotEmpty);
+    expect(parked, isNotEmpty);
+    expect(moving.first.color, isNot(parked.first.color));
+  });
 }

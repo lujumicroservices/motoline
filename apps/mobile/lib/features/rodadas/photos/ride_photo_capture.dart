@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/models/ride_photo.dart';
 import '../../../core/models/track_point.dart';
+import '../../../core/services/rider_telemetry_service.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
@@ -86,6 +89,20 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     if (file == null) return null;
     final bytes = await file.readAsBytes();
     final at = takenAt ?? DateTime.now();
+    final fromCamera = source == ImageSource.camera;
+    var lat = lastPoint?.latitude ?? fallbackLat;
+    var lng = lastPoint?.longitude ?? fallbackLng;
+    var savedToGallery = false;
+    if (fromCamera) {
+      savedToGallery =
+          await ref.read(ridePhotoStoreProvider).persistBytesToGallery(
+                bytes: bytes,
+                filename: 'riderlab_${at.millisecondsSinceEpoch}.jpg',
+                takenAt: at,
+                latitude: lat,
+                longitude: lng,
+              );
+    }
 
     var rideId = localRideId;
     final db = ref.read(rideDatabaseProvider);
@@ -125,19 +142,49 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
             SnackBar(content: Text(l10n.photoUploaded)),
           );
         }
+        unawaited(
+          RiderTelemetryService.instance.log(
+            category: TelemetryCategory.camera,
+            eventType: 'ride_photo_saved',
+            payload: {
+              'saved_gallery': savedToGallery,
+              'queued_local': false,
+              'uploaded': true,
+              'source': fromCamera ? 'camera' : 'gallery',
+            },
+          ),
+        );
         return null;
       }
       if (!context.mounted) return null;
       if (showSnackbars) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.photoNeedsActiveRide)),
+          SnackBar(
+            content: Text(
+              savedToGallery
+                  ? l10n.photoSavedToGallery
+                  : l10n.photoNeedsActiveRide,
+            ),
+          ),
         );
       }
+      unawaited(
+        RiderTelemetryService.instance.log(
+          category: TelemetryCategory.camera,
+          eventType: 'ride_photo_saved',
+          payload: {
+            'saved_gallery': savedToGallery,
+            'queued_local': false,
+            'has_ride': false,
+            'source': fromCamera ? 'camera' : 'gallery',
+          },
+        ),
+      );
       return null;
     }
 
-    var lat = lastPoint?.latitude ?? fallbackLat;
-    var lng = lastPoint?.longitude ?? fallbackLng;
+    lat ??= lastPoint?.latitude ?? fallbackLat;
+    lng ??= lastPoint?.longitude ?? fallbackLng;
     if (lat == null || lng == null) {
       final points = await db.getPoints(rideId);
       final last = lastTrackPoint(points);
@@ -171,13 +218,37 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
           content: Text(
             attachRodada != null
                 ? l10n.photoUploaded
-                : l10n.photoLinkedToRoute,
+                : savedToGallery
+                    ? l10n.photoSavedToGallery
+                    : l10n.photoLinkedToRoute,
           ),
         ),
       );
     }
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.camera,
+        eventType: 'ride_photo_saved',
+        rideLocalId: rideId,
+        latitude: lat,
+        longitude: lng,
+        payload: {
+          'saved_gallery': savedToGallery,
+          'queued_local': true,
+          'uploaded': attachRodada != null,
+          'source': fromCamera ? 'camera' : 'gallery',
+        },
+      ),
+    );
     return saved;
   } catch (e) {
+    unawaited(
+      RiderTelemetryService.instance.log(
+        category: TelemetryCategory.camera,
+        eventType: 'ride_photo_failed',
+        payload: {'error': '$e'},
+      ),
+    );
     if (!context.mounted) return null;
     if (showSnackbars) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -203,7 +274,7 @@ Future<String?> _resolveCaptureRodada(
           .linkedRodadaIdForLocal(localRideId);
     } catch (_) {}
   }
-  return resolveCaptureRodadaId(
+  final resolved = resolveCaptureRodadaId(
     explicitRodadaId: explicitRodadaId,
     boundRodadaId: localRideId == null
         ? null
@@ -211,6 +282,13 @@ Future<String?> _resolveCaptureRodada(
     stampedRodadaId: stamped,
     cloudLinkedRodadaId: linked,
   );
+  if (resolved != null) return resolved;
+  if (localRideId == null || localRideId.isEmpty) return null;
+  try {
+    final live = await ref.read(rodadaRepositoryProvider).findAttachableRodada();
+    if (live != null && live.status == 'live') return live.id;
+  } catch (_) {}
+  return null;
 }
 
 class RidePhotoShutterButton extends ConsumerWidget {

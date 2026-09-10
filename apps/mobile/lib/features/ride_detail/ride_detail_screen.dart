@@ -37,6 +37,7 @@ import 'widgets/lab_section.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
 import 'widgets/ride_loop_panel.dart';
+import 'widgets/ride_photos_strip.dart';
 import 'widgets/ride_profile_chart.dart';
 import 'widgets/ride_share_panel.dart';
 import 'widgets/ride_skill_coach_card.dart';
@@ -529,6 +530,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         const SizedBox(height: 4),
                         GpsQualityChip(analytics: full),
                         ImuAzureChip(rideId: ride.id),
+                        RidePhotosStrip(rideId: ride.id),
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 10,

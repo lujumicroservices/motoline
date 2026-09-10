@@ -119,8 +119,8 @@ Future<void> completeArmedOrActiveRide(
           builder: (_) => LeanLabReviewScreen(rideId: ride.id),
         ),
       );
-      return;
     }
+    if (!context.mounted) return;
     await continueAfterRideToRodadaShare(
       context: context,
       ref: ref,

@@ -5,6 +5,10 @@ const _preRideSlack = Duration(minutes: 5);
 const _postRideSlack = Duration(minutes: 15);
 const _gpsSnapMeters = 150.0;
 const _gpsRejectMeters = 2000.0;
+/// When the recorded line has holes, nearest-point can be kilometres away
+/// even if the photo GPS is on the road. Compare to the time-interpolated
+/// position before rejecting.
+const _gpsHoleRejectMeters = 5000.0;
 const _timeSnap = Duration(seconds: 30);
 
 class PhotoTrackMatch {
@@ -59,9 +63,6 @@ PhotoTrackMatch matchPhotoToTrack({
   final hasGps = photoLat != null && photoLng != null;
   if (hasGps) {
     final nearest = _nearestByDistance(points, photoLat, photoLng);
-    if (nearest.$1 > _gpsRejectMeters) {
-      return PhotoTrackMatch.farFromLine;
-    }
     if (nearest.$1 <= _gpsSnapMeters) {
       return PhotoTrackMatch(
         accepted: true,
@@ -69,14 +70,31 @@ PhotoTrackMatch matchPhotoToTrack({
         longitude: photoLng,
       );
     }
-    return PhotoTrackMatch(
-      accepted: true,
-      latitude: nearest.$2.latitude,
-      longitude: nearest.$2.longitude,
+    if (nearest.$1 <= _gpsRejectMeters) {
+      return PhotoTrackMatch(
+        accepted: true,
+        latitude: nearest.$2.latitude,
+        longitude: nearest.$2.longitude,
+      );
+    }
+    final alongTrack = _interpolateByTime(points, takenAt);
+    final holeDist = haversineMeters(
+      photoLat,
+      photoLng,
+      alongTrack.latitude,
+      alongTrack.longitude,
     );
+    if (holeDist <= _gpsHoleRejectMeters) {
+      return PhotoTrackMatch(
+        accepted: true,
+        latitude: photoLat,
+        longitude: photoLng,
+      );
+    }
+    return PhotoTrackMatch.farFromLine;
   }
 
-  final byTime = _nearestByTime(points, takenAt);
+  final byTime = _interpolateByTime(points, takenAt);
   final delta = takenAt.difference(byTime.timestamp).abs();
   if (delta > _timeSnap &&
       (takenAt.isBefore(rideStart) || takenAt.isAfter(rideEnd))) {
@@ -117,4 +135,27 @@ TrackPoint _nearestByTime(List<TrackPoint> points, DateTime takenAt) {
     }
   }
   return best;
+}
+
+/// Pin on the polyline by timestamp so GPS dropouts don't look like "off route".
+TrackPoint _interpolateByTime(List<TrackPoint> points, DateTime takenAt) {
+  if (points.length == 1) return points.first;
+  if (!takenAt.isAfter(points.first.timestamp)) return points.first;
+  if (!takenAt.isBefore(points.last.timestamp)) return points.last;
+  for (var i = 1; i < points.length; i++) {
+    final a = points[i - 1];
+    final b = points[i];
+    if (takenAt.isAfter(b.timestamp)) continue;
+    final span = b.timestamp.difference(a.timestamp).inMilliseconds;
+    if (span <= 0) return b;
+    final t = takenAt.difference(a.timestamp).inMilliseconds / span;
+    return TrackPoint(
+      id: a.id,
+      rideId: a.rideId,
+      latitude: a.latitude + (b.latitude - a.latitude) * t,
+      longitude: a.longitude + (b.longitude - a.longitude) * t,
+      timestamp: takenAt,
+    );
+  }
+  return _nearestByTime(points, takenAt);
 }

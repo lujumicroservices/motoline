@@ -125,22 +125,28 @@ class RideAnalytics {
     return ride.distanceKm;
   }
 
+  List<double?>? _displaySpeedsMps;
+
+  List<double?> get _speedsMps =>
+      _displaySpeedsMps ??= displaySpeedsMps(samples);
+
   double? get maxSpeedKmh {
     double? max;
-    for (final p in samples) {
-      final s = p.speedKmh;
-      if (s == null) continue;
+    for (final mps in _speedsMps) {
+      if (mps == null) continue;
+      final s = mps * 3.6;
       max = max == null ? s : math.max(max, s);
     }
-    if (max != null) return max;
+    if (max != null && max > 1) return max;
     return isSegment ? null : ride.maxSpeedKmh;
   }
 
   double? get avgMovingSpeedKmh {
     final moving = <double>[];
-    for (final p in samples) {
-      final s = p.speedKmh;
-      if (s != null && s >= 3) moving.add(s);
+    for (final mps in _speedsMps) {
+      if (mps == null) continue;
+      final s = mps * 3.6;
+      if (s >= 3) moving.add(s);
     }
     if (moving.isEmpty) {
       return isSegment ? null : ride.avgSpeedKmh;
@@ -235,15 +241,21 @@ class RideAnalytics {
       _seriesOrigin ??
       (samples.isEmpty ? DateTime.fromMillisecondsSinceEpoch(0) : samples.first.timestamp);
 
-  List<TimedValue> get speedSeries => [
-        for (final p in samples)
-          if (p.speedKmh != null)
-            TimedValue(
-              seconds:
-                  p.timestamp.difference(_origin).inMilliseconds / 1000.0,
-              value: p.speedKmh!,
-            ),
-      ];
+  List<TimedValue> get speedSeries {
+    final speeds = _speedsMps;
+    return [
+      for (var i = 0; i < samples.length; i++)
+        if (speeds[i] != null)
+          TimedValue(
+            seconds: samples[i]
+                    .timestamp
+                    .difference(_origin)
+                    .inMilliseconds /
+                1000.0,
+            value: speeds[i]! * 3.6,
+          ),
+    ];
+  }
 
   /// Relative bike lean (0 = upright after pocket neutral removed).
   List<TimedValue> get leanSeries => [

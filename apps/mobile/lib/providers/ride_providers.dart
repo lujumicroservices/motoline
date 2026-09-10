@@ -8,6 +8,7 @@ import '../core/db/ride_database.dart';
 import '../core/lean_lab/lean_lab_service.dart';
 import '../core/models/lean_sample.dart';
 import '../core/models/ride.dart';
+import '../core/models/ride_photo.dart';
 import '../core/models/track_point.dart';
 import '../core/services/loop_session_controller.dart';
 import '../core/services/imu_blob_upload_service.dart';
@@ -52,6 +53,14 @@ final rideRecorderProvider = Provider<RideRecorder>((ref) {
     database: ref.watch(rideDatabaseProvider),
     onRideCompleted: (_) {
       unawaited(ref.read(proEntitlementProvider.notifier).onRideCompleted());
+    },
+    onSuggestEnd: (rideId) {
+      unawaited(
+        ref.read(rideSyncServiceProvider).syncRide(
+              rideId,
+              allowRecording: true,
+            ),
+      );
     },
   );
   ref.onDispose(recorder.dispose);
@@ -300,6 +309,11 @@ final rideOverviewPointsProvider =
 final rideLeanSamplesProvider =
     FutureProvider.autoDispose.family<List<LeanSample>, String>((ref, id) {
   return ref.watch(rideDatabaseProvider).getLeanSamples(id);
+});
+
+final ridePhotosProvider =
+    FutureProvider.autoDispose.family<List<RidePhoto>, String>((ref, id) {
+  return ref.watch(rideDatabaseProvider).getRidePhotos(id);
 });
 
 /// Full-track curves / skill; loads in a background isolate.

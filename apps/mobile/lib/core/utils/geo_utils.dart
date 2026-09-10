@@ -32,6 +32,91 @@ bool inGeofence(
   return haversineMeters(lat, lng, centerLat, centerLng) <= radiusM;
 }
 
+/// Below this (~1 km/h) Android's GPS `speed` of 0.0 usually means "no
+/// Doppler", not parked. Heatmap / pause use implied speed instead.
+const kUsableGpsSpeedMps = 0.3;
+
+/// Wander smaller than this is not a ride, even with a tight accuracy circle.
+const kImpliedMinJumpMeters = 5.0;
+
+/// Ground speed (m/s) from two fixes. `0` when the hop is inside the accuracy
+/// circle. Null when [dt] is unusable or longer than [maxGap].
+double? impliedSpeedMps({
+  required double fromLat,
+  required double fromLng,
+  required DateTime fromTs,
+  required double toLat,
+  required double toLng,
+  required DateTime toTs,
+  double? accuracyMeters,
+  Duration? maxGap,
+  double? minJumpMeters,
+  double? minCredibleMps,
+}) {
+  final dtSec = toTs.difference(fromTs).inMilliseconds / 1000.0;
+  if (dtSec < 0.05) return null;
+  if (maxGap != null && toTs.difference(fromTs) > maxGap) return null;
+  final jump = haversineMeters(fromLat, fromLng, toLat, toLng);
+  final minJump = minJumpMeters ?? kImpliedMinJumpMeters;
+  if (jump <= minJump) return 0;
+  final implied = jump / dtSec;
+  final floor = math.max(accuracyMeters ?? 0, minJump);
+  // 1 Hz at 15–20 km/h is a 4–6 m hop, often inside the accuracy circle.
+  // Treating that as 0 made Tesistán auto-pause while the pin was moving.
+  if (jump <= floor &&
+      (minCredibleMps == null || implied < minCredibleMps)) {
+    return 0;
+  }
+  return implied;
+}
+
+/// Prefer a real GPS Doppler reading; otherwise the hop-implied speed.
+double? preferGpsOrImpliedMps({
+  required double? gpsSpeedMps,
+  required double? impliedMps,
+}) {
+  final gpsUsable = gpsSpeedMps != null && gpsSpeedMps > kUsableGpsSpeedMps;
+  if (gpsUsable && impliedMps != null) {
+    return math.max(gpsSpeedMps, impliedMps);
+  }
+  if (gpsUsable) return gpsSpeedMps;
+  if (impliedMps != null) return impliedMps;
+  return gpsSpeedMps;
+}
+
+/// Per-sample display speed (m/s). Fills Android `speed_mps = 0` holes from
+/// consecutive GPS hops so the speed heatmap is not a single crawl color.
+List<double?> displaySpeedsMps(List<TrackPoint> points) {
+  if (points.isEmpty) return const [];
+  final out = List<double?>.filled(points.length, null);
+  out[0] = points.first.speedMps;
+  for (var i = 1; i < points.length; i++) {
+    final a = points[i - 1];
+    final b = points[i];
+    final implied = impliedSpeedMps(
+      fromLat: a.latitude,
+      fromLng: a.longitude,
+      fromTs: a.timestamp,
+      toLat: b.latitude,
+      toLng: b.longitude,
+      toTs: b.timestamp,
+      accuracyMeters: b.accuracyMeters,
+      maxGap: const Duration(seconds: 8),
+    );
+    out[i] = preferGpsOrImpliedMps(
+      gpsSpeedMps: b.speedMps,
+      impliedMps: implied,
+    );
+  }
+  final first = out[0];
+  if (out.length > 1 &&
+      (first == null || first <= kUsableGpsSpeedMps) &&
+      out[1] != null) {
+    out[0] = out[1];
+  }
+  return out;
+}
+
 double pathDistanceMeters(List<TrackPoint> points) {
   if (points.length < 2) return 0;
   var total = 0.0;

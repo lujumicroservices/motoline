@@ -48,6 +48,37 @@ void main() {
     expect(match.reason, 'far_from_line');
   });
 
+  test('accepts GPS on the road during a track hole', () {
+    final holeStart = start.add(const Duration(minutes: 10));
+    final holeEnd = start.add(const Duration(minutes: 19));
+    final gappy = [
+      TrackPoint(
+        id: 1,
+        rideId: 'r',
+        latitude: 20.78625,
+        longitude: -103.46712,
+        timestamp: holeStart,
+      ),
+      TrackPoint(
+        id: 2,
+        rideId: 'r',
+        latitude: 20.71921,
+        longitude: -103.46087,
+        timestamp: holeEnd,
+      ),
+    ];
+    final match = matchPhotoToTrack(
+      takenAt: holeStart.add(const Duration(minutes: 4)),
+      photoLat: 20.7527,
+      photoLng: -103.4640,
+      points: gappy,
+      rideStart: start,
+      rideEnd: end,
+    );
+    expect(match.accepted, isTrue);
+    expect(match.latitude, closeTo(20.7527, 0.0001));
+  });
+
   test('pins by time when EXIF has no GPS', () {
     final match = matchPhotoToTrack(
       takenAt: start.add(const Duration(minutes: 40)),

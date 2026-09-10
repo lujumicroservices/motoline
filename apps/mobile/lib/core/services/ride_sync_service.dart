@@ -94,7 +94,10 @@ class RideSyncService {
 
   /// Upsert ride summary + upload track points without destroying cloud backup
   /// until the new points are fully inserted.
-  Future<String?> syncRide(String localRideId) async {
+  Future<String?> syncRide(
+    String localRideId, {
+    bool allowRecording = false,
+  }) async {
     try {
       if (ImpersonationStore.isActive) {
         lastSyncError = 'Cloud sync is off while viewing as another rider.';
@@ -113,9 +116,10 @@ class RideSyncService {
       }
 
       final ride = await _db.getRide(localRideId);
-      if (ride == null || ride.status != RideStatus.completed) {
-        return null;
-      }
+      if (ride == null) return null;
+      final okStatus = ride.status == RideStatus.completed ||
+          (allowRecording && ride.status == RideStatus.recording);
+      if (!okStatus) return null;
 
       final points = await _db.getPoints(localRideId);
       // Never upload an empty track over a ride that claimed it had GPS —
@@ -179,6 +183,11 @@ class RideSyncService {
       }
 
       debugPrint('RiderLab synced ride $localRideId → $cloudRideId');
+      await _bindPhotoRideIds(
+        userId: userId,
+        localRideId: localRideId,
+        cloudRideId: cloudRideId,
+      );
       try {
         await RiderTelemetryService.instance.log(
           category: TelemetryCategory.sync,
@@ -206,6 +215,29 @@ class RideSyncService {
         );
       } catch (_) {}
       return null;
+    }
+  }
+
+  Future<void> _bindPhotoRideIds({
+    required String userId,
+    required String localRideId,
+    required String cloudRideId,
+  }) async {
+    try {
+      final photos = await _db.getRidePhotos(localRideId);
+      final hashes = [
+        for (final p in photos)
+          if (p.contentHash != null && p.contentHash!.isNotEmpty) p.contentHash!,
+      ];
+      if (hashes.isEmpty) return;
+      await _supabase
+          .from('rodada_photos')
+          .update({'ride_id': cloudRideId})
+          .eq('user_id', userId)
+          .inFilter('content_hash', hashes)
+          .isFilter('ride_id', null);
+    } catch (e) {
+      debugPrint('RiderLab bind photo ride_id: $e');
     }
   }
 

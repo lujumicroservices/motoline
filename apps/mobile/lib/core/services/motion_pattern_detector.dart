@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import '../utils/geo_utils.dart';
 
 /// Coarse motion phase — informational only, derived from the same
@@ -66,6 +64,7 @@ class MotionPatternDetector {
   DateTime? _fastSinceArm;
   double? _armLastLat;
   double? _armLastLng;
+  DateTime? _armLastTs;
   double _armCumulativeMeters = 0;
 
   double? _lastLat;
@@ -115,6 +114,7 @@ class MotionPatternDetector {
     _fastSinceArm = null;
     _armLastLat = null;
     _armLastLng = null;
+    _armLastTs = null;
     _armCumulativeMeters = 0;
   }
 
@@ -148,12 +148,6 @@ class MotionPatternDetector {
     _lastTs = timestamp;
   }
 
-  /// Below ~1 km/h Android's 0.0 usually means "no speed", not parked.
-  static const _usableGpsSpeedMps = 0.3;
-
-  /// Wander smaller than this is not a ride, even with a tight accuracy.
-  static const _impliedMinJumpMeters = 5.0;
-
   double _effectiveSpeedMps(
     double? speedMps,
     double lat,
@@ -162,14 +156,11 @@ class MotionPatternDetector {
     double? accuracyMeters,
   ) {
     final implied = _credibleImpliedMps(lat, lng, ts, accuracyMeters);
-    final gpsUsable =
-        speedMps != null && speedMps > _usableGpsSpeedMps;
-    if (gpsUsable && implied != null) {
-      return math.max(speedMps, implied);
-    }
-    if (gpsUsable) return speedMps;
-    if (implied != null) return implied;
-    return speedMps ?? -1;
+    return preferGpsOrImpliedMps(
+          gpsSpeedMps: speedMps,
+          impliedMps: implied,
+        ) ??
+        -1;
   }
 
   /// Implied m/s from the previous sample, or 0 when the hop is inside the
@@ -184,12 +175,17 @@ class MotionPatternDetector {
     final prevLng = _lastLng;
     final prevTs = _lastTs;
     if (prevLat == null || prevLng == null || prevTs == null) return null;
-    final dtSec = ts.difference(prevTs).inMilliseconds / 1000.0;
-    if (dtSec < 0.05) return null;
-    final jump = haversineMeters(prevLat, prevLng, lat, lng);
-    final floor = math.max(accuracyMeters ?? 0, _impliedMinJumpMeters);
-    if (jump <= floor) return 0;
-    return jump / dtSec;
+    return impliedSpeedMps(
+      fromLat: prevLat,
+      fromLng: prevLng,
+      fromTs: prevTs,
+      toLat: lat,
+      toLng: lng,
+      toTs: ts,
+      accuracyMeters: accuracyMeters,
+      minJumpMeters: 2,
+      minCredibleMps: pauseSpeedThresholdMps,
+    );
   }
 
   void _updatePause(
@@ -297,6 +293,7 @@ class MotionPatternDetector {
     required double longitude,
     required DateTime timestamp,
   }) {
+    double? implied;
     if (_armLastLat != null && _armLastLng != null) {
       _armCumulativeMeters += haversineMeters(
         _armLastLat!,
@@ -304,11 +301,28 @@ class MotionPatternDetector {
         latitude,
         longitude,
       );
+      if (_armLastTs != null) {
+        implied = impliedSpeedMps(
+          fromLat: _armLastLat!,
+          fromLng: _armLastLng!,
+          fromTs: _armLastTs!,
+          toLat: latitude,
+          toLng: longitude,
+          toTs: timestamp,
+          minJumpMeters: 2,
+          minCredibleMps: autoStartSpeedThresholdMps,
+        );
+      }
     }
     _armLastLat = latitude;
     _armLastLng = longitude;
+    _armLastTs = timestamp;
 
-    final speed = speedMps ?? -1;
+    final speed = preferGpsOrImpliedMps(
+          gpsSpeedMps: speedMps,
+          impliedMps: implied,
+        ) ??
+        (speedMps ?? -1);
     if (speed >= 0 && speed > autoStartSpeedThresholdMps) {
       _fastSinceArm ??= timestamp;
     } else {

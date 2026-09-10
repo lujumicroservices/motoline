@@ -24,35 +24,42 @@ class GalleryPhotoCandidate {
   double? get longitude => match.longitude;
 }
 
-Future<List<GalleryPhotoCandidate>> scanRideGalleryPhotos({
+class GalleryScanResult {
+  const GalleryScanResult({
+    required this.candidates,
+    this.denied = false,
+    this.limited = false,
+  });
+
+  final List<GalleryPhotoCandidate> candidates;
+  final bool denied;
+  final bool limited;
+}
+
+Future<GalleryScanResult> scanRideGalleryPhotos({
   required DateTime rideStart,
   required DateTime rideEnd,
   required List<TrackPoint> points,
 }) async {
-  final perm = await PhotoManager.requestPermissionExtend();
-  if (!perm.hasAccess) return const [];
-
-  final from = rideStart.subtract(const Duration(minutes: 5));
-  final to = rideEnd.add(const Duration(minutes: 15));
-  final filter = FilterOptionGroup(
-    imageOption: const FilterOption(
-      sizeConstraint: SizeConstraint(ignoreSize: true),
+  final perm = await PhotoManager.requestPermissionExtend(
+    requestOption: const PermissionRequestOption(
+      iosAccessLevel: IosAccessLevel.readWrite,
+      androidPermission: AndroidPermission(
+        type: RequestType.image,
+        mediaLocation: true,
+      ),
     ),
-    createTimeCond: DateTimeCond(min: from, max: to),
   );
-  final paths = await PhotoManager.getAssetPathList(
-    type: RequestType.image,
-    filterOption: filter,
-    onlyAll: true,
-  );
-  if (paths.isEmpty) return const [];
+  if (!perm.hasAccess) {
+    return const GalleryScanResult(candidates: [], denied: true);
+  }
 
-  final album = paths.first;
-  final total = await album.assetCountAsync;
-  final assets = await album.getAssetListRange(
-    start: 0,
-    end: total.clamp(0, 400),
-  );
+  final from = rideStart.subtract(const Duration(minutes: 30));
+  final to = rideEnd.add(const Duration(minutes: 30));
+  var assets = await _recentImages(from: from, to: to);
+  if (assets.isEmpty) {
+    assets = await _recentImages();
+  }
 
   final out = <GalleryPhotoCandidate>[];
   for (final asset in assets) {
@@ -82,13 +89,38 @@ Future<List<GalleryPhotoCandidate>> scanRideGalleryPhotos({
     );
   }
   out.sort((a, b) => a.takenAt.compareTo(b.takenAt));
-  return out;
+  return GalleryScanResult(
+    candidates: out,
+    limited: perm == PermissionState.limited,
+  );
+}
+
+Future<List<AssetEntity>> _recentImages({DateTime? from, DateTime? to}) async {
+  final filter = FilterOptionGroup(
+    imageOption: const FilterOption(
+      sizeConstraint: SizeConstraint(ignoreSize: true),
+    ),
+    createTimeCond: from == null || to == null
+        ? DateTimeCond.def()
+        : DateTimeCond(min: from, max: to),
+  );
+  final paths = await PhotoManager.getAssetPathList(
+    type: RequestType.image,
+    filterOption: filter,
+    onlyAll: true,
+  );
+  if (paths.isEmpty) return const [];
+  final album = paths.first;
+  final total = await album.assetCountAsync;
+  if (total <= 0) return const [];
+  return album.getAssetListRange(start: 0, end: total.clamp(0, 400));
 }
 
 Future<Uint8List?> loadGalleryBytes(AssetEntity asset) async {
-  final data = await asset.thumbnailDataWithSize(
+  final data = await asset.originBytes;
+  if (data != null && data.isNotEmpty) return data;
+  return asset.thumbnailDataWithSize(
     const ThumbnailSize(1920, 1920),
     quality: 85,
   );
-  return data ?? await asset.originBytes;
 }
