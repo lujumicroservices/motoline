@@ -28,8 +28,11 @@ import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
 import '../lean_lab/lean_lab_bootstrap.dart';
 import '../ride_detail/pilot_line_map.dart';
 import '../watch/family_watch_screen.dart';
+import '../watch/watch_models.dart';
 import '../watch/watch_providers.dart';
 import '../rodadas/photos/ride_photo_capture.dart';
+import '../rodadas/rodada_capture.dart';
+import '../rodadas/rodada_capture_flow.dart';
 import 'armed_session_flow.dart';
 import 'armed_session_nav.dart';
 import 'location_permission_gate.dart';
@@ -118,6 +121,17 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       }
     }
     if (mounted) ref.invalidate(activeRideProvider);
+    await _resumeFamilyWatch();
+  }
+
+  Future<void> _resumeFamilyWatch() async {
+    final id = ref.read(rideRecorderProvider).activeRide?.id;
+    if (id == null) return;
+    try {
+      await ref
+          .read(activeWatchControllerProvider.notifier)
+          .resumeFor(localRideId: id);
+    } catch (_) {}
   }
 
   Future<void> _bootstrap() async {
@@ -186,6 +200,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         _warmup = null;
       });
       ref.invalidate(activeRideProvider);
+      await _resumeFamilyWatch();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -228,6 +243,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final loopState = loopStateAsync?.valueOrNull;
 
     final isRecording = recorder.isRecording;
+    final familyOn = familyWatchIsLive(ref.watch(activeWatchControllerProvider));
     final staging =
         !widget.autoStart && !isRecording && !_starting && _startError == null;
     final lockNav = _starting || (isRecording && !widget.allowMinimize);
@@ -269,10 +285,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
               IconButton(
                 tooltip: l10n.familyAppBarShareTooltip,
                 icon: Icon(
-                  ref.watch(activeWatchControllerProvider) != null
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: AppTheme.lineHot,
+                  familyOn ? Icons.favorite : Icons.favorite_border,
+                  color: familyOn ? AppTheme.lineHot : AppTheme.steel,
                 ),
                 onPressed: () => openFamilyWatchScreen(
                   context,
@@ -320,6 +334,11 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                           setState(() => _keepRidingDismissed = true),
                       onEnd: () =>
                           _isLoop ? _endLoopSession(context) : _stop(context),
+                      endLabel: shouldUseRodadaPauseAction(
+                        ref.read(rideRecorderProvider).activeRodadaId,
+                      )
+                          ? l10n.pauseRodadaCapture
+                          : l10n.endRide,
                     ),
                   Expanded(
                     child: snapshotAsync.when(
@@ -427,7 +446,13 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                 ),
                 onPressed: () => _stop(context),
                 child: Text(
-                  widget.allowMinimize ? l10n.stopRecording : l10n.endRide,
+                  shouldUseRodadaPauseAction(
+                        ref.read(rideRecorderProvider).activeRodadaId,
+                      )
+                      ? l10n.pauseRodadaCapture
+                      : (widget.allowMinimize
+                          ? l10n.stopRecording
+                          : l10n.endRide),
                 ),
               ),
             ],
@@ -636,6 +661,12 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   }
 
   Future<void> _stop(BuildContext context) async {
+    if (shouldUseRodadaPauseAction(
+      ref.read(rideRecorderProvider).activeRodadaId,
+    )) {
+      await holdRodadaCaptureAndReturn(context, ref);
+      return;
+    }
     await completeArmedOrActiveRide(context, ref);
   }
 
@@ -804,10 +835,15 @@ class _AutoPauseToggleRow extends StatelessWidget {
 }
 
 class _SuggestEndBanner extends StatelessWidget {
-  const _SuggestEndBanner({required this.onKeepRiding, required this.onEnd});
+  const _SuggestEndBanner({
+    required this.onKeepRiding,
+    required this.onEnd,
+    this.endLabel,
+  });
 
   final VoidCallback onKeepRiding;
   final VoidCallback onEnd;
+  final String? endLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -863,7 +899,7 @@ class _SuggestEndBanner extends StatelessWidget {
                     backgroundColor: AppTheme.signal,
                   ),
                   onPressed: onEnd,
-                  child: Text(l10n.endRide),
+                  child: Text(endLabel ?? l10n.endRide),
                 ),
               ),
             ],

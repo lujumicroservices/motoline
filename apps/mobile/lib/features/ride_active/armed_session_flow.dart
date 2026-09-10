@@ -73,7 +73,11 @@ void openArmedSessionAfterAutoStart(
   ensureArmedSessionHub(context, ref);
   final recorder = ref.read(rideRecorderProvider);
   final nav = ref.read(armedSessionNavProvider);
-  if (shouldAutoPushHud(nav, isRecording: recorder.isRecording)) {
+  if (shouldAutoPushHud(
+    nav,
+    isRecording: recorder.isRecording,
+    rodadaMetricsHeld: recorder.isRodadaMetricsHeld,
+  )) {
     openArmedRecordingHud(context, ref);
   }
 }

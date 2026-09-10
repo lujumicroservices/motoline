@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
+import 'rodada_capture_flow.dart';
 import 'rodada_providers.dart';
 
 /// Non-host leave. Returns true if the membership was deleted.
@@ -30,6 +31,7 @@ Future<bool> confirmAndLeaveRodada(
   );
   if (ok != true || !context.mounted) return false;
   try {
+    await completeRodadaCaptureIfNeeded(ref, rodadaId: rodadaId);
     await ref.read(rodadaRepositoryProvider).leaveRodada(rodadaId);
   } catch (e) {
     if (context.mounted) {

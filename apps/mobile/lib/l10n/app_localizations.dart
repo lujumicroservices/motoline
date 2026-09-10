@@ -140,6 +140,36 @@ abstract class AppLocalizations {
   /// **'Detener grabación'**
   String get stopRecording;
 
+  /// No description provided for @pauseRodadaCapture.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausar captura'**
+  String get pauseRodadaCapture;
+
+  /// No description provided for @resumeRodadaCapture.
+  ///
+  /// In es, this message translates to:
+  /// **'Reanudar captura'**
+  String get resumeRodadaCapture;
+
+  /// No description provided for @rodadaCaptureHeldHint.
+  ///
+  /// In es, this message translates to:
+  /// **'La captura de métricas está en pausa. Puedes reanudar cuando quieras durante la rodada.'**
+  String get rodadaCaptureHeldHint;
+
+  /// No description provided for @rodadaCaptureLive.
+  ///
+  /// In es, this message translates to:
+  /// **'Capturando métricas'**
+  String get rodadaCaptureLive;
+
+  /// No description provided for @garageRodadaBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodada'**
+  String get garageRodadaBadge;
+
   /// No description provided for @recordingRec.
   ///
   /// In es, this message translates to:
@@ -3121,6 +3151,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Familia puede verte'**
   String get familyWatchActive;
+
+  /// No description provided for @familyWatchInactive.
+  ///
+  /// In es, this message translates to:
+  /// **'No estás compartiendo'**
+  String get familyWatchInactive;
+
+  /// No description provided for @familyWatchQuickHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparte tu ubicación para activar los avisos rápidos.'**
+  String get familyWatchQuickHint;
 
   /// No description provided for @familyWatchStop.
   ///

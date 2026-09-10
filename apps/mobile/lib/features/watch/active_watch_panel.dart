@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import 'family_share.dart';
+import 'watch_models.dart';
 import 'watch_providers.dart';
 
 /// Compact safety panel on active ride / rodada screens.
@@ -51,9 +52,7 @@ class _ActiveWatchPanelState extends ConsumerState<ActiveWatchPanel> {
     final l10n = context.l10n;
     final session = ref.watch(activeWatchControllerProvider);
     final ctrl = ref.read(activeWatchControllerProvider.notifier);
-    final mine = session != null && session.localRideId == widget.localRideId
-        ? session
-        : null;
+    final mine = familyWatchIsLive(session) ? session : null;
 
     if (mine == null) {
       if (widget.compact) {

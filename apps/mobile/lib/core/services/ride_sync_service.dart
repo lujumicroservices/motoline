@@ -165,6 +165,7 @@ class RideSyncService {
         'visibility': ride.visibility.dbValue,
         'is_shared': ride.visibility.legacyIsShared,
         'route_id': ride.routeId,
+        'rodada_id': ride.rodadaId,
         'title': ride.title,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
         if (bbox != null) ...bbox.toMap(),
@@ -500,6 +501,7 @@ class RideSyncService {
       avgSpeedMps: (map['avg_speed_mps'] as num?)?.toDouble(),
       maxLeanDegrees: maxLean ?? existing?.maxLeanDegrees,
       routeId: _str(map['route_id']),
+      rodadaId: _str(map['rodada_id']) ?? existing?.rodadaId,
       visibility: ShareVisibility.fromDb(
         map['visibility'],
         legacyIsShared: map['is_shared'] == true || map['is_shared'] == 1,

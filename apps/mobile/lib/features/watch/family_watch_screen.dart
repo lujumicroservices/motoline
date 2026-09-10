@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import 'family_share.dart';
+import 'watch_models.dart';
 import 'watch_providers.dart';
 
 /// Dedicated family-watch controls. Opened from the HUD heart / rodada live.
@@ -31,38 +32,53 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(activeWatchControllerProvider.notifier)
-          .resumeFor(localRideId: widget.localRideId);
-      unawaited(_loadLastEvent());
+      unawaited(_hydrate());
     });
+  }
+
+  Future<void> _hydrate() async {
+    await ref
+        .read(activeWatchControllerProvider.notifier)
+        .resumeFor(localRideId: widget.localRideId);
+    if (!mounted) return;
+    await _loadLastEvent();
   }
 
   Future<void> _loadLastEvent() async {
     final session = ref.read(activeWatchControllerProvider);
-    if (session == null || session.localRideId != widget.localRideId) return;
+    if (!familyWatchIsLive(session)) return;
     try {
       final events = await ref
           .read(watchRepositoryProvider)
-          .listEvents(session.id);
+          .listEvents(session!.id);
       if (!mounted || events.isEmpty) return;
       setState(() => _lastKind = events.first.kind);
     } catch (_) {}
   }
 
   Future<void> _post(Future<void> Function() action, String kind) async {
+    if (!familyWatchIsLive(ref.read(activeWatchControllerProvider))) return;
     await action();
     if (!mounted) return;
     setState(() => _lastKind = kind);
+  }
+
+  Future<void> _share() async {
+    await shareFamilyWatchLink(
+      context,
+      ref,
+      localRideId: widget.localRideId,
+      riderDisplayName: widget.riderDisplayName,
+    );
+    if (!mounted) return;
+    await _loadLastEvent();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final session = ref.watch(activeWatchControllerProvider);
-    final mine = session != null && session.localRideId == widget.localRideId
-        ? session
-        : null;
+    final active = familyWatchIsLive(session);
     final ctrl = ref.read(activeWatchControllerProvider.notifier);
     final lastLabel = switch (_lastKind) {
       'ok' => l10n.familyOk,
@@ -100,77 +116,90 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          if (mine == null) ...[
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
+          Row(
+            children: [
+              Icon(
+                active ? Icons.favorite : Icons.favorite_border,
+                color: active ? AppTheme.lineHot : AppTheme.steel,
               ),
-              onPressed: () => shareFamilyWatchLink(
-                context,
-                ref,
-                localRideId: widget.localRideId,
-                riderDisplayName: widget.riderDisplayName,
-              ),
-              icon: Icon(familyShareIcon(context)),
-              label: Text(l10n.familyWatchShareCta),
-            ),
-          ] else ...[
-            Row(
-              children: [
-                const Icon(Icons.favorite, color: AppTheme.lineHot),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    l10n.familyWatchActive,
-                    style: GoogleFonts.exo2(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 18,
-                    ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  active ? l10n.familyWatchActive : l10n.familyWatchInactive,
+                  style: GoogleFonts.exo2(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: active ? null : AppTheme.steel,
                   ),
-                ),
-              ],
-            ),
-            if (lastLabel != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                l10n.familyLastPing(lastLabel),
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.line,
-                  fontSize: 14,
                 ),
               ),
             ],
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _StatusAction(
-                    icon: Icons.check_circle,
-                    color: AppTheme.line,
-                    label: l10n.familyOk,
-                    onTap: () => _post(ctrl.postOk, 'ok'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _StatusAction(
-                    icon: Icons.pause_circle,
-                    color: AppTheme.mist,
-                    label: l10n.familyStopped,
-                    onTap: () => _post(ctrl.postStopped, 'stopped'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _StatusAction(
-                    icon: Icons.sos,
-                    color: AppTheme.lineHot,
-                    label: l10n.familySos,
-                    onTap: () => _post(ctrl.postSos, 'sos'),
-                  ),
-                ),
-              ],
+          ),
+          if (active && lastLabel != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.familyLastPing(lastLabel),
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.line,
+                fontSize: 14,
+              ),
             ),
+          ],
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+            ),
+            onPressed: _share,
+            icon: Icon(familyShareIcon(context)),
+            label: Text(l10n.familyWatchShareCta),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _StatusAction(
+                  icon: Icons.check_circle,
+                  color: AppTheme.line,
+                  label: l10n.familyOk,
+                  enabled: active,
+                  onTap: () => _post(ctrl.postOk, 'ok'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatusAction(
+                  icon: Icons.pause_circle,
+                  color: AppTheme.mist,
+                  label: l10n.familyStopped,
+                  enabled: active,
+                  onTap: () => _post(ctrl.postStopped, 'stopped'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatusAction(
+                  icon: Icons.sos,
+                  color: AppTheme.lineHot,
+                  label: l10n.familySos,
+                  enabled: active,
+                  onTap: () => _post(ctrl.postSos, 'sos'),
+                ),
+              ),
+            ],
+          ),
+          if (!active) ...[
+            const SizedBox(height: 12),
+            Text(
+              l10n.familyWatchQuickHint,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 13,
+                height: 1.35,
+              ),
+            ),
+          ],
+          if (active) ...[
             const SizedBox(height: 20),
             Text(
               l10n.familyShareAgainHint,
@@ -181,17 +210,6 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: () => shareFamilyWatchLink(
-                context,
-                ref,
-                localRideId: widget.localRideId,
-                riderDisplayName: widget.riderDisplayName,
-              ),
-              icon: const Icon(Icons.person_add_alt_1),
-              label: Text(l10n.familyShareAgain),
-            ),
-            const SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: () => confirmRotateFamilyWatchLink(
                 context,
@@ -227,37 +245,44 @@ class _StatusAction extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.label,
+    required this.enabled,
     required this.onTap,
   });
 
   final IconData icon;
   final Color color;
   final String label;
+  final bool enabled;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppTheme.asphaltElevated,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
+    final paint = enabled ? color : AppTheme.steel;
+    return Opacity(
+      opacity: enabled ? 1 : 0.45,
+      child: Material(
+        color: AppTheme.asphaltElevated,
         borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          child: Column(
-            children: [
-              Icon(icon, color: color, size: 36),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.exo2(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            child: Column(
+              children: [
+                Icon(icon, color: paint, size: 36),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.exo2(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: paint,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

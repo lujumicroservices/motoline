@@ -39,12 +39,16 @@ Future<bool> freezeThenArm(
   BuildContext context,
   WidgetRef ref, {
   String? routeId,
+  String? rodadaId,
   bool autoBeginHold = false,
 }) async {
   if (freezeThenArmInProgress) return false;
   freezeThenArmInProgress = true;
   try {
     final recorder = ref.read(rideRecorderProvider);
+    if (rodadaId != null && rodadaId.isNotEmpty) {
+      recorder.bindRodada(rodadaId);
+    }
     if (recorder.isArmed || recorder.isRecording) return true;
     final l10n = context.l10n;
     if (!await LocationPermissionGate.requestForRecording(context)) {
@@ -60,7 +64,10 @@ Future<bool> freezeThenArm(
     );
     if (g0 == null || !context.mounted) return false;
     ref.read(rideRecorderProvider).prepareLeanLabUpright(g0);
-    await ref.read(armedStateProvider.notifier).arm(routeId: routeId);
+    await ref.read(armedStateProvider.notifier).arm(
+      routeId: routeId,
+      rodadaId: rodadaId,
+    );
     return true;
   } finally {
     freezeThenArmInProgress = false;

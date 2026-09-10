@@ -35,8 +35,10 @@ class ArmedSessionNavState {
 bool shouldAutoPushHud(
   ArmedSessionNavState nav, {
   required bool isRecording,
+  bool rodadaMetricsHeld = false,
 }) {
   if (!isRecording) return false;
+  if (rodadaMetricsHeld) return false;
   if (nav.hudOnStack) return false;
   if (nav.hudMinimized) return false;
   return true;
@@ -54,8 +56,10 @@ bool canOpenArmedHud({required String? currentRouteName}) {
 bool shouldResumeHubFromHome({
   required bool isRecording,
   required bool hubOnStack,
+  bool rodadaMetricsHeld = false,
 }) {
   if (hubOnStack) return false;
+  if (rodadaMetricsHeld) return false;
   return isRecording;
 }
 

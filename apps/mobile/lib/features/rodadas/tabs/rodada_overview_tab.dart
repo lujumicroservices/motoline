@@ -19,10 +19,12 @@ import '../../watch/family_circle_screen.dart';
 import '../leave_rodada.dart';
 import '../models/rodada_models.dart';
 import '../rodada_auto_arm.dart';
+import '../rodada_capture_flow.dart';
 import '../rodada_invite_share.dart';
 import '../rodada_itinerary.dart';
 import '../rodada_itinerary_map.dart';
 import '../rodada_providers.dart';
+import '../widgets/rodada_capture_bar.dart';
 
 class RodadaOverviewTab extends ConsumerWidget {
   const RodadaOverviewTab({super.key, required this.rodadaId});
@@ -108,6 +110,7 @@ class RodadaOverviewTab extends ConsumerWidget {
                 },
                 orElse: () => const SizedBox.shrink(),
               ),
+              RodadaCaptureBar(rodadaId: rodadaId, live: rodada.isLive),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: () => shareRodadaInviteSummary(
@@ -373,7 +376,12 @@ class RodadaOverviewTab extends ConsumerWidget {
           rodadaId: rodadaId,
           repository: ref.read(rodadaRepositoryProvider),
         );
-        armFuture = freezeThenArm(context, ref, autoBeginHold: true);
+        armFuture = freezeThenArm(
+          context,
+          ref,
+          autoBeginHold: true,
+          rodadaId: rodadaId,
+        );
       }
       ref.invalidate(rodadaOverviewProvider(rodadaId));
       ref.invalidate(myRodadasProvider);
@@ -399,6 +407,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       await ref
           .read(rodadaRepositoryProvider)
           .updateRodada(rodadaId, status: 'ended');
+      await completeRodadaCaptureIfNeeded(ref, rodadaId: rodadaId);
       ref.invalidate(rodadaOverviewProvider(rodadaId));
       ref.invalidate(myRodadasProvider);
       if (!context.mounted) return;

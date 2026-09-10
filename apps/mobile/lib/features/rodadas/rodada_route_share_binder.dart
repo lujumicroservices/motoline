@@ -13,6 +13,7 @@ import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../watch/watch_providers.dart';
 import '../watch/watch_repository.dart';
 import 'rodada_auto_arm.dart';
+import 'rodada_capture_flow.dart';
 import 'rodada_live_session.dart';
 import 'rodada_providers.dart';
 import 'rodada_repository.dart';
@@ -75,6 +76,14 @@ class _RodadaRouteShareBinderState
     _armedFor.removeWhere((id) => !catalog.wantArm.contains(id));
     _familyFor.removeWhere((id) => !catalog.liveIds.contains(id));
 
+    final boundId = ref.read(rideRecorderProvider).activeRodadaId;
+    if (boundId != null && !catalog.liveIds.contains(boundId)) {
+      unawaited(completeRodadaCaptureIfNeeded(ref, rodadaId: boundId));
+    }
+    for (final leftover in catalog.endedIds) {
+      unawaited(completeRodadaCaptureIfNeeded(ref, rodadaId: leftover));
+    }
+
     for (final id in _sessions.keys.toList()) {
       if (!wantShare.contains(id)) {
         unawaited(_sessions.remove(id)?.dispose());
@@ -102,6 +111,10 @@ class _RodadaRouteShareBinderState
     try {
       final mine = await repo.listMyRodadas(limit: 30);
       final live = mine.where((r) => r.status == 'live').toList();
+      final endedIds = mine
+          .where((r) => r.status == 'ended')
+          .map((r) => r.id)
+          .toSet();
       final liveIds = live.map((r) => r.id).toSet();
       final wantShare = <String>{};
       final wantFamily = <String>{};
@@ -121,6 +134,7 @@ class _RodadaRouteShareBinderState
       }
       return _ShareCatalog(
         liveIds: liveIds,
+        endedIds: endedIds,
         wantShare: wantShare,
         wantFamily: wantFamily,
         wantArm: wantArm,
@@ -147,7 +161,12 @@ class _RodadaRouteShareBinderState
     final recorder = ref.read(rideRecorderProvider);
     if (recorder.isArmed || recorder.isRecording) return;
     try {
-      final ok = await freezeThenArm(context, ref, autoBeginHold: true);
+      final ok = await freezeThenArm(
+        context,
+        ref,
+        autoBeginHold: true,
+        rodadaId: rodadaId,
+      );
       if (ok && mounted) ensureArmedSessionHub(context, ref);
     } catch (e) {
       debugPrint('Rodada auto-arm: $e');
@@ -210,12 +229,14 @@ class _RodadaRouteShareBinderState
 class _ShareCatalog {
   const _ShareCatalog({
     required this.liveIds,
+    required this.endedIds,
     required this.wantShare,
     required this.wantFamily,
     required this.wantArm,
   });
 
   final Set<String> liveIds;
+  final Set<String> endedIds;
   final Set<String> wantShare;
   final Set<String> wantFamily;
   final Set<String> wantArm;

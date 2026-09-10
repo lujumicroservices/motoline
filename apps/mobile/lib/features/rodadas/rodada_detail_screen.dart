@@ -11,6 +11,7 @@ import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import 'invite_push_feedback.dart';
 import 'leave_rodada.dart';
+import 'rodada_capture_flow.dart';
 import 'rodada_invite_share.dart';
 import 'rodada_providers.dart';
 import 'tabs/rodada_live_tab.dart';
@@ -18,6 +19,26 @@ import 'tabs/rodada_messages_tab.dart';
 import 'tabs/rodada_overview_tab.dart';
 import 'tabs/rodada_photos_tab.dart';
 import 'tabs/rodada_rides_tab.dart';
+
+const kRodadaDetailRoute = 'rodada-detail';
+
+Future<void> openRodadaDetail(
+  BuildContext context, {
+  required String rodadaId,
+  int initialTab = 0,
+  bool promptShareInvite = false,
+}) {
+  return Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      settings: RouteSettings(name: kRodadaDetailRoute, arguments: rodadaId),
+      builder: (_) => RodadaDetailScreen(
+        rodadaId: rodadaId,
+        initialTab: initialTab,
+        promptShareInvite: promptShareInvite,
+      ),
+    ),
+  );
+}
 
 /// Shell with lazy tabs: switching tabs destroys the previous body so
 /// autoDispose providers (live GPS, photos, tracks) release immediately.
@@ -244,6 +265,12 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
         await repo.startRodada(widget.rodadaId);
       } else {
         await repo.updateRodada(widget.rodadaId, status: action);
+        if (action == 'ended') {
+          await completeRodadaCaptureIfNeeded(
+            ref,
+            rodadaId: widget.rodadaId,
+          );
+        }
       }
       ref.invalidate(rodadaOverviewProvider(widget.rodadaId));
       ref.invalidate(myRodadasProvider);

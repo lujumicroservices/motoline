@@ -95,6 +95,14 @@ void main() {
         shouldResumeHubFromHome(isRecording: false, hubOnStack: false),
         isFalse,
       );
+      expect(
+        shouldResumeHubFromHome(
+          isRecording: true,
+          hubOnStack: false,
+          rodadaMetricsHeld: true,
+        ),
+        isFalse,
+      );
     });
 
     test('hudClosed while recording marks minimized (not stop)', () {

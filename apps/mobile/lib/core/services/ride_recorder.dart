@@ -144,6 +144,8 @@ class RideRecorder {
   double _maxLeanRight = 0;
   bool _armed = false;
   String? _armedRouteId;
+  String? _boundRodadaId;
+  bool _rodadaMetricsHeld = false;
   bool _promotingArm = false;
   bool _autoPauseEnabled = true;
   bool _autoPausePrefLoaded = false;
@@ -167,6 +169,23 @@ class RideRecorder {
   bool get isRecording => _ride?.status == RideStatus.recording;
   bool get isArmed => _armed;
 
+  /// Rodada this armed/recording session belongs to, if any.
+  String? get activeRodadaId => _ride?.rodadaId ?? _boundRodadaId;
+
+  void bindRodada(String rodadaId) {
+    if (rodadaId.isEmpty) return;
+    _boundRodadaId = rodadaId;
+    final ride = _ride;
+    if (ride != null && (ride.rodadaId == null || ride.rodadaId!.isEmpty)) {
+      _ride = ride.copyWith(rodadaId: rodadaId);
+      unawaited(_db.upsertRide(_ride!));
+      if (isRecording) _emit();
+    }
+  }
+
+  /// Manual hold of metric capture during a rodada (does not complete the ride).
+  bool get isRodadaMetricsHeld => _rodadaMetricsHeld;
+
   /// GPS stored this session (empty while armed and waiting for motion).
   List<TrackPoint> get sessionPoints => List.unmodifiable(_sessionPoints);
 
@@ -174,7 +193,8 @@ class RideRecorder {
 
   /// Route id that will be applied when arm auto-starts (if any).
   String? get armedRouteId => _armedRouteId;
-  bool get isPaused => isRecording && _motion.isPaused;
+  bool get isPaused =>
+      isRecording && (_rodadaMetricsHeld || _motion.isPaused);
 
   /// Automatic pause/resume while recording (persisted).
   bool get autoPauseEnabled => _autoPauseEnabled;
@@ -360,6 +380,7 @@ class RideRecorder {
       startedAt: DateTime.now(),
       status: RideStatus.recording,
       routeId: routeId,
+      rodadaId: _boundRodadaId,
     );
     await _db.upsertRide(ride);
     _ride = ride;
@@ -468,6 +489,8 @@ class RideRecorder {
     unawaited(_telemetry.flushPending());
     _telemetry.bindRide(null);
     _ride = null;
+    _rodadaMetricsHeld = false;
+    _boundRodadaId = null;
     _emitCompleted(completed);
     unawaited(ImuBlobUploadService().enqueueAndUpload(completed.id));
     onRideCompleted?.call(completed);
@@ -549,6 +572,100 @@ class RideRecorder {
     );
   }
 
+  /// Stop writing GPS metrics without completing the ride (rodada rest stop).
+  /// Motion will not auto-resume capture until [resumeRodadaMetrics].
+  void holdRodadaMetrics() {
+    if (_boundRodadaId == null && _ride?.rodadaId == null) return;
+    _rodadaMetricsHeld = true;
+    if (_armed && !isRecording) {
+      disarm();
+    }
+    if (isRecording) _emit();
+  }
+
+  /// Continue the same rodada ride. Reattaches GPS if the process died.
+  Future<Ride?> resumeRodadaMetrics({String? rodadaId}) async {
+    final id = rodadaId ?? _boundRodadaId ?? _ride?.rodadaId;
+    if (id == null || id.isEmpty) return _ride;
+
+    if (isRecording && _ride?.rodadaId == id) {
+      _rodadaMetricsHeld = false;
+      _motion.clearPause();
+      _emit();
+      return _ride;
+    }
+
+    if (isRecording) return _ride;
+
+    _boundRodadaId = id;
+    final existing = await _db.getRecordingRideForRodada(id);
+    if (existing == null) {
+      _rodadaMetricsHeld = false;
+      return null;
+    }
+    return _reattachRecording(existing);
+  }
+
+  Future<Ride> _reattachRecording(Ride ride) async {
+    await _ensureAutoPausePref();
+    final points = await _db.getPoints(ride.id);
+    _ride = ride;
+    _boundRodadaId = ride.rodadaId ?? _boundRodadaId;
+    _rodadaMetricsHeld = false;
+    _sessionPoints
+      ..clear()
+      ..addAll(points);
+    _pending.clear();
+    _lastStoredPoint = points.isEmpty ? null : points.last;
+    _lastPoint = _lastStoredPoint;
+    _distanceMeters = ride.distanceMeters;
+    _maxSpeedMps = ride.maxSpeedMps;
+    _speedSum = (ride.avgSpeedMps ?? 0) * (points.isEmpty ? 0 : points.length);
+    _speedSamples = points.where((p) => p.speedMps != null && p.speedMps! >= 0).length;
+    _maxLeanAbs = ride.maxLeanDegrees;
+    _maxLeanLeft = 0;
+    _maxLeanRight = 0;
+    _fixAcceptTimes.clear();
+    _gpsSkipAccuracy = 0;
+    _gpsSkipTeleport = 0;
+    _wasPaused = false;
+    _wasSuggestEnd = false;
+    _motion.resetForNewRide();
+
+    _armed = false;
+    _armedRouteId = null;
+    _armedController.add(false);
+
+    _lean.start();
+    _baro.start();
+    _applyPendingLeanLock();
+    _beginLeanCapture();
+    _flushTimer?.cancel();
+    _flushTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _flushPending(),
+    );
+    _startLeanSampleTimer();
+
+    await _sub?.cancel();
+    _sub = _location.watchPositions().listen(
+      _onPosition,
+      onError: (Object error, StackTrace stack) {
+        unawaited(
+          _telemetry.error(
+            where: 'ride.gps_stream',
+            error: error,
+            category: TelemetryCategory.gps,
+          ),
+        );
+      },
+    );
+
+    _telemetry.bindRide(ride.id);
+    _emit();
+    return ride;
+  }
+
   // ---------------------------------------------------------------------
   // Arm -> auto-start
   // ---------------------------------------------------------------------
@@ -556,7 +673,7 @@ class RideRecorder {
   /// Keep a dedicated foreground Dart isolate alive while armed so GPS is
   /// processed even with the screen locked. Geolocator FGS alone is not
   /// enough — native GPS can continue while Dart callbacks are frozen.
-  Future<void> armForAutoStart({String? routeId}) async {
+  Future<void> armForAutoStart({String? routeId, String? rodadaId}) async {
     if (ImpersonationStore.isActive) {
       throw StateError('Recording is off while viewing as another rider.');
     }
@@ -571,6 +688,10 @@ class RideRecorder {
 
     _armMotion.resetArm();
     _armedRouteId = routeId;
+    if (rodadaId != null && rodadaId.isNotEmpty) {
+      _boundRodadaId = rodadaId;
+    }
+    _rodadaMetricsHeld = false;
     if (routeId != null && routeId.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(preferredArmRoutePrefKey, routeId);
@@ -752,6 +873,7 @@ class RideRecorder {
       startedAt: DateTime.now(),
       status: RideStatus.recording,
       routeId: routeId,
+      rodadaId: _boundRodadaId,
     );
     await _db.upsertRide(ride);
 
@@ -896,6 +1018,11 @@ class RideRecorder {
     );
     _lastPoint = point;
     _noteGpsAccept(position.timestamp);
+
+    if (_rodadaMetricsHeld) {
+      _emit();
+      return;
+    }
 
     _motion.feedRideSample(
       speedMps: speedMps,
@@ -1250,8 +1377,8 @@ class RideRecorder {
         maxLeanLeftDegrees: _maxLeanLeft,
         maxLeanRightDegrees: _maxLeanRight,
         leanCalibrated: _lean.isCalibrated,
-        isPaused: _motion.isPaused,
-        suggestEnd: _motion.suggestEnd,
+        isPaused: _rodadaMetricsHeld || _motion.isPaused,
+        suggestEnd: _rodadaMetricsHeld ? false : _motion.suggestEnd,
         pausedFor: _motion.pausedFor(),
         autoPauseEnabled: _autoPauseEnabled,
         gpsRateHz: _liveGpsRateHz,

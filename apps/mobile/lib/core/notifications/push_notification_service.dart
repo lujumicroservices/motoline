@@ -366,6 +366,7 @@ class PushNotificationService {
     if (nav == null) return false;
     nav.push(
       MaterialPageRoute<void>(
+        settings: RouteSettings(name: kRodadaDetailRoute, arguments: id),
         builder: (_) => RodadaDetailScreen(rodadaId: id, initialTab: tab),
       ),
     );

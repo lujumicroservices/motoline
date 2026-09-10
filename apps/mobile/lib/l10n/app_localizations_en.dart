@@ -31,6 +31,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stopRecording => 'Stop recording';
 
   @override
+  String get pauseRodadaCapture => 'Pause capture';
+
+  @override
+  String get resumeRodadaCapture => 'Resume capture';
+
+  @override
+  String get rodadaCaptureHeldHint =>
+      'Metric capture is paused. You can resume anytime during the rodada.';
+
+  @override
+  String get rodadaCaptureLive => 'Capturing metrics';
+
+  @override
+  String get garageRodadaBadge => 'Rodada';
+
+  @override
   String get recordingRec => 'REC';
 
   @override
@@ -1703,6 +1719,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyWatchActive => 'Family can see you';
+
+  @override
+  String get familyWatchInactive => 'You are not sharing';
+
+  @override
+  String get familyWatchQuickHint =>
+      'Share your location to enable quick check-ins.';
 
   @override
   String get familyWatchStop => 'Stop';

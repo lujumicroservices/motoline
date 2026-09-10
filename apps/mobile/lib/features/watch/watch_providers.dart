@@ -87,10 +87,13 @@ class ActiveWatchController extends Notifier<WatchSession?> {
     }
   }
 
-  /// Rehydrate an already-active cloud session (same ride/rodada key).
+  /// Rehydrate an already-active cloud session for this rider.
+  ///
+  /// The live session may be keyed to a ride uuid or a `rodada:` synthetic id;
+  /// either one means family sharing is on.
   Future<WatchSession?> resumeFor({required String localRideId}) async {
     if (!SupabaseBootstrap.isReady) return null;
-    if (state != null && state!.localRideId == localRideId && state!.isActive) {
+    if (familyWatchIsLive(state)) {
       _live?.kick();
       final withUrl = await _repo.attachShareUrl(state!);
       state = withUrl;
@@ -99,7 +102,8 @@ class ActiveWatchController extends Notifier<WatchSession?> {
     if (_resuming) return state;
     _resuming = true;
     try {
-      final existing = await _repo.activeSessionForRide(localRideId);
+      final existing = await _repo.activeSessionForRide(localRideId) ??
+          await _repo.activeSessionMine();
       if (existing == null) return state;
       await _attachLive(existing);
       return existing;
@@ -113,7 +117,7 @@ class ActiveWatchController extends Notifier<WatchSession?> {
     String? riderDisplayName,
   }) async {
     if (!SupabaseBootstrap.isReady) return null;
-    if (state != null && state!.localRideId == localRideId && state!.isActive) {
+    if (familyWatchIsLive(state)) {
       _live?.kick();
       return _repo.attachShareUrl(state!);
     }

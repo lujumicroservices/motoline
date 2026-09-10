@@ -24,6 +24,7 @@ class Ride {
     this.leanSignFlip = 1,
     this.leanFreezeAtMs,
     this.leanMountMode,
+    this.rodadaId,
   });
 
   final String id;
@@ -58,6 +59,9 @@ class Ride {
 
   /// `mount` | `pocket` | `unknown` | null
   final String? leanMountMode;
+
+  /// Local/cloud rodada this ride belongs to (group outing capture).
+  final String? rodadaId;
 
   bool get hasLeanUprightFreeze =>
       leanUprightLocked || (leanG0X != null && leanG0Y != null && leanG0Z != null);
@@ -108,6 +112,7 @@ class Ride {
         'lean_sign_flip': leanSignFlip,
         'lean_freeze_at_ms': leanFreezeAtMs,
         'lean_mount_mode': leanMountMode,
+        'rodada_id': rodadaId,
       };
 
   factory Ride.fromMap(Map<String, Object?> map) => Ride(
@@ -138,6 +143,7 @@ class Ride {
         leanSignFlip: (map['lean_sign_flip'] as num?)?.toInt() ?? 1,
         leanFreezeAtMs: (map['lean_freeze_at_ms'] as num?)?.toInt(),
         leanMountMode: map['lean_mount_mode'] as String?,
+        rodadaId: map['rodada_id'] as String?,
       );
 
   Ride copyWith({
@@ -162,6 +168,8 @@ class Ride {
     int? leanSignFlip,
     int? leanFreezeAtMs,
     String? leanMountMode,
+    String? rodadaId,
+    bool clearRodadaId = false,
   }) {
     var nextVis = visibility ?? this.visibility;
     if (visibility == null && isShared != null) {
@@ -188,6 +196,7 @@ class Ride {
       leanSignFlip: leanSignFlip ?? this.leanSignFlip,
       leanFreezeAtMs: leanFreezeAtMs ?? this.leanFreezeAtMs,
       leanMountMode: leanMountMode ?? this.leanMountMode,
+      rodadaId: clearRodadaId ? null : (rodadaId ?? this.rodadaId),
     );
   }
 }

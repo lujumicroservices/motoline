@@ -30,6 +30,7 @@ import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../ride_detail/ride_rename.dart';
 import '../rodadas/models/rodada_models.dart';
+import '../rodadas/rodada_capture.dart';
 import '../rodadas/rodada_detail_screen.dart';
 import '../rodadas/rodada_providers.dart';
 import '../rodadas/rodada_route_share_binder.dart';
@@ -48,8 +49,10 @@ class HomeScreen extends ConsumerWidget {
     final incompleteAsync = ref.watch(incompleteRideProvider);
     final updateAsync = ref.watch(appUpdateCheckProvider);
     final armed = ref.watch(armedStateProvider);
-    final recording = ref.watch(rideRecorderProvider).isRecording;
-    final sessionLive = armed || recording;
+    final recorder = ref.watch(rideRecorderProvider);
+    final recording = recorder.isRecording;
+    final held = recorder.isRodadaMetricsHeld;
+    final sessionLive = (armed || recording) && !held;
 
     ref.listen(autoStartEventsProvider, (previous, next) {
       next.whenData((_) {
@@ -155,6 +158,9 @@ class HomeScreen extends ConsumerWidget {
             incompleteAsync.when(
               data: (ride) {
                 if (ride == null) return const SizedBox.shrink();
+                if (shouldHideIncompleteRodadaRide(ride)) {
+                  return const SizedBox.shrink();
+                }
                 return _RecoveryBanner(ride: ride);
               },
               loading: () => const SizedBox.shrink(),
@@ -493,11 +499,16 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
     final recorder = ref.read(rideRecorderProvider);
     final ride = recorder.activeRide;
     if (!recorder.isRecording || ride == null) return;
+    if (recorder.isRodadaMetricsHeld) return;
     final nav = ref.read(armedSessionNavProvider);
     _opening = true;
     try {
       ensureArmedSessionHub(context, ref);
-      if (shouldAutoPushHud(nav, isRecording: true)) {
+      if (shouldAutoPushHud(
+        nav,
+        isRecording: true,
+        rodadaMetricsHeld: recorder.isRodadaMetricsHeld,
+      )) {
         openArmedRecordingHud(context, ref);
       }
     } finally {
@@ -599,12 +610,7 @@ class _RodadaHomeCard extends ConsumerWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: () async {
-                await Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        RodadaDetailScreen(rodadaId: highlight.id),
-                  ),
-                );
+                await openRodadaDetail(context, rodadaId: highlight.id);
                 ref.invalidate(myRodadasProvider);
               },
               child: Padding(
@@ -900,6 +906,18 @@ class _RideTile extends ConsumerWidget {
                         fontSize: 16,
                       ),
                     ),
+                    if (!abandoned && rideIsRodadaBound(ride)) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.garageRodadaBadge,
+                        style: GoogleFonts.exo2(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                          letterSpacing: 0.6,
+                          color: AppTheme.lineHot,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 2),
                     Text(
                       abandoned

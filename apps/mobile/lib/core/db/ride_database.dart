@@ -30,7 +30,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 20,
+      version: 21,
       onConfigure: (db) async {
         // Outdoor-grade durability: survive kills mid-batch flush.
         // Android requires rawQuery for PRAGMAs that return a row
@@ -61,7 +61,8 @@ class RideDatabase {
             lean_pose_class TEXT,
             lean_sign_flip INTEGER NOT NULL DEFAULT 1,
             lean_freeze_at_ms INTEGER,
-            lean_mount_mode TEXT
+            lean_mount_mode TEXT,
+            rodada_id TEXT
           )
         ''');
         await db.execute('''
@@ -164,6 +165,9 @@ class RideDatabase {
         }
         if (oldVersion < 20) {
           await _createImuUploadsTable(db);
+        }
+        if (oldVersion < 21) {
+          await _addRideRodadaIdColumnIfMissing(db);
         }
       },
     );
@@ -334,6 +338,14 @@ class RideDatabase {
       'CREATE INDEX IF NOT EXISTS idx_ride_engine_labels_synced '
       'ON ride_engine_labels(synced, created_at_ms)',
     );
+  }
+
+  Future<void> _addRideRodadaIdColumnIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(rides)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    if (!existing.contains('rodada_id')) {
+      await db.execute('ALTER TABLE rides ADD COLUMN rodada_id TEXT');
+    }
   }
 
   Future<void> _addRideTitleColumnIfMissing(Database db) async {
@@ -730,6 +742,19 @@ class RideDatabase {
       'rides',
       where: 'id = ?',
       whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Ride.fromMap(rows.first);
+  }
+
+  Future<Ride?> getRecordingRideForRodada(String rodadaId) async {
+    final db = await database;
+    final rows = await db.query(
+      'rides',
+      where: 'status = ? AND rodada_id = ?',
+      whereArgs: [RideStatus.recording.name, rodadaId],
+      orderBy: 'started_at_ms DESC',
       limit: 1,
     );
     if (rows.isEmpty) return null;

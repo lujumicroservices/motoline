@@ -80,6 +80,10 @@ class WatchSession {
   }
 }
 
+/// Rider is broadcasting a family-watch session (any local ride / rodada key).
+bool familyWatchIsLive(WatchSession? session) =>
+    session != null && session.isActive;
+
 class WatchPosition {
   const WatchPosition({
     required this.sessionId,

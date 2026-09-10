@@ -42,13 +42,10 @@ class RodadasScreen extends ConsumerWidget {
               );
               if (id != null && context.mounted) {
                 ref.invalidate(myRodadasProvider);
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => RodadaDetailScreen(
-                      rodadaId: id,
-                      promptShareInvite: true,
-                    ),
-                  ),
+                await openRodadaDetail(
+                  context,
+                  rodadaId: id,
+                  promptShareInvite: true,
                 );
                 ref.invalidate(myRodadasProvider);
               }
@@ -106,13 +103,10 @@ class RodadasScreen extends ConsumerWidget {
                             );
                             if (id != null && context.mounted) {
                               ref.invalidate(myRodadasProvider);
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => RodadaDetailScreen(
-                                    rodadaId: id,
-                                    promptShareInvite: true,
-                                  ),
-                                ),
+                              await openRodadaDetail(
+                                context,
+                                rodadaId: id,
+                                promptShareInvite: true,
                               );
                             }
                           },
@@ -137,12 +131,7 @@ class RodadasScreen extends ConsumerWidget {
                       return _RodadaCard(
                         rodada: r,
                         onTap: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  RodadaDetailScreen(rodadaId: r.id),
-                            ),
-                          );
+                          await openRodadaDetail(context, rodadaId: r.id);
                           ref.invalidate(myRodadasProvider);
                         },
                       );
@@ -191,13 +180,10 @@ class RodadasScreen extends ConsumerWidget {
           await ref.read(rodadaRepositoryProvider).joinByCode(code);
       ref.invalidate(myRodadasProvider);
       if (!context.mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => RodadaDetailScreen(
-            rodadaId: id,
-            promptShareInvite: true,
-          ),
-        ),
+      await openRodadaDetail(
+        context,
+        rodadaId: id,
+        promptShareInvite: true,
       );
     } catch (e) {
       if (!context.mounted) return;

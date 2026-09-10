@@ -15,6 +15,7 @@ import '../../../theme/app_theme.dart';
 import '../../../widgets/app_snack.dart';
 import '../../maps/live_gps_map_mixin.dart';
 import '../../watch/family_watch_screen.dart';
+import '../../watch/watch_models.dart';
 import '../../watch/watch_providers.dart';
 import '../../watch/watch_repository.dart';
 import '../../ride_active/location_permission_gate.dart';
@@ -23,6 +24,7 @@ import '../photos/ride_photo_capture.dart';
 import '../rodada_itinerary.dart';
 import '../rodada_itinerary_map.dart';
 import '../rodada_providers.dart';
+import '../widgets/rodada_capture_bar.dart';
 
 /// Live pack map. Pack GPS is published by [RodadaRouteShareBinder] for the
 /// whole live rodada, not only while this tab is open.
@@ -50,6 +52,15 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
     final ok = await LocationPermissionGate.hasWhileInUsePermission();
     if (!mounted) return;
     setState(() => _locationOk = ok);
+    if (ok) unawaited(_resumeFamilyWatch());
+  }
+
+  Future<void> _resumeFamilyWatch() async {
+    try {
+      await ref.read(activeWatchControllerProvider.notifier).resumeFor(
+        localRideId: WatchRepository.rodadaLocalRideId(widget.rodadaId),
+      );
+    } catch (_) {}
   }
 
   Future<void> _acceptDisclosure() async {
@@ -63,6 +74,7 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
           permission == LocationPermission.always;
       if (!mounted) return;
       setState(() => _locationOk = ok);
+      if (ok) unawaited(_resumeFamilyWatch());
       if (!ok) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.locationPermissionDenied)),
@@ -96,8 +108,13 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
     }
 
     final localRideId = WatchRepository.rodadaLocalRideId(widget.rodadaId);
-    final session = ref.watch(activeWatchControllerProvider);
-    final familyOn = session != null && session.localRideId == localRideId;
+    final familyOn = familyWatchIsLive(
+      ref.watch(activeWatchControllerProvider),
+    );
+    final live = ref.watch(rodadaOverviewProvider(widget.rodadaId)).maybeWhen(
+      data: (r) => r?.isLive == true,
+      orElse: () => false,
+    );
 
     return Column(
       children: [
@@ -172,7 +189,7 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                       tooltip: l10n.familyAppBarShareTooltip,
                       icon: Icon(
                         familyOn ? Icons.favorite : Icons.favorite_border,
-                        color: AppTheme.lineHot,
+                        color: familyOn ? AppTheme.lineHot : AppTheme.steel,
                       ),
                       onPressed: () => openFamilyWatchScreen(
                         context,
@@ -180,6 +197,13 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                       ),
                     ),
                   ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  child: RodadaCaptureBar(
+                    rodadaId: widget.rodadaId,
+                    live: live,
+                  ),
                 ),
               ],
             ),

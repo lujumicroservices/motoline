@@ -10,6 +10,8 @@ import '../../providers/force_start_prefs.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_snack.dart';
+import '../rodadas/rodada_capture.dart';
+import '../rodadas/rodada_capture_flow.dart';
 import 'armed_session_flow.dart';
 import 'armed_session_nav.dart';
 import 'widgets/recording_rec_badge.dart';
@@ -31,7 +33,11 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
       ref.read(armedSessionNavProvider.notifier).hubOpened();
       final recorder = ref.read(rideRecorderProvider);
       final nav = ref.read(armedSessionNavProvider);
-      if (shouldAutoPushHud(nav, isRecording: recorder.isRecording)) {
+      if (shouldAutoPushHud(
+        nav,
+        isRecording: recorder.isRecording,
+        rodadaMetricsHeld: recorder.isRodadaMetricsHeld,
+      )) {
         openArmedRecordingHud(context, ref);
       }
     });
@@ -52,7 +58,11 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
       next.whenData((_) {
         if (!mounted) return;
         final nav = ref.read(armedSessionNavProvider);
-        if (shouldAutoPushHud(nav, isRecording: true)) {
+        if (shouldAutoPushHud(
+          nav,
+          isRecording: true,
+          rodadaMetricsHeld: recorder.isRodadaMetricsHeld,
+        )) {
           openArmedRecordingHud(context, ref);
         }
       });
@@ -209,8 +219,18 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
                       backgroundColor: AppTheme.signal,
                       minimumSize: const Size.fromHeight(48),
                     ),
-                    onPressed: () => completeArmedOrActiveRide(context, ref),
-                    child: Text(l10n.armedSessionEndArm),
+                    onPressed: () {
+                      if (shouldUseRodadaPauseAction(recorder.activeRodadaId)) {
+                        holdRodadaCaptureAndReturn(context, ref);
+                      } else {
+                        completeArmedOrActiveRide(context, ref);
+                      }
+                    },
+                    child: Text(
+                      shouldUseRodadaPauseAction(recorder.activeRodadaId)
+                          ? l10n.pauseRodadaCapture
+                          : l10n.armedSessionEndArm,
+                    ),
                   ),
                 ],
               ),
