@@ -829,7 +829,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'GPS is ready. Recording starts by itself when you move.';
 
   @override
-  String get armedSessionForceStart => 'Force recording (dev)';
+  String get armedSessionForceStart => 'Force recording';
 
   @override
   String get armedSessionLiveHelp =>
@@ -1594,7 +1594,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyHowToShareSteps =>
-      '1) On Record or on a Rodada (Live tab).\n2) Tap the share icon.\n3) Pick contacts — the same link works for everyone.\n\nPack “Share live” is separate: only riders with the app.';
+      '1) On Record or on a Rodada (Live tab).\n2) Tap the heart.\n3) Share the link — the same one works for everyone.\n\nPack “Share live” is separate: only riders with the app.';
 
   @override
   String get familyShareNeedsRide =>
@@ -1612,6 +1612,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyRodadaTipCta => 'Open family circle';
+
+  @override
+  String get familyWatchScreenTitle => 'Notify family';
+
+  @override
+  String get familyWatchScreenHelp =>
+      'Share a link so they can see you on the map. They don’t need RiderLab.';
+
+  @override
+  String get familyNotEmergency =>
+      'This does not call emergency services (not 911).';
+
+  @override
+  String get familyWatchShareCta => 'Share location';
+
+  @override
+  String familyLastPing(String label) {
+    return 'Last check-in: $label';
+  }
+
+  @override
+  String get showForceStartArmed => 'Show force recording';
+
+  @override
+  String get showForceStartArmedHelp =>
+      'On Armed route, start recording even if you are still standing.';
 
   @override
   String get familyAppBarShareTooltip => 'Notify family';
@@ -2091,7 +2117,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autoArmOnRodadaStartHelp =>
-      'When an admin starts the group ride, RiderLab waits for motion and starts recording.';
+      'Once when the rodada goes live. If you cancel, arm later with Start Rolling.';
 
   @override
   String get autoShareFamilyOnRodada => 'Share location with my family circle';

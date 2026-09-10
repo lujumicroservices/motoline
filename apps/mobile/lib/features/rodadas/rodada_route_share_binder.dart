@@ -12,11 +12,12 @@ import '../ride_active/armed_session_flow.dart';
 import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../watch/watch_providers.dart';
 import '../watch/watch_repository.dart';
+import 'rodada_auto_arm.dart';
 import 'rodada_live_session.dart';
 import 'rodada_providers.dart';
 import 'rodada_repository.dart';
 
-/// Keeps pack GPS sharing, auto-arm, and family watch in sync with live rodadas.
+/// Keeps pack GPS sharing, one-shot auto-arm, and family watch in sync with live rodadas.
 ///
 /// Pack share cadence is owned by [RodadaLiveSession]. A catalog fetch failure
 /// does **not** drop sessions — that used to kill the family magic link.
@@ -70,7 +71,8 @@ class _RodadaRouteShareBinderState
       currentSessionIds: _sessions.keys.toSet(),
     );
 
-    _armedFor.removeWhere((id) => !catalog.liveIds.contains(id));
+    // Drop spent one-shots so turning the switch back on can fire again.
+    _armedFor.removeWhere((id) => !catalog.wantArm.contains(id));
     _familyFor.removeWhere((id) => !catalog.liveIds.contains(id));
 
     for (final id in _sessions.keys.toList()) {
@@ -131,29 +133,35 @@ class _RodadaRouteShareBinderState
 
   Future<void> _maybeArm(String rodadaId) async {
     if (_armedFor.contains(rodadaId)) return;
-    final recorder = ref.read(rideRecorderProvider);
-    if (recorder.isArmed || recorder.isRecording) {
+    if (await RodadaAutoArm.isConsumed(rodadaId)) {
       _armedFor.add(rodadaId);
+      unawaited(_consumeAutoArm(rodadaId));
       return;
     }
-    if (freezeThenArmInProgress) {
-      _armedFor.add(rodadaId);
-      return;
-    }
+    // Another freeze sheet is up (host start, or Home button). Don't spend
+    // this one-shot until that sheet finishes.
+    if (freezeThenArmInProgress) return;
     if (!mounted) return;
     _armedFor.add(rodadaId);
+    await _consumeAutoArm(rodadaId);
+    final recorder = ref.read(rideRecorderProvider);
+    if (recorder.isArmed || recorder.isRecording) return;
     try {
       final ok = await freezeThenArm(context, ref, autoBeginHold: true);
-      if (!ok) {
-        if (!freezeThenArmInProgress) _armedFor.remove(rodadaId);
-        return;
-      }
-      if (!mounted) return;
-      ensureArmedSessionHub(context, ref);
+      if (ok && mounted) ensureArmedSessionHub(context, ref);
     } catch (e) {
-      _armedFor.remove(rodadaId);
       debugPrint('Rodada auto-arm: $e');
     }
+  }
+
+  Future<void> _consumeAutoArm(String rodadaId) async {
+    await RodadaAutoArm.consume(
+      rodadaId: rodadaId,
+      repository: ref.read(rodadaRepositoryProvider),
+    );
+    if (!mounted) return;
+    ref.invalidate(myRodadaMembershipProvider(rodadaId));
+    ref.invalidate(myRodadasProvider);
   }
 
   Future<void> _maybeFamilyWatch(String rodadaId) async {

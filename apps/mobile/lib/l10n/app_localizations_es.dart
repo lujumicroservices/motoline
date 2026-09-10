@@ -815,7 +815,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get armedSessionMinimize => 'Minimizar';
 
   @override
-  String get armedSessionWatchRecording => 'Ver grabación';
+  String get armedSessionWatchRecording => 'Abrir tablero en vivo';
 
   @override
   String get armedSessionEndArm => 'Terminar ruta';
@@ -834,7 +834,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'GPS listo. La grabación arranca sola al moverte.';
 
   @override
-  String get armedSessionForceStart => 'Forzar grabación (dev)';
+  String get armedSessionForceStart => 'Forzar grabación';
 
   @override
   String get armedSessionLiveHelp =>
@@ -1604,7 +1604,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familyHowToShareSteps =>
-      '1) En Grabar o en una Rodada (pestaña En vivo).\n2) Toca el icono de compartir.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.';
+      '1) En Grabar o en una Rodada (pestaña En vivo).\n2) Toca el corazón.\n3) Comparte el link — el mismo sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.';
 
   @override
   String get familyShareNeedsRide =>
@@ -1622,6 +1622,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familyRodadaTipCta => 'Ver círculo familiar';
+
+  @override
+  String get familyWatchScreenTitle => 'Avisar a familia';
+
+  @override
+  String get familyWatchScreenHelp =>
+      'Comparte un link para que te vean en el mapa. No necesitan RiderLab.';
+
+  @override
+  String get familyNotEmergency => 'Esto no llama a emergencias (no es 911).';
+
+  @override
+  String get familyWatchShareCta => 'Compartir ubicación';
+
+  @override
+  String familyLastPing(String label) {
+    return 'Último aviso: $label';
+  }
+
+  @override
+  String get showForceStartArmed => 'Mostrar forzar grabación';
+
+  @override
+  String get showForceStartArmedHelp =>
+      'En Ruta armada, inicia la grabación aunque aún no te muevas.';
 
   @override
   String get familyAppBarShareTooltip => 'Avisar a familia';
@@ -2102,7 +2127,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get autoArmOnRodadaStartHelp =>
-      'Cuando un administrador inicie la rodada, RiderLab espera movimiento y empieza a grabar.';
+      'Una sola vez cuando la rodada pase a en vivo. Si cancelas, arma después con Empezar a Rodar.';
 
   @override
   String get autoShareFamilyOnRodada =>

@@ -282,7 +282,7 @@
     }
   },
   "armedSessionWaitingHelp": "GPS is ready. Recording starts by itself when you move.",
-  "armedSessionForceStart": "Force recording (dev)",
+  "armedSessionForceStart": "Force recording",
   "armedSessionLiveHelp": "Recording. You can leave this screen — the ride keeps going.",
   "loopMode": "Lap mode",
   "pausedLabel": "PAUSED",
@@ -570,12 +570,24 @@
   "familyCircleHomeTile": "People who can see you’re OK while riding",
   "familyCircleHelp": "Add contacts here. The link is created while recording or on a Rodada (Live). You can resend it to more people without breaking earlier links.",
   "familyHowToShareTitle": "How to send the link",
-  "familyHowToShareSteps": "1) On Record or on a Rodada (Live tab).\n2) Tap the share icon.\n3) Pick contacts — the same link works for everyone.\n\nPack “Share live” is separate: only riders with the app.",
+  "familyHowToShareSteps": "1) On Record or on a Rodada (Live tab).\n2) Tap the heart.\n3) Share the link — the same one works for everyone.\n\nPack “Share live” is separate: only riders with the app.",
   "familyShareNeedsRide": "Start a recording or open a Rodada first. Then you can share the family link.",
   "familyShareFromCircle": "Share link now",
   "familyRodadaTipTitle": "Family link?",
   "familyRodadaTipBody": "Pack = rodada map in the app. Family without the app = share from Live (same link can be resent).",
   "familyRodadaTipCta": "Open family circle",
+  "familyWatchScreenTitle": "Notify family",
+  "familyWatchScreenHelp": "Share a link so they can see you on the map. They don’t need RiderLab.",
+  "familyNotEmergency": "This does not call emergency services (not 911).",
+  "familyWatchShareCta": "Share location",
+  "familyLastPing": "Last check-in: {label}",
+  "@familyLastPing": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "showForceStartArmed": "Show force recording",
+  "showForceStartArmedHelp": "On Armed route, start recording even if you are still standing.",
   "familyAppBarShareTooltip": "Notify family",
   "familyAddContact": "Add contact",
   "familyContactLabel": "Name",
@@ -842,7 +854,7 @@
   "startRodadaConfirmBody": "Everyone in the group will get a notification. Arm-on-start and location sharing kick in if you enabled them.",
   "rodadaStartedSnack": "Rodada started. Members were notified.",
   "autoArmOnRodadaStart": "Arm route when the rodada starts",
-  "autoArmOnRodadaStartHelp": "When an admin starts the group ride, RiderLab waits for motion and starts recording.",
+  "autoArmOnRodadaStartHelp": "Once when the rodada goes live. If you cancel, arm later with Start Rolling.",
   "autoShareFamilyOnRodada": "Share location with my family circle",
   "autoShareFamilyOnRodadaHelp": "Starts family watch automatically while this rodada is live.",
   "markAsOpen": "Mark as open",

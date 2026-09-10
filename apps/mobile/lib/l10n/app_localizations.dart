@@ -1547,7 +1547,7 @@ abstract class AppLocalizations {
   /// No description provided for @armedSessionWatchRecording.
   ///
   /// In es, this message translates to:
-  /// **'Ver grabación'**
+  /// **'Abrir tablero en vivo'**
   String get armedSessionWatchRecording;
 
   /// No description provided for @armedSessionEndArm.
@@ -1577,7 +1577,7 @@ abstract class AppLocalizations {
   /// No description provided for @armedSessionForceStart.
   ///
   /// In es, this message translates to:
-  /// **'Forzar grabación (dev)'**
+  /// **'Forzar grabación'**
   String get armedSessionForceStart;
 
   /// No description provided for @armedSessionLiveHelp.
@@ -2927,7 +2927,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyHowToShareSteps.
   ///
   /// In es, this message translates to:
-  /// **'1) En Grabar o en una Rodada (pestaña En vivo).\n2) Toca el icono de compartir.\n3) Elige contactos — el mismo link sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.'**
+  /// **'1) En Grabar o en una Rodada (pestaña En vivo).\n2) Toca el corazón.\n3) Comparte el link — el mismo sirve para todos.\n\n«Compartir en vivo» del pack es aparte: solo riders con la app.'**
   String get familyHowToShareSteps;
 
   /// No description provided for @familyShareNeedsRide.
@@ -2959,6 +2959,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ver círculo familiar'**
   String get familyRodadaTipCta;
+
+  /// No description provided for @familyWatchScreenTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar a familia'**
+  String get familyWatchScreenTitle;
+
+  /// No description provided for @familyWatchScreenHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Comparte un link para que te vean en el mapa. No necesitan RiderLab.'**
+  String get familyWatchScreenHelp;
+
+  /// No description provided for @familyNotEmergency.
+  ///
+  /// In es, this message translates to:
+  /// **'Esto no llama a emergencias (no es 911).'**
+  String get familyNotEmergency;
+
+  /// No description provided for @familyWatchShareCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir ubicación'**
+  String get familyWatchShareCta;
+
+  /// No description provided for @familyLastPing.
+  ///
+  /// In es, this message translates to:
+  /// **'Último aviso: {label}'**
+  String familyLastPing(String label);
+
+  /// No description provided for @showForceStartArmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar forzar grabación'**
+  String get showForceStartArmed;
+
+  /// No description provided for @showForceStartArmedHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'En Ruta armada, inicia la grabación aunque aún no te muevas.'**
+  String get showForceStartArmedHelp;
 
   /// No description provided for @familyAppBarShareTooltip.
   ///
@@ -3785,7 +3827,7 @@ abstract class AppLocalizations {
   /// No description provided for @autoArmOnRodadaStartHelp.
   ///
   /// In es, this message translates to:
-  /// **'Cuando un administrador inicie la rodada, RiderLab espera movimiento y empieza a grabar.'**
+  /// **'Una sola vez cuando la rodada pase a en vivo. Si cancelas, arma después con Empezar a Rodar.'**
   String get autoArmOnRodadaStartHelp;
 
   /// No description provided for @autoShareFamilyOnRodada.

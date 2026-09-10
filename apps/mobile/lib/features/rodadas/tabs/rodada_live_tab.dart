@@ -14,7 +14,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_snack.dart';
 import '../../maps/live_gps_map_mixin.dart';
-import '../../watch/active_watch_panel.dart';
+import '../../watch/family_watch_screen.dart';
 import '../../watch/watch_providers.dart';
 import '../../watch/watch_repository.dart';
 import '../../ride_active/location_permission_gate.dart';
@@ -168,12 +168,19 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                         orElse: () => const SizedBox.shrink(),
                       ),
                     ),
-                    if (!familyOn)
-                      ActiveWatchPanel(localRideId: localRideId, compact: true),
+                    IconButton(
+                      tooltip: l10n.familyAppBarShareTooltip,
+                      icon: Icon(
+                        familyOn ? Icons.favorite : Icons.favorite_border,
+                        color: AppTheme.lineHot,
+                      ),
+                      onPressed: () => openFamilyWatchScreen(
+                        context,
+                        localRideId: localRideId,
+                      ),
+                    ),
                   ],
                 ),
-                if (familyOn)
-                  ActiveWatchPanel(localRideId: localRideId, compact: true),
               ],
             ),
           ),

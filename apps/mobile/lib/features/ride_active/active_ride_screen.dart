@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,8 +27,7 @@ import '../adventure_camera/widgets/adventure_camera_ride_controls.dart';
 import '../adventure_camera/widgets/adventure_camera_status_chip.dart';
 import '../lean_lab/lean_lab_bootstrap.dart';
 import '../ride_detail/pilot_line_map.dart';
-import '../watch/active_watch_panel.dart';
-import '../watch/family_share.dart';
+import '../watch/family_watch_screen.dart';
 import '../watch/watch_providers.dart';
 import '../rodadas/photos/ride_photo_capture.dart';
 import 'armed_session_flow.dart';
@@ -274,8 +274,10 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                       : Icons.favorite_border,
                   color: AppTheme.lineHot,
                 ),
-                onPressed: () =>
-                    shareFamilyWatchLink(context, ref, localRideId: ride.id),
+                onPressed: () => openFamilyWatchScreen(
+                  context,
+                  localRideId: ride.id,
+                ),
               ),
             if (!_starting && (isRecording || staging)) ...[
               const AdventureCameraStatusChip(),
@@ -323,7 +325,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                     child: snapshotAsync.when(
                       loading: () => _body(
                         context,
-                        localRideId: ride?.id,
                         distanceKm: ride?.distanceKm ?? 0,
                         duration: ride?.duration ?? Duration.zero,
                         points: const <TrackPoint>[],
@@ -343,7 +344,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                         final r = snap?.ride ?? ride;
                         return _body(
                           context,
-                          localRideId: r?.id,
                           distanceKm: r?.distanceKm ?? 0,
                           duration: r?.duration ?? Duration.zero,
                           points: snap?.points ?? const <TrackPoint>[],
@@ -370,7 +370,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
 
   Widget _body(
     BuildContext context, {
-    required String? localRideId,
     required double distanceKm,
     required Duration duration,
     required List<TrackPoint> points,
@@ -388,33 +387,80 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final l10n = context.l10n;
     final isPaused =
         ref.watch(activeRideProvider).valueOrNull?.isPaused ?? false;
-    return Column(
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-                child: Row(
-                  children: [
-                    GpsLockBadge(
-                      accuracyMeters: accuracyMeters,
-                      rateHz: gpsRateHz,
-                    ),
-                    const Spacer(),
-                  ],
-                ),
+    final mapH = math
+        .max(200.0, MediaQuery.sizeOf(context).height * 0.28)
+        .clamp(200.0, 420.0);
+    final bottomPad = MediaQuery.paddingOf(context).bottom;
+
+    Widget autoPauseAndStop() {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(24, 8, 24, 8 + bottomPad),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _AutoPauseToggleRow(
+              enabled: ref.watch(rideRecorderProvider).autoPauseEnabled,
+              isPaused: isPaused,
+              onChanged: (value) async {
+                await ref.read(rideRecorderProvider).setAutoPauseEnabled(value);
+                if (context.mounted) setState(() {});
+              },
+            ),
+            if (_isLoop) ...[
+              const SizedBox(height: 8),
+              _LoopHud(
+                loopState: loopState,
+                points: points,
+                onOpenMarkMap: () => _openLoopMarkMap(points, loopState),
+                onEndSession: () => _endLoopSession(context),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                child: Text(
-                  l10n.activeMountHelp,
-                  style: GoogleFonts.rajdhani(
-                    color: AppTheme.steel,
-                    fontSize: 13,
+            ] else ...[
+              const SizedBox(height: 8),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.signal,
+                  minimumSize: const Size.fromHeight(52),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
                   ),
                 ),
+                onPressed: () => _stop(context),
+                child: Text(
+                  widget.allowMinimize ? l10n.stopRecording : l10n.endRide,
+                ),
               ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 8),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+          child: Row(
+            children: [
+              GpsLockBadge(
+                accuracyMeters: accuracyMeters,
+                rateHz: gpsRateHz,
+              ),
+              const Spacer(),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+          child: Text(
+            l10n.activeMountHelp,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 13,
+            ),
+          ),
+        ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -508,7 +554,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Expanded(
+              SizedBox(
+                height: mapH,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Stack(
@@ -551,85 +598,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                   ),
                 ),
               ),
-              if (localRideId != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-                  child: ActiveWatchPanel(
-                    localRideId: localRideId,
-                    compact: true,
-                  ),
-                ),
+              autoPauseAndStop(),
             ],
-          ),
-        ),
-        if (_isLoop)
-          SafeArea(
-            top: false,
-            minimum: const EdgeInsets.only(bottom: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-                  child: _AutoPauseToggleRow(
-                    enabled: ref.watch(rideRecorderProvider).autoPauseEnabled,
-                    isPaused: isPaused,
-                    onChanged: (value) async {
-                      await ref
-                          .read(rideRecorderProvider)
-                          .setAutoPauseEnabled(value);
-                      if (context.mounted) setState(() {});
-                    },
-                  ),
-                ),
-                _LoopHud(
-                  loopState: loopState,
-                  points: points,
-                  onOpenMarkMap: () => _openLoopMarkMap(points, loopState),
-                  onEndSession: () => _endLoopSession(context),
-                ),
-              ],
-            ),
-          )
-        else
-          SafeArea(
-            top: false,
-            minimum: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _AutoPauseToggleRow(
-                    enabled: ref.watch(rideRecorderProvider).autoPauseEnabled,
-                    isPaused: isPaused,
-                    onChanged: (value) async {
-                      await ref
-                          .read(rideRecorderProvider)
-                          .setAutoPauseEnabled(value);
-                      if (context.mounted) setState(() {});
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.signal,
-                      minimumSize: const Size.fromHeight(52),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
-                      ),
-                    ),
-                    onPressed: () => _stop(context),
-                    child: Text(
-                      widget.allowMinimize ? l10n.stopRecording : l10n.endRide,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
     );
   }
 

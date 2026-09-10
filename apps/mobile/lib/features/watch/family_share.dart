@@ -61,3 +61,45 @@ Future<void> shareFamilyWatchLink(
     );
   }
 }
+
+IconData familyShareIcon(BuildContext context) {
+  final platform = Theme.of(context).platform;
+  return platform == TargetPlatform.iOS || platform == TargetPlatform.macOS
+      ? Icons.ios_share
+      : Icons.share;
+}
+
+/// Confirm, then issue a new magic link (old URLs stop working).
+Future<void> confirmRotateFamilyWatchLink(
+  BuildContext context,
+  WidgetRef ref, {
+  required String localRideId,
+  String? riderDisplayName,
+}) async {
+  final l10n = context.l10n;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.familyRotateLinkTitle),
+      content: Text(l10n.familyRotateLinkBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(l10n.familyRotateLinkConfirm),
+        ),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  await shareFamilyWatchLink(
+    context,
+    ref,
+    localRideId: localRideId,
+    riderDisplayName: riderDisplayName,
+    rotateFirst: true,
+  );
+}

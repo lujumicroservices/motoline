@@ -42,6 +42,14 @@ bool shouldAutoPushHud(
   return true;
 }
 
+/// Explicit "open HUD" from the session hub.
+///
+/// Ignores a stale [ArmedSessionNavState.hudOnStack]: that flag can stay true
+/// after the HUD is popped, which used to make **Ver grabación** a no-op.
+bool canOpenArmedHud({required String? currentRouteName}) {
+  return currentRouteName != kArmedHudRoute;
+}
+
 /// Home is visible while a ride is recording — reopen the session hub.
 bool shouldResumeHubFromHome({
   required bool isRecording,

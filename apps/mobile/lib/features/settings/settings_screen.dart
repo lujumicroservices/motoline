@@ -9,6 +9,7 @@ import '../../core/legal/legal_urls.dart';
 import '../../core/notifications/push_diagnostics.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/bike_provider.dart';
+import '../../providers/force_start_prefs.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../providers/ride_providers.dart';
@@ -450,6 +451,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ],
           const SizedBox(height: 16),
+          if (forceStartArmedOffered())
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                l10n.showForceStartArmed,
+                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                l10n.showForceStartArmedHelp,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                ),
+              ),
+              value: ref.watch(forceStartArmedVisibleProvider),
+              activeThumbColor: RideVizPalette.leanLeft,
+              onChanged: (v) => ref
+                  .read(forceStartArmedVisibleProvider.notifier)
+                  .setVisible(v),
+            ),
           if (allowLocalProToggle)
             SwitchListTile(
               contentPadding: EdgeInsets.zero,

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/features.dart';
 import '../../core/models/ride_stretch.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/force_start_prefs.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_snack.dart';
@@ -170,7 +170,10 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (!recording && AppFeatures.forceStartArmedRecording) ...[
+                  if (!recording &&
+                      showForceStartArmedButton(
+                        ref.watch(forceStartArmedVisibleProvider),
+                      )) ...[
                     OutlinedButton.icon(
                       onPressed: () async {
                         try {

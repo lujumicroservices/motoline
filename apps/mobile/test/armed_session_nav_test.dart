@@ -108,6 +108,12 @@ void main() {
       expect(shouldAutoPushHud(nav.state, isRecording: true), isFalse);
     });
 
+    test('hub can reopen HUD even if hudOnStack was left stale', () {
+      expect(canOpenArmedHud(currentRouteName: kArmedSessionRoute), isTrue);
+      expect(canOpenArmedHud(currentRouteName: null), isTrue);
+      expect(canOpenArmedHud(currentRouteName: kArmedHudRoute), isFalse);
+    });
+
     test('hudClosed after stop does not treat as minimize', () {
       final nav = ArmedSessionNav();
       nav.hudOpened();

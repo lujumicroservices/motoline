@@ -47,7 +47,11 @@ void ensureArmedSessionHub(BuildContext context, WidgetRef ref) {
 
 void openArmedRecordingHud(BuildContext context, WidgetRef ref) {
   if (!context.mounted) return;
-  if (ref.read(armedSessionNavProvider).hudOnStack) return;
+  if (!canOpenArmedHud(
+    currentRouteName: ModalRoute.of(context)?.settings.name,
+  )) {
+    return;
+  }
   ref.read(armedSessionNavProvider.notifier).hudOpened();
   Navigator.of(context).push(
     MaterialPageRoute<void>(

@@ -18,6 +18,7 @@ import '../../ride_active/widgets/upright_freeze_sheet.dart';
 import '../../watch/family_circle_screen.dart';
 import '../leave_rodada.dart';
 import '../models/rodada_models.dart';
+import '../rodada_auto_arm.dart';
 import '../rodada_invite_share.dart';
 import '../rodada_itinerary.dart';
 import '../rodada_itinerary_map.dart';
@@ -216,6 +217,9 @@ class RodadaOverviewTab extends ConsumerWidget {
                                   context,
                                 );
                             if (!ok || !context.mounted) return;
+                            await RodadaAutoArm.clearConsumed(rodadaId);
+                          } else {
+                            await RodadaAutoArm.markConsumed(rodadaId);
                           }
                           await ref
                               .read(rodadaRepositoryProvider)
@@ -365,6 +369,10 @@ class RodadaOverviewTab extends ConsumerWidget {
       await ref.read(rodadaRepositoryProvider).startRodada(rodadaId);
       Future<bool>? armFuture;
       if (member.autoArmOnStart) {
+        await RodadaAutoArm.consume(
+          rodadaId: rodadaId,
+          repository: ref.read(rodadaRepositoryProvider),
+        );
         armFuture = freezeThenArm(context, ref, autoBeginHold: true);
       }
       ref.invalidate(rodadaOverviewProvider(rodadaId));
