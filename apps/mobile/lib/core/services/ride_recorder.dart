@@ -1050,7 +1050,7 @@ class RideRecorder {
     _lastPoint = point;
     _noteGpsAccept(position.timestamp);
 
-    if (_rodadaMetricsHeld) {
+    if (_rodadaMetricsHeld || _motionDetectionHeld) {
       _emit();
       return;
     }
@@ -1249,7 +1249,7 @@ class RideRecorder {
     _leanSampleTimer?.cancel();
     _leanSampleTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       final ride = _ride;
-      if (ride == null || _motion.isPaused) return;
+      if (ride == null || _motion.isPaused || _motionDetectionHeld) return;
       _maybeRecordLeanSample(ride.id, speedMps: _lastPoint?.speedMps);
     });
   }
@@ -1272,6 +1272,9 @@ class RideRecorder {
   void _onImuTick() {
     final ride = _ride;
     if (ride == null) return;
+    if (_motionDetectionHeld || _rodadaMetricsHeld || _motion.isPaused) {
+      return;
+    }
     _maybeRecordImuSample(ride.id);
   }
 

@@ -182,10 +182,12 @@ class GpsLockBadge extends StatelessWidget {
     super.key,
     this.accuracyMeters,
     this.rateHz,
+    this.enabled = true,
   });
 
   final double? accuracyMeters;
   final double? rateHz;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -193,13 +195,15 @@ class GpsLockBadge extends StatelessWidget {
     final acc = accuracyMeters;
     final hz = rateHz;
 
-    final color = acc == null
+    final color = !enabled
+        ? AppTheme.steel
+        : acc == null
         ? AppTheme.steel
         : acc <= LocationService.warmTargetAccuracyMeters
-            ? RideVizPalette.leanLeft
-            : acc <= LocationService.maxAcceptAccuracyMeters
-                ? AppTheme.lineHot
-                : AppTheme.signal;
+        ? RideVizPalette.leanLeft
+        : acc <= LocationService.maxAcceptAccuracyMeters
+        ? AppTheme.lineHot
+        : AppTheme.signal;
 
     final icon = acc == null
         ? Icons.gps_not_fixed
@@ -216,27 +220,30 @@ class GpsLockBadge extends StatelessWidget {
     }
     final label = parts.isEmpty ? 'GPS…' : 'GPS ${parts.join(' · ')}';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: GoogleFonts.exo2(
-              color: color,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
+    return Opacity(
+      opacity: enabled ? 1 : 0.45,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.exo2(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

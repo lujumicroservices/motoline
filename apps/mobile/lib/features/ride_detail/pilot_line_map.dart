@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -22,6 +24,7 @@ class PilotLineMap extends StatefulWidget {
     this.interactive = true,
     this.allowZoom = false,
     this.showStartEnd = true,
+    this.followRider = false,
     this.scrubIndex,
     this.onTapScrub,
     this.focusStartIndex,
@@ -40,6 +43,9 @@ class PilotLineMap extends StatefulWidget {
   /// Pinch / double-tap zoom without full pan (good inside scroll views).
   final bool allowZoom;
   final bool showStartEnd;
+
+  /// Keep the camera on the last point, heading-up, looking ahead.
+  final bool followRider;
 
   /// When set, a playhead marker is drawn at this sample index (into [points]).
   final int? scrubIndex;
@@ -76,11 +82,16 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
   LatLngBounds? _bounds;
   LatLng? _center;
   int? _cacheIdentity;
+  LatLng? _lastFollowAt;
+  double? _lastFollowHeading;
 
   @override
   void initState() {
     super.initState();
     _rebuildGeometry();
+    if (widget.followRider) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _followCamera());
+    }
   }
 
   @override
@@ -95,6 +106,27 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
     super.didUpdateWidget(oldWidget);
     if (_geometryDirty(oldWidget, widget)) {
       _rebuildGeometry();
+    }
+    if (widget.followRider) {
+      _followCamera();
+    } else if (oldWidget.followRider) {
+      _lastFollowAt = null;
+      _lastFollowHeading = null;
+      final bounds = _bounds;
+      if (bounds != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          try {
+            _map.fitCamera(
+              CameraFit.bounds(
+                bounds: bounds,
+                padding: const EdgeInsets.all(44),
+                maxZoom: 17,
+              ),
+            );
+          } catch (_) {}
+        });
+      }
     }
   }
 
@@ -112,7 +144,73 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
         a.layers.showBrakes != b.layers.showBrakes ||
         a.layers.showStartEnd != b.layers.showStartEnd ||
         a.layers.showLegend != b.layers.showLegend ||
-        a.layers.showGpsGaps != b.layers.showGpsGaps;
+        a.layers.showGpsGaps != b.layers.showGpsGaps ||
+        a.followRider != b.followRider;
+  }
+
+  double? _courseDeg(List<TrackPoint> points) {
+    if (points.isEmpty) return null;
+    final last = points.last;
+    final h = last.heading;
+    if (h != null && h.isFinite) return (h + 360) % 360;
+    if (points.length < 2) return null;
+    final prev = points[points.length - 2];
+    final moved = haversineMeters(
+      prev.latitude,
+      prev.longitude,
+      last.latitude,
+      last.longitude,
+    );
+    if (moved < 2) return _lastFollowHeading;
+    return bearingDegrees(
+      prev.latitude,
+      prev.longitude,
+      last.latitude,
+      last.longitude,
+    );
+  }
+
+  void _followCamera() {
+    if (!widget.followRider || widget.points.isEmpty) return;
+    final last = widget.points.last;
+    final here = LatLng(last.latitude, last.longitude);
+    final heading = _courseDeg(widget.points);
+    final moved = _lastFollowAt == null ||
+        haversineMeters(
+              _lastFollowAt!.latitude,
+              _lastFollowAt!.longitude,
+              here.latitude,
+              here.longitude,
+            ) >
+            3;
+    var headingDelta = 0.0;
+    if (heading != null && _lastFollowHeading != null) {
+      headingDelta = (heading - _lastFollowHeading!).abs();
+      if (headingDelta > 180) headingDelta = 360 - headingDelta;
+    }
+    if (!moved && headingDelta < 6 && _lastFollowAt != null) return;
+    _lastFollowAt = here;
+    if (heading != null) _lastFollowHeading = heading;
+
+    LatLng lookAhead = here;
+    if (heading != null) {
+      final o = offsetAlongHeading(
+        lat: last.latitude,
+        lng: last.longitude,
+        headingDeg: heading,
+        meters: 55,
+      );
+      lookAhead = LatLng(o.lat, o.lng);
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      try {
+        final zoom = _map.camera.zoom < 15 ? 16.8 : _map.camera.zoom;
+        _map.move(lookAhead, zoom);
+        if (heading != null) _map.rotate(heading);
+      } catch (_) {}
+    });
   }
 
   void _rebuildGeometry() {
@@ -277,8 +375,6 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppTheme.asphalt, width: 2),
               ),
-              child:
-                  const Icon(Icons.south, size: 12, color: AppTheme.asphalt),
             ),
           ),
         );
@@ -403,50 +499,84 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
         scrub >= 0 &&
         scrub < points.length) {
       final p = points[scrub];
+      final heading = headingAtIndex(points, scrub);
       markers.add(
         Marker(
           point: LatLng(p.latitude, p.longitude),
           width: 28,
           height: 28,
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppTheme.mist,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.lineHot, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.lineHot.withValues(alpha: 0.45),
-                  blurRadius: 10,
-                ),
-              ],
+          child: Transform.rotate(
+            angle: (heading ?? 0) * math.pi / 180,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppTheme.mist,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.lineHot, width: 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.lineHot.withValues(alpha: 0.45),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.navigation,
+                size: 14,
+                color: AppTheme.asphalt,
+              ),
             ),
-            child:
-                const Icon(Icons.navigation, size: 14, color: AppTheme.asphalt),
+          ),
+        ),
+      );
+    }
+
+    if (widget.followRider && points.isNotEmpty) {
+      final last = points.last;
+      markers.add(
+        Marker(
+          point: LatLng(last.latitude, last.longitude),
+          width: 32,
+          height: 32,
+          child: const Icon(
+            Icons.navigation,
+            size: 28,
+            color: AppTheme.line,
           ),
         ),
       );
     }
 
     final map = FlutterMap(
-      key: ValueKey(_cacheIdentity),
+      key: widget.followRider
+          ? const ValueKey('pilot-follow')
+          : ValueKey(_cacheIdentity),
       mapController: _map,
       options: MapOptions(
-        initialCenter: _center!,
-        initialZoom: hasFocus ? 16 : 15,
+        initialCenter: widget.followRider
+            ? LatLng(points.last.latitude, points.last.longitude)
+            : _center!,
+        initialZoom: widget.followRider ? 16.8 : (hasFocus ? 16 : 15),
+        initialRotation: widget.followRider ? (_courseDeg(points) ?? 0) : 0,
         interactionOptions: InteractionOptions(
-          flags: widget.interactive
+          flags: widget.followRider
+              ? (InteractiveFlag.pinchZoom |
+                  InteractiveFlag.doubleTapZoom |
+                  InteractiveFlag.scrollWheelZoom)
+              : widget.interactive
               ? InteractiveFlag.all
               : widget.allowZoom
-                  ? (InteractiveFlag.pinchZoom |
-                      InteractiveFlag.doubleTapZoom |
-                      InteractiveFlag.scrollWheelZoom)
-                  : InteractiveFlag.none,
+              ? (InteractiveFlag.pinchZoom |
+                  InteractiveFlag.doubleTapZoom |
+                  InteractiveFlag.scrollWheelZoom)
+              : InteractiveFlag.none,
         ),
-        initialCameraFit: CameraFit.bounds(
-          bounds: _bounds!,
-          padding: const EdgeInsets.all(44),
-          maxZoom: hasFocus ? 18 : 17,
-        ),
+        initialCameraFit: widget.followRider
+            ? null
+            : CameraFit.bounds(
+                bounds: _bounds!,
+                padding: const EdgeInsets.all(44),
+                maxZoom: hasFocus ? 18 : 17,
+              ),
         onTap: widget.onTapScrub == null
             ? null
             : (tap, latLng) {
@@ -472,7 +602,7 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
     final stacked = Stack(
       children: [
         Positioned.fill(child: map),
-        if (widget.interactive) myLocationOverlay(_map),
+        if (widget.interactive && !widget.followRider) myLocationOverlay(_map),
         if (widget.layers.showLegend)
           Positioned(
             left: 12,

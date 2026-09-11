@@ -9,7 +9,6 @@ import 'package:latlong2/latlong.dart';
 import '../../core/lean_lab/lean_imu_math.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/lean_lab/upright_freeze_controller.dart';
-import '../../core/models/ride_stretch.dart';
 import '../../core/models/route_circuit.dart';
 import '../../core/models/route_loop.dart';
 import '../../core/models/track_point.dart';
@@ -41,7 +40,8 @@ import 'location_permission_gate.dart';
 import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 import 'widgets/recording_rec_badge.dart';
-import 'widgets/session_stretches_sheet.dart';
+import 'widgets/session_action_designs.dart';
+import 'widgets/session_motion_cue.dart';
 import 'widgets/upright_freeze_panel.dart';
 import '../../widgets/app_snack.dart';
 
@@ -86,6 +86,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
   GnssWarmupStatus? _warmup;
   Object? _startError;
   bool _keepRidingDismissed = false;
+  _HeldHudSnapshot? _heldHud;
+  DateTime? _holdStartedAt;
+  Duration _holdAccrued = Duration.zero;
 
   bool get _isLoop => widget.mode == ActiveRideMode.loop;
 
@@ -393,7 +396,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                         gpsRateHz: null,
                         pressureHpa: null,
                         loopState: loopState,
-                        stretches: recorder.sessionStretches,
                       ),
                       error: (e, _) => Center(child: Text('$e')),
                       data: (snap) {
@@ -414,8 +416,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                           pressureHpa:
                               snap?.pressureHpa ?? snap?.lastPoint?.pressureHpa,
                           loopState: loopState,
-                          stretches: snap?.stretches ??
-                              recorder.sessionStretches,
                         );
                       },
                     ),
@@ -441,7 +441,6 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     required double? gpsRateHz,
     required double? pressureHpa,
     required LoopSessionState? loopState,
-    required List<RideStretch> stretches,
   }) {
     final l10n = context.l10n;
     final recorder = ref.watch(rideRecorderProvider);
@@ -455,15 +454,54 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         .clamp(200.0, 420.0);
     final bottomPad = MediaQuery.paddingOf(context).bottom;
 
-    final helpText = detectionHeld
-        ? l10n.sessionDetectionPausedHelp
-        : !isRecording
-        ? l10n.sessionArmedHelp
-        : isPaused
-        ? l10n.sessionStoppedHelp
-        : widget.allowMinimize
-        ? l10n.armedSessionLiveHelp
-        : l10n.activeMountHelp;
+    final motionCueMode = detectionHeld
+        ? SessionMotionCueMode.held
+        : (!isRecording || isPaused)
+        ? SessionMotionCueMode.waiting
+        : SessionMotionCueMode.live;
+
+    if (detectionHeld) {
+      _holdStartedAt ??= DateTime.now();
+      final pausedClock = duration - _holdAccrued;
+      _heldHud ??= _HeldHudSnapshot(
+        duration: pausedClock.isNegative ? Duration.zero : pausedClock,
+        distanceKm: distanceKm,
+        pointCount: pointCount,
+        speedKmh: speedKmh,
+        leanDegrees: leanDegrees,
+        maxLeanLeft: maxLeanLeft,
+        maxLeanRight: maxLeanRight,
+        leanCalibrated: leanCalibrated,
+        accuracyMeters: accuracyMeters,
+        gpsRateHz: gpsRateHz,
+        pressureHpa: pressureHpa,
+        points: points,
+      );
+    } else {
+      final started = _holdStartedAt;
+      if (started != null) {
+        _holdAccrued += DateTime.now().difference(started);
+        _holdStartedAt = null;
+      }
+      _heldHud = null;
+    }
+    final frozen = _heldHud;
+    final liveClock = duration - _holdAccrued;
+    final showDuration = frozen?.duration ??
+        (liveClock.isNegative ? Duration.zero : liveClock);
+    final showDistanceKm = frozen?.distanceKm ?? distanceKm;
+    final showPointCount = frozen?.pointCount ?? pointCount;
+    final showSpeedKmh = frozen?.speedKmh ?? speedKmh;
+    final showLean = frozen?.leanDegrees ?? leanDegrees;
+    final showMaxLeft = frozen?.maxLeanLeft ?? maxLeanLeft;
+    final showMaxRight = frozen?.maxLeanRight ?? maxLeanRight;
+    final showLeanCalibrated = frozen?.leanCalibrated ?? leanCalibrated;
+    final showAccuracy = frozen?.accuracyMeters ?? accuracyMeters;
+    final showGpsHz = frozen?.gpsRateHz ?? gpsRateHz;
+    final showPressure = frozen?.pressureHpa ?? pressureHpa;
+    final showPoints = frozen?.points ?? points;
+    final indicatorsOn = !detectionHeld;
+    final expandMap = motionCueMode == SessionMotionCueMode.live;
 
     Widget sessionControls() {
       return Padding(
@@ -471,29 +509,25 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _MotionDetectionHoldRow(
-              held: detectionHeld,
-              onToggle: () {
-                ref
-                    .read(motionDetectionHeldProvider.notifier)
-                    .setHeld(!detectionHeld);
-              },
-            ),
-            if (widget.allowMinimize) ...[
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () => showSessionStretchesSheet(
-                  context,
-                  stretches: stretches,
-                ),
-                icon: const Icon(Icons.timeline, size: 18),
-                label: Text(
-                  stretches.isEmpty
-                      ? l10n.armedSessionStretchesEmpty
-                      : l10n.armedSessionStretchN(stretches.length),
-                ),
+            if (widget.allowMinimize && !_isLoop)
+              SessionActionBar(
+                held: detectionHeld,
+                onToggleHold: () {
+                  ref
+                      .read(motionDetectionHeldProvider.notifier)
+                      .setHeld(!detectionHeld);
+                },
+                onFinish: () => completeArmedOrActiveRide(context, ref),
+              )
+            else
+              _MotionDetectionHoldRow(
+                held: detectionHeld,
+                onToggle: () {
+                  ref
+                      .read(motionDetectionHeldProvider.notifier)
+                      .setHeld(!detectionHeld);
+                },
               ),
-            ],
             if (widget.allowMinimize &&
                 !isRecording &&
                 isArmed &&
@@ -538,182 +572,221 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                   child: Text(l10n.pauseRodadaCapture),
                 ),
               ],
-              const SizedBox(height: 8),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.signal,
-                  minimumSize: const Size.fromHeight(52),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
+              if (!widget.allowMinimize) ...[
+                const SizedBox(height: 8),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.signal,
+                    minimumSize: const Size.fromHeight(52),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
+                  ),
+                  onPressed: () => _stop(context),
+                  child: Text(
+                    shouldUseRodadaPauseAction(recorder.activeRodadaId)
+                        ? l10n.pauseRodadaCapture
+                        : l10n.endRide,
                   ),
                 ),
-                onPressed: () => widget.allowMinimize
-                    ? completeArmedOrActiveRide(context, ref)
-                    : _stop(context),
-                child: Text(
-                  widget.allowMinimize
-                      ? l10n.endSession
-                      : shouldUseRodadaPauseAction(recorder.activeRodadaId)
-                      ? l10n.pauseRodadaCapture
-                      : l10n.endRide,
-                ),
-              ),
+              ],
             ],
           ],
         ),
       );
     }
 
+    Widget mapPane() {
+      return Opacity(
+        opacity: indicatorsOn ? 1 : 0.42,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: PilotLineMap(
+                points: showPoints,
+                interactive: true,
+                showStartEnd: !_isLoop && !expandMap,
+                followRider: expandMap,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              child: RecordingRecBadge(
+                label: !isRecording
+                    ? l10n.sessionPhaseArmed
+                    : isPaused
+                    ? l10n.pausedLabel
+                    : l10n.recordingRec,
+                paused: !isRecording || isPaused || detectionHeld,
+              ),
+            ),
+            if (_isLoop)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Material(
+                  color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(12),
+                  child: IconButton(
+                    tooltip: l10n.loopOpenMarkMap,
+                    onPressed: () => _openLoopMarkMap(points, loopState),
+                    icon: const Icon(Icons.fullscreen),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    final extraMetrics = <Widget>[
+      const SizedBox(height: 10),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                label: l10n.speed,
+                value: showSpeedKmh == null
+                    ? '--'
+                    : showSpeedKmh.toStringAsFixed(0),
+                unit: l10n.kmh,
+                enabled: indicatorsOn,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _StatCard(
+                label: showLeanCalibrated ? l10n.bikeLean : l10n.calibrating,
+                value: showLean == null
+                    ? '--'
+                    : showLean.abs().toStringAsFixed(0),
+                unit: showLean == null
+                    ? '°'
+                    : (showLean.abs() < 2
+                          ? '°'
+                          : (showLean >= 0
+                                ? '° ${l10n.rightShort}'
+                                : '° ${l10n.leftShort}')),
+                enabled: indicatorsOn,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 10),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                label: l10n.points,
+                value: '$showPointCount',
+                unit: '',
+                enabled: indicatorsOn,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _StatCard(
+                label: l10n.pressure,
+                value: showPressure == null
+                    ? '--'
+                    : showPressure.toStringAsFixed(0),
+                unit: 'hPa',
+                enabled: indicatorsOn,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 10),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: _StatCard(
+          label: l10n.maxLR,
+          value:
+              '${showMaxLeft.toStringAsFixed(0)}/${showMaxRight.toStringAsFixed(0)}',
+          unit: '°',
+          enabled: indicatorsOn,
+        ),
+      ),
+    ];
+
+    final chrome = <Widget>[
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+        child: Row(
+          children: [
+            GpsLockBadge(
+              accuracyMeters: showAccuracy,
+              rateHz: showGpsHz,
+              enabled: indicatorsOn,
+            ),
+            const Spacer(),
+          ],
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+        child: SessionMotionCue(mode: motionCueMode),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                label: l10n.distance,
+                value: showDistanceKm.toStringAsFixed(2),
+                unit: 'km',
+                enabled: indicatorsOn,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _StatCard(
+                label: l10n.time,
+                value: formatDuration(showDuration),
+                unit: '',
+                enabled: indicatorsOn,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+
+    if (expandMap) {
+      return Column(
+        children: [
+          ...chrome,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
+              child: mapPane(),
+            ),
+          ),
+          sessionControls(),
+        ],
+      );
+    }
+
     return ListView(
       padding: const EdgeInsets.only(bottom: 8),
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-          child: Row(
-            children: [
-              GpsLockBadge(accuracyMeters: accuracyMeters, rateHz: gpsRateHz),
-              const Spacer(),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-          child: Text(
-            helpText,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: l10n.distance,
-                  value: distanceKm.toStringAsFixed(2),
-                  unit: 'km',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _StatCard(
-                  label: l10n.time,
-                  value: formatDuration(duration),
-                  unit: '',
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: l10n.speed,
-                  value: speedKmh == null ? '--' : speedKmh.toStringAsFixed(0),
-                  unit: l10n.kmh,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _StatCard(
-                  label: leanCalibrated ? l10n.bikeLean : l10n.calibrating,
-                  value: leanDegrees == null
-                      ? '--'
-                      : leanDegrees.abs().toStringAsFixed(0),
-                  unit: leanDegrees == null
-                      ? '°'
-                      : (leanDegrees.abs() < 2
-                            ? '°'
-                            : (leanDegrees >= 0
-                                  ? '° ${l10n.rightShort}'
-                                  : '° ${l10n.leftShort}')),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: l10n.points,
-                  value: '$pointCount',
-                  unit: '',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _StatCard(
-                  label: l10n.pressure,
-                  value: pressureHpa == null
-                      ? '--'
-                      : pressureHpa.toStringAsFixed(0),
-                  unit: 'hPa',
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: _StatCard(
-            label: l10n.maxLR,
-            value:
-                '${maxLeanLeft.toStringAsFixed(0)}/${maxLeanRight.toStringAsFixed(0)}',
-            unit: '°',
-          ),
-        ),
+        ...chrome,
+        ...extraMetrics,
         const SizedBox(height: 16),
         SizedBox(
           height: mapH,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: PilotLineMap(
-                    points: points,
-                    interactive: true,
-                    showStartEnd: !_isLoop,
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: RecordingRecBadge(
-                    label: !isRecording
-                        ? l10n.sessionPhaseArmed
-                        : isPaused
-                        ? l10n.pausedLabel
-                        : l10n.recordingRec,
-                    paused: !isRecording || isPaused,
-                  ),
-                ),
-                if (_isLoop)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Material(
-                      color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(12),
-                      child: IconButton(
-                        tooltip: l10n.loopOpenMarkMap,
-                        onPressed: () => _openLoopMarkMap(points, loopState),
-                        icon: const Icon(Icons.fullscreen),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+            child: mapPane(),
           ),
         ),
         sessionControls(),
@@ -1176,58 +1249,98 @@ class _StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.unit,
+    this.enabled = true,
   });
 
   final String label;
   final String value;
   final String unit;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.asphaltElevated,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 11,
-              letterSpacing: 1.1,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value,
-                style: GoogleFonts.exo2(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
-                ),
+    final valueColor = enabled ? AppTheme.mist : AppTheme.steel;
+    return Opacity(
+      opacity: enabled ? 1 : 0.45,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.asphaltElevated,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.steel,
+                fontSize: 11,
+                letterSpacing: 1.1,
+                fontWeight: FontWeight.w600,
               ),
-              if (unit.isNotEmpty) ...[
-                const SizedBox(width: 4),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(
-                    unit,
-                    style: const TextStyle(color: AppTheme.steel, fontSize: 13),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.exo2(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                    color: valueColor,
                   ),
                 ),
+                if (unit.isNotEmpty) ...[
+                  const SizedBox(width: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      unit,
+                      style: const TextStyle(
+                        color: AppTheme.steel,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _HeldHudSnapshot {
+  const _HeldHudSnapshot({
+    required this.duration,
+    required this.distanceKm,
+    required this.pointCount,
+    required this.speedKmh,
+    required this.leanDegrees,
+    required this.maxLeanLeft,
+    required this.maxLeanRight,
+    required this.leanCalibrated,
+    required this.accuracyMeters,
+    required this.gpsRateHz,
+    required this.pressureHpa,
+    required this.points,
+  });
+
+  final Duration duration;
+  final double distanceKm;
+  final int pointCount;
+  final double? speedKmh;
+  final double? leanDegrees;
+  final double maxLeanLeft;
+  final double maxLeanRight;
+  final bool leanCalibrated;
+  final double? accuracyMeters;
+  final double? gpsRateHz;
+  final double? pressureHpa;
+  final List<TrackPoint> points;
 }

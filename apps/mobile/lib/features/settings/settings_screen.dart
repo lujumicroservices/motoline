@@ -152,17 +152,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   );
                 },
               ),
-              if (forceStartArmedOffered())
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.showForceStartArmed, style: _tileTitle),
-                  subtitle: Text(l10n.showForceStartArmedHelp, style: _tileSub),
-                  value: ref.watch(forceStartArmedVisibleProvider),
-                  activeThumbColor: RideVizPalette.leanLeft,
-                  onChanged: (v) => ref
-                      .read(forceStartArmedVisibleProvider.notifier)
-                      .setVisible(v),
-                ),
             ],
           ),
           SettingsGroup(
@@ -387,6 +376,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: l10n.labsSectionTitle,
             help: l10n.labsSectionHelp,
             children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.showForceStartArmed, style: _tileTitle),
+                subtitle: Text(l10n.showForceStartArmedHelp, style: _tileSub),
+                value: ref.watch(forceStartArmedVisibleProvider),
+                activeThumbColor: RideVizPalette.leanLeft,
+                onChanged: (v) => ref
+                    .read(forceStartArmedVisibleProvider.notifier)
+                    .setVisible(v),
+              ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const AppMotoIcon(size: 28, color: AppTheme.line),

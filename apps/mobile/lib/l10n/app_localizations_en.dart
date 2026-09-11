@@ -832,15 +832,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get armedSessionEndArm => 'End session';
 
   @override
-  String get armedSessionStretchesEmpty =>
-      'No stretches yet. They\'ll show up here when you start rolling.';
-
-  @override
-  String armedSessionStretchN(int n) {
-    return 'Stretch $n';
-  }
-
-  @override
   String get armedSessionWaitingHelp =>
       'GPS is ready. Recording starts by itself when you move.';
 
@@ -1653,7 +1644,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showForceStartArmedHelp =>
-      'On Armed route, start recording even if you are still standing.';
+      'On Armed route, show the button to start even if you are still standing. Store builds default off; turn this on here if you need it.';
 
   @override
   String get familyAppBarShareTooltip => 'Notify family';
@@ -2671,7 +2662,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skillLabFocusHelp =>
-      'Worst-scoring turns first. Bars show entry → middle → exit speed. Tap Replay to watch lean, brake, and speed — and compare the same corner with a friend.';
+      'In the order you rode them. Tap a turn to watch lean, brake, and speed — swipe for the next.';
 
   @override
   String get bikeSection => 'My bike';
@@ -2793,6 +2784,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sessionDetectionPausedHelp =>
       'Motion detection is paused. The current state will not change on its own.';
+
+  @override
+  String get sessionWaitingMotion => 'Waiting for motion';
+
+  @override
+  String get sessionWaitingMotionHelp =>
+      'When you move, recording continues on its own.';
+
+  @override
+  String get sessionRecordingMotion => 'In motion';
+
+  @override
+  String get sessionRecordingMotionHelp => 'Capturing ride metrics.';
+
+  @override
+  String get sessionNotDetectingMotion => 'Not detecting motion';
+
+  @override
+  String get sessionNotDetectingMotionHelp =>
+      'Detection is paused. The current state will not change on its own.';
 
   @override
   String get labsSectionTitle => 'Tests / new features';

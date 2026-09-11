@@ -837,15 +837,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get armedSessionEndArm => 'Terminar sesión';
 
   @override
-  String get armedSessionStretchesEmpty =>
-      'Aún no hay tramos. Cuando empieces a rodar, aparecerán aquí.';
-
-  @override
-  String armedSessionStretchN(int n) {
-    return 'Tramo $n';
-  }
-
-  @override
   String get armedSessionWaitingHelp =>
       'GPS listo. La grabación arranca sola al moverte.';
 
@@ -1662,7 +1653,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get showForceStartArmedHelp =>
-      'En Ruta armada, inicia la grabación aunque aún no te muevas.';
+      'En Ruta armada muestra el botón para iniciar aunque aún no te muevas. En la tienda viene apagado; actívalo aquí si lo necesitas.';
 
   @override
   String get familyAppBarShareTooltip => 'Avisar a familia';
@@ -2684,7 +2675,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get skillLabFocusHelp =>
-      'Primero las curvas con peor puntaje. Las barras son entrada → centro → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma curva con un amigo.';
+      'En el orden en que las pasaste. Toca una para ver inclinación, freno y velocidad — desliza para la siguiente.';
 
   @override
   String get bikeSection => 'Mi moto';
@@ -2807,6 +2798,25 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get sessionDetectionPausedHelp =>
       'La detección de movimiento está pausada. El estado no cambia solo.';
+
+  @override
+  String get sessionWaitingMotion => 'Esperando movimiento';
+
+  @override
+  String get sessionWaitingMotionHelp => 'Al moverte, la grabación sigue sola.';
+
+  @override
+  String get sessionRecordingMotion => 'En movimiento';
+
+  @override
+  String get sessionRecordingMotionHelp => 'Capturando métricas del recorrido.';
+
+  @override
+  String get sessionNotDetectingMotion => 'No está detectando movimiento';
+
+  @override
+  String get sessionNotDetectingMotionHelp =>
+      'La detección está en pausa. El estado no cambia solo.';
 
   @override
   String get labsSectionTitle => 'Pruebas / nuevas funciones';

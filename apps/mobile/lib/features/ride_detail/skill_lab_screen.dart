@@ -7,8 +7,8 @@ import '../../core/models/track_point.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../l10n/skill_tip_l10n.dart';
 import '../../theme/app_theme.dart';
-import 'curva_detail_screen.dart';
 import 'skill_replay_screen.dart';
+import 'widgets/corner_shape_thumb.dart';
 
 /// Visual skill lab: corner scores, mistakes, and how to improve.
 class SkillLabScreen extends StatelessWidget {
@@ -31,7 +31,9 @@ class SkillLabScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final corners = [...summary.corners]
-      ..sort((a, b) => a.score.compareTo(b.score));
+      ..sort(
+        (a, b) => a.analysis.entryIndex.compareTo(b.analysis.entryIndex),
+      );
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
@@ -69,11 +71,12 @@ class SkillLabScreen extends StatelessWidget {
               style: GoogleFonts.rajdhani(color: AppTheme.steel),
             )
           else
-            for (final corner in corners) ...[
+            for (var i = 0; i < corners.length; i++) ...[
               _CornerMistakeCard(
-                corner: corner,
-                onReplay: () => _openReplay(context, corner),
-                onOpenDetail: () => _openCurva(context, corner),
+                samples: samples,
+                corner: corners[i],
+                rideOrder: i + 1,
+                onOpen: () => _openReplay(context, corners, i),
               ),
               const SizedBox(height: 10),
             ],
@@ -82,32 +85,20 @@ class SkillLabScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _openReplay(BuildContext context, CornerSkill corner) async {
+  Future<void> _openReplay(
+    BuildContext context,
+    List<CornerSkill> corners,
+    int index,
+  ) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => SkillReplayScreen(
           samples: samples,
-          analysis: corner.analysis,
+          corners: corners,
+          initialIndex: index,
           neutralLeanDegrees: neutralLeanDegrees,
           brakeEvents: brakeEvents,
-          title: corner.label,
           localRideId: localRideId,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openCurva(BuildContext context, CornerSkill corner) async {
-    final analyses = summary.corners.map((c) => c.analysis).toList();
-    final initial =
-        summary.corners.indexOf(corner).clamp(0, analyses.length - 1);
-    if (analyses.isEmpty) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => CurvaDetailScreen(
-          samples: samples,
-          analyses: analyses,
-          initialIndex: initial,
         ),
       ),
     );
@@ -180,172 +171,84 @@ class _SessionHeader extends StatelessWidget {
 
 class _CornerMistakeCard extends StatelessWidget {
   const _CornerMistakeCard({
+    required this.samples,
     required this.corner,
-    required this.onReplay,
-    required this.onOpenDetail,
+    required this.rideOrder,
+    required this.onOpen,
   });
 
+  final List<TrackPoint> samples;
   final CornerSkill corner;
-  final VoidCallback onReplay;
-  final VoidCallback onOpenDetail;
+  final int rideOrder;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final a = corner.analysis;
     final score = corner.score;
     final color = score >= 75
         ? AppTheme.line
         : score >= 55
             ? AppTheme.lineHot
             : AppTheme.signal;
-    final tips = corner.tips;
 
     return Material(
       color: AppTheme.asphaltElevated,
       borderRadius: BorderRadius.circular(14),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onOpen,
+        child: Stack(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    corner.label,
-                    style: GoogleFonts.exo2(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-                Text(
-                  '$score',
-                  style: GoogleFonts.exo2(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
-                    color: color,
-                  ),
-                ),
-              ],
+            CornerShapeThumb(
+              samples: samples,
+              analysis: corner.analysis,
             ),
-            const SizedBox(height: 10),
-            _SpeedBars(
-              entry: a.entrySpeedKmh,
-              apex: a.apexSpeedKmh,
-              exit: a.exitSpeedKmh,
-            ),
-            const SizedBox(height: 10),
-            for (final tip in tips)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      score >= 75
-                          ? Icons.check_circle_outline
-                          : Icons.lightbulb_outline,
-                      size: 16,
-                      color: score >= 75 ? AppTheme.line : AppTheme.lineHot,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        l10n.skillTipText(tip),
-                        style: GoogleFonts.rajdhani(
-                          fontSize: 13,
-                          height: 1.35,
-                          color: AppTheme.mist,
-                        ),
+            Positioned(
+              left: 10,
+              right: 10,
+              bottom: 10,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '$rideOrder · ${corner.label}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.exo2(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AppTheme.mist,
+                        shadows: const [
+                          Shadow(color: Colors.black54, blurRadius: 6),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.asphalt.withValues(alpha: 0.82),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: color.withValues(alpha: 0.7)),
+                    ),
+                    child: Text(
+                      '$score',
+                      style: GoogleFonts.exo2(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                FilledButton.tonalIcon(
-                  onPressed: onReplay,
-                  icon: const Icon(Icons.play_arrow, size: 20),
-                  label: Text(l10n.skillReplay),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: onOpenDetail,
-                  child: Text(l10n.openCornerLab),
-                ),
-              ],
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SpeedBars extends StatelessWidget {
-  const _SpeedBars({
-    required this.entry,
-    required this.apex,
-    required this.exit,
-  });
-
-  final double entry;
-  final double apex;
-  final double exit;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final maxV = [entry, apex, exit].fold<double>(1, (m, v) => v > m ? v : m);
-
-    Widget bar(String label, double v, Color color) {
-      final t = (v / maxV).clamp(0.08, 1.0);
-      return Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.rajdhani(
-                fontSize: 11,
-                color: AppTheme.steel,
-              ),
-            ),
-            const SizedBox(height: 4),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: t,
-                minHeight: 8,
-                backgroundColor: AppTheme.asphalt,
-                color: color,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${v.toStringAsFixed(0)} ${l10n.kmh}',
-              style: GoogleFonts.exo2(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Row(
-      children: [
-        bar(l10n.entry, entry, AppTheme.mist),
-        const SizedBox(width: 10),
-        bar(l10n.apex, apex, AppTheme.lineHot),
-        const SizedBox(width: 10),
-        bar(l10n.exit, exit, AppTheme.line),
-      ],
     );
   }
 }

@@ -135,3 +135,38 @@ int indexAtPathFraction(List<TrackPoint> points, double t) {
   }
   return points.length - 1;
 }
+
+/// Sample index at a given fraction of elapsed time (0–1).
+///
+/// Use this for solo corner replay so the playhead matches braking in time.
+/// Prefer [indexAtPathFraction] when comparing two lines by distance.
+int indexAtTimeFraction(List<TrackPoint> points, double t) {
+  if (points.isEmpty) return 0;
+  if (points.length == 1) return 0;
+  final target = t.clamp(0.0, 1.0);
+  final start = points.first.timestamp;
+  final end = points.last.timestamp;
+  final spanMs = end.difference(start).inMilliseconds;
+  if (spanMs <= 0) return indexAtPathFraction(points, target);
+  final goal = start.add(
+    Duration(milliseconds: (spanMs * target).round()),
+  );
+  var lo = 0;
+  var hi = points.length - 1;
+  while (lo < hi) {
+    final mid = (lo + hi) ~/ 2;
+    if (points[mid].timestamp.isBefore(goal)) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  if (lo > 0) {
+    final a = points[lo - 1].timestamp;
+    final b = points[lo].timestamp;
+    if ((goal.difference(a)).abs() <= (b.difference(goal)).abs()) {
+      return lo - 1;
+    }
+  }
+  return lo;
+}

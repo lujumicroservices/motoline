@@ -1,20 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const forceStartArmedPrefKey = 'force_start_armed_visible';
-
-/// Build-time gate: debug always; release only with SHOW_FORCE_START_ARMED=true.
-bool forceStartArmedOffered() {
-  if (!kReleaseMode) return true;
-  try {
-    final raw = dotenv.env['SHOW_FORCE_START_ARMED']?.trim().toLowerCase() ?? '';
-    return raw == 'true' || raw == '1' || raw == 'yes';
-  } catch (_) {
-    return false;
-  }
-}
 
 class ForceStartArmedVisible extends StateNotifier<bool> {
   ForceStartArmedVisible() : super(!kReleaseMode) {
@@ -40,6 +28,5 @@ final forceStartArmedVisibleProvider =
       (ref) => ForceStartArmedVisible(),
     );
 
-bool showForceStartArmedButton(bool settingsVisible) {
-  return forceStartArmedOffered() && settingsVisible;
-}
+/// Armed hub / HUD force-start button. Gated only by the Settings switch.
+bool showForceStartArmedButton(bool settingsVisible) => settingsVisible;

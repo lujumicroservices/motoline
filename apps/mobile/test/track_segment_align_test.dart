@@ -76,4 +76,17 @@ void main() {
     expect(mid, greaterThan(5));
     expect(mid, lessThan(pts.length - 5));
   });
+
+  test('indexAtTimeFraction follows elapsed time, not path wiggles', () {
+    final pts = [
+      _pt(20.7, -103.4, i: 0),
+      _pt(20.7, -103.40012, i: 1),
+      _pt(20.7, -103.40024, i: 10),
+      _pt(20.7, -103.40036, i: 11),
+    ];
+    expect(indexAtTimeFraction(pts, 0), 0);
+    expect(indexAtTimeFraction(pts, 1), pts.length - 1);
+    final mid = indexAtTimeFraction(pts, 0.5);
+    expect(mid, anyOf(1, 2));
+  });
 }

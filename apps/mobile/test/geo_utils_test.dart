@@ -141,4 +141,29 @@ void main() {
     final speeds = displaySpeedsMps(points);
     expect(speeds[1], 0);
   });
+
+  test('headingAtIndex follows the GPS line, not a stored heading of 0', () {
+    final base = DateTime.utc(2026, 9, 11);
+    final points = [
+      TrackPoint(
+        id: 1,
+        rideId: 'r',
+        latitude: 20.7,
+        longitude: -103.4,
+        timestamp: base,
+        heading: 0,
+      ),
+      TrackPoint(
+        id: 2,
+        rideId: 'r',
+        latitude: 20.7,
+        longitude: -103.401,
+        timestamp: base.add(const Duration(seconds: 1)),
+        heading: 0,
+      ),
+    ];
+    final heading = headingAtIndex(points, 1);
+    expect(heading, isNotNull);
+    expect(heading!, closeTo(270, 8));
+  });
 }

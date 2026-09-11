@@ -1586,18 +1586,6 @@ abstract class AppLocalizations {
   /// **'Terminar sesión'**
   String get armedSessionEndArm;
 
-  /// No description provided for @armedSessionStretchesEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'Aún no hay tramos. Cuando empieces a rodar, aparecerán aquí.'**
-  String get armedSessionStretchesEmpty;
-
-  /// No description provided for @armedSessionStretchN.
-  ///
-  /// In es, this message translates to:
-  /// **'Tramo {n}'**
-  String armedSessionStretchN(int n);
-
   /// No description provided for @armedSessionWaitingHelp.
   ///
   /// In es, this message translates to:
@@ -3029,7 +3017,7 @@ abstract class AppLocalizations {
   /// No description provided for @showForceStartArmedHelp.
   ///
   /// In es, this message translates to:
-  /// **'En Ruta armada, inicia la grabación aunque aún no te muevas.'**
+  /// **'En Ruta armada muestra el botón para iniciar aunque aún no te muevas. En la tienda viene apagado; actívalo aquí si lo necesitas.'**
   String get showForceStartArmedHelp;
 
   /// No description provided for @familyAppBarShareTooltip.
@@ -4793,7 +4781,7 @@ abstract class AppLocalizations {
   /// No description provided for @skillLabFocusHelp.
   ///
   /// In es, this message translates to:
-  /// **'Primero las curvas con peor puntaje. Las barras son entrada → centro → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma curva con un amigo.'**
+  /// **'En el orden en que las pasaste. Toca una para ver inclinación, freno y velocidad — desliza para la siguiente.'**
   String get skillLabFocusHelp;
 
   /// No description provided for @bikeSection.
@@ -5029,6 +5017,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'La detección de movimiento está pausada. El estado no cambia solo.'**
   String get sessionDetectionPausedHelp;
+
+  /// No description provided for @sessionWaitingMotion.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando movimiento'**
+  String get sessionWaitingMotion;
+
+  /// No description provided for @sessionWaitingMotionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Al moverte, la grabación sigue sola.'**
+  String get sessionWaitingMotionHelp;
+
+  /// No description provided for @sessionRecordingMotion.
+  ///
+  /// In es, this message translates to:
+  /// **'En movimiento'**
+  String get sessionRecordingMotion;
+
+  /// No description provided for @sessionRecordingMotionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Capturando métricas del recorrido.'**
+  String get sessionRecordingMotionHelp;
+
+  /// No description provided for @sessionNotDetectingMotion.
+  ///
+  /// In es, this message translates to:
+  /// **'No está detectando movimiento'**
+  String get sessionNotDetectingMotion;
+
+  /// No description provided for @sessionNotDetectingMotionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'La detección está en pausa. El estado no cambia solo.'**
+  String get sessionNotDetectingMotionHelp;
 
   /// No description provided for @labsSectionTitle.
   ///

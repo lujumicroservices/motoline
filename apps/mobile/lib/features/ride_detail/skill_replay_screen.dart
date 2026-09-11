@@ -6,46 +6,158 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/brake_detection.dart';
-import '../../core/analytics/curva_analysis.dart';
+import '../../core/analytics/corner_skill.dart';
 import '../../core/analytics/lean_neutral.dart';
 import '../../core/analytics/track_segment_align.dart';
 import '../../core/models/cloud_models.dart';
 import '../../core/models/track_point.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../l10n/skill_tip_l10n.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../compare/compare_widgets.dart';
 import 'pilot_line_map.dart';
+import 'widgets/corner_speed_bars.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/motorcycle_lean_gauge.dart';
 
 /// Live replay of a corner: lean, brake, speed + map playhead.
-/// Optionally overlays a friend on the **same geographic section**.
-class SkillReplayScreen extends ConsumerStatefulWidget {
+/// Swipe between corners. Optionally overlays a friend on the same section.
+class SkillReplayScreen extends StatefulWidget {
   const SkillReplayScreen({
     super.key,
     required this.samples,
-    required this.analysis,
+    required this.corners,
+    required this.initialIndex,
     required this.neutralLeanDegrees,
     this.brakeEvents = const [],
-    this.title,
     this.localRideId,
   });
 
   final List<TrackPoint> samples;
-  final CurvaAnalysis analysis;
+  final List<CornerSkill> corners;
+  final int initialIndex;
   final double neutralLeanDegrees;
   final List<BrakeEvent> brakeEvents;
-  final String? title;
   final String? localRideId;
 
   @override
-  ConsumerState<SkillReplayScreen> createState() => _SkillReplayScreenState();
+  State<SkillReplayScreen> createState() => _SkillReplayScreenState();
 }
 
-class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
+class _SkillReplayScreenState extends State<SkillReplayScreen> {
+  late final PageController _pages;
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex.clamp(0, widget.corners.length - 1);
+    _pages = PageController(initialPage: _index);
+  }
+
+  @override
+  void dispose() {
+    _pages.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final corners = widget.corners;
+    if (corners.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.skillReplayTitle)),
+        body: Center(child: Text(l10n.skillTipNoCurvas)),
+      );
+    }
+
+    final total = corners.length;
+    final current = corners[_index];
+
+    return Scaffold(
+      backgroundColor: AppTheme.asphalt,
+      appBar: AppBar(
+        title: Text(
+          '${_index + 1} · ${current.label}',
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+        ),
+        actions: [
+          if (total > 1)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Text(
+                  '${_index + 1} / $total',
+                  style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: Column(
+        children: [
+          if (total > 1)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text(
+                l10n.curvaSwipeHint,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          Expanded(
+            child: PageView.builder(
+              controller: _pages,
+              itemCount: total,
+              onPageChanged: (i) => setState(() => _index = i),
+              itemBuilder: (context, i) {
+                return _SkillReplayPage(
+                  key: ValueKey('$i-${corners[i].fingerprint}'),
+                  samples: widget.samples,
+                  corner: corners[i],
+                  neutralLeanDegrees: widget.neutralLeanDegrees,
+                  brakeEvents: widget.brakeEvents,
+                  localRideId: widget.localRideId,
+                  isActive: i == _index,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SkillReplayPage extends ConsumerStatefulWidget {
+  const _SkillReplayPage({
+    super.key,
+    required this.samples,
+    required this.corner,
+    required this.neutralLeanDegrees,
+    required this.brakeEvents,
+    required this.isActive,
+    this.localRideId,
+  });
+
+  final List<TrackPoint> samples;
+  final CornerSkill corner;
+  final double neutralLeanDegrees;
+  final List<BrakeEvent> brakeEvents;
+  final String? localRideId;
+  final bool isActive;
+
+  @override
+  ConsumerState<_SkillReplayPage> createState() => _SkillReplayPageState();
+}
+
+class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late List<TrackPoint> _youSlice;
@@ -53,7 +165,7 @@ class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
   CloudRideSummary? _peer;
   bool _loadingPeer = false;
   String? _peerError;
-  double _rate = 1;
+  double _rate = 2;
   bool _loop = true;
 
   @override
@@ -65,17 +177,32 @@ class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
       vsync: this,
       duration: Duration(milliseconds: (realMs / _rate).round()),
     )..addStatusListener((status) {
-        if (status == AnimationStatus.completed && _loop && mounted) {
+        if (status == AnimationStatus.completed &&
+            _loop &&
+            widget.isActive &&
+            mounted) {
           _ctrl.forward(from: 0);
         }
       });
-    unawaited(_ctrl.forward());
+    if (widget.isActive) {
+      unawaited(_ctrl.forward());
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _SkillReplayPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      unawaited(_ctrl.forward());
+    } else if (!widget.isActive && oldWidget.isActive) {
+      _ctrl.stop();
+    }
   }
 
   List<TrackPoint> _localCornerSlice() {
     final n = widget.samples.length;
-    final lo = widget.analysis.mapStartIndex.clamp(0, n - 1);
-    final hi = widget.analysis.mapEndIndex.clamp(lo, n - 1);
+    final lo = widget.corner.analysis.mapStartIndex.clamp(0, n - 1);
+    final hi = widget.corner.analysis.mapEndIndex.clamp(lo, n - 1);
     return widget.samples.sublist(lo, hi + 1);
   }
 
@@ -129,8 +256,8 @@ class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
       final peerPts = trackPointsFromCloud(cloud, rideId: peer.id);
       final aligned = alignCornerToPeer(
         localSamples: widget.samples,
-        mapStartIndex: widget.analysis.mapStartIndex,
-        mapEndIndex: widget.analysis.mapEndIndex,
+        mapStartIndex: widget.corner.analysis.mapStartIndex,
+        mapEndIndex: widget.corner.analysis.mapEndIndex,
         peerSamples: peerPts,
       );
       if (!mounted) return;
@@ -150,7 +277,9 @@ class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
         _peerError = null;
       });
       _resyncDuration();
-      unawaited(_ctrl.forward(from: 0));
+      if (widget.isActive) {
+        unawaited(_ctrl.forward(from: 0));
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -208,18 +337,16 @@ class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
       if (comparing) ..._peerSlice!.map(_relativeLean),
     ].where((v) => v > 0).fold<double>(0, (m, v) => v > m ? v : m);
 
-    return Scaffold(
-      backgroundColor: AppTheme.asphalt,
-      appBar: AppBar(
-        title: Text(
-          widget.title ?? l10n.skillReplayTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-        ),
-      ),
-      body: AnimatedBuilder(
+    if (_youSlice.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return AnimatedBuilder(
         animation: _ctrl,
         builder: (context, _) {
-          final yi = indexAtPathFraction(_youSlice, _ctrl.value);
+          final yi = comparing
+              ? indexAtPathFraction(_youSlice, _ctrl.value)
+              : indexAtTimeFraction(_youSlice, _ctrl.value);
           final pi = comparing
               ? indexAtPathFraction(_peerSlice!, _ctrl.value)
               : 0;
@@ -336,10 +463,10 @@ class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
                       points: widget.samples,
                       interactive: false,
                       allowZoom: true,
-                      scrubIndex: widget.analysis.mapStartIndex +
+                      scrubIndex: widget.corner.analysis.mapStartIndex +
                           yi.clamp(0, _youSlice.length - 1),
-                      focusStartIndex: widget.analysis.mapStartIndex,
-                      focusEndIndex: widget.analysis.mapEndIndex,
+                      focusStartIndex: widget.corner.analysis.mapStartIndex,
+                      focusEndIndex: widget.corner.analysis.mapEndIndex,
                       dimOutsideFocus: true,
                       brakeEvents: widget.brakeEvents,
                       layers: const MapLayerOptions(
@@ -526,10 +653,94 @@ class _SkillReplayScreenState extends ConsumerState<SkillReplayScreen>
                   setState(() {});
                 },
               ),
+              const SizedBox(height: 20),
+              _CornerCoachPanel(corner: widget.corner),
             ],
           );
         },
-      ),
+    );
+  }
+}
+
+class _CornerCoachPanel extends StatelessWidget {
+  const _CornerCoachPanel({required this.corner});
+
+  final CornerSkill corner;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final score = corner.score;
+    final color = score >= 75
+        ? AppTheme.line
+        : score >= 55
+            ? AppTheme.lineHot
+            : AppTheme.signal;
+    final a = corner.analysis;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                corner.label,
+                style: GoogleFonts.exo2(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Text(
+              '$score',
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w800,
+                fontSize: 28,
+                color: color,
+              ),
+            ),
+            Text(
+              ' /100',
+              style: GoogleFonts.rajdhani(color: AppTheme.steel),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        CornerSpeedBars(
+          entry: a.entrySpeedKmh,
+          apex: a.apexSpeedKmh,
+          exit: a.exitSpeedKmh,
+        ),
+        const SizedBox(height: 12),
+        for (final tip in corner.tips)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  score >= 75
+                      ? Icons.check_circle_outline
+                      : Icons.lightbulb_outline,
+                  size: 16,
+                  color: score >= 75 ? AppTheme.line : AppTheme.lineHot,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    l10n.skillTipText(tip),
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 13,
+                      height: 1.35,
+                      color: AppTheme.mist,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

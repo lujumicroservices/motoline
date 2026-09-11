@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -574,7 +576,6 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
                 shape: BoxShape.circle,
                 border: Border.all(color: AppTheme.asphalt, width: 2),
               ),
-              child: const Icon(Icons.south, size: 12, color: AppTheme.asphalt),
             ),
           ),
         );
@@ -615,21 +616,25 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
     final scrub = _scrubIndex;
     if (_layers.showPlayhead && scrub >= 0 && scrub < points.length) {
       final p = points[scrub];
+      final heading = headingAtIndex(points, scrub);
       markers.add(
         Marker(
           point: LatLng(p.latitude, p.longitude),
           width: 28,
           height: 28,
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppTheme.mist,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.lineHot, width: 3),
-            ),
-            child: const Icon(
-              Icons.navigation,
-              size: 14,
-              color: AppTheme.asphalt,
+          child: Transform.rotate(
+            angle: (heading ?? 0) * math.pi / 180,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppTheme.mist,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.lineHot, width: 3),
+              ),
+              child: const Icon(
+                Icons.navigation,
+                size: 14,
+                color: AppTheme.asphalt,
+              ),
             ),
           ),
         ),

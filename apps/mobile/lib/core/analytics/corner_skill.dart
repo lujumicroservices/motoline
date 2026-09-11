@@ -123,6 +123,10 @@ class CornerSkillEngine {
         ),
     ];
 
+    corners.sort(
+      (a, b) => a.analysis.entryIndex.compareTo(b.analysis.entryIndex),
+    );
+
     return RideSkillSummary(
       corners: corners,
       sessionScore: avg.clamp(0, 100),

@@ -21,6 +21,72 @@ double haversineMeters(
   return earthRadius * c;
 }
 
+/// Initial bearing in degrees (0 = north, clockwise) from A to B.
+double bearingDegrees(
+  double lat1,
+  double lon1,
+  double lat2,
+  double lon2,
+) {
+  final phi1 = _toRad(lat1);
+  final phi2 = _toRad(lat2);
+  final dLon = _toRad(lon2 - lon1);
+  final y = math.sin(dLon) * math.cos(phi2);
+  final x = math.cos(phi1) * math.sin(phi2) -
+      math.sin(phi1) * math.cos(phi2) * math.cos(dLon);
+  return (_toDeg(math.atan2(y, x)) + 360) % 360;
+}
+
+/// Course the track actually travels at [index] (polyline direction).
+///
+/// Prefers bearing between neighbouring GPS samples so playheads follow the
+/// recorded line. Stored [TrackPoint.heading] is only a fallback — watches
+/// often persist `0`, which would point the marker north.
+double? headingAtIndex(List<TrackPoint> points, int index) {
+  if (points.isEmpty || index < 0 || index >= points.length) return null;
+  if (index > 0) {
+    final a = points[index - 1];
+    final b = points[index];
+    if (haversineMeters(a.latitude, a.longitude, b.latitude, b.longitude) >= 1) {
+      return bearingDegrees(a.latitude, a.longitude, b.latitude, b.longitude);
+    }
+  }
+  if (index + 1 < points.length) {
+    final a = points[index];
+    final b = points[index + 1];
+    if (haversineMeters(a.latitude, a.longitude, b.latitude, b.longitude) >= 1) {
+      return bearingDegrees(a.latitude, a.longitude, b.latitude, b.longitude);
+    }
+  }
+  final h = points[index].heading;
+  if (h != null && h.isFinite) return (h + 360) % 360;
+  return null;
+}
+
+/// Point [meters] ahead of (lat, lng) along [headingDeg] (0 = north).
+({double lat, double lng}) offsetAlongHeading({
+  required double lat,
+  required double lng,
+  required double headingDeg,
+  required double meters,
+}) {
+  const earthRadius = 6371000.0;
+  final br = _toRad(headingDeg);
+  final lat1 = _toRad(lat);
+  final lng1 = _toRad(lng);
+  final ang = meters / earthRadius;
+  final lat2 = math.asin(
+    math.sin(lat1) * math.cos(ang) +
+        math.cos(lat1) * math.sin(ang) * math.cos(br),
+  );
+  final lng2 = lng1 +
+      math.atan2(
+        math.sin(br) * math.sin(ang) * math.cos(lat1),
+        math.cos(ang) - math.sin(lat1) * math.sin(lat2),
+      );
+  return (lat: _toDeg(lat2), lng: _toDeg(lng2));
+}
+
 /// True when (lat, lng) is within [radiusM] meters of (centerLat, centerLng).
 bool inGeofence(
   double lat,
@@ -354,3 +420,4 @@ String formatDurationPrecise(Duration d) =>
 }
 
 double _toRad(double deg) => deg * math.pi / 180;
+double _toDeg(double rad) => rad * 180 / math.pi;

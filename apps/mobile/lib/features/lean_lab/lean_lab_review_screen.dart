@@ -219,7 +219,9 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
     built.sort(
       (x, y) => y.maxLean.absLeanDeg.compareTo(x.maxLean.absLeanDeg),
     );
-    return built.take(5).toList();
+    final top = built.take(5).toList()
+      ..sort((x, y) => x.analysisStart.compareTo(y.analysisStart));
+    return top;
   }
 
   String _emptyReason(AppLocalizations l10n) {

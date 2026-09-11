@@ -345,13 +345,6 @@
   "armedSessionMinimize": "Minimizar",
   "armedSessionWatchRecording": "Abrir tablero en vivo",
   "armedSessionEndArm": "Terminar sesión",
-  "armedSessionStretchesEmpty": "Aún no hay tramos. Cuando empieces a rodar, aparecerán aquí.",
-  "armedSessionStretchN": "Tramo {n}",
-  "@armedSessionStretchN": {
-    "placeholders": {
-      "n": { "type": "int" }
-    }
-  },
   "armedSessionWaitingHelp": "GPS listo. La grabación arranca sola al moverte.",
   "armedSessionForceStart": "Forzar grabación",
   "armedSessionLiveHelp": "Grabando. Puedes salir de esta pantalla; el recorrido sigue.",
@@ -663,7 +656,7 @@
     }
   },
   "showForceStartArmed": "Mostrar forzar grabación",
-  "showForceStartArmedHelp": "En Ruta armada, inicia la grabación aunque aún no te muevas.",
+  "showForceStartArmedHelp": "En Ruta armada muestra el botón para iniciar aunque aún no te muevas. En la tienda viene apagado; actívalo aquí si lo necesitas.",
   "familyAppBarShareTooltip": "Avisar a familia",
   "familyAddContact": "Agregar contacto",
   "familyContactLabel": "Nombre",
@@ -1208,7 +1201,7 @@
   "skillLabTapHint": "Toca para ver errores y cómo mejorarlos",
   "skillLabTapHintEmpty": "Toca para tips tras un tramo sinuoso",
   "skillLabFocusTitle": "Dónde mejorar",
-  "skillLabFocusHelp": "Primero las curvas con peor puntaje. Las barras son entrada → centro → salida. Toca Repetir para ver inclinación, freno y velocidad — y comparar la misma curva con un amigo.",
+  "skillLabFocusHelp": "En el orden en que las pasaste. Toca una para ver inclinación, freno y velocidad — desliza para la siguiente.",
   "bikeSection": "Mi moto",
   "bikeSelect": "Elige tu moto",
   "bikeSelectHelp": "Se usa en el Lab de inclinación y en tus recorridos",
@@ -1248,6 +1241,12 @@
   "sessionArmedHelp": "GPS listo. Al moverte empieza a grabar. Al parar pasa a detenido.",
   "sessionStoppedHelp": "Sesión en pausa por detención. Al moverte vuelve a grabar.",
   "sessionDetectionPausedHelp": "La detección de movimiento está pausada. El estado no cambia solo.",
+  "sessionWaitingMotion": "Esperando movimiento",
+  "sessionWaitingMotionHelp": "Al moverte, la grabación sigue sola.",
+  "sessionRecordingMotion": "En movimiento",
+  "sessionRecordingMotionHelp": "Capturando métricas del recorrido.",
+  "sessionNotDetectingMotion": "No está detectando movimiento",
+  "sessionNotDetectingMotionHelp": "La detección está en pausa. El estado no cambia solo.",
   "labsSectionTitle": "Pruebas / nuevas funciones",
   "labsSectionHelp": "Herramientas experimentales. No forman parte del flujo diario.",
   "pushDiagnosticsTitle": "Último envío de notificación",

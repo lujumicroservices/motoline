@@ -279,13 +279,6 @@
   "armedSessionMinimize": "Minimize",
   "armedSessionWatchRecording": "Open recording",
   "armedSessionEndArm": "End session",
-  "armedSessionStretchesEmpty": "No stretches yet. They'll show up here when you start rolling.",
-  "armedSessionStretchN": "Stretch {n}",
-  "@armedSessionStretchN": {
-    "placeholders": {
-      "n": { "type": "int" }
-    }
-  },
   "armedSessionWaitingHelp": "GPS is ready. Recording starts by itself when you move.",
   "armedSessionForceStart": "Force recording",
   "armedSessionLiveHelp": "Recording. You can leave this screen — the ride keeps going.",
@@ -592,7 +585,7 @@
     }
   },
   "showForceStartArmed": "Show force recording",
-  "showForceStartArmedHelp": "On Armed route, start recording even if you are still standing.",
+  "showForceStartArmedHelp": "On Armed route, show the button to start even if you are still standing. Store builds default off; turn this on here if you need it.",
   "familyAppBarShareTooltip": "Notify family",
   "familyAddContact": "Add contact",
   "familyContactLabel": "Name",
@@ -1137,7 +1130,7 @@
   "skillLabTapHint": "Tap to see mistakes and how to fix them",
   "skillLabTapHintEmpty": "Tap for tips after a twisty ride",
   "skillLabFocusTitle": "Where to improve",
-  "skillLabFocusHelp": "Worst-scoring turns first. Bars show entry → middle → exit speed. Tap Replay to watch lean, brake, and speed — and compare the same corner with a friend.",
+  "skillLabFocusHelp": "In the order you rode them. Tap a turn to watch lean, brake, and speed — swipe for the next.",
   "bikeSection": "My bike",
   "bikeSelect": "Select your bike",
   "bikeSelectHelp": "Used for Lean lab and your rides",
@@ -1179,6 +1172,12 @@
   "sessionArmedHelp": "GPS is ready. Moving starts recording. Stopping goes to stopped.",
   "sessionStoppedHelp": "Session paused because you stopped. Moving starts recording again.",
   "sessionDetectionPausedHelp": "Motion detection is paused. The current state will not change on its own.",
+  "sessionWaitingMotion": "Waiting for motion",
+  "sessionWaitingMotionHelp": "When you move, recording continues on its own.",
+  "sessionRecordingMotion": "In motion",
+  "sessionRecordingMotionHelp": "Capturing ride metrics.",
+  "sessionNotDetectingMotion": "Not detecting motion",
+  "sessionNotDetectingMotionHelp": "Detection is paused. The current state will not change on its own.",
   "pushDiagnosticsTitle": "Last notification send",
   "pushDiagnosticsEmpty": "No notification send recorded yet.",
   "pushDiagnosticsCopied": "Notification log copied",
