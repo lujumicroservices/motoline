@@ -22,9 +22,8 @@ class PlaceSearchHit {
   final String? primaryType;
 }
 
-typedef PlaceSearchInvoker = Future<Map<String, dynamic>?> Function(
-  Map<String, dynamic> body,
-);
+typedef PlaceSearchInvoker =
+    Future<Map<String, dynamic>?> Function(Map<String, dynamic> body);
 
 Map<String, double>? viewBoundsPayload(LatLngBounds? bounds) {
   if (bounds == null) return null;
@@ -62,11 +61,9 @@ List<PlaceSearchHit> parseGooglePlaceHits(Map<String, dynamic> data) {
 
 /// Google Places via `places-search`, Nominatim fallback.
 class PlaceSearchService {
-  PlaceSearchService({
-    http.Client? client,
-    PlaceSearchInvoker? invoke,
-  })  : _client = client ?? http.Client(),
-        _invoke = invoke ?? _defaultInvoke;
+  PlaceSearchService({http.Client? client, PlaceSearchInvoker? invoke})
+    : _client = client ?? http.Client(),
+      _invoke = invoke ?? _defaultInvoke;
 
   final http.Client _client;
   final PlaceSearchInvoker _invoke;
@@ -93,6 +90,31 @@ class PlaceSearchService {
       debugPrint('PlaceSearchService google: $e');
     }
     return _searchNominatim(q, viewBounds: viewBounds, limit: limit);
+  }
+
+  /// Place name for a map tap. Google reverse first, Nominatim if needed.
+  Future<PlaceSearchHit?> reverse(LatLng point) async {
+    try {
+      final data = await _invoke({
+        'lat': point.latitude,
+        'lng': point.longitude,
+        'limit': 1,
+      });
+      final hits = data == null
+          ? const <PlaceSearchHit>[]
+          : parseGooglePlaceHits(data);
+      if (hits.isNotEmpty) {
+        return PlaceSearchHit(
+          title: hits.first.title,
+          subtitle: hits.first.subtitle,
+          point: point,
+          primaryType: hits.first.primaryType,
+        );
+      }
+    } catch (e) {
+      debugPrint('PlaceSearchService reverse google: $e');
+    }
+    return _reverseNominatim(point);
   }
 
   Future<List<PlaceSearchHit>> _searchGoogle(
@@ -131,10 +153,7 @@ class PlaceSearchService {
       final uri = Uri.https('nominatim.openstreetmap.org', '/search', params);
       final res = await _client.get(
         uri,
-        headers: {
-          'User-Agent': _userAgent,
-          'Accept-Language': 'es,en',
-        },
+        headers: {'User-Agent': _userAgent, 'Accept-Language': 'es,en'},
       );
       _lastNominatimAt = DateTime.now();
       if (res.statusCode != 200) {
@@ -167,6 +186,41 @@ class PlaceSearchService {
     }
   }
 
+  Future<PlaceSearchHit?> _reverseNominatim(LatLng point) async {
+    await _paceNominatim();
+    try {
+      final uri = Uri.https('nominatim.openstreetmap.org', '/reverse', {
+        'format': 'jsonv2',
+        'lat': '${point.latitude}',
+        'lon': '${point.longitude}',
+        'zoom': '15',
+        'addressdetails': '1',
+      });
+      final res = await _client.get(
+        uri,
+        headers: {'User-Agent': _userAgent, 'Accept-Language': 'es,en'},
+      );
+      _lastNominatimAt = DateTime.now();
+      if (res.statusCode != 200) {
+        debugPrint('Nominatim reverse ${res.statusCode}');
+        return null;
+      }
+      final body = jsonDecode(res.body);
+      if (body is! Map) return null;
+      final map = Map<String, dynamic>.from(body);
+      final title = _title(map);
+      if (title.isEmpty) return null;
+      return PlaceSearchHit(
+        title: title,
+        subtitle: _subtitle(map, title),
+        point: point,
+      );
+    } catch (e) {
+      debugPrint('PlaceSearchService reverse nominatim: $e');
+      return null;
+    }
+  }
+
   Future<void> _paceNominatim() async {
     final last = _lastNominatimAt;
     if (last == null) return;
@@ -188,9 +242,11 @@ class PlaceSearchService {
   String? _subtitle(Map<String, dynamic> map, String title) {
     final display = map['display_name']?.toString();
     if (display == null || display.isEmpty) return null;
-    final rest = display.split(',').skip(1).map((s) => s.trim()).where(
-          (s) => s.isNotEmpty && s.toLowerCase() != title.toLowerCase(),
-        );
+    final rest = display
+        .split(',')
+        .skip(1)
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty && s.toLowerCase() != title.toLowerCase());
     final joined = rest.take(3).join(', ');
     return joined.isEmpty ? null : joined;
   }

@@ -49,13 +49,14 @@ void main() {
       );
     });
 
-    test('first auto-start opens HUD while recording', () {
-      const waitingOnHub = ArmedSessionNavState(
+    test('first auto-start does not stack another session route', () {
+      const alreadyOnSession = ArmedSessionNavState(
         hubOnStack: true,
+        hudOnStack: true,
       );
       expect(
-        shouldAutoPushHud(waitingOnHub, isRecording: true),
-        isTrue,
+        shouldAutoPushHud(alreadyOnSession, isRecording: true),
+        isFalse,
       );
     });
 
@@ -117,9 +118,41 @@ void main() {
     });
 
     test('hub can reopen HUD even if hudOnStack was left stale', () {
-      expect(canOpenArmedHud(currentRouteName: kArmedSessionRoute), isTrue);
+      expect(canOpenArmedHud(currentRouteName: kArmedSessionRoute), isFalse);
       expect(canOpenArmedHud(currentRouteName: null), isTrue);
       expect(canOpenArmedHud(currentRouteName: kArmedHudRoute), isFalse);
+    });
+
+    test('minimized session is not auto-pushed from Home', () {
+      expect(
+        shouldPushArmedHub(
+          hubOnStack: false,
+          homeIsVisible: true,
+          hudMinimized: true,
+        ),
+        isFalse,
+      );
+      expect(
+        shouldPushArmedHub(
+          hubOnStack: false,
+          homeIsVisible: true,
+          hudMinimized: true,
+          userRequested: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('auto-push after minimize stays off until the user reopens', () {
+      const afterMinimize = ArmedSessionNavState(
+        hubOnStack: false,
+        hudOnStack: false,
+        hudMinimized: true,
+      );
+      expect(
+        shouldAutoPushHud(afterMinimize, isRecording: true),
+        isFalse,
+      );
     });
 
     test('hudClosed after stop does not treat as minimize', () {

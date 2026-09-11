@@ -381,6 +381,30 @@ final armedStateProvider =
   return ArmedStateNotifier(recorder);
 });
 
+class MotionHeldNotifier extends StateNotifier<bool> {
+  MotionHeldNotifier(this._recorder)
+      : super(_recorder.motionDetectionHeld) {
+    _sub = _recorder.motionHeldStates.listen((held) => state = held);
+  }
+
+  final RideRecorder _recorder;
+  late final StreamSubscription<bool> _sub;
+
+  void setHeld(bool held) => _recorder.setMotionDetectionHeld(held);
+
+  @override
+  void dispose() {
+    unawaited(_sub.cancel());
+    super.dispose();
+  }
+}
+
+final motionDetectionHeldProvider =
+    StateNotifierProvider.autoDispose<MotionHeldNotifier, bool>((ref) {
+  final recorder = ref.watch(rideRecorderProvider);
+  return MotionHeldNotifier(recorder);
+});
+
 final loopSessionControllerProvider =
     Provider.autoDispose<LoopSessionController>((ref) {
   final controller = LoopSessionController(

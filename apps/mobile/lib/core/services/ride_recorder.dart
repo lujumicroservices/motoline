@@ -37,6 +37,7 @@ class ActiveRideSnapshot {
     this.suggestEnd = false,
     this.pausedFor,
     this.autoPauseEnabled = true,
+    this.motionDetectionHeld = false,
     this.gpsRateHz,
     this.pressureHpa,
   });
@@ -61,6 +62,9 @@ class ActiveRideSnapshot {
 
   /// Whether automatic pause/resume is armed for this session.
   final bool autoPauseEnabled;
+
+  /// When true, motion will not auto-start, auto-pause, or auto-resume.
+  final bool motionDetectionHeld;
 
   /// Rolling accepted-fix rate over ~12 s (null until enough samples).
   final double? gpsRateHz;
@@ -112,6 +116,7 @@ class RideRecorder {
   final _autoStartController = StreamController<Ride>.broadcast();
   final _fixAcceptTimes = <DateTime>[];
   final _armedController = StreamController<bool>.broadcast();
+  final _motionHeldController = StreamController<bool>.broadcast();
 
   final MotionPatternDetector _motion = MotionPatternDetector();
   final MotionPatternDetector _armMotion = MotionPatternDetector();
@@ -149,6 +154,7 @@ class RideRecorder {
   bool _promotingArm = false;
   bool _autoPauseEnabled = true;
   bool _autoPausePrefLoaded = false;
+  bool _motionDetectionHeld = false;
   double? _pendingLeanNeutral;
   Vec3? _pendingG0;
   int _pendingSignFlip = 1;
@@ -164,6 +170,8 @@ class RideRecorder {
 
   /// Fires whenever the armed state changes (true = armed, waiting for motion).
   Stream<bool> get armedStates => _armedController.stream;
+
+  Stream<bool> get motionHeldStates => _motionHeldController.stream;
 
   Ride? get activeRide => _ride;
   bool get isRecording => _ride?.status == RideStatus.recording;
@@ -198,6 +206,17 @@ class RideRecorder {
 
   /// Automatic pause/resume while recording (persisted).
   bool get autoPauseEnabled => _autoPauseEnabled;
+
+  bool get motionDetectionHeld => _motionDetectionHeld;
+
+  void setMotionDetectionHeld(bool held) {
+    if (_motionDetectionHeld == held) return;
+    _motionDetectionHeld = held;
+    _motion.motionDetectionHeld = held;
+    _armMotion.motionDetectionHeld = held;
+    _motionHeldController.add(held);
+    if (isRecording) _emit();
+  }
 
   Future<void> setAutoPauseEnabled(bool enabled) async {
     await _ensureAutoPausePref();
@@ -490,6 +509,10 @@ class RideRecorder {
     _telemetry.bindRide(null);
     _ride = null;
     _rodadaMetricsHeld = false;
+    _motionDetectionHeld = false;
+    _motion.motionDetectionHeld = false;
+    _armMotion.motionDetectionHeld = false;
+    _motionHeldController.add(false);
     _boundRodadaId = null;
     _emitCompleted(completed);
     unawaited(ImuBlobUploadService().enqueueAndUpload(completed.id));
@@ -698,6 +721,10 @@ class RideRecorder {
     }
     _armed = true;
     _armedController.add(true);
+    _motionDetectionHeld = false;
+    _motion.motionDetectionHeld = false;
+    _armMotion.motionDetectionHeld = false;
+    _motionHeldController.add(false);
 
     final started = await ArmForegroundService.start(
       onData: _onArmForegroundData,
@@ -728,6 +755,10 @@ class RideRecorder {
     _promotingArm = false;
     _pendingG0 = null;
     _pendingSignFlip = 1;
+    _motionDetectionHeld = false;
+    _motion.motionDetectionHeld = false;
+    _armMotion.motionDetectionHeld = false;
+    _motionHeldController.add(false);
     unawaited(_armSub?.cancel());
     _armSub = null;
     unawaited(ArmForegroundService.stop());
@@ -1381,6 +1412,7 @@ class RideRecorder {
         suggestEnd: _rodadaMetricsHeld ? false : _motion.suggestEnd,
         pausedFor: _motion.pausedFor(),
         autoPauseEnabled: _autoPauseEnabled,
+        motionDetectionHeld: _motionDetectionHeld,
         gpsRateHz: _liveGpsRateHz,
         pressureHpa: _baro.pressureHpa,
       ),
@@ -1416,5 +1448,6 @@ class RideRecorder {
     await _controller.close();
     await _autoStartController.close();
     await _armedController.close();
+    await _motionHeldController.close();
   }
 }

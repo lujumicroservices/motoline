@@ -15,11 +15,7 @@ List<LatLng> rodadaItineraryLine({
   List<LatLng> stops = const [],
   LatLng? finish,
 }) {
-  return [
-    ?start,
-    ...stops,
-    ?finish,
-  ];
+  return [?start, ...stops, ?finish];
 }
 
 /// Prefer a snapped route; fall back to pin-to-pin when routing failed.
@@ -50,6 +46,46 @@ String rodadaAutoTitle({
   if (start.isEmpty) return finish;
   if (finish.isEmpty) return start;
   return '$start - $finish';
+}
+
+/// Drop empty / generic pin labels so the auto title stays blank until Places.
+String rodadaTitlePlaceLabel(
+  String? name, {
+  Iterable<String> generic = const [],
+}) {
+  final t = name?.trim() ?? '';
+  if (t.isEmpty) return '';
+  final lower = t.toLowerCase();
+  for (final g in generic) {
+    if (g.trim().toLowerCase() == lower) return '';
+  }
+  return t;
+}
+
+class RodadaCreateGaps {
+  const RodadaCreateGaps({
+    required this.start,
+    required this.finish,
+    required this.title,
+  });
+
+  final bool start;
+  final bool finish;
+  final bool title;
+
+  bool get any => start || finish || title;
+}
+
+RodadaCreateGaps rodadaCreateGaps({
+  required bool hasStart,
+  required bool hasFinish,
+  required String title,
+}) {
+  return RodadaCreateGaps(
+    start: !hasStart,
+    finish: !hasFinish,
+    title: title.trim().isEmpty,
+  );
 }
 
 /// Waypoints for routing. [roundTrip] appends the reverse so Valhalla

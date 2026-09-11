@@ -49,6 +49,9 @@ class MotionPatternDetector {
   /// When false, ride samples never auto-pause / auto-resume (manual recording).
   bool autoPauseEnabled = true;
 
+  /// When true, freeze motion-driven transitions (auto-start, pause, resume).
+  bool motionDetectionHeld = false;
+
   bool _isPaused = false;
   DateTime? _slowSince;
   DateTime? _fastSince;
@@ -195,6 +198,7 @@ class MotionPatternDetector {
     DateTime ts,
     double? accuracyMeters,
   ) {
+    if (motionDetectionHeld) return;
     if (!autoPauseEnabled) {
       if (_isPaused) clearPause();
       return;
@@ -293,6 +297,7 @@ class MotionPatternDetector {
     required double longitude,
     required DateTime timestamp,
   }) {
+    if (motionDetectionHeld) return false;
     double? implied;
     if (_armLastLat != null && _armLastLng != null) {
       _armCumulativeMeters += haversineMeters(

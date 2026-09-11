@@ -13,6 +13,7 @@ import '../../providers/force_start_prefs.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../providers/ride_providers.dart';
+import '../../providers/rodada_share_prefs.dart';
 import '../../core/services/ride_sync_service.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
@@ -27,8 +28,12 @@ import '../lean_lab/lean_imu_lab_screen.dart';
 import '../lean_lab/lean_lab_screen.dart';
 import '../moderation/content_guidelines.dart';
 import '../moderation/staff_reports_screen.dart';
+import '../ride_active/location_permission_gate.dart';
+import '../rodadas/rodada_providers.dart';
+import '../watch/family_circle_screen.dart';
 import 'bike_picker_screen.dart';
 import 'impersonate_screen.dart';
+import 'settings_group.dart';
 import '../../widgets/app_snack.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -83,6 +88,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _pushShareToRodadas() async {
+    await syncShareSettingsToOpenRodadas(
+      repo: ref.read(rodadaRepositoryProvider),
+      settings: ref.read(rodadaSharePrefsProvider),
+    );
+    ref.invalidate(myRodadasProvider);
+  }
+
+  TextStyle get _tileTitle =>
+      GoogleFonts.rajdhani(fontWeight: FontWeight.w600);
+
+  TextStyle get _tileSub =>
+      GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12);
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -90,6 +109,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final pro = ref.watch(proEntitlementProvider);
     final locale = ref.watch(localeProvider);
     final bike = ref.watch(riderBikeProvider);
+    final share = ref.watch(rodadaSharePrefsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -112,395 +132,391 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           const Align(alignment: Alignment.centerLeft, child: RiderAliasChip()),
-          const SizedBox(height: 20),
-          Text(
-            l10n.labsSectionTitle,
-            style: GoogleFonts.barlowCondensed(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.labsSectionHelp,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 13,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const AppMotoIcon(size: 28, color: AppTheme.line),
-            title: Text(
-              l10n.leanLabSettingsTile,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              l10n.leanLabSettingsHelp,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const LeanLabScreen()),
-              );
-            },
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.sensors, color: AppTheme.lineHot),
-            title: Text(
-              l10n.leanImuLabSettingsTile,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              l10n.leanImuLabSettingsHelp,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const LeanImuLabScreen(),
+          SettingsGroup(
+            title: l10n.settingsRideSection,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const AppMotoIcon(size: 28, color: AppTheme.mist),
+                title: Text(bike?.label ?? l10n.bikeSelect, style: _tileTitle),
+                subtitle: Text(
+                  bike == null ? l10n.bikeSelectHelp : bike.subtitle,
+                  style: _tileSub,
                 ),
-              );
-            },
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(
-              Icons.notifications_outlined,
-              color: AppTheme.mist,
-            ),
-            title: Text(
-              l10n.pushDiagnosticsTitle,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: SelectableText(
-              PushDiagnostics.history.isEmpty
-                  ? l10n.pushDiagnosticsEmpty
-                  : PushDiagnostics.history.reversed.take(5).join('\n'),
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-            ),
-            trailing: PushDiagnostics.history.isEmpty
-                ? null
-                : IconButton(
-                    tooltip: l10n.pushDiagnosticsTitle,
-                    icon: const Icon(Icons.copy, size: 18),
-                    onPressed: () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: PushDiagnostics.history.join('\n')),
-                      );
-                      if (!context.mounted) return;
-                      showAppSnack(context, l10n.pushDiagnosticsCopied);
-                    },
-                  ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.bikeSection,
-            style: GoogleFonts.barlowCondensed(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const AppMotoIcon(size: 28, color: AppTheme.mist),
-            title: Text(
-              bike?.label ?? l10n.bikeSelect,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              bike == null ? l10n.bikeSelectHelp : bike.subtitle,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const BikePickerScreen(),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 28),
-          Text(
-            l10n.language,
-            style: GoogleFonts.barlowCondensed(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.translate, color: AppTheme.mist),
-            title: Text(
-              locale.languageCode == 'es' ? l10n.spanish : l10n.english,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            trailing: TextButton(
-              onPressed: () => ref.read(localeProvider.notifier).toggle(),
-              child: Text(
-                locale.languageCode == 'es' ? l10n.english : l10n.spanish,
-              ),
-            ),
-          ),
-          const SizedBox(height: 28),
-          const AccountAuthSection(),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(
-              Icons.description_outlined,
-              color: AppTheme.line,
-            ),
-            title: Text(
-              l10n.termsTitle,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              l10n.legalOpenInBrowser,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => openLegalUrlOrSnack(context, LegalUrls.terms),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(
-              Icons.privacy_tip_outlined,
-              color: AppTheme.line,
-            ),
-            title: Text(
-              l10n.privacyTitle,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              l10n.legalOpenInBrowser,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => openLegalUrlOrSnack(context, LegalUrls.privacy),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.gavel_outlined, color: AppTheme.line),
-            title: Text(
-              l10n.ugcGuidelinesTitle,
-              style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              l10n.ugcGuidelinesBanner,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => showUgcGuidelinesDialog(context),
-          ),
-          if (ref.watch(impersonationProvider).staff &&
-              !ref.watch(impersonationProvider).active) ...[
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.visibility, color: AppTheme.signal),
-              title: Text(
-                l10n.impersonateTile,
-                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                l10n.impersonateHelp,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.steel,
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ImpersonateScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-            const _StaffPartnerCodeTile(),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.flag_outlined, color: AppTheme.signal),
-              title: Text(
-                l10n.ugcStaffQueueTitle,
-                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                l10n.ugcStaffQueueHelp,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.steel,
-                  fontSize: 12,
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const StaffReportsScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-          const SizedBox(height: 28),
-          const AdventureCameraSettingsSection(),
-          const SizedBox(height: 28),
-          Text(
-            l10n.syncCloudRides,
-            style: GoogleFonts.barlowCondensed(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.syncCloudRidesHelp,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 14,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: _syncing || ref.watch(impersonationProvider).active
-                ? null
-                : _syncCloud,
-            icon: _syncing
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.cloud_upload_outlined),
-            label: Text(_syncing ? '…' : l10n.syncCloudRides),
-          ),
-          const SizedBox(height: 28),
-          Text(
-            l10n.proUnlock,
-            style: GoogleFonts.barlowCondensed(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.proUnlockBody,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 14,
-              height: 1.4,
-            ),
-          ),
-          if (proRemainingLabel(l10n, pro) != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              proRemainingLabel(l10n, pro)!,
-              style: GoogleFonts.rajdhani(
-                color: RideVizPalette.leanLeft,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-          if (pro.expiredAfterGrant) ...[
-            const SizedBox(height: 8),
-            Text(
-              l10n.proExpiredKeepLab,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.signal,
-                fontSize: 13,
-                height: 1.35,
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          if (forceStartArmedOffered())
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                l10n.showForceStartArmed,
-                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                l10n.showForceStartArmedHelp,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.steel,
-                  fontSize: 12,
-                ),
-              ),
-              value: ref.watch(forceStartArmedVisibleProvider),
-              activeThumbColor: RideVizPalette.leanLeft,
-              onChanged: (v) => ref
-                  .read(forceStartArmedVisibleProvider.notifier)
-                  .setVisible(v),
-            ),
-          if (allowLocalProToggle)
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                l10n.proToggleDev,
-                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                l10n.proToggleHelp,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.steel,
-                  fontSize: 12,
-                ),
-              ),
-              value: isPro,
-              activeThumbColor: RideVizPalette.leanLeft,
-              onChanged: (v) =>
-                  ref.read(proEntitlementProvider.notifier).setPro(v),
-            ),
-          if (revenueCatConfigured) ...[
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () async {
-                await ref
-                    .read(proEntitlementProvider.notifier)
-                    .restorePurchases();
-                if (!context.mounted) return;
-                showAppSnack(context, l10n.proUnlocked);
-              },
-              child: Text(l10n.restorePurchases),
-            ),
-          ],
-          const SizedBox(height: 12),
-          const PartnerCodeRedeemField(),
-          const SizedBox(height: 8),
-          if (!isPro)
-            OutlinedButton(
-              onPressed: () => showProUpsellSheet(context, ref),
-              child: Text(l10n.upgradeToPro),
-            )
-          else
-            Row(
-              children: [
-                Icon(Icons.verified, color: RideVizPalette.leanLeft, size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    proRemainingLabel(l10n, pro) ?? l10n.proUnlocked,
-                    style: GoogleFonts.rajdhani(
-                      color: RideVizPalette.leanLeft,
-                      fontWeight: FontWeight.w600,
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const BikePickerScreen(),
                     ),
+                  );
+                },
+              ),
+              if (forceStartArmedOffered())
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.showForceStartArmed, style: _tileTitle),
+                  subtitle: Text(l10n.showForceStartArmedHelp, style: _tileSub),
+                  value: ref.watch(forceStartArmedVisibleProvider),
+                  activeThumbColor: RideVizPalette.leanLeft,
+                  onChanged: (v) => ref
+                      .read(forceStartArmedVisibleProvider.notifier)
+                      .setVisible(v),
+                ),
+            ],
+          ),
+          SettingsGroup(
+            title: l10n.settingsShareSection,
+            help: l10n.settingsShareSectionHelp,
+            children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.autoArmOnRodadaStart, style: _tileTitle),
+                subtitle: Text(l10n.autoArmOnRodadaStartHelp, style: _tileSub),
+                value: share.autoArmOnStart,
+                activeThumbColor: RideVizPalette.leanLeft,
+                onChanged: (v) async {
+                  if (v) {
+                    final ok =
+                        await LocationPermissionGate.requestForRecording(
+                          context,
+                        );
+                    if (!ok || !context.mounted) return;
+                  }
+                  await ref
+                      .read(rodadaSharePrefsProvider.notifier)
+                      .setAutoArmOnStart(v);
+                  await _pushShareToRodadas();
+                },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.shareLocationOnRoute, style: _tileTitle),
+                subtitle: Text(l10n.shareLocationEvery5Min, style: _tileSub),
+                value: share.shareLive,
+                activeThumbColor: RideVizPalette.leanLeft,
+                onChanged: (v) async {
+                  if (v) {
+                    final ok =
+                        await LocationPermissionGate.requestForRodadaLive(
+                          context,
+                        );
+                    if (!ok || !context.mounted) return;
+                  }
+                  await ref
+                      .read(rodadaSharePrefsProvider.notifier)
+                      .setShareLive(v);
+                  await _pushShareToRodadas();
+                },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.autoShareFamilyOnRodada, style: _tileTitle),
+                subtitle: Text(
+                  l10n.autoShareFamilyOnRodadaHelp,
+                  style: _tileSub,
+                ),
+                value: share.autoShareFamily,
+                activeThumbColor: RideVizPalette.leanLeft,
+                onChanged: (v) async {
+                  if (v) {
+                    final ok =
+                        await LocationPermissionGate.requestForRodadaLive(
+                          context,
+                        );
+                    if (!ok || !context.mounted) return;
+                  }
+                  await ref
+                      .read(rodadaSharePrefsProvider.notifier)
+                      .setAutoShareFamily(v);
+                  await _pushShareToRodadas();
+                },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.shareTrackAfterRides, style: _tileTitle),
+                value: share.shareTrack,
+                activeThumbColor: RideVizPalette.leanLeft,
+                onChanged: (v) async {
+                  await ref
+                      .read(rodadaSharePrefsProvider.notifier)
+                      .setShareTrack(v);
+                  await _pushShareToRodadas();
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
+                title: Text(l10n.familyRodadaTipTitle, style: _tileTitle),
+                subtitle: Text(l10n.familyRodadaTipBody, style: _tileSub),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const FamilyCircleScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          SettingsGroup(
+            title: l10n.accountSection,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.translate, color: AppTheme.mist),
+                title: Text(
+                  locale.languageCode == 'es' ? l10n.spanish : l10n.english,
+                  style: _tileTitle,
+                ),
+                trailing: TextButton(
+                  onPressed: () => ref.read(localeProvider.notifier).toggle(),
+                  child: Text(
+                    locale.languageCode == 'es' ? l10n.english : l10n.spanish,
+                  ),
+                ),
+              ),
+              const AccountAuthSection(),
+            ],
+          ),
+          SettingsGroup(
+            title: l10n.proUnlock,
+            children: [
+              Text(
+                l10n.proUnlockBody,
+                style: GoogleFonts.rajdhani(
+                  color: AppTheme.steel,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+              if (proRemainingLabel(l10n, pro) != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  proRemainingLabel(l10n, pro)!,
+                  style: GoogleFonts.rajdhani(
+                    color: RideVizPalette.leanLeft,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
-            ),
+              if (pro.expiredAfterGrant) ...[
+                const SizedBox(height: 8),
+                Text(
+                  l10n.proExpiredKeepLab,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.signal,
+                    fontSize: 13,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+              if (allowLocalProToggle)
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.proToggleDev, style: _tileTitle),
+                  subtitle: Text(l10n.proToggleHelp, style: _tileSub),
+                  value: isPro,
+                  activeThumbColor: RideVizPalette.leanLeft,
+                  onChanged: (v) =>
+                      ref.read(proEntitlementProvider.notifier).setPro(v),
+                ),
+              if (revenueCatConfigured) ...[
+                OutlinedButton(
+                  onPressed: () async {
+                    await ref
+                        .read(proEntitlementProvider.notifier)
+                        .restorePurchases();
+                    if (!context.mounted) return;
+                    showAppSnack(context, l10n.proUnlocked);
+                  },
+                  child: Text(l10n.restorePurchases),
+                ),
+              ],
+              const PartnerCodeRedeemField(),
+              const SizedBox(height: 8),
+              if (!isPro)
+                OutlinedButton(
+                  onPressed: () => showProUpsellSheet(context, ref),
+                  child: Text(l10n.upgradeToPro),
+                )
+              else
+                Row(
+                  children: [
+                    Icon(
+                      Icons.verified,
+                      color: RideVizPalette.leanLeft,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        proRemainingLabel(l10n, pro) ?? l10n.proUnlocked,
+                        style: GoogleFonts.rajdhani(
+                          color: RideVizPalette.leanLeft,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          SettingsGroup(
+            title: l10n.settingsCloudSection,
+            help: l10n.syncCloudRidesHelp,
+            children: [
+              FilledButton.icon(
+                onPressed: _syncing || ref.watch(impersonationProvider).active
+                    ? null
+                    : _syncCloud,
+                icon: _syncing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.cloud_upload_outlined),
+                label: Text(_syncing ? '…' : l10n.syncCloudRides),
+              ),
+            ],
+          ),
+          SettingsGroup(
+            title: l10n.labsSectionTitle,
+            help: l10n.labsSectionHelp,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const AppMotoIcon(size: 28, color: AppTheme.line),
+                title: Text(l10n.leanLabSettingsTile, style: _tileTitle),
+                subtitle: Text(l10n.leanLabSettingsHelp, style: _tileSub),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LeanLabScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.sensors, color: AppTheme.lineHot),
+                title: Text(l10n.leanImuLabSettingsTile, style: _tileTitle),
+                subtitle: Text(l10n.leanImuLabSettingsHelp, style: _tileSub),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LeanImuLabScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.notifications_outlined,
+                  color: AppTheme.mist,
+                ),
+                title: Text(l10n.pushDiagnosticsTitle, style: _tileTitle),
+                subtitle: SelectableText(
+                  PushDiagnostics.history.isEmpty
+                      ? l10n.pushDiagnosticsEmpty
+                      : PushDiagnostics.history.reversed.take(5).join('\n'),
+                  style: _tileSub,
+                ),
+                trailing: PushDiagnostics.history.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: l10n.pushDiagnosticsTitle,
+                        icon: const Icon(Icons.copy, size: 18),
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(
+                              text: PushDiagnostics.history.join('\n'),
+                            ),
+                          );
+                          if (!context.mounted) return;
+                          showAppSnack(context, l10n.pushDiagnosticsCopied);
+                        },
+                      ),
+              ),
+              const AdventureCameraSettingsSection(),
+            ],
+          ),
+          SettingsGroup(
+            title: l10n.settingsLegalSection,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.description_outlined,
+                  color: AppTheme.line,
+                ),
+                title: Text(l10n.termsTitle, style: _tileTitle),
+                subtitle: Text(l10n.legalOpenInBrowser, style: _tileSub),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => openLegalUrlOrSnack(context, LegalUrls.terms),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
+                  Icons.privacy_tip_outlined,
+                  color: AppTheme.line,
+                ),
+                title: Text(l10n.privacyTitle, style: _tileTitle),
+                subtitle: Text(l10n.legalOpenInBrowser, style: _tileSub),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => openLegalUrlOrSnack(context, LegalUrls.privacy),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.gavel_outlined, color: AppTheme.line),
+                title: Text(l10n.ugcGuidelinesTitle, style: _tileTitle),
+                subtitle: Text(l10n.ugcGuidelinesBanner, style: _tileSub),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => showUgcGuidelinesDialog(context),
+              ),
+              if (ref.watch(impersonationProvider).staff &&
+                  !ref.watch(impersonationProvider).active) ...[
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.visibility, color: AppTheme.signal),
+                  title: Text(l10n.impersonateTile, style: _tileTitle),
+                  subtitle: Text(l10n.impersonateHelp, style: _tileSub),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ImpersonateScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const _StaffPartnerCodeTile(),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.flag_outlined,
+                    color: AppTheme.signal,
+                  ),
+                  title: Text(l10n.ugcStaffQueueTitle, style: _tileTitle),
+                  subtitle: Text(l10n.ugcStaffQueueHelp, style: _tileSub),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const StaffReportsScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );

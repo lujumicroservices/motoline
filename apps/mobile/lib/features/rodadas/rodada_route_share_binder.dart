@@ -8,6 +8,7 @@ import '../../core/services/live_share_loop.dart';
 import '../../core/services/location_service.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../providers/ride_providers.dart';
+import '../../providers/rodada_share_prefs.dart';
 import '../ride_active/armed_session_flow.dart';
 import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../watch/watch_providers.dart';
@@ -116,6 +117,7 @@ class _RodadaRouteShareBinderState
           .map((r) => r.id)
           .toSet();
       final liveIds = live.map((r) => r.id).toSet();
+      final share = ref.read(rodadaSharePrefsProvider);
       final wantShare = <String>{};
       final wantFamily = <String>{};
       final wantArm = <String>{};
@@ -123,9 +125,9 @@ class _RodadaRouteShareBinderState
         try {
           final m = await repo.myMembership(r.id);
           if (m == null || m.rsvp == 'declined') continue;
-          if (m.shareLive) wantShare.add(r.id);
-          if (m.autoArmOnStart) wantArm.add(r.id);
-          if (m.autoShareFamily) wantFamily.add(r.id);
+          if (share.shareLive) wantShare.add(r.id);
+          if (share.autoArmOnStart) wantArm.add(r.id);
+          if (share.autoShareFamily) wantFamily.add(r.id);
         } catch (e) {
           debugPrint('RodadaRouteShareBinder membership ${r.id}: $e');
           if (_sessions.containsKey(r.id)) wantShare.add(r.id);
@@ -203,6 +205,9 @@ class _RodadaRouteShareBinderState
   @override
   Widget build(BuildContext context) {
     ref.listen(myRodadasProvider, (_, _) {
+      unawaited(_reconcile());
+    });
+    ref.listen(rodadaSharePrefsProvider, (_, _) {
       unawaited(_reconcile());
     });
     ref.listen(autoStartEventsProvider, (_, next) {

@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const kArmedSessionRoute = 'armed-session';
+
+/// Legacy HUD route name — still popped if it remains on the stack.
 const kArmedHudRoute = 'armed-ride-hud';
 
 class ArmedSessionNavState {
@@ -10,10 +12,13 @@ class ArmedSessionNavState {
     this.hudMinimized = false,
   });
 
+  /// Unified session screen is on the navigator stack.
   final bool hubOnStack;
+
+  /// Same as [hubOnStack] after the lobby was removed.
   final bool hudOnStack;
 
-  /// User left the recording HUD on purpose. Do not auto-reopen it.
+  /// User left the session on purpose. Do not auto-reopen it.
   final bool hudMinimized;
 
   ArmedSessionNavState copyWith({
@@ -29,9 +34,9 @@ class ArmedSessionNavState {
   }
 }
 
-/// Whether motion auto-start / Home resume should push the recording HUD.
+/// Whether motion auto-start / Home resume should push the session screen.
 ///
-/// False when the HUD is already showing, or the user minimized it.
+/// False when the session is already showing, or the user minimized it.
 bool shouldAutoPushHud(
   ArmedSessionNavState nav, {
   required bool isRecording,
@@ -39,38 +44,45 @@ bool shouldAutoPushHud(
 }) {
   if (!isRecording) return false;
   if (rodadaMetricsHeld) return false;
-  if (nav.hudOnStack) return false;
+  if (nav.hubOnStack || nav.hudOnStack) return false;
   if (nav.hudMinimized) return false;
   return true;
 }
 
-/// Explicit "open HUD" from the session hub.
-///
-/// Ignores a stale [ArmedSessionNavState.hudOnStack]: that flag can stay true
-/// after the HUD is popped, which used to make **Ver grabación** a no-op.
+/// Explicit reopen of the session (banner, capture bar).
 bool canOpenArmedHud({required String? currentRouteName}) {
-  return currentRouteName != kArmedHudRoute;
+  return currentRouteName != kArmedSessionRoute &&
+      currentRouteName != kArmedHudRoute;
 }
 
-/// Home is visible while a ride is recording — reopen the session hub.
+/// Home is visible while a ride is recording — reopen the session unless
+/// the user minimized it.
 bool shouldResumeHubFromHome({
   required bool isRecording,
   required bool hubOnStack,
   bool rodadaMetricsHeld = false,
+  bool hudMinimized = false,
 }) {
   if (hubOnStack) return false;
   if (rodadaMetricsHeld) return false;
+  if (hudMinimized) return false;
   return isRecording;
 }
 
-/// Whether Home should push the armed hub again.
+/// Whether Home should push the session screen again.
 ///
 /// If [homeIsVisible], a leftover [hubOnStack] is stale (user popped with
 /// the back arrow and dispose could not clear the flag).
+///
+/// Auto-start / lifecycle must not reopen a minimized session; a tap
+/// ([userRequested]) may.
 bool shouldPushArmedHub({
   required bool hubOnStack,
   required bool homeIsVisible,
+  bool hudMinimized = false,
+  bool userRequested = false,
 }) {
+  if (hudMinimized && !userRequested) return false;
   if (!hubOnStack) return true;
   return homeIsVisible;
 }
@@ -80,9 +92,14 @@ class ArmedSessionNav extends StateNotifier<ArmedSessionNavState> {
 
   void reset() => state = const ArmedSessionNavState();
 
-  void hubOpened() => state = state.copyWith(hubOnStack: true);
+  void hubOpened() => state = state.copyWith(
+        hubOnStack: true,
+        hudOnStack: true,
+        hudMinimized: false,
+      );
 
-  void hubClosed() => state = state.copyWith(hubOnStack: false);
+  void hubClosed() =>
+      state = state.copyWith(hubOnStack: false, hudOnStack: false);
 
   void hudOpened() =>
       state = state.copyWith(hudOnStack: true, hudMinimized: false);

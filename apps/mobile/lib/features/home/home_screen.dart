@@ -503,16 +503,10 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
     if (!recorder.isRecording || ride == null) return;
     if (recorder.isRodadaMetricsHeld) return;
     final nav = ref.read(armedSessionNavProvider);
+    if (nav.hudMinimized) return;
     _opening = true;
     try {
-      ensureArmedSessionHub(context, ref);
-      if (shouldAutoPushHud(
-        nav,
-        isRecording: true,
-        rodadaMetricsHeld: recorder.isRodadaMetricsHeld,
-      )) {
-        openArmedRecordingHud(context, ref);
-      }
+      ensureArmedSessionHub(context, ref, userRequested: false);
     } finally {
       _opening = false;
     }
@@ -664,6 +658,19 @@ class _ArmedBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final recording = ref.watch(rideRecorderProvider).isRecording;
+    final paused =
+        ref.watch(activeRideProvider).valueOrNull?.isPaused ?? false;
+    final held = ref.watch(motionDetectionHeldProvider);
+    final title = !recording
+        ? l10n.sessionPhaseArmed
+        : paused
+        ? l10n.sessionPhaseStopped
+        : l10n.sessionPhaseRecording;
+    final body = held
+        ? l10n.sessionDetectionPausedHelp
+        : recording
+        ? (paused ? l10n.sessionStoppedHelp : l10n.armedSessionLiveHelp)
+        : l10n.armedBannerBody;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       child: Material(
@@ -683,7 +690,7 @@ class _ArmedBanner extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(
-                  recording
+                  recording && !paused && !held
                       ? Icons.fiber_manual_record
                       : Icons.motion_photos_auto,
                   color: AppTheme.lineHot,
@@ -694,7 +701,7 @@ class _ArmedBanner extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        recording ? l10n.recording : l10n.waitingForMotion,
+                        title,
                         style: GoogleFonts.exo2(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -702,9 +709,7 @@ class _ArmedBanner extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        recording
-                            ? l10n.armedSessionLiveHelp
-                            : l10n.armedBannerBody,
+                        body,
                         style: const TextStyle(
                           color: AppTheme.steel,
                           fontSize: 12,

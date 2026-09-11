@@ -428,4 +428,74 @@ void main() {
       expect(detector.isPaused, isFalse);
     });
   });
+
+  group('motionDetectionHeld', () {
+    test('skips auto-start while held', () {
+      final detector = MotionPatternDetector()..motionDetectionHeld = true;
+      final base = DateTime(2026, 1, 1);
+
+      detector.feedArmedSample(
+        speedMps: 8.0,
+        latitude: 30.0000,
+        longitude: 30,
+        timestamp: base,
+      );
+      final triggered = detector.feedArmedSample(
+        speedMps: 8.0,
+        latitude: 30.0010,
+        longitude: 30,
+        timestamp: base.add(const Duration(seconds: 9)),
+      );
+      expect(triggered, isFalse);
+    });
+
+    test('skips auto-pause while held', () {
+      final detector = MotionPatternDetector()..motionDetectionHeld = true;
+      final base = DateTime(2026, 1, 1);
+
+      for (var t = 0; t <= 20; t += 2) {
+        detector.feedRideSample(
+          speedMps: 0.0,
+          latitude: 10,
+          longitude: 10,
+          timestamp: base.add(Duration(seconds: t)),
+        );
+      }
+      expect(detector.isPaused, isFalse);
+    });
+
+    test('skips auto-resume while held', () {
+      final detector = MotionPatternDetector();
+      final base = DateTime(2026, 1, 1);
+
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base,
+      );
+      detector.feedRideSample(
+        speedMps: 0.0,
+        latitude: 10,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 13)),
+      );
+      expect(detector.isPaused, isTrue);
+
+      detector.motionDetectionHeld = true;
+      detector.feedRideSample(
+        speedMps: 8.0,
+        latitude: 10.002,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 20)),
+      );
+      detector.feedRideSample(
+        speedMps: 8.0,
+        latitude: 10.004,
+        longitude: 10,
+        timestamp: base.add(const Duration(seconds: 24)),
+      );
+      expect(detector.isPaused, isTrue);
+    });
+  });
 }

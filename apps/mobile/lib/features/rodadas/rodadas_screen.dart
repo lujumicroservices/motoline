@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../core/demo_ids.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/rodada_share_prefs.dart';
 import '../../theme/app_theme.dart';
 import 'create_rodada_screen.dart';
 import 'models/rodada_models.dart';
@@ -178,6 +179,11 @@ class RodadasScreen extends ConsumerWidget {
     if (code == null || code.isEmpty || !context.mounted) return;
     try {
       final id = await ref.read(rodadaRepositoryProvider).joinByCode(code);
+      await applyShareSettingsToMembership(
+        repo: ref.read(rodadaRepositoryProvider),
+        rodadaId: id,
+        settings: ref.read(rodadaSharePrefsProvider),
+      );
       ref.invalidate(myRodadasProvider);
       if (!context.mounted) return;
       await openRodadaDetail(context, rodadaId: id, promptShareInvite: true);

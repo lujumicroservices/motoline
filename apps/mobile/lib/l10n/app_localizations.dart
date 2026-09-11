@@ -1547,19 +1547,19 @@ abstract class AppLocalizations {
   /// No description provided for @waitingForMotion.
   ///
   /// In es, this message translates to:
-  /// **'Esperando movimiento…'**
+  /// **'Armado'**
   String get waitingForMotion;
 
   /// No description provided for @armedBannerBody.
   ///
   /// In es, this message translates to:
-  /// **'RiderLab empieza a grabar sola cuando te empiezas a mover.'**
+  /// **'Armado: al moverte empieza a grabar. Al parar queda detenido.'**
   String get armedBannerBody;
 
   /// No description provided for @armedSessionTitle.
   ///
   /// In es, this message translates to:
-  /// **'Ruta armada'**
+  /// **'Sesión'**
   String get armedSessionTitle;
 
   /// No description provided for @armedSessionOpen.
@@ -1583,7 +1583,7 @@ abstract class AppLocalizations {
   /// No description provided for @armedSessionEndArm.
   ///
   /// In es, this message translates to:
-  /// **'Terminar ruta'**
+  /// **'Terminar sesión'**
   String get armedSessionEndArm;
 
   /// No description provided for @armedSessionStretchesEmpty.
@@ -1625,7 +1625,7 @@ abstract class AppLocalizations {
   /// No description provided for @pausedLabel.
   ///
   /// In es, this message translates to:
-  /// **'PAUSADO'**
+  /// **'DETENIDO'**
   String get pausedLabel;
 
   /// No description provided for @suggestEndTitle.
@@ -3491,7 +3491,7 @@ abstract class AppLocalizations {
   /// No description provided for @rodadaTitleHint.
   ///
   /// In es, this message translates to:
-  /// **'Tapalpa sábado'**
+  /// **'Se arma al marcar inicio y fin'**
   String get rodadaTitleHint;
 
   /// No description provided for @rodadaDestinationLabel.
@@ -3715,6 +3715,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'El título es obligatorio'**
   String get titleRequired;
+
+  /// No description provided for @rodadaStartRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca el inicio en el mapa o búscalo'**
+  String get rodadaStartRequired;
+
+  /// No description provided for @rodadaFinishRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca el fin en el mapa o búscalo'**
+  String get rodadaFinishRequired;
 
   /// No description provided for @locationFailed.
   ///
@@ -4939,6 +4951,84 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Lab de inclinación'**
   String get leanLabTitle;
+
+  /// No description provided for @settingsRideSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido'**
+  String get settingsRideSection;
+
+  /// No description provided for @settingsShareSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodadas y compartir'**
+  String get settingsShareSection;
+
+  /// No description provided for @settingsShareSectionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Valen para todas las rodadas. El pack y familia usan estos interruptores.'**
+  String get settingsShareSectionHelp;
+
+  /// No description provided for @settingsLegalSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Legal'**
+  String get settingsLegalSection;
+
+  /// No description provided for @settingsCloudSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Nube'**
+  String get settingsCloudSection;
+
+  /// No description provided for @sessionPhaseArmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Armado'**
+  String get sessionPhaseArmed;
+
+  /// No description provided for @sessionPhaseRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando'**
+  String get sessionPhaseRecording;
+
+  /// No description provided for @sessionPhaseStopped.
+  ///
+  /// In es, this message translates to:
+  /// **'Detenido'**
+  String get sessionPhaseStopped;
+
+  /// No description provided for @pauseMotionDetection.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausar detección'**
+  String get pauseMotionDetection;
+
+  /// No description provided for @resumeMotionDetection.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumir detección'**
+  String get resumeMotionDetection;
+
+  /// No description provided for @sessionArmedHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'GPS listo. Al moverte empieza a grabar. Al parar pasa a detenido.'**
+  String get sessionArmedHelp;
+
+  /// No description provided for @sessionStoppedHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión en pausa por detención. Al moverte vuelve a grabar.'**
+  String get sessionStoppedHelp;
+
+  /// No description provided for @sessionDetectionPausedHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'La detección de movimiento está pausada. El estado no cambia solo.'**
+  String get sessionDetectionPausedHelp;
 
   /// No description provided for @labsSectionTitle.
   ///

@@ -9,10 +9,12 @@ void main() {
     const b = LatLng(20.2, -103.2);
     const finish = LatLng(21, -104);
 
-    expect(
-      rodadaItineraryLine(start: start, stops: [a, b], finish: finish),
-      [start, a, b, finish],
-    );
+    expect(rodadaItineraryLine(start: start, stops: [a, b], finish: finish), [
+      start,
+      a,
+      b,
+      finish,
+    ]);
     expect(rodadaItineraryLine(start: start), [start]);
     expect(rodadaItineraryLine(finish: finish, stops: [a]), [a, finish]);
     expect(rodadaItineraryLine(), isEmpty);
@@ -20,14 +22,13 @@ void main() {
 
   test('display line prefers routed geometry and falls back to pins', () {
     const pins = [LatLng(20, -103), LatLng(21, -104)];
-    const routed = [
-      LatLng(20, -103),
-      LatLng(20.5, -103.4),
-      LatLng(21, -104),
-    ];
+    const routed = [LatLng(20, -103), LatLng(20.5, -103.4), LatLng(21, -104)];
     expect(rodadaDisplayLine(pins: pins, routed: routed), routed);
     expect(rodadaDisplayLine(pins: pins, routed: null), pins);
-    expect(rodadaDisplayLine(pins: pins, routed: const [LatLng(20, -103)]), pins);
+    expect(
+      rodadaDisplayLine(pins: pins, routed: const [LatLng(20, -103)]),
+      pins,
+    );
   });
 
   test('nextStopSortOrder is max plus one', () {
@@ -47,14 +48,42 @@ void main() {
     expect(rodadaAutoTitle(startName: '', finishName: 'Destino'), 'Destino');
   });
 
+  test('generic pin labels are blank for auto title', () {
+    expect(
+      rodadaTitlePlaceLabel('Punto en el mapa', generic: ['Punto en el mapa']),
+      '',
+    );
+    expect(
+      rodadaTitlePlaceLabel('Tapalpa', generic: ['Punto en el mapa']),
+      'Tapalpa',
+    );
+    expect(rodadaTitlePlaceLabel('  '), '');
+  });
+
+  test('create gaps require start, finish, and title', () {
+    expect(
+      rodadaCreateGaps(hasStart: true, hasFinish: true, title: 'Tapalpa').any,
+      isFalse,
+    );
+    final empty = rodadaCreateGaps(
+      hasStart: false,
+      hasFinish: false,
+      title: '',
+    );
+    expect(empty.start, isTrue);
+    expect(empty.finish, isTrue);
+    expect(empty.title, isTrue);
+    expect(
+      rodadaCreateGaps(hasStart: true, hasFinish: false, title: 'X').finish,
+      isTrue,
+    );
+  });
+
   test('round-trip waypoints reverse outbound without duplicating finish', () {
     const start = LatLng(20, -103);
     const stop = LatLng(20.5, -103.5);
     const finish = LatLng(21, -104);
-    expect(
-      rodadaRouteWaypoints(start: start, finish: finish),
-      [start, finish],
-    );
+    expect(rodadaRouteWaypoints(start: start, finish: finish), [start, finish]);
     expect(
       rodadaRouteWaypoints(
         start: start,

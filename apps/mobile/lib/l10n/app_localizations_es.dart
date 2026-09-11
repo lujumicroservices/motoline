@@ -815,14 +815,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get disarmAutoRide => 'Cancelar arranque auto';
 
   @override
-  String get waitingForMotion => 'Esperando movimiento…';
+  String get waitingForMotion => 'Armado';
 
   @override
   String get armedBannerBody =>
-      'RiderLab empieza a grabar sola cuando te empiezas a mover.';
+      'Armado: al moverte empieza a grabar. Al parar queda detenido.';
 
   @override
-  String get armedSessionTitle => 'Ruta armada';
+  String get armedSessionTitle => 'Sesión';
 
   @override
   String get armedSessionOpen => 'Ver sesión';
@@ -834,7 +834,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get armedSessionWatchRecording => 'Abrir tablero en vivo';
 
   @override
-  String get armedSessionEndArm => 'Terminar ruta';
+  String get armedSessionEndArm => 'Terminar sesión';
 
   @override
   String get armedSessionStretchesEmpty =>
@@ -860,7 +860,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loopMode => 'Modo vueltas';
 
   @override
-  String get pausedLabel => 'PAUSADO';
+  String get pausedLabel => 'DETENIDO';
 
   @override
   String get suggestEndTitle => '¿Sigues rodando?';
@@ -1922,7 +1922,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rodadaTitleLabel => 'Título';
 
   @override
-  String get rodadaTitleHint => 'Tapalpa sábado';
+  String get rodadaTitleHint => 'Se arma al marcar inicio y fin';
 
   @override
   String get rodadaDestinationLabel => 'Destino';
@@ -2042,6 +2042,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get titleRequired => 'El título es obligatorio';
+
+  @override
+  String get rodadaStartRequired => 'Marca el inicio en el mapa o búscalo';
+
+  @override
+  String get rodadaFinishRequired => 'Marca el fin en el mapa o búscalo';
 
   @override
   String locationFailed(String error) {
@@ -2758,6 +2764,49 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanLabTitle => 'Lab de inclinación';
+
+  @override
+  String get settingsRideSection => 'Recorrido';
+
+  @override
+  String get settingsShareSection => 'Rodadas y compartir';
+
+  @override
+  String get settingsShareSectionHelp =>
+      'Valen para todas las rodadas. El pack y familia usan estos interruptores.';
+
+  @override
+  String get settingsLegalSection => 'Legal';
+
+  @override
+  String get settingsCloudSection => 'Nube';
+
+  @override
+  String get sessionPhaseArmed => 'Armado';
+
+  @override
+  String get sessionPhaseRecording => 'Grabando';
+
+  @override
+  String get sessionPhaseStopped => 'Detenido';
+
+  @override
+  String get pauseMotionDetection => 'Pausar detección';
+
+  @override
+  String get resumeMotionDetection => 'Resumir detección';
+
+  @override
+  String get sessionArmedHelp =>
+      'GPS listo. Al moverte empieza a grabar. Al parar pasa a detenido.';
+
+  @override
+  String get sessionStoppedHelp =>
+      'Sesión en pausa por detención. Al moverte vuelve a grabar.';
+
+  @override
+  String get sessionDetectionPausedHelp =>
+      'La detección de movimiento está pausada. El estado no cambia solo.';
 
   @override
   String get labsSectionTitle => 'Pruebas / nuevas funciones';

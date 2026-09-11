@@ -810,14 +810,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disarmAutoRide => 'Cancel auto-start';
 
   @override
-  String get waitingForMotion => 'Waiting for motion…';
+  String get waitingForMotion => 'Armed';
 
   @override
   String get armedBannerBody =>
-      'RiderLab will start recording by itself when you start moving.';
+      'Armed: recording starts when you move. Stopping puts the session on hold.';
 
   @override
-  String get armedSessionTitle => 'Armed route';
+  String get armedSessionTitle => 'Session';
 
   @override
   String get armedSessionOpen => 'Open session';
@@ -829,7 +829,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get armedSessionWatchRecording => 'Open recording';
 
   @override
-  String get armedSessionEndArm => 'End route';
+  String get armedSessionEndArm => 'End session';
 
   @override
   String get armedSessionStretchesEmpty =>
@@ -855,7 +855,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loopMode => 'Lap mode';
 
   @override
-  String get pausedLabel => 'PAUSED';
+  String get pausedLabel => 'STOPPED';
 
   @override
   String get suggestEndTitle => 'Still riding?';
@@ -1912,7 +1912,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rodadaTitleLabel => 'Title';
 
   @override
-  String get rodadaTitleHint => 'Tapalpa Saturday';
+  String get rodadaTitleHint => 'Filled from start and finish';
 
   @override
   String get rodadaDestinationLabel => 'Destination';
@@ -2032,6 +2032,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get titleRequired => 'Title is required';
+
+  @override
+  String get rodadaStartRequired => 'Set the start on the map or search for it';
+
+  @override
+  String get rodadaFinishRequired =>
+      'Set the finish on the map or search for it';
 
   @override
   String locationFailed(String error) {
@@ -2743,6 +2750,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabTitle => 'Lean Lab';
+
+  @override
+  String get settingsRideSection => 'Ride';
+
+  @override
+  String get settingsShareSection => 'Group rides and sharing';
+
+  @override
+  String get settingsShareSectionHelp =>
+      'These apply to every rodada. Pack live share and family use these switches.';
+
+  @override
+  String get settingsLegalSection => 'Legal';
+
+  @override
+  String get settingsCloudSection => 'Cloud';
+
+  @override
+  String get sessionPhaseArmed => 'Armed';
+
+  @override
+  String get sessionPhaseRecording => 'Recording';
+
+  @override
+  String get sessionPhaseStopped => 'Stopped';
+
+  @override
+  String get pauseMotionDetection => 'Pause detection';
+
+  @override
+  String get resumeMotionDetection => 'Resume detection';
+
+  @override
+  String get sessionArmedHelp =>
+      'GPS is ready. Moving starts recording. Stopping goes to stopped.';
+
+  @override
+  String get sessionStoppedHelp =>
+      'Session paused because you stopped. Moving starts recording again.';
+
+  @override
+  String get sessionDetectionPausedHelp =>
+      'Motion detection is paused. The current state will not change on its own.';
 
   @override
   String get labsSectionTitle => 'Tests / new features';

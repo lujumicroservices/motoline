@@ -12,6 +12,7 @@ import '../../core/services/directions_service.dart';
 import '../../core/services/place_search_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/social_providers.dart';
+import '../../providers/rodada_share_prefs.dart';
 import '../../theme/app_theme.dart';
 import '../maps/live_gps_map_mixin.dart';
 import 'rodada_itinerary.dart';
@@ -58,6 +59,13 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
   String? _finishTitle;
   bool _titleLocked = false;
   bool _roundTrip = false;
+  bool _missingStart = false;
+  bool _missingFinish = false;
+  bool _missingTitle = false;
+  final _formScroll = ScrollController();
+  final _startFieldKey = GlobalKey();
+  final _finishFieldKey = GlobalKey();
+  final _titleFieldKey = GlobalKey();
 
   List<LatLng> get _pins => rodadaRouteWaypoints(
     start: _start,
@@ -73,6 +81,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
   void dispose() {
     _routeDebounce?.cancel();
     _searchDebounce?.cancel();
+    _formScroll.dispose();
     stopLiveGps();
     disposeLiveGpsListenable();
     _title.dispose();
@@ -107,29 +116,40 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     });
   }
 
+  List<String> get _genericPlaceNames {
+    final l10n = context.l10n;
+    return [l10n.rodadaMapPoint, l10n.rodadaMyLocation];
+  }
+
+  bool _needsPlaceLookup(String? title) {
+    return rodadaTitlePlaceLabel(title, generic: _genericPlaceNames).isEmpty;
+  }
+
   void _place(LatLng point, {String? title}) {
     final l10n = context.l10n;
-    final label = (title != null && title.trim().isNotEmpty)
-        ? title.trim()
-        : l10n.rodadaMapPoint;
+    final lookup = _needsPlaceLookup(title);
+    final label = lookup ? l10n.rodadaMapPoint : title!.trim();
+    final modePlaced = _mode;
     setState(() {
       _hits = [];
       switch (_mode) {
         case RodadaPinMode.start:
           _start = point;
           _startTitle = label;
+          _missingStart = false;
           _mode = RodadaPinMode.finish;
         case RodadaPinMode.finish:
           _finish = point;
           _finishTitle = label;
+          _missingFinish = false;
           _mode = RodadaPinMode.stop;
         case RodadaPinMode.stop:
           _stops.add(
             DraftRodadaStop(
               point: point,
-              title: title != null && title.trim().isNotEmpty
-                  ? title.trim()
-                  : l10n.rodadaStopN(_stops.length + 1),
+              title: lookup
+                  ? l10n.rodadaStopN(_stops.length + 1)
+                  : title!.trim(),
             ),
           );
       }
@@ -146,15 +166,48 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
       });
     }
     _scheduleRoute();
+    if (lookup) {
+      unawaited(_resolvePlaceName(point, modePlaced));
+    }
+  }
+
+  Future<void> _resolvePlaceName(LatLng point, RodadaPinMode mode) async {
+    final hit = await ref.read(placeSearchServiceProvider).reverse(point);
+    if (!mounted || hit == null || hit.title.trim().isEmpty) return;
+    setState(() {
+      switch (mode) {
+        case RodadaPinMode.start:
+          if (_start == point) _startTitle = hit.title;
+        case RodadaPinMode.finish:
+          if (_finish == point) _finishTitle = hit.title;
+        case RodadaPinMode.stop:
+          final i = _stops.indexWhere((s) => s.point == point);
+          if (i >= 0) {
+            _stops[i] = DraftRodadaStop(point: point, title: hit.title);
+          }
+      }
+      _syncAutoTitle();
+    });
   }
 
   void _syncAutoTitle() {
     if (_titleLocked) return;
     _title.text = rodadaAutoTitle(
-      startName: _startTitle ?? '',
-      finishName: _finishTitle ?? '',
+      startName: rodadaTitlePlaceLabel(
+        _startTitle,
+        generic: _genericPlaceNames,
+      ),
+      finishName: rodadaTitlePlaceLabel(
+        _finishTitle,
+        generic: _genericPlaceNames,
+      ),
     );
-    _destination.text = _finishTitle ?? '';
+    final dest = rodadaTitlePlaceLabel(
+      _finishTitle,
+      generic: _genericPlaceNames,
+    );
+    _destination.text = dest;
+    if (_title.text.trim().isNotEmpty) _missingTitle = false;
   }
 
   void _scheduleRoute() {
@@ -284,14 +337,45 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
 
   Future<void> _save() async {
     final l10n = context.l10n;
+    if (!_titleLocked) _syncAutoTitle();
     final title = _title.text.trim();
-    if (title.isEmpty) {
-      setState(() => _error = l10n.titleRequired);
+    final gaps = rodadaCreateGaps(
+      hasStart: _start != null,
+      hasFinish: _finish != null,
+      title: title,
+    );
+    if (gaps.any) {
+      setState(() {
+        _saving = false;
+        _error = null;
+        _missingStart = gaps.start;
+        _missingFinish = gaps.finish;
+        _missingTitle = gaps.title;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final target = gaps.start
+            ? _startFieldKey
+            : gaps.finish
+            ? _finishFieldKey
+            : _titleFieldKey;
+        final ctx = target.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            alignment: 0.15,
+            duration: const Duration(milliseconds: 280),
+          );
+        }
+      });
       return;
     }
     setState(() {
       _saving = true;
       _error = null;
+      _missingStart = false;
+      _missingFinish = false;
+      _missingTitle = false;
     });
     _routeDebounce?.cancel();
     if (_pins.length >= 2 && _route == null && !_routeFailed) {
@@ -299,12 +383,16 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     }
     try {
       final repo = ref.read(rodadaRepositoryProvider);
+      final destLabel = rodadaTitlePlaceLabel(
+        _finishTitle,
+        generic: _genericPlaceNames,
+      );
       final dest = _destination.text.trim().isNotEmpty
           ? _destination.text.trim()
-          : _finishTitle?.trim();
+          : destLabel;
       final rodada = await repo.createRodada(
         title: title,
-        destination: (dest == null || dest.isEmpty) ? null : dest,
+        destination: dest.isEmpty ? null : dest,
         notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
         meetupLat: _start?.latitude,
         meetupLng: _start?.longitude,
@@ -313,6 +401,11 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
         startsAt: _startsAt,
         route: _route,
         prefs: _prefs,
+      );
+      await applyShareSettingsToMembership(
+        repo: repo,
+        rodadaId: rodada.id,
+        settings: ref.read(rodadaSharePrefsProvider),
       );
       for (var i = 0; i < _stops.length; i++) {
         final stop = _stops[i];
@@ -509,6 +602,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
           Expanded(
             flex: 4,
             child: ListView(
+              controller: _formScroll,
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               children: [
                 if (_hits.isNotEmpty) ...[
@@ -594,10 +688,12 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                     },
                   ),
                 _PinRow(
+                  key: _startFieldKey,
                   icon: Icons.flag,
                   color: AppTheme.lineHot,
-                  label: l10n.rodadaPinStart,
+                  label: '${l10n.rodadaPinStart} *',
                   value: _start == null ? l10n.rodadaPinUnset : _startTitle,
+                  errorText: _missingStart ? l10n.rodadaStartRequired : null,
                   onClear: _start == null
                       ? null
                       : () {
@@ -611,10 +707,12 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                         },
                 ),
                 _PinRow(
+                  key: _finishFieldKey,
                   icon: Icons.sports_score,
                   color: AppTheme.line,
-                  label: l10n.rodadaPinFinish,
+                  label: '${l10n.rodadaPinFinish} *',
                   value: _finish == null ? l10n.rodadaPinUnset : _finishTitle,
+                  errorText: _missingFinish ? l10n.rodadaFinishRequired : null,
                   onClear: _finish == null
                       ? null
                       : () {
@@ -639,13 +737,20 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                   ),
                 const SizedBox(height: 16),
                 TextField(
+                  key: _titleFieldKey,
                   controller: _title,
                   decoration: InputDecoration(
-                    labelText: l10n.rodadaTitleLabel,
+                    labelText: '${l10n.rodadaTitleLabel} *',
                     hintText: l10n.rodadaTitleHint,
+                    errorText: _missingTitle ? l10n.titleRequired : null,
                   ),
                   textCapitalization: TextCapitalization.sentences,
-                  onChanged: (_) => _titleLocked = true,
+                  onChanged: (v) {
+                    _titleLocked = v.trim().isNotEmpty;
+                    if (_missingTitle && v.trim().isNotEmpty) {
+                      setState(() => _missingTitle = false);
+                    }
+                  },
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -803,10 +908,12 @@ class _CreateRodadaMapState extends State<_CreateRodadaMap> {
 
 class _PinRow extends StatelessWidget {
   const _PinRow({
+    super.key,
     required this.icon,
     required this.color,
     required this.label,
     this.value,
+    this.errorText,
     this.onClear,
   });
 
@@ -814,19 +921,33 @@ class _PinRow extends StatelessWidget {
   final Color color;
   final String label;
   final String? value;
+  final String? errorText;
   final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: color),
-      title: Text(label),
-      subtitle: value == null ? null : Text(value!),
-      trailing: onClear == null
-          ? null
-          : TextButton(onPressed: onClear, child: Text(l10n.clearPin)),
+    final missing = errorText != null;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: missing ? Border.all(color: AppTheme.signal) : null,
+        color: missing ? AppTheme.signal.withValues(alpha: 0.08) : null,
+      ),
+      child: ListTile(
+        contentPadding: missing
+            ? const EdgeInsets.fromLTRB(8, 0, 8, 0)
+            : EdgeInsets.zero,
+        leading: Icon(icon, color: missing ? AppTheme.signal : color),
+        title: Text(label),
+        subtitle: missing
+            ? Text(errorText!, style: const TextStyle(color: AppTheme.signal))
+            : (value == null || value!.isEmpty ? null : Text(value!)),
+        trailing: onClear == null
+            ? null
+            : TextButton(onPressed: onClear, child: Text(l10n.clearPin)),
+      ),
     );
   }
 }

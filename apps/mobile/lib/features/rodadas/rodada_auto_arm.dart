@@ -32,20 +32,14 @@ class RodadaAutoArm {
     await prefs.setStringList(prefsKey, ids.toList());
   }
 
-  /// Local + membership flag. Safe to call more than once.
+  /// Marks this rodada as already offered. Does not change global Settings.
   static Future<void> consume({
     required String rodadaId,
     RodadaRepository? repository,
   }) async {
     await markConsumed(rodadaId);
+    // [repository] kept for call-site compatibility; membership flags
+    // now follow global Settings, not a one-shot cloud toggle.
     if (repository == null) return;
-    try {
-      await repository.updateMySharing(
-        rodadaId: rodadaId,
-        autoArmOnStart: false,
-      );
-    } catch (e) {
-      debugPrint('RodadaAutoArm consume: $e');
-    }
   }
 }

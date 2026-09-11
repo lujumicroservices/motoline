@@ -8,14 +8,13 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/services/directions_service.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
+import '../../../providers/rodada_share_prefs.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_snack.dart';
 import '../../reel/reel_compose_screen.dart';
 import '../../ride_active/armed_session_flow.dart';
 import '../../ride_active/armed_session_nav.dart';
-import '../../ride_active/location_permission_gate.dart';
 import '../../ride_active/widgets/upright_freeze_sheet.dart';
-import '../../watch/family_circle_screen.dart';
 import '../leave_rodada.dart';
 import '../models/rodada_models.dart';
 import '../rodada_auto_arm.dart';
@@ -130,36 +129,6 @@ class RodadaOverviewTab extends ConsumerWidget {
                   orElse: () => const <RodadaStop>[],
                 ),
               ),
-              Text(
-                l10n.yourSharing,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.sharingDefaultsHelp,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.steel,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Card(
-                color: AppTheme.asphaltElevated,
-                child: ListTile(
-                  leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
-                  title: Text(l10n.familyRodadaTipTitle),
-                  subtitle: Text(l10n.familyRodadaTipBody),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const FamilyCircleScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
               Card(
                 color: AppTheme.asphaltElevated,
                 child: ListTile(
@@ -208,92 +177,6 @@ class RodadaOverviewTab extends ConsumerWidget {
                             child: Text(l10n.leaveRodada),
                           ),
                         ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.autoArmOnRodadaStart),
-                        subtitle: Text(l10n.autoArmOnRodadaStartHelp),
-                        value: m.autoArmOnStart,
-                        onChanged: (v) async {
-                          if (v) {
-                            final ok =
-                                await LocationPermissionGate.requestForRecording(
-                                  context,
-                                );
-                            if (!ok || !context.mounted) return;
-                            await RodadaAutoArm.clearConsumed(rodadaId);
-                          } else {
-                            await RodadaAutoArm.markConsumed(rodadaId);
-                          }
-                          await ref
-                              .read(rodadaRepositoryProvider)
-                              .updateMySharing(
-                                rodadaId: rodadaId,
-                                autoArmOnStart: v,
-                              );
-                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
-                          ref.invalidate(myRodadasProvider);
-                        },
-                      ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.shareLocationOnRoute),
-                        subtitle: Text(l10n.shareLocationEvery5Min),
-                        value: m.shareLive,
-                        onChanged: (v) async {
-                          if (v) {
-                            final ok =
-                                await LocationPermissionGate.requestForRodadaLive(
-                                  context,
-                                );
-                            if (!ok || !context.mounted) return;
-                          }
-                          await ref
-                              .read(rodadaRepositoryProvider)
-                              .updateMySharing(
-                                rodadaId: rodadaId,
-                                shareLive: v,
-                              );
-                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
-                          ref.invalidate(myRodadasProvider);
-                        },
-                      ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.autoShareFamilyOnRodada),
-                        subtitle: Text(l10n.autoShareFamilyOnRodadaHelp),
-                        value: m.autoShareFamily,
-                        onChanged: (v) async {
-                          if (v) {
-                            final ok =
-                                await LocationPermissionGate.requestForRodadaLive(
-                                  context,
-                                );
-                            if (!ok || !context.mounted) return;
-                          }
-                          await ref
-                              .read(rodadaRepositoryProvider)
-                              .updateMySharing(
-                                rodadaId: rodadaId,
-                                autoShareFamily: v,
-                              );
-                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
-                          ref.invalidate(myRodadasProvider);
-                        },
-                      ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.shareTrackAfterRides),
-                        value: m.shareTrack,
-                        onChanged: (v) async {
-                          await ref
-                              .read(rodadaRepositoryProvider)
-                              .updateMySharing(
-                                rodadaId: rodadaId,
-                                shareTrack: v,
-                              );
-                          ref.invalidate(myRodadaMembershipProvider(rodadaId));
-                        },
-                      ),
                     ],
                   );
                 },
@@ -371,7 +254,7 @@ class RodadaOverviewTab extends ConsumerWidget {
     try {
       await ref.read(rodadaRepositoryProvider).startRodada(rodadaId);
       Future<bool>? armFuture;
-      if (member.autoArmOnStart) {
+      if (ref.read(rodadaSharePrefsProvider).autoArmOnStart) {
         await RodadaAutoArm.consume(
           rodadaId: rodadaId,
           repository: ref.read(rodadaRepositoryProvider),

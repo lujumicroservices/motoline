@@ -13,20 +13,25 @@ import '../rodadas/rodada_post_ride_flow.dart';
 import '../watch/watch_providers.dart';
 import 'active_ride_screen.dart';
 import 'armed_session_nav.dart';
-import 'armed_session_screen.dart';
 
-void ensureArmedSessionHub(BuildContext context, WidgetRef ref) {
+void ensureArmedSessionHub(
+  BuildContext context,
+  WidgetRef ref, {
+  bool userRequested = true,
+}) {
   if (!context.mounted) return;
-  final hubClaimed = ref.read(armedSessionNavProvider).hubOnStack;
+  final nav = ref.read(armedSessionNavProvider);
   final route = ModalRoute.of(context);
   final homeIsVisible = route != null && route.isCurrent && route.isFirst;
   if (!shouldPushArmedHub(
-    hubOnStack: hubClaimed,
+    hubOnStack: nav.hubOnStack,
     homeIsVisible: homeIsVisible,
+    hudMinimized: nav.hudMinimized,
+    userRequested: userRequested,
   )) {
     return;
   }
-  if (hubClaimed) {
+  if (nav.hubOnStack) {
     ref.read(armedSessionNavProvider.notifier).hubClosed();
   }
   ref.read(armedSessionNavProvider.notifier).hubOpened();
@@ -34,7 +39,8 @@ void ensureArmedSessionHub(BuildContext context, WidgetRef ref) {
       .push(
         MaterialPageRoute<void>(
           settings: const RouteSettings(name: kArmedSessionRoute),
-          builder: (_) => const ArmedSessionScreen(),
+          builder: (_) =>
+              const ActiveRideScreen(autoStart: false, allowMinimize: true),
         ),
       )
       .whenComplete(() {
@@ -44,36 +50,16 @@ void ensureArmedSessionHub(BuildContext context, WidgetRef ref) {
       });
 }
 
+/// Same screen as the session hub — do not stack a second route.
 void openArmedRecordingHud(BuildContext context, WidgetRef ref) {
-  if (!context.mounted) return;
-  if (!canOpenArmedHud(
-    currentRouteName: ModalRoute.of(context)?.settings.name,
-  )) {
-    return;
-  }
-  ref.read(armedSessionNavProvider.notifier).hudOpened();
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      settings: const RouteSettings(name: kArmedHudRoute),
-      builder: (_) =>
-          const ActiveRideScreen(autoStart: false, allowMinimize: true),
-    ),
-  );
+  ensureArmedSessionHub(context, ref);
 }
 
-/// After arm auto-start: hub if missing, then HUD unless the user minimized.
+/// After arm auto-start: open the session if it is not already showing
+/// and the user did not minimize it.
 void openArmedSessionAfterAutoStart(BuildContext context, WidgetRef ref) {
   if (!context.mounted) return;
-  ensureArmedSessionHub(context, ref);
-  final recorder = ref.read(rideRecorderProvider);
-  final nav = ref.read(armedSessionNavProvider);
-  if (shouldAutoPushHud(
-    nav,
-    isRecording: recorder.isRecording,
-    rodadaMetricsHeld: recorder.isRodadaMetricsHeld,
-  )) {
-    openArmedRecordingHud(context, ref);
-  }
+  ensureArmedSessionHub(context, ref, userRequested: false);
 }
 
 /// Stop recording (or just disarm) and leave the armed hub/HUD.

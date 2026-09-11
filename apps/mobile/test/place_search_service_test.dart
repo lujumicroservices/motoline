@@ -51,11 +51,7 @@ void main() {
           'primary_type': 'restaurant',
         },
         {'title': 'No coords'},
-        {
-          'title': 'Guadalajara',
-          'lat': 20.67,
-          'lng': -103.35,
-        },
+        {'title': 'Guadalajara', 'lat': 20.67, 'lng': -103.35},
       ],
     });
     expect(hits, hasLength(2));
@@ -122,10 +118,7 @@ void main() {
         headers: {'content-type': 'application/json'},
       );
     });
-    final svc = PlaceSearchService(
-      client: client,
-      invoke: (_) async => null,
-    );
+    final svc = PlaceSearchService(client: client, invoke: (_) async => null);
     final hits = await svc.search('Guadalajara');
     expect(hits, hasLength(1));
     expect(hits.first.title, 'Guadalajara');
@@ -138,5 +131,43 @@ void main() {
       invoke: (_) async => {'hits': []},
     );
     expect(await bad.search('Tapalpa'), isEmpty);
+  });
+
+  test('reverse prefers Google then Nominatim', () async {
+    Map<String, dynamic>? sent;
+    final svc = PlaceSearchService(
+      invoke: (body) async {
+        sent = body;
+        return {
+          'hits': [
+            {'title': 'Zapopan', 'lat': 20.72, 'lng': -103.39},
+          ],
+        };
+      },
+      client: _FakeClient((_) async => http.Response('[]', 200)),
+    );
+    final hit = await svc.reverse(const LatLng(20.72, -103.39));
+    expect(hit?.title, 'Zapopan');
+    expect(sent?['lat'], 20.72);
+    expect(sent?['lng'], -103.39);
+  });
+
+  test('reverse falls back to Nominatim', () async {
+    final client = _FakeClient((req) async {
+      expect(req.url.path, contains('reverse'));
+      return http.Response(
+        jsonEncode({
+          'lat': '20.67',
+          'lon': '-103.35',
+          'name': 'Guadalajara',
+          'display_name': 'Guadalajara, Jalisco, México',
+        }),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    });
+    final svc = PlaceSearchService(client: client, invoke: (_) async => null);
+    final hit = await svc.reverse(const LatLng(20.67, -103.35));
+    expect(hit?.title, 'Guadalajara');
   });
 }

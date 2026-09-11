@@ -19,6 +19,7 @@ import '../../watch/watch_models.dart';
 import '../../watch/watch_providers.dart';
 import '../../watch/watch_repository.dart';
 import '../../ride_active/location_permission_gate.dart';
+import '../../../providers/rodada_share_prefs.dart';
 import '../models/rodada_models.dart';
 import '../photos/ride_photo_capture.dart';
 import '../rodada_itinerary.dart';
@@ -129,7 +130,7 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                     Expanded(
                       child: membership.maybeWhen(
                         data: (m) {
-                          final sharing = m?.shareLive == true;
+                          final sharing = ref.watch(rodadaSharePrefsProvider).shareLive;
                           return Row(
                             children: [
                               Icon(
@@ -165,11 +166,21 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                                         );
                                     if (!ok || !context.mounted) return;
                                     await ref
-                                        .read(rodadaRepositoryProvider)
-                                        .updateMySharing(
-                                          rodadaId: widget.rodadaId,
-                                          shareLive: true,
-                                        );
+                                        .read(rodadaSharePrefsProvider.notifier)
+                                        .setShareLive(true);
+                                    await applyShareSettingsToMembership(
+                                      repo: ref.read(rodadaRepositoryProvider),
+                                      rodadaId: widget.rodadaId,
+                                      settings: ref.read(
+                                        rodadaSharePrefsProvider,
+                                      ),
+                                    );
+                                    await syncShareSettingsToOpenRodadas(
+                                      repo: ref.read(rodadaRepositoryProvider),
+                                      settings: ref.read(
+                                        rodadaSharePrefsProvider,
+                                      ),
+                                    );
                                     ref.invalidate(
                                       myRodadaMembershipProvider(
                                         widget.rodadaId,

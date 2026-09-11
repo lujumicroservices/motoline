@@ -16,7 +16,7 @@ import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../watch/watch_providers.dart';
 import 'rodada_detail_screen.dart';
 
-/// Pause metric capture and return to the rodada (do not complete the ride).
+/// Minimize the session and freeze motion detection (do not complete the ride).
 Future<void> holdRodadaCaptureAndReturn(
   BuildContext context,
   WidgetRef ref,
@@ -28,8 +28,10 @@ Future<void> holdRodadaCaptureAndReturn(
     return;
   }
 
-  recorder.holdRodadaMetrics();
-  ref.read(armedSessionNavProvider.notifier).reset();
+  recorder.setMotionDetectionHeld(true);
+  ref.read(armedSessionNavProvider.notifier).hudClosed(
+        stillRecording: recorder.isRecording || recorder.isArmed,
+      );
 
   final navigator = Navigator.of(context);
   Route<dynamic>? remaining;
@@ -66,6 +68,8 @@ Future<void> resumeRodadaCapture(
     }
     if (!context.mounted) return;
 
+    recorder.setMotionDetectionHeld(false);
+
     if (recorder.isArmed && !recorder.isRecording) {
       if (context.mounted) ensureArmedSessionHub(context, ref);
       return;
@@ -88,9 +92,6 @@ Future<void> resumeRodadaCapture(
     if (!context.mounted) return;
     ref.read(armedSessionNavProvider.notifier).reset();
     ensureArmedSessionHub(context, ref);
-    if (recorder.isRecording) {
-      openArmedRecordingHud(context, ref);
-    }
   } catch (e) {
     if (!context.mounted) return;
     showAppSnackError(context, context.l10n.userFacingError(e));
