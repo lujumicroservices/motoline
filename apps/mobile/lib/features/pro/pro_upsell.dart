@@ -8,6 +8,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
+import '../../widgets/app_snack.dart';
 
 /// Commercial / Pro upsell banner shown over locked curva detail, etc.
 class ProUpsellBanner extends ConsumerWidget {
@@ -31,8 +32,12 @@ class ProUpsellBanner extends ConsumerWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
-        padding:
-            EdgeInsets.fromLTRB(16, compact ? 12 : 18, 16, compact ? 12 : 18),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          compact ? 12 : 18,
+          16,
+          compact ? 12 : 18,
+        ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -55,8 +60,10 @@ class ProUpsellBanner extends ConsumerWidget {
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: RideVizPalette.leanRight.withValues(alpha: 0.95),
                     borderRadius: BorderRadius.circular(6),
@@ -103,12 +110,9 @@ class ProUpsellBanner extends ConsumerWidget {
                     .read(proEntitlementProvider.notifier)
                     .purchasePro();
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      ok ? l10n.proUnlocked : l10n.proStoreNotReady,
-                    ),
-                  ),
+                showAppSnack(
+                  context,
+                  ok ? l10n.proUnlocked : l10n.proStoreNotReady,
                 );
               },
               style: FilledButton.styleFrom(

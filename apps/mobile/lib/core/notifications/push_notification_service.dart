@@ -23,8 +23,6 @@ const _declineAction = 'rodada_decline';
 const _radioTabIndex = 4;
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<ScaffoldMessengerState> appMessengerKey =
-    GlobalKey<ScaffoldMessengerState>();
 
 String? _pendingRodadaId;
 int _pendingTab = 0;

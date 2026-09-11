@@ -11,12 +11,10 @@ import 'photos/ride_photo_capture.dart';
 import 'photos/ride_photo_gallery_scan.dart';
 import 'photos/ride_photo_import_sheet.dart';
 import 'rodada_providers.dart';
+import '../../widgets/app_snack.dart';
 
 class LinkedRodadaRide {
-  const LinkedRodadaRide({
-    required this.rodadaId,
-    this.cloudRideId,
-  });
+  const LinkedRodadaRide({required this.rodadaId, this.cloudRideId});
 
   final String rodadaId;
   final String? cloudRideId;
@@ -93,9 +91,7 @@ Future<void> continueAfterRideToRodadaShare({
     } catch (_) {}
     if (!context.mounted) return;
     if (candidates.isEmpty && limited) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.photoLibraryLimited)),
-      );
+      showAppSnack(context, context.l10n.photoLibraryLimited);
     }
     if (candidates.isNotEmpty) {
       await Navigator.of(context).push<bool>(
@@ -110,7 +106,9 @@ Future<void> continueAfterRideToRodadaShare({
       );
     }
     try {
-      await ref.read(ridePhotoStoreProvider).uploadPending(
+      await ref
+          .read(ridePhotoStoreProvider)
+          .uploadPending(
             rideId: rideId,
             rodadaId: linked.rodadaId,
             cloudRideId: linked.cloudRideId,
@@ -121,10 +119,7 @@ Future<void> continueAfterRideToRodadaShare({
   if (!context.mounted) return;
   _openAfterRide(
     context,
-    ReelComposeScreen(
-      rideId: rideId,
-      rodadaId: linked.rodadaId,
-    ),
+    ReelComposeScreen(rideId: rideId, rodadaId: linked.rodadaId),
     replaceCurrent: replaceCurrent,
   );
 }

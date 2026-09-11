@@ -7,6 +7,7 @@ import '../../l10n/l10n_ext.dart';
 import '../ride_active/location_permission_gate.dart';
 import 'watch_models.dart';
 import 'watch_providers.dart';
+import '../../widgets/app_snack.dart';
 
 /// Starts (or reuses) a family watch session and opens the system share sheet.
 ///
@@ -38,9 +39,7 @@ Future<void> shareFamilyWatchLink(
     }
     if (session == null) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.familyShareNeedsSignIn)),
-      );
+      showAppSnack(context, l10n.familyShareNeedsSignIn);
       return;
     }
 
@@ -57,9 +56,7 @@ Future<void> shareFamilyWatchLink(
     );
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$e')),
-    );
+    showAppSnackError(context, '$e');
   }
 }
 

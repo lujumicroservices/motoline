@@ -13,6 +13,7 @@ import '../../../theme/app_theme.dart';
 import '../models/rodada_models.dart';
 import '../rodada_providers.dart';
 import 'ride_photo_store.dart';
+import '../../../widgets/app_snack.dart';
 
 final ridePhotoStoreProvider = Provider<RidePhotoStore>((ref) {
   return RidePhotoStore(
@@ -38,8 +39,8 @@ class RecordingRodadaBinding extends Notifier<Map<String, String>> {
 
 final recordingRodadaBindingProvider =
     NotifierProvider<RecordingRodadaBinding, Map<String, String>>(
-  RecordingRodadaBinding.new,
-);
+      RecordingRodadaBinding.new,
+    );
 
 /// One-tap camera that geotags with the latest track point / live GPS.
 Future<void> captureRidePhoto({
@@ -94,14 +95,15 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     var lng = lastPoint?.longitude ?? fallbackLng;
     var savedToGallery = false;
     if (fromCamera) {
-      savedToGallery =
-          await ref.read(ridePhotoStoreProvider).persistBytesToGallery(
-                bytes: bytes,
-                filename: 'riderlab_${at.millisecondsSinceEpoch}.jpg',
-                takenAt: at,
-                latitude: lat,
-                longitude: lng,
-              );
+      savedToGallery = await ref
+          .read(ridePhotoStoreProvider)
+          .persistBytesToGallery(
+            bytes: bytes,
+            filename: 'riderlab_${at.millisecondsSinceEpoch}.jpg',
+            takenAt: at,
+            latitude: lat,
+            longitude: lng,
+          );
     }
 
     var rideId = localRideId;
@@ -117,16 +119,17 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
       localRideId: rideId,
     );
     if (rideId != null && attachRodada != null) {
-      ref.read(recordingRodadaBindingProvider.notifier).bind(
-            rideId: rideId,
-            rodadaId: attachRodada,
-          );
+      ref
+          .read(recordingRodadaBindingProvider.notifier)
+          .bind(rideId: rideId, rodadaId: attachRodada);
     }
 
     if (rideId == null) {
       if (attachRodada != null) {
         final prepared = await prepareAlbumImage(bytes);
-        await ref.read(rodadaRepositoryProvider).uploadPhoto(
+        await ref
+            .read(rodadaRepositoryProvider)
+            .uploadPhoto(
               rodadaId: attachRodada,
               bytes: prepared.bytes,
               contentType: prepared.mime,
@@ -138,9 +141,7 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
         ref.invalidate(rodadaPhotosProvider(attachRodada));
         if (!context.mounted) return null;
         if (showSnackbars) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.photoUploaded)),
-          );
+          showAppSnack(context, l10n.photoUploaded);
         }
         unawaited(
           RiderTelemetryService.instance.log(
@@ -158,14 +159,9 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
       }
       if (!context.mounted) return null;
       if (showSnackbars) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              savedToGallery
-                  ? l10n.photoSavedToGallery
-                  : l10n.photoNeedsActiveRide,
-            ),
-          ),
+        showAppSnack(
+          context,
+          savedToGallery ? l10n.photoSavedToGallery : l10n.photoNeedsActiveRide,
         );
       }
       unawaited(
@@ -194,11 +190,14 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
 
     String? cloudRideId;
     try {
-      cloudRideId =
-          await ref.read(rodadaRepositoryProvider).cloudRideIdForLocal(rideId);
+      cloudRideId = await ref
+          .read(rodadaRepositoryProvider)
+          .cloudRideIdForLocal(rideId);
     } catch (_) {}
 
-    final saved = await ref.read(ridePhotoStoreProvider).saveCaptured(
+    final saved = await ref
+        .read(ridePhotoStoreProvider)
+        .saveCaptured(
           rideId: rideId,
           bytes: bytes,
           source: source == ImageSource.camera ? 'camera' : 'gallery',
@@ -213,16 +212,13 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     }
     if (!context.mounted) return saved;
     if (showSnackbars) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            attachRodada != null
-                ? l10n.photoUploaded
-                : savedToGallery
-                    ? l10n.photoSavedToGallery
-                    : l10n.photoLinkedToRoute,
-          ),
-        ),
+      showAppSnack(
+        context,
+        attachRodada != null
+            ? l10n.photoUploaded
+            : savedToGallery
+            ? l10n.photoSavedToGallery
+            : l10n.photoLinkedToRoute,
       );
     }
     unawaited(
@@ -251,9 +247,7 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     );
     if (!context.mounted) return null;
     if (showSnackbars) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
     }
     return null;
   }
@@ -278,14 +272,18 @@ Future<String?> _resolveCaptureRodada(
     explicitRodadaId: explicitRodadaId,
     boundRodadaId: localRideId == null
         ? null
-        : ref.read(recordingRodadaBindingProvider.notifier).rodadaFor(localRideId),
+        : ref
+              .read(recordingRodadaBindingProvider.notifier)
+              .rodadaFor(localRideId),
     stampedRodadaId: stamped,
     cloudLinkedRodadaId: linked,
   );
   if (resolved != null) return resolved;
   if (localRideId == null || localRideId.isEmpty) return null;
   try {
-    final live = await ref.read(rodadaRepositoryProvider).findAttachableRodada();
+    final live = await ref
+        .read(rodadaRepositoryProvider)
+        .findAttachableRodada();
     if (live != null && live.status == 'live') return live.id;
   } catch (_) {}
   return null;
@@ -314,34 +312,33 @@ class RidePhotoShutterButton extends ConsumerWidget {
     final l10n = context.l10n;
     final explicit = rodadaId?.trim();
     final hasExplicit = explicit != null && explicit.isNotEmpty;
-    final activeRideId = localRideId ??
-        ref.watch(activeRideProvider).asData?.value?.ride.id;
+    final activeRideId =
+        localRideId ?? ref.watch(activeRideProvider).asData?.value?.ride.id;
     if (hasExplicit && activeRideId != null) {
       final bound = ref.read(recordingRodadaBindingProvider)[activeRideId];
       if (bound != explicit) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(recordingRodadaBindingProvider.notifier).bind(
-                rideId: activeRideId,
-                rodadaId: explicit,
-              );
+          ref
+              .read(recordingRodadaBindingProvider.notifier)
+              .bind(rideId: activeRideId, rodadaId: explicit);
         });
       }
     }
     final dest = hasExplicit
         ? explicit
         : (activeRideId == null
-            ? null
-            : ref.watch(recordingRodadaBindingProvider)[activeRideId]);
+              ? null
+              : ref.watch(recordingRodadaBindingProvider)[activeRideId]);
 
     void shoot() => captureRidePhoto(
-          context: context,
-          ref: ref,
-          localRideId: localRideId ?? activeRideId,
-          rodadaId: dest,
-          lastPoint: lastPoint,
-          fallbackLat: fallbackLat,
-          fallbackLng: fallbackLng,
-        );
+      context: context,
+      ref: ref,
+      localRideId: localRideId ?? activeRideId,
+      rodadaId: dest,
+      lastPoint: lastPoint,
+      fallbackLat: fallbackLat,
+      fallbackLng: fallbackLng,
+    );
 
     if (compact) {
       return IconButton(

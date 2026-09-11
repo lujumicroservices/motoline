@@ -13,6 +13,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import 'lean_lab_review_screen.dart';
+import '../../widgets/app_snack.dart';
 
 /// Revisit a Lean Lab lap: measures, fix config (ida/vuelta…), re-label corners.
 class LeanLabSessionDetailScreen extends ConsumerStatefulWidget {
@@ -62,8 +63,7 @@ class _LeanLabSessionDetailScreenState
   bool get _dirty {
     final s = _session;
     if (s == null) return false;
-    return _sessionType != s.sessionType ||
-        _direction != s.direction;
+    return _sessionType != s.sessionType || _direction != s.direction;
   }
 
   Future<void> _saveConfig() async {
@@ -79,9 +79,7 @@ class _LeanLabSessionDetailScreenState
       if (updated != null) _session = updated;
     });
     if (updated != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.leanLabConfigSaved)),
-      );
+      showAppSnack(context, context.l10n.leanLabConfigSaved);
     }
   }
 
@@ -99,9 +97,7 @@ class _LeanLabSessionDetailScreenState
     final l10n = context.l10n;
 
     if (_loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final session = _session;
     if (session == null) {
@@ -186,25 +182,21 @@ class _LeanLabSessionDetailScreenState
                 '${session.frozenNeutralDeg.toStringAsFixed(1)}°',
                 l10n.leanLabFrozenNeutral,
               ),
-              (
-                '${session.corners.length}',
-                l10n.leanLabCornersCount,
-              ),
+              ('${session.corners.length}', l10n.leanLabCornersCount),
             ],
           ),
           if (corners.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(
               l10n.leanLabCornerMeasures,
-              style:
-                  GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
             ),
             const SizedBox(height: 8),
             for (var i = 0; i < corners.length; i++)
-              _CornerMeasureTile(
-                index: i + 1,
-                corner: corners[i],
-              ),
+              _CornerMeasureTile(index: i + 1, corner: corners[i]),
           ],
           const SizedBox(height: 20),
           Text(
@@ -289,9 +281,7 @@ class _LeanLabSessionDetailScreenState
           FilledButton.tonalIcon(
             onPressed: _openReview,
             icon: Icon(
-              session.needsCornerLabels
-                  ? Icons.label_outline
-                  : Icons.replay,
+              session.needsCornerLabels ? Icons.label_outline : Icons.replay,
             ),
             label: Text(
               session.needsCornerLabels
@@ -304,13 +294,12 @@ class _LeanLabSessionDetailScreenState
     );
   }
 
-  String _typeLabel(AppLocalizations l10n, LeanLabSessionType t) =>
-      switch (t) {
-        LeanLabSessionType.baselineOutbound => l10n.leanLabProtoOutbound,
-        LeanLabSessionType.baselineReturn => l10n.leanLabProtoReturn,
-        LeanLabSessionType.mountPocket => l10n.leanLabProtoPocket,
-        LeanLabSessionType.free => l10n.leanLabProtoFree,
-      };
+  String _typeLabel(AppLocalizations l10n, LeanLabSessionType t) => switch (t) {
+    LeanLabSessionType.baselineOutbound => l10n.leanLabProtoOutbound,
+    LeanLabSessionType.baselineReturn => l10n.leanLabProtoReturn,
+    LeanLabSessionType.mountPocket => l10n.leanLabProtoPocket,
+    LeanLabSessionType.free => l10n.leanLabProtoFree,
+  };
 }
 
 class _MeasureGrid extends StatelessWidget {
@@ -358,10 +347,7 @@ class _MeasureGrid extends StatelessWidget {
 }
 
 class _CornerMeasureTile extends StatelessWidget {
-  const _CornerMeasureTile({
-    required this.index,
-    required this.corner,
-  });
+  const _CornerMeasureTile({required this.index, required this.corner});
 
   final int index;
   final LeanLabCornerLabel corner;

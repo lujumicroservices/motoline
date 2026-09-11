@@ -62,335 +62,337 @@ class HomeScreen extends ConsumerWidget {
 
     return RodadaRouteShareBinder(
       child: AdventureCameraLifecycleBinder(
-      child: Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const _ArmAutoResumeOpener(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 16, 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        child: Scaffold(
+          body: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _ArmAutoResumeOpener(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 16, 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: RiderLabMark(
-                          size: BrandMarkSize.title,
-                          showAccentBar: true,
-                          showAttribution: true,
-                          attribution: l10n.byRawThrottle,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: RiderLabMark(
+                              size: BrandMarkSize.title,
+                              showAccentBar: true,
+                              showAttribution: true,
+                              attribution: l10n.byRawThrottle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const RiderProfileButton(),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      const RiderProfileButton(),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l10n.tagline,
+                              style: GoogleFonts.rajdhani(
+                                fontSize: 14,
+                                color: AppTheme.steel,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                          if (AppFeatures.routesEnabled)
+                            HomeNavIconButton(
+                              tooltip: l10n.routesTitle,
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => const RoutesScreen(),
+                                  ),
+                                );
+                              },
+                              asset: AppAssetIcon.routes,
+                            ),
+                          HomeNavIconButton(
+                            tooltip: l10n.rodadasTitle,
+                            semanticId: DemoIds.navRodadas,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const RodadasScreen(),
+                                ),
+                              );
+                            },
+                            asset: AppAssetIcon.rodadas,
+                          ),
+                          HomeNavIconButton(
+                            tooltip: l10n.friends,
+                            semanticId: DemoIds.navFriends,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const FriendsScreen(),
+                                ),
+                              );
+                            },
+                            icon: Icons.people_outline,
+                          ),
+                          const UpdateCheckIconButton(),
+                        ],
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Row(
+                ),
+                updateAsync.when(
+                  data: (update) {
+                    if (update == null) return const SizedBox.shrink();
+                    final dismissed = ref.watch(dismissedUpdateTagProvider);
+                    if (dismissed == update.tagName) {
+                      return const SizedBox.shrink();
+                    }
+                    return UpdateAvailableBanner(update: update);
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+                incompleteAsync.when(
+                  data: (ride) {
+                    if (ride == null) return const SizedBox.shrink();
+                    if (shouldHideIncompleteRodadaRide(ride)) {
+                      return const SizedBox.shrink();
+                    }
+                    return _RecoveryBanner(ride: ride);
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+                if (sessionLive) const _ArmedBanner(),
+                ridesAsync.when(
+                  data: (rides) {
+                    final summary = FleetSummary.fromRides(rides);
+                    if (summary.rideCount == 0) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                      child: _SeasonStrip(summary: summary),
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+                const _RodadaHomeCard(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                  child: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          l10n.tagline,
-                          style: GoogleFonts.rajdhani(
-                            fontSize: 14,
-                            color: AppTheme.steel,
-                            height: 1.2,
+                          l10n.yourRides,
+                          style: GoogleFonts.exo2(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                      if (AppFeatures.routesEnabled)
-                        HomeNavIconButton(
-                          tooltip: l10n.routesTitle,
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const RoutesScreen(),
+                      if (ref.watch(garageCloudSyncProvider))
+                        const Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: SizedBox(
+                            width: 12,
+                            height: 12,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ridesAsync.maybeWhen(
+                        data: (rides) {
+                          final untitled = rides
+                              .where(
+                                (r) =>
+                                    r.status == RideStatus.completed &&
+                                    (r.title == null ||
+                                        r.title!.trim().isEmpty) &&
+                                    r.pointCount >= 2,
+                              )
+                              .isNotEmpty;
+                          final naming = ref.watch(rideTitleNamingProvider);
+                          if (!untitled && !naming.running) {
+                            return const SizedBox.shrink();
+                          }
+                          if (naming.running) {
+                            return Text(
+                              l10n.namingRidesProgress(
+                                naming.done,
+                                naming.total,
+                              ),
+                              style: const TextStyle(
+                                color: AppTheme.steel,
+                                fontSize: 12,
                               ),
                             );
-                          },
-                          asset: AppAssetIcon.routes,
-                        ),
-                      HomeNavIconButton(
-                        tooltip: l10n.rodadasTitle,
-                        semanticId: DemoIds.navRodadas,
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const RodadasScreen(),
-                            ),
-                          );
-                        },
-                        asset: AppAssetIcon.rodadas,
-                      ),
-                      HomeNavIconButton(
-                        tooltip: l10n.friends,
-                        semanticId: DemoIds.navFriends,
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const FriendsScreen(),
-                            ),
-                          );
-                        },
-                        icon: Icons.people_outline,
-                      ),
-                      const UpdateCheckIconButton(),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            updateAsync.when(
-              data: (update) {
-                if (update == null) return const SizedBox.shrink();
-                final dismissed = ref.watch(dismissedUpdateTagProvider);
-                if (dismissed == update.tagName) {
-                  return const SizedBox.shrink();
-                }
-                return UpdateAvailableBanner(update: update);
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-            ),
-            incompleteAsync.when(
-              data: (ride) {
-                if (ride == null) return const SizedBox.shrink();
-                if (shouldHideIncompleteRodadaRide(ride)) {
-                  return const SizedBox.shrink();
-                }
-                return _RecoveryBanner(ride: ride);
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-            ),
-            if (sessionLive) const _ArmedBanner(),
-            ridesAsync.when(
-              data: (rides) {
-                final summary = FleetSummary.fromRides(rides);
-                if (summary.rideCount == 0) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                  child: _SeasonStrip(summary: summary),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-            ),
-            const _RodadaHomeCard(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.yourRides,
-                      style: GoogleFonts.exo2(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (ref.watch(garageCloudSyncProvider))
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: SizedBox(
-                        width: 12,
-                        height: 12,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    ),
-                  ridesAsync.maybeWhen(
-                    data: (rides) {
-                      final untitled = rides
-                          .where(
-                            (r) =>
-                                r.status == RideStatus.completed &&
-                                (r.title == null || r.title!.trim().isEmpty) &&
-                                r.pointCount >= 2,
-                          )
-                          .isNotEmpty;
-                      final naming = ref.watch(rideTitleNamingProvider);
-                      if (!untitled && !naming.running) {
-                        return const SizedBox.shrink();
-                      }
-                      if (naming.running) {
-                        return Text(
-                          l10n.namingRidesProgress(naming.done, naming.total),
-                          style: const TextStyle(
-                            color: AppTheme.steel,
-                            fontSize: 12,
-                          ),
-                        );
-                      }
-                      return TextButton.icon(
-                        onPressed: () async {
-                          final count = await ref
-                              .read(rideTitleNamingProvider.notifier)
-                              .nameAll();
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
+                          }
+                          return TextButton.icon(
+                            onPressed: () async {
+                              final count = await ref
+                                  .read(rideTitleNamingProvider.notifier)
+                                  .nameAll();
+                              if (!context.mounted) return;
+                              showAppSnack(
+                                context,
                                 count > 0
                                     ? l10n.namedRidesDone(count)
                                     : l10n.nameRidesFromMapHelp,
-                              ),
+                              );
+                            },
+                            icon: const Icon(Icons.place_outlined, size: 18),
+                            label: Text(l10n.nameRidesFromMap),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppTheme.line,
+                              visualDensity: VisualDensity.compact,
                             ),
                           );
                         },
-                        icon: const Icon(Icons.place_outlined, size: 18),
-                        label: Text(l10n.nameRidesFromMap),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppTheme.line,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      );
-                    },
-                    orElse: () => const SizedBox.shrink(),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () =>
-                    ref.read(garageCloudSyncProvider.notifier).refresh(),
-                child: ridesAsync.when(
-                  loading: () => ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 120),
-                      Center(child: CircularProgressIndicator()),
+                        orElse: () => const SizedBox.shrink(),
+                      ),
                     ],
                   ),
-                  error: (e, _) => ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(24),
-                    children: [
-                      Text(l10n.couldNotLoadRides('$e')),
-                    ],
-                  ),
-                  data: (rides) {
-                    final completed = rides
-                        .where((r) => r.status != RideStatus.recording)
-                        .toList();
-                    if (completed.isEmpty) {
-                      return ListView(
+                ),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () =>
+                        ref.read(garageCloudSyncProvider.notifier).refresh(),
+                    child: ridesAsync.when(
+                      loading: () => ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: const [
-                          SizedBox(height: 48),
-                          _EmptyState(),
+                          SizedBox(height: 120),
+                          Center(child: CircularProgressIndicator()),
                         ],
-                      );
-                    }
-                    final rows = _garageRowsByMonth(completed, l10n.localeName);
-                    return ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                      itemCount: rows.length,
-                      separatorBuilder: (_, i) {
-                        final next = i + 1 < rows.length ? rows[i + 1] : null;
-                        if (next is _GarageMonthHeader) {
-                          return const SizedBox(height: 4);
-                        }
-                        return const SizedBox(height: 8);
-                      },
-                      itemBuilder: (context, index) {
-                        final row = rows[index];
-                        if (row is _GarageMonthHeader) {
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              top: index == 0 ? 0 : 10,
-                              bottom: 4,
-                            ),
-                            child: Text(
-                              row.label,
-                              style: GoogleFonts.exo2(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.6,
-                                color: AppTheme.steel,
-                              ),
-                            ),
+                      ),
+                      error: (e, _) => ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(24),
+                        children: [Text(l10n.couldNotLoadRides('$e'))],
+                      ),
+                      data: (rides) {
+                        final completed = rides
+                            .where((r) => r.status != RideStatus.recording)
+                            .toList();
+                        if (completed.isEmpty) {
+                          return ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              SizedBox(height: 48),
+                              _EmptyState(),
+                            ],
                           );
                         }
-                        final ride = (row as _GarageRideRow).ride;
-                        return _RideTile(
-                          ride: ride,
-                          demoId: ride.status == RideStatus.abandoned
-                              ? null
-                              : DemoIds.rideTile,
-                          onDeleted: () {
-                            ref.invalidate(ridesListProvider);
+                        final rows = _garageRowsByMonth(
+                          completed,
+                          l10n.localeName,
+                        );
+                        return ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                          itemCount: rows.length,
+                          separatorBuilder: (_, i) {
+                            final next = i + 1 < rows.length
+                                ? rows[i + 1]
+                                : null;
+                            if (next is _GarageMonthHeader) {
+                              return const SizedBox(height: 4);
+                            }
+                            return const SizedBox(height: 8);
+                          },
+                          itemBuilder: (context, index) {
+                            final row = rows[index];
+                            if (row is _GarageMonthHeader) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  top: index == 0 ? 0 : 10,
+                                  bottom: 4,
+                                ),
+                                child: Text(
+                                  row.label,
+                                  style: GoogleFonts.exo2(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.6,
+                                    color: AppTheme.steel,
+                                  ),
+                                ),
+                              );
+                            }
+                            final ride = (row as _GarageRideRow).ride;
+                            return _RideTile(
+                              ride: ride,
+                              demoId: ride.status == RideStatus.abandoned
+                                  ? null
+                                  : DemoIds.rideTile,
+                              onDeleted: () {
+                                ref.invalidate(ridesListProvider);
+                              },
+                            );
                           },
                         );
                       },
+                    ),
+                  ),
+                ),
+                _HomeActionDock(
+                  armed: sessionLive,
+                  onArmToggle: () async {
+                    if (ref.read(impersonationProvider).active) {
+                      showAppSnack(context, l10n.impersonateNoRide);
+                      return;
+                    }
+                    if (sessionLive) {
+                      ensureArmedSessionHub(context, ref);
+                      return;
+                    }
+                    try {
+                      final ok = await freezeThenArm(context, ref);
+                      if (!ok || !context.mounted) return;
+                      ref.read(armedSessionNavProvider.notifier).reset();
+                      ensureArmedSessionHub(context, ref);
+                      showAppSnack(context, l10n.armAutoNoRouteHint);
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      showAppSnackError(context, '$e');
+                    }
+                  },
+                ),
+                Builder(
+                  builder: (context) {
+                    final pro = ref.watch(proEntitlementProvider);
+                    final remaining = proRemainingLabel(l10n, pro);
+                    if (remaining == null && !pro.expiredAfterGrant) {
+                      return const SizedBox.shrink();
+                    }
+                    return Material(
+                      color: AppTheme.asphaltElevated,
+                      child: InkWell(
+                        onTap: () => showProUpsellSheet(context, ref),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                          child: Text(
+                            remaining ?? l10n.proExpiredKeepLab,
+                            style: GoogleFonts.rajdhani(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: remaining != null
+                                  ? AppTheme.line
+                                  : AppTheme.signal,
+                            ),
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ),
-              ),
+                FreeAdBanner(onUpgrade: () => showProUpsellSheet(context, ref)),
+              ],
             ),
-            _HomeActionDock(
-              armed: sessionLive,
-              onArmToggle: () async {
-                if (ref.read(impersonationProvider).active) {
-                  showAppSnack(context, l10n.impersonateNoRide);
-                  return;
-                }
-                if (sessionLive) {
-                  ensureArmedSessionHub(context, ref);
-                  return;
-                }
-                try {
-                  final ok = await freezeThenArm(context, ref);
-                  if (!ok || !context.mounted) return;
-                  ref.read(armedSessionNavProvider.notifier).reset();
-                  ensureArmedSessionHub(context, ref);
-                  showAppSnack(context, l10n.armAutoNoRouteHint);
-                } catch (e) {
-                  if (!context.mounted) return;
-                  showAppSnackError(context, '$e');
-                }
-              },
-            ),
-            Builder(
-              builder: (context) {
-                final pro = ref.watch(proEntitlementProvider);
-                final remaining = proRemainingLabel(l10n, pro);
-                if (remaining == null && !pro.expiredAfterGrant) {
-                  return const SizedBox.shrink();
-                }
-                return Material(
-                  color: AppTheme.asphaltElevated,
-                  child: InkWell(
-                    onTap: () => showProUpsellSheet(context, ref),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                      child: Text(
-                        remaining ?? l10n.proExpiredKeepLab,
-                        style: GoogleFonts.rajdhani(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: remaining != null
-                              ? AppTheme.line
-                              : AppTheme.signal,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            FreeAdBanner(
-              onUpgrade: () => showProUpsellSheet(context, ref),
-            ),
-          ],
+          ),
         ),
-      ),
-      ),
       ),
     );
   }
@@ -521,10 +523,7 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
 }
 
 class _HomeActionDock extends StatelessWidget {
-  const _HomeActionDock({
-    required this.armed,
-    required this.onArmToggle,
-  });
+  const _HomeActionDock({required this.armed, required this.onArmToggle});
 
   final bool armed;
   final VoidCallback onArmToggle;
@@ -620,9 +619,7 @@ class _RodadaHomeCard extends ConsumerWidget {
                     AppAssetIcon(
                       asset: AppAssetIcon.rodadas,
                       size: 36,
-                      color: highlight.isLive
-                          ? AppTheme.line
-                          : AppTheme.mist,
+                      color: highlight.isLive ? AppTheme.line : AppTheme.mist,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -679,7 +676,9 @@ class _ArmedBanner extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppTheme.lineHot.withValues(alpha: 0.5)),
+              border: Border.all(
+                color: AppTheme.lineHot.withValues(alpha: 0.5),
+              ),
             ),
             child: Row(
               children: [
@@ -751,10 +750,7 @@ class _RecoveryBanner extends ConsumerWidget {
         children: [
           Text(
             l10n.unfinishedRide,
-            style: GoogleFonts.exo2(
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-            ),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 16),
           ),
           const SizedBox(height: 4),
           Text(
@@ -812,11 +808,7 @@ class _RecoveryBanner extends ConsumerWidget {
 }
 
 class _RideTile extends ConsumerWidget {
-  const _RideTile({
-    required this.ride,
-    required this.onDeleted,
-    this.demoId,
-  });
+  const _RideTile({required this.ride, required this.onDeleted, this.demoId});
 
   final Ride ride;
   final VoidCallback onDeleted;
@@ -849,9 +841,7 @@ class _RideTile extends ConsumerWidget {
     }
     onDeleted();
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.rideDeleted)),
-    );
+    showAppSnack(context, l10n.rideDeleted);
   }
 
   @override
@@ -868,11 +858,13 @@ class _RideTile extends ConsumerWidget {
         onTap: abandoned
             ? null
             : () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => RideDetailScreen(rideId: ride.id),
-                  ),
-                ).then((_) => onDeleted());
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => RideDetailScreen(rideId: ride.id),
+                      ),
+                    )
+                    .then((_) => onDeleted());
               },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -973,14 +965,15 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.map_outlined, size: 56, color: AppTheme.steel.withValues(alpha: 0.7)),
+          Icon(
+            Icons.map_outlined,
+            size: 56,
+            color: AppTheme.steel.withValues(alpha: 0.7),
+          ),
           const SizedBox(height: 16),
           Text(
             context.l10n.emptyRidesTitle,
-            style: GoogleFonts.exo2(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.exo2(fontSize: 20, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(

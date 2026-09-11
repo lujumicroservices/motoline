@@ -14,6 +14,7 @@ import '../../core/lean_lab/upright_freeze_controller.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../ride_active/widgets/upright_freeze_panel.dart';
+import '../../widgets/app_snack.dart';
 
 /// Live IMU study bench — every signal the phone can give for lean.
 class LeanImuLabScreen extends StatefulWidget {
@@ -60,11 +61,10 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
       ),
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.leanImuLabExportDone(name)),
-        duration: const Duration(seconds: 4),
-      ),
+    showAppSnack(
+      context,
+      context.l10n.leanImuLabExportDone(name),
+      duration: const Duration(seconds: 4),
     );
   }
 
@@ -168,7 +168,9 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                           }
                         },
                         icon: Icon(
-                          _lab.recording ? Icons.stop : Icons.fiber_manual_record,
+                          _lab.recording
+                              ? Icons.stop
+                              : Icons.fiber_manual_record,
                           color: _lab.recording ? Colors.redAccent : null,
                         ),
                         label: Text(
@@ -221,7 +223,8 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                 ),
                 _VectorCard(
                   title: 'Linear accel (motion)',
-                  hint: 'a − gravity. Braking / bumps. Should be ~0 when still.',
+                  hint:
+                      'a − gravity. Braking / bumps. Should be ~0 when still.',
                   v: s.linear,
                   unit: 'm/s²',
                 ),
@@ -335,9 +338,9 @@ class _PoseEngineBanner extends StatelessWidget {
     final gpsTxt = gps == null ? '--' : '${gps.toStringAsFixed(0)}°';
     final text = frozen
         ? '${sample.pose.label} · ${sample.winningChannel}'
-            '  ·  conf ${(conf * 100).round()}%'
-            '  ·  GPS $gpsTxt'
-            '  ·  up ${sample.upAxis}'
+              '  ·  conf ${(conf * 100).round()}%'
+              '  ·  GPS $gpsTxt'
+              '  ·  up ${sample.upAxis}'
         : '${context.l10n.leanImuLabFreeze}  ·  up ${sample.upAxis}  ·  ${sample.pose.label}';
     return Container(
       width: double.infinity,
@@ -386,11 +389,7 @@ class _AttitudePainter extends CustomPainter {
     final gx = g.x.clamp(-1.0, 1.0);
     final gz = g.z.clamp(-1.0, 1.0);
     final bubble = Offset(c.dx + gx * r * 0.92, c.dy + gz * r * 0.92);
-    canvas.drawCircle(
-      bubble,
-      10,
-      Paint()..color = AppTheme.line,
-    );
+    canvas.drawCircle(bubble, 10, Paint()..color = AppTheme.line);
 
     // Bike lean wedge (production).
     final leanRad = (sample.bikeLean ?? sample.appLean) * math.pi / 180;
@@ -549,12 +548,9 @@ class _HistoryChart extends StatelessWidget {
     }
     final t0 = history.first.at.millisecondsSinceEpoch;
     List<FlSpot> spots(double Function(ImuSample s) y) => [
-          for (final s in history)
-            FlSpot(
-              (s.at.millisecondsSinceEpoch - t0) / 1000.0,
-              y(s),
-            ),
-        ];
+      for (final s in history)
+        FlSpot((s.at.millisecondsSinceEpoch - t0) / 1000.0, y(s)),
+    ];
 
     return Container(
       height: 180,
@@ -579,11 +575,15 @@ class _HistoryChart extends StatelessWidget {
             drawVerticalLine: false,
           ),
           titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            bottomTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            bottomTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -628,20 +628,20 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget chip(Color c, String t) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              t,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 11),
-            ),
-          ],
-        );
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          t,
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 11),
+        ),
+      ],
+    );
     return Wrap(
       spacing: 12,
       runSpacing: 4,
@@ -687,7 +687,10 @@ class _VectorCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
             ),
             Text(
               hint,

@@ -19,6 +19,7 @@ import 'tabs/rodada_messages_tab.dart';
 import 'tabs/rodada_overview_tab.dart';
 import 'tabs/rodada_photos_tab.dart';
 import 'tabs/rodada_rides_tab.dart';
+import '../../widgets/app_snack.dart';
 
 const kRodadaDetailRoute = 'rodada-detail';
 
@@ -79,9 +80,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
     if (widget.promptShareInvite) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          rodadaInviteShareSnackBar(context, ref, rodadaId: widget.rodadaId),
-        );
+        promptRodadaInviteShare(context, ref, rodadaId: widget.rodadaId);
       });
     }
   }
@@ -148,10 +147,9 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
                         ClipboardData(text: r.inviteCode),
                       );
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.inviteCodeCopied(r.inviteCode)),
-                        ),
+                      showAppSnack(
+                        context,
+                        l10n.inviteCodeCopied(r.inviteCode),
                       );
                     },
                     icon: const Icon(Icons.copy),
@@ -266,27 +264,21 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       } else {
         await repo.updateRodada(widget.rodadaId, status: action);
         if (action == 'ended') {
-          await completeRodadaCaptureIfNeeded(
-            ref,
-            rodadaId: widget.rodadaId,
-          );
+          await completeRodadaCaptureIfNeeded(ref, rodadaId: widget.rodadaId);
         }
       }
       ref.invalidate(rodadaOverviewProvider(widget.rodadaId));
       ref.invalidate(myRodadasProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            action == 'live'
-                ? l10n.rodadaStartedSnack
-                : l10n.rodadaStatusChanged(action),
-          ),
-        ),
+      showAppSnack(
+        context,
+        action == 'live'
+            ? l10n.rodadaStartedSnack
+            : l10n.rodadaStatusChanged(action),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 
@@ -330,7 +322,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
     if (!mounted) return;
     final msg = messageForInviteBatch(l10n, results);
     if (msg == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    showAppSnack(context, msg);
   }
 }
 

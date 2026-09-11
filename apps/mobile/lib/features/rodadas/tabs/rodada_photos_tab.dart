@@ -16,6 +16,7 @@ import '../photos/ride_photo_capture.dart';
 import '../photos/ride_photo_gallery_scan.dart';
 import '../photos/ride_photo_import_sheet.dart';
 import '../rodada_providers.dart';
+import '../../../widgets/app_snack.dart';
 
 class RodadaPhotosTab extends ConsumerWidget {
   const RodadaPhotosTab({super.key, required this.rodadaId});
@@ -129,28 +130,28 @@ class RodadaPhotosTab extends ConsumerWidget {
                 return GridView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(12),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                ),
-                itemCount: list.length,
-                itemBuilder: (context, i) {
-                  final photo = list[i];
-                  return _PhotoThumb(
-                    photo: photo,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => _PhotoViewer(photo: photo),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          ),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                  ),
+                  itemCount: list.length,
+                  itemBuilder: (context, i) {
+                    final photo = list[i];
+                    return _PhotoThumb(
+                      photo: photo,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => _PhotoViewer(photo: photo),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -180,7 +181,9 @@ class RodadaPhotosTab extends ConsumerWidget {
       for (final file in files) {
         final bytes = await file.readAsBytes();
         final mime = file.mimeType ?? 'image/jpeg';
-        await ref.read(rodadaRepositoryProvider).uploadPhoto(
+        await ref
+            .read(rodadaRepositoryProvider)
+            .uploadPhoto(
               rodadaId: rodadaId,
               bytes: bytes,
               contentType: mime,
@@ -191,20 +194,13 @@ class RodadaPhotosTab extends ConsumerWidget {
       }
       ref.invalidate(rodadaPhotosProvider(rodadaId));
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ok == 1 ? l10n.photoUploaded : l10n.photosUploaded(ok),
-          ),
-        ),
+      showAppSnack(
+        context,
+        ok == 1 ? l10n.photoUploaded : l10n.photosUploaded(ok),
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(isUgcBannedError(e) ? l10n.ugcBanned : '$e'),
-        ),
-      );
+      showAppSnackError(context, isUgcBannedError(e) ? l10n.ugcBanned : '$e');
     }
   }
 
@@ -219,8 +215,9 @@ class RodadaPhotosTab extends ConsumerWidget {
     ];
     if (ids.isNotEmpty) return ids;
     final local = await ref.read(ridesListProvider.future);
-    final completed =
-        local.where((r) => r.status == RideStatus.completed).toList();
+    final completed = local
+        .where((r) => r.status == RideStatus.completed)
+        .toList();
     return completed.isEmpty ? const [] : [completed.first.id];
   }
 
@@ -235,9 +232,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       final rideIds = await _localRideIds(ref);
       if (rideIds.isEmpty) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.noCompletedRidesToLink)),
-        );
+        showAppSnack(context, l10n.noCompletedRidesToLink);
         return;
       }
       var imported = false;
@@ -252,9 +247,7 @@ class RodadaPhotosTab extends ConsumerWidget {
         );
         if (!context.mounted) return;
         if (scan.denied || (scan.limited && scan.candidates.isEmpty)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.photoLibraryLimited)),
-          );
+          showAppSnack(context, l10n.photoLibraryLimited);
           if (scan.denied) return;
         }
         if (scan.candidates.isEmpty) continue;
@@ -284,7 +277,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       await _uploadPickedFiles(context, ref, files);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 
@@ -294,9 +287,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       final rideId = await _localRideId(ref);
       if (rideId == null) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.noCompletedRidesToLink)),
-        );
+        showAppSnack(context, l10n.noCompletedRidesToLink);
         return;
       }
       if (!context.mounted) return;
@@ -311,7 +302,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 }
@@ -376,9 +367,7 @@ class _PhotoViewer extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (u) => InteractiveViewer(
-          child: Center(
-            child: Image.network(u, fit: BoxFit.contain),
-          ),
+          child: Center(child: Image.network(u, fit: BoxFit.contain)),
         ),
       ),
     );

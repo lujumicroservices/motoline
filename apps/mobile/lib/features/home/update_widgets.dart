@@ -7,6 +7,7 @@ import '../../core/services/app_update_service.dart';
 import '../../providers/update_providers.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snack.dart';
 
 /// Compact header control: shows a NEW badge when a newer release exists.
 class UpdateCheckIconButton extends ConsumerWidget {
@@ -22,10 +23,7 @@ class UpdateCheckIconButton extends ConsumerWidget {
       tooltip: hasUpdate ? l10n.updateAvailable : l10n.checkUpdates,
       visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(
-        minWidth: 52,
-        minHeight: 52,
-      ),
+      constraints: const BoxConstraints(minWidth: 52, minHeight: 52),
       onPressed: () => promptManualUpdateCheck(context, ref),
       icon: Badge(
         isLabelVisible: hasUpdate,
@@ -151,11 +149,8 @@ class UpdateAvailableBanner extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => confirmUpdateWithChangelog(
-                    context,
-                    ref,
-                    update,
-                  ),
+                  onPressed: () =>
+                      confirmUpdateWithChangelog(context, ref, update),
                   child: Text(l10n.update),
                 ),
               ),
@@ -267,7 +262,9 @@ Future<void> confirmUpdateWithChangelog(
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    notes.isEmpty ? l10n.updatePrompt(update.currentVersion) : notes,
+                    notes.isEmpty
+                        ? l10n.updatePrompt(update.currentVersion)
+                        : notes,
                     style: const TextStyle(
                       color: AppTheme.mist,
                       fontSize: 14,
@@ -336,7 +333,9 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
     if (_started) return;
     _started = true;
     try {
-      await ref.read(appUpdateServiceProvider).downloadAndInstall(
+      await ref
+          .read(appUpdateServiceProvider)
+          .downloadAndInstall(
             widget.update,
             onProgress: (value) {
               if (!mounted) return;
@@ -402,9 +401,7 @@ Future<void> promptManualUpdateCheck(
   final l10n = context.l10n;
 
   if (AppDistribution.isPlayStore) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.playStoreUpdatesOnly)),
-    );
+    showAppSnack(context, l10n.playStoreUpdatesOnly);
     return;
   }
 
@@ -432,9 +429,7 @@ Future<void> promptManualUpdateCheck(
     if (!context.mounted) return;
     Navigator.of(context).pop();
     if (update == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.onLatest)),
-      );
+      showAppSnack(context, l10n.onLatest);
       return;
     }
     ref.invalidate(appUpdateCheckProvider);
@@ -442,8 +437,6 @@ Future<void> promptManualUpdateCheck(
   } catch (e) {
     if (!context.mounted) return;
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.updateCheckFailed('$e'))),
-    );
+    showAppSnackError(context, l10n.updateCheckFailed('$e'));
   }
 }

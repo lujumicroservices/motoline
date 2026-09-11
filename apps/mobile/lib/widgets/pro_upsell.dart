@@ -7,6 +7,7 @@ import '../providers/pro_entitlement_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/ride_viz_palette.dart';
 import 'partner_code_redeem.dart';
+import 'app_snack.dart';
 
 Future<void> showProUpsellSheet(BuildContext context, WidgetRef ref) {
   return showModalBottomSheet<void>(
@@ -113,9 +114,7 @@ class _ProUpsellSheet extends ConsumerWidget {
                       Navigator.of(context).pop();
                       return;
                     }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.proStoreNotReady)),
-                    );
+                    showAppSnack(context, l10n.proStoreNotReady);
                   },
                   child: Text(l10n.upgradeToPro),
                 ),

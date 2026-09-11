@@ -7,6 +7,7 @@ import '../../core/auth/email_password.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/auth_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snack.dart';
 
 /// Google + email/password controls. Used on the auth gate and (rarely)
 /// Settings if a leftover guest session is still present.
@@ -34,9 +35,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   Future<void> _afterOk() async {
     if (!mounted) return;
     widget.onSignedIn?.call();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.accountSignedInSnack)),
-    );
+    showAppSnack(context, context.l10n.accountSignedInSnack);
   }
 
   Future<void> _google(AuthProviderKind provider) async {
@@ -54,9 +53,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     final ok = await ref.read(authActionsProvider).requestPasswordReset(email);
     if (!mounted) return;
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.authResetEmailSent)),
-      );
+      showAppSnack(context, l10n.authResetEmailSent);
     }
   }
 
@@ -69,8 +66,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     if (issue != null) {
       ref.read(authErrorProvider.notifier).state = switch (issue) {
         EmailPasswordIssue.emptyEmail ||
-        EmailPasswordIssue.invalidEmail =>
-          l10n.authInvalidEmail,
+        EmailPasswordIssue.invalidEmail => l10n.authInvalidEmail,
         EmailPasswordIssue.shortPassword => l10n.authShortPassword,
       };
       return;
@@ -197,10 +193,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             l10n.authOrEmail,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 12,
-            ),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
           ),
         ),
         const Expanded(child: Divider()),
@@ -219,8 +212,7 @@ String _localizeAuthError(AppLocalizations l10n, String raw) {
   return switch (classifyEmailAuthError(raw)) {
     EmailAuthServerIssue.invalidCredentials => l10n.authInvalidCredentials,
     EmailAuthServerIssue.emailNotConfirmed ||
-    EmailAuthServerIssue.needsEmailConfirm =>
-      l10n.authConfirmEmailThenSignIn,
+    EmailAuthServerIssue.needsEmailConfirm => l10n.authConfirmEmailThenSignIn,
     EmailAuthServerIssue.alreadyRegistered => l10n.authEmailAlreadyRegistered,
     EmailAuthServerIssue.unknown => raw,
   };

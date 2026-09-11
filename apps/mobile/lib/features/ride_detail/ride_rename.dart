@@ -9,6 +9,7 @@ import '../../core/services/ride_place_name_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snack.dart';
 
 /// Dialog to set a custom ride name or fill from GPS start/end places.
 Future<void> showRideRenameDialog(
@@ -30,17 +31,12 @@ Future<void> showRideRenameDialog(
             controller: ctrl,
             autofocus: true,
             textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              hintText: l10n.rideNameHint,
-            ),
+            decoration: InputDecoration(hintText: l10n.rideNameHint),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.rideNameHelp,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 13,
-            ),
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
           ),
         ],
       ),
@@ -65,16 +61,12 @@ Future<void> showRideRenameDialog(
   try {
     String? title;
     if (action == 'geo') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.lookingUpPlaces)),
-      );
+      showAppSnack(context, l10n.lookingUpPlaces);
       final points = await ref.read(ridePointsProvider(ride.id).future);
       title = await RidePlaceNameService().titleFromTrack(points);
       if (title == null || title.isEmpty) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.couldNotResolvePlaces)),
-        );
+        showAppSnack(context, l10n.couldNotResolvePlaces);
         return;
       }
     } else {
@@ -89,17 +81,12 @@ Future<void> showRideRenameDialog(
     ref.invalidate(rideProvider(ride.id));
     ref.invalidate(ridesListProvider);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          title == null ? l10n.rideTitleCleared : l10n.rideNamed(title),
-        ),
-      ),
+    showAppSnack(
+      context,
+      title == null ? l10n.rideTitleCleared : l10n.rideNamed(title),
     );
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$e')),
-    );
+    showAppSnackError(context, '$e');
   }
 }

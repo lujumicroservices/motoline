@@ -10,6 +10,7 @@ import '../../moderation/content_guidelines.dart';
 import '../../moderation/content_moderation_repository.dart';
 import '../../moderation/report_content_sheet.dart';
 import '../rodada_providers.dart';
+import '../../../widgets/app_snack.dart';
 
 /// Short radio / safety pings — tiny payloads, no media.
 class RodadaMessagesTab extends ConsumerStatefulWidget {
@@ -39,7 +40,9 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
     if (!mounted) return;
     setState(() => _sending = true);
     try {
-      await ref.read(rodadaRepositoryProvider).sendMessage(
+      await ref
+          .read(rodadaRepositoryProvider)
+          .sendMessage(
             rodadaId: widget.rodadaId,
             body: kind == 'safety'
                 ? (body.isEmpty ? l10n.radioNeedHelp : body)
@@ -52,19 +55,14 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
           PushDiagnostics.hasError &&
           PushDiagnostics.lastLine != null &&
           mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${l10n.pushDiagnosticsTitle}: ${PushDiagnostics.lastLine}',
-            ),
-          ),
+        showAppSnack(
+          context,
+          '${l10n.pushDiagnosticsTitle}: ${PushDiagnostics.lastLine}',
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(isUgcBannedError(e) ? l10n.ugcBanned : '$e')),
-      );
+      showAppSnackError(context, isUgcBannedError(e) ? l10n.ugcBanned : '$e');
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -74,18 +72,15 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
     if (!await ensureUgcGuidelinesAccepted(context)) return;
     if (!mounted) return;
     try {
-      await ref.read(rodadaRepositoryProvider).sendMessage(
-            rodadaId: widget.rodadaId,
-            body: body,
-            kind: 'text',
-          );
+      await ref
+          .read(rodadaRepositoryProvider)
+          .sendMessage(rodadaId: widget.rodadaId, body: body, kind: 'text');
       ref.invalidate(rodadaMessagesProvider(widget.rodadaId));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(isUgcBannedError(e) ? context.l10n.ugcBanned : '$e'),
-        ),
+      showAppSnackError(
+        context,
+        isUgcBannedError(e) ? context.l10n.ugcBanned : '$e',
       );
     }
   }
@@ -104,7 +99,9 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
             children: [
               ActionChip(
                 label: Text(l10n.radioAllGood),
-                onPressed: _sending ? null : () => _sendCanned(l10n.radioAllGood),
+                onPressed: _sending
+                    ? null
+                    : () => _sendCanned(l10n.radioAllGood),
               ),
               ActionChip(
                 label: Text(l10n.radioStoppingFiveMin),
@@ -152,74 +149,79 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                 return ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                itemCount: list.length,
-                itemBuilder: (context, i) {
-                  final m = list[i];
-                  final time =
-                      DateFormat('HH:mm').format(m.createdAt.toLocal());
-                  final mine = m.userId ==
-                      ref.read(rodadaRepositoryProvider).currentUserId;
-                  return InkWell(
-                    onLongPress: mine
-                        ? null
-                        : () => showReportContentSheet(
+                  itemCount: list.length,
+                  itemBuilder: (context, i) {
+                    final m = list[i];
+                    final time = DateFormat(
+                      'HH:mm',
+                    ).format(m.createdAt.toLocal());
+                    final mine =
+                        m.userId ==
+                        ref.read(rodadaRepositoryProvider).currentUserId;
+                    return InkWell(
+                      onLongPress: mine
+                          ? null
+                          : () => showReportContentSheet(
                               context,
                               kind: 'message',
                               messageId: m.id,
                             ),
-                    child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: m.isSafety
-                          ? AppTheme.signal.withValues(alpha: 0.15)
-                          : AppTheme.asphaltElevated,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: m.isSafety
+                              ? AppTheme.signal.withValues(alpha: 0.15)
+                              : AppTheme.asphaltElevated,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                '${m.displayName ?? l10n.riderFallback} · $time'
-                                '${m.isSafety ? ' · ${l10n.safetyTag}' : ''}',
-                                style: GoogleFonts.exo2(
-                                  fontSize: 12,
-                                  color: m.isSafety
-                                      ? AppTheme.signal
-                                      : AppTheme.steel,
-                                  fontWeight: FontWeight.w600,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${m.displayName ?? l10n.riderFallback} · $time'
+                                    '${m.isSafety ? ' · ${l10n.safetyTag}' : ''}',
+                                    style: GoogleFonts.exo2(
+                                      fontSize: 12,
+                                      color: m.isSafety
+                                          ? AppTheme.signal
+                                          : AppTheme.steel,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                if (!mine)
+                                  IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    tooltip: l10n.ugcReportTitle,
+                                    icon: const Icon(
+                                      Icons.flag_outlined,
+                                      size: 18,
+                                    ),
+                                    onPressed: () => showReportContentSheet(
+                                      context,
+                                      kind: 'message',
+                                      messageId: m.id,
+                                    ),
+                                  ),
+                              ],
                             ),
-                            if (!mine)
-                              IconButton(
-                                visualDensity: VisualDensity.compact,
-                                tooltip: l10n.ugcReportTitle,
-                                icon: const Icon(Icons.flag_outlined, size: 18),
-                                onPressed: () => showReportContentSheet(
-                                  context,
-                                  kind: 'message',
-                                  messageId: m.id,
-                                ),
-                              ),
+                            const SizedBox(height: 4),
+                            Text(
+                              m.body,
+                              style: GoogleFonts.rajdhani(fontSize: 15),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          m.body,
-                          style: GoogleFonts.rajdhani(fontSize: 15),
-                        ),
-                      ],
-                    ),
-                  ),
-                  );
-                },
-              );
-            },
-          ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
         SafeArea(

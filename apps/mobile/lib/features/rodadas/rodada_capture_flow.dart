@@ -40,16 +40,14 @@ Future<void> holdRodadaCaptureAndReturn(
     return true;
   });
   if (!navigator.mounted) return;
-  final onRodada = remaining?.settings.name == kRodadaDetailRoute &&
+  final onRodada =
+      remaining?.settings.name == kRodadaDetailRoute &&
       remaining?.settings.arguments == rodadaId;
   if (!onRodada) {
     await navigator.push<void>(
       MaterialPageRoute<void>(
         settings: RouteSettings(name: kRodadaDetailRoute, arguments: rodadaId),
-        builder: (_) => RodadaDetailScreen(
-          rodadaId: rodadaId,
-          initialTab: 1,
-        ),
+        builder: (_) => RodadaDetailScreen(rodadaId: rodadaId, initialTab: 1),
       ),
     );
   }
@@ -95,9 +93,7 @@ Future<void> resumeRodadaCapture(
     }
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      appSnackBar(context.l10n.userFacingError(e)),
-    );
+    showAppSnackError(context, context.l10n.userFacingError(e));
   }
 }
 
@@ -111,9 +107,7 @@ Future<void> completeRodadaCaptureIfNeeded(
   try {
     Ride? completed;
     final active = recorder.activeRide;
-    if (active != null &&
-        active.rodadaId == rodadaId &&
-        recorder.isRecording) {
+    if (active != null && active.rodadaId == rodadaId && recorder.isRecording) {
       await ref.read(activeWatchControllerProvider.notifier).end();
       completed = await recorder.stop();
     } else {
@@ -125,7 +119,10 @@ Future<void> completeRodadaCaptureIfNeeded(
     }
     if (completed == null) return;
     unawaited(
-      enqueueAndDrainRideSync(ref.read(syncOutboxServiceProvider), completed.id),
+      enqueueAndDrainRideSync(
+        ref.read(syncOutboxServiceProvider),
+        completed.id,
+      ),
     );
     final points = await db.getPoints(completed.id);
     await LeanLabService.instance.finalizeTrackStats(

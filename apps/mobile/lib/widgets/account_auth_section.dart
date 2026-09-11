@@ -6,6 +6,7 @@ import '../features/auth/sign_in_form.dart';
 import '../l10n/l10n_ext.dart';
 import '../providers/auth_providers.dart';
 import '../theme/app_theme.dart';
+import 'app_snack.dart';
 
 /// Account block in Settings. Signed-in riders can sign out (returns to the
 /// auth gate). Leftover guests see the same sign-in form as launch.
@@ -111,10 +112,10 @@ class AccountAuthSection extends ConsumerWidget {
                       onPressed: () async {
                         await ref.read(authActionsProvider).signOut();
                         if (!context.mounted) return;
-                        Navigator.of(context).popUntil((route) => route.isFirst);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.accountSignedOutSnack)),
-                        );
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
+                        showAppSnack(context, l10n.accountSignedOutSnack);
                       },
                       child: Text(l10n.signOut),
                     ),
@@ -142,22 +143,22 @@ class AccountAuthSection extends ConsumerWidget {
                           ),
                         );
                         if (ok != true || !context.mounted) return;
-                        final deleted =
-                            await ref.read(authActionsProvider).deleteAccount();
+                        final deleted = await ref
+                            .read(authActionsProvider)
+                            .deleteAccount();
                         if (!context.mounted) return;
                         if (!deleted) {
                           final err = ref.read(authErrorProvider);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(err ?? l10n.deleteAccountFailed),
-                            ),
+                          showAppSnackError(
+                            context,
+                            err ?? l10n.deleteAccountFailed,
                           );
                           return;
                         }
-                        Navigator.of(context).popUntil((route) => route.isFirst);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.deleteAccountDoneSnack)),
-                        );
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
+                        showAppSnack(context, l10n.deleteAccountDoneSnack);
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: AppTheme.signal,

@@ -10,7 +10,6 @@ import 'package:latlong2/latlong.dart';
 import '../../core/routing/route_prefs.dart';
 import '../../core/services/directions_service.dart';
 import '../../core/services/place_search_service.dart';
-import '../../core/notifications/push_notification_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
@@ -21,6 +20,7 @@ import 'invite_push_feedback.dart';
 import 'rodada_providers.dart';
 import 'rodada_repository.dart';
 import 'route_prefs_chips.dart';
+import '../../widgets/app_snack.dart';
 
 class CreateRodadaScreen extends ConsumerStatefulWidget {
   const CreateRodadaScreen({super.key});
@@ -60,11 +60,11 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
   bool _roundTrip = false;
 
   List<LatLng> get _pins => rodadaRouteWaypoints(
-        start: _start,
-        stops: [for (final s in _stops) s.point],
-        finish: _finish,
-        roundTrip: _roundTrip,
-      );
+    start: _start,
+    stops: [for (final s in _stops) s.point],
+    finish: _finish,
+    roundTrip: _roundTrip,
+  );
 
   List<LatLng> get _displayLine =>
       rodadaDisplayLine(pins: _pins, routed: _route?.points);
@@ -179,10 +179,9 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
       _routing = true;
       _routeFailed = false;
     });
-    final result = await ref.read(directionsServiceProvider).route(
-          waypoints: pins,
-          prefs: _prefs,
-        );
+    final result = await ref
+        .read(directionsServiceProvider)
+        .route(waypoints: pins, prefs: _prefs);
     if (!mounted || gen != _routeGen) return;
     setState(() {
       _routing = false;
@@ -229,11 +228,9 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
     try {
       bounds = _map.camera.visibleBounds;
     } catch (_) {}
-    final hits = await ref.read(placeSearchServiceProvider).search(
-          q,
-          viewBounds: bounds,
-          limit: 10,
-        );
+    final hits = await ref
+        .read(placeSearchServiceProvider)
+        .search(q, viewBounds: bounds, limit: 10);
     if (!mounted) return;
     setState(() {
       _searching = false;
@@ -278,15 +275,10 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
         ),
       );
       if (!mounted) return;
-      _place(
-        LatLng(pos.latitude, pos.longitude),
-        title: l10n.rodadaMyLocation,
-      );
+      _place(LatLng(pos.latitude, pos.longitude), title: l10n.rodadaMyLocation);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.locationFailed('$e'))),
-      );
+      showAppSnackError(context, l10n.locationFailed('$e'));
     }
   }
 
@@ -342,9 +334,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
       final pushMsg = messageForInviteBatch(l10n, inviteResults);
       Navigator.of(context).pop(rodada.id);
       if (pushMsg != null) {
-        appMessengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text(pushMsg)),
-        );
+        showAppSnack(null, pushMsg);
       }
     } catch (e) {
       if (!mounted) return;
@@ -468,14 +458,14 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                                 ),
                               )
                             : (_search.text.isEmpty
-                                ? null
-                                : IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      _search.clear();
-                                      setState(() => _hits = []);
-                                    },
-                                  )),
+                                  ? null
+                                  : IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        _search.clear();
+                                        setState(() => _hits = []);
+                                      },
+                                    )),
                       ),
                       textInputAction: TextInputAction.search,
                       onChanged: _onSearchChanged,
@@ -521,201 +511,207 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               children: [
-          if (_hits.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (var i = 0; i < _hits.length; i++)
-                  ActionChip(
-                    avatar: CircleAvatar(
-                      backgroundColor: const Color(0xFF7C9CFF),
-                      foregroundColor: AppTheme.asphalt,
-                      child: Text(
-                        '${i + 1}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                if (_hits.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (var i = 0; i < _hits.length; i++)
+                        ActionChip(
+                          avatar: CircleAvatar(
+                            backgroundColor: const Color(0xFF7C9CFF),
+                            foregroundColor: AppTheme.asphalt,
+                            child: Text(
+                              '${i + 1}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          label: Text(
+                            _hits[i].title,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onPressed: () => _pickHit(_hits[i]),
                         ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 8),
+                if (_routing)
+                  Text(
+                    l10n.routeRouting,
+                    style: GoogleFonts.rajdhani(
+                      color: AppTheme.steel,
+                      fontSize: 13,
+                    ),
+                  )
+                else if (_route != null)
+                  Text(
+                    l10n.routeSummaryKmEta(
+                      formatRouteDistance(_route!.distanceM),
+                      formatRouteEta(_route!.durationS),
+                    ),
+                    style: GoogleFonts.rajdhani(
+                      color: AppTheme.mist,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                else if (_routeFailed)
+                  Text(
+                    l10n.routeFailedFallback,
+                    style: GoogleFonts.rajdhani(
+                      color: AppTheme.signal,
+                      fontSize: 13,
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                RoutePrefsChips(
+                  prefs: _prefs,
+                  onChanged: (next) {
+                    setState(() => _prefs = next);
+                    _scheduleRoute();
+                  },
+                ),
+                if (_start != null && _finish != null)
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.rodadaRoundTrip),
+                    subtitle: Text(
+                      l10n.rodadaRoundTripHelp,
+                      style: GoogleFonts.rajdhani(
+                        color: AppTheme.steel,
+                        fontSize: 13,
                       ),
                     ),
-                    label: Text(
-                      _hits[i].title,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onPressed: () => _pickHit(_hits[i]),
+                    value: _roundTrip,
+                    onChanged: (v) {
+                      setState(() => _roundTrip = v);
+                      _scheduleRoute();
+                    },
                   ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 8),
-          if (_routing)
-            Text(
-              l10n.routeRouting,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
-            )
-          else if (_route != null)
-            Text(
-              l10n.routeSummaryKmEta(
-                formatRouteDistance(_route!.distanceM),
-                formatRouteEta(_route!.durationS),
-              ),
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.mist,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            )
-          else if (_routeFailed)
-            Text(
-              l10n.routeFailedFallback,
-              style: GoogleFonts.rajdhani(color: AppTheme.signal, fontSize: 13),
-            ),
-          const SizedBox(height: 8),
-          RoutePrefsChips(
-            prefs: _prefs,
-            onChanged: (next) {
-              setState(() => _prefs = next);
-              _scheduleRoute();
-            },
-          ),
-          if (_start != null && _finish != null)
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.rodadaRoundTrip),
-              subtitle: Text(
-                l10n.rodadaRoundTripHelp,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.steel,
-                  fontSize: 13,
+                _PinRow(
+                  icon: Icons.flag,
+                  color: AppTheme.lineHot,
+                  label: l10n.rodadaPinStart,
+                  value: _start == null ? l10n.rodadaPinUnset : _startTitle,
+                  onClear: _start == null
+                      ? null
+                      : () {
+                          setState(() {
+                            _start = null;
+                            _startTitle = null;
+                            _mode = RodadaPinMode.start;
+                            _syncAutoTitle();
+                          });
+                          _scheduleRoute();
+                        },
                 ),
-              ),
-              value: _roundTrip,
-              onChanged: (v) {
-                setState(() => _roundTrip = v);
-                _scheduleRoute();
-              },
-            ),
-          _PinRow(
-            icon: Icons.flag,
-            color: AppTheme.lineHot,
-            label: l10n.rodadaPinStart,
-            value: _start == null ? l10n.rodadaPinUnset : _startTitle,
-            onClear: _start == null
-                ? null
-                : () {
-                    setState(() {
-                      _start = null;
-                      _startTitle = null;
-                      _mode = RodadaPinMode.start;
-                      _syncAutoTitle();
-                    });
-                    _scheduleRoute();
-                  },
-          ),
-          _PinRow(
-            icon: Icons.sports_score,
-            color: AppTheme.line,
-            label: l10n.rodadaPinFinish,
-            value: _finish == null ? l10n.rodadaPinUnset : _finishTitle,
-            onClear: _finish == null
-                ? null
-                : () {
-                    setState(() {
-                      _finish = null;
-                      _finishTitle = null;
-                      _mode = RodadaPinMode.finish;
-                      _syncAutoTitle();
-                    });
-                    _scheduleRoute();
-                  },
-          ),
-          for (var i = 0; i < _stops.length; i++)
-            _PinRow(
-              icon: Icons.local_gas_station,
-              color: AppTheme.signal,
-              label: '${rodadaStopLetter(i)} · ${_stops[i].title}',
-              onClear: () {
-                setState(() => _stops.removeAt(i));
-                _scheduleRoute();
-              },
-            ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _title,
-            decoration: InputDecoration(
-              labelText: l10n.rodadaTitleLabel,
-              hintText: l10n.rodadaTitleHint,
-            ),
-            textCapitalization: TextCapitalization.sentences,
-            onChanged: (_) => _titleLocked = true,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _notes,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: l10n.rodadaNotesLabel,
-              hintText: l10n.rodadaNotesHint,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.rodadaStartsAt),
-            subtitle: Text(
-              _startsAt == null
-                  ? l10n.rodadaPickDateTime
-                  : _startsAt!.toLocal().toString().substring(0, 16),
-            ),
-            trailing: const Icon(Icons.schedule),
-            onTap: _pickStartsAt,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.inviteFriends,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          friendsAsync.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (e, _) => Text('$e'),
-            data: (friends) {
-              if (friends.isEmpty) {
-                return Text(
-                  l10n.noFriendsToInvite,
-                  style: GoogleFonts.rajdhani(
-                    color: AppTheme.steel,
-                    fontSize: 13,
+                _PinRow(
+                  icon: Icons.sports_score,
+                  color: AppTheme.line,
+                  label: l10n.rodadaPinFinish,
+                  value: _finish == null ? l10n.rodadaPinUnset : _finishTitle,
+                  onClear: _finish == null
+                      ? null
+                      : () {
+                          setState(() {
+                            _finish = null;
+                            _finishTitle = null;
+                            _mode = RodadaPinMode.finish;
+                            _syncAutoTitle();
+                          });
+                          _scheduleRoute();
+                        },
+                ),
+                for (var i = 0; i < _stops.length; i++)
+                  _PinRow(
+                    icon: Icons.local_gas_station,
+                    color: AppTheme.signal,
+                    label: '${rodadaStopLetter(i)} · ${_stops[i].title}',
+                    onClear: () {
+                      setState(() => _stops.removeAt(i));
+                      _scheduleRoute();
+                    },
                   ),
-                );
-              }
-              return Column(
-                children: [
-                  for (final f in friends)
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: _inviteIds.contains(f.id),
-                      title: Text(f.label),
-                      onChanged: (v) {
-                        setState(() {
-                          if (v == true) {
-                            _inviteIds.add(f.id);
-                          } else {
-                            _inviteIds.remove(f.id);
-                          }
-                        });
-                      },
-                    ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _title,
+                  decoration: InputDecoration(
+                    labelText: l10n.rodadaTitleLabel,
+                    hintText: l10n.rodadaTitleHint,
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (_) => _titleLocked = true,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _notes,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: l10n.rodadaNotesLabel,
+                    hintText: l10n.rodadaNotesHint,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.rodadaStartsAt),
+                  subtitle: Text(
+                    _startsAt == null
+                        ? l10n.rodadaPickDateTime
+                        : _startsAt!.toLocal().toString().substring(0, 16),
+                  ),
+                  trailing: const Icon(Icons.schedule),
+                  onTap: _pickStartsAt,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.inviteFriends,
+                  style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                friendsAsync.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (e, _) => Text('$e'),
+                  data: (friends) {
+                    if (friends.isEmpty) {
+                      return Text(
+                        l10n.noFriendsToInvite,
+                        style: GoogleFonts.rajdhani(
+                          color: AppTheme.steel,
+                          fontSize: 13,
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (final f in friends)
+                          CheckboxListTile(
+                            contentPadding: EdgeInsets.zero,
+                            value: _inviteIds.contains(f.id),
+                            title: Text(f.label),
+                            onChanged: (v) {
+                              setState(() {
+                                if (v == true) {
+                                  _inviteIds.add(f.id);
+                                } else {
+                                  _inviteIds.remove(f.id);
+                                }
+                              });
+                            },
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 16),
+                  Text(_error!, style: const TextStyle(color: AppTheme.signal)),
                 ],
-              );
-            },
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: 16),
-            Text(_error!, style: const TextStyle(color: AppTheme.signal)),
-          ],
               ],
             ),
           ),
@@ -785,10 +781,7 @@ class _CreateRodadaMapState extends State<_CreateRodadaMap> {
               routedLine: widget.routedLine,
               stops: [
                 for (final s in widget.stops)
-                  RodadaItineraryStopPin(
-                    point: s.point,
-                    title: s.title,
-                  ),
+                  RodadaItineraryStopPin(point: s.point, title: s.title),
               ],
             ),
             if (widget.hits.isNotEmpty)
@@ -833,10 +826,7 @@ class _PinRow extends StatelessWidget {
       subtitle: value == null ? null : Text(value!),
       trailing: onClear == null
           ? null
-          : TextButton(
-              onPressed: onClear,
-              child: Text(l10n.clearPin),
-            ),
+          : TextButton(onPressed: onClear, child: Text(l10n.clearPin)),
     );
   }
 }

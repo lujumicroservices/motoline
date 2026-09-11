@@ -7,6 +7,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../rodadas/rodada_providers.dart';
 import 'content_moderation_providers.dart';
+import '../../widgets/app_snack.dart';
 
 class StaffReportsScreen extends ConsumerWidget {
   const StaffReportsScreen({super.key});
@@ -39,8 +40,9 @@ class StaffReportsScreen extends ConsumerWidget {
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, i) {
               final r = list[i];
-              final when =
-                  DateFormat('d MMM · HH:mm').format(r.createdAt.toLocal());
+              final when = DateFormat(
+                'd MMM · HH:mm',
+              ).format(r.createdAt.toLocal());
               return Material(
                 color: AppTheme.asphaltElevated,
                 borderRadius: BorderRadius.circular(14),
@@ -91,7 +93,8 @@ class StaffReportsScreen extends ConsumerWidget {
                           runSpacing: 8,
                           children: [
                             OutlinedButton(
-                              onPressed: () => _act(context, ref, r.id, 'dismiss'),
+                              onPressed: () =>
+                                  _act(context, ref, r.id, 'dismiss'),
                               child: Text(l10n.ugcStaffDismiss),
                             ),
                             FilledButton.tonal(
@@ -118,9 +121,7 @@ class StaffReportsScreen extends ConsumerWidget {
                               ref.invalidate(staffContentReportsProvider);
                             } catch (e) {
                               if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('$e')),
-                              );
+                              showAppSnackError(context, '$e');
                             }
                           },
                           child: Text(l10n.ugcStaffUnban),
@@ -144,18 +145,15 @@ class StaffReportsScreen extends ConsumerWidget {
   ) async {
     final l10n = context.l10n;
     try {
-      await ref.read(contentModerationRepositoryProvider).resolveReport(
-            reportId: reportId,
-            action: action,
-          );
+      await ref
+          .read(contentModerationRepositoryProvider)
+          .resolveReport(reportId: reportId, action: action);
       ref.invalidate(staffContentReportsProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.ugcStaffDone)),
-      );
+      showAppSnack(context, l10n.ugcStaffDone);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 }

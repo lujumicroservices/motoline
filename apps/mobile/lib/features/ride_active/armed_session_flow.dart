@@ -19,8 +19,7 @@ void ensureArmedSessionHub(BuildContext context, WidgetRef ref) {
   if (!context.mounted) return;
   final hubClaimed = ref.read(armedSessionNavProvider).hubOnStack;
   final route = ModalRoute.of(context);
-  final homeIsVisible =
-      route != null && route.isCurrent && route.isFirst;
+  final homeIsVisible = route != null && route.isCurrent && route.isFirst;
   if (!shouldPushArmedHub(
     hubOnStack: hubClaimed,
     homeIsVisible: homeIsVisible,
@@ -56,19 +55,14 @@ void openArmedRecordingHud(BuildContext context, WidgetRef ref) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
       settings: const RouteSettings(name: kArmedHudRoute),
-      builder: (_) => const ActiveRideScreen(
-        autoStart: false,
-        allowMinimize: true,
-      ),
+      builder: (_) =>
+          const ActiveRideScreen(autoStart: false, allowMinimize: true),
     ),
   );
 }
 
 /// After arm auto-start: hub if missing, then HUD unless the user minimized.
-void openArmedSessionAfterAutoStart(
-  BuildContext context,
-  WidgetRef ref,
-) {
+void openArmedSessionAfterAutoStart(BuildContext context, WidgetRef ref) {
   if (!context.mounted) return;
   ensureArmedSessionHub(context, ref);
   final recorder = ref.read(rideRecorderProvider);
@@ -105,10 +99,7 @@ Future<void> completeArmedOrActiveRide(
     await ref.read(activeWatchControllerProvider.notifier).end();
     final ride = await recorder.stop();
     unawaited(
-      enqueueAndDrainRideSync(
-        ref.read(syncOutboxServiceProvider),
-        ride.id,
-      ),
+      enqueueAndDrainRideSync(ref.read(syncOutboxServiceProvider), ride.id),
     );
     final points = await ref.read(rideDatabaseProvider).getPoints(ride.id);
     await LeanLabService.instance.finalizeTrackStats(
@@ -137,8 +128,6 @@ Future<void> completeArmedOrActiveRide(
     );
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      appSnackBar(l10n.userFacingError(e)),
-    );
+    showAppSnackError(context, l10n.userFacingError(e));
   }
 }

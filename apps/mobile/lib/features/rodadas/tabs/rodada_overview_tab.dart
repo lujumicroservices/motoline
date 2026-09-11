@@ -397,7 +397,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       }
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 
@@ -411,12 +411,10 @@ class RodadaOverviewTab extends ConsumerWidget {
       ref.invalidate(rodadaOverviewProvider(rodadaId));
       ref.invalidate(myRodadasProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.rodadaStatusChanged('ended'))),
-      );
+      showAppSnack(context, l10n.rodadaStatusChanged('ended'));
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 
@@ -439,9 +437,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       }
       if (rideId == null) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.noCompletedRidesToLink)));
+        showAppSnack(context, l10n.noCompletedRidesToLink);
         return;
       }
       if (!context.mounted) return;
@@ -456,7 +452,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 }

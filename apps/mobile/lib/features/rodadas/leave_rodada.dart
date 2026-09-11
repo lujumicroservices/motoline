@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/l10n_ext.dart';
 import 'rodada_capture_flow.dart';
 import 'rodada_providers.dart';
+import '../../widgets/app_snack.dart';
 
 /// Non-host leave. Returns true if the membership was deleted.
 Future<bool> confirmAndLeaveRodada(
@@ -35,9 +36,7 @@ Future<bool> confirmAndLeaveRodada(
     await ref.read(rodadaRepositoryProvider).leaveRodada(rodadaId);
   } catch (e) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
     }
     return false;
   }
@@ -45,8 +44,6 @@ Future<bool> confirmAndLeaveRodada(
   ref.invalidate(rodadaOverviewProvider(rodadaId));
   ref.invalidate(myRodadaMembershipProvider(rodadaId));
   if (!context.mounted) return true;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(l10n.leaveRodadaDone)),
-  );
+  showAppSnack(context, l10n.leaveRodadaDone);
   return true;
 }

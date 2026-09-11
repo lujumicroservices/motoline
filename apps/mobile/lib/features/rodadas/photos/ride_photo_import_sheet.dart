@@ -7,6 +7,7 @@ import '../../../theme/app_theme.dart';
 import '../rodada_providers.dart';
 import 'ride_photo_capture.dart';
 import 'ride_photo_gallery_scan.dart';
+import '../../../widgets/app_snack.dart';
 
 /// Confirm gallery photos before they hit the rodada album.
 class RidePhotoImportSheet extends ConsumerStatefulWidget {
@@ -64,7 +65,7 @@ class _RidePhotoImportSheetState extends ConsumerState<RidePhotoImportSheet> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
       setState(() => _busy = false);
     }
   }

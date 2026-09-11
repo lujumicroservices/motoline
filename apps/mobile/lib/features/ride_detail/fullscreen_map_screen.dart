@@ -15,6 +15,7 @@ import '../maps/map_control_chip.dart';
 import 'map_polyline_builder.dart';
 import 'widgets/map_layer_toggles.dart';
 import 'widgets/speed_legend.dart';
+import '../../widgets/app_snack.dart';
 
 /// Result returned when the rider loads metrics for a map area.
 class FullscreenMapSelection {
@@ -76,9 +77,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
     super.initState();
     _layers = widget.initialLayers;
     final scrub = widget.scrubIndex;
-    _scrubIndex = scrub != null &&
-            scrub >= 0 &&
-            scrub < widget.points.length
+    _scrubIndex = scrub != null && scrub >= 0 && scrub < widget.points.length
         ? scrub
         : (widget.points.isEmpty ? 0 : widget.points.length ~/ 2);
     final lo = widget.initialFocusStart;
@@ -201,9 +200,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
         if (mounted) _fitSelection(hit.start, hit.end);
       });
     } else if (showFeedback && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.areaNoPoints)),
-      );
+      showAppSnack(context, context.l10n.areaNoPoints);
     }
   }
 
@@ -254,9 +251,9 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
   void _loadMetrics() {
     final sel = _selection;
     if (sel == null || sel.end <= sel.start) return;
-    Navigator.of(context).pop(
-      FullscreenMapSelection(startIndex: sel.start, endIndex: sel.end),
-    );
+    Navigator.of(
+      context,
+    ).pop(FullscreenMapSelection(startIndex: sel.start, endIndex: sel.end));
   }
 
   void _setScrubAt(LatLng latLng) {
@@ -300,8 +297,8 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
     final leanSide = lean < -1
         ? l10n.leftShort
         : lean > 1
-            ? l10n.rightShort
-            : '·';
+        ? l10n.rightShort
+        : '·';
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
@@ -312,186 +309,191 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
           _popWithScrub();
         },
         child: Stack(
-        children: [
-          Positioned.fill(
-            child: FlutterMap(
-              mapController: _map,
-              options: MapOptions(
-                initialCenter: center,
-                initialZoom: 15,
-                initialCameraFit: CameraFit.bounds(
-                  bounds: bounds,
-                  padding: const EdgeInsets.fromLTRB(48, 120, 48, 200),
-                  maxZoom: 17,
-                ),
-                interactionOptions: InteractionOptions(
-                  flags: _selectMode
-                      ? InteractiveFlag.pinchZoom |
-                          InteractiveFlag.doubleTapZoom
-                      : InteractiveFlag.all,
-                ),
-                onTap: _selectMode ? null : (tap, latLng) => _setScrubAt(latLng),
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.rawthrottle.riderlab',
-                ),
-                PolylineLayer(polylines: _polylines),
-                MarkerLayer(markers: _markers),
-                liveGpsMapChild(),
-                if (_areaBounds != null)
-                  PolygonLayer(
-                    polygons: [
-                      Polygon(
-                        points: [
-                          _areaBounds!.northWest,
-                          _areaBounds!.northEast,
-                          _areaBounds!.southEast,
-                          _areaBounds!.southWest,
-                        ],
-                        color: RideVizPalette.leanLeft.withValues(alpha: 0.12),
-                        borderColor: RideVizPalette.leanLeft,
-                        borderStrokeWidth: 2,
-                      ),
-                    ],
+          children: [
+            Positioned.fill(
+              child: FlutterMap(
+                mapController: _map,
+                options: MapOptions(
+                  initialCenter: center,
+                  initialZoom: 15,
+                  initialCameraFit: CameraFit.bounds(
+                    bounds: bounds,
+                    padding: const EdgeInsets.fromLTRB(48, 120, 48, 200),
+                    maxZoom: 17,
                   ),
-              ],
-            ),
-          ),
-          if (_selectMode)
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              // Keep bottom chrome + zoom controls tappable.
-              bottom: 210,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onPanStart: _onSelectPanStart,
-                onPanUpdate: _onSelectPanUpdate,
-                onPanEnd: _onSelectPanEnd,
-                child: ValueListenableBuilder<(Offset?, Offset?)>(
-                  valueListenable: _dragRect,
-                  builder: (context, drag, _) {
-                    return CustomPaint(
-                      painter: _SelectionRectPainter(
-                        start: drag.$1,
-                        current: drag.$2,
-                      ),
-                    );
-                  },
+                  interactionOptions: InteractionOptions(
+                    flags: _selectMode
+                        ? InteractiveFlag.pinchZoom |
+                              InteractiveFlag.doubleTapZoom
+                        : InteractiveFlag.all,
+                  ),
+                  onTap: _selectMode
+                      ? null
+                      : (tap, latLng) => _setScrubAt(latLng),
                 ),
-              ),
-            ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-              child: Column(
                 children: [
-                  _TopBar(
-                    title: l10n.fullscreenMap,
-                    selecting: _selectMode,
-                    onBack: _popWithScrub,
-                    onToggleSelect: () {
-                      _dragRect.value = (null, null);
-                      setState(() {
-                        _selectMode = !_selectMode;
-                      });
-                    },
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.rawthrottle.riderlab',
                   ),
-                  const SizedBox(height: 8),
-                  Material(
-                    color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
-                      child: MapLayerToggles(
-                        options: _layers,
-                        onChanged: (v) => setState(() {
-                          _layers = v;
-                          _rebuildTrackLayers();
-                        }),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: _ZoomControls(
-                      onZoomIn: () => _zoomBy(1),
-                      onZoomOut: () => _zoomBy(-1),
-                      onMyLocation: () => recenterToLiveGpsOrNotify(_map),
-                      onFit: _fitRide,
-                    ),
-                  ),
-                  const Spacer(),
-                  Material(
-                    color: AppTheme.asphaltElevated.withValues(alpha: 0.94),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.navigation,
-                            size: 16,
-                            color: AppTheme.lineHot,
+                  PolylineLayer(polylines: _polylines),
+                  MarkerLayer(markers: _markers),
+                  liveGpsMapChild(),
+                  if (_areaBounds != null)
+                    PolygonLayer(
+                      polygons: [
+                        Polygon(
+                          points: [
+                            _areaBounds!.northWest,
+                            _areaBounds!.northEast,
+                            _areaBounds!.southEast,
+                            _areaBounds!.southWest,
+                          ],
+                          color: RideVizPalette.leanLeft.withValues(
+                            alpha: 0.12,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${speed == null ? "--" : "${speed.toStringAsFixed(0)} ${l10n.kmh}"}'
-                              '  ·  ${lean.abs().toStringAsFixed(0)}° $leanSide'
-                              '  ·  ${_scrubIndex + 1}/${points.length}',
-                              style: GoogleFonts.rajdhani(
-                                color: AppTheme.mist,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                          borderColor: RideVizPalette.leanLeft,
+                          borderStrokeWidth: 2,
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  if (_layers.showLegend)
-                    DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: Color(0xCC1A1C1E),
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: _layers.showRoadKindContrast
-                            ? Text(
-                                '${l10n.recta} · ${l10n.curva}',
-                                style: GoogleFonts.rajdhani(
-                                  color: AppTheme.steel,
-                                  fontSize: 12,
-                                ),
-                              )
-                            : const SpeedColorLegend(),
-                      ),
-                    ),
-                  if (_layers.showLegend) const SizedBox(height: 10),
-                  _BottomPanel(
-                    selectMode: _selectMode,
-                    hasSelection: hasFocus,
-                    selection: _selection,
-                    onUseVisible: _useVisibleArea,
-                    onClear: _clearSelection,
-                    onLoadMetrics: hasFocus ? _loadMetrics : null,
-                  ),
                 ],
               ),
             ),
-          ),
-        ],
+            if (_selectMode)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                // Keep bottom chrome + zoom controls tappable.
+                bottom: 210,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanStart: _onSelectPanStart,
+                  onPanUpdate: _onSelectPanUpdate,
+                  onPanEnd: _onSelectPanEnd,
+                  child: ValueListenableBuilder<(Offset?, Offset?)>(
+                    valueListenable: _dragRect,
+                    builder: (context, drag, _) {
+                      return CustomPaint(
+                        painter: _SelectionRectPainter(
+                          start: drag.$1,
+                          current: drag.$2,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                child: Column(
+                  children: [
+                    _TopBar(
+                      title: l10n.fullscreenMap,
+                      selecting: _selectMode,
+                      onBack: _popWithScrub,
+                      onToggleSelect: () {
+                        _dragRect.value = (null, null);
+                        setState(() {
+                          _selectMode = !_selectMode;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Material(
+                      color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
+                        child: MapLayerToggles(
+                          options: _layers,
+                          onChanged: (v) => setState(() {
+                            _layers = v;
+                            _rebuildTrackLayers();
+                          }),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _ZoomControls(
+                        onZoomIn: () => _zoomBy(1),
+                        onZoomOut: () => _zoomBy(-1),
+                        onMyLocation: () => recenterToLiveGpsOrNotify(_map),
+                        onFit: _fitRide,
+                      ),
+                    ),
+                    const Spacer(),
+                    Material(
+                      color: AppTheme.asphaltElevated.withValues(alpha: 0.94),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.navigation,
+                              size: 16,
+                              color: AppTheme.lineHot,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${speed == null ? "--" : "${speed.toStringAsFixed(0)} ${l10n.kmh}"}'
+                                '  ·  ${lean.abs().toStringAsFixed(0)}° $leanSide'
+                                '  ·  ${_scrubIndex + 1}/${points.length}',
+                                style: GoogleFonts.rajdhani(
+                                  color: AppTheme.mist,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (_layers.showLegend)
+                      DecoratedBox(
+                        decoration: const BoxDecoration(
+                          color: Color(0xCC1A1C1E),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                          child: _layers.showRoadKindContrast
+                              ? Text(
+                                  '${l10n.recta} · ${l10n.curva}',
+                                  style: GoogleFonts.rajdhani(
+                                    color: AppTheme.steel,
+                                    fontSize: 12,
+                                  ),
+                                )
+                              : const SpeedColorLegend(),
+                        ),
+                      ),
+                    if (_layers.showLegend) const SizedBox(height: 10),
+                    _BottomPanel(
+                      selectMode: _selectMode,
+                      hasSelection: hasFocus,
+                      selection: _selection,
+                      onUseVisible: _useVisibleArea,
+                      onClear: _clearSelection,
+                      onLoadMetrics: hasFocus ? _loadMetrics : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -611,9 +613,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
     }
 
     final scrub = _scrubIndex;
-    if (_layers.showPlayhead &&
-        scrub >= 0 &&
-        scrub < points.length) {
+    if (_layers.showPlayhead && scrub >= 0 && scrub < points.length) {
       final p = points[scrub];
       markers.add(
         Marker(
@@ -626,8 +626,11 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
               shape: BoxShape.circle,
               border: Border.all(color: AppTheme.lineHot, width: 3),
             ),
-            child:
-                const Icon(Icons.navigation, size: 14, color: AppTheme.asphalt),
+            child: const Icon(
+              Icons.navigation,
+              size: 14,
+              color: AppTheme.asphalt,
+            ),
           ),
         ),
       );
@@ -642,9 +645,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
     if (segment.length < 2) return const [];
     return [
       Polyline(
-        points: [
-          for (final p in segment) LatLng(p.latitude, p.longitude),
-        ],
+        points: [for (final p in segment) LatLng(p.latitude, p.longitude)],
         color: AppTheme.steel.withValues(alpha: dimmed ? 0.35 : 0.7),
         strokeWidth: dimmed ? 3 : 4,
       ),
@@ -797,10 +798,8 @@ class _BottomPanel extends StatelessWidget {
             selectMode
                 ? l10n.selectAreaBody
                 : (hasSelection
-                    ? l10n.areaReady(
-                        selection!.end - selection!.start + 1,
-                      )
-                    : l10n.fullscreenMapHelp),
+                      ? l10n.areaReady(selection!.end - selection!.start + 1)
+                      : l10n.fullscreenMapHelp),
             style: GoogleFonts.rajdhani(
               color: AppTheme.steel,
               fontSize: 13,
@@ -818,10 +817,7 @@ class _BottomPanel extends StatelessWidget {
               ),
               if (hasSelection) ...[
                 const SizedBox(width: 10),
-                TextButton(
-                  onPressed: onClear,
-                  child: Text(l10n.clearArea),
-                ),
+                TextButton(onPressed: onClear, child: Text(l10n.clearArea)),
               ],
             ],
           ),

@@ -57,9 +57,11 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
 
   Future<void> _resumeFamilyWatch() async {
     try {
-      await ref.read(activeWatchControllerProvider.notifier).resumeFor(
-        localRideId: WatchRepository.rodadaLocalRideId(widget.rodadaId),
-      );
+      await ref
+          .read(activeWatchControllerProvider.notifier)
+          .resumeFor(
+            localRideId: WatchRepository.rodadaLocalRideId(widget.rodadaId),
+          );
     } catch (_) {}
   }
 
@@ -76,9 +78,7 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
       setState(() => _locationOk = ok);
       if (ok) unawaited(_resumeFamilyWatch());
       if (!ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.locationPermissionDenied)),
-        );
+        showAppSnackError(context, context.l10n.locationPermissionDenied);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -111,10 +111,9 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
     final familyOn = familyWatchIsLive(
       ref.watch(activeWatchControllerProvider),
     );
-    final live = ref.watch(rodadaOverviewProvider(widget.rodadaId)).maybeWhen(
-      data: (r) => r?.isLive == true,
-      orElse: () => false,
-    );
+    final live = ref
+        .watch(rodadaOverviewProvider(widget.rodadaId))
+        .maybeWhen(data: (r) => r?.isLive == true, orElse: () => false);
 
     return Column(
       children: [
@@ -446,7 +445,9 @@ Future<void> _addStop(
       showAppSnack(context, l10n.myLocationUnavailable);
       return;
     }
-    await ref.read(rodadaRepositoryProvider).addStop(
+    await ref
+        .read(rodadaRepositoryProvider)
+        .addStop(
           rodadaId: rodadaId,
           title: title.isEmpty ? l10n.stopDefault : title,
           latitude: pos.latitude,

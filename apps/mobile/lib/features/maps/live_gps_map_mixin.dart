@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import 'map_control_chip.dart';
+import '../../widgets/app_snack.dart';
 
 /// Live GPS blue-dot + recenter control for interactive maps.
 ///
@@ -24,6 +25,7 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
   Future<void> startLiveGps({
     MapController? map,
     bool centerOnce = true,
+
     /// When set, called before the system permission dialog (Play disclosure).
     Future<bool> Function(BuildContext context)? ensurePermission,
   }) async {
@@ -32,7 +34,8 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
       if (!serviceOn) return;
 
       var permission = await Geolocator.checkPermission();
-      final granted = permission == LocationPermission.whileInUse ||
+      final granted =
+          permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
       if (!granted) {
         if (ensurePermission != null) {
@@ -62,15 +65,16 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
       }
 
       await _liveGpsSub?.cancel();
-      _liveGpsSub = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 15,
-        ),
-      ).listen((pos) {
-        if (!mounted || _gpsNotifierDisposed) return;
-        liveGpsListenable.value = LatLng(pos.latitude, pos.longitude);
-      });
+      _liveGpsSub =
+          Geolocator.getPositionStream(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              distanceFilter: 15,
+            ),
+          ).listen((pos) {
+            if (!mounted || _gpsNotifierDisposed) return;
+            liveGpsListenable.value = LatLng(pos.latitude, pos.longitude);
+          });
     } catch (_) {
       // Maps still work without live GPS.
     }
@@ -110,15 +114,11 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
   Future<void> recenterToLiveGpsOrNotify(MapController map) async {
     final ok = await recenterToLiveGps(map);
     if (ok || !mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.myLocationUnavailable)),
-    );
+    showAppSnackError(context, context.l10n.myLocationUnavailable);
   }
 
   Widget myLocationChip(MapController map) {
-    return MapMyLocationChip(
-      onPressed: () => recenterToLiveGpsOrNotify(map),
-    );
+    return MapMyLocationChip(onPressed: () => recenterToLiveGpsOrNotify(map));
   }
 
   Widget myLocationOverlay(
@@ -126,11 +126,7 @@ mixin LiveGpsMapMixin<T extends StatefulWidget> on State<T> {
     double top = 8,
     double right = 8,
   }) {
-    return Positioned(
-      top: top,
-      right: right,
-      child: myLocationChip(map),
-    );
+    return Positioned(top: top, right: right, child: myLocationChip(map));
   }
 
   /// Single map child — rebuilds only when the blue-dot moves.

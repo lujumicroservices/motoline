@@ -12,6 +12,7 @@ import '../models/camera_member.dart';
 import '../models/camera_zone.dart';
 import '../providers/adventure_camera_providers.dart';
 import 'camera_zones_map_screen.dart';
+import '../../../widgets/app_snack.dart';
 
 /// Settings → Lab block. Entirely optional; default off.
 class AdventureCameraSettingsSection extends ConsumerWidget {
@@ -30,10 +31,8 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
     if (!context.mounted) return;
     final result = await Navigator.of(context).push<List<CameraZone>>(
       MaterialPageRoute(
-        builder: (_) => CameraZonesMapScreen(
-          initialZones: hub.zones,
-          trackPoints: track,
-        ),
+        builder: (_) =>
+            CameraZonesMapScreen(initialZones: hub.zones, trackPoints: track),
       ),
     );
     if (result == null) return;
@@ -69,9 +68,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
       final known = hub.cameraGroup.map((m) => m.remoteId).toSet();
       final fresh = hits.where((h) => !known.contains(h.remoteId)).toList();
       if (fresh.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.labAdventureCameraGroupNoneFound)),
-        );
+        showAppSnack(context, l10n.labAdventureCameraGroupNoneFound);
         return;
       }
       final picked = await showDialog<GoProScanHit>(
@@ -121,9 +118,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
     }
   }
 
@@ -136,7 +131,8 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
 
     return hydrated.when(
       loading: () => const SizedBox.shrink(),
-      error: (e, _) => Text('$e', style: const TextStyle(color: AppTheme.signal)),
+      error: (e, _) =>
+          Text('$e', style: const TextStyle(color: AppTheme.signal)),
       data: (hub) {
         final enabled = hub.isLabEnabled;
         final status = statusAsync.asData?.value ?? hub.status;
@@ -341,42 +337,39 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                     fontSize: 12,
                   ),
                 )
-              else
-                ...[
-                  for (final member in hub.cameraGroup)
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      secondary: IconButton(
-                        tooltip: l10n.labAdventureCameraGroupRemove,
-                        onPressed: () async {
-                          await hub.removeCameraFromGroup(member.id);
-                          ref.invalidate(adventureCameraHydratedProvider);
-                        },
-                        icon: const Icon(Icons.delete_outline, size: 20),
-                      ),
-                      title: Text(
-                        member.displayName,
-                        style: GoogleFonts.rajdhani(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        member.remoteId,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.rajdhani(
-                          color: AppTheme.steel,
-                          fontSize: 11,
-                        ),
-                      ),
-                      value: member.enabled,
-                      activeThumbColor: AppTheme.lineHot,
-                      onChanged: (v) async {
-                        await hub.setCameraEnabled(member.id, v);
+              else ...[
+                for (final member in hub.cameraGroup)
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    secondary: IconButton(
+                      tooltip: l10n.labAdventureCameraGroupRemove,
+                      onPressed: () async {
+                        await hub.removeCameraFromGroup(member.id);
                         ref.invalidate(adventureCameraHydratedProvider);
                       },
+                      icon: const Icon(Icons.delete_outline, size: 20),
                     ),
-                ],
+                    title: Text(
+                      member.displayName,
+                      style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      member.remoteId,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.rajdhani(
+                        color: AppTheme.steel,
+                        fontSize: 11,
+                      ),
+                    ),
+                    value: member.enabled,
+                    activeThumbColor: AppTheme.lineHot,
+                    onChanged: (v) async {
+                      await hub.setCameraEnabled(member.id, v);
+                      ref.invalidate(adventureCameraHydratedProvider);
+                    },
+                  ),
+              ],
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
@@ -386,7 +379,9 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                 ),
               ),
               Theme(
-                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                data: Theme.of(
+                  context,
+                ).copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
                   tilePadding: EdgeInsets.zero,
                   childrenPadding: const EdgeInsets.only(bottom: 8),
@@ -500,10 +495,9 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                       onPressed: () async {
                         await hub.startRecordingNow();
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.labAdventureCameraTestStartSnack),
-                          ),
+                        showAppSnack(
+                          context,
+                          l10n.labAdventureCameraTestStartSnack,
                         );
                       },
                       style: FilledButton.styleFrom(
@@ -520,10 +514,9 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                       onPressed: () async {
                         await hub.stopRecordingNow();
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.labAdventureCameraTestStopSnack),
-                          ),
+                        showAppSnack(
+                          context,
+                          l10n.labAdventureCameraTestStopSnack,
                         );
                       },
                       icon: const Icon(Icons.stop_circle_outlined, size: 18),

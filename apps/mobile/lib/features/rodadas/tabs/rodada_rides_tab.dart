@@ -11,6 +11,7 @@ import '../../../theme/app_theme.dart';
 import '../../maps/live_gps_map_mixin.dart';
 import '../models/rodada_models.dart';
 import '../rodada_providers.dart';
+import '../../../widgets/app_snack.dart';
 
 class RodadaRidesTab extends ConsumerWidget {
   const RodadaRidesTab({super.key, required this.rodadaId});
@@ -76,30 +77,30 @@ class RodadaRidesTab extends ConsumerWidget {
                 return ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                itemCount: list.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, i) {
-                  final r = list[i];
-                  return ListTile(
-                    title: Text(r.riderLabel),
-                    subtitle: Text(
-                      '${r.distanceKm.toStringAsFixed(1)} km'
-                      '${r.maxSpeedKmh != null ? ' · ${r.maxSpeedKmh!.toStringAsFixed(0)} km/h' : ''}'
-                      '${r.lineScore != null ? ' · ${l10n.scoreLabel(r.lineScore!)}' : ''}',
-                    ),
-                    trailing: const Icon(Icons.map_outlined),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => _RodadaRideTrackScreen(ride: r),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          ),
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, i) {
+                    final r = list[i];
+                    return ListTile(
+                      title: Text(r.riderLabel),
+                      subtitle: Text(
+                        '${r.distanceKm.toStringAsFixed(1)} km'
+                        '${r.maxSpeedKmh != null ? ' · ${r.maxSpeedKmh!.toStringAsFixed(0)} km/h' : ''}'
+                        '${r.lineScore != null ? ' · ${l10n.scoreLabel(r.lineScore!)}' : ''}',
+                      ),
+                      trailing: const Icon(Icons.map_outlined),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => _RodadaRideTrackScreen(ride: r),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -110,13 +111,12 @@ class RodadaRidesTab extends ConsumerWidget {
     final l10n = context.l10n;
     try {
       final rides = await ref.read(ridesListProvider.future);
-      final completed =
-          rides.where((r) => r.status == RideStatus.completed).toList();
+      final completed = rides
+          .where((r) => r.status == RideStatus.completed)
+          .toList();
       if (completed.isEmpty) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.noCompletedRidesToLink)),
-        );
+        showAppSnack(context, l10n.noCompletedRidesToLink);
         return;
       }
       final local = completed.first;
@@ -126,26 +126,19 @@ class RodadaRidesTab extends ConsumerWidget {
           .cloudRideIdForLocal(local.id);
       if (cloudId == null) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.syncRideFirst)),
-        );
+        showAppSnack(context, l10n.syncRideFirst);
         return;
       }
-      await ref.read(rodadaRepositoryProvider).linkRideToRodada(
-            cloudRideId: cloudId,
-            rodadaId: rodadaId,
-          );
+      await ref
+          .read(rodadaRepositoryProvider)
+          .linkRideToRodada(cloudRideId: cloudId, rodadaId: rodadaId);
       ref.invalidate(rodadaRidesProvider(rodadaId));
       ref.invalidate(myRodadaMembershipProvider(rodadaId));
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.rideLinkedToRodada)),
-      );
+      showAppSnack(context, l10n.rideLinkedToRodada);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
     }
   }
 }
@@ -184,10 +177,7 @@ class _RodadaRideTrackScreen extends ConsumerWidget {
 }
 
 class _RodadaRideTrackMap extends StatefulWidget {
-  const _RodadaRideTrackMap({
-    required this.center,
-    required this.points,
-  });
+  const _RodadaRideTrackMap({required this.center, required this.points});
 
   final LatLng center;
   final List<({double lat, double lng})> points;
@@ -213,10 +203,7 @@ class _RodadaRideTrackMapState extends State<_RodadaRideTrackMap>
       children: [
         FlutterMap(
           mapController: _map,
-          options: MapOptions(
-            initialCenter: widget.center,
-            initialZoom: 12,
-          ),
+          options: MapOptions(initialCenter: widget.center, initialZoom: 12),
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -225,9 +212,7 @@ class _RodadaRideTrackMapState extends State<_RodadaRideTrackMap>
             PolylineLayer(
               polylines: [
                 Polyline(
-                  points: [
-                    for (final p in widget.points) LatLng(p.lat, p.lng),
-                  ],
+                  points: [for (final p in widget.points) LatLng(p.lat, p.lng)],
                   color: AppTheme.line,
                   strokeWidth: 4,
                 ),

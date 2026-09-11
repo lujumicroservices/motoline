@@ -6,6 +6,7 @@ import '../core/pro/pro_entitlement.dart';
 import '../l10n/l10n_ext.dart';
 import '../providers/pro_entitlement_provider.dart';
 import '../theme/app_theme.dart';
+import 'app_snack.dart';
 
 String partnerCodeErrorMessage(AppLocalizations l10n, String? error) {
   switch (error) {
@@ -56,17 +57,14 @@ class _PartnerCodeRedeemFieldState
       _busy = true;
       _error = null;
     });
-    final result =
-        await ref.read(proEntitlementProvider.notifier).redeemPartnerCode(
-              _controller.text,
-            );
+    final result = await ref
+        .read(proEntitlementProvider.notifier)
+        .redeemPartnerCode(_controller.text);
     if (!mounted) return;
     setState(() => _busy = false);
     if (result.ok) {
       _controller.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.partnerCodeRedeemed)),
-      );
+      showAppSnack(context, l10n.partnerCodeRedeemed);
     } else {
       setState(() => _error = partnerCodeErrorMessage(l10n, result.error));
     }

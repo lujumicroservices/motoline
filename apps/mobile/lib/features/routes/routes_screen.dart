@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../../widgets/visibility_selector.dart';
 import 'route_detail_screen.dart';
+import '../../widgets/app_snack.dart';
 
 /// Manage named routes / circuits and share them with friends.
 class RoutesScreen extends ConsumerWidget {
@@ -156,8 +157,7 @@ class RoutesScreen extends ConsumerWidget {
                 }
                 return Column(
                   children: [
-                    for (final route in routes)
-                      _MyRouteTile(route: route),
+                    for (final route in routes) _MyRouteTile(route: route),
                   ],
                 );
               },
@@ -192,9 +192,7 @@ class RoutesScreen extends ConsumerWidget {
                         leading: const Icon(Icons.route, color: AppTheme.line),
                         title: Text(
                           r.name,
-                          style: GoogleFonts.exo2(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
                           r.description?.isNotEmpty == true
@@ -289,7 +287,9 @@ class RoutesScreen extends ConsumerWidget {
 
     if (ok != true || !context.mounted) return;
     try {
-      await ref.read(routeServiceProvider).createRoute(
+      await ref
+          .read(routeServiceProvider)
+          .createRoute(
             name: nameCtrl.text,
             description: descCtrl.text,
             visibility: visibility,
@@ -297,14 +297,10 @@ class RoutesScreen extends ConsumerWidget {
       ref.invalidate(routesListProvider);
       ref.invalidate(sharedPeerRoutesProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.routeCreated)),
-      );
+      showAppSnack(context, l10n.routeCreated);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
     }
   }
 }
@@ -339,9 +335,7 @@ class _MyRouteTile extends ConsumerWidget {
     ref.invalidate(routesListProvider);
     ref.invalidate(sharedPeerRoutesProvider);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.routeDeleted)),
-    );
+    showAppSnack(context, l10n.routeDeleted);
   }
 
   @override
@@ -352,13 +346,15 @@ class _MyRouteTile extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => RouteDetailScreen(route: route),
-            ),
-          ).then((_) {
-            ref.invalidate(routesListProvider);
-          });
+          Navigator.of(context)
+              .push(
+                MaterialPageRoute<void>(
+                  builder: (_) => RouteDetailScreen(route: route),
+                ),
+              )
+              .then((_) {
+                ref.invalidate(routesListProvider);
+              });
         },
         title: Row(
           children: [
@@ -371,7 +367,11 @@ class _MyRouteTile extends ConsumerWidget {
             if (route.isLoopReady)
               const Padding(
                 padding: EdgeInsets.only(left: 6),
-                child: Icon(Icons.all_inclusive, size: 16, color: AppTheme.line),
+                child: Icon(
+                  Icons.all_inclusive,
+                  size: 16,
+                  color: AppTheme.line,
+                ),
               ),
           ],
         ),
@@ -390,9 +390,7 @@ class _MyRouteTile extends ConsumerWidget {
               tooltip: 'Visibility',
               initialValue: route.visibility,
               onSelected: (v) async {
-                await ref
-                    .read(routeServiceProvider)
-                    .setVisibility(route.id, v);
+                await ref.read(routeServiceProvider).setVisibility(route.id, v);
                 ref.invalidate(routesListProvider);
                 ref.invalidate(sharedPeerRoutesProvider);
               },
@@ -402,14 +400,11 @@ class _MyRouteTile extends ConsumerWidget {
               ],
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(
-                  switch (route.visibility) {
-                    ShareVisibility.private => Icons.lock_outline,
-                    ShareVisibility.friends => Icons.group_outlined,
-                    ShareVisibility.public => Icons.public,
-                  },
-                  color: AppTheme.mist,
-                ),
+                child: Icon(switch (route.visibility) {
+                  ShareVisibility.private => Icons.lock_outline,
+                  ShareVisibility.friends => Icons.group_outlined,
+                  ShareVisibility.public => Icons.public,
+                }, color: AppTheme.mist),
               ),
             ),
             IconButton(

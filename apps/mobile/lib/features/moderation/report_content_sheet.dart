@@ -6,6 +6,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import 'content_moderation_providers.dart';
 import 'content_moderation_repository.dart';
+import '../../widgets/app_snack.dart';
 
 const ugcReportReasons = ['sexual', 'hate', 'harassment', 'spam', 'other'];
 
@@ -18,20 +19,13 @@ Future<void> showReportContentSheet(
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
-    builder: (ctx) => _ReportSheet(
-      kind: kind,
-      messageId: messageId,
-      photoId: photoId,
-    ),
+    builder: (ctx) =>
+        _ReportSheet(kind: kind, messageId: messageId, photoId: photoId),
   );
 }
 
 class _ReportSheet extends ConsumerStatefulWidget {
-  const _ReportSheet({
-    required this.kind,
-    this.messageId,
-    this.photoId,
-  });
+  const _ReportSheet({required this.kind, this.messageId, this.photoId});
 
   final String kind;
   final String? messageId;
@@ -46,18 +40,20 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
   bool _busy = false;
 
   String _label(AppLocalizations l10n, String reason) => switch (reason) {
-        'sexual' => l10n.ugcReasonSexual,
-        'hate' => l10n.ugcReasonHate,
-        'harassment' => l10n.ugcReasonHarassment,
-        'spam' => l10n.ugcReasonSpam,
-        _ => l10n.ugcReasonOther,
-      };
+    'sexual' => l10n.ugcReasonSexual,
+    'hate' => l10n.ugcReasonHate,
+    'harassment' => l10n.ugcReasonHarassment,
+    'spam' => l10n.ugcReasonSpam,
+    _ => l10n.ugcReasonOther,
+  };
 
   Future<void> _submit() async {
     final l10n = context.l10n;
     setState(() => _busy = true);
     try {
-      await ref.read(contentModerationRepositoryProvider).report(
+      await ref
+          .read(contentModerationRepositoryProvider)
+          .report(
             kind: widget.kind,
             messageId: widget.messageId,
             photoId: widget.photoId,
@@ -65,13 +61,11 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
           );
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.ugcReportThanks)),
-      );
+      showAppSnack(context, l10n.ugcReportThanks);
     } catch (e) {
       if (!mounted) return;
       final msg = isUgcBannedError(e) ? l10n.ugcBanned : '$e';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      showAppSnack(context, msg);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -89,7 +83,10 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
           children: [
             Text(
               l10n.ugcReportTitle,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 18),
+              style: GoogleFonts.exo2(
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -103,7 +100,7 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
                 dense: true,
                 value: r,
                 groupValue: _reason,
-                title: Text( _label(l10n, r)),
+                title: Text(_label(l10n, r)),
                 onChanged: _busy
                     ? null
                     : (v) {

@@ -10,6 +10,7 @@ import '../../providers/bike_provider.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../rodadas/rodada_post_ride_flow.dart';
+import '../../widgets/app_snack.dart';
 
 /// Beta post-ride survey — trains lean / curve / brake models.
 class RideEngineLabelScreen extends ConsumerStatefulWidget {
@@ -67,9 +68,7 @@ class _RideEngineLabelScreenState extends ConsumerState<RideEngineLabelScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
       setState(() => _saving = false);
     }
   }

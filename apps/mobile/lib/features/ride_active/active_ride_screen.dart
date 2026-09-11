@@ -40,6 +40,7 @@ import 'loop_mark_map_screen.dart';
 import 'widgets/gps_status_widgets.dart';
 import 'widgets/recording_rec_badge.dart';
 import 'widgets/upright_freeze_panel.dart';
+import '../../widgets/app_snack.dart';
 
 /// Normal = single ride. Loop = auto-lap session bound to a route loop.
 enum ActiveRideMode { normal, loop }
@@ -243,7 +244,9 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final loopState = loopStateAsync?.valueOrNull;
 
     final isRecording = recorder.isRecording;
-    final familyOn = familyWatchIsLive(ref.watch(activeWatchControllerProvider));
+    final familyOn = familyWatchIsLive(
+      ref.watch(activeWatchControllerProvider),
+    );
     final staging =
         !widget.autoStart && !isRecording && !_starting && _startError == null;
     final lockNav = _starting || (isRecording && !widget.allowMinimize);
@@ -288,10 +291,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                   familyOn ? Icons.favorite : Icons.favorite_border,
                   color: familyOn ? AppTheme.lineHot : AppTheme.steel,
                 ),
-                onPressed: () => openFamilyWatchScreen(
-                  context,
-                  localRideId: ride.id,
-                ),
+                onPressed: () =>
+                    openFamilyWatchScreen(context, localRideId: ride.id),
               ),
             if (!_starting && (isRecording || staging)) ...[
               const AdventureCameraStatusChip(),
@@ -334,9 +335,10 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                           setState(() => _keepRidingDismissed = true),
                       onEnd: () =>
                           _isLoop ? _endLoopSession(context) : _stop(context),
-                      endLabel: shouldUseRodadaPauseAction(
-                        ref.read(rideRecorderProvider).activeRodadaId,
-                      )
+                      endLabel:
+                          shouldUseRodadaPauseAction(
+                            ref.read(rideRecorderProvider).activeRodadaId,
+                          )
                           ? l10n.pauseRodadaCapture
                           : l10n.endRide,
                     ),
@@ -451,8 +453,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                       )
                       ? l10n.pauseRodadaCapture
                       : (widget.allowMinimize
-                          ? l10n.stopRecording
-                          : l10n.endRide),
+                            ? l10n.stopRecording
+                            : l10n.endRide),
                 ),
               ),
             ],
@@ -468,10 +470,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
           child: Row(
             children: [
-              GpsLockBadge(
-                accuracyMeters: accuracyMeters,
-                rateHz: gpsRateHz,
-              ),
+              GpsLockBadge(accuracyMeters: accuracyMeters, rateHz: gpsRateHz),
               const Spacer(),
             ],
           ),
@@ -480,151 +479,139 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
           child: Text(
             l10n.activeMountHelp,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.steel,
-              fontSize: 13,
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: l10n.distance,
+                  value: distanceKm.toStringAsFixed(2),
+                  unit: 'km',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatCard(
+                  label: l10n.time,
+                  value: formatDuration(duration),
+                  unit: '',
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: l10n.speed,
+                  value: speedKmh == null ? '--' : speedKmh.toStringAsFixed(0),
+                  unit: l10n.kmh,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatCard(
+                  label: leanCalibrated ? l10n.bikeLean : l10n.calibrating,
+                  value: leanDegrees == null
+                      ? '--'
+                      : leanDegrees.abs().toStringAsFixed(0),
+                  unit: leanDegrees == null
+                      ? '°'
+                      : (leanDegrees.abs() < 2
+                            ? '°'
+                            : (leanDegrees >= 0
+                                  ? '° ${l10n.rightShort}'
+                                  : '° ${l10n.leftShort}')),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: l10n.points,
+                  value: '$pointCount',
+                  unit: '',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatCard(
+                  label: l10n.pressure,
+                  value: pressureHpa == null
+                      ? '--'
+                      : pressureHpa.toStringAsFixed(0),
+                  unit: 'hPa',
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: _StatCard(
+            label: l10n.maxLR,
+            value:
+                '${maxLeanLeft.toStringAsFixed(0)}/${maxLeanRight.toStringAsFixed(0)}',
+            unit: '°',
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: mapH,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: PilotLineMap(
+                    points: points,
+                    interactive: true,
+                    showStartEnd: !_isLoop,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: RecordingRecBadge(
+                    label: isPaused ? l10n.pausedLabel : l10n.recordingRec,
+                    paused: isPaused,
+                  ),
+                ),
+                if (_isLoop)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Material(
+                      color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
+                      borderRadius: BorderRadius.circular(12),
+                      child: IconButton(
+                        tooltip: l10n.loopOpenMarkMap,
+                        onPressed: () => _openLoopMarkMap(points, loopState),
+                        icon: const Icon(Icons.fullscreen),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _StatCard(
-                        label: l10n.distance,
-                        value: distanceKm.toStringAsFixed(2),
-                        unit: 'km',
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatCard(
-                        label: l10n.time,
-                        value: formatDuration(duration),
-                        unit: '',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _StatCard(
-                        label: l10n.speed,
-                        value: speedKmh == null
-                            ? '--'
-                            : speedKmh.toStringAsFixed(0),
-                        unit: l10n.kmh,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatCard(
-                        label: leanCalibrated
-                            ? l10n.bikeLean
-                            : l10n.calibrating,
-                        value: leanDegrees == null
-                            ? '--'
-                            : leanDegrees.abs().toStringAsFixed(0),
-                        unit: leanDegrees == null
-                            ? '°'
-                            : (leanDegrees.abs() < 2
-                                  ? '°'
-                                  : (leanDegrees >= 0
-                                        ? '° ${l10n.rightShort}'
-                                        : '° ${l10n.leftShort}')),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _StatCard(
-                        label: l10n.points,
-                        value: '$pointCount',
-                        unit: '',
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatCard(
-                        label: l10n.pressure,
-                        value: pressureHpa == null
-                            ? '--'
-                            : pressureHpa.toStringAsFixed(0),
-                        unit: 'hPa',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _StatCard(
-                  label: l10n.maxLR,
-                  value:
-                      '${maxLeanLeft.toStringAsFixed(0)}/${maxLeanRight.toStringAsFixed(0)}',
-                  unit: '°',
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: mapH,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: PilotLineMap(
-                          points: points,
-                          interactive: true,
-                          showStartEnd: !_isLoop,
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: RecordingRecBadge(
-                          label: isPaused
-                              ? l10n.pausedLabel
-                              : l10n.recordingRec,
-                          paused: isPaused,
-                        ),
-                      ),
-                      if (_isLoop)
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Material(
-                            color: AppTheme.asphaltElevated.withValues(
-                              alpha: 0.92,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            child: IconButton(
-                              tooltip: l10n.loopOpenMarkMap,
-                              onPressed: () =>
-                                  _openLoopMarkMap(points, loopState),
-                              icon: const Icon(Icons.fullscreen),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              autoPauseAndStop(),
-            ],
+        autoPauseAndStop(),
+      ],
     );
   }
 
@@ -656,7 +643,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       await loop.markEnd(lat: result.end.latitude, lng: result.end.longitude);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 
@@ -678,7 +665,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       Navigator.of(context).pop();
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 }
@@ -931,7 +918,7 @@ class _LoopHud extends StatelessWidget {
       await action;
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 

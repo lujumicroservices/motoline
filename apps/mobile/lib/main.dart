@@ -11,6 +11,7 @@ import 'features/auth/auth_gate.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'theme/app_theme.dart';
+import 'widgets/app_toast.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,6 @@ class RiderLabApp extends ConsumerWidget {
     return MaterialApp(
       title: 'RiderLab',
       navigatorKey: appNavigatorKey,
-      scaffoldMessengerKey: appMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       locale: locale,
@@ -54,8 +54,9 @@ class RiderLabApp extends ConsumerWidget {
       },
       home: const _BootHome(),
       builder: (context, child) {
-        return ImpersonationGate(
-          child: child ?? const SizedBox.shrink(),
+        return AppToastHost(
+          key: appToastHostKey,
+          child: ImpersonationGate(child: child ?? const SizedBox.shrink()),
         );
       },
     );

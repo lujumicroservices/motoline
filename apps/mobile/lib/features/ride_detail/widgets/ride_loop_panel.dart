@@ -14,14 +14,11 @@ import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 import '../../ride_active/loop_mark_map_screen.dart';
 import '../../routes/route_detail_screen.dart';
+import '../../../widgets/app_snack.dart';
 
 /// Loop discover / define module inside Ride Lab for one ride.
 class RideLoopPanel extends ConsumerStatefulWidget {
-  const RideLoopPanel({
-    super.key,
-    required this.ride,
-    required this.points,
-  });
+  const RideLoopPanel({super.key, required this.ride, required this.points});
 
   final Ride ride;
   final List<TrackPoint> points;
@@ -43,10 +40,9 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
     }
 
     final when = DateFormat('yyyy-MM-dd HH:mm').format(widget.ride.startedAt);
-    final route = await ref.read(routeServiceProvider).createRoute(
-          name: 'Loop $when',
-          isShared: true,
-        );
+    final route = await ref
+        .read(routeServiceProvider)
+        .createRoute(name: 'Loop $when', isShared: true);
     final updated = widget.ride.copyWith(routeId: route.id);
     await ref.read(rideDatabaseProvider).upsertRide(updated);
     // Best-effort cloud retag.
@@ -75,16 +71,14 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _detecting = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 
   Future<void> _markManual() async {
     final l10n = context.l10n;
     if (widget.points.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.rideLoopNeedPoints)),
-      );
+      showAppSnack(context, l10n.rideLoopNeedPoints);
       return;
     }
 
@@ -98,7 +92,9 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
     setState(() => _busy = true);
     try {
       final routeId = await _ensureRouteId();
-      await ref.read(routeLoopServiceProvider).saveManual(
+      await ref
+          .read(routeLoopServiceProvider)
+          .saveManual(
             routeId: routeId,
             name: l10n.routeLoopManualName,
             initLat: result.init.latitude,
@@ -109,12 +105,10 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
       ref.invalidate(routeLoopsProvider(routeId));
       ref.invalidate(routesListProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.routeLoopSaved)),
-      );
+      showAppSnack(context, l10n.routeLoopSaved);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -125,19 +119,16 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
     setState(() => _busy = true);
     try {
       final routeId = await _ensureRouteId();
-      await ref.read(routeLoopServiceProvider).saveDetected(
-            routeId: routeId,
-            candidate: c,
-          );
+      await ref
+          .read(routeLoopServiceProvider)
+          .saveDetected(routeId: routeId, candidate: c);
       ref.invalidate(routeLoopsProvider(routeId));
       ref.invalidate(routesListProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.routeLoopSaved)),
-      );
+      showAppSnack(context, l10n.routeLoopSaved);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -146,17 +137,13 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
   Future<void> _openRoute() async {
     final id = widget.ride.routeId;
     if (id == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.rideLoopSaveFirst)),
-      );
+      showAppSnack(context, context.l10n.rideLoopSaveFirst);
       return;
     }
     final route = await ref.read(rideDatabaseProvider).getRoute(id);
     if (route == null || !mounted) return;
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => RouteDetailScreen(route: route),
-      ),
+      MaterialPageRoute<void>(builder: (_) => RouteDetailScreen(route: route)),
     );
   }
 
@@ -216,10 +203,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
         const SizedBox(height: 16),
         Text(
           l10n.routeLoopSavedTitle,
-          style: GoogleFonts.exo2(
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
-          ),
+          style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 14),
         ),
         const SizedBox(height: 8),
         loopsAsync.when(
@@ -278,10 +262,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
           const SizedBox(height: 16),
           Text(
             l10n.routeLoopDetectedTitle,
-            style: GoogleFonts.exo2(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 14),
           ),
           const SizedBox(height: 8),
           if (_detected!.isEmpty)

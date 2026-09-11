@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import 'family_share.dart';
 import 'watch_providers.dart';
 import 'watch_viewer_screen.dart';
+import '../../widgets/app_snack.dart';
 
 /// Trusted circle + in-app watch list for family/friends.
 class FamilyCircleScreen extends ConsumerWidget {
@@ -129,8 +130,13 @@ class FamilyCircleScreen extends ConsumerWidget {
                       Card(
                         color: AppTheme.asphaltElevated,
                         child: ListTile(
-                          leading: const Icon(Icons.sensors, color: AppTheme.line),
-                          title: Text(s.riderDisplayName ?? l10n.familyRiderFallback),
+                          leading: const Icon(
+                            Icons.sensors,
+                            color: AppTheme.line,
+                          ),
+                          title: Text(
+                            s.riderDisplayName ?? l10n.familyRiderFallback,
+                          ),
                           subtitle: Text(l10n.familyTapToWatch),
                           onTap: () {
                             Navigator.of(context).push(
@@ -234,7 +240,10 @@ class FamilyCircleScreen extends ConsumerWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         l10n.familyOptionalFriend,
-                        style: const TextStyle(fontSize: 12, color: AppTheme.steel),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.steel,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -262,7 +271,7 @@ class FamilyCircleScreen extends ConsumerWidget {
                   onPressed: () => Navigator.pop(ctx, false),
                   child: Text(l10n.cancel),
                 ),
-                  FilledButton(
+                FilledButton(
                   onPressed: () => Navigator.pop(ctx, true),
                   child: Text(l10n.familySaveContact),
                 ),
@@ -279,17 +288,14 @@ class FamilyCircleScreen extends ConsumerWidget {
     try {
       final repo = ref.read(watchRepositoryProvider);
       if (picked != null) {
-        await repo.addFriendContact(
-          friendUserId: picked!.id,
-          label: label,
-        );
+        await repo.addFriendContact(friendUserId: picked!.id, label: label);
       } else {
         await repo.addLabelContact(label);
       }
       ref.invalidate(trustedContactsProvider);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      showAppSnackError(context, '$e');
     }
   }
 }

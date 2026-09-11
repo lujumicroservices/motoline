@@ -12,6 +12,7 @@ import 'create_rodada_screen.dart';
 import 'models/rodada_models.dart';
 import 'rodada_detail_screen.dart';
 import 'rodada_providers.dart';
+import '../../widgets/app_snack.dart';
 
 /// Lightweight list — no live GPS / tracks / photos until a rodada is opened.
 class RodadasScreen extends ConsumerWidget {
@@ -176,20 +177,13 @@ class RodadasScreen extends ConsumerWidget {
     );
     if (code == null || code.isEmpty || !context.mounted) return;
     try {
-      final id =
-          await ref.read(rodadaRepositoryProvider).joinByCode(code);
+      final id = await ref.read(rodadaRepositoryProvider).joinByCode(code);
       ref.invalidate(myRodadasProvider);
       if (!context.mounted) return;
-      await openRodadaDetail(
-        context,
-        rodadaId: id,
-        promptShareInvite: true,
-      );
+      await openRodadaDetail(context, rodadaId: id, promptShareInvite: true);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.joinFailed('$e'))),
-      );
+      showAppSnackError(context, l10n.joinFailed('$e'));
     }
   }
 }
@@ -219,76 +213,76 @@ class _RodadaCard extends StatelessWidget {
       child: DemoTarget(
         id: DemoIds.rodadaCard,
         child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: statusColor,
-                  borderRadius: BorderRadius.circular(4),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      rodada.title,
-                      style: GoogleFonts.exo2(
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        rodada.title,
+                        style: GoogleFonts.exo2(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 17,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          if (rodada.destination != null &&
+                              rodada.destination!.trim().isNotEmpty)
+                            rodada.destination!,
+                          dateLabel,
+                          l10n.rodadaRidersCount(rodada.memberCount),
+                        ].join(' · '),
+                        style: GoogleFonts.rajdhani(
+                          color: AppTheme.steel,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (rodada.isPendingInvite)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Chip(
+                      label: Text(l10n.rodadaInviteChip),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: AppTheme.asphalt,
+                      labelStyle: GoogleFonts.exo2(
+                        fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        fontSize: 17,
+                        color: AppTheme.lineHot,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      [
-                        if (rodada.destination != null &&
-                            rodada.destination!.trim().isNotEmpty)
-                          rodada.destination!,
-                        dateLabel,
-                        l10n.rodadaRidersCount(rodada.memberCount),
-                      ].join(' · '),
-                      style: GoogleFonts.rajdhani(
-                        color: AppTheme.steel,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (rodada.isPendingInvite)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Chip(
-                    label: Text(l10n.rodadaInviteChip),
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: AppTheme.asphalt,
-                    labelStyle: GoogleFonts.exo2(
+                  )
+                else
+                  Text(
+                    rodada.status.toUpperCase(),
+                    style: GoogleFonts.exo2(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.lineHot,
+                      color: statusColor,
+                      letterSpacing: 0.6,
                     ),
                   ),
-                )
-              else
-                Text(
-                  rodada.status.toUpperCase(),
-                  style: GoogleFonts.exo2(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: statusColor,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

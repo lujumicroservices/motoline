@@ -13,6 +13,7 @@ import '../rodadas/invite_push_feedback.dart';
 import '../rodadas/rodada_providers.dart';
 import '../rodadas/rodadas_screen.dart';
 import '../watch/family_circle_screen.dart';
+import '../../widgets/app_snack.dart';
 
 class FriendsScreen extends ConsumerStatefulWidget {
   const FriendsScreen({super.key});
@@ -194,18 +195,13 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                                     .requestFriend(rider.id);
                                 _invalidateSocial();
                                 if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      l10n.friendRequestSent(rider.label),
-                                    ),
-                                  ),
+                                showAppSnack(
+                                  context,
+                                  l10n.friendRequestSent(rider.label),
                                 );
                               } catch (e) {
                                 if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('$e')),
-                                );
+                                showAppSnackError(context, '$e');
                               }
                             },
                             child: Text(l10n.addFriend),
@@ -328,7 +324,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
               ),
               error: (e, _) {
                 final msg = '$e';
-                final anonymousOff = msg.contains('anonymous_disabled') ||
+                final anonymousOff =
+                    msg.contains('anonymous_disabled') ||
                     msg.toLowerCase().contains('anonymous');
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
@@ -369,8 +366,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                 }
                 return Column(
                   children: [
-                    for (final friend in friends)
-                      _FriendTile(friend: friend),
+                    for (final friend in friends) _FriendTile(friend: friend),
                   ],
                 );
               },
@@ -389,17 +385,13 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       await ref.read(socialRepositoryProvider).updateDisplayName(name);
       _invalidateSocial();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.nameSaved)),
-      );
+      showAppSnack(context, context.l10n.nameSaved);
     } catch (e) {
       await ref
           .read(riderAliasProvider.notifier)
           .setAlias(_nameController.text);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -447,10 +439,7 @@ class _FriendTile extends ConsumerWidget {
           },
           itemBuilder: (_) => [
             PopupMenuItem(value: 'rides', child: Text(l10n.viewRides)),
-            PopupMenuItem(
-              value: 'invite',
-              child: Text(l10n.inviteToRodada),
-            ),
+            PopupMenuItem(value: 'invite', child: Text(l10n.inviteToRodada)),
           ],
         ),
         onTap: () {
@@ -468,16 +457,17 @@ class _FriendTile extends ConsumerWidget {
     final l10n = context.l10n;
     final rodadas = await ref.read(myRodadasProvider.future);
     final open = rodadas
-        .where((r) => r.status == 'open' || r.status == 'live' || r.status == 'draft')
+        .where(
+          (r) =>
+              r.status == 'open' || r.status == 'live' || r.status == 'draft',
+        )
         .toList();
     if (!context.mounted) return;
     if (open.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.createRodadaFirst)),
-      );
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const RodadasScreen()),
-      );
+      showAppSnack(context, l10n.createRodadaFirst);
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const RodadasScreen()));
       return;
     }
     final picked = await showModalBottomSheet<String>(
@@ -496,19 +486,14 @@ class _FriendTile extends ConsumerWidget {
     );
     if (picked == null) return;
     try {
-      final result = await ref.read(rodadaRepositoryProvider).inviteUser(
-            rodadaId: picked,
-            userId: friend.id,
-          );
+      final result = await ref
+          .read(rodadaRepositoryProvider)
+          .inviteUser(rodadaId: picked, userId: friend.id);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(messageForInviteResult(l10n, result))),
-      );
+      showAppSnack(context, messageForInviteResult(l10n, result));
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      showAppSnackError(context, '$e');
     }
   }
 }
@@ -558,8 +543,9 @@ class FriendRidesScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 title: Text(
-                  DateFormat('EEE · MMM d · HH:mm')
-                      .format(ride.startedAt.toLocal()),
+                  DateFormat(
+                    'EEE · MMM d · HH:mm',
+                  ).format(ride.startedAt.toLocal()),
                   style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
@@ -600,10 +586,7 @@ class _FriendRideSheet extends StatelessWidget {
         children: [
           Text(
             ride.riderLabel,
-            style: GoogleFonts.exo2(
-              fontWeight: FontWeight.w700,
-              fontSize: 20,
-            ),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 20),
           ),
           const SizedBox(height: 4),
           Text(

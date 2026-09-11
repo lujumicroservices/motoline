@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../widgets/app_snack.dart';
 
 class LegalUrls {
   static final terms = Uri.parse(
@@ -17,8 +18,6 @@ Future<bool> openLegalUrl(Uri uri) {
 Future<void> openLegalUrlOrSnack(BuildContext context, Uri uri) async {
   final ok = await openLegalUrl(uri);
   if (!ok && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$uri')),
-    );
+    showAppSnack(context, '$uri');
   }
 }

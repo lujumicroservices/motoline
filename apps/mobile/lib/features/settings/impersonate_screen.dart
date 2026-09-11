@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../core/auth/impersonation_controller.dart';
+import '../../widgets/app_snack.dart';
 
 class ImpersonateScreen extends ConsumerStatefulWidget {
   const ImpersonateScreen({super.key});
@@ -64,16 +65,13 @@ class _ImpersonateScreenState extends ConsumerState<ImpersonateScreen> {
       ),
     );
     if (ok != true || !mounted) return;
-    final started = await ref.read(impersonationProvider.notifier).start(
-          userId: hit.id,
-          label: hit.label,
-        );
+    final started = await ref
+        .read(impersonationProvider.notifier)
+        .start(userId: hit.id, label: hit.label);
     if (!mounted) return;
     if (!started) {
       final err = ref.read(impersonationProvider).error;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err ?? l10n.impersonateFailed)),
-      );
+      showAppSnackError(context, err ?? l10n.impersonateFailed);
       return;
     }
     Navigator.of(context).pop();

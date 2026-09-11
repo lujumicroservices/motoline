@@ -29,6 +29,7 @@ import '../moderation/content_guidelines.dart';
 import '../moderation/staff_reports_screen.dart';
 import 'bike_picker_screen.dart';
 import 'impersonate_screen.dart';
+import '../../widgets/app_snack.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -51,9 +52,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _syncCloud() async {
     final l10n = context.l10n;
     if (ref.read(impersonationProvider).active) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.impersonateNoSync)),
-      );
+      showAppSnack(context, l10n.impersonateNoSync);
       return;
     }
     setState(() => _syncing = true);
@@ -67,20 +66,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final pulled = await sync.pullMyCloudRides(
         policy: TrackPullPolicy.preferRicher,
       );
-      final leanPulled =
-          await LeanLabService.instance.pullMyCloudSessions();
+      final leanPulled = await LeanLabService.instance.pullMyCloudSessions();
       if (!mounted) return;
       final err = sync.lastSyncError ?? sync.lastPullError;
       final detail = err == null ? '' : '\n$err';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: Duration(seconds: err == null ? 4 : 10),
-          content: Text(
-            '${l10n.syncCloudRidesDone(combinedOk, combinedFail)} · '
-            '${l10n.syncCloudRidesPulled(pulled, leanPulled)}'
-            '$detail',
-          ),
-        ),
+      showAppSnack(
+        context,
+        '${l10n.syncCloudRidesDone(combinedOk, combinedFail)} · '
+        '${l10n.syncCloudRidesPulled(pulled, leanPulled)}'
+        '$detail',
+        duration: Duration(seconds: err == null ? 4 : 10),
       );
       ref.invalidate(ridesListProvider);
     } finally {
@@ -116,10 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             attribution: l10n.byRawThrottle,
           ),
           const SizedBox(height: 16),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: RiderAliasChip(),
-          ),
+          const Align(alignment: Alignment.centerLeft, child: RiderAliasChip()),
           const SizedBox(height: 20),
           Text(
             l10n.labsSectionTitle,
@@ -147,17 +139,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             subtitle: Text(
               l10n.leanLabSettingsHelp,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const LeanLabScreen(),
-                ),
+                MaterialPageRoute<void>(builder: (_) => const LeanLabScreen()),
               );
             },
           ),
@@ -170,10 +157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             subtitle: Text(
               l10n.leanImuLabSettingsHelp,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
@@ -186,7 +170,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.notifications_outlined, color: AppTheme.mist),
+            leading: const Icon(
+              Icons.notifications_outlined,
+              color: AppTheme.mist,
+            ),
             title: Text(
               l10n.pushDiagnosticsTitle,
               style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
@@ -195,10 +182,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               PushDiagnostics.history.isEmpty
                   ? l10n.pushDiagnosticsEmpty
                   : PushDiagnostics.history.reversed.take(5).join('\n'),
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
             ),
             trailing: PushDiagnostics.history.isEmpty
                 ? null
@@ -207,14 +191,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     icon: const Icon(Icons.copy, size: 18),
                     onPressed: () async {
                       await Clipboard.setData(
-                        ClipboardData(
-                          text: PushDiagnostics.history.join('\n'),
-                        ),
+                        ClipboardData(text: PushDiagnostics.history.join('\n')),
                       );
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.pushDiagnosticsCopied)),
-                      );
+                      showAppSnack(context, l10n.pushDiagnosticsCopied);
                     },
                   ),
           ),
@@ -236,10 +216,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             subtitle: Text(
               bike == null ? l10n.bikeSelectHelp : bike.subtitle,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
@@ -278,34 +255,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.description_outlined, color: AppTheme.line),
+            leading: const Icon(
+              Icons.description_outlined,
+              color: AppTheme.line,
+            ),
             title: Text(
               l10n.termsTitle,
               style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               l10n.legalOpenInBrowser,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => openLegalUrlOrSnack(context, LegalUrls.terms),
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.privacy_tip_outlined, color: AppTheme.line),
+            leading: const Icon(
+              Icons.privacy_tip_outlined,
+              color: AppTheme.line,
+            ),
             title: Text(
               l10n.privacyTitle,
               style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               l10n.legalOpenInBrowser,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => openLegalUrlOrSnack(context, LegalUrls.privacy),
@@ -319,10 +296,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             subtitle: Text(
               l10n.ugcGuidelinesBanner,
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.steel,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => showUgcGuidelinesDialog(context),
@@ -498,9 +472,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     .read(proEntitlementProvider.notifier)
                     .restorePurchases();
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.proUnlocked)),
-                );
+                showAppSnack(context, l10n.proUnlocked);
               },
               child: Text(l10n.restorePurchases),
             ),
@@ -562,17 +534,13 @@ class _StaffPartnerCodeTileState extends ConsumerState<_StaffPartnerCodeTile> {
     if (!mounted) return;
     setState(() => _busy = false);
     if (!result.ok || result.code == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.partnerCodeInvalid)),
-      );
+      showAppSnackError(context, l10n.partnerCodeInvalid);
       return;
     }
     setState(() => _lastCode = result.code);
     await Clipboard.setData(ClipboardData(text: result.code!));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.partnerCodeCopied(result.code!))),
-    );
+    showAppSnack(context, l10n.partnerCodeCopied(result.code!));
   }
 
   @override

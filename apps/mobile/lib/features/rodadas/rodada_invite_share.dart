@@ -9,6 +9,7 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_ext.dart';
 import 'models/rodada_models.dart';
 import 'rodada_providers.dart';
+import '../../widgets/app_snack.dart';
 
 const rodadaInviteRiderNameCap = 8;
 
@@ -34,13 +35,14 @@ RodadaInviteRiderPreview rodadaInviteRiderPreview(
   List<RodadaMember> members, {
   int maxNames = rodadaInviteRiderNameCap,
 }) {
-  final pool = [
-    for (final m in members)
-      if (m.rsvp == 'going' || m.rsvp == 'maybe') m,
-  ]..sort((a, b) {
-      if (a.isHost != b.isHost) return a.isHost ? -1 : 1;
-      return a.label.toLowerCase().compareTo(b.label.toLowerCase());
-    });
+  final pool =
+      [
+        for (final m in members)
+          if (m.rsvp == 'going' || m.rsvp == 'maybe') m,
+      ]..sort((a, b) {
+        if (a.isHost != b.isHost) return a.isHost ? -1 : 1;
+        return a.label.toLowerCase().compareTo(b.label.toLowerCase());
+      });
   final names = [for (final m in pool) m.label];
   final cap = maxNames < 1 ? 1 : maxNames;
   if (names.length <= cap) {
@@ -96,11 +98,7 @@ String buildRodadaInviteShareText({
   if (riders.total > 0) {
     final names = riders.shown.join(', ');
     ridersLine = riders.extra > 0
-        ? l10n.rodadaInviteShareRidersMore(
-            riders.total,
-            names,
-            riders.extra,
-          )
+        ? l10n.rodadaInviteShareRidersMore(riders.total, names, riders.extra)
         : l10n.rodadaInviteShareRiders(riders.total, names);
   }
 
@@ -132,27 +130,26 @@ String buildRodadaInviteShareText({
   ]);
 }
 
-SnackBar rodadaInviteShareSnackBar(
+void promptRodadaInviteShare(
   BuildContext context,
   WidgetRef ref, {
   required String rodadaId,
   RodadaSummary? rodada,
 }) {
   final l10n = context.l10n;
-  return SnackBar(
+  showAppSnack(
+    context,
+    l10n.rodadaInviteShareHint,
     duration: const Duration(seconds: 6),
-    content: Text(l10n.rodadaInviteShareHint),
-    action: SnackBarAction(
-      label: l10n.rodadaInviteShare,
-      onPressed: () {
-        shareRodadaInviteSummary(
-          context,
-          ref,
-          rodadaId: rodadaId,
-          rodada: rodada,
-        );
-      },
-    ),
+    actionLabel: l10n.rodadaInviteShare,
+    onAction: () {
+      shareRodadaInviteSummary(
+        context,
+        ref,
+        rodadaId: rodadaId,
+        rodada: rodada,
+      );
+    },
   );
 }
 
@@ -165,13 +162,10 @@ Future<void> shareRodadaInviteSummary(
 }) async {
   final l10n = context.l10n;
   try {
-    final r = rodada ??
-        await ref.read(rodadaOverviewProvider(rodadaId).future);
+    final r = rodada ?? await ref.read(rodadaOverviewProvider(rodadaId).future);
     if (r == null) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.rodadaNotFound)),
-      );
+      showAppSnack(context, l10n.rodadaNotFound);
       return;
     }
     final members = await ref.read(rodadaMembersProvider(rodadaId).future);
@@ -184,8 +178,10 @@ Future<void> shareRodadaInviteSummary(
     final locale = Localizations.localeOf(context).toString();
     final when = r.startsAt == null
         ? l10n.timeTbd
-        : DateFormat('EEE d MMM yyyy · HH:mm', locale)
-            .format(r.startsAt!.toLocal());
+        : DateFormat(
+            'EEE d MMM yyyy · HH:mm',
+            locale,
+          ).format(r.startsAt!.toLocal());
     final text = buildRodadaInviteShareText(
       l10n: l10n,
       rodada: r,
@@ -196,15 +192,10 @@ Future<void> shareRodadaInviteSummary(
     await Clipboard.setData(ClipboardData(text: text));
     if (!context.mounted) return;
     await SharePlus.instance.share(
-      ShareParams(
-        text: text,
-        subject: l10n.rodadaInviteShareSubject(r.title),
-      ),
+      ShareParams(text: text, subject: l10n.rodadaInviteShareSubject(r.title)),
     );
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$e')),
-    );
+    showAppSnackError(context, '$e');
   }
 }

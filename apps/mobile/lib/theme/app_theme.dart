@@ -44,20 +44,9 @@ class AppTheme {
 
     // Exo 2 for UI chrome (titles + body via text theme).
     return base.copyWith(
-      textTheme: GoogleFonts.exo2TextTheme(base.textTheme).apply(
-        bodyColor: mist,
-        displayColor: mist,
-      ),
-      snackBarTheme: const SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        elevation: 2,
-        insetPadding: EdgeInsets.fromLTRB(48, 0, 48, 20),
-        contentTextStyle: TextStyle(
-          fontSize: 13,
-          height: 1.25,
-          color: mist,
-        ),
-      ),
+      textTheme: GoogleFonts.exo2TextTheme(
+        base.textTheme,
+      ).apply(bodyColor: mist, displayColor: mist),
       appBarTheme: AppBarTheme(
         backgroundColor: asphalt,
         foregroundColor: mist,
