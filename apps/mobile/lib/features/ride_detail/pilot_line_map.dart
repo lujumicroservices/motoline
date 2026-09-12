@@ -31,6 +31,8 @@ class PilotLineMap extends StatefulWidget {
     this.focusEndIndex,
     this.dimOutsideFocus = true,
     this.accentIndex,
+    this.mapApex,
+    this.riderApex,
     this.brakeEvents = const [],
     this.roadStretches = const [],
     this.layers = const MapLayerOptions(),
@@ -62,6 +64,10 @@ class PilotLineMap extends StatefulWidget {
 
   /// Optional fixed accent pin (e.g. max lean) — stays visible during scrub.
   final int? accentIndex;
+
+  /// Dual-apex pins: street geometry vs rider lean.
+  final LatLng? mapApex;
+  final LatLng? riderApex;
 
   /// Brake hits inferred from speed — drawn as map pins.
   final List<BrakeEvent> brakeEvents;
@@ -138,6 +144,8 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
         a.focusEndIndex != b.focusEndIndex ||
         a.dimOutsideFocus != b.dimOutsideFocus ||
         a.accentIndex != b.accentIndex ||
+        a.mapApex != b.mapApex ||
+        a.riderApex != b.riderApex ||
         a.showStartEnd != b.showStartEnd ||
         a.layers.showSpeedColors != b.layers.showSpeedColors ||
         a.layers.showRoadKindContrast != b.layers.showRoadKindContrast ||
@@ -439,12 +447,45 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
       );
     }
 
+    void letterPin(LatLng at, String letter, Color color) {
+      markers.add(
+        Marker(
+          point: at,
+          width: 26,
+          height: 26,
+          child: Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.mist, width: 2),
+            ),
+            child: Text(
+              letter,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.asphalt,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final mapApex = widget.mapApex;
+    if (mapApex != null) letterPin(mapApex, 'M', AppTheme.lineHot);
+    final riderApex = widget.riderApex;
+    if (riderApex != null) letterPin(riderApex, 'P', AppTheme.line);
+
     _baseMarkers = markers;
     _cacheIdentity = Object.hash(
       points.length,
       focusLo,
       focusHi,
       accent,
+      widget.mapApex,
+      widget.riderApex,
       widget.layers.showSpeedColors,
       widget.layers.showRoadKindContrast,
       widget.layers.showBrakes,

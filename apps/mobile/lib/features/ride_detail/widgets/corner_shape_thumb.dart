@@ -68,6 +68,14 @@ class _CornerShapePainter extends CustomPainter {
       minLng = math.min(minLng, p.longitude);
       maxLng = math.max(maxLng, p.longitude);
     }
+    final mapLat = analysis.mapApexLat;
+    final mapLng = analysis.mapApexLng;
+    if (mapLat != null && mapLng != null) {
+      minLat = math.min(minLat, mapLat);
+      maxLat = math.max(maxLat, mapLat);
+      minLng = math.min(minLng, mapLng);
+      maxLng = math.max(maxLng, mapLng);
+    }
     final dLat = math.max(maxLat - minLat, 1e-6);
     final dLng = math.max(maxLng - minLng, 1e-6);
     final pad = 0.18;
@@ -89,11 +97,13 @@ class _CornerShapePainter extends CustomPainter {
     final originY =
         inset + (inner.height - spanY * scale) / 2;
 
-    Offset project(TrackPoint p) {
-      final x = originX + (p.longitude - minLng) * cosLat * scale;
-      final y = originY + (maxLat - p.latitude) * scale;
+    Offset projectLatLng(double lat, double lng) {
+      final x = originX + (lng - minLng) * cosLat * scale;
+      final y = originY + (maxLat - lat) * scale;
       return Offset(x, y);
     }
+
+    Offset project(TrackPoint p) => projectLatLng(p.latitude, p.longitude);
 
     final speeds = displaySpeedsMps(slice);
     final entryRel = (analysis.entryIndex - lo).clamp(0, slice.length - 1);
@@ -151,11 +161,26 @@ class _CornerShapePainter extends CustomPainter {
       'E',
       RideVizPalette.speedColor(analysis.entrySpeedKmh),
     );
-    pin(
-      project(slice[apexRel]),
-      'A',
-      RideVizPalette.speedColor(analysis.apexSpeedKmh),
-    );
+    if (analysis.fromMapMatch &&
+        analysis.mapApexLat != null &&
+        analysis.mapApexLng != null) {
+      pin(
+        projectLatLng(analysis.mapApexLat!, analysis.mapApexLng!),
+        'M',
+        AppTheme.lineHot,
+      );
+      pin(
+        project(slice[apexRel]),
+        'P',
+        AppTheme.line,
+      );
+    } else {
+      pin(
+        project(slice[apexRel]),
+        'A',
+        RideVizPalette.speedColor(analysis.apexSpeedKmh),
+      );
+    }
     pin(
       project(slice[exitRel]),
       'S',
@@ -167,5 +192,7 @@ class _CornerShapePainter extends CustomPainter {
   bool shouldRepaint(covariant _CornerShapePainter old) =>
       old.samples != samples ||
       old.analysis.entryIndex != analysis.entryIndex ||
-      old.analysis.exitIndex != analysis.exitIndex;
+      old.analysis.exitIndex != analysis.exitIndex ||
+      old.analysis.mapApexLat != analysis.mapApexLat ||
+      old.analysis.fromMapMatch != analysis.fromMapMatch;
 }

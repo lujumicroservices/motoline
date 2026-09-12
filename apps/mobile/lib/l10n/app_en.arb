@@ -330,7 +330,7 @@
   },
   "proExpiredKeepLab": "Your Pro access ended — keep segment zoom and full corners.",
   "partnerProCode": "Partner Pro code",
-  "partnerProCodeHint": "PRO-7K4M2Q",
+  "partnerProCodeHint": "Paste your code",
   "partnerProCodeHelp": "A personal code from a RiderLab partner. Not a rodada invite.",
   "redeemPartnerCode": "Redeem",
   "partnerCodeInvalid": "That code is not valid.",
@@ -1073,8 +1073,38 @@
   "skillTipLittleSpeedScrub": "Speed barely dropped — check you’re not carrying too much in the middle of the turn.",
   "skillTipWeakExitDrive": "Weak exit — open the gas sooner once the bike starts standing up.",
   "skillTipPeakLeanNotAtApex": "Most lean wasn’t at the tightest point — lean in earlier so you’re set in the middle.",
+  "skillTipApexLate": "Peak lean was {gap} m after the road apex — get the bike set earlier.",
+  "@skillTipApexLate": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
+  "skillTipApexEarly": "Peak lean was {gap} m before the road apex — wait a bit longer for the middle.",
+  "@skillTipApexEarly": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
   "skillTipLowLeanBigHeading": "A lot of turning with little lean — check the phone is firmly held, or lean more.",
   "skillTipSolidCorner": "Solid corner — keep this entry and middle rhythm.",
+  "skillApexGapBefore": "Rider apex {gap} m before the road apex",
+  "@skillApexGapBefore": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
+  "skillApexGapAfter": "Rider apex {gap} m after the road apex",
+  "@skillApexGapAfter": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
+  "skillApexGapNear": "Rider apex near the road apex ({gap} m)",
+  "@skillApexGapNear": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
   "skillHighlightBest": "Best: {label} · {score}/100",
   "@skillHighlightBest": {
     "placeholders": {

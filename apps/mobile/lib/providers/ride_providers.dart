@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/analytics/ride_analytics.dart';
 import '../core/analytics/ride_lab_isolate.dart';
+import '../core/analytics/map_curve_engine.dart';
 import '../core/db/ride_database.dart';
 import '../core/lean_lab/lean_lab_service.dart';
 import '../core/models/lean_sample.dart';
@@ -15,6 +16,7 @@ import '../core/services/imu_blob_upload_service.dart';
 import '../core/services/ride_place_name_service.dart';
 import '../core/services/ride_recorder.dart';
 import '../core/services/ride_sync_service.dart';
+import '../core/services/map_match_service.dart';
 import '../core/services/sync_outbox_service.dart';
 import '../core/supabase/supabase_bootstrap.dart';
 import 'pro_entitlement_provider.dart';
@@ -325,10 +327,17 @@ final rideLabAnalyticsProvider =
   if (ride == null) return null;
   final points = await db.getPoints(id);
   final lean = await db.getLeanSamples(id);
+  List<GeoPoint>? matched;
+  try {
+    matched = await ref.read(mapMatchServiceProvider).match(points);
+  } catch (_) {
+    matched = null;
+  }
   return computeRideLabAnalytics(
     ride: ride,
     points: points,
     leanSamples: lean,
+    matchedCenterline: matched,
   );
 });
 

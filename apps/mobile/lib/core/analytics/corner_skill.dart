@@ -1,6 +1,7 @@
 import '../models/lean_sample.dart';
 import '../models/track_point.dart';
 import 'curva_analysis.dart';
+import 'map_curve_engine.dart';
 import 'road_kind_detection.dart';
 
 /// Stable tip codes resolved to localized text in the UI layer.
@@ -11,6 +12,8 @@ enum SkillTipId {
   littleSpeedScrub,
   weakExitDrive,
   peakLeanNotAtApex,
+  apexLate,
+  apexEarly,
   lowLeanBigHeading,
   solidCorner,
   bestHighlight,
@@ -19,13 +22,21 @@ enum SkillTipId {
 }
 
 class SkillTip {
-  const SkillTip(this.id, {this.entry, this.apex, this.label, this.score});
+  const SkillTip(
+    this.id, {
+    this.entry,
+    this.apex,
+    this.label,
+    this.score,
+    this.gap,
+  });
 
   final SkillTipId id;
   final int? entry;
   final int? apex;
   final String? label;
   final int? score;
+  final int? gap;
 }
 
 /// Per-corner skill rating derived from GPS + lean (no extra hardware).
@@ -81,9 +92,38 @@ class CornerSkillEngine {
         leanSamples: leanSamples,
       );
       if (analysis == null) continue;
-      corners.add(_scoreCorner(analysis, s));
+      corners.add(
+        _scoreCorner(
+          analysis,
+          headingChangeDeg: s.headingChangeDeg,
+          fingerprint: s.fingerprint ?? '',
+        ),
+      );
     }
+    return _summarize(corners);
+  }
 
+  /// Skill Lab from map-first (or GPS-curvature) riders.
+  RideSkillSummary evaluateRiders({
+    required List<TrackPoint> samples,
+    required List<MapCurveRider> riders,
+  }) {
+    final corners = <CornerSkill>[];
+    for (final r in riders) {
+      final analysis = CurvaAnalysis.fromMapRider(samples: samples, rider: r);
+      corners.add(
+        _scoreCorner(
+          analysis,
+          headingChangeDeg: r.curve.headingChangeDeg,
+          fingerprint: mapCurveFingerprint(r.curve.mapApex),
+          rider: r,
+        ),
+      );
+    }
+    return _summarize(corners);
+  }
+
+  RideSkillSummary _summarize(List<CornerSkill> corners) {
     if (corners.isEmpty) {
       return const RideSkillSummary(
         corners: [],
@@ -161,9 +201,11 @@ class CornerSkillEngine {
   }
 
   CornerSkill _scoreCorner(
-    CurvaAnalysis a,
-    RoadStretch stretch,
-  ) {
+    CurvaAnalysis a, {
+    required double headingChangeDeg,
+    required String fingerprint,
+    MapCurveRider? rider,
+  }) {
     final tips = <SkillTip>[];
     var score = 70.0;
 
@@ -172,11 +214,9 @@ class CornerSkillEngine {
     final entry = a.entrySpeedKmh;
     final apex = a.apexSpeedKmh;
     final maxLean = a.maxLeanDegrees;
-    // Prefer high-rate lean apex when present.
     final apexLean =
         (a.leanApexDegrees?.abs() ?? a.apexLeanDegrees?.abs() ?? 0);
 
-    // Entry control: huge drop → entered hot / braked hard late.
     if (drop > 35) {
       score -= 18;
       tips.add(
@@ -196,7 +236,6 @@ class CornerSkillEngine {
       tips.add(const SkillTip(SkillTipId.littleSpeedScrub));
     }
 
-    // Exit drive: rebuild speed after apex.
     if (gain > 12) {
       score += 10;
     } else if (gain < 3 && a.distanceMeters > 40) {
@@ -204,7 +243,6 @@ class CornerSkillEngine {
       tips.add(const SkillTip(SkillTipId.weakExitDrive));
     }
 
-    // Lean commitment at lean-apex vs peak.
     if (maxLean >= 18) {
       score += 6;
       if (apexLean >= maxLean * 0.75) {
@@ -213,12 +251,24 @@ class CornerSkillEngine {
         score -= 8;
         tips.add(const SkillTip(SkillTipId.peakLeanNotAtApex));
       }
-    } else if (stretch.headingChangeDeg.abs() > 50 && maxLean < 12) {
+    } else if (headingChangeDeg.abs() > 50 && maxLean < 12) {
       score -= 10;
       tips.add(const SkillTip(SkillTipId.lowLeanBigHeading));
     }
 
-    // Smoothness proxy: duration vs distance (jerky = short chaotic).
+    final gap = rider?.apexGapAlongM ?? a.apexGapAlongM;
+    if (a.fromMapMatch && gap != null) {
+      if (gap > 25) {
+        score -= 8;
+        tips.add(SkillTip(SkillTipId.apexLate, gap: gap.abs().round()));
+      } else if (gap < -25) {
+        score -= 6;
+        tips.add(SkillTip(SkillTipId.apexEarly, gap: gap.abs().round()));
+      } else if (gap.abs() <= 12) {
+        score += 8;
+      }
+    }
+
     final mps = a.duration.inMilliseconds <= 0
         ? 0.0
         : a.distanceMeters / (a.duration.inMilliseconds / 1000.0);
@@ -235,7 +285,7 @@ class CornerSkillEngine {
       analysis: a,
       score: clamped,
       tips: tips,
-      fingerprint: stretch.fingerprint ?? '',
+      fingerprint: fingerprint,
     );
   }
 }

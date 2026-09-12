@@ -8,7 +8,7 @@ import '../../core/auth/impersonation_controller.dart';
 import '../../core/legal/legal_urls.dart';
 import '../../core/notifications/push_diagnostics.dart';
 import '../../l10n/l10n_ext.dart';
-import '../../providers/bike_provider.dart';
+import '../../providers/auth_providers.dart';
 import '../../providers/force_start_prefs.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/pro_entitlement_provider.dart';
@@ -31,7 +31,6 @@ import '../moderation/staff_reports_screen.dart';
 import '../ride_active/location_permission_gate.dart';
 import '../rodadas/rodada_providers.dart';
 import '../watch/family_circle_screen.dart';
-import 'bike_picker_screen.dart';
 import 'impersonate_screen.dart';
 import 'settings_group.dart';
 import '../../widgets/app_snack.dart';
@@ -108,8 +107,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final isPro = ref.watch(isProProvider);
     final pro = ref.watch(proEntitlementProvider);
     final locale = ref.watch(localeProvider);
-    final bike = ref.watch(riderBikeProvider);
     final share = ref.watch(rodadaSharePrefsProvider);
+    final signedIn = ref.watch(hasPermanentIdentityProvider);
+    final accountGroup = SettingsGroup(
+      title: l10n.accountSection,
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.translate, color: AppTheme.mist),
+          title: Text(
+            locale.languageCode == 'es' ? l10n.spanish : l10n.english,
+            style: _tileTitle,
+          ),
+          trailing: TextButton(
+            onPressed: () => ref.read(localeProvider.notifier).toggle(),
+            child: Text(
+              locale.languageCode == 'es' ? l10n.english : l10n.spanish,
+            ),
+          ),
+        ),
+        const AccountAuthSection(),
+      ],
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -132,28 +151,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           const Align(alignment: Alignment.centerLeft, child: RiderAliasChip()),
-          SettingsGroup(
-            title: l10n.settingsRideSection,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const AppMotoIcon(size: 28, color: AppTheme.mist),
-                title: Text(bike?.label ?? l10n.bikeSelect, style: _tileTitle),
-                subtitle: Text(
-                  bike == null ? l10n.bikeSelectHelp : bike.subtitle,
-                  style: _tileSub,
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const BikePickerScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+          if (!signedIn) accountGroup,
           SettingsGroup(
             title: l10n.settingsShareSection,
             help: l10n.settingsShareSectionHelp,
@@ -247,26 +245,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   );
                 },
               ),
-            ],
-          ),
-          SettingsGroup(
-            title: l10n.accountSection,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.translate, color: AppTheme.mist),
-                title: Text(
-                  locale.languageCode == 'es' ? l10n.spanish : l10n.english,
-                  style: _tileTitle,
-                ),
-                trailing: TextButton(
-                  onPressed: () => ref.read(localeProvider.notifier).toggle(),
-                  child: Text(
-                    locale.languageCode == 'es' ? l10n.english : l10n.spanish,
-                  ),
-                ),
-              ),
-              const AccountAuthSection(),
             ],
           ),
           SettingsGroup(
@@ -516,6 +494,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ],
           ),
+          if (signedIn) accountGroup,
         ],
       ),
     );

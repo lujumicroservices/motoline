@@ -26,14 +26,6 @@ class AccountAuthSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          l10n.accountSection,
-          style: GoogleFonts.barlowCondensed(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
           permanent ? l10n.accountSignedInBody : l10n.authGateBody,
           style: GoogleFonts.rajdhani(
             color: AppTheme.steel,

@@ -1835,7 +1835,7 @@ abstract class AppLocalizations {
   /// No description provided for @partnerProCodeHint.
   ///
   /// In es, this message translates to:
-  /// **'PRO-7K4M2Q'**
+  /// **'Pega tu código'**
   String get partnerProCodeHint;
 
   /// No description provided for @partnerProCodeHelp.
@@ -4622,6 +4622,18 @@ abstract class AppLocalizations {
   /// **'La inclinación máxima no fue en el punto más cerrado — inclina antes para llegar listo al centro.'**
   String get skillTipPeakLeanNotAtApex;
 
+  /// No description provided for @skillTipApexLate.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu máximo lean fue {gap} m después del codo de la calle — llega inclinado más pronto.'**
+  String skillTipApexLate(String gap);
+
+  /// No description provided for @skillTipApexEarly.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu máximo lean fue {gap} m antes del codo de la calle — espera un poco más para el ápice.'**
+  String skillTipApexEarly(String gap);
+
   /// No description provided for @skillTipLowLeanBigHeading.
   ///
   /// In es, this message translates to:
@@ -4633,6 +4645,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Buena curva — mantén este ritmo de entrada y centro.'**
   String get skillTipSolidCorner;
+
+  /// No description provided for @skillApexGapBefore.
+  ///
+  /// In es, this message translates to:
+  /// **'Ápice piloto {gap} m antes del codo'**
+  String skillApexGapBefore(String gap);
+
+  /// No description provided for @skillApexGapAfter.
+  ///
+  /// In es, this message translates to:
+  /// **'Ápice piloto {gap} m después del codo'**
+  String skillApexGapAfter(String gap);
+
+  /// No description provided for @skillApexGapNear.
+  ///
+  /// In es, this message translates to:
+  /// **'Ápice piloto cerca del codo ({gap} m)'**
+  String skillApexGapNear(String gap);
 
   /// No description provided for @skillHighlightBest.
   ///

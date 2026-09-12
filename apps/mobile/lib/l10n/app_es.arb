@@ -401,7 +401,7 @@
   },
   "proExpiredKeepLab": "Se acabó tu Pro — conserva el zoom de segmento y el detalle de curvas.",
   "partnerProCode": "Código Pro de socio",
-  "partnerProCodeHint": "PRO-7K4M2Q",
+  "partnerProCodeHint": "Pega tu código",
   "partnerProCodeHelp": "Un código personal de un socio RiderLab. No es el código de una rodada.",
   "redeemPartnerCode": "Canjear",
   "partnerCodeInvalid": "Ese código no es válido.",
@@ -1144,8 +1144,38 @@
   "skillTipLittleSpeedScrub": "Casi no bajaste de velocidad — checa que no lleves de más a media curva.",
   "skillTipWeakExitDrive": "Salida floja — abre el gas más pronto cuando la moto se empiece a parar.",
   "skillTipPeakLeanNotAtApex": "La inclinación máxima no fue en el punto más cerrado — inclina antes para llegar listo al centro.",
+  "skillTipApexLate": "Tu máximo lean fue {gap} m después del codo de la calle — llega inclinado más pronto.",
+  "@skillTipApexLate": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
+  "skillTipApexEarly": "Tu máximo lean fue {gap} m antes del codo de la calle — espera un poco más para el ápice.",
+  "@skillTipApexEarly": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
   "skillTipLowLeanBigHeading": "Mucho giro con poca inclinación — checa que el teléfono esté bien sujeto, o inclínate más.",
   "skillTipSolidCorner": "Buena curva — mantén este ritmo de entrada y centro.",
+  "skillApexGapBefore": "Ápice piloto {gap} m antes del codo",
+  "@skillApexGapBefore": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
+  "skillApexGapAfter": "Ápice piloto {gap} m después del codo",
+  "@skillApexGapAfter": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
+  "skillApexGapNear": "Ápice piloto cerca del codo ({gap} m)",
+  "@skillApexGapNear": {
+    "placeholders": {
+      "gap": { "type": "String" }
+    }
+  },
   "skillHighlightBest": "Mejor: {label} · {score}/100",
   "@skillHighlightBest": {
     "placeholders": {

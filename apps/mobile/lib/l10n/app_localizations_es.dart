@@ -975,7 +975,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get partnerProCode => 'Código Pro de socio';
 
   @override
-  String get partnerProCodeHint => 'PRO-7K4M2Q';
+  String get partnerProCodeHint => 'Pega tu código';
 
   @override
   String get partnerProCodeHelp =>
@@ -2581,12 +2581,37 @@ class AppLocalizationsEs extends AppLocalizations {
       'La inclinación máxima no fue en el punto más cerrado — inclina antes para llegar listo al centro.';
 
   @override
+  String skillTipApexLate(String gap) {
+    return 'Tu máximo lean fue $gap m después del codo de la calle — llega inclinado más pronto.';
+  }
+
+  @override
+  String skillTipApexEarly(String gap) {
+    return 'Tu máximo lean fue $gap m antes del codo de la calle — espera un poco más para el ápice.';
+  }
+
+  @override
   String get skillTipLowLeanBigHeading =>
       'Mucho giro con poca inclinación — checa que el teléfono esté bien sujeto, o inclínate más.';
 
   @override
   String get skillTipSolidCorner =>
       'Buena curva — mantén este ritmo de entrada y centro.';
+
+  @override
+  String skillApexGapBefore(String gap) {
+    return 'Ápice piloto $gap m antes del codo';
+  }
+
+  @override
+  String skillApexGapAfter(String gap) {
+    return 'Ápice piloto $gap m después del codo';
+  }
+
+  @override
+  String skillApexGapNear(String gap) {
+    return 'Ápice piloto cerca del codo ($gap m)';
+  }
 
   @override
   String skillHighlightBest(String label, int score) {

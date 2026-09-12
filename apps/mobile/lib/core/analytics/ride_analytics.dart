@@ -7,6 +7,7 @@ import '../utils/geo_utils.dart';
 import 'brake_detection.dart';
 import 'corner_skill.dart';
 import 'lean_neutral.dart';
+import 'map_curve_engine.dart';
 import 'road_kind_detection.dart';
 import '../telemetry/curves/curves.dart';
 import '../lean_lab/lean_imu_math.dart';
@@ -21,6 +22,7 @@ class RideAnalytics {
     this.mapIndexOffset = 0,
     this.leanSamples = const [],
     this.computeLab = true,
+    this.matchedCenterline,
   })  : samples = _dedupe(points),
         _distanceMetersOverride = distanceMetersOverride,
         _seriesOrigin = seriesOrigin {
@@ -43,16 +45,44 @@ class RideAnalytics {
         samples,
         neutralLeanDegrees: neutralLeanDegrees,
       );
-      skillSummary = const CornerSkillEngine().evaluate(
-        samples: samples,
-        stretches: roadStretches,
-        neutralLeanDegrees: neutralLeanDegrees,
-        leanSamples: leanSamples,
+      final fromMap = matchedCenterline != null &&
+          matchedCenterline!.length >= 4;
+      final center = fromMap
+          ? matchedCenterline!
+          : gpsCenterline(samples);
+      const mapEngine = MapCurveEngine();
+      mapCurves = mapEngine.detect(
+        centerline: center,
+        fromMapMatch: fromMap,
       );
+      final riders = <MapCurveRider>[];
+      for (final c in mapCurves) {
+        final r = mapEngine.attachRider(
+          curve: c,
+          samples: samples,
+          neutralLeanDegrees: neutralLeanDegrees,
+          leanSamples: leanSamples,
+        );
+        if (r != null) riders.add(r);
+      }
+      if (riders.isNotEmpty) {
+        skillSummary = const CornerSkillEngine().evaluateRiders(
+          samples: samples,
+          riders: riders,
+        );
+      } else {
+        skillSummary = const CornerSkillEngine().evaluate(
+          samples: samples,
+          stretches: roadStretches,
+          neutralLeanDegrees: neutralLeanDegrees,
+          leanSamples: leanSamples,
+        );
+      }
     } else {
       brakeEvents = const [];
       roadStretches = const [];
       curveEvents = const [];
+      mapCurves = const [];
       skillSummary = const RideSkillSummary(
         corners: [],
         sessionScore: 0,
@@ -70,6 +100,9 @@ class RideAnalytics {
 
   /// When false, skip curves / brakes / skill (overview paint).
   final bool computeLab;
+
+  /// Snapped road axis from `valhalla-match`. Null → GPS-curvature fallback.
+  final List<GeoPoint>? matchedCenterline;
 
   /// One sample per unique timestamp (GPS sometimes emits duplicates).
   final List<TrackPoint> samples;
@@ -93,6 +126,9 @@ class RideAnalytics {
 
   /// Typed curve telemetry events (sweep / S / hairpin / …) — differentiator engine.
   late final List<CurveEvent> curveEvents;
+
+  /// Corners on the matched (or GPS) centerline.
+  late final List<MapCurve> mapCurves;
 
   /// Corner skill scores + short coach tips (technique, not GPS lock).
   late final RideSkillSummary skillSummary;

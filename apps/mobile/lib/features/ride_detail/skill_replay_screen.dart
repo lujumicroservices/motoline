@@ -468,6 +468,25 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                       focusStartIndex: widget.corner.analysis.mapStartIndex,
                       focusEndIndex: widget.corner.analysis.mapEndIndex,
                       dimOutsideFocus: true,
+                      mapApex: widget.corner.analysis.mapApexLat != null &&
+                              widget.corner.analysis.mapApexLng != null
+                          ? LatLng(
+                              widget.corner.analysis.mapApexLat!,
+                              widget.corner.analysis.mapApexLng!,
+                            )
+                          : null,
+                      riderApex: widget.corner.analysis.fromMapMatch
+                          ? LatLng(
+                              widget.samples[widget
+                                  .corner.analysis.displayApexIndex
+                                  .clamp(0, widget.samples.length - 1)]
+                                  .latitude,
+                              widget.samples[widget
+                                  .corner.analysis.displayApexIndex
+                                  .clamp(0, widget.samples.length - 1)]
+                                  .longitude,
+                            )
+                          : null,
                       brakeEvents: widget.brakeEvents,
                       layers: const MapLayerOptions(
                         showSpeedColors: true,
@@ -712,6 +731,26 @@ class _CornerCoachPanel extends StatelessWidget {
           apex: a.apexSpeedKmh,
           exit: a.exitSpeedKmh,
         ),
+        if (a.fromMapMatch && a.apexGapAlongM != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            a.apexTiming == 'antes'
+                ? l10n.skillApexGapBefore(
+                    a.apexGapAlongM!.abs().toStringAsFixed(0),
+                  )
+                : a.apexTiming == 'despues'
+                    ? l10n.skillApexGapAfter(
+                        a.apexGapAlongM!.abs().toStringAsFixed(0),
+                      )
+                    : l10n.skillApexGapNear(
+                        a.apexGapAlongM!.abs().toStringAsFixed(0),
+                      ),
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 13,
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         for (final tip in corner.tips)
           Padding(

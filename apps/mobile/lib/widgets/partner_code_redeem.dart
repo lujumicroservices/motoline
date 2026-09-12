@@ -46,12 +46,23 @@ class _PartnerCodeRedeemFieldState
   String? _error;
 
   @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  bool get _hasCode => _controller.text.trim().isNotEmpty;
+
   Future<void> _redeem() async {
+    if (!_hasCode) return;
     final l10n = context.l10n;
     setState(() {
       _busy = true;
@@ -105,6 +116,10 @@ class _PartnerCodeRedeemFieldState
                 controller: _controller,
                 textCapitalization: TextCapitalization.characters,
                 enabled: !_busy,
+                autocorrect: false,
+                enableSuggestions: false,
+                smartDashesType: SmartDashesType.disabled,
+                smartQuotesType: SmartQuotesType.disabled,
                 decoration: InputDecoration(
                   hintText: l10n.partnerProCodeHint,
                   errorText: _error,
@@ -115,7 +130,7 @@ class _PartnerCodeRedeemFieldState
             ),
             const SizedBox(width: 8),
             FilledButton(
-              onPressed: _busy ? null : _redeem,
+              onPressed: _busy || !_hasCode ? null : _redeem,
               child: _busy
                   ? const SizedBox(
                       width: 16,

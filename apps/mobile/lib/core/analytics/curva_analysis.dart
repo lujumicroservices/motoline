@@ -2,6 +2,7 @@ import '../models/lean_sample.dart';
 import '../models/track_point.dart';
 import '../utils/geo_utils.dart';
 import 'lean_neutral.dart';
+import 'map_curve_engine.dart';
 import 'road_kind_detection.dart';
 
 /// Pilot-oriented breakdown of a single curva: entrada → ápice → salida.
@@ -28,6 +29,11 @@ class CurvaAnalysis {
     this.geoApexIndex,
     this.geoApexLat,
     this.geoApexLng,
+    this.mapApexLat,
+    this.mapApexLng,
+    this.apexGapAlongM,
+    this.apexTiming,
+    this.fromMapMatch = false,
   });
 
   final RoadStretch stretch;
@@ -65,6 +71,19 @@ class CurvaAnalysis {
   final int? geoApexIndex;
   final double? geoApexLat;
   final double? geoApexLng;
+
+  /// Street-axis apex (matched centerline). Null when Skill Lab used GPS-only.
+  final double? mapApexLat;
+  final double? mapApexLng;
+
+  /// Along-track meters: rider apex − map apex. Negative = early.
+  final double? apexGapAlongM;
+
+  /// `antes` | `despues` | `cerca`
+  final String? apexTiming;
+
+  /// True when [mapApexLat] comes from a snapped road axis.
+  final bool fromMapMatch;
 
   String get labelEs => stretch.labelEs;
 
@@ -235,6 +254,56 @@ class CurvaAnalysis {
       geoApexIndex: geoApexIndex,
       geoApexLat: samples[geoApexIndex].latitude,
       geoApexLng: samples[geoApexIndex].longitude,
+    );
+  }
+
+  /// Skill Lab analysis from a map-first (or GPS-curvature) corner.
+  static CurvaAnalysis fromMapRider({
+    required List<TrackPoint> samples,
+    required MapCurveRider rider,
+    int mapPadSamples = 6,
+  }) {
+    final lo = rider.entryIndex.clamp(0, samples.length - 1);
+    final hi = rider.exitIndex.clamp(lo, samples.length - 1);
+    final c = rider.curve;
+    final stretch = RoadStretch(
+      startIndex: lo,
+      endIndex: hi,
+      kind: RoadKind.curva,
+      side: c.side,
+      distanceMeters: c.lengthM,
+      duration: samples[hi].timestamp.difference(samples[lo].timestamp),
+      headingChangeDeg: c.headingChangeDeg,
+      avgAbsLeanDeg: rider.maxLeanDegrees,
+      peakAbsLeanDeg: rider.maxLeanDegrees,
+      fingerprint: mapCurveFingerprint(c.mapApex),
+    );
+    final apex = rider.riderApexIndex.clamp(lo, hi);
+    final mapStart = (lo - mapPadSamples).clamp(0, samples.length - 1);
+    final mapEnd = (hi + mapPadSamples).clamp(0, samples.length - 1);
+    return CurvaAnalysis(
+      stretch: stretch,
+      entryIndex: lo,
+      apexIndex: apex,
+      exitIndex: hi,
+      entrySpeedKmh: rider.entrySpeedKmh,
+      apexSpeedKmh: rider.apexSpeedKmh,
+      exitSpeedKmh: rider.exitSpeedKmh,
+      apexLeanDegrees: rider.riderLeanDegrees,
+      maxLeanDegrees: rider.maxLeanDegrees,
+      distanceMeters: pathDistanceMeters(samples.sublist(lo, hi + 1)),
+      duration: samples[hi].timestamp.difference(samples[lo].timestamp),
+      mapStartIndex: mapStart,
+      mapEndIndex: mapEnd,
+      leanApexIndex: apex,
+      leanApexDegrees: rider.riderLeanDegrees,
+      leanApexLat: samples[apex].latitude,
+      leanApexLng: samples[apex].longitude,
+      mapApexLat: c.fromMapMatch ? c.mapApex.lat : null,
+      mapApexLng: c.fromMapMatch ? c.mapApex.lng : null,
+      apexGapAlongM: rider.apexGapAlongM,
+      apexTiming: rider.timing,
+      fromMapMatch: c.fromMapMatch,
     );
   }
 }

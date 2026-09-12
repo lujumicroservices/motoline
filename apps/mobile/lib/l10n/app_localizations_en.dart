@@ -970,7 +970,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get partnerProCode => 'Partner Pro code';
 
   @override
-  String get partnerProCodeHint => 'PRO-7K4M2Q';
+  String get partnerProCodeHint => 'Paste your code';
 
   @override
   String get partnerProCodeHelp =>
@@ -2568,12 +2568,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'Most lean wasn’t at the tightest point — lean in earlier so you’re set in the middle.';
 
   @override
+  String skillTipApexLate(String gap) {
+    return 'Peak lean was $gap m after the road apex — get the bike set earlier.';
+  }
+
+  @override
+  String skillTipApexEarly(String gap) {
+    return 'Peak lean was $gap m before the road apex — wait a bit longer for the middle.';
+  }
+
+  @override
   String get skillTipLowLeanBigHeading =>
       'A lot of turning with little lean — check the phone is firmly held, or lean more.';
 
   @override
   String get skillTipSolidCorner =>
       'Solid corner — keep this entry and middle rhythm.';
+
+  @override
+  String skillApexGapBefore(String gap) {
+    return 'Rider apex $gap m before the road apex';
+  }
+
+  @override
+  String skillApexGapAfter(String gap) {
+    return 'Rider apex $gap m after the road apex';
+  }
+
+  @override
+  String skillApexGapNear(String gap) {
+    return 'Rider apex near the road apex ($gap m)';
+  }
 
   @override
   String skillHighlightBest(String label, int score) {

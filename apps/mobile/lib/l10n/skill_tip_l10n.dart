@@ -19,6 +19,10 @@ extension SkillTipL10n on AppLocalizations {
         return skillTipWeakExitDrive;
       case SkillTipId.peakLeanNotAtApex:
         return skillTipPeakLeanNotAtApex;
+      case SkillTipId.apexLate:
+        return skillTipApexLate((tip.gap ?? 0).toString());
+      case SkillTipId.apexEarly:
+        return skillTipApexEarly((tip.gap ?? 0).toString());
       case SkillTipId.lowLeanBigHeading:
         return skillTipLowLeanBigHeading;
       case SkillTipId.solidCorner:
