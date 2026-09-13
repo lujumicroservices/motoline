@@ -13,6 +13,7 @@ void main() {
           body: Row(
             children: [
               AppAssetIcon(asset: AppAssetIcon.rodadas, size: 48),
+              AppAssetIcon(asset: AppAssetIcon.friends, size: 48),
               AppAssetIcon(asset: AppAssetIcon.lean, size: 48, color: AppTheme.line),
               AppAssetIcon(asset: AppAssetIcon.routes, size: 48),
               AppMotoIcon(size: 48),
@@ -22,7 +23,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(Image), findsNWidgets(4));
+    expect(find.byType(Image), findsNWidgets(5));
     expect(tester.takeException(), isNull);
   });
 }

@@ -135,9 +135,8 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                               );
                             },
-                            icon: Icons.people_outline,
+                            asset: AppAssetIcon.friends,
                           ),
-                          const UpdateCheckIconButton(),
                         ],
                       ),
                     ],

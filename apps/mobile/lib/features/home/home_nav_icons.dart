@@ -55,6 +55,7 @@ class AppAssetIcon extends StatelessWidget {
   final Color color;
 
   static const rodadas = 'assets/icons/ic_rodadas.png';
+  static const friends = 'assets/icons/ic_friends.png';
   static const lean = 'assets/icons/ic_lean.png';
   static const routes = 'assets/icons/ic_routes.png';
 

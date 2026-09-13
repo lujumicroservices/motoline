@@ -2,53 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/distribution.dart';
 import '../../core/services/app_update_service.dart';
 import '../../providers/update_providers.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/app_snack.dart';
-
-/// Compact header control: shows a NEW badge when a newer release exists.
-class UpdateCheckIconButton extends ConsumerWidget {
-  const UpdateCheckIconButton({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final updateAsync = ref.watch(appUpdateCheckProvider);
-    final hasUpdate = updateAsync.asData?.value != null;
-
-    return IconButton(
-      tooltip: hasUpdate ? l10n.updateAvailable : l10n.checkUpdates,
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 52, minHeight: 52),
-      onPressed: () => promptManualUpdateCheck(context, ref),
-      icon: Badge(
-        isLabelVisible: hasUpdate,
-        backgroundColor: AppTheme.lineHot,
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-        label: Text(
-          l10n.newVersionBadge,
-          style: GoogleFonts.exo2(
-            fontSize: 8,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.asphalt,
-            height: 1,
-          ),
-        ),
-        child: Icon(
-          hasUpdate
-              ? Icons.system_update_alt
-              : Icons.system_update_alt_outlined,
-          size: 18,
-          color: hasUpdate ? AppTheme.lineHot : AppTheme.steel,
-        ),
-      ),
-    );
-  }
-}
 
 class UpdateAvailableBanner extends ConsumerWidget {
   const UpdateAvailableBanner({super.key, required this.update});
@@ -391,52 +348,5 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
           ),
       ],
     );
-  }
-}
-
-Future<void> promptManualUpdateCheck(
-  BuildContext context,
-  WidgetRef ref,
-) async {
-  final l10n = context.l10n;
-
-  if (AppDistribution.isPlayStore) {
-    showAppSnack(context, l10n.playStoreUpdatesOnly);
-    return;
-  }
-
-  showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => AlertDialog(
-      backgroundColor: AppTheme.asphaltElevated,
-      content: Row(
-        children: [
-          const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: 14),
-          Expanded(child: Text(l10n.checkingUpdates)),
-        ],
-      ),
-    ),
-  );
-
-  try {
-    final update = await ref.read(appUpdateServiceProvider).checkForUpdate();
-    if (!context.mounted) return;
-    Navigator.of(context).pop();
-    if (update == null) {
-      showAppSnack(context, l10n.onLatest);
-      return;
-    }
-    ref.invalidate(appUpdateCheckProvider);
-    await confirmUpdateWithChangelog(context, ref, update);
-  } catch (e) {
-    if (!context.mounted) return;
-    Navigator.of(context).pop();
-    showAppSnackError(context, l10n.updateCheckFailed('$e'));
   }
 }
