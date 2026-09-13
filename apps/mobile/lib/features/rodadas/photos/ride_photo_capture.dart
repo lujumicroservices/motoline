@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
 import '../../../core/models/ride_photo.dart';
 import '../../../core/models/track_point.dart';
@@ -14,6 +17,15 @@ import '../models/rodada_models.dart';
 import '../rodada_providers.dart';
 import 'ride_photo_store.dart';
 import '../../../widgets/app_snack.dart';
+
+/// Play policy: API 33+ must use the system photo picker, not READ_MEDIA_*.
+void enableAndroidPhotoPicker() {
+  if (!Platform.isAndroid) return;
+  final impl = ImagePickerPlatform.instance;
+  if (impl is ImagePickerAndroid) {
+    impl.useAndroidPhotoPicker = true;
+  }
+}
 
 final ridePhotoStoreProvider = Provider<RidePhotoStore>((ref) {
   return RidePhotoStore(

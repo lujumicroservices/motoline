@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:photo_manager/photo_manager.dart';
@@ -41,6 +42,12 @@ Future<GalleryScanResult> scanRideGalleryPhotos({
   required DateTime rideEnd,
   required List<TrackPoint> points,
 }) async {
+  // Play policy: do not request READ_MEDIA_IMAGES/VIDEO. Android uses the
+  // system photo picker instead (see ImagePicker.pickMultiImage).
+  if (Platform.isAndroid) {
+    return const GalleryScanResult(candidates: []);
+  }
+
   final perm = await PhotoManager.requestPermissionExtend(
     requestOption: const PermissionRequestOption(
       iosAccessLevel: IosAccessLevel.readWrite,

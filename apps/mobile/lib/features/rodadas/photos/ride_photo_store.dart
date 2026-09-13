@@ -151,16 +151,14 @@ class RidePhotoStore {
     double? longitude,
   }) async {
     try {
-      final perm = await PhotoManager.requestPermissionExtend(
-        requestOption: const PermissionRequestOption(
-          iosAccessLevel: IosAccessLevel.addOnly,
-          androidPermission: AndroidPermission(
-            type: RequestType.image,
-            mediaLocation: true,
+      if (!Platform.isAndroid) {
+        final perm = await PhotoManager.requestPermissionExtend(
+          requestOption: const PermissionRequestOption(
+            iosAccessLevel: IosAccessLevel.addOnly,
           ),
-        ),
-      );
-      if (!perm.hasAccess && !Platform.isAndroid) return false;
+        );
+        if (!perm.hasAccess) return false;
+      }
       await PhotoManager.editor.saveImage(
         bytes,
         filename: filename,

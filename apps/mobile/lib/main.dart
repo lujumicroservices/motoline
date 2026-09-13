@@ -8,6 +8,7 @@ import 'core/notifications/push_notification_service.dart';
 import 'core/services/arm_foreground_service.dart';
 import 'core/supabase/supabase_bootstrap.dart';
 import 'features/auth/auth_gate.dart';
+import 'features/rodadas/photos/ride_photo_capture.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'theme/app_theme.dart';
@@ -15,6 +16,7 @@ import 'widgets/app_toast.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  enableAndroidPhotoPicker();
   ArmForegroundService.ensureInitialized();
   await SupabaseBootstrap.init();
   await ImpersonationStore.hydrate();
