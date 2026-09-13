@@ -33,6 +33,7 @@ class PilotLineMap extends StatefulWidget {
     this.accentIndex,
     this.mapApex,
     this.riderApex,
+    this.streetLine = const [],
     this.brakeEvents = const [],
     this.roadStretches = const [],
     this.layers = const MapLayerOptions(),
@@ -68,6 +69,9 @@ class PilotLineMap extends StatefulWidget {
   /// Dual-apex pins: street geometry vs rider lean.
   final LatLng? mapApex;
   final LatLng? riderApex;
+
+  /// Matched (or curvature) centerline for this corner — drawn as the street.
+  final List<LatLng> streetLine;
 
   /// Brake hits inferred from speed — drawn as map pins.
   final List<BrakeEvent> brakeEvents;
@@ -146,6 +150,7 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
         a.accentIndex != b.accentIndex ||
         a.mapApex != b.mapApex ||
         a.riderApex != b.riderApex ||
+        a.streetLine.length != b.streetLine.length ||
         a.showStartEnd != b.showStartEnd ||
         a.layers.showSpeedColors != b.layers.showSpeedColors ||
         a.layers.showRoadKindContrast != b.layers.showRoadKindContrast ||
@@ -243,8 +248,10 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
 
     final fitPoints =
         hasFocus ? points.sublist(focusLo, focusHi + 1) : points;
+    final street = widget.streetLine;
     _bounds = LatLngBounds.fromPoints([
       for (final p in fitPoints) LatLng(p.latitude, p.longitude),
+      ...street,
     ]);
     _center = LatLng(
       fitPoints[fitPoints.length ~/ 2].latitude,
@@ -257,7 +264,23 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
     );
 
     final polylines = <Polyline>[];
-    if (hasFocus && widget.dimOutsideFocus) {
+    if (street.length >= 2) {
+      if (hasFocus) {
+        polylines.addAll(
+          _plainSegments(
+            points.sublist(focusLo, focusHi + 1),
+            dimmed: true,
+          ),
+        );
+      }
+      polylines.add(
+        Polyline(
+          points: street,
+          color: AppTheme.line,
+          strokeWidth: 6,
+        ),
+      );
+    } else if (hasFocus && widget.dimOutsideFocus) {
       if (focusLo > 0) {
         polylines.addAll(
           _plainSegments(points.sublist(0, focusLo + 1), dimmed: true),
@@ -486,6 +509,7 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
       accent,
       widget.mapApex,
       widget.riderApex,
+      widget.streetLine.length,
       widget.layers.showSpeedColors,
       widget.layers.showRoadKindContrast,
       widget.layers.showBrakes,

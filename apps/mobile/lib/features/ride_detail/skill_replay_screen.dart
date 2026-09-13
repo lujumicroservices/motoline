@@ -467,7 +467,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                           yi.clamp(0, _youSlice.length - 1),
                       focusStartIndex: widget.corner.analysis.mapStartIndex,
                       focusEndIndex: widget.corner.analysis.mapEndIndex,
-                      dimOutsideFocus: true,
+                      dimOutsideFocus: false,
                       mapApex: widget.corner.analysis.mapApexLat != null &&
                               widget.corner.analysis.mapApexLng != null
                           ? LatLng(
@@ -487,6 +487,10 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                                   .longitude,
                             )
                           : null,
+                      streetLine: [
+                        for (final p in widget.corner.analysis.streetPoly)
+                          LatLng(p.lat, p.lng),
+                      ],
                       brakeEvents: widget.brakeEvents,
                       layers: const MapLayerOptions(
                         showSpeedColors: true,

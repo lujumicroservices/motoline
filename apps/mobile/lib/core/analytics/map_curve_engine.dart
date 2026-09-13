@@ -159,45 +159,72 @@ class MapCurveEngine {
       final end = j.clamp(start, n - 2);
       i = j + 1;
 
-      var heading = 0.0;
-      var minR = 1e9;
-      var apex = start;
-      for (var k = start; k <= end; k++) {
-        heading += dHeading[k];
-        if (radius[k] < minR) {
-          minR = radius[k];
-          apex = k;
-        }
-      }
-      final lo = math.max(0, start - 2);
-      final hi = math.min(n - 1, end + 2);
-      final poly = rs.sublist(lo, hi + 1);
-      final length = s[hi] - s[lo];
-      if (heading.abs() < minTurnDeg) continue;
-      if (length < minLengthM || length > maxLengthM) continue;
-      if (hi - lo < 3) continue;
-
-      curves.add(
-        MapCurve(
-          startIndex: 0,
-          apexIndex: apex - lo,
-          endIndex: poly.length - 1,
-          poly: poly,
-          headingChangeDeg: heading,
-          radiusM: minR.isFinite
-              ? minR
-              : length / math.max(heading.abs() * math.pi / 180, 1e-3),
-          lengthM: length,
-          side: heading < 0 ? TurnSide.izquierda : TurnSide.derecha,
-          fromMapMatch: fromMapMatch,
-          mapApex: rs[apex],
-          entryS: 0,
-          apexS: s[apex] - s[lo],
-          exitS: s[hi] - s[lo],
-        ),
+      final parts = splitByHeadingSign(
+        dHeading: dHeading,
+        start: start,
+        end: end,
+        minTurnDeg: minTurnDeg,
       );
+      for (final part in parts) {
+        final built = buildCurve(
+          rs: rs,
+          s: s,
+          dHeading: dHeading,
+          radius: radius,
+          start: part.$1,
+          end: part.$2,
+          fromMapMatch: fromMapMatch,
+        );
+        if (built != null) curves.add(built);
+      }
     }
     return curves;
+  }
+
+  MapCurve? buildCurve({
+    required List<GeoPoint> rs,
+    required List<double> s,
+    required List<double> dHeading,
+    required List<double> radius,
+    required int start,
+    required int end,
+    required bool fromMapMatch,
+  }) {
+    final n = rs.length;
+    var heading = 0.0;
+    var minR = 1e9;
+    var apex = start;
+    for (var k = start; k <= end; k++) {
+      heading += dHeading[k];
+      if (radius[k] < minR) {
+        minR = radius[k];
+        apex = k;
+      }
+    }
+    final lo = math.max(0, start - 2);
+    final hi = math.min(n - 1, end + 2);
+    final poly = rs.sublist(lo, hi + 1);
+    final length = s[hi] - s[lo];
+    if (heading.abs() < minTurnDeg) return null;
+    if (length < minLengthM || length > maxLengthM) return null;
+    if (hi - lo < 3) return null;
+    return MapCurve(
+      startIndex: 0,
+      apexIndex: apex - lo,
+      endIndex: poly.length - 1,
+      poly: poly,
+      headingChangeDeg: heading,
+      radiusM: minR.isFinite
+          ? minR
+          : length / math.max(heading.abs() * math.pi / 180, 1e-3),
+      lengthM: length,
+      side: heading < 0 ? TurnSide.izquierda : TurnSide.derecha,
+      fromMapMatch: fromMapMatch,
+      mapApex: rs[apex],
+      entryS: 0,
+      apexS: s[apex] - s[lo],
+      exitS: s[hi] - s[lo],
+    );
   }
 
   /// Bind GPS/IMU samples to a detected map (or GPS-geometry) curve.
@@ -221,8 +248,19 @@ class MapCurveEngine {
     }
     if (hits.length < 3) return null;
 
-    final entryIndex = hits.first;
-    final exitIndex = hits.last;
+    // One pass through the corner — not every time the rider came near it.
+    final visit = pickCornerVisit(
+      samples: samples,
+      hits: hits,
+      hitS: hitS,
+      apexS: curve.apexS,
+    );
+    final visitHits = [for (var h = visit.$1; h <= visit.$2; h++) hits[h]];
+    final visitS = [for (var h = visit.$1; h <= visit.$2; h++) hitS[h]];
+    if (visitHits.length < 3) return null;
+
+    final entryIndex = visitHits.first;
+    final exitIndex = visitHits.last;
     final wantLeft = curve.headingChangeDeg < 0;
 
     var riderApexIndex = ((entryIndex + exitIndex) / 2).round();
@@ -244,15 +282,15 @@ class MapCurveEngine {
       }
     }
 
-    for (var h = 0; h < hits.length; h++) {
-      final i = hits[h];
+    for (var h = 0; h < visitHits.length; h++) {
+      final i = visitHits[h];
       final raw = samples[i].leanDegrees;
       if (raw == null) continue;
       final lean = relativeLeanDegrees(
         rawLeanDegrees: raw,
         neutralDegrees: neutralLeanDegrees,
       );
-      consider(i, lean, samples[i].speedKmh ?? 0, hitS[h]);
+      consider(i, lean, samples[i].speedKmh ?? 0, visitS[h]);
     }
 
     if (leanSamples.isNotEmpty) {
@@ -276,20 +314,20 @@ class MapCurveEngine {
     }
 
     if (riderLean == null) {
-      for (var h = 0; h < hits.length; h++) {
-        final i = hits[h];
+      for (var h = 0; h < visitHits.length; h++) {
+        final i = visitHits[h];
         final raw = samples[i].leanDegrees;
         if (raw == null) continue;
         final lean = relativeLeanDegrees(
           rawLeanDegrees: raw,
           neutralDegrees: neutralLeanDegrees,
         );
-        consider(i, lean, samples[i].speedKmh ?? 0, hitS[h], allowSlow: true);
+        consider(i, lean, samples[i].speedKmh ?? 0, visitS[h], allowSlow: true);
       }
     }
 
     var maxLean = 0.0;
-    for (final i in hits) {
+    for (final i in visitHits) {
       final raw = samples[i].leanDegrees;
       if (raw == null) continue;
       final lean = relativeLeanDegrees(
@@ -344,6 +382,82 @@ class MapCurveEngine {
       timing: timing,
     );
   }
+}
+
+/// Split a hysteresis blob where the rider (or street) turns left then right.
+List<(int, int)> splitByHeadingSign({
+  required List<double> dHeading,
+  required int start,
+  required int end,
+  required double minTurnDeg,
+}) {
+  if (end <= start) return [(start, end)];
+  final parts = <(int, int)>[];
+  var a = start;
+  var acc = 0.0;
+  var sign = 0;
+  for (var k = start; k <= end; k++) {
+    final dh = dHeading[k];
+    final s = dh.abs() < 3 ? 0 : (dh < 0 ? -1 : 1);
+    if (sign != 0 && s != 0 && s != sign && acc.abs() >= minTurnDeg) {
+      parts.add((a, k - 1));
+      a = k;
+      acc = dh;
+      sign = s;
+    } else {
+      acc += dh;
+      if (sign == 0 && s != 0) sign = s;
+    }
+  }
+  parts.add((a, end));
+  return parts;
+}
+
+/// Among GPS hits on a corner, keep the single pass nearest the map apex.
+(int, int) pickCornerVisit({
+  required List<TrackPoint> samples,
+  required List<int> hits,
+  required List<double> hitS,
+  required double apexS,
+}) {
+  if (hits.isEmpty) return (0, 0);
+  final visits = <(int, int)>[];
+  var a = 0;
+  for (var h = 1; h < hits.length; h++) {
+    final dt = samples[hits[h]]
+        .timestamp
+        .difference(samples[hits[h - 1]].timestamp)
+        .inMilliseconds;
+    final ds = hitS[h] - hitS[h - 1];
+    final newLap = dt > 8000 || hits[h] - hits[h - 1] > 8 || ds < -25;
+    if (newLap) {
+      visits.add((a, h - 1));
+      a = h;
+    }
+  }
+  visits.add((a, hits.length - 1));
+
+  var best = visits.first;
+  var bestD = 1e9;
+  var bestLean = -1.0;
+  for (final v in visits) {
+    var d = 1e9;
+    var lean = 0.0;
+    for (var h = v.$1; h <= v.$2; h++) {
+      final x = (hitS[h] - apexS).abs();
+      if (x < d) d = x;
+      final raw = samples[hits[h]].leanDegrees;
+      if (raw != null && raw.abs() > lean) lean = raw.abs();
+    }
+    final closer = d < bestD - 8;
+    final samePlace = (d - bestD).abs() <= 8;
+    if (closer || (samePlace && lean >= bestLean)) {
+      bestD = d;
+      bestLean = lean;
+      best = v;
+    }
+  }
+  return best;
 }
 
 /// GPS points as a fallback centerline (no street axis).
@@ -477,21 +591,80 @@ String mapCurveFingerprint(GeoPoint apex) {
   return '$gLat,$gLng';
 }
 
-/// Drop GPS to ~[stepM] so the match payload stays small.
-List<GeoPoint> decimateTrack(List<TrackPoint> samples, {double stepM = 18}) {
-  if (samples.isEmpty) return const [];
-  final out = <GeoPoint>[GeoPoint(samples.first.latitude, samples.first.longitude)];
+/// GPS vertices while moving — Skill Lab fallback when map-match is missing.
+List<GeoPoint> movingCenterline(
+  List<TrackPoint> samples, {
+  double minKmh = 18,
+}) {
+  if (samples.length < 2) return const [];
+  final out = <GeoPoint>[];
+  for (var i = 0; i < samples.length; i++) {
+    final p = samples[i];
+    final kmh = p.speedKmh;
+    if (kmh != null) {
+      if (kmh >= minKmh) out.add(GeoPoint(p.latitude, p.longitude));
+      continue;
+    }
+    if (out.isEmpty) {
+      out.add(GeoPoint(p.latitude, p.longitude));
+      continue;
+    }
+    final prev = samples[i - 1];
+    final d = haversineMeters(
+      prev.latitude,
+      prev.longitude,
+      p.latitude,
+      p.longitude,
+    );
+    final dt = p.timestamp.difference(prev.timestamp).inMilliseconds / 1000.0;
+    if (dt <= 0) continue;
+    if ((d / dt) * 3.6 >= minKmh) {
+      out.add(GeoPoint(p.latitude, p.longitude));
+    }
+  }
+  return out;
+}
+
+/// Drop moving GPS to ~[stepM] so the match payload stays small.
+List<GeoPoint> decimateTrack(
+  List<TrackPoint> samples, {
+  double stepM = 18,
+  double minKmh = 18,
+}) {
+  final moving = <TrackPoint>[];
+  for (var i = 0; i < samples.length; i++) {
+    final p = samples[i];
+    final kmh = p.speedKmh;
+    if (kmh != null && kmh < minKmh) continue;
+    if (kmh == null && moving.isNotEmpty) {
+      final prev = moving.last;
+      final d = haversineMeters(
+        prev.latitude,
+        prev.longitude,
+        p.latitude,
+        p.longitude,
+      );
+      final dt =
+          p.timestamp.difference(prev.timestamp).inMilliseconds / 1000.0;
+      if (dt > 0 && (d / dt) * 3.6 < minKmh) continue;
+    }
+    moving.add(p);
+  }
+  if (moving.isEmpty) return const [];
+  final out = <GeoPoint>[
+    GeoPoint(moving.first.latitude, moving.first.longitude),
+  ];
   var acc = 0.0;
-  for (var i = 1; i < samples.length; i++) {
-    final a = samples[i - 1];
-    final b = samples[i];
+  for (var i = 1; i < moving.length; i++) {
+    final a = moving[i - 1];
+    final b = moving[i];
     acc += haversineMeters(a.latitude, a.longitude, b.latitude, b.longitude);
     if (acc >= stepM) {
       out.add(GeoPoint(b.latitude, b.longitude));
       acc = 0;
     }
   }
-  final last = samples.last;
+  final last = moving.last;
   if (out.last.lat != last.latitude || out.last.lng != last.longitude) {
     out.add(GeoPoint(last.latitude, last.longitude));
   }

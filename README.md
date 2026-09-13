@@ -38,6 +38,7 @@ flutter run --flavor sideload --dart-define=DISTRIBUTION=sideload
 
 See [INSTALL.md](INSTALL.md) for Android APK sideload steps.
 
+**Inventario (módulos, estados, secretos, riesgos):** [docs/PROJECT_INVENTORY.md](docs/PROJECT_INVENTORY.md)  
 **Google Play:** [docs/PLAY_STORE.md](docs/PLAY_STORE.md)  
 **Store checklist + legal:** [docs/STORE_READINESS.md](docs/STORE_READINESS.md) · [docs/legal/](docs/legal/)  
 **Cloud:** [docs/SUPABASE.md](docs/SUPABASE.md)

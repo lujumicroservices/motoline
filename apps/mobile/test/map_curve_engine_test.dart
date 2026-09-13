@@ -206,6 +206,32 @@ void main() {
     expect(gpsOnly.skillSummary.corners, isNotEmpty);
     expect(gpsOnly.skillSummary.corners.first.analysis.fromMapMatch, isFalse);
     expect(gpsOnly.skillSummary.corners.first.analysis.mapApexLat, isNull);
+    expect(gpsOnly.skillSummary.corners.first.analysis.streetPoly, isNotEmpty);
+  });
+
+  test('slow GPS cluster around a plaza is not a Skill Lab corner', () {
+    final t0 = DateTime.utc(2026, 9, 11, 16);
+    final samples = <TrackPoint>[
+      for (var i = 0; i < 40; i++)
+        TrackPoint(
+          id: i,
+          rideId: 'plaza',
+          latitude: 45.764 + (i % 5) * 0.00004,
+          longitude: 4.835 + ((i ~/ 5) % 5) * 0.00004,
+          timestamp: t0.add(Duration(seconds: i * 10)),
+          speedMps: 0.8,
+          leanDegrees: 4,
+        ),
+    ];
+    final ride = Ride(
+      id: 'plaza',
+      startedAt: t0,
+      status: RideStatus.completed,
+      endedAt: t0.add(const Duration(seconds: 400)),
+      pointCount: samples.length,
+    );
+    final a = RideAnalytics(ride: ride, points: samples);
+    expect(a.skillSummary.corners, isEmpty);
   });
 
   test('MapMatchService decodes matched polyline from the edge function', () async {
@@ -236,6 +262,66 @@ void main() {
     expect(matched, isNotNull);
     expect(matched!.length, pts.length);
     expect(matched.first.lat, closeTo(pts.first.latitude, 1e-4));
+  });
+
+  test('left then right 90s are two corners, not one plaza blob', () {
+    final poly = [
+      ..._rightAngle(lat0: 20.68, lng0: -103.38, left: false),
+    ];
+    // Continue north after the right turn so the next bend is left.
+    final last = poly.last;
+    const meters = 8.0;
+    const degLat = meters / 111320.0;
+    var lat = last.lat;
+    final lng = last.lng;
+    for (var i = 1; i <= 22; i++) {
+      lat += degLat;
+      poly.add(GeoPoint(lat, lng));
+    }
+    final curves = engine.detect(centerline: poly, fromMapMatch: true);
+    expect(curves.length, greaterThanOrEqualTo(2));
+    expect(curves.any((c) => c.side == TurnSide.derecha), isTrue);
+    expect(curves.any((c) => c.side == TurnSide.izquierda), isTrue);
+  });
+
+  test('attachRider keeps one pass, not every loop past the same corner', () {
+    final poly = _rightAngle(lat0: 20.67, lng0: -103.37, left: false);
+    final curves = engine.detect(centerline: poly, fromMapMatch: true);
+    expect(curves, isNotEmpty);
+    final curve = curves.first;
+    final line = curve.poly;
+    final t0 = DateTime.utc(2026, 9, 11, 15, 0);
+    final samples = <TrackPoint>[];
+    var id = 0;
+    void addPass(DateTime start, double lean) {
+      for (var i = 0; i < line.length; i++) {
+        samples.add(
+          TrackPoint(
+            id: id++,
+            rideId: 'r',
+            latitude: line[i].lat,
+            longitude: line[i].lng,
+            timestamp: start.add(Duration(milliseconds: i * 400)),
+            speedMps: 12,
+            leanDegrees: lean,
+          ),
+        );
+      }
+    }
+
+    addPass(t0, 8);
+    addPass(t0.add(const Duration(seconds: 40)), 24);
+    final rider = engine.attachRider(
+      curve: curve,
+      samples: samples,
+      neutralLeanDegrees: 0,
+    );
+    expect(rider, isNotNull);
+    final span = samples[rider!.exitIndex]
+        .timestamp
+        .difference(samples[rider.entryIndex].timestamp);
+    expect(span.inSeconds, lessThan(20));
+    expect(rider.entryIndex, greaterThan(line.length - 5));
   });
 }
 

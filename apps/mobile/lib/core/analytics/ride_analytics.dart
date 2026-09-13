@@ -49,7 +49,7 @@ class RideAnalytics {
           matchedCenterline!.length >= 4;
       final center = fromMap
           ? matchedCenterline!
-          : gpsCenterline(samples);
+          : movingCenterline(samples);
       const mapEngine = MapCurveEngine();
       mapCurves = mapEngine.detect(
         centerline: center,
@@ -65,19 +65,10 @@ class RideAnalytics {
         );
         if (r != null) riders.add(r);
       }
-      if (riders.isNotEmpty) {
-        skillSummary = const CornerSkillEngine().evaluateRiders(
-          samples: samples,
-          riders: riders,
-        );
-      } else {
-        skillSummary = const CornerSkillEngine().evaluate(
-          samples: samples,
-          stretches: roadStretches,
-          neutralLeanDegrees: neutralLeanDegrees,
-          leanSamples: leanSamples,
-        );
-      }
+      skillSummary = const CornerSkillEngine().evaluateRiders(
+        samples: samples,
+        riders: riders,
+      );
     } else {
       brakeEvents = const [];
       roadStretches = const [];

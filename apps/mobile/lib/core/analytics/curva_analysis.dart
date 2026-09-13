@@ -34,6 +34,7 @@ class CurvaAnalysis {
     this.apexGapAlongM,
     this.apexTiming,
     this.fromMapMatch = false,
+    this.streetPoly = const [],
   });
 
   final RoadStretch stretch;
@@ -85,6 +86,9 @@ class CurvaAnalysis {
   /// True when [mapApexLat] comes from a snapped road axis.
   final bool fromMapMatch;
 
+  /// Polyline κ was measured on (matched street axis, or moving-GPS fallback).
+  final List<GeoPoint> streetPoly;
+
   String get labelEs => stretch.labelEs;
 
   double get speedDropToApexKmh => entrySpeedKmh - apexSpeedKmh;
@@ -100,7 +104,6 @@ class CurvaAnalysis {
     required List<TrackPoint> samples,
     required RoadStretch stretch,
     required double neutralLeanDegrees,
-    int mapPadSamples = 6,
     List<LeanSample> leanSamples = const [],
   }) {
     if (stretch.kind != RoadKind.curva) return null;
@@ -228,8 +231,8 @@ class CurvaAnalysis {
     }
 
     final slice = samples.sublist(lo, hi + 1);
-    final mapStart = (lo - mapPadSamples).clamp(0, samples.length - 1);
-    final mapEnd = (hi + mapPadSamples).clamp(0, samples.length - 1);
+    final mapStart = expandIndexByMeters(samples, lo, 50, backward: true);
+    final mapEnd = expandIndexByMeters(samples, hi, 50, backward: false);
 
     return CurvaAnalysis(
       stretch: stretch,
@@ -261,7 +264,6 @@ class CurvaAnalysis {
   static CurvaAnalysis fromMapRider({
     required List<TrackPoint> samples,
     required MapCurveRider rider,
-    int mapPadSamples = 6,
   }) {
     final lo = rider.entryIndex.clamp(0, samples.length - 1);
     final hi = rider.exitIndex.clamp(lo, samples.length - 1);
@@ -279,8 +281,8 @@ class CurvaAnalysis {
       fingerprint: mapCurveFingerprint(c.mapApex),
     );
     final apex = rider.riderApexIndex.clamp(lo, hi);
-    final mapStart = (lo - mapPadSamples).clamp(0, samples.length - 1);
-    final mapEnd = (hi + mapPadSamples).clamp(0, samples.length - 1);
+    final mapStart = expandIndexByMeters(samples, lo, 50, backward: true);
+    final mapEnd = expandIndexByMeters(samples, hi, 50, backward: false);
     return CurvaAnalysis(
       stretch: stretch,
       entryIndex: lo,
@@ -304,6 +306,7 @@ class CurvaAnalysis {
       apexGapAlongM: rider.apexGapAlongM,
       apexTiming: rider.timing,
       fromMapMatch: c.fromMapMatch,
+      streetPoly: c.poly,
     );
   }
 }
@@ -339,4 +342,23 @@ class CurvaAnalysis {
     );
   }
   return null;
+}
+
+int expandIndexByMeters(
+  List<TrackPoint> samples,
+  int index,
+  double meters, {
+  required bool backward,
+}) {
+  if (samples.isEmpty) return 0;
+  var i = index.clamp(0, samples.length - 1);
+  var acc = 0.0;
+  while (backward ? i > 0 : i < samples.length - 1) {
+    final a = samples[backward ? i - 1 : i];
+    final b = samples[backward ? i : i + 1];
+    acc += haversineMeters(a.latitude, a.longitude, b.latitude, b.longitude);
+    i = backward ? i - 1 : i + 1;
+    if (acc >= meters) break;
+  }
+  return i;
 }

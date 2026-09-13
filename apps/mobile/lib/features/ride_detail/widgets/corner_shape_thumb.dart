@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/analytics/curva_analysis.dart';
 import '../../../core/models/track_point.dart';
-import '../../../core/utils/geo_utils.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
@@ -56,25 +55,30 @@ class _CornerShapePainter extends CustomPainter {
     final lo = analysis.mapStartIndex.clamp(0, n - 1);
     final hi = analysis.mapEndIndex.clamp(lo + 1, n - 1);
     final slice = samples.sublist(lo, hi + 1);
-    if (slice.length < 2) return;
+    final street = analysis.streetPoly;
+    if (slice.length < 2 && street.length < 2) return;
 
-    var minLat = slice.first.latitude;
+    var minLat = slice.isNotEmpty ? slice.first.latitude : street.first.lat;
     var maxLat = minLat;
-    var minLng = slice.first.longitude;
+    var minLng = slice.isNotEmpty ? slice.first.longitude : street.first.lng;
     var maxLng = minLng;
+    void span(double lat, double lng) {
+      minLat = math.min(minLat, lat);
+      maxLat = math.max(maxLat, lat);
+      minLng = math.min(minLng, lng);
+      maxLng = math.max(maxLng, lng);
+    }
+
     for (final p in slice) {
-      minLat = math.min(minLat, p.latitude);
-      maxLat = math.max(maxLat, p.latitude);
-      minLng = math.min(minLng, p.longitude);
-      maxLng = math.max(maxLng, p.longitude);
+      span(p.latitude, p.longitude);
+    }
+    for (final p in street) {
+      span(p.lat, p.lng);
     }
     final mapLat = analysis.mapApexLat;
     final mapLng = analysis.mapApexLng;
     if (mapLat != null && mapLng != null) {
-      minLat = math.min(minLat, mapLat);
-      maxLat = math.max(maxLat, mapLat);
-      minLng = math.min(minLng, mapLng);
-      maxLng = math.max(maxLng, mapLng);
+      span(mapLat, mapLng);
     }
     final dLat = math.max(maxLat - minLat, 1e-6);
     final dLng = math.max(maxLng - minLng, 1e-6);
@@ -105,11 +109,6 @@ class _CornerShapePainter extends CustomPainter {
 
     Offset project(TrackPoint p) => projectLatLng(p.latitude, p.longitude);
 
-    final speeds = displaySpeedsMps(slice);
-    final entryRel = (analysis.entryIndex - lo).clamp(0, slice.length - 1);
-    final exitRel = (analysis.exitIndex - lo).clamp(0, slice.length - 1);
-    final apexRel = (analysis.displayApexIndex - lo).clamp(0, slice.length - 1);
-
     final dimPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
@@ -118,19 +117,34 @@ class _CornerShapePainter extends CustomPainter {
       ..color = AppTheme.steel.withValues(alpha: 0.35);
 
     for (var i = 1; i < slice.length; i++) {
-      final inCorner = i > entryRel && i <= exitRel;
-      final paint = inCorner
-          ? (Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 4.5
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..color = RideVizPalette.speedColor(
-              (speeds[i] ?? slice[i].speedMps ?? 0) * 3.6,
-            ))
-          : dimPaint;
-      canvas.drawLine(project(slice[i - 1]), project(slice[i]), paint);
+      canvas.drawLine(project(slice[i - 1]), project(slice[i]), dimPaint);
     }
+
+    if (street.length >= 2) {
+      final streetPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..color = AppTheme.line;
+      for (var i = 1; i < street.length; i++) {
+        canvas.drawLine(
+          projectLatLng(street[i - 1].lat, street[i - 1].lng),
+          projectLatLng(street[i].lat, street[i].lng),
+          streetPaint,
+        );
+      }
+    }
+
+    final entryRel = slice.isEmpty
+        ? 0
+        : (analysis.entryIndex - lo).clamp(0, slice.length - 1);
+    final exitRel = slice.isEmpty
+        ? 0
+        : (analysis.exitIndex - lo).clamp(0, slice.length - 1);
+    final apexRel = slice.isEmpty
+        ? 0
+        : (analysis.displayApexIndex - lo).clamp(0, slice.length - 1);
 
     void pin(Offset at, String letter, Color color) {
       canvas.drawCircle(at, 8, Paint()..color = color);
@@ -155,6 +169,8 @@ class _CornerShapePainter extends CustomPainter {
       )..layout();
       tp.paint(canvas, at - Offset(tp.width / 2, tp.height / 2));
     }
+
+    if (slice.isEmpty) return;
 
     pin(
       project(slice[entryRel]),
@@ -194,5 +210,6 @@ class _CornerShapePainter extends CustomPainter {
       old.analysis.entryIndex != analysis.entryIndex ||
       old.analysis.exitIndex != analysis.exitIndex ||
       old.analysis.mapApexLat != analysis.mapApexLat ||
-      old.analysis.fromMapMatch != analysis.fromMapMatch;
+      old.analysis.fromMapMatch != analysis.fromMapMatch ||
+      old.analysis.streetPoly != analysis.streetPoly;
 }
