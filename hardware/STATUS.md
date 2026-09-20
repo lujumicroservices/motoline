@@ -1,7 +1,7 @@
 # STATUS — hardware
 
 > Archivo vivo. El agente lo actualiza al pausar o al cerrar una decisión.  
-> Última actualización: 2026-09-19
+> Última actualización: 2026-09-20
 
 ## Fase
 
@@ -9,7 +9,7 @@
 
 ## Chat de origen
 
-[Hardware logger BOM](c349b6a7-8f93-4815-a7e1-a518e71cc66c) — 18 Sep 2026.
+[Hardware logger BOM](c349b6a7-8f93-4815-a7e1-a518e71cc66c) — 18 Sep 2026. Render honesto 20 Sep 2026.
 
 ## Dónde nos quedamos
 
@@ -18,6 +18,7 @@
 - Decisión de compra: **1 unidad** para primer prototipo, no 10.
 - Power: Battery 13.2 **o** USB 5 V de moto **o** buck 12→5 V (no los tres a la vez).
 - Cotización qty 1 en curso (M5Stack shop + SparkFun + local buck/caja).
+- Render honesto del prototipo (banco, no dash AiM): stack Basic arriba / Battery + M135 abajo, caja IP65 vacía, puck + ground plane ~10 cm. La UI de pantalla es mock de firmware (aún no existe).
 
 ## Siguiente paso (cuando se retome)
 
