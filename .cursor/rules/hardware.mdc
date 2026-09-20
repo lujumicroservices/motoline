@@ -1,0 +1,14 @@
+---
+description: Contexto del subproyecto de hardware (logger GNSS/IMU). Aplicar al tocar archivos en hardware/.
+globs: hardware/**
+alwaysApply: false
+---
+
+# Hardware lane
+
+Al trabajar archivos en `hardware/`:
+
+1. Leer `hardware/STATUS.md` antes de proponer cambios.
+2. No reabrir decisiones de `hardware/DECISIONS.md` salvo que el usuario lo pida.
+3. El prototipo es stack M5Stack (Basic + M135), no un producto sellado tipo AiM.
+4. Al cerrar trabajo, actualizar `hardware/STATUS.md`.

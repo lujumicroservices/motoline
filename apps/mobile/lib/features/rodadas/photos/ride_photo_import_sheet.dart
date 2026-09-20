@@ -47,8 +47,8 @@ class _RidePhotoImportSheetState extends ConsumerState<RidePhotoImportSheet> {
     final store = ref.read(ridePhotoStoreProvider);
     try {
       for (final c in _items.where((c) => c.selected)) {
-        final bytes = await loadGalleryBytes(c.asset);
-        if (bytes == null) continue;
+        final bytes = c.bytes;
+        if (bytes.isEmpty) continue;
         await store.saveCaptured(
           rideId: widget.rideId,
           bytes: bytes,
@@ -120,7 +120,11 @@ class _RidePhotoImportSheetState extends ConsumerState<RidePhotoImportSheet> {
                         borderRadius: BorderRadius.circular(8),
                         child: c.thumb == null
                             ? Container(color: AppTheme.asphaltElevated)
-                            : Image.memory(c.thumb!, fit: BoxFit.cover),
+                            : Image.memory(
+                                c.thumb!,
+                                fit: BoxFit.cover,
+                                cacheWidth: 256,
+                              ),
                       ),
                       Positioned(
                         top: 6,

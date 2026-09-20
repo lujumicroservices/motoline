@@ -10,6 +10,11 @@ void main() {
       expect(isPartnerProCodeShape('PRO-7K4M2Q'), isTrue);
     });
 
+    test('accepts SIMM26 partner codes', () {
+      expect(normalizePartnerProCode('simm26-ab23cd'), 'SIMM26-AB23CD');
+      expect(isPartnerProCodeShape('SIMM26-AB23CD'), isTrue);
+    });
+
     test('rejects values that are not a 6-character code', () {
       expect(isPartnerProCodeShape(normalizePartnerProCode('hello')), isFalse);
       expect(isPartnerProCodeShape(normalizePartnerProCode('TAP42')), isFalse);

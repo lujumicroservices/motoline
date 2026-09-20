@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RiderLab — SIMM 2026</title>
+  <meta name="description" content="Lista de espera RiderLab en SIMM. Android 24 sep. 3 meses de Ride Lab al activar cuenta." />
+  <link rel="canonical" href="https://riderlab.rawthrottle.com.mx/simm" />
+  <link rel="icon" type="image/png" href="/site/icon-512.png" />
+  <meta name="theme-color" content="#0e1013" />
+  <meta name="robots" content="noindex" />
+  <style>
+    :root {
+      --asphalt: #0e1013;
+      --card: #151920;
+      --steel: #9ba4ae;
+      --mist: #f1f5f8;
+      --line: #00d4aa;
+      --hair: #2a313a;
+      --err: #ff6b57;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--asphalt);
+      color: var(--mist);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.4;
+      min-height: 100vh;
+    }
+    .wrap { width: min(560px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+    .brand img.icon { width: 40px; height: 40px; border-radius: 10px; }
+    .brand img.word { height: 24px; width: auto; }
+    .kicker {
+      color: var(--line); letter-spacing: .16em; text-transform: uppercase;
+      font-size: 12px; font-weight: 800; margin: 28px 0 10px;
+    }
+    h1 { font-size: clamp(32px, 8vw, 44px); line-height: 1.05; font-weight: 800; }
+    .lede { margin-top: 12px; color: var(--steel); font-size: 18px; }
+    .card {
+      background: var(--card); border: 1px solid var(--hair);
+      border-radius: 18px; padding: 20px; margin-top: 22px;
+    }
+    label { display: block; font-size: 13px; font-weight: 700; margin: 12px 0 6px; }
+    input[type="text"], input[type="email"], input[type="tel"], select {
+      width: 100%; background: #0e1013; color: var(--mist);
+      border: 1px solid var(--hair); border-radius: 12px;
+      padding: 14px 14px; font: inherit; font-size: 17px;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .consent { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; color: var(--steel); font-size: 14px; }
+    .consent input { margin-top: 4px; width: 18px; height: 18px; }
+    .hp { position: absolute; left: -9999px; height: 0; overflow: hidden; }
+    .btn {
+      display: flex; width: 100%; align-items: center; justify-content: center;
+      margin-top: 16px; background: var(--line); color: #04221b;
+      font-weight: 800; font-size: 18px; border: 0; border-radius: 999px;
+      padding: 16px; cursor: pointer; text-decoration: none;
+    }
+    .btn.ghost { background: transparent; color: var(--mist); border: 1px solid var(--hair); }
+    .fine { margin-top: 14px; color: var(--steel); font-size: 13px; }
+    .err { color: var(--err); font-size: 14px; margin-top: 10px; }
+    .ok { color: var(--line); font-size: 18px; font-weight: 700; }
+    .steps { display: grid; gap: 12px; margin-top: 16px; }
+    .steps article { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center; }
+    .steps img { width: 92px; height: 92px; object-fit: cover; border-radius: 12px; }
+    a { color: var(--line); }
+    .hidden { display: none; }
+    @media (max-width: 420px) {
+      .row { grid-template-columns: 1fr; }
+      .steps article { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="brand" href="/">
+      <img class="icon" src="/site/icon-512.png" alt="" />
+      <img class="word" src="/site/wordmark.png" alt="RiderLab" />
+    </a>
+    <p class="kicker">SIMM 2026 · Expo Santa Fe</p>
+    <h1>Graba tu línea. Te avisamos en Android.</h1>
+    <p class="lede">24 sep, 12:00 México. Al activar cuenta: 3 meses de Ride Lab (Pro). Grabar y el mapa siguen gratis. iOS más adelante.</p>
+    <p class="fine" style="margin-top:0">Mientras Play revisa: <a href="/go/apk">descargar APK Android</a>.</p>
+
+    <section id="pending" class="card">
+      <form id="lead-form">
+        <label for="name">Nombre</label>
+        <input id="name" name="name" type="text" autocomplete="name" required maxlength="80" />
+        <label for="platform">Teléfono</label>
+        <select id="platform" name="platform" required>
+          <option value="android" selected>Android</option>
+          <option value="ios">iPhone</option>
+        </select>
+        <div class="row">
+          <div>
+            <label for="email">Correo</label>
+            <input id="email" name="email" type="email" autocomplete="email" />
+          </div>
+          <div>
+            <label for="phone">WhatsApp</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="10 dígitos" />
+          </div>
+        </div>
+        <p class="fine">Uno de los dos basta.</p>
+        <label class="hp" aria-hidden="true">Empresa <input id="company" name="company" tabindex="-1" autocomplete="off" /></label>
+        <label class="consent">
+          <input id="consent" name="consent" type="checkbox" required />
+          <span>Acepto que RiderLab me avise del lanzamiento Android. <a href="/legal/privacy.html">Aviso de privacidad</a>.</span>
+        </label>
+        <button class="btn" type="submit" id="submit">Apuntarme</button>
+        <p class="err hidden" id="form-err"></p>
+      </form>
+      <div id="thanks" class="hidden">
+        <p class="ok">Quedaste en la lista.</p>
+        <p class="lede" style="margin-top:8px">Te avisamos cuando Android esté. El código de 3 meses se envía entonces — no hace falta que lo anotes aquí.</p>
+      </div>
+    </section>
+
+    <section id="available" class="card hidden">
+      <p class="ok" id="avail-title">Ya puedes instalar en Android</p>
+      <p class="lede" id="avail-sub">Entra con Google, toca Convertirse en tester e instala. iOS sigue en lista de espera.</p>
+      <a class="btn" id="install-btn" href="/go/android">Instalar Android</a>
+      <div class="steps" aria-label="Cómo empezar">
+        <article>
+          <img src="/site/howto-1-tester.jpg" alt="" />
+          <p><b>1. Instalar</b> — Convertirse en tester, luego Instalar.</p>
+        </article>
+        <article>
+          <img src="/site/howto-2-joined.jpg" alt="" />
+          <p><b>2. Cuenta</b> — Google o correo. Prueba Pro de 30 días al entrar.</p>
+        </article>
+        <article>
+          <img src="/site/phone-01-home.png" alt="" />
+          <p><b>3. Arm / Start ride now</b> — ubicación Siempre. No mires el teléfono en marcha.</p>
+        </article>
+      </div>
+      <p class="fine">3 meses de Ride Lab: Ajustes → código de socio cuando te lo enviemos.</p>
+    </section>
+
+    <p class="fine">18+ · No uses ni mires el teléfono mientras conduces. <a href="/">Sitio RiderLab</a></p>
+  </main>
+  <script src="config.js"></script>
+  <script>
+    const pending = document.getElementById("pending");
+    const available = document.getElementById("available");
+    const form = document.getElementById("lead-form");
+    const thanks = document.getElementById("thanks");
+    const errEl = document.getElementById("form-err");
+    const params = new URLSearchParams(location.search);
+    const utm = {};
+    for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_content"]) {
+      if (params.get(k)) utm[k] = params.get(k);
+    }
+
+    function showAvailable(store) {
+      pending.classList.add("hidden");
+      available.classList.remove("hidden");
+      const early = (store.earlyAccessUrl || "").trim();
+      const play = (store.playUrl || "").trim();
+      const href = early || "/go/android";
+      document.getElementById("install-btn").href = href;
+      if (!early && play) {
+        document.getElementById("avail-title").textContent = "RiderLab en Google Play";
+        document.getElementById("avail-sub").textContent = "Instala, entra con Google o correo, y usa Start ride now. iOS sigue en lista de espera.";
+        document.getElementById("install-btn").href = play;
+        document.getElementById("install-btn").textContent = "Abrir Play";
+      }
+    }
+
+    async function boot() {
+      let store = {};
+      try {
+        store = await (await fetch("/store.json", { cache: "no-store" })).json();
+      } catch (_) {}
+      const early = (store.earlyAccessUrl || "").trim();
+      const unlock = Date.parse(store.androidReleaseAt || "") || 0;
+      const play = (store.playUrl || "").trim();
+      const live = Boolean(early) || (unlock && Date.now() >= unlock && play);
+      if (live) showAvailable(store);
+
+      const cfg = window.RL_SIMM || {};
+      const url = (cfg.supabaseUrl || store.supabaseUrl || "").replace(/\/$/, "");
+      const key = cfg.supabaseAnonKey || "";
+      if (url && key) {
+        fetch(url + "/functions/v1/submit-event-lead", {
+          method: "GET",
+          headers: { apikey: key, Authorization: "Bearer " + key },
+        }).catch(() => {});
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errEl.classList.add("hidden");
+      const name = document.getElementById("name").value.trim();
+      const platform = document.getElementById("platform").value;
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const consent = document.getElementById("consent").checked;
+      const company = document.getElementById("company").value;
+      if (!email && !phone) {
+        errEl.textContent = "Pon un correo o un WhatsApp.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      const cfg = window.RL_SIMM || {};
+      const url = (cfg.supabaseUrl || "").replace(/\/$/, "");
+      const key = cfg.supabaseAnonKey || "";
+      if (!url || !key) {
+        errEl.textContent = "Registro en el stand: el staff anota tus datos.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      document.getElementById("submit").disabled = true;
+      try {
+        const res = await fetch(url + "/functions/v1/submit-event-lead", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: key,
+            Authorization: "Bearer " + key,
+          },
+          body: JSON.stringify({
+            name, platform, email, phone, consent, company, utm, source: "simm-2026",
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "fail");
+        }
+        form.classList.add("hidden");
+        thanks.classList.remove("hidden");
+      } catch (_) {
+        errEl.textContent = "No se pudo enviar. Prueba otra red o deja tus datos con el staff.";
+        errEl.classList.remove("hidden");
+        document.getElementById("submit").disabled = false;
+      }
+    });
+
+    boot();
+  </script>
+</body>
+</html>

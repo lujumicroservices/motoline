@@ -107,6 +107,46 @@ PhotoTrackMatch matchPhotoToTrack({
   );
 }
 
+/// User picked these in the system Photo Picker — always keep them.
+/// Clamp EXIF time into the ride so we can still pin GPS on the line.
+PhotoTrackMatch matchUserPickedPhotoToTrack({
+  DateTime? takenAt,
+  double? photoLat,
+  double? photoLng,
+  required List<TrackPoint> points,
+  required DateTime rideStart,
+  required DateTime rideEnd,
+}) {
+  final raw = takenAt ?? rideEnd;
+  final clamped = raw.isBefore(rideStart)
+      ? rideStart
+      : (raw.isAfter(rideEnd) ? rideEnd : raw);
+  final match = matchPhotoToTrack(
+    takenAt: clamped,
+    photoLat: photoLat,
+    photoLng: photoLng,
+    points: points,
+    rideStart: rideStart,
+    rideEnd: rideEnd,
+  );
+  if (match.accepted) return match;
+  if (points.isEmpty) {
+    return PhotoTrackMatch(
+      accepted: true,
+      latitude: photoLat,
+      longitude: photoLng,
+      reason: 'picked',
+    );
+  }
+  final last = points.last;
+  return PhotoTrackMatch(
+    accepted: true,
+    latitude: photoLat ?? last.latitude,
+    longitude: photoLng ?? last.longitude,
+    reason: 'picked',
+  );
+}
+
 (double, TrackPoint) _nearestByDistance(
   List<TrackPoint> points,
   double lat,

@@ -40,3 +40,6 @@ verify_jwt = true
 
 [functions.delete-account]
 verify_jwt = true
+
+[functions.submit-event-lead]
+verify_jwt = false

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/ride.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
-import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../reel/reel_compose_screen.dart';
 import '../ride_detail/ride_detail_screen.dart';
@@ -11,7 +10,6 @@ import 'photos/ride_photo_capture.dart';
 import 'photos/ride_photo_gallery_scan.dart';
 import 'photos/ride_photo_import_sheet.dart';
 import 'rodada_providers.dart';
-import '../../widgets/app_snack.dart';
 
 class LinkedRodadaRide {
   const LinkedRodadaRide({required this.rodadaId, this.cloudRideId});
@@ -79,7 +77,6 @@ Future<void> continueAfterRideToRodadaShare({
   if (!context.mounted) return;
   if (ride != null && ride.status == RideStatus.completed) {
     List<GalleryPhotoCandidate> candidates = const [];
-    var limited = false;
     try {
       final scan = await scanRideGalleryPhotos(
         rideStart: ride.startedAt,
@@ -87,12 +84,8 @@ Future<void> continueAfterRideToRodadaShare({
         points: points,
       );
       candidates = scan.candidates;
-      limited = scan.limited || scan.denied;
     } catch (_) {}
     if (!context.mounted) return;
-    if (candidates.isEmpty && limited) {
-      showAppSnack(context, context.l10n.photoLibraryLimited);
-    }
     if (candidates.isNotEmpty) {
       await Navigator.of(context).push<bool>(
         MaterialPageRoute(

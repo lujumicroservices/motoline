@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RawThrottle — RiderLab shop</title>
+    <meta
+      name="description"
+      content="Playeras y gorras RiderLab y RawThrottle. Envíos a todo México."
+    />
+    <link rel="canonical" href="https://rawthrottle.com.mx/" />
+    <meta property="og:title" content="RawThrottle — playeras y gorras" />
+    <meta property="og:description" content="Drop de merch RiderLab y RawThrottle. Se usa, se ensucia, se vuelve a salir." />
+    <meta property="og:image" content="https://rawthrottle.com.mx/img/products/hero.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css?v=6" />
+    <link rel="icon" href="img/mark.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="wrap topbar">
+      <a class="brand" href="index.html">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="#0a0b0c" />
+          <path
+            fill="none"
+            stroke="#e6d7b8"
+            stroke-width="1.7"
+            stroke-linejoin="miter"
+            stroke-linecap="square"
+            d="M4.6 24.6 L11.4 13.2 L15.6 20.2 L21.2 8.6 L28.4 24.6"
+          />
+          <path
+            fill="none"
+            stroke="#e6d7b8"
+            stroke-width="1.35"
+            stroke-linejoin="miter"
+            d="M9.4 21.4 L11.4 17.8 L13.4 21.4"
+          />
+          <g fill="none" stroke="#e6d7b8" stroke-width="1.25" stroke-linecap="round">
+            <path d="M22.8 10.6 A6.2 6.2 0 0 1 28.4 18.6" />
+            <path d="M23.2 9.4 L23.9 7.9" />
+            <path d="M25.2 10.2 L26.3 8.9" />
+            <path d="M26.8 12 L28.3 11.2" />
+            <path d="M27.8 14.2 L29.5 14" />
+            <path d="M28.2 16.6 L29.9 17.1" />
+          </g>
+        </svg>
+        RawThrottle
+      </a>
+      <nav>
+        <a href="#tienda">Shop</a>
+        <a href="#riderlab">RiderLab</a>
+        <a href="#rodadas">Rodadas</a>
+        <a href="#envios">Envíos</a>
+        <a href="#contacto">WhatsApp</a>
+      </nav>
+    </header>
+    <p class="soon-bar">Venta lista pronto. Ya puedes ver el drop; los pedidos se abren en breve.</p>
+
+    <main>
+      <section class="hero-bleed">
+        <div class="wrap hero">
+          <div>
+            <p class="kicker">RiderLab · RawThrottle</p>
+            <h1>Tierra.<br />Asfalto.<br />Más gas.</h1>
+            <p class="lede">
+              Playeras y gorras para el camino, y la app que recuerda la curva.
+              Hecho para riders en México. La venta está lista pronto.
+            </p>
+            <p class="hero-actions">
+              <a class="btn" href="#tienda">Ver el marketplace</a>
+              <a class="btn ghost" href="#riderlab">La app</a>
+            </p>
+          </div>
+          <aside class="hero-panel">
+            <p class="kicker">Drop 01</p>
+            <h2>Se usa. Se ensucia. Se vuelve a salir.</h2>
+            <p class="muted">
+              Tres playeras y seis gorras. Pocas piezas, hechas para el camino,
+              enviadas a todo el país.
+            </p>
+            <div class="stat-row">
+              <div class="stat">
+                <b>$450</b>
+                <span>Playeras</span>
+              </div>
+              <div class="stat">
+                <b>$450</b>
+                <span>Gorras</span>
+              </div>
+              <div class="stat">
+                <b id="tee-ship">$119</b>
+                <span>Envío desde</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="wrap" id="tienda">
+        <div class="section-head">
+          <div>
+            <p class="kicker">Marketplace</p>
+            <h2>Playeras y gorras</h2>
+          </div>
+          <p class="muted">MXN. IVA incluido. El envío se suma al pedir.</p>
+        </div>
+        <div class="filters" role="tablist" aria-label="Filtro de productos">
+          <button class="filter on" type="button" data-filter="all">Todo</button>
+          <button class="filter" type="button" data-filter="playera">Playeras</button>
+          <button class="filter" type="button" data-filter="gorra">Gorras</button>
+          <button class="filter" type="button" data-filter="RiderLab">RiderLab</button>
+          <button class="filter" type="button" data-filter="RawThrottle">RawThrottle</button>
+        </div>
+        <div class="market" id="market">
+          <button class="sku" type="button" data-id="tee-barredora" data-category="playera" data-brand="RawThrottle">
+            <img src="img/products/tee-barredora-1-thumb.jpg" alt="Playera La Eterna Barredora" />
+            <div class="sku-body">
+              <div class="sku-brand">RawThrottle · playera</div>
+              <h3>Playera La Eterna Barredora</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="tee-calle" data-category="playera" data-brand="RawThrottle">
+            <img src="img/products/tee-calle-1-thumb.jpg" alt="Playera Calle" />
+            <div class="sku-body">
+              <div class="sku-brand">RawThrottle · playera</div>
+              <h3>Playera Calle</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="tee-rfr" data-category="playera" data-brand="RawThrottle">
+            <img src="img/products/tee-rfr-1-thumb.jpg" alt="Playera RFR" />
+            <div class="sku-body">
+              <div class="sku-brand">RawThrottle · playera</div>
+              <h3>Playera RFR</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="hat-rl-black" data-category="gorra" data-brand="RiderLab">
+            <img src="img/products/hat-rl-black-1-thumb.jpg" alt="Gorra RiderLab Negra" />
+            <div class="sku-body">
+              <div class="sku-brand">RiderLab · gorra</div>
+              <h3>Gorra RiderLab Negra</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="hat-rl-brown" data-category="gorra" data-brand="RiderLab">
+            <img src="img/products/hat-rl-brown-1-thumb.jpg" alt="Gorra RiderLab Café" />
+            <div class="sku-body">
+              <div class="sku-brand">RiderLab · gorra</div>
+              <h3>Gorra RiderLab Café</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="hat-rt-black" data-category="gorra" data-brand="RawThrottle">
+            <img src="img/products/hat-rt-black-1-thumb.jpg" alt="Gorra Cima Negra" />
+            <div class="sku-body">
+              <div class="sku-brand">RawThrottle · gorra</div>
+              <h3>Gorra Cima Negra</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="hat-rt-brown" data-category="gorra" data-brand="RawThrottle">
+            <img src="img/products/hat-rt-brown-2-thumb.jpg" alt="Gorra Cima Café" />
+            <div class="sku-body">
+              <div class="sku-brand">RawThrottle · gorra</div>
+              <h3>Gorra Cima Café</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="hat-rt-patch" data-category="gorra" data-brand="RawThrottle">
+            <img src="img/products/hat-rt-patch-1-thumb.jpg" alt="Gorra RFR Parche" />
+            <div class="sku-body">
+              <div class="sku-brand">RawThrottle · gorra</div>
+              <h3>Gorra RFR Parche</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+          <button class="sku" type="button" data-id="hat-rt-suede" data-category="gorra" data-brand="RawThrottle">
+            <img src="img/products/hat-rt-suede-1-thumb.jpg" alt="Gorra Cima Suede" />
+            <div class="sku-body">
+              <div class="sku-brand">RawThrottle · gorra</div>
+              <h3>Gorra Cima Suede</h3>
+              <p class="price">$450</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <section class="wrap" id="como-comprar">
+        <div class="section-head">
+          <div>
+            <p class="kicker">Pedido</p>
+            <h2>Venta lista pronto</h2>
+          </div>
+        </div>
+        <ol class="steps">
+          <li>Elige la pieza y la talla en el marketplace. Gorras y playeras, $450.</li>
+          <li>Revisa precio y envío en la ficha. El envío va aparte del precio de la prenda.</li>
+          <li>Cuando se abra la venta, cierras el pedido y te llega a casa con rastreo.</li>
+        </ol>
+      </section>
+
+      <section class="wrap" id="riderlab">
+        <div class="section-head">
+          <div>
+            <p class="kicker">App</p>
+            <h2>RiderLab</h2>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="scene scene-acid" aria-hidden="true"></div>
+          <div class="card">
+            <h3>La rodada, en claro</h3>
+            <p class="muted">
+              Inclinación, ritmo, el tramo que sí contó. RiderLab es la app de
+              RawThrottle: el teléfono en el bolsillo, el laboratorio al detenerte.
+            </p>
+            <p>
+              <a class="btn" href="https://riderlab.rawthrottle.com.mx/">Sitio de la app</a>
+              <a class="btn ghost" id="riderlab-play" href="https://riderlab.rawthrottle.com.mx/go/android">Google Play</a>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="ribbon ribbon-trail" aria-hidden="true"></div>
+
+      <section class="wrap" id="rodadas">
+        <div class="section-head">
+          <div>
+            <p class="kicker">Salidas</p>
+            <h2>La siguiente rodada</h2>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="scene scene-camp" aria-hidden="true"></div>
+          <article class="card">
+            <p class="muted">
+              Punto, hora y ritmo se sueltan primero por WhatsApp. Sin cartel
+              gigante. Si te late salir, métete a la lista y te cae el pin.
+            </p>
+            <p>
+              <a class="btn" data-wa="Méteme a la lista de la próxima rodada" href="#">Méteme a la lista</a>
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="wrap" id="envios">
+        <div class="section-head">
+          <div>
+            <p class="kicker">México</p>
+            <h2>Cómo te llega</h2>
+          </div>
+        </div>
+        <div class="grid-3">
+          <article class="card">
+            <h3>A todo el país</h3>
+            <p class="muted">
+              Sale desde <span id="origin-city">México</span> por paquetería
+              nacional. Express si lo pides.
+            </p>
+          </article>
+          <article class="card">
+            <h3>El envío se ve claro</h3>
+            <p class="muted">
+              No va metido en el precio de la pieza. Lo cotizamos al pedir —
+              desde <span id="tee-ship-copy">$119</span> — para que el total no te
+              sorprenda.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Si algo falla</h3>
+            <p class="muted">
+              7 días si llega mal o equivocada. Te la reponemos. Cambio de talla
+              por gusto: cubres el regreso.
+            </p>
+          </article>
+        </div>
+        <p style="margin-top: 1.2rem">
+          <a href="envios.html">Pagos, factura y cambios →</a>
+        </p>
+      </section>
+
+      <section class="wrap" id="contacto" style="border-bottom: 0">
+        <p class="kicker">WhatsApp</p>
+        <h2>Un mensaje y lo armamos</h2>
+        <p class="lede">
+          Talla, CP, RiderLab o la próxima salida. Aquí se cierra el pedido.
+        </p>
+        <p>
+          <a class="btn" data-wa="Hola, vengo de rawthrottle.com.mx" href="#">Abrir WhatsApp</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="wrap">
+      <p>RawThrottle · RiderLab · México</p>
+      <p>
+        <a href="aviso-privacidad.html">Aviso de privacidad</a>
+        ·
+        <a href="terminos.html">Términos</a>
+        ·
+        <a href="envios.html">Envíos</a>
+        ·
+        <a href="https://riderlab.rawthrottle.com.mx/">App</a>
+      </p>
+    </footer>
+
+    <div class="modal" id="modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-gallery">
+          <img id="modal-photo" alt="" />
+          <div class="thumbs" id="modal-thumbs"></div>
+        </div>
+        <div class="modal-copy">
+          <button class="close" type="button" id="modal-close" aria-label="Cerrar">×</button>
+          <p class="kicker" id="modal-brand"></p>
+          <h2 id="modal-title"></h2>
+          <p class="price" id="modal-price"></p>
+          <p class="note" id="modal-blurb"></p>
+          <label>
+            Talla
+            <select id="modal-size"></select>
+          </label>
+          <button class="btn" id="modal-buy" type="button">Venta lista pronto</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/config.js?v=6"></script>
+    <script src="js/main.js?v=6"></script>
+  </body>
+</html>

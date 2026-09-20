@@ -235,46 +235,30 @@ class RodadaPhotosTab extends ConsumerWidget {
         showAppSnack(context, l10n.noCompletedRidesToLink);
         return;
       }
-      var imported = false;
-      for (final rideId in rideIds) {
-        final ride = await ref.read(rideDatabaseProvider).getRide(rideId);
-        final points = await ref.read(rideDatabaseProvider).getPoints(rideId);
-        if (ride == null) continue;
-        final scan = await scanRideGalleryPhotos(
-          rideStart: ride.startedAt,
-          rideEnd: ride.endedAt ?? DateTime.now(),
-          points: points,
-        );
-        if (!context.mounted) return;
-        if (scan.denied || (scan.limited && scan.candidates.isEmpty)) {
-          showAppSnack(context, l10n.photoLibraryLimited);
-          if (scan.denied) return;
-        }
-        if (scan.candidates.isEmpty) continue;
-        imported = true;
-        final cloudId = await ref
-            .read(rodadaRepositoryProvider)
-            .cloudRideIdForLocal(rideId);
-        if (!context.mounted) return;
-        await Navigator.of(context).push<bool>(
-          MaterialPageRoute(
-            builder: (_) => RidePhotoImportSheet(
-              rideId: rideId,
-              rodadaId: rodadaId,
-              cloudRideId: cloudId,
-              candidates: scan.candidates,
-            ),
-          ),
-        );
-      }
-      if (imported || !context.mounted) return;
-      final files = await ImagePicker().pickMultiImage(
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 82,
+      final rideId = rideIds.first;
+      final ride = await ref.read(rideDatabaseProvider).getRide(rideId);
+      final points = await ref.read(rideDatabaseProvider).getPoints(rideId);
+      if (ride == null) return;
+      final scan = await scanRideGalleryPhotos(
+        rideStart: ride.startedAt,
+        rideEnd: ride.endedAt ?? DateTime.now(),
+        points: points,
       );
-      if (files.isEmpty || !context.mounted) return;
-      await _uploadPickedFiles(context, ref, files);
+      if (!context.mounted || scan.candidates.isEmpty) return;
+      final cloudId = await ref
+          .read(rodadaRepositoryProvider)
+          .cloudRideIdForLocal(rideId);
+      if (!context.mounted) return;
+      await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => RidePhotoImportSheet(
+            rideId: rideId,
+            rodadaId: rodadaId,
+            cloudRideId: cloudId,
+            candidates: scan.candidates,
+          ),
+        ),
+      );
     } catch (e) {
       if (!context.mounted) return;
       showAppSnackError(context, '$e');

@@ -102,4 +102,17 @@ void main() {
     );
     expect(match.accepted, isFalse);
   });
+
+  test('user-picked photos stay even when EXIF is outside the window', () {
+    final match = matchUserPickedPhotoToTrack(
+      takenAt: start.subtract(const Duration(hours: 5)),
+      photoLat: 20.6702,
+      photoLng: -103.3501,
+      points: points,
+      rideStart: start,
+      rideEnd: end,
+    );
+    expect(match.accepted, isTrue);
+    expect(match.latitude, closeTo(20.6702, 0.0001));
+  });
 }

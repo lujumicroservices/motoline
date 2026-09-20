@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RiderLab — el laboratorio de calle para motociclistas</title>
+  <meta name="description" content="RiderLab graba tu línea GPS y la inclinación de la moto. Al terminar, Ride Lab te muestra cómo tomaste cada curva. Android y iOS." />
+  <link rel="canonical" href="https://riderlab.rawthrottle.com.mx/" />
+  <link rel="icon" type="image/png" href="site/icon-512.png" />
+  <link rel="apple-touch-icon" href="site/icon-512.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="RiderLab — mejora en cada curva" />
+  <meta property="og:description" content="Graba tu línea GPS y la inclinación con el teléfono en el bolsillo. Revisa cada curva al detenerte." />
+  <meta property="og:url" content="https://riderlab.rawthrottle.com.mx/" />
+  <meta property="og:image" content="https://riderlab.rawthrottle.com.mx/site/hero.png" />
+  <meta name="theme-color" content="#0e1013" />
+  <style>
+    :root {
+      --asphalt: #0e1013;
+      --elevated: #1a1e24;
+      --card: #151920;
+      --steel: #9ba4ae;
+      --mist: #f1f5f8;
+      --signal: #ff3d1f;
+      --line: #00d4aa;
+      --amber: #ffc107;
+      --hair: #2a313a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--asphalt);
+      color: var(--mist);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.45;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: var(--line); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    header.nav {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(14,16,19,.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--hair);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 12px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+    .brand img.icon { width: 36px; height: 36px; border-radius: 9px; }
+    .brand img.word { height: 22px; width: auto; }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .lang { display: flex; border: 1px solid var(--hair); border-radius: 999px; overflow: hidden; }
+    .lang button {
+      background: transparent; color: var(--steel); border: 0;
+      padding: 6px 12px; font: inherit; font-size: 12px; font-weight: 700;
+      letter-spacing: .06em; cursor: pointer;
+    }
+    .lang button.on { background: var(--elevated); color: var(--mist); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--line); color: #04221b; font-weight: 800;
+      border-radius: 999px; padding: 10px 16px; text-decoration: none;
+    }
+    .btn:hover { text-decoration: none; filter: brightness(1.05); }
+    .btn.ghost {
+      background: transparent; color: var(--mist);
+      border: 1px solid var(--hair);
+    }
+    .btn.is-off, .btn[disabled] {
+      opacity: .42; pointer-events: none; cursor: not-allowed;
+      filter: grayscale(.35); text-decoration: none;
+    }
+    .btn.ig {
+      gap: 8px;
+      background: linear-gradient(135deg, #f58529 0%, #dd2a7b 52%, #8134af 100%);
+      color: #fff;
+      border: 0;
+      padding: 11px 18px;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      box-shadow: 0 8px 22px rgba(221, 42, 123, .45);
+      animation: ig-pulse 1.7s ease-out infinite;
+    }
+    .btn.ig svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .btn.ig:hover {
+      text-decoration: none;
+      filter: brightness(1.12);
+      transform: translateY(-1px) scale(1.04);
+    }
+    .btn.ig.ig-lg {
+      padding: 16px 28px;
+      font-size: 18px;
+      letter-spacing: .1em;
+      gap: 10px;
+    }
+    .btn.ig.ig-lg svg { width: 22px; height: 22px; }
+    .ig-banner {
+      display: flex;
+      justify-content: center;
+      padding: 18px 0 4px;
+    }
+    @keyframes ig-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(221, 42, 123, .7), 0 8px 22px rgba(221, 42, 123, .45); }
+      70% { box-shadow: 0 0 0 16px rgba(221, 42, 123, 0), 0 8px 22px rgba(221, 42, 123, .45); }
+      100% { box-shadow: 0 0 0 0 rgba(221, 42, 123, 0), 0 8px 22px rgba(221, 42, 123, .45); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .btn.ig { animation: none; }
+    }
+    .promo {
+      position: relative; z-index: 1;
+      padding: 20px 0 12px;
+    }
+    .promo-frame {
+      width: min(260px, 100%);
+      margin: 0 auto;
+      background: #050607;
+      border: 8px solid #1b2028;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+      aspect-ratio: 9 / 16;
+      max-height: min(62vh, 520px);
+    }
+    .promo-frame video {
+      width: 100%; height: 100%; display: block; object-fit: contain; background: #000;
+    }
+    .promo-actions {
+      display: flex; justify-content: center; margin-top: 14px;
+    }
+    .cinema {
+      position: fixed; inset: 0; z-index: 80;
+      display: none; place-items: center;
+      background: #000;
+    }
+    .cinema.is-on { display: grid; }
+    .cinema-stage {
+      width: min(100vw, calc(100dvh * 9 / 16));
+      height: min(100dvh, calc(100vw * 16 / 9));
+    }
+    .cinema-stage video {
+      width: 100%; height: 100%; display: block;
+      object-fit: contain; background: #000;
+    }
+    .cinema-close {
+      position: absolute; top: 14px; right: 14px; z-index: 2;
+      width: 44px; height: 44px; border: 0; border-radius: 999px;
+      background: rgba(255,255,255,.16); color: #fff;
+      font: 800 22px/1 "Segoe UI", system-ui, sans-serif;
+      cursor: pointer;
+    }
+    .cinema-close:hover { background: rgba(255,255,255,.28); }
+    body.cinema-lock { overflow: hidden; }
+    #promo-video:fullscreen,
+    #promo-video:-webkit-full-screen {
+      object-fit: contain; background: #000; width: 100%; height: 100%;
+    }
+    .hero {
+      position: relative; z-index: 0; isolation: isolate;
+      overflow: hidden;
+      min-height: min(78vh, 720px);
+      display: grid; align-items: end;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: #050607 center/cover no-repeat;
+      transform: scale(1.04);
+    }
+    .hero-bg::after {
+      content: ""; position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(14,16,19,.25) 0%, rgba(14,16,19,.88) 72%, var(--asphalt) 100%),
+        linear-gradient(90deg, rgba(14,16,19,.55), transparent 55%);
+    }
+    .hero-copy { position: relative; padding: 72px 0 48px; max-width: 640px; }
+    .kicker {
+      color: var(--line); letter-spacing: .18em; text-transform: uppercase;
+      font-size: 12px; font-weight: 700; margin-bottom: 14px;
+    }
+    h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.05; font-weight: 800; }
+    .lede { margin-top: 16px; color: var(--steel); font-size: clamp(16px, 2vw, 20px); max-width: 52ch; }
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .section { position: relative; z-index: 1; padding: 56px 0; }
+    h2 { font-size: clamp(26px, 3.4vw, 40px); font-weight: 800; margin-bottom: 10px; }
+    .sub { color: var(--steel); max-width: 58ch; }
+    .grid4 {
+      display: grid; gap: 14px; margin-top: 28px;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--hair);
+      border-radius: 16px; padding: 20px 20px 22px;
+    }
+    .card em {
+      display: block; color: var(--line); font-style: normal;
+      font-size: 12px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .card h3 { font-size: 18px; margin-bottom: 8px; }
+    .card p { color: var(--steel); font-size: 15px; }
+    .shots {
+      display: grid; gap: 16px; margin-top: 28px;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .phone {
+      background: #07080a; border: 8px solid #1b2028; border-radius: 28px;
+      overflow: hidden; box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    .phone img { width: 100%; height: auto; }
+    .download {
+      position: relative; z-index: 1;
+      background: var(--elevated); border-top: 1px solid var(--hair);
+      border-bottom: 1px solid var(--hair);
+      padding-top: 28px;
+    }
+    .qr-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px;
+    }
+    .qr-card {
+      background: var(--card); border: 1px solid var(--hair);
+      border-radius: 20px; padding: 24px;
+      display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center;
+    }
+    .qr-wrap { position: relative; width: 180px; height: 180px; }
+    .qr-card img.qr {
+      width: 180px; height: 180px; border-radius: 12px; background: #fff; padding: 8px;
+    }
+    .qr-card.is-locked {
+      pointer-events: none;
+    }
+    .qr-card .btn { margin-top: 14px; }
+    .qr-card.is-locked img.qr {
+      filter: grayscale(1) blur(7px) brightness(.55);
+      user-select: none; pointer-events: none;
+    }
+    .qr-lock {
+      position: absolute; inset: 0; border-radius: 12px;
+      background: rgba(14,16,19,.62);
+      display: grid; place-items: center; text-align: center;
+      font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--amber);
+      padding: 10px;
+    }
+    .qr-cd {
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 4px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--mist);
+    }
+    .qr-cd b {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: 22px; line-height: 1; color: var(--line);
+    }
+    .qr-cd span {
+      display: block; margin-top: 2px;
+      font-size: 9px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--steel);
+    }
+    .countdown {
+      margin-top: 22px; margin-bottom: 8px;
+    }
+    .cd-clock {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px;
+    }
+    .cd-unit {
+      background: var(--card); border: 1px solid var(--hair);
+      border-radius: 16px; min-width: 86px; padding: 14px 12px; text-align: center;
+    }
+    .cd-unit b {
+      display: block; font-variant-numeric: tabular-nums;
+      font-size: clamp(28px, 5.4vw, 48px); line-height: 1; color: var(--line);
+    }
+    .cd-unit span {
+      display: block; margin-top: 6px; color: var(--steel);
+      font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .store-name { font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--line); }
+    .qr-card h3 { font-size: 24px; margin: 6px 0 8px; }
+    .qr-card p { color: var(--steel); font-size: 15px; }
+    .badge { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--amber); }
+    .howto {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px;
+    }
+    .howto-step {
+      background: var(--card); border: 1px solid var(--hair); border-radius: 16px; overflow: hidden;
+    }
+    .howto-cap { padding: 14px 16px 16px; }
+    .howto-cap em {
+      display: block; color: var(--line); font-style: normal;
+      font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .howto-cap p { color: var(--steel); font-size: 14px; margin: 0; }
+    .howto-cap strong { color: var(--mist); }
+    .fine {
+      margin-top: 22px; color: var(--steel); font-size: 13px; line-height: 1.5;
+    }
+    footer {
+      padding: 36px 0 48px; color: var(--steel); font-size: 14px;
+    }
+    footer .foot {
+      display: flex; flex-wrap: wrap; gap: 12px 20px;
+      justify-content: space-between; align-items: center;
+    }
+    footer nav { display: flex; flex-wrap: wrap; gap: 14px; }
+    [data-en] { display: none; }
+    html[lang="en"] [data-es] { display: none; }
+    html[lang="en"] [data-en] { display: revert; }
+    html[lang="en"] [data-en].block { display: block; }
+    @media (max-width: 980px) {
+      .grid4, .shots { grid-template-columns: repeat(2, 1fr); }
+      .shots .phone:last-child { grid-column: 1 / -1; max-width: 280px; justify-self: center; }
+    }
+    @media (max-width: 720px) {
+      .nav-inner { flex-wrap: wrap; }
+      .brand img.word { height: 18px; }
+      .qr-grid { grid-template-columns: 1fr; }
+      .qr-card { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+      .grid4 { grid-template-columns: 1fr; }
+      .shots { grid-template-columns: 1fr 1fr; }
+      .shots .phone:last-child { grid-column: auto; max-width: none; }
+      .howto { grid-template-columns: 1fr; max-width: 360px; margin-inline: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/">
+        <img class="icon" src="site/icon-512.png" alt="" />
+        <img class="word" src="site/wordmark.png" alt="RiderLab" />
+      </a>
+      <div class="nav-actions">
+        <div class="lang" role="group" aria-label="Idioma">
+          <button type="button" id="btn-es" class="on">ES</button>
+          <button type="button" id="btn-en">EN</button>
+        </div>
+        <a class="btn ig" id="btn-ig" href="https://www.instagram.com/rawthrottlemx/" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" />
+          </svg>
+          <span data-es>Síguenos</span>
+          <span data-en>Follow us</span>
+        </a>
+        <a class="btn" href="#descarga" data-es>Probar Android</a>
+        <a class="btn" href="#descarga" data-en>Try Android</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="promo" aria-label="Video RiderLab">
+    <div class="wrap">
+      <div class="promo-frame" id="promo-frame">
+        <video
+          id="promo-video"
+          poster="site/promo-stand.jpg"
+          src="site/promo-stand.mp4"
+          playsinline
+          autoplay
+          muted
+          loop
+          controls
+          controlslist="nofullscreen nodownload"
+          disablepictureinpicture
+          preload="metadata"
+        ></video>
+      </div>
+      <p class="promo-actions">
+        <button class="btn ghost" type="button" id="btn-video-big" aria-expanded="false">
+          <span data-es>Ver en grande</span>
+          <span data-en>Watch larger</span>
+        </button>
+      </p>
+      <p class="ig-banner">
+        <a class="btn ig ig-lg" id="btn-ig-main" href="https://www.instagram.com/rawthrottlemx/" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" />
+          </svg>
+          <span data-es>Síguenos en Instagram</span>
+          <span data-en>Follow us on Instagram</span>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section download" id="descarga">
+    <div class="wrap">
+      <p class="kicker">Android · APK</p>
+      <h2 data-es>Instala RiderLab con el APK</h2>
+      <h2 data-en>Install RiderLab with the APK</h2>
+      <p class="sub" data-es>Google Play sigue en revisión. Escanea el QR o descarga el APK. iOS va aparte.</p>
+      <p class="sub" data-en>Google Play is still in review. Scan the QR or download the APK. iOS is separate.</p>
+      <div class="qr-grid">
+        <article class="qr-card" id="qr-apk">
+          <div class="qr-wrap">
+            <img class="qr" src="site/qr-apk.png" alt="Código QR para descargar el APK de RiderLab" />
+          </div>
+          <div>
+            <div class="store-name">Android</div>
+            <h3>APK</h3>
+            <p data-es>Escanea o toca Descargar. Si Android pregunta, permite instalar de esta fuente.</p>
+            <p data-en>Scan or tap Download. If Android asks, allow installs from this source.</p>
+            <p><a class="btn" id="btn-apk" href="/go/apk">Descargar APK</a></p>
+          </div>
+        </article>
+        <article class="qr-card is-locked" id="qr-android">
+          <div class="qr-wrap">
+            <img class="qr" src="site/qr-android.png" alt="" />
+            <div class="qr-lock qr-cd" id="qr-android-cd" aria-label="Cuenta regresiva de Google Play">
+              <div><b id="cd-d">--</b><span data-es>días</span><span data-en>days</span></div>
+              <div><b id="cd-h">--</b><span data-es>hrs</span><span data-en>hrs</span></div>
+              <div><b id="cd-m">--</b><span data-es>min</span><span data-en>min</span></div>
+              <div><b id="cd-s">--</b><span data-es>seg</span><span data-en>sec</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="store-name">Google Play</div>
+            <h3>Play Store</h3>
+            <p data-es>Cuenta regresiva a la fecha de Android. Mientras tanto usa el APK.</p>
+            <p data-en>Countdown to the Android date. Use the APK until then.</p>
+            <p><span class="btn ghost is-off" aria-disabled="true">Google Play</span></p>
+          </div>
+        </article>
+        <article class="qr-card is-locked" id="qr-ios">
+          <div class="qr-wrap">
+            <img class="qr" src="site/qr-ios.png" alt="" />
+            <div class="qr-lock" aria-hidden="true"><span data-es>Próximamente</span><span data-en>Coming soon</span></div>
+          </div>
+          <div>
+            <div class="store-name">iOS</div>
+            <h3>App Store</h3>
+            <p data-es>RiderLab para iPhone. Todavía no hay ficha en App Store.</p>
+            <p data-en>RiderLab for iPhone. The App Store listing is not live yet.</p>
+            <span class="badge" data-es>Próximamente</span>
+            <span class="badge" data-en>Coming soon</span>
+            <p><span class="btn ghost is-off" aria-disabled="true">App Store</span></p>
+          </div>
+        </article>
+      </div>
+      <div class="howto" aria-label="Cómo instalar el APK">
+        <article class="howto-step">
+          <div class="howto-cap">
+            <em>Paso 1</em>
+            <p data-es>Escanea el QR o toca <strong>Descargar APK</strong>. El archivo se llama RiderLab.apk.</p>
+            <p data-en>Scan the QR or tap <strong>Download APK</strong>. The file is RiderLab.apk.</p>
+          </div>
+        </article>
+        <article class="howto-step">
+          <div class="howto-cap">
+            <em>Paso 2</em>
+            <p data-es>Si Android avisa de origen desconocido, toca <strong>Permitir</strong> para este navegador o archivo.</p>
+            <p data-en>If Android warns about an unknown source, tap <strong>Allow</strong> for this browser or file.</p>
+          </div>
+        </article>
+        <article class="howto-step">
+          <div class="howto-cap">
+            <em>Paso 3</em>
+            <p data-es>Abre el APK e <strong>Instalar</strong>. Entra con Google o correo.</p>
+            <p data-en>Open the APK and tap <strong>Install</strong>. Sign in with Google or email.</p>
+          </div>
+        </article>
+      </div>
+      <p class="fine" data-es><b>Seguridad:</b> no uses ni mires el teléfono mientras conduces. El análisis es para cuando ya te detuviste. RiderLab está pensado para adultos (18+) que conducen motocicleta.</p>
+      <p class="fine" data-en><b>Safety:</b> do not use or look at the phone while riding. Analysis is for after you stop. RiderLab is for adults (18+) who ride motorcycles.</p>
+    </div>
+  </section>
+
+  <section class="hero">
+    <div class="hero-bg" style="background-image:url('site/hero.png')"></div>
+    <div class="wrap hero-copy">
+      <div class="kicker">RiderLab · by RawThrottle</div>
+      <h1 data-es>El laboratorio de calle para motociclistas.</h1>
+      <h1 data-en>The street lab for motorcyclists.</h1>
+      <p class="lede" data-es>El teléfono en el bolsillo o sobre el tanque. RiderLab graba tu línea GPS y la inclinación. Al detenerte, Ride Lab te muestra cómo tomaste cada curva.</p>
+      <p class="lede" data-en>Phone in a pocket or on the tank. RiderLab records your GPS line and lean. When you stop, Ride Lab shows how you took every corner.</p>
+      <div class="hero-ctas">
+        <a class="btn" href="#descarga" data-es>Probar en Android</a>
+        <a class="btn" href="#descarga" data-en>Try on Android</a>
+        <a class="btn ghost" href="#que-es" data-es>Cómo funciona</a>
+        <a class="btn ghost" href="#que-es" data-en>How it works</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="que-es">
+    <div class="wrap">
+      <h2 data-es>Graba. Rueda. Revisa la línea.</h2>
+      <h2 data-en>Record. Ride. Review the line.</h2>
+      <p class="sub" data-es>RiderLab no es un medidor para mirar en movimiento. Es un grabador y un laboratorio para después de la rodada: mapa, inclinación, curvas y frenadas de la línea que sí tomaste.</p>
+      <p class="sub" data-en>RiderLab is not a gauge to stare at while moving. It is a recorder and a lab for after the ride: map, lean, corners, and braking on the line you actually took.</p>
+      <div class="grid4">
+        <article class="card">
+          <em>01</em>
+          <h3 data-es>Graba sin mirar</h3>
+          <h3 data-en>Record without looking</h3>
+          <p data-es>Inicia el recorrido, guarda el teléfono y rueda. Sigue grabando con la pantalla apagada y una notificación visible.</p>
+          <p data-en>Start the ride, put the phone away, and ride. Recording continues with the screen off and a visible notification.</p>
+        </article>
+        <article class="card">
+          <em>02</em>
+          <h3 data-es>Ride Lab</h3>
+          <h3 data-en>Ride Lab</h3>
+          <p data-es>Mapa coloreado por velocidad, curvas (entrada, ápice, salida), frenadas y un marcador para recorrer el ride segundo a segundo.</p>
+          <p data-en>Speed-colored map, corners (entry, apex, exit), braking, and a playhead to scrub the ride second by second.</p>
+        </article>
+        <article class="card">
+          <em>03</em>
+          <h3 data-es>Inclinación</h3>
+          <h3 data-en>Lean</h3>
+          <p data-es>El IMU del teléfono estima inclinación izquierda y derecha junto a tu traza. Para mejorar técnica, no para competir en el momento.</p>
+          <p data-en>The phone IMU estimates left and right lean next to your line. For technique after you stop — not to race the needle live.</p>
+        </article>
+        <article class="card">
+          <em>04</em>
+          <h3 data-es>Rodadas y amigos</h3>
+          <h3 data-en>Group rides and friends</h3>
+          <p data-es>Crea o únete con un código, comparte ubicación si quieres, radio corto y compara la línea con un amigo.</p>
+          <p data-en>Create or join with a code, share location if you choose, short radio, and compare lines with a friend.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2 data-es>Así se ve en el teléfono.</h2>
+      <h2 data-en>This is what it looks like on the phone.</h2>
+      <p class="sub" data-es>Garaje, mapa de la rodada, Ride Lab, inclinación y la línea completa.</p>
+      <p class="sub" data-en>Garage, group-ride map, Ride Lab, lean gauge, and the full line.</p>
+      <div class="shots">
+        <figure class="phone"><img src="site/phone-01-home.png" alt="Inicio de RiderLab" /></figure>
+        <figure class="phone"><img src="site/phone-02-live-map.png" alt="Rodada en RiderLab" /></figure>
+        <figure class="phone"><img src="site/phone-03-ride-lab.png" alt="Ride Lab" /></figure>
+        <figure class="phone"><img src="site/phone-04-lean-gauge.png" alt="Medidor de inclinación" /></figure>
+        <figure class="phone"><img src="site/phone-05-full-map.png" alt="Mapa completo del recorrido" /></figure>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap foot">
+      <div>
+        <div>RiderLab · RawThrottle</div>
+        <div data-es>Línea GPS, laboratorio de inclinación y rodadas.</div>
+        <div data-en>GPS line, lean lab, and group rides.</div>
+      </div>
+      <nav>
+        <a href="https://www.instagram.com/rawthrottlemx/" id="link-ig" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="/legal/privacy.html">Privacidad</a>
+        <a href="/legal/terms.html">Términos</a>
+        <a href="/legal/delete-account.html" data-es>Eliminar cuenta</a>
+        <a href="/legal/delete-account.html" data-en>Delete account</a>
+      </nav>
+    </div>
+  </footer>
+
+  <div class="cinema" id="cinema" hidden>
+    <button class="cinema-close" type="button" id="cinema-close" aria-label="Cerrar">&times;</button>
+    <div class="cinema-stage" id="cinema-stage"></div>
+  </div>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "RiderLab",
+    "applicationCategory": "NavigationApplication",
+    "operatingSystem": "Android, iOS",
+    "url": "https://riderlab.rawthrottle.com.mx/",
+    "description": "Motorcycle GPS line, lean lab, and group rides.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <script>
+    const root = document.documentElement;
+    const btnEs = document.getElementById("btn-es");
+    const btnEn = document.getElementById("btn-en");
+    function setLang(lang) {
+      root.lang = lang;
+      btnEs.classList.toggle("on", lang === "es");
+      btnEn.classList.toggle("on", lang === "en");
+      try { localStorage.setItem("rl-lang", lang); } catch (_) {}
+    }
+    btnEs.addEventListener("click", () => setLang("es"));
+    btnEn.addEventListener("click", () => setLang("en"));
+    const saved = (() => { try { return localStorage.getItem("rl-lang"); } catch (_) { return null; } })();
+    if (saved === "en" || saved === "es") setLang(saved);
+
+    (function cinemaMode() {
+      const video = document.getElementById("promo-video");
+      const frame = document.getElementById("promo-frame");
+      const cinema = document.getElementById("cinema");
+      const stage = document.getElementById("cinema-stage");
+      const openBtn = document.getElementById("btn-video-big");
+      const closeBtn = document.getElementById("cinema-close");
+      if (!video || !frame || !cinema || !stage) return;
+      let on = false;
+      function setOpen(next) {
+        if (next === on) return;
+        on = next;
+        document.body.classList.toggle("cinema-lock", on);
+        cinema.classList.toggle("is-on", on);
+        cinema.hidden = !on;
+        openBtn?.setAttribute("aria-expanded", String(on));
+        if (on) {
+          stage.appendChild(video);
+          if (cinema.requestFullscreen) cinema.requestFullscreen().catch(() => {});
+        } else {
+          const fs = document.fullscreenElement;
+          if (fs && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+          frame.appendChild(video);
+        }
+      }
+      openBtn?.addEventListener("click", () => setOpen(true));
+      closeBtn?.addEventListener("click", () => setOpen(false));
+      cinema.addEventListener("click", (e) => { if (e.target === cinema) setOpen(false); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && on) setOpen(false); });
+      document.addEventListener("fullscreenchange", () => {
+        const fs = document.fullscreenElement;
+        if (on && !fs) setOpen(false);
+        if (fs === video) {
+          document.exitFullscreen().then(() => setOpen(true)).catch(() => setOpen(true));
+        }
+      });
+      video.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        setOpen(!on);
+      });
+    })();
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+    function renderCd(ms) {
+      const d = document.getElementById("cd-d");
+      const h = document.getElementById("cd-h");
+      const m = document.getElementById("cd-m");
+      const s = document.getElementById("cd-s");
+      if (!d) return;
+      if (ms <= 0) {
+        d.textContent = "00";
+        h.textContent = "00";
+        m.textContent = "00";
+        s.textContent = "00";
+        return;
+      }
+      const sec = Math.floor(ms / 1000);
+      d.textContent = pad(Math.floor(sec / 86400));
+      h.textContent = pad(Math.floor((sec % 86400) / 3600));
+      m.textContent = pad(Math.floor((sec % 3600) / 60));
+      s.textContent = pad(sec % 60);
+    }
+    (async () => {
+      let at = Date.parse("2026-09-24T12:00:00-06:00");
+      try {
+        const store = await (await fetch("/store.json", { cache: "no-store" })).json();
+        const parsed = Date.parse(store.androidReleaseAt || "");
+        if (parsed) at = parsed;
+        const ig = (store.instagramUrl || "").trim();
+        if (ig) {
+          ["btn-ig", "btn-ig-main", "link-ig"].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.href = ig;
+          });
+        }
+      } catch (_) {}
+      const tick = () => renderCd(at - Date.now());
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
+</body>
+</html>
