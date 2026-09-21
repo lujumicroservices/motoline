@@ -16,6 +16,7 @@ class MapLayerOptions {
     this.showPlayhead = true,
     this.showLegend = true,
     this.showGpsGaps = true,
+    this.showTrackPoints = true,
   });
 
   final bool showSpeedColors;
@@ -26,6 +27,9 @@ class MapLayerOptions {
   final bool showLegend;
   final bool showGpsGaps;
 
+  /// Raw GPS samples that form the track polyline (experimental).
+  final bool showTrackPoints;
+
   MapLayerOptions copyWith({
     bool? showSpeedColors,
     bool? showRoadKindContrast,
@@ -34,6 +38,7 @@ class MapLayerOptions {
     bool? showPlayhead,
     bool? showLegend,
     bool? showGpsGaps,
+    bool? showTrackPoints,
   }) =>
       MapLayerOptions(
         showSpeedColors: showSpeedColors ?? this.showSpeedColors,
@@ -44,6 +49,7 @@ class MapLayerOptions {
         showPlayhead: showPlayhead ?? this.showPlayhead,
         showLegend: showLegend ?? this.showLegend,
         showGpsGaps: showGpsGaps ?? this.showGpsGaps,
+        showTrackPoints: showTrackPoints ?? this.showTrackPoints,
       );
 }
 
@@ -108,6 +114,13 @@ class MapLayerToggles extends StatelessWidget {
             selected: options.showGpsGaps,
             color: AppTheme.lineHot,
             onSelected: (v) => onChanged(options.copyWith(showGpsGaps: v)),
+          ),
+          _chip(
+            label: l10n.mapLayerTrackPoints,
+            selected: options.showTrackPoints,
+            color: AppTheme.line,
+            onSelected: (v) =>
+                onChanged(options.copyWith(showTrackPoints: v)),
           ),
         ],
       ),

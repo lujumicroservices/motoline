@@ -583,6 +583,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLayerGpsGaps => 'GPS gaps';
 
   @override
+  String get mapLayerTrackPoints => 'GPS points';
+
+  @override
   String get friends => 'Friends';
 
   @override

@@ -250,6 +250,7 @@
   "mapLayerPlayhead": "Marcador",
   "mapLayerLegend": "Leyenda",
   "mapLayerGpsGaps": "Huecos GPS",
+  "mapLayerTrackPoints": "Puntos GPS",
   "friends": "Amigos",
   "friendsSubtitle": "Grupo cerrado — quien tenga la app aparece aquí.",
   "friendsEmpty": "Aún no hay otros riders. Cuando un amigo instale RiderLab, aparece aquí.",

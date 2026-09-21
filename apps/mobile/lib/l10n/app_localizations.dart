@@ -1136,6 +1136,12 @@ abstract class AppLocalizations {
   /// **'Huecos GPS'**
   String get mapLayerGpsGaps;
 
+  /// No description provided for @mapLayerTrackPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos GPS'**
+  String get mapLayerTrackPoints;
+
   /// No description provided for @friends.
   ///
   /// In es, this message translates to:

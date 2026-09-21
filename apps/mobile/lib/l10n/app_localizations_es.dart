@@ -584,6 +584,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mapLayerGpsGaps => 'Huecos GPS';
 
   @override
+  String get mapLayerTrackPoints => 'Puntos GPS';
+
+  @override
   String get friends => 'Amigos';
 
   @override

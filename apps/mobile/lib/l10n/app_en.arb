@@ -204,6 +204,7 @@
   "mapLayerPlayhead": "Marker",
   "mapLayerLegend": "Legend",
   "mapLayerGpsGaps": "GPS gaps",
+  "mapLayerTrackPoints": "GPS points",
   "friends": "Friends",
   "friendsSubtitle": "Closed group — anyone with the app shows up here.",
   "friendsEmpty": "No other riders yet. When a friend installs RiderLab, they appear here.",
