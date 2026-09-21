@@ -1585,5 +1585,163 @@
   "termsAcceptTitle": "Términos de uso",
   "termsAcceptBody": "Al usar RiderLab aceptas los Términos de uso y el Aviso de privacidad.\n\nNo uses el teléfono mientras conduces. El radio y las fotos son para ir con tu grupo. Contenido sexual, odio, acoso, spam o publicaciones ilegales pueden banearte.\n\nAbre los documentos completos abajo. Después los puedes leer otra vez en Ajustes.",
   "termsAcceptAgree": "Acepto",
-  "termsAcceptDecline": "Ahora no"
+  "termsAcceptDecline": "Ahora no",
+  "offroadMapTitle": "Mapa de circuito",
+  "offroadMapCardTitle": "Mapear circuito offroad",
+  "offroadMapCardBody": "Camina el perímetro exterior y el interior. La app marca qué más hace falta para que el mapa sirva para vueltas.",
+  "offroadMapOpen": "Abrir mapa",
+  "offroadLayerOuter": "Exterior",
+  "offroadLayerInner": "Interior",
+  "offroadLayerLine": "Trazada",
+  "offroadLayerGate": "Meta",
+  "offroadRecord": "Grabar",
+  "offroadRecording": "Grabando",
+  "offroadUndo": "Deshacer",
+  "offroadClearLayer": "Borrar capa",
+  "offroadCloseRing": "Cerrar",
+  "offroadAdviceTitle": "Qué falta",
+  "offroadDirection": "Sentido",
+  "offroadClockwise": "Horario",
+  "offroadCounterclockwise": "Antihorario",
+  "offroadDirectionUnset": "Sin definir",
+  "offroadSatellite": "Satélite",
+  "offroadStreets": "Calles",
+  "offroadHintOuter": "Camina el límite exterior en el sentido de la pista, con el teléfono en alto. No lo uses mientras ruedas.",
+  "offroadHintInner": "Camina el límite interior en el mismo sentido. El hueco entre los dos bordes es el ancho de pista.",
+  "offroadHintLine": "La trazada es por dónde se rueda, no el borde. Márcala despacio con un pasajero, o tocando el mapa.",
+  "offroadHintGate": "La meta cruza la pista de un borde al otro.",
+  "offroadGateNeedOuter": "Toca el lado exterior de la meta",
+  "offroadGateNeedInner": "Toca el lado interior de la meta",
+  "offroadGateReady": "Meta marcada",
+  "offroadQuality": "Calidad {score}",
+  "@offroadQuality": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "offroadReady": "Listo para vueltas",
+  "offroadNotReady": "Aún no cierra como circuito",
+  "offroadStatLengths": "Exterior {outer} m · interior {inner} m",
+  "@offroadStatLengths": {
+    "placeholders": {
+      "outer": {"type": "int"},
+      "inner": {"type": "int"}
+    }
+  },
+  "offroadStatWidth": "Ancho {min}–{max} m",
+  "@offroadStatWidth": {
+    "placeholders": {
+      "min": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "offroadStatGap": "Para cerrar: exterior {outer} m · interior {inner} m",
+  "@offroadStatGap": {
+    "placeholders": {
+      "outer": {"type": "int"},
+      "inner": {"type": "int"}
+    }
+  },
+  "offroadNameHint": "Nombre del circuito",
+  "offroadSavedLocal": "Se guarda en este teléfono",
+  "offroadDropped": "{count} puntos descartados — precisión peor que 12 m",
+  "@offroadDropped": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadPoints": "{count} puntos",
+  "@offroadPoints": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadClearTitle": "Borrar esta capa",
+  "offroadClearBody": "Se quitan los puntos de la capa que estás editando.",
+  "offroadGapHint": "A {meters} m de cerrar",
+  "@offroadGapHint": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadClosed": "Perímetro cerrado",
+  "offroadLevelRequired": "Hace falta",
+  "offroadLevelRecommended": "Recomendado",
+  "offroadLevelTip": "Para afinar",
+  "offroadAdviceNeedOuter": "Camina o marca el perímetro exterior hasta volver al inicio.",
+  "offroadAdviceOuterTooFew": "El exterior necesita más puntos. Sigue el borde, sobre todo en las curvas.",
+  "offroadAdviceOuterOpen": "El exterior queda a {meters} m de cerrar. Vuelve al inicio, o pulsa Cerrar si estás a menos de 20 m.",
+  "@offroadAdviceOuterOpen": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceOuterTooShort": "El exterior mide {meters} m. Un circuito real es más largo; revisa que no se haya cerrado antes de tiempo.",
+  "@offroadAdviceOuterTooShort": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceNeedInner": "Camina el perímetro interior en el mismo sentido. Con un solo borde no hay ancho de pista.",
+  "offroadAdviceInnerTooFew": "El interior necesita más puntos a lo largo del borde del infield.",
+  "offroadAdviceInnerOpen": "El interior queda a {meters} m de cerrar.",
+  "@offroadAdviceInnerOpen": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceInnerTooShort": "El interior mide {meters} m. Revisa que sea el borde del infield y no un trazo corto.",
+  "@offroadAdviceInnerTooShort": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceInnerOutside": "Parte del interior quedó fuera del exterior. El infield tiene que quedar dentro.",
+  "offroadAdviceRingsCross": "Los dos perímetros se cruzan. La pista es un corredor, no una X.",
+  "offroadAdviceEdgesSwapped": "El interior encierra más terreno que el exterior. Cámbialos de lugar.",
+  "offroadAdviceWidthNarrow": "El paso más estrecho mide {meters} m. Una moto necesita unos 3 m.",
+  "@offroadAdviceWidthNarrow": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceWidthWide": "Hay un tramo de {meters} m de ancho. Revisa que el borde no se haya ido al monte.",
+  "@offroadAdviceWidthWide": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceNeedLine": "Graba la trazada, la línea por donde se rueda. Los bordes no cronometran una vuelta.",
+  "offroadAdviceNeedLineMore": "La trazada tiene {count} puntos. Tiene que dar toda la vuelta.",
+  "@offroadAdviceNeedLineMore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadAdviceLineOutside": "{count} puntos de la trazada salen del corredor entre los dos bordes.",
+  "@offroadAdviceLineOutside": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadAdviceNeedGate": "Marca la meta: un punto en el borde exterior y otro en el interior, cruzando la pista.",
+  "offroadAdviceGateOff": "La meta tiene que tocar los dos bordes y cruzar la pista, no quedar en el infield.",
+  "offroadAdviceNeedDirection": "Indica si se rueda en sentido horario o antihorario.",
+  "offroadAdviceDirectionMismatch": "Un borde se caminó al revés del sentido de la pista. Los dos se caminan en la dirección en que se rueda.",
+  "offroadAdvicePoorAccuracy": "{count} puntos tienen peor precisión que 12 m. Teléfono en alto, lejos de árboles y del cuerpo, y repite ese tramo.",
+  "@offroadAdvicePoorAccuracy": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadAdviceSpacingSparse": "Los puntos quedan a {meters} m. En las curvas hace falta uno cada 3 m.",
+  "@offroadAdviceSpacingSparse": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceSpacingDense": "Los puntos están amontonados a menos de 1 m. Eso es ruido del GPS, no la forma del borde.",
+  "offroadAdviceNeedElevation": "No hay altitud. Saltos y subidas la necesitan. La altura del GPS del teléfono es floja; un barómetro es mejor.",
+  "offroadAdviceAlignLandmark": "Cuando cierre, alinea la meta con un poste o una raya que veas en la foto satélite. El GPS del teléfono suele quedar a varios metros de la imagen.",
+  "offroadAdviceWalkAgain": "Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos."
 }

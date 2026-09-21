@@ -1514,5 +1514,163 @@
   "termsAcceptTitle": "Terms of use",
   "termsAcceptBody": "By using RiderLab you agree to the Terms of use and Privacy policy.\n\nDo not use the phone while riding. Radio and photos must stay about riding with your group. Sexual content, hate, harassment, spam, or illegal posts can get you banned.\n\nOpen the full documents below. You can read them again later in Settings.",
   "termsAcceptAgree": "I agree",
-  "termsAcceptDecline": "Not now"
+  "termsAcceptDecline": "Not now",
+  "offroadMapTitle": "Circuit map",
+  "offroadMapCardTitle": "Map an offroad circuit",
+  "offroadMapCardBody": "Walk the outside and inside perimeters. The app tells you what else the map still needs before it can time laps.",
+  "offroadMapOpen": "Open map",
+  "offroadLayerOuter": "Outside",
+  "offroadLayerInner": "Inside",
+  "offroadLayerLine": "Line",
+  "offroadLayerGate": "Finish",
+  "offroadRecord": "Record",
+  "offroadRecording": "Recording",
+  "offroadUndo": "Undo",
+  "offroadClearLayer": "Clear layer",
+  "offroadCloseRing": "Close",
+  "offroadAdviceTitle": "What's missing",
+  "offroadDirection": "Direction",
+  "offroadClockwise": "Clockwise",
+  "offroadCounterclockwise": "Counterclockwise",
+  "offroadDirectionUnset": "Not set",
+  "offroadSatellite": "Satellite",
+  "offroadStreets": "Streets",
+  "offroadHintOuter": "Walk the outside edge in the direction of travel, phone held high. Don't use it while riding.",
+  "offroadHintInner": "Walk the inside edge the same way. The gap between the two edges is the track width.",
+  "offroadHintLine": "The racing line is where you ride, not the edge. Mark it slowly with a passenger, or by tapping the map.",
+  "offroadHintGate": "The finish line crosses the track from one edge to the other.",
+  "offroadGateNeedOuter": "Tap the outside end of the finish line",
+  "offroadGateNeedInner": "Tap the inside end of the finish line",
+  "offroadGateReady": "Finish line marked",
+  "offroadQuality": "Quality {score}",
+  "@offroadQuality": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "offroadReady": "Ready for laps",
+  "offroadNotReady": "Not a closed circuit yet",
+  "offroadStatLengths": "Outside {outer} m · inside {inner} m",
+  "@offroadStatLengths": {
+    "placeholders": {
+      "outer": {"type": "int"},
+      "inner": {"type": "int"}
+    }
+  },
+  "offroadStatWidth": "Width {min}–{max} m",
+  "@offroadStatWidth": {
+    "placeholders": {
+      "min": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "offroadStatGap": "To close: outside {outer} m · inside {inner} m",
+  "@offroadStatGap": {
+    "placeholders": {
+      "outer": {"type": "int"},
+      "inner": {"type": "int"}
+    }
+  },
+  "offroadNameHint": "Circuit name",
+  "offroadSavedLocal": "Saved on this phone",
+  "offroadDropped": "{count} points dropped — accuracy worse than 12 m",
+  "@offroadDropped": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadPoints": "{count} points",
+  "@offroadPoints": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadClearTitle": "Clear this layer",
+  "offroadClearBody": "This removes the points on the layer you are editing.",
+  "offroadGapHint": "{meters} m from closing",
+  "@offroadGapHint": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadClosed": "Perimeter closed",
+  "offroadLevelRequired": "Required",
+  "offroadLevelRecommended": "Recommended",
+  "offroadLevelTip": "To tighten",
+  "offroadAdviceNeedOuter": "Walk or mark the outside perimeter until you are back at the start.",
+  "offroadAdviceOuterTooFew": "The outside edge needs more points. Follow the tape, especially through corners.",
+  "offroadAdviceOuterOpen": "The outside edge is {meters} m from closing. Walk back to the start, or tap Close if you are within 20 m.",
+  "@offroadAdviceOuterOpen": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceOuterTooShort": "The outside edge is {meters} m. A real circuit is longer — check that it did not close early.",
+  "@offroadAdviceOuterTooShort": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceNeedInner": "Walk the inside perimeter in the same direction. One edge does not give you track width.",
+  "offroadAdviceInnerTooFew": "The inside edge needs more points along the infield.",
+  "offroadAdviceInnerOpen": "The inside edge is {meters} m from closing.",
+  "@offroadAdviceInnerOpen": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceInnerTooShort": "The inside edge is {meters} m. Check that it is the infield boundary, not a short scribble.",
+  "@offroadAdviceInnerTooShort": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceInnerOutside": "Part of the inside edge sits outside the outside edge. The infield has to stay inside.",
+  "offroadAdviceRingsCross": "The two perimeters cross. The track is a corridor, not an X.",
+  "offroadAdviceEdgesSwapped": "The inside edge encloses more ground than the outside edge. Swap them.",
+  "offroadAdviceWidthNarrow": "The narrowest gap is {meters} m. A bike needs about 3 m.",
+  "@offroadAdviceWidthNarrow": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceWidthWide": "One stretch is {meters} m wide. Check the edge did not wander off into the field.",
+  "@offroadAdviceWidthWide": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceNeedLine": "Record the racing line, the path riders actually take. Edges do not time a lap.",
+  "offroadAdviceNeedLineMore": "The racing line has {count} points. It needs to go all the way around.",
+  "@offroadAdviceNeedLineMore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadAdviceLineOutside": "{count} racing-line points leave the corridor between the two edges.",
+  "@offroadAdviceLineOutside": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadAdviceNeedGate": "Mark the finish: one point on the outside edge and one on the inside edge, across the track.",
+  "offroadAdviceGateOff": "The finish has to meet both edges and cross the track, not sit in the infield.",
+  "offroadAdviceNeedDirection": "Set whether the circuit runs clockwise or counterclockwise.",
+  "offroadAdviceDirectionMismatch": "One edge was walked against the direction of travel. Walk both the way you ride.",
+  "offroadAdvicePoorAccuracy": "{count} points are worse than 12 m. Hold the phone high, away from trees and your body, and redo that stretch.",
+  "@offroadAdvicePoorAccuracy": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offroadAdviceSpacingSparse": "Points are {meters} m apart. Corners need one about every 3 m.",
+  "@offroadAdviceSpacingSparse": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "offroadAdviceSpacingDense": "Points are packed closer than 1 m. That is GPS noise, not the shape of the edge.",
+  "offroadAdviceNeedElevation": "Altitude is missing. Jumps and climbs need it. Phone GPS height is rough; a barometer is better.",
+  "offroadAdviceAlignLandmark": "Once it closes, line the finish up with a post or a painted mark you can see on the satellite photo. Phone GPS often sits several meters off the picture.",
+  "offroadAdviceWalkAgain": "One pass is a sketch. Walk each edge again and keep the pass that sits on the tape or the rut, not an average of the two."
 }
