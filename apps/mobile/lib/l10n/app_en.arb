@@ -204,6 +204,7 @@
   "mapLayerPlayhead": "Marker",
   "mapLayerLegend": "Legend",
   "mapLayerGpsGaps": "GPS gaps",
+  "mapLayerTrackPoints": "GPS points",
   "friends": "Friends",
   "friendsSubtitle": "Closed group — anyone with the app shows up here.",
   "friendsEmpty": "No other riders yet. When a friend installs RiderLab, they appear here.",
@@ -1316,6 +1317,195 @@
   "leanLabTrendDescending": "descending",
   "leanLabTrendFlat": "flat",
   "leanLabSaveLabels": "Save corner labels",
+  "appVersionTitle": "Installed version",
+  "appVersionUnavailable": "Could not read version",
+  "appVersionCopy": "Copy version",
+  "appVersionCopied": "Version copied",
+  "gpsTrackPointsLabTile": "8-hour circuit · A / B",
+  "gpsTrackPointsLabHelp": "Route type A and type B · record N passes of each",
+  "gpsTrackPointsLabTitle": "Record GPS perimeter",
+  "circuit8hTitle": "8-hour circuit",
+  "circuit8hIntro": "Pick route type A or type B and record as many passes as you need. Each pass stores every GPS fix for later calibration.",
+  "circuit8hRouteA": "Route type A",
+  "circuit8hRouteB": "Route type B",
+  "circuit8hRoutePasses": "{count} passes saved",
+  "@circuit8hRoutePasses": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "circuit8hNoPassesYet": "No passes yet. Record the first one.",
+  "circuit8hRecordPass": "Record another pass",
+  "circuit8hDeletePass": "Delete pass",
+  "circuit8hPassTitle": "Pass {index} · {time}",
+  "@circuit8hPassTitle": {
+    "placeholders": {
+      "index": {"type": "int"},
+      "time": {"type": "String"}
+    }
+  },
+  "circuit8hPassMeta": "{points} points · {duration}",
+  "@circuit8hPassMeta": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "duration": {"type": "String"}
+    }
+  },
+  "circuit8hRecordTitle": "Type {route} · pass {pass}",
+  "@circuit8hRecordTitle": {
+    "placeholders": {
+      "route": {"type": "String"},
+      "pass": {"type": "int"}
+    }
+  },
+  "circuit8hRecordIdle": "Type {route}, pass {pass}. Tap Start pass and ride the route — only tight GPS fixes are stored.",
+  "@circuit8hRecordIdle": {
+    "placeholders": {
+      "route": {"type": "String"},
+      "pass": {"type": "int"}
+    }
+  },
+  "circuit8hStartPass": "Start pass",
+  "circuit8hStopSave": "Stop and save",
+  "circuit8hSaving": "Saving…",
+  "circuit8hNeedMorePoints": "Need at least 3 GPS points to save the pass.",
+  "circuit8hRecordingStats": "Recording · {points} pts · {distance} · {accuracy}",
+  "@circuit8hRecordingStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "distance": {"type": "String"},
+      "accuracy": {"type": "String"}
+    }
+  },
+  "circuit8hRejected": "Dropped (loose fix or jump): {count}",
+  "@circuit8hPrecisionNote": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hPrecisionNote": "Only fixes within ±{meters} m are stored.",
+  "@circuit8hWarming": {
+    "placeholders": {
+      "accuracy": {"type": "String"}
+    }
+  },
+  "circuit8hWarming": "Tightening GPS · now {accuracy}",
+  "circuit8hRecordNow": "Record now",
+  "circuit8hCancelWait": "Cancel wait",
+  "circuit8hEdgePick": "Track edge",
+  "circuit8hEdgeInner": "Inside",
+  "circuit8hEdgeOuter": "Outside",
+  "circuit8hEdgeRequired": "Choose the inside or outside edge before starting.",
+  "@circuit8hLooseNote": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hLooseNote": "Recording anyway. Fixes up to ±{meters} m are stored.",
+  "@circuit8hAccuracyGate": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hAccuracyGate": "This fix is wider than ±{meters} m. Wait outside for a tighter lock.",
+  "@circuit8hHoldStill": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hHoldStill": "Hold still. Need {count} fixes within ±{meters} m at the same spot.",
+  "@circuit8hRejected": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "circuit8hMarkersTitle": "Start · Finish · Checkpoints",
+  "circuit8hMarkersOpen": "Mark start, finish, and checkpoints",
+  "circuit8hMarkersSummary": "Start: {start} · Finish: {finish} · Checkpoints: {count}",
+  "@circuit8hMarkersSummary": {
+    "placeholders": {
+      "start": {"type": "String"},
+      "finish": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "circuit8hMarkersHint": "Pick what to mark, then tap the map or use your current GPS.",
+  "circuit8hMarkStart": "Start",
+  "circuit8hMarkFinish": "Finish",
+  "circuit8hMarkCheckpoint": "Checkpoint",
+  "circuit8hPlaceAtGps": "Place at my GPS",
+  "circuit8hNeedGps": "No GPS fix. Go outside or tap the map.",
+  "circuit8hMarkerSet": "Set",
+  "circuit8hMarkerMissing": "Not set",
+  "circuit8hClearMarker": "Clear",
+  "circuit8hFitMarkers": "Fit all markers",
+  "circuit8hCheckpointCount": "{count} checkpoints",
+  "@circuit8hCheckpointCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "circuit8hYes": "yes",
+  "circuit8hNo": "no",
+  "circuit8hPassMarkersHint": "Mark at your current GPS: Start, Checkpoint N, or Finish. Use X to undo a mistake.",
+  "circuit8hCheckpointN": "CP{n}",
+  "@circuit8hCheckpointN": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "circuit8hOpenPass": "View track",
+  "circuit8hPassViewTitle": "Type {route} · pass {pass}",
+  "@circuit8hPassViewTitle": {
+    "placeholders": {
+      "route": {"type": "String"},
+      "pass": {"type": "int"}
+    }
+  },
+  "circuit8hPassViewStats": "{points} GPS points · {distance} · {duration}",
+  "@circuit8hPassViewStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "distance": {"type": "String"},
+      "duration": {"type": "String"}
+    }
+  },
+  "circuit8hTogglePoints": "Show/hide GPS points",
+  "circuit8hUploadCloud": "Upload to cloud for analysis",
+  "circuit8hUploading": "Uploading…",
+  "circuit8hUploadOk": "Uploaded {count} passes to the cloud",
+  "@circuit8hUploadOk": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "circuit8hLastUpload": "Last upload: {when}",
+  "@circuit8hLastUpload": {
+    "placeholders": {
+      "when": {"type": "String"}
+    }
+  },
+  "gpsTrackPointsLabIdleHint": "Map at your GPS. Tap Record perimeter and walk or ride the outline — each fix shows as a dot.",
+  "gpsTrackPointsLabStartPerimeter": "Record perimeter",
+  "gpsTrackPointsLabStopPerimeter": "Stop recording",
+  "gpsTrackPointsLabClear": "Clear points",
+  "gpsTrackPointsLabRecordingStats": "Recording · {points} points · ~{hz} Hz · {distance}",
+  "@gpsTrackPointsLabRecordingStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "hz": {"type": "String"},
+      "distance": {"type": "String"}
+    }
+  },
+  "gpsTrackPointsLabStoppedStats": "Done · {points} points · ~{hz} Hz · {distance}",
+  "@gpsTrackPointsLabStoppedStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "hz": {"type": "String"},
+      "distance": {"type": "String"}
+    }
+  },
   "leanLabSettingsTile": "Lean lab (test)",
   "leanLabSettingsHelp": "Bugambilias sessions · save 0° · hills · mark corners",
   "leanImuLabTitle": "IMU lean lab",

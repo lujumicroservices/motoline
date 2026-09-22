@@ -1136,6 +1136,12 @@ abstract class AppLocalizations {
   /// **'Huecos GPS'**
   String get mapLayerGpsGaps;
 
+  /// No description provided for @mapLayerTrackPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos GPS'**
+  String get mapLayerTrackPoints;
+
   /// No description provided for @friends.
   ///
   /// In es, this message translates to:
@@ -5509,6 +5515,418 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Guardar marcas de curvas'**
   String get leanLabSaveLabels;
+
+  /// No description provided for @appVersionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión instalada'**
+  String get appVersionTitle;
+
+  /// No description provided for @appVersionUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo leer la versión'**
+  String get appVersionUnavailable;
+
+  /// No description provided for @appVersionCopy.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar versión'**
+  String get appVersionCopy;
+
+  /// No description provided for @appVersionCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión copiada'**
+  String get appVersionCopied;
+
+  /// No description provided for @gpsTrackPointsLabTile.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuito 8 horas · A / B'**
+  String get gpsTrackPointsLabTile;
+
+  /// No description provided for @gpsTrackPointsLabHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido tipo A y tipo B · grabar N pasadas de cada uno'**
+  String get gpsTrackPointsLabHelp;
+
+  /// No description provided for @gpsTrackPointsLabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar perímetro GPS'**
+  String get gpsTrackPointsLabTitle;
+
+  /// No description provided for @circuit8hTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuito 8 horas'**
+  String get circuit8hTitle;
+
+  /// No description provided for @circuit8hIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige recorrido tipo A o tipo B y graba tantas pasadas como necesites. Cada pasada guarda todos los fixes GPS para calibrar después.'**
+  String get circuit8hIntro;
+
+  /// No description provided for @circuit8hRouteA.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido tipo A'**
+  String get circuit8hRouteA;
+
+  /// No description provided for @circuit8hRouteB.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido tipo B'**
+  String get circuit8hRouteB;
+
+  /// No description provided for @circuit8hRoutePasses.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} pasadas guardadas'**
+  String circuit8hRoutePasses(int count);
+
+  /// No description provided for @circuit8hNoPassesYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay pasadas. Graba la primera.'**
+  String get circuit8hNoPassesYet;
+
+  /// No description provided for @circuit8hRecordPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar otra pasada'**
+  String get circuit8hRecordPass;
+
+  /// No description provided for @circuit8hDeletePass.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar pasada'**
+  String get circuit8hDeletePass;
+
+  /// No description provided for @circuit8hPassTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasada {index} · {time}'**
+  String circuit8hPassTitle(int index, String time);
+
+  /// No description provided for @circuit8hPassMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'{points} puntos · {duration}'**
+  String circuit8hPassMeta(int points, String duration);
+
+  /// No description provided for @circuit8hRecordTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo {route} · pasada {pass}'**
+  String circuit8hRecordTitle(String route, int pass);
+
+  /// No description provided for @circuit8hRecordIdle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo {route}, pasada {pass}. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.'**
+  String circuit8hRecordIdle(String route, int pass);
+
+  /// No description provided for @circuit8hStartPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar pasada'**
+  String get circuit8hStartPass;
+
+  /// No description provided for @circuit8hStopSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Detener y guardar'**
+  String get circuit8hStopSave;
+
+  /// No description provided for @circuit8hSaving.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardando…'**
+  String get circuit8hSaving;
+
+  /// No description provided for @circuit8hNeedMorePoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitas al menos 3 puntos GPS para guardar la pasada.'**
+  String get circuit8hNeedMorePoints;
+
+  /// No description provided for @circuit8hRecordingStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando · {points} pts · {distance} · {accuracy}'**
+  String circuit8hRecordingStats(int points, String distance, String accuracy);
+
+  /// No description provided for @circuit8hRejected.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazados (precisión o salto): {count}'**
+  String circuit8hRejected(int count);
+
+  /// No description provided for @circuit8hPrecisionNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se guardan fixes de ±{meters} m o mejores.'**
+  String circuit8hPrecisionNote(int meters);
+
+  /// No description provided for @circuit8hWarming.
+  ///
+  /// In es, this message translates to:
+  /// **'Afinando GPS · ahora {accuracy}'**
+  String circuit8hWarming(String accuracy);
+
+  /// No description provided for @circuit8hRecordNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar ahora'**
+  String get circuit8hRecordNow;
+
+  /// No description provided for @circuit8hCancelWait.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar espera'**
+  String get circuit8hCancelWait;
+
+  /// No description provided for @circuit8hEdgePick.
+  ///
+  /// In es, this message translates to:
+  /// **'Extremo del trazado'**
+  String get circuit8hEdgePick;
+
+  /// No description provided for @circuit8hEdgeInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Interno'**
+  String get circuit8hEdgeInner;
+
+  /// No description provided for @circuit8hEdgeOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Externo'**
+  String get circuit8hEdgeOuter;
+
+  /// No description provided for @circuit8hEdgeRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige extremo interno o externo antes de iniciar.'**
+  String get circuit8hEdgeRequired;
+
+  /// No description provided for @circuit8hLooseNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando igual. Se guardan fixes de hasta ±{meters} m.'**
+  String circuit8hLooseNote(int meters);
+
+  /// No description provided for @circuit8hAccuracyGate.
+  ///
+  /// In es, this message translates to:
+  /// **'Este punto es peor que ±{meters} m. Espera afuera a una fijación más precisa.'**
+  String circuit8hAccuracyGate(int meters);
+
+  /// No description provided for @circuit8hHoldStill.
+  ///
+  /// In es, this message translates to:
+  /// **'Quédate quieto. Hacen falta {count} fixes de ±{meters} m en el mismo punto.'**
+  String circuit8hHoldStill(int count, int meters);
+
+  /// No description provided for @circuit8hMarkersTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio · Meta · Checkpoints'**
+  String get circuit8hMarkersTitle;
+
+  /// No description provided for @circuit8hMarkersOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar inicio, meta y checkpoints'**
+  String get circuit8hMarkersOpen;
+
+  /// No description provided for @circuit8hMarkersSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio: {start} · Meta: {finish} · Checkpoints: {count}'**
+  String circuit8hMarkersSummary(String start, String finish, int count);
+
+  /// No description provided for @circuit8hMarkersHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige qué marcar, luego toca el mapa o usa tu GPS actual.'**
+  String get circuit8hMarkersHint;
+
+  /// No description provided for @circuit8hMarkStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
+  String get circuit8hMarkStart;
+
+  /// No description provided for @circuit8hMarkFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta'**
+  String get circuit8hMarkFinish;
+
+  /// No description provided for @circuit8hMarkCheckpoint.
+  ///
+  /// In es, this message translates to:
+  /// **'Checkpoint'**
+  String get circuit8hMarkCheckpoint;
+
+  /// No description provided for @circuit8hPlaceAtGps.
+  ///
+  /// In es, this message translates to:
+  /// **'Colocar en mi GPS'**
+  String get circuit8hPlaceAtGps;
+
+  /// No description provided for @circuit8hNeedGps.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin fix GPS. Sal al aire o toca el mapa.'**
+  String get circuit8hNeedGps;
+
+  /// No description provided for @circuit8hMarkerSet.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcado'**
+  String get circuit8hMarkerSet;
+
+  /// No description provided for @circuit8hMarkerMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin marcar'**
+  String get circuit8hMarkerMissing;
+
+  /// No description provided for @circuit8hClearMarker.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
+  String get circuit8hClearMarker;
+
+  /// No description provided for @circuit8hFitMarkers.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver todas las marcas'**
+  String get circuit8hFitMarkers;
+
+  /// No description provided for @circuit8hCheckpointCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} checkpoints'**
+  String circuit8hCheckpointCount(int count);
+
+  /// No description provided for @circuit8hYes.
+  ///
+  /// In es, this message translates to:
+  /// **'sí'**
+  String get circuit8hYes;
+
+  /// No description provided for @circuit8hNo.
+  ///
+  /// In es, this message translates to:
+  /// **'no'**
+  String get circuit8hNo;
+
+  /// No description provided for @circuit8hPassMarkersHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca en tu GPS actual: Inicio, Checkpoint N o Meta. La X borra si te equivocas.'**
+  String get circuit8hPassMarkersHint;
+
+  /// No description provided for @circuit8hCheckpointN.
+  ///
+  /// In es, this message translates to:
+  /// **'CP{n}'**
+  String circuit8hCheckpointN(int n);
+
+  /// No description provided for @circuit8hOpenPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver trazada'**
+  String get circuit8hOpenPass;
+
+  /// No description provided for @circuit8hPassViewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo {route} · pasada {pass}'**
+  String circuit8hPassViewTitle(String route, int pass);
+
+  /// No description provided for @circuit8hPassViewStats.
+  ///
+  /// In es, this message translates to:
+  /// **'{points} puntos GPS · {distance} · {duration}'**
+  String circuit8hPassViewStats(int points, String distance, String duration);
+
+  /// No description provided for @circuit8hTogglePoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar/ocultar puntos GPS'**
+  String get circuit8hTogglePoints;
+
+  /// No description provided for @circuit8hUploadCloud.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir a la nube para análisis'**
+  String get circuit8hUploadCloud;
+
+  /// No description provided for @circuit8hUploading.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiendo…'**
+  String get circuit8hUploading;
+
+  /// No description provided for @circuit8hUploadOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Subidas {count} pasadas a la nube'**
+  String circuit8hUploadOk(int count);
+
+  /// No description provided for @circuit8hLastUpload.
+  ///
+  /// In es, this message translates to:
+  /// **'Última subida: {when}'**
+  String circuit8hLastUpload(String when);
+
+  /// No description provided for @gpsTrackPointsLabIdleHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa en tu GPS. Toca Grabar perímetro y camina o rueda el contorno — cada fix aparece como punto.'**
+  String get gpsTrackPointsLabIdleHint;
+
+  /// No description provided for @gpsTrackPointsLabStartPerimeter.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar perímetro'**
+  String get gpsTrackPointsLabStartPerimeter;
+
+  /// No description provided for @gpsTrackPointsLabStopPerimeter.
+  ///
+  /// In es, this message translates to:
+  /// **'Detener grabación'**
+  String get gpsTrackPointsLabStopPerimeter;
+
+  /// No description provided for @gpsTrackPointsLabClear.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar puntos'**
+  String get gpsTrackPointsLabClear;
+
+  /// No description provided for @gpsTrackPointsLabRecordingStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando · {points} puntos · ~{hz} Hz · {distance}'**
+  String gpsTrackPointsLabRecordingStats(
+    int points,
+    String hz,
+    String distance,
+  );
+
+  /// No description provided for @gpsTrackPointsLabStoppedStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo · {points} puntos · ~{hz} Hz · {distance}'**
+  String gpsTrackPointsLabStoppedStats(int points, String hz, String distance);
 
   /// No description provided for @leanLabSettingsTile.
   ///

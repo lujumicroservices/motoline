@@ -584,6 +584,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mapLayerGpsGaps => 'Huecos GPS';
 
   @override
+  String get mapLayerTrackPoints => 'Puntos GPS';
+
+  @override
   String get friends => 'Amigos';
 
   @override
@@ -3087,6 +3090,263 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanLabSaveLabels => 'Guardar marcas de curvas';
+
+  @override
+  String get appVersionTitle => 'Versión instalada';
+
+  @override
+  String get appVersionUnavailable => 'No se pudo leer la versión';
+
+  @override
+  String get appVersionCopy => 'Copiar versión';
+
+  @override
+  String get appVersionCopied => 'Versión copiada';
+
+  @override
+  String get gpsTrackPointsLabTile => 'Circuito 8 horas · A / B';
+
+  @override
+  String get gpsTrackPointsLabHelp =>
+      'Recorrido tipo A y tipo B · grabar N pasadas de cada uno';
+
+  @override
+  String get gpsTrackPointsLabTitle => 'Grabar perímetro GPS';
+
+  @override
+  String get circuit8hTitle => 'Circuito 8 horas';
+
+  @override
+  String get circuit8hIntro =>
+      'Elige recorrido tipo A o tipo B y graba tantas pasadas como necesites. Cada pasada guarda todos los fixes GPS para calibrar después.';
+
+  @override
+  String get circuit8hRouteA => 'Recorrido tipo A';
+
+  @override
+  String get circuit8hRouteB => 'Recorrido tipo B';
+
+  @override
+  String circuit8hRoutePasses(int count) {
+    return '$count pasadas guardadas';
+  }
+
+  @override
+  String get circuit8hNoPassesYet => 'Aún no hay pasadas. Graba la primera.';
+
+  @override
+  String get circuit8hRecordPass => 'Grabar otra pasada';
+
+  @override
+  String get circuit8hDeletePass => 'Borrar pasada';
+
+  @override
+  String circuit8hPassTitle(int index, String time) {
+    return 'Pasada $index · $time';
+  }
+
+  @override
+  String circuit8hPassMeta(int points, String duration) {
+    return '$points puntos · $duration';
+  }
+
+  @override
+  String circuit8hRecordTitle(String route, int pass) {
+    return 'Tipo $route · pasada $pass';
+  }
+
+  @override
+  String circuit8hRecordIdle(String route, int pass) {
+    return 'Tipo $route, pasada $pass. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.';
+  }
+
+  @override
+  String get circuit8hStartPass => 'Iniciar pasada';
+
+  @override
+  String get circuit8hStopSave => 'Detener y guardar';
+
+  @override
+  String get circuit8hSaving => 'Guardando…';
+
+  @override
+  String get circuit8hNeedMorePoints =>
+      'Necesitas al menos 3 puntos GPS para guardar la pasada.';
+
+  @override
+  String circuit8hRecordingStats(int points, String distance, String accuracy) {
+    return 'Grabando · $points pts · $distance · $accuracy';
+  }
+
+  @override
+  String circuit8hRejected(int count) {
+    return 'Rechazados (precisión o salto): $count';
+  }
+
+  @override
+  String circuit8hPrecisionNote(int meters) {
+    return 'Solo se guardan fixes de ±$meters m o mejores.';
+  }
+
+  @override
+  String circuit8hWarming(String accuracy) {
+    return 'Afinando GPS · ahora $accuracy';
+  }
+
+  @override
+  String get circuit8hRecordNow => 'Grabar ahora';
+
+  @override
+  String get circuit8hCancelWait => 'Cancelar espera';
+
+  @override
+  String get circuit8hEdgePick => 'Extremo del trazado';
+
+  @override
+  String get circuit8hEdgeInner => 'Interno';
+
+  @override
+  String get circuit8hEdgeOuter => 'Externo';
+
+  @override
+  String get circuit8hEdgeRequired =>
+      'Elige extremo interno o externo antes de iniciar.';
+
+  @override
+  String circuit8hLooseNote(int meters) {
+    return 'Grabando igual. Se guardan fixes de hasta ±$meters m.';
+  }
+
+  @override
+  String circuit8hAccuracyGate(int meters) {
+    return 'Este punto es peor que ±$meters m. Espera afuera a una fijación más precisa.';
+  }
+
+  @override
+  String circuit8hHoldStill(int count, int meters) {
+    return 'Quédate quieto. Hacen falta $count fixes de ±$meters m en el mismo punto.';
+  }
+
+  @override
+  String get circuit8hMarkersTitle => 'Inicio · Meta · Checkpoints';
+
+  @override
+  String get circuit8hMarkersOpen => 'Marcar inicio, meta y checkpoints';
+
+  @override
+  String circuit8hMarkersSummary(String start, String finish, int count) {
+    return 'Inicio: $start · Meta: $finish · Checkpoints: $count';
+  }
+
+  @override
+  String get circuit8hMarkersHint =>
+      'Elige qué marcar, luego toca el mapa o usa tu GPS actual.';
+
+  @override
+  String get circuit8hMarkStart => 'Inicio';
+
+  @override
+  String get circuit8hMarkFinish => 'Meta';
+
+  @override
+  String get circuit8hMarkCheckpoint => 'Checkpoint';
+
+  @override
+  String get circuit8hPlaceAtGps => 'Colocar en mi GPS';
+
+  @override
+  String get circuit8hNeedGps => 'Sin fix GPS. Sal al aire o toca el mapa.';
+
+  @override
+  String get circuit8hMarkerSet => 'Marcado';
+
+  @override
+  String get circuit8hMarkerMissing => 'Sin marcar';
+
+  @override
+  String get circuit8hClearMarker => 'Quitar';
+
+  @override
+  String get circuit8hFitMarkers => 'Ver todas las marcas';
+
+  @override
+  String circuit8hCheckpointCount(int count) {
+    return '$count checkpoints';
+  }
+
+  @override
+  String get circuit8hYes => 'sí';
+
+  @override
+  String get circuit8hNo => 'no';
+
+  @override
+  String get circuit8hPassMarkersHint =>
+      'Marca en tu GPS actual: Inicio, Checkpoint N o Meta. La X borra si te equivocas.';
+
+  @override
+  String circuit8hCheckpointN(int n) {
+    return 'CP$n';
+  }
+
+  @override
+  String get circuit8hOpenPass => 'Ver trazada';
+
+  @override
+  String circuit8hPassViewTitle(String route, int pass) {
+    return 'Tipo $route · pasada $pass';
+  }
+
+  @override
+  String circuit8hPassViewStats(int points, String distance, String duration) {
+    return '$points puntos GPS · $distance · $duration';
+  }
+
+  @override
+  String get circuit8hTogglePoints => 'Mostrar/ocultar puntos GPS';
+
+  @override
+  String get circuit8hUploadCloud => 'Subir a la nube para análisis';
+
+  @override
+  String get circuit8hUploading => 'Subiendo…';
+
+  @override
+  String circuit8hUploadOk(int count) {
+    return 'Subidas $count pasadas a la nube';
+  }
+
+  @override
+  String circuit8hLastUpload(String when) {
+    return 'Última subida: $when';
+  }
+
+  @override
+  String get gpsTrackPointsLabIdleHint =>
+      'Mapa en tu GPS. Toca Grabar perímetro y camina o rueda el contorno — cada fix aparece como punto.';
+
+  @override
+  String get gpsTrackPointsLabStartPerimeter => 'Grabar perímetro';
+
+  @override
+  String get gpsTrackPointsLabStopPerimeter => 'Detener grabación';
+
+  @override
+  String get gpsTrackPointsLabClear => 'Borrar puntos';
+
+  @override
+  String gpsTrackPointsLabRecordingStats(
+    int points,
+    String hz,
+    String distance,
+  ) {
+    return 'Grabando · $points puntos · ~$hz Hz · $distance';
+  }
+
+  @override
+  String gpsTrackPointsLabStoppedStats(int points, String hz, String distance) {
+    return 'Listo · $points puntos · ~$hz Hz · $distance';
+  }
 
   @override
   String get leanLabSettingsTile => 'Lab de inclinación (pruebas)';

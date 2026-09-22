@@ -53,6 +53,9 @@ class AppUpdateService {
     if (!Platform.isAndroid) return null;
     // Play builds update only via Google Play — never sideload APKs.
     if (!AppDistribution.allowsSideloadUpdates) return null;
+    // Experimental labeled builds must not be overwritten by master releases.
+    const buildLabel = String.fromEnvironment('BUILD_LABEL', defaultValue: '');
+    if (buildLabel.isNotEmpty) return null;
 
     final package = await PackageInfo.fromPlatform();
     final response = await _client.get(

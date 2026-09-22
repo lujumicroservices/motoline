@@ -1,0 +1,97 @@
+name: survey-apk
+
+# Side-by-side Circuito 8h APK. Does not upload to Play.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - exp/gps-track-points
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/ride_core/**'
+      - '.github/workflows/survey-apk.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Write signing + env files
+        env:
+          PLAY_KEYSTORE_BASE64: ${{ secrets.PLAY_KEYSTORE_BASE64 }}
+          PLAY_KEYSTORE_PASSWORD: ${{ secrets.PLAY_KEYSTORE_PASSWORD }}
+          PLAY_KEY_PASSWORD: ${{ secrets.PLAY_KEY_PASSWORD }}
+          PLAY_KEY_ALIAS: ${{ secrets.PLAY_KEY_ALIAS }}
+          MOBILE_ENV: ${{ secrets.MOBILE_ENV }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          set -euo pipefail
+          test -n "$PLAY_KEYSTORE_BASE64"
+          test -n "$PLAY_KEYSTORE_PASSWORD"
+          test -n "$PLAY_KEY_PASSWORD"
+          test -n "${PLAY_KEY_ALIAS:-upload}"
+          test -n "$MOBILE_ENV"
+          test -n "$GOOGLE_SERVICES_JSON"
+          echo "$PLAY_KEYSTORE_BASE64" | base64 -d > android/upload-keystore.jks
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=upload-keystore.jks\n' \
+            "$PLAY_KEYSTORE_PASSWORD" \
+            "$PLAY_KEY_PASSWORD" \
+            "${PLAY_KEY_ALIAS:-upload}" \
+            > android/key.properties
+          printf '%s\n' "$MOBILE_ENV" > .env
+          printf '%s\n' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          python3 tool/patch_survey_google_services.py android/app/google-services.json
+
+      - name: ride_core deps
+        working-directory: packages/ride_core
+        run: dart pub get
+
+      - name: Build Circuito 8h APK
+        run: |
+          flutter pub get
+          flutter gen-l10n
+          flutter build apk --flavor survey --release \
+            --dart-define=DISTRIBUTION=sideload \
+            --dart-define=BUILD_LABEL=circuito-8h \
+            --dart-define=APP_NAME="Circuito 8h" \
+            --dart-define=GOOGLE_OAUTH_REDIRECT=com.rawthrottle.riderlab.c8h://login-callback
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Circuito8h
+          path: apps/mobile/build/app/outputs/flutter-apk/app-survey-release.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp build/app/outputs/flutter-apk/app-survey-release.apk Circuito8h.apk
+          notes='Side app for the Circuito 8h GPS survey. Installs beside RiderLab (com.rawthrottle.riderlab.c8h). Prerelease so it does not replace the RiderLab sideload APK.'
+          if gh release view circuito-8h >/dev/null 2>&1; then
+            gh release upload circuito-8h Circuito8h.apk --clobber
+          else
+            gh release create circuito-8h Circuito8h.apk \
+              --prerelease \
+              --title "Circuito 8h" \
+              --notes "$notes"
+          fi
