@@ -3089,14 +3089,178 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appVersionCopied => 'Version copied';
 
   @override
-  String get gpsTrackPointsLabTile => 'GPS points / perimeter';
+  String get gpsTrackPointsLabTile => '8-hour circuit · A / B';
 
   @override
   String get gpsTrackPointsLabHelp =>
-      'Map at your location · record a perimeter with every GPS fix';
+      'Route type A and type B · record N passes of each';
 
   @override
-  String get gpsTrackPointsLabTitle => 'GPS lab — perimeter';
+  String get gpsTrackPointsLabTitle => 'Record GPS perimeter';
+
+  @override
+  String get circuit8hTitle => '8-hour circuit';
+
+  @override
+  String get circuit8hIntro =>
+      'Pick route type A or type B and record as many passes as you need. Each pass stores every GPS fix for later calibration.';
+
+  @override
+  String get circuit8hRouteA => 'Route type A';
+
+  @override
+  String get circuit8hRouteB => 'Route type B';
+
+  @override
+  String circuit8hRoutePasses(int count) {
+    return '$count passes saved';
+  }
+
+  @override
+  String get circuit8hNoPassesYet => 'No passes yet. Record the first one.';
+
+  @override
+  String get circuit8hRecordPass => 'Record another pass';
+
+  @override
+  String get circuit8hDeletePass => 'Delete pass';
+
+  @override
+  String circuit8hPassTitle(int index, String time) {
+    return 'Pass $index · $time';
+  }
+
+  @override
+  String circuit8hPassMeta(int points, String duration) {
+    return '$points points · $duration';
+  }
+
+  @override
+  String circuit8hRecordTitle(String route, int pass) {
+    return 'Type $route · pass $pass';
+  }
+
+  @override
+  String circuit8hRecordIdle(String route, int pass) {
+    return 'Type $route, pass $pass. Tap Start pass and ride the route — each GPS fix is stored as a point.';
+  }
+
+  @override
+  String get circuit8hStartPass => 'Start pass';
+
+  @override
+  String get circuit8hStopSave => 'Stop and save';
+
+  @override
+  String get circuit8hSaving => 'Saving…';
+
+  @override
+  String get circuit8hNeedMorePoints =>
+      'Need at least 3 GPS points to save the pass.';
+
+  @override
+  String circuit8hRecordingStats(int points, String distance, String accuracy) {
+    return 'Recording · $points pts · $distance · $accuracy';
+  }
+
+  @override
+  String circuit8hRejected(int count) {
+    return 'Dropped for accuracy: $count';
+  }
+
+  @override
+  String get circuit8hMarkersTitle => 'Start · Finish · Checkpoints';
+
+  @override
+  String get circuit8hMarkersOpen => 'Mark start, finish, and checkpoints';
+
+  @override
+  String circuit8hMarkersSummary(String start, String finish, int count) {
+    return 'Start: $start · Finish: $finish · Checkpoints: $count';
+  }
+
+  @override
+  String get circuit8hMarkersHint =>
+      'Pick what to mark, then tap the map or use your current GPS.';
+
+  @override
+  String get circuit8hMarkStart => 'Start';
+
+  @override
+  String get circuit8hMarkFinish => 'Finish';
+
+  @override
+  String get circuit8hMarkCheckpoint => 'Checkpoint';
+
+  @override
+  String get circuit8hPlaceAtGps => 'Place at my GPS';
+
+  @override
+  String get circuit8hNeedGps => 'No GPS fix. Go outside or tap the map.';
+
+  @override
+  String get circuit8hMarkerSet => 'Set';
+
+  @override
+  String get circuit8hMarkerMissing => 'Not set';
+
+  @override
+  String get circuit8hClearMarker => 'Clear';
+
+  @override
+  String get circuit8hFitMarkers => 'Fit all markers';
+
+  @override
+  String circuit8hCheckpointCount(int count) {
+    return '$count checkpoints';
+  }
+
+  @override
+  String get circuit8hYes => 'yes';
+
+  @override
+  String get circuit8hNo => 'no';
+
+  @override
+  String get circuit8hPassMarkersHint =>
+      'Mark at your current GPS: Start, Checkpoint N, or Finish. Use X to undo a mistake.';
+
+  @override
+  String circuit8hCheckpointN(int n) {
+    return 'CP$n';
+  }
+
+  @override
+  String get circuit8hOpenPass => 'View track';
+
+  @override
+  String circuit8hPassViewTitle(String route, int pass) {
+    return 'Type $route · pass $pass';
+  }
+
+  @override
+  String circuit8hPassViewStats(int points, String distance, String duration) {
+    return '$points GPS points · $distance · $duration';
+  }
+
+  @override
+  String get circuit8hTogglePoints => 'Show/hide GPS points';
+
+  @override
+  String get circuit8hUploadCloud => 'Upload to cloud for analysis';
+
+  @override
+  String get circuit8hUploading => 'Uploading…';
+
+  @override
+  String circuit8hUploadOk(int count) {
+    return 'Uploaded $count passes to the cloud';
+  }
+
+  @override
+  String circuit8hLastUpload(String when) {
+    return 'Last upload: $when';
+  }
 
   @override
   String get gpsTrackPointsLabIdleHint =>

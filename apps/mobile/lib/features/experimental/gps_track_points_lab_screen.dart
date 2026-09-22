@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +8,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/app_build_info.dart';
+import '../../core/services/location_service.dart';
 import '../../core/utils/geo_utils.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../maps/live_gps_map_mixin.dart';
@@ -31,12 +31,16 @@ class _GpsTrackPointsLabScreenState
     extends ConsumerState<GpsTrackPointsLabScreen>
     with LiveGpsMapMixin {
   final MapController _map = MapController();
+  final LocationService _location = LocationService();
   final List<LatLng> _points = [];
   final List<DateTime> _timestamps = [];
 
   StreamSubscription<Position>? _recordSub;
   bool _recording = false;
   bool _follow = true;
+  double? _lastAccuracyM;
+  int _rejectedAccuracy = 0;
+  String? _lastError;
 
   @override
   void initState() {
@@ -59,65 +63,78 @@ class _GpsTrackPointsLabScreenState
     super.dispose();
   }
 
-  LocationSettings _recordSettings() {
-    if (!kIsWeb && Platform.isAndroid) {
-      return AndroidSettings(
-        accuracy: LocationAccuracy.bestForNavigation,
-        distanceFilter: 0,
-        intervalDuration: const Duration(milliseconds: 100),
-        forceLocationManager: false,
-      );
-    }
-    if (!kIsWeb && Platform.isIOS) {
-      return AppleSettings(
-        accuracy: LocationAccuracy.bestForNavigation,
-        activityType: ActivityType.otherNavigation,
-        distanceFilter: 0,
-        pauseLocationUpdatesAutomatically: false,
-        showBackgroundLocationIndicator: true,
-      );
-    }
-    return const LocationSettings(
-      accuracy: LocationAccuracy.bestForNavigation,
-      distanceFilter: 0,
-    );
-  }
-
   Future<void> _startRecording() async {
     if (_recording) return;
     final ok = await LocationPermissionGate.requestForRecording(context);
     if (!ok || !mounted) return;
 
+    // One high-rate stream only — don't fight the live blue-dot stream.
+    stopLiveGps();
     await _recordSub?.cancel();
+
     setState(() {
       _recording = true;
       _follow = true;
+      _rejectedAccuracy = 0;
+      _lastError = null;
     });
 
-    _recordSub = Geolocator.getPositionStream(
-      locationSettings: _recordSettings(),
-    ).listen(
-      (pos) {
-        if (!mounted || !_recording) return;
-        if (pos.accuracy > 40) return;
-        final ll = LatLng(pos.latitude, pos.longitude);
-        setState(() {
-          _points.add(ll);
-          _timestamps.add(pos.timestamp);
-        });
-        if (_follow) {
-          try {
-            final zoom = _map.camera.zoom < 15 ? 17.0 : _map.camera.zoom;
-            _map.move(ll, zoom);
-          } catch (_) {}
-        }
-      },
-      onError: (Object e) {
-        if (!mounted) return;
-        showAppSnackError(context, '$e');
-        setState(() => _recording = false);
-      },
-    );
+    // Seed immediately so the rider sees a first point without waiting.
+    try {
+      final seed = await _location.currentPosition();
+      if (mounted && seed != null && _recording) {
+        _acceptFix(seed, force: true);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _lastError = '$e');
+      }
+    }
+
+    // Same FGS + wake-lock path as ride recording (S25 / Android 14+).
+    _recordSub = _location
+        .watchPositions(
+          notificationTitle: 'RiderLab lab',
+          notificationText: 'Grabando perímetro GPS…',
+        )
+        .listen(
+          (pos) {
+            if (!mounted || !_recording) return;
+            _acceptFix(pos);
+          },
+          onError: (Object e) {
+            if (!mounted) return;
+            setState(() {
+              _lastError = '$e';
+              _recording = false;
+            });
+            showAppSnackError(context, '$e');
+          },
+        );
+  }
+
+  void _acceptFix(Position pos, {bool force = false}) {
+    final acc = pos.accuracy;
+    if (acc.isFinite) _lastAccuracyM = acc;
+    // Soft filter: keep continuity; only drop garbage unless seeding.
+    if (!force && acc.isFinite && acc > LocationService.maxAcceptAccuracyMeters) {
+      _rejectedAccuracy++;
+      if (mounted) setState(() {});
+      return;
+    }
+    final ll = LatLng(pos.latitude, pos.longitude);
+    final ts = pos.timestamp;
+    setState(() {
+      _points.add(ll);
+      _timestamps.add(ts);
+      liveGpsListenable.value = ll;
+    });
+    if (_follow) {
+      try {
+        final zoom = _map.camera.zoom < 15 ? 17.0 : _map.camera.zoom;
+        _map.move(ll, zoom);
+      } catch (_) {}
+    }
   }
 
   Future<void> _stopRecording() async {
@@ -125,12 +142,16 @@ class _GpsTrackPointsLabScreenState
     _recordSub = null;
     if (!mounted) return;
     setState(() => _recording = false);
+    // Restore lightweight blue-dot for browsing the result.
+    await startLiveGps(map: _map, centerOnce: false);
   }
 
   void _clear() {
     setState(() {
       _points.clear();
       _timestamps.clear();
+      _rejectedAccuracy = 0;
+      _lastError = null;
     });
   }
 
@@ -197,12 +218,39 @@ class _GpsTrackPointsLabScreenState
     ];
   }
 
+  String _statusLine(AppLocalizations l10n) {
+    final hz = _avgHz();
+    final meters = _pathMeters();
+    final dist = meters < 1000
+        ? '${meters.toStringAsFixed(0)} m'
+        : '${(meters / 1000).toStringAsFixed(2)} km';
+    final acc = _lastAccuracyM == null
+        ? '—'
+        : '±${_lastAccuracyM!.toStringAsFixed(0)} m';
+    if (_recording) {
+      return '${l10n.gpsTrackPointsLabRecordingStats(
+        _points.length,
+        hz == null ? '—' : hz.toStringAsFixed(1),
+        dist,
+      )} · $acc'
+          '${_rejectedAccuracy > 0 ? ' · rechazados $_rejectedAccuracy' : ''}';
+    }
+    if (_points.isEmpty) {
+      final err = _lastError;
+      if (err != null) return err;
+      return l10n.gpsTrackPointsLabIdleHint;
+    }
+    return l10n.gpsTrackPointsLabStoppedStats(
+      _points.length,
+      hz == null ? '—' : hz.toStringAsFixed(1),
+      dist,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final buildAsync = ref.watch(appBuildInfoProvider);
-    final hz = _avgHz();
-    final meters = _pathMeters();
     final center = liveGps ?? const LatLng(20.67, -103.35);
 
     return Scaffold(
@@ -280,25 +328,7 @@ class _GpsTrackPointsLabScreenState
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                       child: Text(
-                        _recording
-                            ? l10n.gpsTrackPointsLabRecordingStats(
-                                _points.length,
-                                hz == null ? '—' : hz.toStringAsFixed(1),
-                                meters < 1000
-                                    ? '${meters.toStringAsFixed(0)} m'
-                                    : '${(meters / 1000).toStringAsFixed(2)} km',
-                              )
-                            : _points.isEmpty
-                                ? l10n.gpsTrackPointsLabIdleHint
-                                : l10n.gpsTrackPointsLabStoppedStats(
-                                    _points.length,
-                                    hz == null
-                                        ? '—'
-                                        : hz.toStringAsFixed(1),
-                                    meters < 1000
-                                        ? '${meters.toStringAsFixed(0)} m'
-                                        : '${(meters / 1000).toStringAsFixed(2)} km',
-                                  ),
+                        _statusLine(l10n),
                         style: GoogleFonts.rajdhani(
                           color: AppTheme.mist,
                           fontWeight: FontWeight.w600,
@@ -354,7 +384,9 @@ class _GpsTrackPointsLabScreenState
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: _recording ? _stopRecording : _startRecording,
-                    icon: Icon(_recording ? Icons.stop : Icons.radio_button_checked),
+                    icon: Icon(
+                      _recording ? Icons.stop : Icons.radio_button_checked,
+                    ),
                     label: Text(
                       _recording
                           ? l10n.gpsTrackPointsLabStopPerimeter

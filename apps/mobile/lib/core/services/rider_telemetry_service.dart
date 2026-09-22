@@ -22,6 +22,8 @@ abstract final class TelemetryCategory {
   static const engineLabel = 'engine_label';
   /// Lean Lab protocol sessions (Bugambilias + corner ground truth).
   static const leanLab = 'lean_lab';
+  /// Circuito 8h survey passes (route A/B + markers) for remote analysis.
+  static const circuit8h = 'circuit_8h';
 }
 
 /// Queues device troubleshooting events locally and uploads to Supabase

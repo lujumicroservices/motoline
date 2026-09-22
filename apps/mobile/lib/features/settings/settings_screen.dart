@@ -23,7 +23,7 @@ import '../../widgets/partner_code_redeem.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
-import '../experimental/gps_track_points_lab_screen.dart';
+import '../experimental/circuit_8h/circuit_8h_hub_screen.dart';
 import 'widgets/app_version_tile.dart';
 import '../home/home_nav_icons.dart';
 import '../lean_lab/lean_imu_lab_screen.dart';
@@ -162,14 +162,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: ListTile(
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              leading: const Icon(Icons.gps_fixed, color: AppTheme.lineHot),
+              leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),
               title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
               subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
               trailing: const Icon(Icons.chevron_right, color: AppTheme.lineHot),
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const GpsTrackPointsLabScreen(),
+                    builder: (_) => const Circuit8hHubScreen(),
                   ),
                 );
               },
@@ -390,14 +390,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.gps_fixed, color: AppTheme.lineHot),
+                leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),
                 title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
                 subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const GpsTrackPointsLabScreen(),
+                      builder: (_) => const Circuit8hHubScreen(),
                     ),
                   );
                 },
