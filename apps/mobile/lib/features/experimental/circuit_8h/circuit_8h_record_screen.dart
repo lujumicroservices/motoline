@@ -46,6 +46,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
   StreamSubscription<Position>? _recordSub;
   bool _recording = false;
   bool _warming = false;
+  bool _sampling = false;
   bool _follow = true;
   bool _saving = false;
   double? _lastAccuracyM;
@@ -53,6 +54,8 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
   String? _lastError;
   int? _startedAtMs;
   int _captureGen = 0;
+  Position? _held;
+  final List<Circuit8hSurveySample> _tight = [];
 
   Color get _accent => widget.routeType == Circuit8hRouteType.a
       ? AppTheme.lineHot
@@ -93,50 +96,52 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     }
   }
 
-  Future<(double lat, double lng, double? acc)?> _currentFix() async {
-    try {
-      final pos = await _location.currentPosition();
-      if (pos != null) {
-        return (
-          pos.latitude,
-          pos.longitude,
-          pos.accuracy.isFinite ? pos.accuracy : null,
-        );
-      }
-    } catch (_) {}
-    final live = liveGps;
-    if (live != null) return (live.latitude, live.longitude, null);
-    return null;
+  Future<Circuit8hSurveySample?> _readSurveySample() async {
+    final pos = await _location.currentPosition();
+    if (pos == null || !pos.accuracy.isFinite) return null;
+    return Circuit8hSurveySample(
+      lat: pos.latitude,
+      lng: pos.longitude,
+      accuracyM: pos.accuracy,
+      tsMs: pos.timestamp.millisecondsSinceEpoch,
+    );
   }
 
   Future<void> _placeMarker(Circuit8hMarkerKind kind) async {
-    final fix = await _currentFix();
-    if (fix == null) {
-      if (mounted) {
-        showAppSnackError(context, context.l10n.circuit8hNeedGps);
-      }
-      return;
-    }
-    final (lat, lng, acc) = fix;
-    if (!decideCircuit8hFix(accuracyMeters: acc).accepted) {
-      if (mounted) {
-        showAppSnackError(
-          context,
-          context.l10n.circuit8hAccuracyGate(
-            circuit8hMaxAcceptAccuracyMeters.round(),
-          ),
+    if (_sampling) return;
+    setState(() => _sampling = true);
+    final Circuit8hMarkerFix? fix;
+    try {
+      if (_recording && _tight.isNotEmpty) {
+        fix = medianMarkerFix(_tight);
+      } else {
+        final samples = await collectSurveySamples(
+          read: _readSurveySample,
+          cancelled: () => !mounted,
         );
+        fix = medianMarkerFix(samples);
       }
+    } finally {
+      if (mounted) setState(() => _sampling = false);
+    }
+    if (!mounted) return;
+    if (fix == null) {
+      showAppSnackError(
+        context,
+        context.l10n.circuit8hHoldStill(
+          circuit8hMarkerMinSamples,
+          circuit8hMaxAcceptAccuracyMeters.round(),
+        ),
+      );
       return;
     }
-    final now = DateTime.now().millisecondsSinceEpoch;
     final marker = Circuit8hMarker(
-      id: 'mk_${kind.id}_$now',
+      id: 'mk_${kind.id}_${fix.tsMs}',
       kind: kind,
-      lat: lat,
-      lng: lng,
-      tsMs: now,
-      accuracyM: acc,
+      lat: fix.lat,
+      lng: fix.lng,
+      tsMs: fix.tsMs,
+      accuracyM: fix.accuracyM,
       label: kind == Circuit8hMarkerKind.checkpoint ? 'CP$_nextCp' : null,
     );
     final next = switch (kind) {
@@ -193,19 +198,25 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
       _rejectedAccuracy = 0;
       _lastError = null;
       _points.clear();
+      _held = null;
+      _tight.clear();
       _startedAtMs = DateTime.now().millisecondsSinceEpoch;
     });
 
     try {
-      await for (final status in _location.warmUpGnss(
-        timeout: const Duration(seconds: 20),
-        targetAccuracyMeters: circuit8hMaxAcceptAccuracyMeters,
-      )) {
-        if (!mounted || gen != _captureGen) return;
-        setState(() => _lastAccuracyM = status.accuracyMeters);
-        if (status.phase == GpsWarmupPhase.ready ||
-            status.phase == GpsWarmupPhase.timeout) {
-          break;
+      var locked = false;
+      while (!locked && mounted && gen == _captureGen) {
+        await for (final status in _location.warmUpGnss(
+          timeout: const Duration(seconds: 8),
+          targetAccuracyMeters: circuit8hMaxAcceptAccuracyMeters,
+        )) {
+          if (!mounted || gen != _captureGen) return;
+          setState(() => _lastAccuracyM = status.accuracyMeters);
+          if (status.phase == GpsWarmupPhase.ready) {
+            locked = true;
+            break;
+          }
+          if (status.phase == GpsWarmupPhase.timeout) break;
         }
       }
     } catch (e) {
@@ -248,32 +259,23 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
         );
   }
 
-  void _acceptFix(Position pos) {
-    final acc = pos.accuracy;
-    if (acc.isFinite) _lastAccuracyM = acc;
+  void _rememberTight(Position pos) {
+    if (!pos.accuracy.isFinite) return;
+    final ts = pos.timestamp.millisecondsSinceEpoch;
+    _tight.add(
+      Circuit8hSurveySample(
+        lat: pos.latitude,
+        lng: pos.longitude,
+        accuracyM: pos.accuracy,
+        tsMs: ts,
+      ),
+    );
+    final cutoff = ts - 4000;
+    _tight.removeWhere((s) => s.tsMs < cutoff);
+  }
 
-    double? jump;
-    double? dt;
-    if (_points.isNotEmpty) {
-      final prev = _points.last;
-      jump = haversineMeters(
-        prev.lat,
-        prev.lng,
-        pos.latitude,
-        pos.longitude,
-      );
-      dt = (pos.timestamp.millisecondsSinceEpoch - prev.tsMs) / 1000;
-      if (dt < 0) dt = 0;
-    }
-    if (!decideCircuit8hFix(
-      accuracyMeters: acc.isFinite ? acc : null,
-      jumpMeters: jump,
-      dtSeconds: dt,
-    ).accepted) {
-      _rejectedAccuracy++;
-      if (mounted) setState(() {});
-      return;
-    }
+  void _storeFix(Position pos) {
+    final acc = pos.accuracy;
     final ll = LatLng(pos.latitude, pos.longitude);
     final point = Circuit8hPoint(
       lat: pos.latitude,
@@ -293,12 +295,62 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     }
   }
 
+  void _flushHeld() {
+    final held = _held;
+    _held = null;
+    if (held == null || _points.isEmpty) return;
+    _storeFix(held);
+  }
+
+  void _acceptFix(Position pos) {
+    final acc = pos.accuracy;
+    if (acc.isFinite) _lastAccuracyM = acc;
+    final accuracy = acc.isFinite ? acc : null;
+    if (!decideCircuit8hFix(accuracyMeters: accuracy).accepted) {
+      _rejectedAccuracy++;
+      if (mounted) setState(() {});
+      return;
+    }
+    _rememberTight(pos);
+
+    final held = _held;
+    if (held == null) {
+      _held = pos;
+      return;
+    }
+
+    var dt = (pos.timestamp.millisecondsSinceEpoch -
+            held.timestamp.millisecondsSinceEpoch) /
+        1000;
+    if (dt < 0) dt = 0;
+    final speed = pos.speed;
+    final decision = decideCircuit8hFix(
+      accuracyMeters: accuracy,
+      jumpMeters: haversineMeters(
+        held.latitude,
+        held.longitude,
+        pos.latitude,
+        pos.longitude,
+      ),
+      dtSeconds: dt,
+      reportedSpeedMps: speed.isFinite && speed >= 0 ? speed : null,
+    );
+    if (!decision.accepted) {
+      _rejectedAccuracy++;
+      if (mounted) setState(() {});
+      return;
+    }
+    _storeFix(held);
+    _held = pos;
+  }
+
   Future<void> _stopAndSave() async {
     if (_saving) return;
     _captureGen++;
     await _recordSub?.cancel();
     _recordSub = null;
     if (!mounted) return;
+    _flushHeld();
 
     if (_points.length < 3) {
       final partial = _points.isNotEmpty;
@@ -445,7 +497,12 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     final acc = _lastAccuracyM == null
         ? '—'
         : '±${_lastAccuracyM!.toStringAsFixed(0)} m';
-    final status = _warming
+    final status = _sampling
+        ? l10n.circuit8hHoldStill(
+            circuit8hMarkerMinSamples,
+            circuit8hMaxAcceptAccuracyMeters.round(),
+          )
+        : _warming
         ? l10n.circuit8hWarming(acc)
         : _recording
             ? l10n.circuit8hRecordingStats(_points.length, dist, acc)

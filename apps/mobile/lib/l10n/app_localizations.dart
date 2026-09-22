@@ -5684,6 +5684,12 @@ abstract class AppLocalizations {
   /// **'Este punto es peor que ±{meters} m. Espera afuera a una fijación más precisa.'**
   String circuit8hAccuracyGate(int meters);
 
+  /// No description provided for @circuit8hHoldStill.
+  ///
+  /// In es, this message translates to:
+  /// **'Quédate quieto. Hacen falta {count} fixes de ±{meters} m en el mismo punto.'**
+  String circuit8hHoldStill(int count, int meters);
+
   /// No description provided for @circuit8hMarkersTitle.
   ///
   /// In es, this message translates to:

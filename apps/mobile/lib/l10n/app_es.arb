@@ -1467,6 +1467,13 @@
     }
   },
   "circuit8hAccuracyGate": "Este punto es peor que ±{meters} m. Espera afuera a una fijación más precisa.",
+  "@circuit8hHoldStill": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hHoldStill": "Quédate quieto. Hacen falta {count} fixes de ±{meters} m en el mismo punto.",
   "@circuit8hRejected": {
     "placeholders": {
       "count": {"type": "int"}

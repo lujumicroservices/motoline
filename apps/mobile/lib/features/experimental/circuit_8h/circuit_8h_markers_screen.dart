@@ -35,6 +35,7 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
   Circuit8hMarkerKind _kind = Circuit8hMarkerKind.start;
   bool _loading = true;
   bool _saving = false;
+  bool _sampling = false;
 
   @override
   void initState() {
@@ -77,36 +78,36 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
   }
 
   Future<void> _placeAtGps() async {
-    PositionFix? fix;
+    if (_sampling || _saving) return;
+    setState(() => _sampling = true);
+    final Circuit8hMarkerFix? fix;
     try {
-      final pos = await _location.currentPosition();
-      if (pos != null) {
-        fix = PositionFix(
-          lat: pos.latitude,
-          lng: pos.longitude,
-          accuracyM: pos.accuracy.isFinite ? pos.accuracy : null,
-        );
-      }
-    } catch (_) {}
-    final live = liveGps;
-    if (fix == null && live != null) {
-      fix = PositionFix(lat: live.latitude, lng: live.longitude);
+      final samples = await collectSurveySamples(
+        read: () async {
+          final pos = await _location.currentPosition();
+          if (pos == null || !pos.accuracy.isFinite) return null;
+          return Circuit8hSurveySample(
+            lat: pos.latitude,
+            lng: pos.longitude,
+            accuracyM: pos.accuracy,
+            tsMs: pos.timestamp.millisecondsSinceEpoch,
+          );
+        },
+        cancelled: () => !mounted,
+      );
+      fix = medianMarkerFix(samples);
+    } finally {
+      if (mounted) setState(() => _sampling = false);
     }
+    if (!mounted) return;
     if (fix == null) {
-      if (mounted) {
-        showAppSnackError(context, context.l10n.circuit8hNeedGps);
-      }
-      return;
-    }
-    if (!decideCircuit8hFix(accuracyMeters: fix.accuracyM).accepted) {
-      if (mounted) {
-        showAppSnackError(
-          context,
-          context.l10n.circuit8hAccuracyGate(
-            circuit8hMaxAcceptAccuracyMeters.round(),
-          ),
-        );
-      }
+      showAppSnackError(
+        context,
+        context.l10n.circuit8hHoldStill(
+          circuit8hMarkerMinSamples,
+          circuit8hMaxAcceptAccuracyMeters.round(),
+        ),
+      );
       return;
     }
     await _place(fix.lat, fix.lng, accuracyM: fix.accuracyM);
@@ -286,10 +287,16 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
                                     backgroundColor: AppTheme.lineHot,
                                     foregroundColor: AppTheme.asphalt,
                                   ),
-                                  onPressed: _saving ? null : _placeAtGps,
+                                  onPressed: (_saving || _sampling) ? null : _placeAtGps,
                                   icon: const Icon(Icons.my_location),
                                   label: Text(
-                                    l10n.circuit8hPlaceAtGps,
+                                    _sampling
+                                        ? l10n.circuit8hHoldStill(
+                                            circuit8hMarkerMinSamples,
+                                            circuit8hMaxAcceptAccuracyMeters
+                                                .round(),
+                                          )
+                                        : l10n.circuit8hPlaceAtGps,
                                     style: GoogleFonts.rajdhani(
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -430,17 +437,6 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
     }
     return out;
   }
-}
-
-class PositionFix {
-  const PositionFix({
-    required this.lat,
-    required this.lng,
-    this.accuracyM,
-  });
-  final double lat;
-  final double lng;
-  final double? accuracyM;
 }
 
 class _KindChip extends StatelessWidget {

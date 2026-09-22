@@ -3199,6 +3199,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String circuit8hHoldStill(int count, int meters) {
+    return 'Quédate quieto. Hacen falta $count fixes de ±$meters m en el mismo punto.';
+  }
+
+  @override
   String get circuit8hMarkersTitle => 'Inicio · Meta · Checkpoints';
 
   @override

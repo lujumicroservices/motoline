@@ -1396,6 +1396,13 @@
     }
   },
   "circuit8hAccuracyGate": "This fix is wider than ±{meters} m. Wait outside for a tighter lock.",
+  "@circuit8hHoldStill": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hHoldStill": "Hold still. Need {count} fixes within ±{meters} m at the same spot.",
   "@circuit8hRejected": {
     "placeholders": {
       "count": {"type": "int"}

@@ -3184,6 +3184,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String circuit8hHoldStill(int count, int meters) {
+    return 'Hold still. Need $count fixes within ±$meters m at the same spot.';
+  }
+
+  @override
   String get circuit8hMarkersTitle => 'Start · Finish · Checkpoints';
 
   @override
