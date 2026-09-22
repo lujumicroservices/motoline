@@ -155,6 +155,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Align(alignment: Alignment.centerLeft, child: RiderAliasChip()),
           const SizedBox(height: 8),
           const AppVersionTile(),
+          const SizedBox(height: 12),
+          Material(
+            color: AppTheme.lineHot.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(12),
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              leading: const Icon(Icons.gps_fixed, color: AppTheme.lineHot),
+              title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
+              subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
+              trailing: const Icon(Icons.chevron_right, color: AppTheme.lineHot),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const GpsTrackPointsLabScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
           if (!signedIn) accountGroup,
           SettingsGroup(
             title: l10n.settingsShareSection,
