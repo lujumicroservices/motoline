@@ -3737,4 +3737,270 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsAcceptDecline => 'Not now';
+
+  @override
+  String get offroadMapTitle => 'Circuit map';
+
+  @override
+  String get offroadMapCardTitle => 'Map an offroad circuit';
+
+  @override
+  String get offroadMapCardBody =>
+      'Walk the outside and inside perimeters. The app tells you what else the map still needs before it can time laps.';
+
+  @override
+  String get offroadMapOpen => 'Open map';
+
+  @override
+  String get offroadLayerOuter => 'Outside';
+
+  @override
+  String get offroadLayerInner => 'Inside';
+
+  @override
+  String get offroadLayerLine => 'Line';
+
+  @override
+  String get offroadLayerGate => 'Finish';
+
+  @override
+  String get offroadRecord => 'Record';
+
+  @override
+  String get offroadRecording => 'Recording';
+
+  @override
+  String get offroadUndo => 'Undo';
+
+  @override
+  String get offroadClearLayer => 'Clear layer';
+
+  @override
+  String get offroadCloseRing => 'Close';
+
+  @override
+  String get offroadAdviceTitle => 'What\'s missing';
+
+  @override
+  String get offroadDirection => 'Direction';
+
+  @override
+  String get offroadClockwise => 'Clockwise';
+
+  @override
+  String get offroadCounterclockwise => 'Counterclockwise';
+
+  @override
+  String get offroadDirectionUnset => 'Not set';
+
+  @override
+  String get offroadSatellite => 'Satellite';
+
+  @override
+  String get offroadStreets => 'Streets';
+
+  @override
+  String get offroadHintOuter =>
+      'Walk the outside edge in the direction of travel, phone held high. Don\'t use it while riding.';
+
+  @override
+  String get offroadHintInner =>
+      'Walk the inside edge the same way. The gap between the two edges is the track width.';
+
+  @override
+  String get offroadHintLine =>
+      'The racing line is where you ride, not the edge. Mark it slowly with a passenger, or by tapping the map.';
+
+  @override
+  String get offroadHintGate =>
+      'The finish line crosses the track from one edge to the other.';
+
+  @override
+  String get offroadGateNeedOuter => 'Tap the outside end of the finish line';
+
+  @override
+  String get offroadGateNeedInner => 'Tap the inside end of the finish line';
+
+  @override
+  String get offroadGateReady => 'Finish line marked';
+
+  @override
+  String offroadQuality(int score) {
+    return 'Quality $score';
+  }
+
+  @override
+  String get offroadReady => 'Ready for laps';
+
+  @override
+  String get offroadNotReady => 'Not a closed circuit yet';
+
+  @override
+  String offroadStatLengths(int outer, int inner) {
+    return 'Outside $outer m · inside $inner m';
+  }
+
+  @override
+  String offroadStatWidth(int min, int max) {
+    return 'Width $min–$max m';
+  }
+
+  @override
+  String offroadStatGap(int outer, int inner) {
+    return 'To close: outside $outer m · inside $inner m';
+  }
+
+  @override
+  String get offroadNameHint => 'Circuit name';
+
+  @override
+  String get offroadSavedLocal => 'Saved on this phone';
+
+  @override
+  String offroadDropped(int count) {
+    return '$count points dropped — accuracy worse than 12 m';
+  }
+
+  @override
+  String offroadPoints(int count) {
+    return '$count points';
+  }
+
+  @override
+  String get offroadClearTitle => 'Clear this layer';
+
+  @override
+  String get offroadClearBody =>
+      'This removes the points on the layer you are editing.';
+
+  @override
+  String offroadGapHint(int meters) {
+    return '$meters m from closing';
+  }
+
+  @override
+  String get offroadClosed => 'Perimeter closed';
+
+  @override
+  String get offroadLevelRequired => 'Required';
+
+  @override
+  String get offroadLevelRecommended => 'Recommended';
+
+  @override
+  String get offroadLevelTip => 'To tighten';
+
+  @override
+  String get offroadAdviceNeedOuter =>
+      'Walk or mark the outside perimeter until you are back at the start.';
+
+  @override
+  String get offroadAdviceOuterTooFew =>
+      'The outside edge needs more points. Follow the tape, especially through corners.';
+
+  @override
+  String offroadAdviceOuterOpen(int meters) {
+    return 'The outside edge is $meters m from closing. Walk back to the start, or tap Close if you are within 20 m.';
+  }
+
+  @override
+  String offroadAdviceOuterTooShort(int meters) {
+    return 'The outside edge is $meters m. A real circuit is longer — check that it did not close early.';
+  }
+
+  @override
+  String get offroadAdviceNeedInner =>
+      'Walk the inside perimeter in the same direction. One edge does not give you track width.';
+
+  @override
+  String get offroadAdviceInnerTooFew =>
+      'The inside edge needs more points along the infield.';
+
+  @override
+  String offroadAdviceInnerOpen(int meters) {
+    return 'The inside edge is $meters m from closing.';
+  }
+
+  @override
+  String offroadAdviceInnerTooShort(int meters) {
+    return 'The inside edge is $meters m. Check that it is the infield boundary, not a short scribble.';
+  }
+
+  @override
+  String get offroadAdviceInnerOutside =>
+      'Part of the inside edge sits outside the outside edge. The infield has to stay inside.';
+
+  @override
+  String get offroadAdviceRingsCross =>
+      'The two perimeters cross. The track is a corridor, not an X.';
+
+  @override
+  String get offroadAdviceEdgesSwapped =>
+      'The inside edge encloses more ground than the outside edge. Swap them.';
+
+  @override
+  String offroadAdviceWidthNarrow(int meters) {
+    return 'The narrowest gap is $meters m. A bike needs about 3 m.';
+  }
+
+  @override
+  String offroadAdviceWidthWide(int meters) {
+    return 'One stretch is $meters m wide. Check the edge did not wander off into the field.';
+  }
+
+  @override
+  String get offroadAdviceNeedLine =>
+      'Record the racing line, the path riders actually take. Edges do not time a lap.';
+
+  @override
+  String offroadAdviceNeedLineMore(int count) {
+    return 'The racing line has $count points. It needs to go all the way around.';
+  }
+
+  @override
+  String offroadAdviceLineOutside(int count) {
+    return '$count racing-line points leave the corridor between the two edges.';
+  }
+
+  @override
+  String get offroadAdviceNeedGate =>
+      'Mark the finish: one point on the outside edge and one on the inside edge, across the track.';
+
+  @override
+  String get offroadAdviceGateOff =>
+      'The finish has to meet both edges and cross the track, not sit in the infield.';
+
+  @override
+  String get offroadAdviceNeedDirection =>
+      'Set whether the circuit runs clockwise or counterclockwise.';
+
+  @override
+  String get offroadAdviceDirectionMismatch =>
+      'One edge was walked against the direction of travel. Walk both the way you ride.';
+
+  @override
+  String offroadAdvicePoorAccuracy(int count) {
+    return '$count points are worse than 12 m. Hold the phone high, away from trees and your body, and redo that stretch.';
+  }
+
+  @override
+  String offroadAdviceSpacingSparse(int meters) {
+    return 'Points are $meters m apart. Corners need one about every 3 m.';
+  }
+
+  @override
+  String get offroadAdviceSpacingDense =>
+      'Points are packed closer than 1 m. That is GPS noise, not the shape of the edge.';
+
+  @override
+  String get offroadAdviceNeedElevation =>
+      'Altitude is missing. Jumps and climbs need it. Phone GPS height is rough; a barometer is better.';
+
+  @override
+  String get offroadAdviceAlignLandmark =>
+      'Once it closes, line the finish up with a post or a painted mark you can see on the satellite photo. Phone GPS often sits several meters off the picture.';
+
+  @override
+  String get offroadAdviceWalkAgain =>
+      'One pass is a sketch. Walk each edge again and keep the pass that sits on the tape or the rut, not an average of the two.';
 }

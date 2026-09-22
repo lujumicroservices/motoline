@@ -3754,4 +3754,269 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsAcceptDecline => 'Ahora no';
+
+  @override
+  String get offroadMapTitle => 'Mapa de circuito';
+
+  @override
+  String get offroadMapCardTitle => 'Mapear circuito offroad';
+
+  @override
+  String get offroadMapCardBody =>
+      'Camina el perímetro exterior y el interior. La app marca qué más hace falta para que el mapa sirva para vueltas.';
+
+  @override
+  String get offroadMapOpen => 'Abrir mapa';
+
+  @override
+  String get offroadLayerOuter => 'Exterior';
+
+  @override
+  String get offroadLayerInner => 'Interior';
+
+  @override
+  String get offroadLayerLine => 'Trazada';
+
+  @override
+  String get offroadLayerGate => 'Meta';
+
+  @override
+  String get offroadRecord => 'Grabar';
+
+  @override
+  String get offroadRecording => 'Grabando';
+
+  @override
+  String get offroadUndo => 'Deshacer';
+
+  @override
+  String get offroadClearLayer => 'Borrar capa';
+
+  @override
+  String get offroadCloseRing => 'Cerrar';
+
+  @override
+  String get offroadAdviceTitle => 'Qué falta';
+
+  @override
+  String get offroadDirection => 'Sentido';
+
+  @override
+  String get offroadClockwise => 'Horario';
+
+  @override
+  String get offroadCounterclockwise => 'Antihorario';
+
+  @override
+  String get offroadDirectionUnset => 'Sin definir';
+
+  @override
+  String get offroadSatellite => 'Satélite';
+
+  @override
+  String get offroadStreets => 'Calles';
+
+  @override
+  String get offroadHintOuter =>
+      'Camina el límite exterior en el sentido de la pista, con el teléfono en alto. No lo uses mientras ruedas.';
+
+  @override
+  String get offroadHintInner =>
+      'Camina el límite interior en el mismo sentido. El hueco entre los dos bordes es el ancho de pista.';
+
+  @override
+  String get offroadHintLine =>
+      'La trazada es por dónde se rueda, no el borde. Márcala despacio con un pasajero, o tocando el mapa.';
+
+  @override
+  String get offroadHintGate => 'La meta cruza la pista de un borde al otro.';
+
+  @override
+  String get offroadGateNeedOuter => 'Toca el lado exterior de la meta';
+
+  @override
+  String get offroadGateNeedInner => 'Toca el lado interior de la meta';
+
+  @override
+  String get offroadGateReady => 'Meta marcada';
+
+  @override
+  String offroadQuality(int score) {
+    return 'Calidad $score';
+  }
+
+  @override
+  String get offroadReady => 'Listo para vueltas';
+
+  @override
+  String get offroadNotReady => 'Aún no cierra como circuito';
+
+  @override
+  String offroadStatLengths(int outer, int inner) {
+    return 'Exterior $outer m · interior $inner m';
+  }
+
+  @override
+  String offroadStatWidth(int min, int max) {
+    return 'Ancho $min–$max m';
+  }
+
+  @override
+  String offroadStatGap(int outer, int inner) {
+    return 'Para cerrar: exterior $outer m · interior $inner m';
+  }
+
+  @override
+  String get offroadNameHint => 'Nombre del circuito';
+
+  @override
+  String get offroadSavedLocal => 'Se guarda en este teléfono';
+
+  @override
+  String offroadDropped(int count) {
+    return '$count puntos descartados — precisión peor que 12 m';
+  }
+
+  @override
+  String offroadPoints(int count) {
+    return '$count puntos';
+  }
+
+  @override
+  String get offroadClearTitle => 'Borrar esta capa';
+
+  @override
+  String get offroadClearBody =>
+      'Se quitan los puntos de la capa que estás editando.';
+
+  @override
+  String offroadGapHint(int meters) {
+    return 'A $meters m de cerrar';
+  }
+
+  @override
+  String get offroadClosed => 'Perímetro cerrado';
+
+  @override
+  String get offroadLevelRequired => 'Hace falta';
+
+  @override
+  String get offroadLevelRecommended => 'Recomendado';
+
+  @override
+  String get offroadLevelTip => 'Para afinar';
+
+  @override
+  String get offroadAdviceNeedOuter =>
+      'Camina o marca el perímetro exterior hasta volver al inicio.';
+
+  @override
+  String get offroadAdviceOuterTooFew =>
+      'El exterior necesita más puntos. Sigue el borde, sobre todo en las curvas.';
+
+  @override
+  String offroadAdviceOuterOpen(int meters) {
+    return 'El exterior queda a $meters m de cerrar. Vuelve al inicio, o pulsa Cerrar si estás a menos de 20 m.';
+  }
+
+  @override
+  String offroadAdviceOuterTooShort(int meters) {
+    return 'El exterior mide $meters m. Un circuito real es más largo; revisa que no se haya cerrado antes de tiempo.';
+  }
+
+  @override
+  String get offroadAdviceNeedInner =>
+      'Camina el perímetro interior en el mismo sentido. Con un solo borde no hay ancho de pista.';
+
+  @override
+  String get offroadAdviceInnerTooFew =>
+      'El interior necesita más puntos a lo largo del borde del infield.';
+
+  @override
+  String offroadAdviceInnerOpen(int meters) {
+    return 'El interior queda a $meters m de cerrar.';
+  }
+
+  @override
+  String offroadAdviceInnerTooShort(int meters) {
+    return 'El interior mide $meters m. Revisa que sea el borde del infield y no un trazo corto.';
+  }
+
+  @override
+  String get offroadAdviceInnerOutside =>
+      'Parte del interior quedó fuera del exterior. El infield tiene que quedar dentro.';
+
+  @override
+  String get offroadAdviceRingsCross =>
+      'Los dos perímetros se cruzan. La pista es un corredor, no una X.';
+
+  @override
+  String get offroadAdviceEdgesSwapped =>
+      'El interior encierra más terreno que el exterior. Cámbialos de lugar.';
+
+  @override
+  String offroadAdviceWidthNarrow(int meters) {
+    return 'El paso más estrecho mide $meters m. Una moto necesita unos 3 m.';
+  }
+
+  @override
+  String offroadAdviceWidthWide(int meters) {
+    return 'Hay un tramo de $meters m de ancho. Revisa que el borde no se haya ido al monte.';
+  }
+
+  @override
+  String get offroadAdviceNeedLine =>
+      'Graba la trazada, la línea por donde se rueda. Los bordes no cronometran una vuelta.';
+
+  @override
+  String offroadAdviceNeedLineMore(int count) {
+    return 'La trazada tiene $count puntos. Tiene que dar toda la vuelta.';
+  }
+
+  @override
+  String offroadAdviceLineOutside(int count) {
+    return '$count puntos de la trazada salen del corredor entre los dos bordes.';
+  }
+
+  @override
+  String get offroadAdviceNeedGate =>
+      'Marca la meta: un punto en el borde exterior y otro en el interior, cruzando la pista.';
+
+  @override
+  String get offroadAdviceGateOff =>
+      'La meta tiene que tocar los dos bordes y cruzar la pista, no quedar en el infield.';
+
+  @override
+  String get offroadAdviceNeedDirection =>
+      'Indica si se rueda en sentido horario o antihorario.';
+
+  @override
+  String get offroadAdviceDirectionMismatch =>
+      'Un borde se caminó al revés del sentido de la pista. Los dos se caminan en la dirección en que se rueda.';
+
+  @override
+  String offroadAdvicePoorAccuracy(int count) {
+    return '$count puntos tienen peor precisión que 12 m. Teléfono en alto, lejos de árboles y del cuerpo, y repite ese tramo.';
+  }
+
+  @override
+  String offroadAdviceSpacingSparse(int meters) {
+    return 'Los puntos quedan a $meters m. En las curvas hace falta uno cada 3 m.';
+  }
+
+  @override
+  String get offroadAdviceSpacingDense =>
+      'Los puntos están amontonados a menos de 1 m. Eso es ruido del GPS, no la forma del borde.';
+
+  @override
+  String get offroadAdviceNeedElevation =>
+      'No hay altitud. Saltos y subidas la necesitan. La altura del GPS del teléfono es floja; un barómetro es mejor.';
+
+  @override
+  String get offroadAdviceAlignLandmark =>
+      'Cuando cierre, alinea la meta con un poste o una raya que veas en la foto satélite. El GPS del teléfono suele quedar a varios metros de la imagen.';
+
+  @override
+  String get offroadAdviceWalkAgain =>
+      'Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos.';
 }

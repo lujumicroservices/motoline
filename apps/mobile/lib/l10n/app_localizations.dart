@@ -6659,6 +6659,426 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ahora no'**
   String get termsAcceptDecline;
+
+  /// No description provided for @offroadMapTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa de circuito'**
+  String get offroadMapTitle;
+
+  /// No description provided for @offroadMapCardTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapear circuito offroad'**
+  String get offroadMapCardTitle;
+
+  /// No description provided for @offroadMapCardBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Camina el perímetro exterior y el interior. La app marca qué más hace falta para que el mapa sirva para vueltas.'**
+  String get offroadMapCardBody;
+
+  /// No description provided for @offroadMapOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir mapa'**
+  String get offroadMapOpen;
+
+  /// No description provided for @offroadLayerOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Exterior'**
+  String get offroadLayerOuter;
+
+  /// No description provided for @offroadLayerInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Interior'**
+  String get offroadLayerInner;
+
+  /// No description provided for @offroadLayerLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Trazada'**
+  String get offroadLayerLine;
+
+  /// No description provided for @offroadLayerGate.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta'**
+  String get offroadLayerGate;
+
+  /// No description provided for @offroadRecord.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar'**
+  String get offroadRecord;
+
+  /// No description provided for @offroadRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando'**
+  String get offroadRecording;
+
+  /// No description provided for @offroadUndo.
+  ///
+  /// In es, this message translates to:
+  /// **'Deshacer'**
+  String get offroadUndo;
+
+  /// No description provided for @offroadClearLayer.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar capa'**
+  String get offroadClearLayer;
+
+  /// No description provided for @offroadCloseRing.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar'**
+  String get offroadCloseRing;
+
+  /// No description provided for @offroadAdviceTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué falta'**
+  String get offroadAdviceTitle;
+
+  /// No description provided for @offroadDirection.
+  ///
+  /// In es, this message translates to:
+  /// **'Sentido'**
+  String get offroadDirection;
+
+  /// No description provided for @offroadClockwise.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario'**
+  String get offroadClockwise;
+
+  /// No description provided for @offroadCounterclockwise.
+  ///
+  /// In es, this message translates to:
+  /// **'Antihorario'**
+  String get offroadCounterclockwise;
+
+  /// No description provided for @offroadDirectionUnset.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin definir'**
+  String get offroadDirectionUnset;
+
+  /// No description provided for @offroadSatellite.
+  ///
+  /// In es, this message translates to:
+  /// **'Satélite'**
+  String get offroadSatellite;
+
+  /// No description provided for @offroadStreets.
+  ///
+  /// In es, this message translates to:
+  /// **'Calles'**
+  String get offroadStreets;
+
+  /// No description provided for @offroadHintOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Camina el límite exterior en el sentido de la pista, con el teléfono en alto. No lo uses mientras ruedas.'**
+  String get offroadHintOuter;
+
+  /// No description provided for @offroadHintInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Camina el límite interior en el mismo sentido. El hueco entre los dos bordes es el ancho de pista.'**
+  String get offroadHintInner;
+
+  /// No description provided for @offroadHintLine.
+  ///
+  /// In es, this message translates to:
+  /// **'La trazada es por dónde se rueda, no el borde. Márcala despacio con un pasajero, o tocando el mapa.'**
+  String get offroadHintLine;
+
+  /// No description provided for @offroadHintGate.
+  ///
+  /// In es, this message translates to:
+  /// **'La meta cruza la pista de un borde al otro.'**
+  String get offroadHintGate;
+
+  /// No description provided for @offroadGateNeedOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el lado exterior de la meta'**
+  String get offroadGateNeedOuter;
+
+  /// No description provided for @offroadGateNeedInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el lado interior de la meta'**
+  String get offroadGateNeedInner;
+
+  /// No description provided for @offroadGateReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta marcada'**
+  String get offroadGateReady;
+
+  /// No description provided for @offroadQuality.
+  ///
+  /// In es, this message translates to:
+  /// **'Calidad {score}'**
+  String offroadQuality(int score);
+
+  /// No description provided for @offroadReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo para vueltas'**
+  String get offroadReady;
+
+  /// No description provided for @offroadNotReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no cierra como circuito'**
+  String get offroadNotReady;
+
+  /// No description provided for @offroadStatLengths.
+  ///
+  /// In es, this message translates to:
+  /// **'Exterior {outer} m · interior {inner} m'**
+  String offroadStatLengths(int outer, int inner);
+
+  /// No description provided for @offroadStatWidth.
+  ///
+  /// In es, this message translates to:
+  /// **'Ancho {min}–{max} m'**
+  String offroadStatWidth(int min, int max);
+
+  /// No description provided for @offroadStatGap.
+  ///
+  /// In es, this message translates to:
+  /// **'Para cerrar: exterior {outer} m · interior {inner} m'**
+  String offroadStatGap(int outer, int inner);
+
+  /// No description provided for @offroadNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del circuito'**
+  String get offroadNameHint;
+
+  /// No description provided for @offroadSavedLocal.
+  ///
+  /// In es, this message translates to:
+  /// **'Se guarda en este teléfono'**
+  String get offroadSavedLocal;
+
+  /// No description provided for @offroadDropped.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} puntos descartados — precisión peor que 12 m'**
+  String offroadDropped(int count);
+
+  /// No description provided for @offroadPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} puntos'**
+  String offroadPoints(int count);
+
+  /// No description provided for @offroadClearTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar esta capa'**
+  String get offroadClearTitle;
+
+  /// No description provided for @offroadClearBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se quitan los puntos de la capa que estás editando.'**
+  String get offroadClearBody;
+
+  /// No description provided for @offroadGapHint.
+  ///
+  /// In es, this message translates to:
+  /// **'A {meters} m de cerrar'**
+  String offroadGapHint(int meters);
+
+  /// No description provided for @offroadClosed.
+  ///
+  /// In es, this message translates to:
+  /// **'Perímetro cerrado'**
+  String get offroadClosed;
+
+  /// No description provided for @offroadLevelRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace falta'**
+  String get offroadLevelRequired;
+
+  /// No description provided for @offroadLevelRecommended.
+  ///
+  /// In es, this message translates to:
+  /// **'Recomendado'**
+  String get offroadLevelRecommended;
+
+  /// No description provided for @offroadLevelTip.
+  ///
+  /// In es, this message translates to:
+  /// **'Para afinar'**
+  String get offroadLevelTip;
+
+  /// No description provided for @offroadAdviceNeedOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Camina o marca el perímetro exterior hasta volver al inicio.'**
+  String get offroadAdviceNeedOuter;
+
+  /// No description provided for @offroadAdviceOuterTooFew.
+  ///
+  /// In es, this message translates to:
+  /// **'El exterior necesita más puntos. Sigue el borde, sobre todo en las curvas.'**
+  String get offroadAdviceOuterTooFew;
+
+  /// No description provided for @offroadAdviceOuterOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'El exterior queda a {meters} m de cerrar. Vuelve al inicio, o pulsa Cerrar si estás a menos de 20 m.'**
+  String offroadAdviceOuterOpen(int meters);
+
+  /// No description provided for @offroadAdviceOuterTooShort.
+  ///
+  /// In es, this message translates to:
+  /// **'El exterior mide {meters} m. Un circuito real es más largo; revisa que no se haya cerrado antes de tiempo.'**
+  String offroadAdviceOuterTooShort(int meters);
+
+  /// No description provided for @offroadAdviceNeedInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Camina el perímetro interior en el mismo sentido. Con un solo borde no hay ancho de pista.'**
+  String get offroadAdviceNeedInner;
+
+  /// No description provided for @offroadAdviceInnerTooFew.
+  ///
+  /// In es, this message translates to:
+  /// **'El interior necesita más puntos a lo largo del borde del infield.'**
+  String get offroadAdviceInnerTooFew;
+
+  /// No description provided for @offroadAdviceInnerOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'El interior queda a {meters} m de cerrar.'**
+  String offroadAdviceInnerOpen(int meters);
+
+  /// No description provided for @offroadAdviceInnerTooShort.
+  ///
+  /// In es, this message translates to:
+  /// **'El interior mide {meters} m. Revisa que sea el borde del infield y no un trazo corto.'**
+  String offroadAdviceInnerTooShort(int meters);
+
+  /// No description provided for @offroadAdviceInnerOutside.
+  ///
+  /// In es, this message translates to:
+  /// **'Parte del interior quedó fuera del exterior. El infield tiene que quedar dentro.'**
+  String get offroadAdviceInnerOutside;
+
+  /// No description provided for @offroadAdviceRingsCross.
+  ///
+  /// In es, this message translates to:
+  /// **'Los dos perímetros se cruzan. La pista es un corredor, no una X.'**
+  String get offroadAdviceRingsCross;
+
+  /// No description provided for @offroadAdviceEdgesSwapped.
+  ///
+  /// In es, this message translates to:
+  /// **'El interior encierra más terreno que el exterior. Cámbialos de lugar.'**
+  String get offroadAdviceEdgesSwapped;
+
+  /// No description provided for @offroadAdviceWidthNarrow.
+  ///
+  /// In es, this message translates to:
+  /// **'El paso más estrecho mide {meters} m. Una moto necesita unos 3 m.'**
+  String offroadAdviceWidthNarrow(int meters);
+
+  /// No description provided for @offroadAdviceWidthWide.
+  ///
+  /// In es, this message translates to:
+  /// **'Hay un tramo de {meters} m de ancho. Revisa que el borde no se haya ido al monte.'**
+  String offroadAdviceWidthWide(int meters);
+
+  /// No description provided for @offroadAdviceNeedLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Graba la trazada, la línea por donde se rueda. Los bordes no cronometran una vuelta.'**
+  String get offroadAdviceNeedLine;
+
+  /// No description provided for @offroadAdviceNeedLineMore.
+  ///
+  /// In es, this message translates to:
+  /// **'La trazada tiene {count} puntos. Tiene que dar toda la vuelta.'**
+  String offroadAdviceNeedLineMore(int count);
+
+  /// No description provided for @offroadAdviceLineOutside.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} puntos de la trazada salen del corredor entre los dos bordes.'**
+  String offroadAdviceLineOutside(int count);
+
+  /// No description provided for @offroadAdviceNeedGate.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca la meta: un punto en el borde exterior y otro en el interior, cruzando la pista.'**
+  String get offroadAdviceNeedGate;
+
+  /// No description provided for @offroadAdviceGateOff.
+  ///
+  /// In es, this message translates to:
+  /// **'La meta tiene que tocar los dos bordes y cruzar la pista, no quedar en el infield.'**
+  String get offroadAdviceGateOff;
+
+  /// No description provided for @offroadAdviceNeedDirection.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica si se rueda en sentido horario o antihorario.'**
+  String get offroadAdviceNeedDirection;
+
+  /// No description provided for @offroadAdviceDirectionMismatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Un borde se caminó al revés del sentido de la pista. Los dos se caminan en la dirección en que se rueda.'**
+  String get offroadAdviceDirectionMismatch;
+
+  /// No description provided for @offroadAdvicePoorAccuracy.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} puntos tienen peor precisión que 12 m. Teléfono en alto, lejos de árboles y del cuerpo, y repite ese tramo.'**
+  String offroadAdvicePoorAccuracy(int count);
+
+  /// No description provided for @offroadAdviceSpacingSparse.
+  ///
+  /// In es, this message translates to:
+  /// **'Los puntos quedan a {meters} m. En las curvas hace falta uno cada 3 m.'**
+  String offroadAdviceSpacingSparse(int meters);
+
+  /// No description provided for @offroadAdviceSpacingDense.
+  ///
+  /// In es, this message translates to:
+  /// **'Los puntos están amontonados a menos de 1 m. Eso es ruido del GPS, no la forma del borde.'**
+  String get offroadAdviceSpacingDense;
+
+  /// No description provided for @offroadAdviceNeedElevation.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay altitud. Saltos y subidas la necesitan. La altura del GPS del teléfono es floja; un barómetro es mejor.'**
+  String get offroadAdviceNeedElevation;
+
+  /// No description provided for @offroadAdviceAlignLandmark.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando cierre, alinea la meta con un poste o una raya que veas en la foto satélite. El GPS del teléfono suele quedar a varios metros de la imagen.'**
+  String get offroadAdviceAlignLandmark;
+
+  /// No description provided for @offroadAdviceWalkAgain.
+  ///
+  /// In es, this message translates to:
+  /// **'Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos.'**
+  String get offroadAdviceWalkAgain;
 }
 
 class _AppLocalizationsDelegate

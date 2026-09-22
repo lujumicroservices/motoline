@@ -2,5 +2,6 @@
 library;
 
 export 'src/gps_gaps.dart';
+export 'src/offroad_circuit.dart';
 export 'src/smoothness.dart';
 export 'src/sync_outbox.dart';

@@ -9,6 +9,7 @@ import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../../widgets/visibility_selector.dart';
+import '../circuit_map/offroad_circuit_map_screen.dart';
 import 'route_detail_screen.dart';
 import '../../widgets/app_snack.dart';
 
@@ -80,6 +81,8 @@ class RoutesScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            const _OffroadMapCard(),
             const SizedBox(height: 20),
             Text(
               l10n.myRoutes,
@@ -415,6 +418,52 @@ class _MyRouteTile extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _OffroadMapCard extends StatelessWidget {
+  const _OffroadMapCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.asphaltElevated,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.line.withValues(alpha: 0.28)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.offroadMapCardTitle,
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.offroadMapCardBody,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.steel,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const OffroadCircuitMapScreen(),
+                ),
+              );
+            },
+            child: Text(l10n.offroadMapOpen),
+          ),
+        ],
       ),
     );
   }

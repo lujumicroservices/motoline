@@ -1,28 +1,18 @@
-name: play-release
+name: apk-release
 
-# Builds the Play flavor AAB and uploads it to Internal testing.
-# One-time setup: GitHub repo secrets listed in docs/PLAY_STORE.md §8.
+# Sideload APK for in-app updates. The app reads GitHub Releases /latest.
+# Push a tag vX.Y.Z, or run this workflow on the branch that should ship.
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
-    inputs:
-      track:
-        description: Play track
-        type: choice
-        options:
-          - internal
-          - alpha
-          - beta
-        default: internal
-      status:
-        description: Release status (draft required while the app is still Draft)
-        type: choice
-        options:
-          - draft
-          - completed
-        default: draft
+
+permissions:
+  contents: write
 
 jobs:
-  bundle-and-upload:
+  sideload-apk:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -69,19 +59,33 @@ jobs:
         working-directory: packages/ride_core
         run: dart pub get
 
-      - name: Build Play App Bundle
+      - name: Build sideload APK
         run: |
           flutter pub get
           flutter gen-l10n
-          flutter build appbundle --flavor play --release --dart-define=DISTRIBUTION=play
+          flutter build apk --flavor sideload --release --dart-define=DISTRIBUTION=sideload
 
-      - name: Upload to Play Console
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: com.rawthrottle.riderlab
-          releaseFiles: apps/mobile/build/app/outputs/bundle/playRelease/app-play-release.aab
-          track: ${{ inputs.track }}
-          status: ${{ inputs.status }}
-          releaseName: RiderLab 1.37.25
-          whatsNewDirectory: apps/mobile/play/whatsnew
+      - name: Publish GitHub Release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(awk '/^version:/ {print $2; exit}' apps/mobile/pubspec.yaml)
+          name="${version%%+*}"
+          apk="apps/mobile/build/app/outputs/flutter-apk/app-sideload-release.apk"
+          test -f "$apk"
+          cp "$apk" "RiderLab-v${name}.apk"
+          notes=$(mktemp)
+          {
+            echo "Sideload APK (not uploaded to Play closed test)."
+            echo
+            cat apps/mobile/play/whatsnew/whatsnew-es-419
+            echo
+            echo "Instalar: abre el APK en el teléfono. Si Android bloquea, permite instalar apps desconocidas para Chrome/Archivos."
+            echo
+            echo "Si ya tienes RiderLab del closed test de Play, desinstálalo primero (firma distinta)."
+          } > "$notes"
+          gh release create "v${name}" "RiderLab-v${name}.apk" \
+            --title "RiderLab ${name}" \
+            --notes-file "$notes"
