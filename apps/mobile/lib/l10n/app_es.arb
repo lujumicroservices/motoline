@@ -1392,27 +1392,27 @@
   "appVersionUnavailable": "No se pudo leer la versión",
   "appVersionCopy": "Copiar versión",
   "appVersionCopied": "Versión copiada",
-  "gpsTrackPointsLabTile": "Puntos GPS de la trazada",
-  "gpsTrackPointsLabHelp": "Mapa experimental con cada fix GPS guardado",
-  "gpsTrackPointsLabTitle": "Lab GPS — puntos de trazada",
-  "gpsTrackPointsLabIntro": "Elige un recorrido para ver cada punto GPS con el que se dibuja la línea. No forma parte del mapa normal de Ride Lab.",
-  "gpsTrackPointsLabPickRide": "Recorridos con GPS",
-  "gpsTrackPointsLabEmpty": "No hay recorridos completados con puntos GPS.",
-  "gpsTrackPointsLabRideMeta": "{points} puntos · {distanceKm} km",
-  "@gpsTrackPointsLabRideMeta": {
-    "placeholders": {
-      "points": {"type": "int"},
-      "distanceKm": {"type": "String"}
-    }
-  },
-  "gpsTrackPointsLabMapTitle": "Puntos GPS",
-  "gpsTrackPointsLabToggleLine": "Mostrar/ocultar línea guía",
-  "gpsTrackPointsLabStats": "{points} puntos · ~{hz} Hz · {duration}",
-  "@gpsTrackPointsLabStats": {
+  "gpsTrackPointsLabTile": "Puntos GPS / perímetro",
+  "gpsTrackPointsLabHelp": "Mapa en tu ubicación · grabar perímetro con cada fix GPS",
+  "gpsTrackPointsLabTitle": "Lab GPS — perímetro",
+  "gpsTrackPointsLabIdleHint": "Mapa en tu GPS. Toca Grabar perímetro y camina o rueda el contorno — cada fix aparece como punto.",
+  "gpsTrackPointsLabStartPerimeter": "Grabar perímetro",
+  "gpsTrackPointsLabStopPerimeter": "Detener grabación",
+  "gpsTrackPointsLabClear": "Borrar puntos",
+  "gpsTrackPointsLabRecordingStats": "Grabando · {points} puntos · ~{hz} Hz · {distance}",
+  "@gpsTrackPointsLabRecordingStats": {
     "placeholders": {
       "points": {"type": "int"},
       "hz": {"type": "String"},
-      "duration": {"type": "String"}
+      "distance": {"type": "String"}
+    }
+  },
+  "gpsTrackPointsLabStoppedStats": "Listo · {points} puntos · ~{hz} Hz · {distance}",
+  "@gpsTrackPointsLabStoppedStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "hz": {"type": "String"},
+      "distance": {"type": "String"}
     }
   },
   "leanLabSettingsTile": "Lab de inclinación (pruebas)",

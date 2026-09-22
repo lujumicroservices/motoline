@@ -3089,39 +3089,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appVersionCopied => 'Version copied';
 
   @override
-  String get gpsTrackPointsLabTile => 'GPS track points';
+  String get gpsTrackPointsLabTile => 'GPS points / perimeter';
 
   @override
   String get gpsTrackPointsLabHelp =>
-      'Experimental map with every stored GPS fix';
+      'Map at your location · record a perimeter with every GPS fix';
 
   @override
-  String get gpsTrackPointsLabTitle => 'GPS lab — track points';
+  String get gpsTrackPointsLabTitle => 'GPS lab — perimeter';
 
   @override
-  String get gpsTrackPointsLabIntro =>
-      'Pick a ride to inspect each GPS fix used to draw the line. This is separate from the normal Ride Lab map.';
+  String get gpsTrackPointsLabIdleHint =>
+      'Map at your GPS. Tap Record perimeter and walk or ride the outline — each fix shows as a dot.';
 
   @override
-  String get gpsTrackPointsLabPickRide => 'Rides with GPS';
+  String get gpsTrackPointsLabStartPerimeter => 'Record perimeter';
 
   @override
-  String get gpsTrackPointsLabEmpty => 'No completed rides with GPS points.';
+  String get gpsTrackPointsLabStopPerimeter => 'Stop recording';
 
   @override
-  String gpsTrackPointsLabRideMeta(int points, String distanceKm) {
-    return '$points points · $distanceKm km';
+  String get gpsTrackPointsLabClear => 'Clear points';
+
+  @override
+  String gpsTrackPointsLabRecordingStats(
+    int points,
+    String hz,
+    String distance,
+  ) {
+    return 'Recording · $points points · ~$hz Hz · $distance';
   }
 
   @override
-  String get gpsTrackPointsLabMapTitle => 'GPS points';
-
-  @override
-  String get gpsTrackPointsLabToggleLine => 'Show/hide guide line';
-
-  @override
-  String gpsTrackPointsLabStats(int points, String hz, String duration) {
-    return '$points points · ~$hz Hz · $duration';
+  String gpsTrackPointsLabStoppedStats(int points, String hz, String distance) {
+    return 'Done · $points points · ~$hz Hz · $distance';
   }
 
   @override

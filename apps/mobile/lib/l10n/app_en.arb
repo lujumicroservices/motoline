@@ -1321,27 +1321,27 @@
   "appVersionUnavailable": "Could not read version",
   "appVersionCopy": "Copy version",
   "appVersionCopied": "Version copied",
-  "gpsTrackPointsLabTile": "GPS track points",
-  "gpsTrackPointsLabHelp": "Experimental map with every stored GPS fix",
-  "gpsTrackPointsLabTitle": "GPS lab — track points",
-  "gpsTrackPointsLabIntro": "Pick a ride to inspect each GPS fix used to draw the line. This is separate from the normal Ride Lab map.",
-  "gpsTrackPointsLabPickRide": "Rides with GPS",
-  "gpsTrackPointsLabEmpty": "No completed rides with GPS points.",
-  "gpsTrackPointsLabRideMeta": "{points} points · {distanceKm} km",
-  "@gpsTrackPointsLabRideMeta": {
-    "placeholders": {
-      "points": {"type": "int"},
-      "distanceKm": {"type": "String"}
-    }
-  },
-  "gpsTrackPointsLabMapTitle": "GPS points",
-  "gpsTrackPointsLabToggleLine": "Show/hide guide line",
-  "gpsTrackPointsLabStats": "{points} points · ~{hz} Hz · {duration}",
-  "@gpsTrackPointsLabStats": {
+  "gpsTrackPointsLabTile": "GPS points / perimeter",
+  "gpsTrackPointsLabHelp": "Map at your location · record a perimeter with every GPS fix",
+  "gpsTrackPointsLabTitle": "GPS lab — perimeter",
+  "gpsTrackPointsLabIdleHint": "Map at your GPS. Tap Record perimeter and walk or ride the outline — each fix shows as a dot.",
+  "gpsTrackPointsLabStartPerimeter": "Record perimeter",
+  "gpsTrackPointsLabStopPerimeter": "Stop recording",
+  "gpsTrackPointsLabClear": "Clear points",
+  "gpsTrackPointsLabRecordingStats": "Recording · {points} points · ~{hz} Hz · {distance}",
+  "@gpsTrackPointsLabRecordingStats": {
     "placeholders": {
       "points": {"type": "int"},
       "hz": {"type": "String"},
-      "duration": {"type": "String"}
+      "distance": {"type": "String"}
+    }
+  },
+  "gpsTrackPointsLabStoppedStats": "Done · {points} points · ~{hz} Hz · {distance}",
+  "@gpsTrackPointsLabStoppedStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "hz": {"type": "String"},
+      "distance": {"type": "String"}
     }
   },
   "leanLabSettingsTile": "Lean lab (test)",

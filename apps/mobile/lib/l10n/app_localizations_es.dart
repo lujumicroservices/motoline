@@ -3104,40 +3104,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appVersionCopied => 'Versión copiada';
 
   @override
-  String get gpsTrackPointsLabTile => 'Puntos GPS de la trazada';
+  String get gpsTrackPointsLabTile => 'Puntos GPS / perímetro';
 
   @override
   String get gpsTrackPointsLabHelp =>
-      'Mapa experimental con cada fix GPS guardado';
+      'Mapa en tu ubicación · grabar perímetro con cada fix GPS';
 
   @override
-  String get gpsTrackPointsLabTitle => 'Lab GPS — puntos de trazada';
+  String get gpsTrackPointsLabTitle => 'Lab GPS — perímetro';
 
   @override
-  String get gpsTrackPointsLabIntro =>
-      'Elige un recorrido para ver cada punto GPS con el que se dibuja la línea. No forma parte del mapa normal de Ride Lab.';
+  String get gpsTrackPointsLabIdleHint =>
+      'Mapa en tu GPS. Toca Grabar perímetro y camina o rueda el contorno — cada fix aparece como punto.';
 
   @override
-  String get gpsTrackPointsLabPickRide => 'Recorridos con GPS';
+  String get gpsTrackPointsLabStartPerimeter => 'Grabar perímetro';
 
   @override
-  String get gpsTrackPointsLabEmpty =>
-      'No hay recorridos completados con puntos GPS.';
+  String get gpsTrackPointsLabStopPerimeter => 'Detener grabación';
 
   @override
-  String gpsTrackPointsLabRideMeta(int points, String distanceKm) {
-    return '$points puntos · $distanceKm km';
+  String get gpsTrackPointsLabClear => 'Borrar puntos';
+
+  @override
+  String gpsTrackPointsLabRecordingStats(
+    int points,
+    String hz,
+    String distance,
+  ) {
+    return 'Grabando · $points puntos · ~$hz Hz · $distance';
   }
 
   @override
-  String get gpsTrackPointsLabMapTitle => 'Puntos GPS';
-
-  @override
-  String get gpsTrackPointsLabToggleLine => 'Mostrar/ocultar línea guía';
-
-  @override
-  String gpsTrackPointsLabStats(int points, String hz, String duration) {
-    return '$points puntos · ~$hz Hz · $duration';
+  String gpsTrackPointsLabStoppedStats(int points, String hz, String distance) {
+    return 'Listo · $points puntos · ~$hz Hz · $distance';
   }
 
   @override
