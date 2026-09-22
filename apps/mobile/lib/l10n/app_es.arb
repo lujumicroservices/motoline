@@ -1429,7 +1429,7 @@
       "pass": {"type": "int"}
     }
   },
-  "circuit8hRecordIdle": "Tipo {route}, pasada {pass}. Toca Iniciar pasada y rueda el recorrido — cada fix GPS queda como punto.",
+  "circuit8hRecordIdle": "Tipo {route}, pasada {pass}. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.",
   "@circuit8hRecordIdle": {
     "placeholders": {
       "route": {"type": "String"},
@@ -1448,7 +1448,25 @@
       "accuracy": {"type": "String"}
     }
   },
-  "circuit8hRejected": "Rechazados por precisión: {count}",
+  "circuit8hRejected": "Rechazados (precisión o salto): {count}",
+  "@circuit8hPrecisionNote": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hPrecisionNote": "Solo se guardan fixes de ±{meters} m o mejores.",
+  "@circuit8hWarming": {
+    "placeholders": {
+      "accuracy": {"type": "String"}
+    }
+  },
+  "circuit8hWarming": "Afinando GPS · ahora {accuracy}",
+  "@circuit8hAccuracyGate": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hAccuracyGate": "Este punto es peor que ±{meters} m. Espera afuera a una fijación más precisa.",
   "@circuit8hRejected": {
     "placeholders": {
       "count": {"type": "int"}

@@ -3142,7 +3142,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String circuit8hRecordIdle(String route, int pass) {
-    return 'Type $route, pass $pass. Tap Start pass and ride the route — each GPS fix is stored as a point.';
+    return 'Type $route, pass $pass. Tap Start pass and ride the route — only tight GPS fixes are stored.';
   }
 
   @override
@@ -3165,7 +3165,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String circuit8hRejected(int count) {
-    return 'Dropped for accuracy: $count';
+    return 'Dropped (loose fix or jump): $count';
+  }
+
+  @override
+  String circuit8hPrecisionNote(int meters) {
+    return 'Only fixes within ±$meters m are stored.';
+  }
+
+  @override
+  String circuit8hWarming(String accuracy) {
+    return 'Tightening GPS · now $accuracy';
+  }
+
+  @override
+  String circuit8hAccuracyGate(int meters) {
+    return 'This fix is wider than ±$meters m. Wait outside for a tighter lock.';
   }
 
   @override

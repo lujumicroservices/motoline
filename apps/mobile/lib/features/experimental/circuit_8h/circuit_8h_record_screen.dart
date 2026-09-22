@@ -16,6 +16,7 @@ import '../../maps/live_gps_map_mixin.dart';
 import '../../maps/map_control_chip.dart';
 import '../../ride_active/location_permission_gate.dart';
 import 'circuit_8h_models.dart';
+import 'circuit_8h_precision.dart';
 import 'circuit_8h_store.dart';
 
 /// Record one GPS pass for route A or B, with start / checkpoints / finish
@@ -44,12 +45,14 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
   Circuit8hProject _project = const Circuit8hProject();
   StreamSubscription<Position>? _recordSub;
   bool _recording = false;
+  bool _warming = false;
   bool _follow = true;
   bool _saving = false;
   double? _lastAccuracyM;
   int _rejectedAccuracy = 0;
   String? _lastError;
   int? _startedAtMs;
+  int _captureGen = 0;
 
   Color get _accent => widget.routeType == Circuit8hRouteType.a
       ? AppTheme.lineHot
@@ -115,6 +118,17 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
       return;
     }
     final (lat, lng, acc) = fix;
+    if (!decideCircuit8hFix(accuracyMeters: acc).accepted) {
+      if (mounted) {
+        showAppSnackError(
+          context,
+          context.l10n.circuit8hAccuracyGate(
+            circuit8hMaxAcceptAccuracyMeters.round(),
+          ),
+        );
+      }
+      return;
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
     final marker = Circuit8hMarker(
       id: 'mk_${kind.id}_$now',
@@ -170,9 +184,11 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
 
     stopLiveGps();
     await _recordSub?.cancel();
+    final gen = ++_captureGen;
 
     setState(() {
       _recording = true;
+      _warming = true;
       _follow = true;
       _rejectedAccuracy = 0;
       _lastError = null;
@@ -181,13 +197,32 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     });
 
     try {
-      final seed = await _location.currentPosition();
-      if (mounted && seed != null && _recording) {
-        _acceptFix(seed, force: true);
+      await for (final status in _location.warmUpGnss(
+        timeout: const Duration(seconds: 20),
+        targetAccuracyMeters: circuit8hMaxAcceptAccuracyMeters,
+      )) {
+        if (!mounted || gen != _captureGen) return;
+        setState(() => _lastAccuracyM = status.accuracyMeters);
+        if (status.phase == GpsWarmupPhase.ready ||
+            status.phase == GpsWarmupPhase.timeout) {
+          break;
+        }
       }
     } catch (e) {
-      if (mounted) setState(() => _lastError = '$e');
+      if (mounted && gen == _captureGen) setState(() => _lastError = '$e');
     }
+    if (!mounted || gen != _captureGen) return;
+    setState(() => _warming = false);
+
+    try {
+      final seed = await _location.currentPosition();
+      if (mounted && seed != null && gen == _captureGen) {
+        _acceptFix(seed);
+      }
+    } catch (e) {
+      if (mounted && gen == _captureGen) setState(() => _lastError = '$e');
+    }
+    if (!mounted || gen != _captureGen) return;
 
     final label = widget.routeType.label;
     _recordSub = _location
@@ -198,7 +233,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
         )
         .listen(
           (pos) {
-            if (!mounted || !_recording) return;
+            if (!mounted || !_recording || gen != _captureGen) return;
             _acceptFix(pos);
           },
           onError: (Object e) {
@@ -206,18 +241,35 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
             setState(() {
               _lastError = '$e';
               _recording = false;
+              _warming = false;
             });
             showAppSnackError(context, '$e');
           },
         );
   }
 
-  void _acceptFix(Position pos, {bool force = false}) {
+  void _acceptFix(Position pos) {
     final acc = pos.accuracy;
     if (acc.isFinite) _lastAccuracyM = acc;
-    if (!force &&
-        acc.isFinite &&
-        acc > LocationService.maxAcceptAccuracyMeters) {
+
+    double? jump;
+    double? dt;
+    if (_points.isNotEmpty) {
+      final prev = _points.last;
+      jump = haversineMeters(
+        prev.lat,
+        prev.lng,
+        pos.latitude,
+        pos.longitude,
+      );
+      dt = (pos.timestamp.millisecondsSinceEpoch - prev.tsMs) / 1000;
+      if (dt < 0) dt = 0;
+    }
+    if (!decideCircuit8hFix(
+      accuracyMeters: acc.isFinite ? acc : null,
+      jumpMeters: jump,
+      dtSeconds: dt,
+    ).accepted) {
       _rejectedAccuracy++;
       if (mounted) setState(() {});
       return;
@@ -243,13 +295,20 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
 
   Future<void> _stopAndSave() async {
     if (_saving) return;
+    _captureGen++;
     await _recordSub?.cancel();
     _recordSub = null;
     if (!mounted) return;
 
     if (_points.length < 3) {
-      setState(() => _recording = false);
-      showAppSnackError(context, context.l10n.circuit8hNeedMorePoints);
+      final partial = _points.isNotEmpty;
+      setState(() {
+        _recording = false;
+        _warming = false;
+      });
+      if (partial) {
+        showAppSnackError(context, context.l10n.circuit8hNeedMorePoints);
+      }
       await startLiveGps(map: _map, centerOnce: false);
       return;
     }
@@ -386,13 +445,15 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     final acc = _lastAccuracyM == null
         ? '—'
         : '±${_lastAccuracyM!.toStringAsFixed(0)} m';
-    final status = _recording
-        ? l10n.circuit8hRecordingStats(_points.length, dist, acc)
-        : (_lastError ??
-            l10n.circuit8hRecordIdle(
-              widget.routeType.label,
-              widget.passNumber,
-            ));
+    final status = _warming
+        ? l10n.circuit8hWarming(acc)
+        : _recording
+            ? l10n.circuit8hRecordingStats(_points.length, dist, acc)
+            : (_lastError ??
+                l10n.circuit8hRecordIdle(
+                  widget.routeType.label,
+                  widget.passNumber,
+                ));
 
     final latLngs = [
       for (final p in _points) LatLng(p.lat, p.lng),
@@ -476,6 +537,18 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                           fontSize: 14,
                         ),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.circuit8hPrecisionNote(
+                      circuit8hMaxAcceptAccuracyMeters.round(),
+                    ),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.rajdhani(
+                      color: AppTheme.mist.withValues(alpha: 0.75),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
                   ),
                   if (_rejectedAccuracy > 0) ...[

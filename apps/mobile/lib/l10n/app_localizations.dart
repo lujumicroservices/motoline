@@ -5627,7 +5627,7 @@ abstract class AppLocalizations {
   /// No description provided for @circuit8hRecordIdle.
   ///
   /// In es, this message translates to:
-  /// **'Tipo {route}, pasada {pass}. Toca Iniciar pasada y rueda el recorrido — cada fix GPS queda como punto.'**
+  /// **'Tipo {route}, pasada {pass}. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.'**
   String circuit8hRecordIdle(String route, int pass);
 
   /// No description provided for @circuit8hStartPass.
@@ -5663,8 +5663,26 @@ abstract class AppLocalizations {
   /// No description provided for @circuit8hRejected.
   ///
   /// In es, this message translates to:
-  /// **'Rechazados por precisión: {count}'**
+  /// **'Rechazados (precisión o salto): {count}'**
   String circuit8hRejected(int count);
+
+  /// No description provided for @circuit8hPrecisionNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se guardan fixes de ±{meters} m o mejores.'**
+  String circuit8hPrecisionNote(int meters);
+
+  /// No description provided for @circuit8hWarming.
+  ///
+  /// In es, this message translates to:
+  /// **'Afinando GPS · ahora {accuracy}'**
+  String circuit8hWarming(String accuracy);
+
+  /// No description provided for @circuit8hAccuracyGate.
+  ///
+  /// In es, this message translates to:
+  /// **'Este punto es peor que ±{meters} m. Espera afuera a una fijación más precisa.'**
+  String circuit8hAccuracyGate(int meters);
 
   /// No description provided for @circuit8hMarkersTitle.
   ///

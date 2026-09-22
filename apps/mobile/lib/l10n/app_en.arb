@@ -1358,7 +1358,7 @@
       "pass": {"type": "int"}
     }
   },
-  "circuit8hRecordIdle": "Type {route}, pass {pass}. Tap Start pass and ride the route — each GPS fix is stored as a point.",
+  "circuit8hRecordIdle": "Type {route}, pass {pass}. Tap Start pass and ride the route — only tight GPS fixes are stored.",
   "@circuit8hRecordIdle": {
     "placeholders": {
       "route": {"type": "String"},
@@ -1377,7 +1377,25 @@
       "accuracy": {"type": "String"}
     }
   },
-  "circuit8hRejected": "Dropped for accuracy: {count}",
+  "circuit8hRejected": "Dropped (loose fix or jump): {count}",
+  "@circuit8hPrecisionNote": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hPrecisionNote": "Only fixes within ±{meters} m are stored.",
+  "@circuit8hWarming": {
+    "placeholders": {
+      "accuracy": {"type": "String"}
+    }
+  },
+  "circuit8hWarming": "Tightening GPS · now {accuracy}",
+  "@circuit8hAccuracyGate": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hAccuracyGate": "This fix is wider than ±{meters} m. Wait outside for a tighter lock.",
   "@circuit8hRejected": {
     "placeholders": {
       "count": {"type": "int"}

@@ -3157,7 +3157,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String circuit8hRecordIdle(String route, int pass) {
-    return 'Tipo $route, pasada $pass. Toca Iniciar pasada y rueda el recorrido — cada fix GPS queda como punto.';
+    return 'Tipo $route, pasada $pass. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.';
   }
 
   @override
@@ -3180,7 +3180,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String circuit8hRejected(int count) {
-    return 'Rechazados por precisión: $count';
+    return 'Rechazados (precisión o salto): $count';
+  }
+
+  @override
+  String circuit8hPrecisionNote(int meters) {
+    return 'Solo se guardan fixes de ±$meters m o mejores.';
+  }
+
+  @override
+  String circuit8hWarming(String accuracy) {
+    return 'Afinando GPS · ahora $accuracy';
+  }
+
+  @override
+  String circuit8hAccuracyGate(int meters) {
+    return 'Este punto es peor que ±$meters m. Espera afuera a una fijación más precisa.';
   }
 
   @override

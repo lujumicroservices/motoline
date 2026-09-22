@@ -14,6 +14,7 @@ import '../../maps/live_gps_map_mixin.dart';
 import '../../maps/map_control_chip.dart';
 import '../../ride_active/location_permission_gate.dart';
 import 'circuit_8h_models.dart';
+import 'circuit_8h_precision.dart';
 import 'circuit_8h_store.dart';
 
 /// Place start, finish, and checkpoints on the live map (GPS or tap).
@@ -94,6 +95,17 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
     if (fix == null) {
       if (mounted) {
         showAppSnackError(context, context.l10n.circuit8hNeedGps);
+      }
+      return;
+    }
+    if (!decideCircuit8hFix(accuracyMeters: fix.accuracyM).accepted) {
+      if (mounted) {
+        showAppSnackError(
+          context,
+          context.l10n.circuit8hAccuracyGate(
+            circuit8hMaxAcceptAccuracyMeters.round(),
+          ),
+        );
       }
       return;
     }
