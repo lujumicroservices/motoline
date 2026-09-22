@@ -47,6 +47,8 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
   bool _recording = false;
   bool _warming = false;
   bool _sampling = false;
+  bool _skipLock = false;
+  bool _looseGate = false;
   bool _follow = true;
   bool _saving = false;
   double? _lastAccuracyM;
@@ -62,6 +64,11 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
       : AppTheme.line;
 
   int get _nextCp => _project.checkpointCount + 1;
+
+  /// ±4 m unless the pilot chose to record before that lock.
+  double get _acceptMeters => _looseGate
+      ? LocationService.maxAcceptAccuracyMeters
+      : circuit8hMaxAcceptAccuracyMeters;
 
   @override
   void initState() {
@@ -113,7 +120,10 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     final Circuit8hMarkerFix? fix;
     try {
       if (_recording && _tight.isNotEmpty) {
-        fix = medianMarkerFix(_tight);
+        fix = medianMarkerFix(
+          _tight,
+          maxAccuracyMeters: _acceptMeters,
+        );
       } else {
         final samples = await collectSurveySamples(
           read: _readSurveySample,
@@ -194,6 +204,8 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     setState(() {
       _recording = true;
       _warming = true;
+      _skipLock = false;
+      _looseGate = false;
       _follow = true;
       _rejectedAccuracy = 0;
       _lastError = null;
@@ -205,7 +217,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
 
     try {
       var locked = false;
-      while (!locked && mounted && gen == _captureGen) {
+      while (!locked && !_skipLock && mounted && gen == _captureGen) {
         await for (final status in _location.warmUpGnss(
           timeout: const Duration(seconds: 8),
           targetAccuracyMeters: circuit8hMaxAcceptAccuracyMeters,
@@ -216,14 +228,17 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
             locked = true;
             break;
           }
-          if (status.phase == GpsWarmupPhase.timeout) break;
+          if (_skipLock || status.phase == GpsWarmupPhase.timeout) break;
         }
       }
     } catch (e) {
       if (mounted && gen == _captureGen) setState(() => _lastError = '$e');
     }
     if (!mounted || gen != _captureGen) return;
-    setState(() => _warming = false);
+    setState(() {
+      _warming = false;
+      _looseGate = _skipLock;
+    });
 
     try {
       final seed = await _location.currentPosition();
@@ -306,7 +321,10 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     final acc = pos.accuracy;
     if (acc.isFinite) _lastAccuracyM = acc;
     final accuracy = acc.isFinite ? acc : null;
-    if (!decideCircuit8hFix(accuracyMeters: accuracy).accepted) {
+    if (!decideCircuit8hFix(
+      accuracyMeters: accuracy,
+      maxAccuracyMeters: _acceptMeters,
+    ).accepted) {
       _rejectedAccuracy++;
       if (mounted) setState(() {});
       return;
@@ -326,6 +344,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     final speed = pos.speed;
     final decision = decideCircuit8hFix(
       accuracyMeters: accuracy,
+      maxAccuracyMeters: _acceptMeters,
       jumpMeters: haversineMeters(
         held.latitude,
         held.longitude,
@@ -344,6 +363,11 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     _held = pos;
   }
 
+  void _recordNow() {
+    if (!_warming || _saving) return;
+    setState(() => _skipLock = true);
+  }
+
   Future<void> _stopAndSave() async {
     if (_saving) return;
     _captureGen++;
@@ -357,6 +381,8 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
       setState(() {
         _recording = false;
         _warming = false;
+        _skipLock = false;
+        _looseGate = false;
       });
       if (partial) {
         showAppSnackError(context, context.l10n.circuit8hNeedMorePoints);
@@ -598,9 +624,11 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    l10n.circuit8hPrecisionNote(
-                      circuit8hMaxAcceptAccuracyMeters.round(),
-                    ),
+                    _looseGate
+                        ? l10n.circuit8hLooseNote(_acceptMeters.round())
+                        : l10n.circuit8hPrecisionNote(
+                            circuit8hMaxAcceptAccuracyMeters.round(),
+                          ),
                     textAlign: TextAlign.center,
                     style: GoogleFonts.rajdhani(
                       color: AppTheme.mist.withValues(alpha: 0.75),
@@ -731,31 +759,60 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                     ),
                   ),
                   const Spacer(),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor:
-                          _recording ? AppTheme.signal : _accent,
-                      foregroundColor: AppTheme.asphalt,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: _saving
-                        ? null
-                        : (_recording ? _stopAndSave : _startRecording),
-                    icon: Icon(
-                      _recording ? Icons.stop : Icons.radio_button_checked,
-                    ),
-                    label: Text(
-                      _saving
-                          ? l10n.circuit8hSaving
-                          : (_recording
-                              ? l10n.circuit8hStopSave
-                              : l10n.circuit8hStartPass),
-                      style: GoogleFonts.rajdhani(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
+                  if (_warming) ...[
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: _accent,
+                        foregroundColor: AppTheme.asphalt,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: _recordNow,
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(
+                        l10n.circuit8hRecordNow,
+                        style: GoogleFonts.rajdhani(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: _stopAndSave,
+                      child: Text(
+                        l10n.circuit8hCancelWait,
+                        style: GoogleFonts.rajdhani(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ] else
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            _recording ? AppTheme.signal : _accent,
+                        foregroundColor: AppTheme.asphalt,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: _saving
+                          ? null
+                          : (_recording ? _stopAndSave : _startRecording),
+                      icon: Icon(
+                        _recording ? Icons.stop : Icons.radio_button_checked,
+                      ),
+                      label: Text(
+                        _saving
+                            ? l10n.circuit8hSaving
+                            : (_recording
+                                ? l10n.circuit8hStopSave
+                                : l10n.circuit8hStartPass),
+                        style: GoogleFonts.rajdhani(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

@@ -1390,6 +1390,14 @@
     }
   },
   "circuit8hWarming": "Tightening GPS · now {accuracy}",
+  "circuit8hRecordNow": "Record now",
+  "circuit8hCancelWait": "Cancel wait",
+  "@circuit8hLooseNote": {
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "circuit8hLooseNote": "Recording anyway. Fixes up to ±{meters} m are stored.",
   "@circuit8hAccuracyGate": {
     "placeholders": {
       "meters": {"type": "int"}

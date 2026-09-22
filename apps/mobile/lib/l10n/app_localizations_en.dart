@@ -3179,6 +3179,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get circuit8hRecordNow => 'Record now';
+
+  @override
+  String get circuit8hCancelWait => 'Cancel wait';
+
+  @override
+  String circuit8hLooseNote(int meters) {
+    return 'Recording anyway. Fixes up to ±$meters m are stored.';
+  }
+
+  @override
   String circuit8hAccuracyGate(int meters) {
     return 'This fix is wider than ±$meters m. Wait outside for a tighter lock.';
   }

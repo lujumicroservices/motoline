@@ -44,6 +44,20 @@ void main() {
     );
   });
 
+  test('a forced start can keep a fix wider than 4 m', () {
+    expect(
+      decideCircuit8hFix(accuracyMeters: 12).drop,
+      Circuit8hFixDrop.accuracy,
+    );
+    expect(
+      decideCircuit8hFix(
+        accuracyMeters: 12,
+        maxAccuracyMeters: 40,
+      ).accepted,
+      isTrue,
+    );
+  });
+
   test('drops a hop that disagrees with reported speed', () {
     expect(
       decideCircuit8hFix(

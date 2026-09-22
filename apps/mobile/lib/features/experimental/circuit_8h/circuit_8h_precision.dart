@@ -134,10 +134,17 @@ double _spanMeters(List<Circuit8hSurveySample> samples) {
 ///
 /// Older samples from the ride in are ignored, so a marker can be placed
 /// right after stopping. Null when the recent cluster is too small.
-Circuit8hMarkerFix? medianMarkerFix(List<Circuit8hSurveySample> samples) {
+Circuit8hMarkerFix? medianMarkerFix(
+  List<Circuit8hSurveySample> samples, {
+  double maxAccuracyMeters = circuit8hMaxAcceptAccuracyMeters,
+}) {
   final kept = <Circuit8hSurveySample>[
     for (final s in samples)
-      if (decideCircuit8hFix(accuracyMeters: s.accuracyM).accepted) s,
+      if (decideCircuit8hFix(
+        accuracyMeters: s.accuracyM,
+        maxAccuracyMeters: maxAccuracyMeters,
+      ).accepted)
+        s,
   ]..sort((a, b) => a.tsMs.compareTo(b.tsMs));
   if (kept.length < circuit8hMarkerMinSamples) return null;
 

@@ -5678,6 +5678,24 @@ abstract class AppLocalizations {
   /// **'Afinando GPS · ahora {accuracy}'**
   String circuit8hWarming(String accuracy);
 
+  /// No description provided for @circuit8hRecordNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar ahora'**
+  String get circuit8hRecordNow;
+
+  /// No description provided for @circuit8hCancelWait.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar espera'**
+  String get circuit8hCancelWait;
+
+  /// No description provided for @circuit8hLooseNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando igual. Se guardan fixes de hasta ±{meters} m.'**
+  String circuit8hLooseNote(int meters);
+
   /// No description provided for @circuit8hAccuracyGate.
   ///
   /// In es, this message translates to:
