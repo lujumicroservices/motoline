@@ -1463,6 +1463,10 @@
   "circuit8hWarming": "Afinando GPS · ahora {accuracy}",
   "circuit8hRecordNow": "Grabar ahora",
   "circuit8hCancelWait": "Cancelar espera",
+  "circuit8hEdgePick": "Extremo del trazado",
+  "circuit8hEdgeInner": "Interno",
+  "circuit8hEdgeOuter": "Externo",
+  "circuit8hEdgeRequired": "Elige extremo interno o externo antes de iniciar.",
   "@circuit8hLooseNote": {
     "placeholders": {
       "meters": {"type": "int"}

@@ -3200,6 +3200,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get circuit8hCancelWait => 'Cancelar espera';
 
   @override
+  String get circuit8hEdgePick => 'Extremo del trazado';
+
+  @override
+  String get circuit8hEdgeInner => 'Interno';
+
+  @override
+  String get circuit8hEdgeOuter => 'Externo';
+
+  @override
+  String get circuit8hEdgeRequired =>
+      'Elige extremo interno o externo antes de iniciar.';
+
+  @override
   String circuit8hLooseNote(int meters) {
     return 'Grabando igual. Se guardan fixes de hasta ±$meters m.';
   }

@@ -19,6 +19,21 @@ enum Circuit8hRouteType {
   }
 }
 
+/// Which edge of the track this pass follows.
+enum Circuit8hTrackEdge {
+  inner,
+  outer;
+
+  String get id => name;
+
+  static Circuit8hTrackEdge? fromId(String? raw) {
+    for (final v in values) {
+      if (v.id == raw) return v;
+    }
+    return null;
+  }
+}
+
 enum Circuit8hMarkerKind {
   start,
   finish,
@@ -111,6 +126,7 @@ class Circuit8hSession {
     required this.startedAtMs,
     required this.endedAtMs,
     required this.points,
+    this.edge,
   });
 
   final String id;
@@ -118,6 +134,9 @@ class Circuit8hSession {
   final int startedAtMs;
   final int endedAtMs;
   final List<Circuit8hPoint> points;
+
+  /// Inside or outside edge of the track. Null on passes saved before this.
+  final Circuit8hTrackEdge? edge;
 
   int get pointCount => points.length;
 
@@ -129,6 +148,7 @@ class Circuit8hSession {
         'routeType': routeType.id,
         'startedAtMs': startedAtMs,
         'endedAtMs': endedAtMs,
+        if (edge != null) 'edge': edge!.id,
         'points': [for (final p in points) p.toJson()],
       };
 
@@ -139,6 +159,7 @@ class Circuit8hSession {
       routeType: Circuit8hRouteType.fromId(json['routeType'] as String?),
       startedAtMs: (json['startedAtMs'] as num).toInt(),
       endedAtMs: (json['endedAtMs'] as num).toInt(),
+      edge: Circuit8hTrackEdge.fromId(json['edge'] as String?),
       points: [
         if (rawPoints is List)
           for (final item in rawPoints)

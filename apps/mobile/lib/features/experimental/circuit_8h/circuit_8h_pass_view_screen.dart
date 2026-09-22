@@ -150,10 +150,16 @@ class _Circuit8hPassViewScreenState extends State<Circuit8hPassViewScreen> {
       backgroundColor: AppTheme.asphalt,
       appBar: AppBar(
         title: Text(
-          l10n.circuit8hPassViewTitle(
-            widget.session.routeType.label,
-            widget.passIndex,
-          ),
+          [
+            l10n.circuit8hPassViewTitle(
+              widget.session.routeType.label,
+              widget.passIndex,
+            ),
+            if (widget.session.edge == Circuit8hTrackEdge.inner)
+              l10n.circuit8hEdgeInner,
+            if (widget.session.edge == Circuit8hTrackEdge.outer)
+              l10n.circuit8hEdgeOuter,
+          ].join(' · '),
         ),
         actions: [
           IconButton(

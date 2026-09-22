@@ -376,10 +376,14 @@ class _RouteCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  meta: passMeta(
-                    sessions[i].pointCount,
-                    _fmtDuration(sessions[i].duration),
-                  ),
+                  meta: [
+                    if (sessions[i].edge != null)
+                      _edgeLabel(context, sessions[i].edge!),
+                    passMeta(
+                      sessions[i].pointCount,
+                      _fmtDuration(sessions[i].duration),
+                    ),
+                  ].join(' · '),
                   openLabel: openLabel,
                   deleteLabel: deleteLabel,
                   onOpen: () => onOpenPass(sessions[i], i + 1),
@@ -400,6 +404,14 @@ class _RouteCard extends StatelessWidget {
 
   static String _fmtClock(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  static String _edgeLabel(BuildContext context, Circuit8hTrackEdge edge) {
+    final l10n = context.l10n;
+    return switch (edge) {
+      Circuit8hTrackEdge.inner => l10n.circuit8hEdgeInner,
+      Circuit8hTrackEdge.outer => l10n.circuit8hEdgeOuter,
+    };
+  }
 }
 
 class _PassTile extends StatelessWidget {

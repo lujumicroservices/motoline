@@ -55,6 +55,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
   int _rejectedAccuracy = 0;
   String? _lastError;
   int? _startedAtMs;
+  Circuit8hTrackEdge? _edge;
   int _captureGen = 0;
   Position? _held;
   final List<Circuit8hSurveySample> _tight = [];
@@ -194,6 +195,10 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
 
   Future<void> _startRecording() async {
     if (_recording) return;
+    if (_edge == null) {
+      showAppSnackError(context, context.l10n.circuit8hEdgeRequired);
+      return;
+    }
     final ok = await LocationPermissionGate.requestForRecording(context);
     if (!ok || !mounted) return;
 
@@ -402,6 +407,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
       routeType: widget.routeType,
       startedAtMs: _startedAtMs ?? ended,
       endedAtMs: ended,
+      edge: _edge,
       points: List<Circuit8hPoint>.of(_points),
     );
 
@@ -512,6 +518,113 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
     return out;
   }
 
+  Widget _actionBar(AppLocalizations l10n) {
+    final locked = _recording || _warming;
+    return Material(
+      color: AppTheme.asphalt.withValues(alpha: 0.96),
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.circuit8hEdgePick,
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.mist,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _EdgeChoice(
+                    label: l10n.circuit8hEdgeInner,
+                    selected: _edge == Circuit8hTrackEdge.inner,
+                    enabled: !locked,
+                    onTap: () =>
+                        setState(() => _edge = Circuit8hTrackEdge.inner),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _EdgeChoice(
+                    label: l10n.circuit8hEdgeOuter,
+                    selected: _edge == Circuit8hTrackEdge.outer,
+                    enabled: !locked,
+                    onTap: () =>
+                        setState(() => _edge = Circuit8hTrackEdge.outer),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (_warming) ...[
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: _accent,
+                  foregroundColor: AppTheme.asphalt,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: _recordNow,
+                icon: const Icon(Icons.play_arrow),
+                label: Text(
+                  l10n.circuit8hRecordNow,
+                  style: GoogleFonts.rajdhani(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.signal,
+                  foregroundColor: AppTheme.mist,
+                  minimumSize: const Size.fromHeight(48),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: _stopAndSave,
+                child: Text(
+                  l10n.circuit8hCancelWait,
+                  style: GoogleFonts.rajdhani(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ] else
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: _recording ? AppTheme.signal : _accent,
+                  foregroundColor:
+                      _recording ? AppTheme.mist : AppTheme.asphalt,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: _saving
+                    ? null
+                    : (_recording ? _stopAndSave : _startRecording),
+                icon: Icon(
+                  _recording ? Icons.stop : Icons.radio_button_checked,
+                ),
+                label: Text(
+                  _saving
+                      ? l10n.circuit8hSaving                      : (_recording
+                          ? l10n.circuit8hStopSave                          : l10n.circuit8hStartPass),
+                  style: GoogleFonts.rajdhani(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -607,6 +720,11 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
                   Material(
                     color: AppTheme.asphaltElevated.withValues(alpha: 0.94),
                     borderRadius: BorderRadius.circular(12),
@@ -758,61 +876,12 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                       },
                     ),
                   ),
-                  const Spacer(),
-                  if (_warming) ...[
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: _accent,
-                        foregroundColor: AppTheme.asphalt,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: _recordNow,
-                      icon: const Icon(Icons.play_arrow),
-                      label: Text(
-                        l10n.circuit8hRecordNow,
-                        style: GoogleFonts.rajdhani(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      onPressed: _stopAndSave,
-                      child: Text(
-                        l10n.circuit8hCancelWait,
-                        style: GoogleFonts.rajdhani(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ] else
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            _recording ? AppTheme.signal : _accent,
-                        foregroundColor: AppTheme.asphalt,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: _saving
-                          ? null
-                          : (_recording ? _stopAndSave : _startRecording),
-                      icon: Icon(
-                        _recording ? Icons.stop : Icons.radio_button_checked,
-                      ),
-                      label: Text(
-                        _saving
-                            ? l10n.circuit8hSaving
-                            : (_recording
-                                ? l10n.circuit8hStopSave
-                                : l10n.circuit8hStartPass),
-                        style: GoogleFonts.rajdhani(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _actionBar(l10n),
                 ],
               ),
             ),
@@ -896,6 +965,52 @@ class _MarkerAction extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _EdgeChoice extends StatelessWidget {
+  const _EdgeChoice({
+    required this.label,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? AppTheme.line.withValues(alpha: 0.22) : AppTheme.asphaltElevated,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: enabled ? onTap : null,
+        child: Container(
+          height: 44,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? AppTheme.line : AppTheme.mist,
+              width: selected ? 2 : 1.5,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.rajdhani(
+              color: AppTheme.mist,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

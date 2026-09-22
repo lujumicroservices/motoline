@@ -5690,6 +5690,30 @@ abstract class AppLocalizations {
   /// **'Cancelar espera'**
   String get circuit8hCancelWait;
 
+  /// No description provided for @circuit8hEdgePick.
+  ///
+  /// In es, this message translates to:
+  /// **'Extremo del trazado'**
+  String get circuit8hEdgePick;
+
+  /// No description provided for @circuit8hEdgeInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Interno'**
+  String get circuit8hEdgeInner;
+
+  /// No description provided for @circuit8hEdgeOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Externo'**
+  String get circuit8hEdgeOuter;
+
+  /// No description provided for @circuit8hEdgeRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige extremo interno o externo antes de iniciar.'**
+  String get circuit8hEdgeRequired;
+
   /// No description provided for @circuit8hLooseNote.
   ///
   /// In es, this message translates to:

@@ -3185,6 +3185,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get circuit8hCancelWait => 'Cancel wait';
 
   @override
+  String get circuit8hEdgePick => 'Track edge';
+
+  @override
+  String get circuit8hEdgeInner => 'Inside';
+
+  @override
+  String get circuit8hEdgeOuter => 'Outside';
+
+  @override
+  String get circuit8hEdgeRequired =>
+      'Choose the inside or outside edge before starting.';
+
+  @override
   String circuit8hLooseNote(int meters) {
     return 'Recording anyway. Fixes up to ±$meters m are stored.';
   }

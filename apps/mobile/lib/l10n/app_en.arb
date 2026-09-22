@@ -1392,6 +1392,10 @@
   "circuit8hWarming": "Tightening GPS · now {accuracy}",
   "circuit8hRecordNow": "Record now",
   "circuit8hCancelWait": "Cancel wait",
+  "circuit8hEdgePick": "Track edge",
+  "circuit8hEdgeInner": "Inside",
+  "circuit8hEdgeOuter": "Outside",
+  "circuit8hEdgeRequired": "Choose the inside or outside edge before starting.",
   "@circuit8hLooseNote": {
     "placeholders": {
       "meters": {"type": "int"}
