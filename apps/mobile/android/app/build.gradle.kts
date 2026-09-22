@@ -36,6 +36,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        resValue("string", "app_name", "RiderLab")
     }
 
     flavorDimensions += "distribution"
@@ -46,6 +47,12 @@ android {
         }
         create("sideload") {
             dimension = "distribution"
+        }
+        // Installs beside RiderLab. Launcher name Circuito 8h.
+        create("survey") {
+            dimension = "distribution"
+            applicationIdSuffix = ".c8h"
+            resValue("string", "app_name", "Circuito 8h")
         }
     }
 

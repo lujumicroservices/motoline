@@ -64,6 +64,18 @@ flutter build apk --flavor sideload --release --dart-define=DISTRIBUTION=sideloa
 
 Sideload keeps GitHub in-app APK updates. **Play flavor removes** `REQUEST_INSTALL_PACKAGES` (required for Play policy).
 
+### Circuito 8h side app
+
+Flavor `survey` installs next to RiderLab (`com.rawthrottle.riderlab.c8h`, launcher name **Circuito 8h**). It does not replace the Play or sideload app. `BUILD_LABEL` keeps GitHub release updates from overwriting it.
+
+```powershell
+flutter build apk --flavor survey --release --dart-define=DISTRIBUTION=sideload --dart-define=BUILD_LABEL=circuito-8h --dart-define=APP_NAME=Circuito 8h --dart-define=GOOGLE_OAUTH_REDIRECT=com.rawthrottle.riderlab.c8h://login-callback
+```
+
+Output: `build/app/outputs/flutter-apk/app-survey-release.apk`.
+
+Add `com.rawthrottle.riderlab.c8h://login-callback` in Supabase → Authentication → Redirect URLs before using Google sign-in on this app. Email sign-in works without that. The package also needs its own Android OAuth client if Google sign-in should succeed.
+
 ---
 
 ## 3. Google Sign-In for Play builds

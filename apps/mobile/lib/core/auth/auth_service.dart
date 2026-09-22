@@ -41,7 +41,13 @@ class AuthService {
 
   /// Deep link registered in AndroidManifest / Info.plist. Also add it in
   /// Supabase → Authentication → URL Configuration → Redirect URLs.
-  static const googleOAuthRedirect = 'com.rawthrottle.riderlab://login-callback';
+  ///
+  /// Play and sideload keep the default. The Circuito 8h side app passes
+  /// `--dart-define=GOOGLE_OAUTH_REDIRECT=com.rawthrottle.riderlab.c8h://login-callback`.
+  static const googleOAuthRedirect = String.fromEnvironment(
+    'GOOGLE_OAUTH_REDIRECT',
+    defaultValue: 'com.rawthrottle.riderlab://login-callback',
+  );
 
   /// Hosted password-reset page (computer + phone browser).
   /// Site URL / Redirect URLs must include this path.

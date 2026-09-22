@@ -32,7 +32,10 @@ class RiderLabApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp(
-      title: 'RiderLab',
+      title: const String.fromEnvironment(
+        'APP_NAME',
+        defaultValue: 'RiderLab',
+      ),
       navigatorKey: appNavigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
