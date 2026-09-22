@@ -5516,6 +5516,90 @@ abstract class AppLocalizations {
   /// **'Guardar marcas de curvas'**
   String get leanLabSaveLabels;
 
+  /// No description provided for @appVersionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión instalada'**
+  String get appVersionTitle;
+
+  /// No description provided for @appVersionUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo leer la versión'**
+  String get appVersionUnavailable;
+
+  /// No description provided for @appVersionCopy.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar versión'**
+  String get appVersionCopy;
+
+  /// No description provided for @appVersionCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión copiada'**
+  String get appVersionCopied;
+
+  /// No description provided for @gpsTrackPointsLabTile.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos GPS de la trazada'**
+  String get gpsTrackPointsLabTile;
+
+  /// No description provided for @gpsTrackPointsLabHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa experimental con cada fix GPS guardado'**
+  String get gpsTrackPointsLabHelp;
+
+  /// No description provided for @gpsTrackPointsLabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Lab GPS — puntos de trazada'**
+  String get gpsTrackPointsLabTitle;
+
+  /// No description provided for @gpsTrackPointsLabIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige un recorrido para ver cada punto GPS con el que se dibuja la línea. No forma parte del mapa normal de Ride Lab.'**
+  String get gpsTrackPointsLabIntro;
+
+  /// No description provided for @gpsTrackPointsLabPickRide.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorridos con GPS'**
+  String get gpsTrackPointsLabPickRide;
+
+  /// No description provided for @gpsTrackPointsLabEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay recorridos completados con puntos GPS.'**
+  String get gpsTrackPointsLabEmpty;
+
+  /// No description provided for @gpsTrackPointsLabRideMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'{points} puntos · {distanceKm} km'**
+  String gpsTrackPointsLabRideMeta(int points, String distanceKm);
+
+  /// No description provided for @gpsTrackPointsLabMapTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos GPS'**
+  String get gpsTrackPointsLabMapTitle;
+
+  /// No description provided for @gpsTrackPointsLabToggleLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar/ocultar línea guía'**
+  String get gpsTrackPointsLabToggleLine;
+
+  /// No description provided for @gpsTrackPointsLabStats.
+  ///
+  /// In es, this message translates to:
+  /// **'{points} puntos · ~{hz} Hz · {duration}'**
+  String gpsTrackPointsLabStats(int points, String hz, String duration);
+
   /// No description provided for @leanLabSettingsTile.
   ///
   /// In es, this message translates to:

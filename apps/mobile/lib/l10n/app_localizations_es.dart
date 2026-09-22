@@ -3092,6 +3092,55 @@ class AppLocalizationsEs extends AppLocalizations {
   String get leanLabSaveLabels => 'Guardar marcas de curvas';
 
   @override
+  String get appVersionTitle => 'Versión instalada';
+
+  @override
+  String get appVersionUnavailable => 'No se pudo leer la versión';
+
+  @override
+  String get appVersionCopy => 'Copiar versión';
+
+  @override
+  String get appVersionCopied => 'Versión copiada';
+
+  @override
+  String get gpsTrackPointsLabTile => 'Puntos GPS de la trazada';
+
+  @override
+  String get gpsTrackPointsLabHelp =>
+      'Mapa experimental con cada fix GPS guardado';
+
+  @override
+  String get gpsTrackPointsLabTitle => 'Lab GPS — puntos de trazada';
+
+  @override
+  String get gpsTrackPointsLabIntro =>
+      'Elige un recorrido para ver cada punto GPS con el que se dibuja la línea. No forma parte del mapa normal de Ride Lab.';
+
+  @override
+  String get gpsTrackPointsLabPickRide => 'Recorridos con GPS';
+
+  @override
+  String get gpsTrackPointsLabEmpty =>
+      'No hay recorridos completados con puntos GPS.';
+
+  @override
+  String gpsTrackPointsLabRideMeta(int points, String distanceKm) {
+    return '$points puntos · $distanceKm km';
+  }
+
+  @override
+  String get gpsTrackPointsLabMapTitle => 'Puntos GPS';
+
+  @override
+  String get gpsTrackPointsLabToggleLine => 'Mostrar/ocultar línea guía';
+
+  @override
+  String gpsTrackPointsLabStats(int points, String hz, String duration) {
+    return '$points puntos · ~$hz Hz · $duration';
+  }
+
+  @override
   String get leanLabSettingsTile => 'Lab de inclinación (pruebas)';
 
   @override

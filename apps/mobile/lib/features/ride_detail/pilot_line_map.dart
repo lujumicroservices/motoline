@@ -89,7 +89,6 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
   final MapController _map = MapController();
   List<Polyline> _polylines = const [];
   List<Marker> _baseMarkers = const [];
-  List<CircleMarker> _trackPointCircles = const [];
   LatLngBounds? _bounds;
   LatLng? _center;
   int? _cacheIdentity;
@@ -159,7 +158,6 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
         a.layers.showStartEnd != b.layers.showStartEnd ||
         a.layers.showLegend != b.layers.showLegend ||
         a.layers.showGpsGaps != b.layers.showGpsGaps ||
-        a.layers.showTrackPoints != b.layers.showTrackPoints ||
         a.followRider != b.followRider;
   }
 
@@ -233,7 +231,6 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
     if (points.isEmpty) {
       _polylines = const [];
       _baseMarkers = const [];
-      _trackPointCircles = const [];
       _bounds = null;
       _center = null;
       _cacheIdentity = 0;
@@ -352,32 +349,6 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
       }
     }
     _polylines = polylines;
-
-    final trackCircles = <CircleMarker>[];
-    if (widget.layers.showTrackPoints) {
-      final dimOutside = hasFocus && widget.dimOutsideFocus;
-      final onlyFocus = hasFocus && !widget.dimOutsideFocus;
-      for (var i = 0; i < points.length; i++) {
-        if (onlyFocus && (i < focusLo || i > focusHi)) continue;
-        final inFocus = !hasFocus || (i >= focusLo && i <= focusHi);
-        final dimmed = dimOutside && !inFocus;
-        final p = points[i];
-        trackCircles.add(
-          CircleMarker(
-            point: LatLng(p.latitude, p.longitude),
-            radius: dimmed ? 2.5 : 3.5,
-            color: dimmed
-                ? AppTheme.steel.withValues(alpha: 0.3)
-                : AppTheme.line.withValues(alpha: 0.85),
-            borderColor: dimmed
-                ? AppTheme.steel.withValues(alpha: 0.15)
-                : AppTheme.mist.withValues(alpha: 0.55),
-            borderStrokeWidth: 0.8,
-          ),
-        );
-      }
-    }
-    _trackPointCircles = trackCircles;
 
     final markers = <Marker>[];
     if (widget.layers.showGpsGaps) {
@@ -543,7 +514,6 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
       widget.layers.showRoadKindContrast,
       widget.layers.showBrakes,
       widget.layers.showGpsGaps,
-      widget.layers.showTrackPoints,
     );
   }
 
@@ -689,8 +659,6 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
           userAgentPackageName: 'com.rawthrottle.riderlab',
         ),
         PolylineLayer(polylines: _polylines),
-        if (_trackPointCircles.isNotEmpty)
-          CircleLayer(circles: _trackPointCircles),
         MarkerLayer(markers: markers),
         liveGpsMapChild(),
       ],

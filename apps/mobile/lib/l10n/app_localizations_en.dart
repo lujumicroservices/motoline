@@ -3077,6 +3077,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabSaveLabels => 'Save corner labels';
 
   @override
+  String get appVersionTitle => 'Installed version';
+
+  @override
+  String get appVersionUnavailable => 'Could not read version';
+
+  @override
+  String get appVersionCopy => 'Copy version';
+
+  @override
+  String get appVersionCopied => 'Version copied';
+
+  @override
+  String get gpsTrackPointsLabTile => 'GPS track points';
+
+  @override
+  String get gpsTrackPointsLabHelp =>
+      'Experimental map with every stored GPS fix';
+
+  @override
+  String get gpsTrackPointsLabTitle => 'GPS lab — track points';
+
+  @override
+  String get gpsTrackPointsLabIntro =>
+      'Pick a ride to inspect each GPS fix used to draw the line. This is separate from the normal Ride Lab map.';
+
+  @override
+  String get gpsTrackPointsLabPickRide => 'Rides with GPS';
+
+  @override
+  String get gpsTrackPointsLabEmpty => 'No completed rides with GPS points.';
+
+  @override
+  String gpsTrackPointsLabRideMeta(int points, String distanceKm) {
+    return '$points points · $distanceKm km';
+  }
+
+  @override
+  String get gpsTrackPointsLabMapTitle => 'GPS points';
+
+  @override
+  String get gpsTrackPointsLabToggleLine => 'Show/hide guide line';
+
+  @override
+  String gpsTrackPointsLabStats(int points, String hz, String duration) {
+    return '$points points · ~$hz Hz · $duration';
+  }
+
+  @override
   String get leanLabSettingsTile => 'Lean lab (test)';
 
   @override

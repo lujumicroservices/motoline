@@ -1388,6 +1388,33 @@
   "leanLabTrendDescending": "bajando",
   "leanLabTrendFlat": "plano",
   "leanLabSaveLabels": "Guardar marcas de curvas",
+  "appVersionTitle": "Versión instalada",
+  "appVersionUnavailable": "No se pudo leer la versión",
+  "appVersionCopy": "Copiar versión",
+  "appVersionCopied": "Versión copiada",
+  "gpsTrackPointsLabTile": "Puntos GPS de la trazada",
+  "gpsTrackPointsLabHelp": "Mapa experimental con cada fix GPS guardado",
+  "gpsTrackPointsLabTitle": "Lab GPS — puntos de trazada",
+  "gpsTrackPointsLabIntro": "Elige un recorrido para ver cada punto GPS con el que se dibuja la línea. No forma parte del mapa normal de Ride Lab.",
+  "gpsTrackPointsLabPickRide": "Recorridos con GPS",
+  "gpsTrackPointsLabEmpty": "No hay recorridos completados con puntos GPS.",
+  "gpsTrackPointsLabRideMeta": "{points} puntos · {distanceKm} km",
+  "@gpsTrackPointsLabRideMeta": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "distanceKm": {"type": "String"}
+    }
+  },
+  "gpsTrackPointsLabMapTitle": "Puntos GPS",
+  "gpsTrackPointsLabToggleLine": "Mostrar/ocultar línea guía",
+  "gpsTrackPointsLabStats": "{points} puntos · ~{hz} Hz · {duration}",
+  "@gpsTrackPointsLabStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "hz": {"type": "String"},
+      "duration": {"type": "String"}
+    }
+  },
   "leanLabSettingsTile": "Lab de inclinación (pruebas)",
   "leanLabSettingsHelp": "Sesiones en Bugambilias · guardar 0° · pendientes · marcar curvas",
   "leanImuLabTitle": "Lab de sensores de inclinación",

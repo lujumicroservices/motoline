@@ -1317,6 +1317,33 @@
   "leanLabTrendDescending": "descending",
   "leanLabTrendFlat": "flat",
   "leanLabSaveLabels": "Save corner labels",
+  "appVersionTitle": "Installed version",
+  "appVersionUnavailable": "Could not read version",
+  "appVersionCopy": "Copy version",
+  "appVersionCopied": "Version copied",
+  "gpsTrackPointsLabTile": "GPS track points",
+  "gpsTrackPointsLabHelp": "Experimental map with every stored GPS fix",
+  "gpsTrackPointsLabTitle": "GPS lab — track points",
+  "gpsTrackPointsLabIntro": "Pick a ride to inspect each GPS fix used to draw the line. This is separate from the normal Ride Lab map.",
+  "gpsTrackPointsLabPickRide": "Rides with GPS",
+  "gpsTrackPointsLabEmpty": "No completed rides with GPS points.",
+  "gpsTrackPointsLabRideMeta": "{points} points · {distanceKm} km",
+  "@gpsTrackPointsLabRideMeta": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "distanceKm": {"type": "String"}
+    }
+  },
+  "gpsTrackPointsLabMapTitle": "GPS points",
+  "gpsTrackPointsLabToggleLine": "Show/hide guide line",
+  "gpsTrackPointsLabStats": "{points} points · ~{hz} Hz · {duration}",
+  "@gpsTrackPointsLabStats": {
+    "placeholders": {
+      "points": {"type": "int"},
+      "hz": {"type": "String"},
+      "duration": {"type": "String"}
+    }
+  },
   "leanLabSettingsTile": "Lean lab (test)",
   "leanLabSettingsHelp": "Bugambilias sessions · save 0° · hills · mark corners",
   "leanImuLabTitle": "IMU lean lab",
