@@ -11,6 +11,9 @@ on:
       - 'packages/ride_core/**'
       - '.github/workflows/survey-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -70,9 +73,25 @@ jobs:
             --dart-define=APP_NAME="Circuito 8h" \
             --dart-define=GOOGLE_OAUTH_REDIRECT=com.rawthrottle.riderlab.c8h://login-callback
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Circuito8h
           path: apps/mobile/build/app/outputs/flutter-apk/app-survey-release.apk
           if-no-files-found: error
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp build/app/outputs/flutter-apk/app-survey-release.apk Circuito8h.apk
+          notes='Side app for the Circuito 8h GPS survey. Installs beside RiderLab (com.rawthrottle.riderlab.c8h). Prerelease so it does not replace the RiderLab sideload APK.'
+          if gh release view circuito-8h >/dev/null 2>&1; then
+            gh release upload circuito-8h Circuito8h.apk --clobber
+          else
+            gh release create circuito-8h Circuito8h.apk \
+              --prerelease \
+              --title "Circuito 8h" \
+              --notes "$notes"
+          fi

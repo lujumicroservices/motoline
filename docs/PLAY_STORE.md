@@ -74,6 +74,8 @@ flutter build apk --flavor survey --release --dart-define=DISTRIBUTION=sideload 
 
 Output: `build/app/outputs/flutter-apk/app-survey-release.apk`.
 
+The `survey-apk` workflow publishes that file on the **Circuito 8h** prerelease (`Circuito8h.apk`). It stays a prerelease so it does not replace `RiderLab-v….apk` on the latest release.
+
 Add `com.rawthrottle.riderlab.c8h://login-callback` in Supabase → Authentication → Redirect URLs before using Google sign-in on this app. Email sign-in works without that. The package also needs its own Android OAuth client if Google sign-in should succeed.
 
 ---
