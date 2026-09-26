@@ -18,7 +18,7 @@
 - Decisión de compra: **1 unidad** para primer prototipo, no 10.
 - Power: Battery 13.2 **o** USB 5 V de moto **o** buck 12→5 V (no los tres a la vez).
 - Cotización qty 1 en curso (M5Stack shop + SparkFun + local buck/caja).
-- Comparado con **AiM Solo 2** (no el DL): misma clase de sensor (4 constelaciones L1, hasta 25 Hz, IMU 6 ejes, display). Solo 2 es el producto terminado (claim bajo 0.5 m, IP67, base de circuitos, delta). Prototipo: partes ~$128, línea esperada 1–2.5 m hasta medir en pista. Firmware aún no existe.
+- Comparación con **AiM Solo 2** cerrada el 26 Sep 2026. Números en el skill y en [comparacion-solo-2.pdf](comparacion-solo-2.pdf). Misma clase de sensor; línea esperada 1–2.5 m hasta medir en pista.
 
 ## Siguiente paso (cuando se retome)
 
