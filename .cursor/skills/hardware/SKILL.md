@@ -10,7 +10,7 @@ Work lives in `hardware/`. This is a **separate lane** from shop, landing, and P
 ## Resume (every hardware turn)
 
 1. Read `hardware/STATUS.md`.
-2. Read `hardware/CONTEXT.md` and `hardware/BOM.md`.
+2. Read `hardware/CONTEXT.md`, `hardware/BOM.md`, and `hardware/BOM-rtk.md` if it exists.
 3. Read `hardware/DECISIONS.md` before proposing a different architecture or BOM.
 4. Continue from **Siguiente paso** in STATUS. Do not re-ask closed decisions.
 
@@ -26,7 +26,10 @@ Keep STATUS short.
 
 ## Honesty
 
-Prototype is a **maker M5Stack stack** (Basic v2.7 on top of M135), not a sealed AiM dash. Do not generate polished commercial renders. Do not imply RTK or <0.5 m accuracy on the current BOM.
+Two lanes, neither is a sealed AiM dash. Do not generate polished commercial renders.
+
+- **M5** (`hardware/BOM.md`): Basic v2.7 on M135. Do not imply RTK or <0.5 m on that BOM.
+- **Discrete RTK** (`hardware/BOM-rtk.md`): loose parts, L1/L2 ZED-F9P. Centimeter-class only while RTK is fixed and a base is up. Without corrections it is ~1.5 m CEP.
 
 ## Language
 

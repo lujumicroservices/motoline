@@ -10,5 +10,5 @@ Al trabajar archivos en `hardware/`:
 
 1. Leer `hardware/STATUS.md` antes de proponer cambios.
 2. No reabrir decisiones de `hardware/DECISIONS.md` salvo que el usuario lo pida.
-3. El prototipo es stack M5Stack (Basic + M135), no un producto sellado tipo AiM.
+3. Hay dos lanes: stack M5 (Basic + M135, sin RTK) y componentes sueltos con ZED-F9P (`hardware/BOM-rtk.md`). Ninguno es un dash sellado tipo AiM. No prometer centímetros fuera de RTK fixed.
 4. Al cerrar trabajo, actualizar `hardware/STATUS.md`.

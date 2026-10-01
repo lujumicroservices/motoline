@@ -30,11 +30,14 @@ Competidor de referencia: **AiM Solo 2 / Solo 2 DL** (no el teléfono).
 
 ## Tesis de costo
 
-Costo eficiente, **no** logger de $900. Con trazada crítica: antena + chip razonable + fusión IMU + software. RTK (base en paddock) queda como **escalón posterior**, no el BOM actual.
+Dos lanes, no uno:
+
+- **M5 / M9N** ([BOM.md](BOM.md)): costo eficiente, ~$128/u, sin RTK. Precisión esperada ~1–2.5 m.
+- **Componentes sueltos + RTK** ([BOM-rtk.md](BOM-rtk.md)): el usuario lo abrió el 2026-10-01. Doble banda L1/L2, base en paddock, ~$495/rover + una base de ~$443. Sigue debajo de un lote de Solo 2 DL, y ya no es el BOM de $128.
 
 ## Expectativa visual (no inflar)
 
-El prototipo es **stack maker M5Stack** (Basic 54×54 mm + módulo GNSS), no un Solo 2 sellado. UI DIY. No generar renders que parezcan producto comercial.
+Ningún lane es un Solo 2 sellado. El M5 es un stack maker (Basic 54×54 mm + M135). El RTK es breakouts cableados en caja de proyecto. UI DIY. No generar renders que parezcan producto comercial.
 
 ## Relación con el repo de software
 

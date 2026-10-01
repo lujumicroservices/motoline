@@ -14,5 +14,6 @@ No hace falta reabrir el chat viejo. El chat de origen está citado en `STATUS.m
 |---------|--------|
 | [STATUS.md](STATUS.md) | Estado actual, siguiente paso, preguntas abiertas |
 | [CONTEXT.md](CONTEXT.md) | Tesis del producto, métricas, restricciones |
-| [BOM.md](BOM.md) | Lista de partes recomendada (10 unidades) |
+| [BOM.md](BOM.md) | Lane M5 / M9N, sin RTK (10 unidades) |
+| [BOM-rtk.md](BOM-rtk.md) | Lane de componentes sueltos, L1/L2 + RTK |
 | [DECISIONS.md](DECISIONS.md) | Decisiones ya cerradas (no reabrir sin pedirlo) |
