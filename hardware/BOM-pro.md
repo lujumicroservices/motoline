@@ -1,4 +1,4 @@
-# BOM — componentes sueltos, GNSS doble banda + RTK
+# BOM Pro — componentes sueltos, GNSS doble banda + RTK
 
 **Perfil:** rover cableado (no stack M5) + **una base en paddock** compartida.  
 **Chip:** u-blox **ZED-F9P**, bandas **L1/L2** (no L1 solo, no el F10).  
@@ -16,7 +16,7 @@ El centímetro **no existe** sin correcciones (base o NTRIP) y sin `carrSoln = f
 
 **Costo de catálogo (1 oct 2026):** ~**$495 / rover**, ~**$443** la base (una sola).  
 Proto: **1 rover + 1 base ≈ $940**. Diez rovers + 1 base ≈ **$5,400**.  
-Vs M5/M9N (~$128/u, sin RTK) y vs AiM Solo 2 / Solo 2 DL (~$500–900/u).
+Vs BOM Standard (~$128/u, sin RTK) y vs AiM Solo 2 / Solo 2 DL (~$500–900/u).
 
 Sigue siendo una **caja de prototipo cableada**, no un dash sellado.
 
@@ -80,7 +80,7 @@ Speed, lean, lap/Δt, y el estado **NONE / FLOAT / FIXED** más la edad RTCM. Si
 
 ## Qué no está
 
-- Stack M5 (Basic, M135, Battery 13.2). Ese BOM sigue en [BOM.md](BOM.md), sin RTK.
+- Stack M5 (Basic, M135, Battery 13.2). Ese es el [BOM Standard](BOM-standard.md), sin RTK.
 - Antena magnética de una sola banda.
 - Módulo suelto ZED-F9P en PCB propia. Los breakouts son el proto. Una placa carrier es el paso para bajar los ~$260 del receptor.
 - NTRIP de pago. Solo si el LoRa no cubre el circuito.

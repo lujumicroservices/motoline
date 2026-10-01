@@ -32,12 +32,12 @@ Competidor de referencia: **AiM Solo 2 / Solo 2 DL** (no el teléfono).
 
 Dos lanes, no uno:
 
-- **M5 / M9N** ([BOM.md](BOM.md)): costo eficiente, ~$128/u, sin RTK. Precisión esperada ~1–2.5 m.
-- **Componentes sueltos + RTK** ([BOM-rtk.md](BOM-rtk.md)): el usuario lo abrió el 2026-10-01. Doble banda L1/L2, base en paddock, ~$495/rover + una base de ~$443. Sigue debajo de un lote de Solo 2 DL, y ya no es el BOM de $128.
+- **BOM Standard** ([BOM-standard.md](BOM-standard.md)): stack M5 / M9N, ~$128/u, sin RTK. Precisión esperada ~1–2.5 m.
+- **BOM Pro** ([BOM-pro.md](BOM-pro.md)): componentes sueltos, doble banda L1/L2, base en paddock, ~$495/rover + una base de ~$443. El usuario lo abrió el 2026-10-01 y le puso este nombre el mismo día.
 
 ## Expectativa visual (no inflar)
 
-Ningún lane es un Solo 2 sellado. El M5 es un stack maker (Basic 54×54 mm + M135). El RTK es breakouts cableados en caja de proyecto. UI DIY. No generar renders que parezcan producto comercial.
+Ningún lane es un Solo 2 sellado. Standard es un stack maker (Basic 54×54 mm + M135). Pro es breakouts cableados en caja de proyecto. UI DIY. No generar renders que parezcan producto comercial.
 
 ## Relación con el repo de software
 

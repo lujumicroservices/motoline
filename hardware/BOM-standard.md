@@ -1,6 +1,6 @@
-# BOM — 10 unidades, stack M5 (sin RTK)
+# BOM Standard — 10 unidades, stack M5 (sin RTK)
 
-Hay un segundo BOM, de componentes sueltos con GNSS L1/L2 y RTK: [BOM-rtk.md](BOM-rtk.md). Este archivo sigue siendo el stack M5.
+El otro lane es el [BOM Pro](BOM-pro.md): componentes sueltos, GNSS L1/L2 y RTK. Este archivo es el stack M5.
 
 **Perfil:** NEO-M9N + antena activa + IMU BMI270 + display 2" + Battery 13.2.  
 **Precisión de línea (esperada):** ~1–2.5 m, 10–25 Hz. Cerca / un poco peor que AiM Solo 2.  

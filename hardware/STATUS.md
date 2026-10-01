@@ -5,12 +5,12 @@
 
 ## Fase
 
-**Dos BOM.** El vivo nuevo es componentes sueltos + RTK ([BOM-rtk.md](BOM-rtk.md)). El stack M5/M9N ([BOM.md](BOM.md)) queda como lane barato, sin compra hasta decidir.
+**Dos BOM.** **Pro** = partes sueltas + RTK ([BOM-pro.md](BOM-pro.md)). **Standard** = stack M5/M9N ([BOM-standard.md](BOM-standard.md)), sin compra hasta decidir.
 
 ## Chat de origen
 
 [Hardware logger BOM](c349b6a7-8f93-4815-a7e1-a518e71cc66c) — 18 Sep 2026.  
-Lane RTK abierto el 1 oct 2026: BOM de partes sueltas, doble banda, RTK.
+BOM Pro abierto el 1 oct 2026 (partes sueltas, doble banda, RTK). Nombres Pro / Standard fijados el mismo día.
 
 ## Dónde nos quedamos
 
@@ -23,7 +23,7 @@ Lane RTK abierto el 1 oct 2026: BOM de partes sueltas, doble banda, RTK.
 
 ## Siguiente paso (cuando se retome)
 
-1. Revisar [BOM-rtk.md](BOM-rtk.md) y confirmar el carrito **1 rover + 1 base** (no el lote de 10).
+1. Revisar [BOM-pro.md](BOM-pro.md) y confirmar el carrito **1 rover + 1 base** (no el lote de 10).
 2. Al recibir: firmware mínimo (UBX + tipo de fix, RTCM por LoRa, lean BMI270, log microSD).
 3. Una sesión en el circuito: ¿el LoRa aguanta la vuelta entera en FIXED?
 
@@ -31,7 +31,7 @@ Lane RTK abierto el 1 oct 2026: BOM de partes sueltas, doble banda, RTK.
 
 - ¿El 915 MHz cubre este circuito desde paddock, o hay que pasar a NTRIP?
 - ¿La pantalla de $20 se lee al sol, o hace falta visera / panel más brillante?
-- ¿Se archiva la compra M5 o se deja el lane M9N como plan B?
+- ¿Se archiva la compra del BOM Standard o se deja como plan B?
 
 ## Fuera de alcance de este chat
 
