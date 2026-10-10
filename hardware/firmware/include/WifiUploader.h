@@ -80,6 +80,42 @@ class WifiUploader {
     prefs_.end();
   }
 
+  // 0.6.8-ble: RAM snapshot of every Wi-Fi slot key, taken before a BLE WIFI write (serial WIFIUNDO
+  // puts it back). Lost on reboot; nothing is printed.
+  struct WifiSnap {
+    bool ok = false, aEn = true, bEn = false;
+    String ssid, ssid2, pass, bSsid, bSsid2, bPass;
+  };
+  WifiSnap snapshotWifi() const {
+    WifiSnap s;
+    s.ok = true; s.aEn = aEn_; s.bEn = bEn_;
+    s.ssid = ssid_; s.ssid2 = ssid2_; s.pass = pass_;
+    s.bSsid = bSsid_; s.bSsid2 = bSsid2_; s.bPass = bPass_;
+    return s;
+  }
+  void restoreWifi(const WifiSnap& s) {
+    if (!s.ok) return;
+    prefs_.begin("riderlab", false);
+    prefs_.putString("wifi_ssid", s.ssid);
+    prefs_.putString("wifi_ssid2", s.ssid2);
+    prefs_.putString("wifi_pass", s.pass);
+    prefs_.putBool("wifi_a_en", s.aEn);
+    prefs_.putString("wifi_b_ssid", s.bSsid);
+    prefs_.putString("wifi_b_ssid2", s.bSsid2);
+    prefs_.putString("wifi_b_pass", s.bPass);
+    prefs_.putBool("wifi_b_en", s.bEn);
+    prefs_.end();
+    ssid_ = s.ssid; ssid2_ = s.ssid2; pass_ = s.pass; aEn_ = s.aEn;
+    bSsid_ = s.bSsid; bSsid2_ = s.bSsid2; bPass_ = s.bPass; bEn_ = s.bEn;
+  }
+  // paired = a real device id (not "unpaired") and a stored secret
+  bool paired() const { return deviceId_.length() && deviceId_ != "unpaired" && deviceSecret_.length(); }
+  String deviceIdMasked() const {
+    if (!deviceId_.length()) return "";
+    if (deviceId_.length() <= 6) return deviceId_;
+    return deviceId_.substring(0, 4) + "..." + deviceId_.substring(deviceId_.length() - 2);
+  }
+
   static String mask(const String& p) {
     return p.length() ? String("********(") + p.length() + ")" : String("(none)");
   }

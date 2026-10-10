@@ -29,8 +29,8 @@ inline uint16_t toneStatus(const char* t) {
   return C_OK;
 }
 
-static constexpr int kMenuItems = 6;  // 0.6.2-circuit.6: TEMA removed, BACK = 5
-enum class UiPage { Home, Menu, About, Wifi, Rides, Circuit };  // 0.6.0: Circuit drawn by CircuitView
+static constexpr int kMenuItems = 7;  // 0.6.8-ble: + EMPAREJAR (4), ABOUT 5, BACK 6
+enum class UiPage { Home, Menu, About, Wifi, Rides, Circuit, CircuitList, BlePair, Trail };  // 0.6.9: Trail  // 0.6.0: Circuit drawn by CircuitView
 
 struct RideRow {
   char label[28] = {};
@@ -91,6 +91,17 @@ struct UiState {
   uint16_t autoColor = 0xAD55;
   char autoShort[8] = {};      // circuit header: ARMADO / CAND / AUTO / MAN / ESPERA / OFF
   uint8_t autoSt = 0;          // 0 OFF 1 ARMED 2 CAND 3 REC_AUTO 4 REC_MANUAL 5 INHIBIT(ESPERA)
+  // 0.6.7-autocircuit
+  const char* toast = "";      // ~3 s banner on Home ("8 Horas Zapopan detectado"), "" = none
+  int circN = 0, circSel = 0;  // circuit list rows (<= 4 circuits + AUTOMATICO)
+  char circName[5][22] = {};
+  char circInfo[5][24] = {};
+  // 0.6.8-ble pairing page
+  char bleName[20] = {};
+  char blePin[8] = {};
+  char bleLine[44] = {};
+  int bleLeftS = 0;
+  bool bleConn = false, bleAuthed = false;
 };
 
 // ---- 0.6.2-circuit.7-rastro: home status bar (icons right of the brand badge) ----------------------
@@ -322,6 +333,24 @@ inline void drawHomeLive(const UiState& s, bool force = false) {
   d.setSwapBytes(true);
   d.startWrite();
   drawHomeStatus(s, force);
+  {  // 0.6.7-autocircuit: circuit-detected banner (y 43..71), drawn/cleared only on change
+    static char lastToast[40] = "";
+    const char* tz = s.toast ? s.toast : "";
+    if (force || strncmp(tz, lastToast, sizeof(lastToast) - 1) != 0) {
+      strncpy(lastToast, tz, sizeof(lastToast) - 1);
+      lastToast[sizeof(lastToast) - 1] = 0;
+      d.fillRect(0, 43, 320, 28, C_BG);
+      if (tz[0]) {
+        d.fillRoundRect(6, 44, 308, 26, 5, C_ORANGE);
+        d.setTextDatum(lgfx::textdatum_t::middle_center);
+        d.setTextSize(1);
+        d.setFont(&fonts::FreeSansBold9pt7b);
+        d.setTextColor(C_FG, C_ORANGE);
+        d.drawString(tz, 160, 57);
+        d.setFont(&fonts::Font0);
+      }
+    }
+  }
   static char lastSpd[8] = "";
   char spd[8];
   if (s.fix) snprintf(spd, sizeof(spd), "%.0f", s.speedKmh);
@@ -402,6 +431,23 @@ inline void drawRoleBadge(const UiState& s) {
   }
 }
 
+// 0.6.9b: home status bar (badge, status icons, RIDER chip, rule at y 40) - shared by Home and the Trail page
+inline void drawHomeBar(const UiState& s) {
+  auto& d = M5.Display;
+  d.setSwapBytes(true);
+  d.fillRect(0, 0, 320, 42, C_BG);
+  drawBadge(d, 8, 6, false);
+  d.setTextSize(1);
+  d.setTextDatum(lgfx::textdatum_t::middle_center);
+  d.fillRoundRect(256, 15, 58, 16, 3, C_FG);
+  d.setTextColor(C_BG, C_FG);
+  d.drawString("RIDER", 285, 23);
+  d.drawFastHLine(56, 40, 258, C_DIM);
+  d.startWrite();
+  drawHomeStatus(s, true);
+  d.endWrite();
+}
+
 inline void drawHome(const UiState& s) {
   auto& d = M5.Display;
   d.setSwapBytes(true);
@@ -478,11 +524,11 @@ inline void drawMenu(const UiState& s) {
   drawBadge(d, 8, 6, false);
   drawWordmark(d, 168, 8, 1.0f);
 
-  static const char* items[] = {"RECORD / STOP", "WIFI", "RIDES", "CIRCUITO", "ABOUT", "BACK"};
+  static const char* items[] = {"RECORD / STOP", "WIFI", "RIDES", "CIRCUITO", "EMPAREJAR", "ABOUT", "BACK"};
   d.setTextSize(2);
   d.setTextDatum(lgfx::textdatum_t::middle_left);
-  for (int i = 0; i < kMenuItems; ++i) {  // 6 items, 27 px pitch (as 0.6.0/0.6.1)
-    const int y = 50 + i * 27;
+  for (int i = 0; i < kMenuItems; ++i) {  // 0.6.8: 7 items, 24 px pitch
+    const int y = 49 + i * 24;
     if (i == s.menuIdx) {
       d.fillRect(8, y - 11, 304, 22, C_ORANGE);
       d.setTextColor(C_FG, C_ORANGE);
@@ -493,6 +539,86 @@ inline void drawMenu(const UiState& s) {
   }
   drawButtonBar(d, "UP", "OK", "DOWN");
   drawLiveBat(s);
+}
+
+// 0.6.7-autocircuit: Menu > CIRCUITO list, nearest first, big rows (gloves). A up, B choose, C down.
+inline void drawCircuitList(const UiState& s) {
+  auto& d = M5.Display;
+  d.fillScreen(C_BG);
+  d.setSwapBytes(true);
+  drawBadge(d, 8, 6, false);
+  d.setFont(&fonts::Font0);
+  d.setTextSize(2);
+  d.setTextDatum(lgfx::textdatum_t::middle_left);
+  d.setTextColor(C_FG, C_BG);
+  d.drawString("CIRCUITO", 120, 22);
+  for (int i = 0; i < s.circN && i < 5; ++i) {
+    const int y = 62 + i * 32;
+    const bool sel = i == s.circSel;
+    const uint16_t bg = sel ? C_ORANGE : C_BG;
+    if (sel) d.fillRoundRect(6, y - 14, 308, 28, 4, C_ORANGE);
+    d.setFont(&fonts::Font0);
+    d.setTextSize(2);
+    d.setTextDatum(lgfx::textdatum_t::middle_left);
+    d.setTextColor(C_FG, bg);
+    char nm[14];
+    snprintf(nm, sizeof(nm), "%s", s.circName[i]);
+    d.drawString(nm, 14, y);
+    d.setFont(&fonts::Font2);
+    d.setTextSize(1);
+    d.setTextDatum(lgfx::textdatum_t::middle_right);
+    d.setTextColor(sel ? C_FG : C_MUTED, bg);
+    d.drawString(s.circInfo[i], 308, y);
+  }
+  d.setFont(&fonts::Font0);
+  d.setTextSize(1);
+  drawButtonBar(d, "ARRIBA", "ELEGIR", "ABAJO");
+  drawLiveBat(s);
+}
+
+// 0.6.8-ble: pairing page. Live part (PIN, status, countdown) redrawn by drawBleLive.
+inline void drawBleLive(const UiState& s, bool force = false) {
+  auto& d = M5.Display;
+  static char last[96] = "";
+  char key[96];
+  snprintf(key, sizeof key, "%s|%s|%s|%d|%d|%d", s.bleName, s.blePin, s.bleLine, s.bleLeftS, (int)s.bleConn,
+           (int)s.bleAuthed);
+  if (!force && strcmp(key, last) == 0) return;
+  memcpy(last, key, sizeof last);
+  d.startWrite();
+  d.fillRect(0, 44, 320, 166, C_BG);
+  d.setTextDatum(lgfx::textdatum_t::middle_center);
+  d.setFont(&fonts::Font2);
+  d.setTextSize(1);
+  d.setTextColor(C_MUTED, C_BG);
+  d.drawString(s.bleName, 160, 54);
+  d.drawString("PIN para la app", 160, 74);
+  d.setFont(&fonts::Font7);
+  d.setTextColor(s.bleAuthed ? C_OK : C_FG, C_BG);
+  d.drawString(s.blePin, 160, 116);
+  d.setFont(&fonts::Font2);
+  d.setTextColor(toneStatus(s.bleLine), C_BG);
+  d.drawString(s.bleLine, 160, 162);
+  char t[40];
+  snprintf(t, sizeof(t), "%s  %d:%02d", s.bleConn ? (s.bleAuthed ? "APP OK" : "APP CONECTADA") : "ESPERANDO APP",
+           s.bleLeftS / 60, s.bleLeftS % 60);
+  d.setTextColor(s.bleConn ? C_OK : C_MUTED, C_BG);
+  d.drawString(t, 160, 190);
+  d.setFont(&fonts::Font0);
+  d.endWrite();
+}
+inline void drawBle(const UiState& s) {
+  auto& d = M5.Display;
+  d.fillScreen(C_BG);
+  d.setSwapBytes(true);
+  drawBadge(d, 8, 6, false);
+  d.setFont(&fonts::Font0);
+  d.setTextSize(2);
+  d.setTextDatum(lgfx::textdatum_t::middle_left);
+  d.setTextColor(C_FG, C_BG);
+  d.drawString("EMPAREJAR", 110, 22);
+  drawButtonBar(d, " ", "SALIR", " ");
+  drawBleLive(s, true);
 }
 
 inline void drawAbout(const UiState& s) {
@@ -636,12 +762,14 @@ inline void drawUi(const UiState& s) {
   static UiPage lastPage = UiPage::Home;
   static int lastMenu = -1;
   static int lastRide = -1;
+  static int lastCircSel = -1;  // 0.6.7
   static bool lastRec = false;
   static bool lastWifi = false;
   static bool inited = false;
   const bool chrome = !inited || s.page != lastPage ||
                       (s.page == UiPage::Menu && s.menuIdx != lastMenu) ||
                       (s.page == UiPage::Rides && s.rideSel != lastRide) ||
+                      (s.page == UiPage::CircuitList && s.circSel != lastCircSel) ||
                       (s.page == UiPage::Wifi && s.wifiOn != lastWifi) ||
                       (s.page == UiPage::Home && s.recording != lastRec);
   const bool force = false;
@@ -649,12 +777,24 @@ inline void drawUi(const UiState& s) {
   lastPage = s.page;
   lastMenu = s.menuIdx;
   lastRide = s.rideSel;
+  lastCircSel = s.circSel;
   lastRec = s.recording;
   lastWifi = s.wifiOn;
   (void)force;
   if (s.page == UiPage::Circuit) return;  // 0.6.0: main/CircuitView paints it; leaving forces chrome
+  if (s.page == UiPage::Trail) return;    // 0.6.9: main (trailPaint) paints it; leaving forces chrome
   if (s.page == UiPage::Menu) {
     if (chrome) drawMenu(s);
+    else drawMenuLive(s);
+    return;
+  }
+  if (s.page == UiPage::BlePair) {  // 0.6.8
+    if (chrome) drawBle(s);
+    else drawBleLive(s);
+    return;
+  }
+  if (s.page == UiPage::CircuitList) {  // 0.6.7
+    if (chrome) drawCircuitList(s);
     else drawMenuLive(s);
     return;
   }

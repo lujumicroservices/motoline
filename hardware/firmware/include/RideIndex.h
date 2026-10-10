@@ -31,10 +31,80 @@ class RideIndex {
     } else {
       n_ = 0;
     }
-    recoverSessions();
-    save();
-    gLog.logf(LogLvl::Info, "index", "load n=%d pending=%d", n_, pendingCount());
+    // 0.6.7: session-folder recovery moved out of setup -> recoverStep() in loop (budgeted)
+    recActive_ = true;
+    recSeen_ = recAdded_ = recSkipFull_ = 0;
+    recT0_ = millis();
+    gLog.logf(LogLvl::Info, "index", "load n=%d pending=%d (recovery deferred to loop)", n_, pendingCount());
   }
+  // 0.6.7: incremental recovery of session folders missing from the index. Runs from loop() with a
+  // time budget per call (GNSS keeps draining between calls). Fixes vs <= 0.6.6:
+  //  * never evicts indexed rides when the index is full (the old code shifted the oldest out, so with
+  //    > kMax folders every boot re-counted the evicted ones byte by byte = minutes, and re-queued them
+  //    as pending uploads, including sim_pos sessions);
+  //  * counts lines with 1 KB block reads, not 1 byte per read();
+  //  * sim_pos sessions (manifest "sim_pos":true) are recovered with gnss=0 (never pending, as 0.6.5).
+  // Returns true when finished (or idle).
+  bool recoverStep(uint32_t budgetMs) {
+    if (!recActive_) return true;
+    const uint32_t t0 = millis();
+    if (!recRootOpen_) {
+      recRoot_ = SD.open("/riderlab/sessions");
+      recRootOpen_ = true;
+      if (!recRoot_) return recFinish();
+    }
+    static uint8_t buf[1024];
+    while (millis() - t0 < budgetMs) {
+      if (recCnt_) {  // counting lines of one gnss.ndjson
+        const int k = recCnt_.read(buf, sizeof buf);
+        if (k > 0) {
+          for (int i = 0; i < k; ++i) recLines_ += buf[i] == '\n';
+          continue;
+        }
+        recCnt_.close();
+        RideRec r;
+        strncpy(r.id, recId_, sizeof(r.id) - 1);
+        r.ms = millis();
+        r.gnss = (uint16_t)(recLines_ > 65535 ? 65535 : recLines_);  // 0.6.9b: sim_pos sessions are pending too
+        r.cloud = false;
+        if (n_ < kMax) { recs_[n_++] = r; ++recAdded_; recDirty_ = true; }
+        gLog.logf(LogLvl::Info, "index", "recovered %s gnss=%lu sim_pos=%d", recId_, (unsigned long)recLines_, (int)recSim_);
+        continue;
+      }
+      File e = recRoot_.openNextFile();
+      if (!e) return recFinish();
+      ++recSeen_;
+      const bool dir = e.isDirectory();
+      const char* nm = e.name();
+      const char* sl = nm ? strrchr(nm, '/') : nullptr;
+      char id[40];
+      snprintf(id, sizeof id, "%s", sl ? sl + 1 : (nm ? nm : ""));
+      e.close();
+      if (!dir || strlen(id) < 4 || find(id) >= 0) continue;
+      if (n_ >= kMax) { ++recSkipFull_; continue; }  // full: keep the index as is (no eviction)
+      snprintf(recId_, sizeof recId_, "%s", id);
+      const String base = String("/riderlab/sessions/") + id;
+      recSim_ = false;
+      File m = SD.open(base + "/manifest.json", FILE_READ);
+      if (m) {
+        const String s = m.readString();
+        m.close();
+        recSim_ = s.indexOf("\"sim_pos\":true") >= 0;
+      }
+      recLines_ = 0;
+      recCnt_ = SD.open(base + "/gnss.ndjson", FILE_READ);
+      if (!recCnt_) {  // no gnss file: index it with 0 points (not pending)
+        RideRec r;
+        strncpy(r.id, id, sizeof(r.id) - 1);
+        r.ms = millis();
+        recs_[n_++] = r;
+        ++recAdded_;
+        recDirty_ = true;
+      }
+    }
+    return false;
+  }
+  bool recovering() const { return recActive_; }
 
   void wipeSessionTree() {
     File root = SD.open("/riderlab/sessions");
@@ -255,8 +325,25 @@ class RideIndex {
     SD.rmdir(path);
   }
 
+  bool recFinish() {
+    if (recCnt_) recCnt_.close();
+    if (recRoot_) recRoot_.close();
+    recRootOpen_ = false;
+    recActive_ = false;
+    if (recDirty_) save();
+    recDirty_ = false;
+    gLog.logf(LogLvl::Info, "index", "recovery done folders=%lu added=%lu skipped_full=%lu ms=%lu n=%d pending=%d",
+              (unsigned long)recSeen_, (unsigned long)recAdded_, (unsigned long)recSkipFull_,
+              (unsigned long)(millis() - recT0_), n_, pendingCount());
+    return true;
+  }
   RideRec recs_[kMax];
   int n_ = 0;
+  // 0.6.7 incremental recovery state
+  bool recActive_ = false, recRootOpen_ = false, recDirty_ = false, recSim_ = false;
+  File recRoot_, recCnt_;
+  char recId_[40] = {};
+  uint32_t recLines_ = 0, recSeen_ = 0, recAdded_ = 0, recSkipFull_ = 0, recT0_ = 0;
 };
 
 }  // namespace riderlab

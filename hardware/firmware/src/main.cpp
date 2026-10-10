@@ -8,6 +8,8 @@
 #include <Wire.h>
 #include <driver/gpio.h>
 #include <esp_timer.h>
+#include <esp_bt.h>
+#include "BlePair.h"
 
 #include "HardwareConfig.h"
 #include "UiChrome.h"
@@ -31,6 +33,7 @@
 #include "LiveDelta.h"  // 0.6.2-circuit.7-rastro
 #include "CircuitEmbedded_suave.h"  // 0.6.2-circuit.2: smoothed edges
 #include "CircuitView.h"
+#include "CircuitIndex.h"  // 0.6.7-autocircuit
 
 using namespace riderlab;
 
@@ -79,6 +82,20 @@ static bool wifiScanning = false;       // async pre-join scan in flight
 static uint32_t wifiScanT0 = 0;
 // 0.5.3 uploader task (core 0). loop() owns SD/LCD; the task owns Wi-Fi + TLS.
 static UploadTask upTask;
+// 0.6.8-ble pairing mode state
+static riderlab::BlePair ble;
+static char gBlePin[8] = "";
+static uint32_t gBleT0 = 0, gBleExitAt = 0;
+static int gBleBad = 0;
+static const char* gBleExitWhy = "done";
+static bool gBleAuthed = false;
+static String gBleLine;
+static WifiUploader::WifiSnap gWifiSnap;  // pre-BLE-WIFI snapshot (serial WIFIUNDO)
+// The BT controller memory (~60 KB DRAM) is given back to the heap at boot unless this boot was requested
+// for pairing (NVS rl_ble/boot). Once released it cannot be re-taken without a reboot, so EMPAREJAR from a
+// normal boot = save the flag + restart straight into pairing; leaving pairing releases it again.
+static bool gBtMemFree = false;
+static uint8_t gBlePairBoot = 0;  // 1 = menu, 2 = serial
 static UploadJob upJob;                 // prepared by loop(), copied into the task on start
 static bool upTaskOk = false;
 static bool pendingRadioOff = false;    // radio off deferred until the task is idle
@@ -158,8 +175,39 @@ static void fillRidesUi() {
 }
 
 static void paint(const GnssFix& fix);
+// 0.6.7: boot step timing (straight to Serial, SD-independent)
+static uint32_t gBootStepMs = 0;
+static void bootStep(const char* what) {
+  const uint32_t now = millis();
+  Serial.printf("BOOTSTEP %-14s t_ms=%lu dt_ms=%lu\n", what, (unsigned long)now,
+                (unsigned long)(gBootStepMs ? now - gBootStepMs : 0));
+  gBootStepMs = now;
+}
+static bool gUpHold = false;  // 0.6.7: UPLOAD HOLD (NVS rl_up/hold): no automatic uploads while ON
 static void circuitPaint();
+static bool circFollowing();  // 0.6.6-follow
 static void circuitRelease(const char* why);
+
+// ---- 0.6.7-autocircuit state ----
+static CircuitIndex cidx;
+static int gCircSel = -1;          // entry circuitLoad() uses (-1 = nothing chosen / detected -> 0.6.6 default)
+static int gCircDet = -1;          // auto-detected entry, -1 = none
+static int gCircLoaded = -1;       // entry currently held in crt
+static bool gCircManual = false;   // manual choice: holds until reboot or AUTOMATICO
+static bool gAutoOpen = true;      // AUTOOPEN (NVS rl_view/ao, ON by default)
+static bool gLastFollow = true;    // last circuit view (NVS rl_view/lv): true = FOLLOW (default), false = MAP
+static bool gCircAutoOpenPending = false;
+static uint32_t gCircAutoOpenAt = 0;
+// 0.6.9-trail: session without circuit -> Trail page (bare follow + speed), opened from loop like the circuit
+static bool gTrailPending = false;
+static uint32_t gTrailAt = 0;
+static void trailClose(const char* why);
+static void trailResetAnchor();
+static char gToast[40] = "";
+static uint32_t gToastUntil = 0;
+static int gListIdx[5] = {-1, -1, -1, -1, -1};
+static constexpr float kDetectM = 500.f, kLoseM = 2000.f, kDetectHaccM = 5.f;
+static constexpr const char* kEmbeddedName = "8 Horas Zapopan";
 
 static void radioOff() {
   WiFi.disconnect(true, false);
@@ -205,6 +253,12 @@ static const char* pageName() {
       return "about";
     case UiPage::Circuit:
       return "circuit";
+    case UiPage::CircuitList:
+      return "circuits";
+    case UiPage::Trail:
+      return "trail";
+    case UiPage::BlePair:
+      return "ble";
     default:
       return "?";
   }
@@ -475,6 +529,7 @@ static void autoDimService(uint32_t now) {
 }
 
 static void startRec(const char* why);
+static void bleExit(const char* why);
 static void stopRec();
 static void circuitSessionEdge(const char* why);  // 0.6.4
 static void processPvtEvent(uint32_t nowMs);       // 0.6.5-simpos
@@ -699,6 +754,7 @@ static bool autoSerial(const String& line) {
 // ===================================================================================================
 
 static void startRec(const char* why) {
+  if (ble.on()) bleExit("rec-start");  // 0.6.8: recording always wins over pairing
   const uint32_t t0 = millis();
   gDiag.logf("rec", "START request why=%s role=%s rec=%d sd=%d userStopped=%d page=%s wifi=%d "
              "pending=%d gnss=%s fix=%d",
@@ -737,6 +793,17 @@ static void startRec(const char* why) {
       if (!gAutoStart && ast != AutoSt::Off) autoSet(AutoSt::RecManual, why);
       autoWake(millis(), "session");
       circuitSessionEdge(gAutoStart ? "open-auto" : "open-manual");  // 0.6.4
+      // 0.6.7-autocircuit: open the detected/chosen circuit AFTER the session is running (loop, ~150 ms)
+      if (gAutoOpen && gCircSel >= 0 && ui.page != UiPage::Circuit) {
+        gCircAutoOpenPending = true;
+        gCircAutoOpenAt = millis() + 150;
+      }
+      // 0.6.9-trail: no circuit detected/chosen -> fading trail + speed instead of the speedometer
+      trailResetAnchor();
+      if (gAutoOpen && gCircSel < 0 && ui.page == UiPage::Home) {
+        gTrailPending = true;
+        gTrailAt = millis() + 150;
+      }
     }
     rides.addLocal(logger.sessionId(), 0);
     mark("session_start", 0, why);
@@ -757,10 +824,13 @@ static void startRec(const char* why) {
 
 static void writeAnchorSummary(bool complete) {
   if (!role.anchor() || logger.sessionDir().length() == 0) return;
-  static char buf[3600];
-  const size_t n = anc.summaryJson(buf, sizeof(buf), role.ref(), role.antH(), millis(),
+  constexpr size_t kBuf = 3600;  // 0.6.8: heap (anchor role only) -> DRAM for the BLE controller
+  char* buf = (char*)malloc(kBuf);
+  if (!buf) return;
+  const size_t n = anc.summaryJson(buf, kBuf, role.ref(), role.antH(), millis(),
                                    logger.secondsRecording(), complete);
   if (n) logger.writeSessionFile("anchor_summary.json", buf);
+  free(buf);
 }
 
 static void stopRec() {
@@ -790,7 +860,8 @@ static void stopRec() {
   writeAnchorSummary(true);  // summary survives with complete=true
   // 0.6.5-simpos: simulated-position sessions stay on the SD but never enter the upload queue
   // (gnss=0 in the ride index = not pending; REUP skips them too).
-  const bool noUpload = !role.anchor() && sinfo.simPos;
+  // 0.6.9b: NO distinction any more: SIMPOS sessions enter the upload queue like real ones (HOLD/pairing apply)
+  const bool noUpload = false;
   rides.updateGnss(id, noUpload ? 0 : g);
   if (noUpload) {
     gDiag.logf("simpos", "session %s sim_pos=1 gnss_pts=%u -> no upload", id.c_str(), (unsigned)g);
@@ -809,6 +880,8 @@ static void stopRec() {
             gAutoStop ? gAutoStopWhy : "manual-stop");
     lastInputMs = millis();  // dim countdown starts at session end
     circuitSessionEdge(gAutoStop ? "close-auto" : "close-manual");  // 0.6.4
+    gTrailPending = false;
+    trailClose("stop");  // 0.6.9-trail: back to the home speedometer
   }
   gDiag.logf("rec", "STOP done id=%s ms=%lu rec=%d wantUpload=%d upload_in_ms=%d wifi_cfg=%d "
              "pending=%d keepsd=%d",
@@ -981,6 +1054,7 @@ static void paint(const GnssFix& fix) {
   ui.lat = fix.lat;
   ui.lng = fix.lng;
   ui.status = uiLine.c_str();
+  ui.toast = (gToastUntil && (int32_t)(millis() - gToastUntil) < 0) ? gToast : "";  // 0.6.7
   ui.gnssTag = gnss.linkTag();
   ui.gnssFixType = fix.fixType;  // 0.6.2-circuit.7-rastro: home status bar
   ui.gnssAccM = fix.accM > 0 ? (float)fix.accM : -1.f;
@@ -993,7 +1067,7 @@ static void paint(const GnssFix& fix) {
   if (ui.anchor) fillAnchorUi();
   fillRidesUi();
   drawUi(ui);
-  if (ui.page == UiPage::Circuit) circuitPaint();
+  if (ui.page == UiPage::Circuit && !circFollowing()) circuitPaint();  // 0.6.6: follow has its own tick
 }
 
 // ---- 0.6.2-circuit.6: dark-only UI. The old NVS "rl_ui"/"dark" key (0.6.2 .. .5) is erased once. ----
@@ -1025,6 +1099,7 @@ struct CircuitRt {
 static CircuitRt* crt = nullptr;
 static CircuitView cview;
 static LiveFix cfix;
+static bool circFollowing() { return cview.following(); }  // 0.6.6-follow
 static char circSrc[24] = "none";
 static uint32_t circGateHits = 0, circDrawnHits = 0xFFFFFFFFUL, circSkips = 0, circRenders = 0;
 static bool circLowMem = false, circRenderLogged = false;
@@ -1038,27 +1113,23 @@ static void circuitLogMem(const char* what) {
              (unsigned long)m.free, (unsigned long)m.big, (unsigned long)m.min);
 }
 
+// 0.6.7: nothing chosen/detected -> legacy SD file if present, else the embedded circuit (as 0.6.6)
+static int circDefaultIdx() { return cidx.legacyIdx >= 0 ? cidx.legacyIdx : (cidx.n > 0 ? 0 : -1); }
 static bool circuitLoad() {
-  if (crt) return true;
+  const int want = (gCircSel >= 0 && gCircSel < cidx.n) ? gCircSel : circDefaultIdx();
+  if (crt && gCircLoaded == want) return true;
+  if (crt) circuitRelease("switch-circuit");
   crt = new (std::nothrow) CircuitRt();
   if (!crt) return false;
   bool ok = false;
-  if (logger.sdOk() && SD.exists(kCircuitPath)) {  // read-only; never written/deleted here
-    File f = SD.open(kCircuitPath, FILE_READ);
-    if (f) {
-      const size_t n = f.size();
-      if (n >= 72 && n <= 8192) {
-        uint8_t* b = (uint8_t*)malloc(n);
-        if (b) {
-          ok = f.read(b, n) == n && crt->c.parse(b, n);
-          free(b);
-        }
-      }
-      f.close();
-    }
-    if (ok) snprintf(circSrc, sizeof circSrc, "sd");
-    else gDiag.logf("circuit", "SD %s invalid -> embedded", kCircuitPath);
+  const char* path = want >= 0 ? cidx.e[want].path : "";
+  if (path[0] && logger.sdOk()) {  // read-only; never written/deleted here
+    ok = CircuitIndex::readFile(path, crt->c);
+    const char* bn = strrchr(path, '/');
+    if (ok) snprintf(circSrc, sizeof circSrc, "sd:%s", bn ? bn + 1 : path);
+    else gDiag.logf("circuit", "SD %s invalid -> embedded", path);
   }
+  (void)kCircuitPath;
   if (!ok) {
     ok = crt->c.parse(kEmbeddedCircuit, kEmbeddedCircuitLen);
     if (ok) snprintf(circSrc, sizeof circSrc, "%s", kEmbeddedCircuitTag);
@@ -1068,8 +1139,10 @@ static bool circuitLoad() {
     crt = nullptr;
     snprintf(circSrc, sizeof circSrc, "none");
     gDiag.logf("circuit", "LOAD FAIL (embedded parse)");
+    gCircLoaded = -1;
     return false;
   }
+  gCircLoaded = strncmp(circSrc, "sd:", 3) == 0 ? want : 0;
   crt->lt.reset();
   crt->ld.reset(crt->c);
   cfix = LiveFix();
@@ -1085,10 +1158,11 @@ static bool circuitLoad() {
 
 // Free everything (view + data). Called before any Wi-Fi use.
 static void circuitRelease(const char* why) {
-  if (!crt && !cview.active()) return;
+  if (!crt && !cview.active() && !cview.bareActive()) return;  // 0.6.9: the trail band is freed too
   cview.end();
   delete crt;
   crt = nullptr;
+  gCircLoaded = -1;
   if (ui.page == UiPage::Circuit) ui.page = UiPage::Home;
   char w[48];
   snprintf(w, sizeof w, "RELEASE why=%s", why);
@@ -1108,6 +1182,7 @@ static bool circuitOpen(const char* why) {
     uiLine = "ancla: sin circuito";
     return false;
   }
+  if (ui.page == UiPage::Trail || cview.bareActive()) trailClose("circuit-open");  // 0.6.9: one view at a time
   if (upTask.busy() || wifiScanning) {
     uiLine = "CIRCUITO: WiFi ocupado";
     gDiag.logf("circuit", "OPEN refused why=%s reason=wifi-busy", why);
@@ -1128,6 +1203,7 @@ static bool circuitOpen(const char* why) {
   }
   ui.page = UiPage::Circuit;
   cview.setMode(CircuitMode::Map);
+  if (gLastFollow && !cview.setFollow(true)) uiLine = "SEGUIR: poca RAM";  // 0.6.7: last view (NVS)
   const uint32_t t0 = millis();
   cview.drawStatic(logger.recording());
   const uint32_t ms = millis() - t0;
@@ -1135,7 +1211,7 @@ static bool circuitOpen(const char* why) {
   circRenderLogged = false;
   circLowMem = false;
   char w[64];
-  snprintf(w, sizeof w, "OPEN ok why=%s static_ms=%lu", why, (unsigned long)ms);
+  snprintf(w, sizeof w, "OPEN ok why=%s mode=%s static_ms=%lu", why, cview.modeName(), (unsigned long)ms);
   circuitLogMem(w);
   return true;
 }
@@ -1165,6 +1241,7 @@ static void circuitOnPvt() {  // every PVT (10 Hz), only while circuit data is l
   cfix.x = x;
   cfix.y = y;
   cfix.kmh = v * 3.6f;
+  cfix.head = (float)f.heading;  // 0.6.6-follow: heading of motion (track-up view)
   cfix.tS = t;
   cfix.valid = true;
 }
@@ -1172,7 +1249,10 @@ static void circuitOnPvt() {  // every PVT (10 Hz), only while circuit data is l
 static void circuitPaint() {
   if (!cview.active() || !crt) return;
   const Mem8 m = mem8();
-  if (m.free < CircuitView::kMinBig8 || m.big < CircuitView::kMinBig8) {  // low heap: skip drawing
+  // 0.6.6-follow: the follow band is pre-allocated and a frame allocates nothing -> lower floor
+  const uint32_t needFree = cview.following() ? 16000 : CircuitView::kMinBig8;
+  const uint32_t needBig = cview.following() ? 8000 : CircuitView::kMinBig8;
+  if (m.free < needFree || m.big < needBig) {  // low heap: skip drawing
     ++circSkips;
     if (!circLowMem) circuitLogMem("SKIP low-heap");
     circLowMem = true;
@@ -1223,6 +1303,521 @@ static void circuitSessionEdge(const char* why) {
   gDiag.logf("circuit", "SESSION edge why=%s lap/trace reset (bests kept)", why);
 }
 // ---- end 0.6.0-circuit --------------------------------------------------------------------------
+
+// ---- 0.6.7-autocircuit: circuit index, detection, auto open, manual choice -----------------------
+static void circToast(const char* t) {
+  snprintf(gToast, sizeof gToast, "%s", t);
+  gToastUntil = millis() + 3000;
+  if (!gToastUntil) gToastUntil = 1;
+}
+static void circIndexBuild(const char* why) {
+  const uint32_t t0 = millis();
+  if (crt && !logger.recording()) circuitRelease("index");
+  cidx.build(logger.sdOk(), kEmbeddedCircuit, kEmbeddedCircuitLen, kEmbeddedName);
+  gCircSel = gCircDet = -1;
+  gCircManual = false;
+  gDiag.logf("circuit", "INDEX why=%s n=%d legacy=%d scan[%s] ms=%lu heap=%u", why, cidx.n, cidx.legacyIdx, cidx.dbg,
+             (unsigned long)(millis() - t0), ESP.getFreeHeap());
+  if (logger.sdOk()) cidx.scanBegin();  // 0.6.7: directory verified incrementally from loop()
+  for (int i = 0; i < cidx.n; ++i)
+    gDiag.logf("circuit", "INDEX #%d name=%s src=%s len_m=%.1f anchor=%.6f,%.6f bbox_m=%.0f..%.0f,%.0f..%.0f", i,
+               cidx.e[i].name, cidx.e[i].path[0] ? cidx.e[i].path : "embedded", cidx.e[i].lenM, cidx.e[i].lat0,
+               cidx.e[i].lon0, cidx.e[i].x0, cidx.e[i].x1, cidx.e[i].y0, cidx.e[i].y1);
+}
+// <= 1 Hz on PVT. Good fix = valid, 3D, hAcc <= 5 m. Hysteresis: once detected, the choice holds until the
+// fix is > 2 km from that circuit (or reboot); GPS jumps never re-select or repeat the banner.
+static void circDetect(uint32_t nowMs) {
+  static uint32_t lastMs = 0;
+  if (role.anchor() || cidx.n == 0 || nowMs - lastMs < 1000) return;
+  const GnssFix f = gnss.snapshot();
+  if (!f.valid || f.fixType < 3 || f.accM <= 0 || f.accM > kDetectHaccM) return;
+  lastMs = nowMs;
+  cidx.updateDist(f.lat, f.lng);
+  if (gCircManual) return;
+  if (gCircDet >= 0) {
+    if (cidx.e[gCircDet].distM > kLoseM) {
+      gDiag.logf("circuit", "DETECT lost #%d name=%s dist_m=%.0f (> %.0f) rec=%d", gCircDet, cidx.e[gCircDet].name,
+                 cidx.e[gCircDet].distM, kLoseM, (int)logger.recording());
+      gCircDet = -1;
+      if (!logger.recording()) gCircSel = -1;  // a running session keeps its circuit
+    }
+    return;
+  }
+  const int i = cidx.nearest(kDetectM);
+  if (i < 0) return;
+  gCircDet = gCircSel = i;
+  char t[40];
+  snprintf(t, sizeof t, "%s detectado", cidx.e[i].name);
+  circToast(t);
+  gDiag.logf("circuit", "DETECT ok #%d name=%s dist_m=%.0f hacc=%.1f page=%s rec=%d", i, cidx.e[i].name,
+             cidx.e[i].distM, f.accM, pageName(), (int)logger.recording());
+}
+// 0.6.7: one /riderlab/circuits entry per loop iteration (only changed files are parsed)
+static void circScanService() {
+  if (!cidx.scanning() || logger.recording()) return;
+  bool changed = false;
+  if (!cidx.scanStep(changed)) return;
+  gDiag.logf("circuit", "SCAN done scan[%s] changed=%d n=%d", cidx.dbg, (int)changed, cidx.n);
+  if (changed) {
+    if (crt && gCircLoaded >= cidx.nFixed) circuitRelease("index-changed");
+    if (gCircSel >= cidx.nFixed) gCircSel = -1;
+    if (gCircDet >= cidx.nFixed) gCircDet = -1;
+    if (gCircManual && gCircSel < 0) gCircManual = false;
+    for (int i = cidx.nFixed; i < cidx.n; ++i)
+      gDiag.logf("circuit", "INDEX #%d name=%s src=%s len_m=%.1f anchor=%.6f,%.6f bbox_m=%.0f..%.0f,%.0f..%.0f", i,
+                 cidx.e[i].name, cidx.e[i].path, cidx.e[i].lenM, cidx.e[i].lat0, cidx.e[i].lon0, cidx.e[i].x0,
+                 cidx.e[i].x1, cidx.e[i].y0, cidx.e[i].y1);
+  }
+}
+static void circSelectManual(int i, const char* why) {
+  gCircManual = true;
+  gCircSel = i;
+  gDiag.logf("circuit", "SELECT manual #%d name=%s why=%s", i, cidx.e[i].name, why);
+}
+static void circSelectAuto(const char* why) {
+  gCircManual = false;
+  gCircSel = gCircDet = -1;  // re-detect on the next good fix
+  gDiag.logf("circuit", "SELECT auto why=%s", why);
+}
+static void circuitsPrint() {
+  const GnssFix f = gnss.snapshot();
+  Serial.printf("CIRCUITS n=%d sel=%d det=%d manual=%d loaded=%d autoopen=%d last_view=%s fix=%d fix_type=%u hacc=%.1f\n",
+                cidx.n, gCircSel, gCircDet, (int)gCircManual, gCircLoaded, (int)gAutoOpen,
+                gLastFollow ? "follow" : "map", (int)f.valid, (unsigned)f.fixType, f.accM);
+  int ord[CircuitIndex::kMax];
+  const int m = cidx.sorted(ord, CircuitIndex::kMax);
+  for (int k = 0; k < m; ++k) {
+    const CircEntry& e = cidx.e[ord[k]];
+    char ds[16];
+    if (e.distM < 0) snprintf(ds, sizeof ds, "?");
+    else snprintf(ds, sizeof ds, "%.0f", e.distM);
+    Serial.printf("CIRCUITS %d. #%d name=%s src=%s dist_m=%s len_m=%.1f anchor=%.6f,%.6f%s%s\n", k + 1, ord[k], e.name,
+                  e.path[0] ? e.path : "embedded", ds, e.lenM, e.lat0, e.lon0, ord[k] == gCircSel ? " SELECTED" : "",
+                  ord[k] == gCircDet ? " DETECTED" : "");
+  }
+}
+static void circListFill() {
+  int ord[CircuitIndex::kMax];
+  const int m = cidx.sorted(ord, CircuitIndex::kMax);
+  const int k = m > 4 ? 4 : m;
+  ui.circSel = 0;
+  for (int r = 0; r < k; ++r) {
+    const CircEntry& e = cidx.e[ord[r]];
+    gListIdx[r] = ord[r];
+    snprintf(ui.circName[r], sizeof ui.circName[r], "%s", e.name);
+    char ds[12];
+    if (e.distM < 0) snprintf(ds, sizeof ds, "--");
+    else if (e.distM < 1000) snprintf(ds, sizeof ds, "%.0f m", e.distM);
+    else snprintf(ds, sizeof ds, "%.1f km", e.distM / 1000.f);
+    const char* tag = ord[r] == gCircSel ? (gCircManual ? " elegido" : " detectado") : "";
+    snprintf(ui.circInfo[r], sizeof ui.circInfo[r], "%s%s", ds, tag);
+    if (ord[r] == gCircSel) ui.circSel = r;
+  }
+  gListIdx[k] = -1;
+  snprintf(ui.circName[k], sizeof ui.circName[k], "AUTOMATICO");
+  snprintf(ui.circInfo[k], sizeof ui.circInfo[k], "%s", gCircManual ? "" : "activo");
+  ui.circN = k + 1;
+}
+static void circMenuOpen() {  // Menu > CIRCUITO
+  if (cidx.n <= 1) {  // one circuit: open directly (as 0.6.6)
+    if (!circuitOpen("menu")) ui.page = UiPage::Home;
+    return;
+  }
+  circListFill();
+  ui.page = UiPage::CircuitList;
+}
+static void circAutoOpenService(uint32_t nowMs) {
+  if (!gCircAutoOpenPending || (int32_t)(nowMs - gCircAutoOpenAt) < 0) return;
+  gCircAutoOpenPending = false;
+  if (!logger.recording() || ui.page == UiPage::Circuit || gCircSel < 0 || gCircSel >= cidx.n) return;
+  const UiPage prev = ui.page;
+  const uint32_t t0 = millis();
+  const bool ok = circuitOpen("auto-session");
+  if (!ok) ui.page = prev;
+  const Mem8 m = mem8();
+  gDiag.logf("circuit", "AUTOOPEN %s name=%s mode=%s ms=%lu reason=%s free8=%lu big8=%lu min8=%lu", ok ? "ok" : "FAIL",
+             cidx.e[gCircSel].name, ok ? cview.modeName() : "-", (unsigned long)(millis() - t0),
+             ok ? "-" : uiLine.c_str(), (unsigned long)m.free, (unsigned long)m.big, (unsigned long)m.min);
+  paint(gnss.snapshot());
+}
+// ---- end 0.6.7-autocircuit -------------------------------------------------------------------------
+
+// ---- 0.6.9-trail: session with NO circuit -> rider trail (CircuitView bare follow) + speed top-right ----
+// Local frame: first good fix of the session (re-anchored at 2.5 km so the int16 dm trail never overflows).
+// Heap: only the follow band + trail ring (CircuitView::followAlloc, same limits as FOLLOW); nothing static
+// beyond a few scalars. Freed when the page closes (session stop, B, circuit open, any cview.end()).
+static LiveFix tfix;
+static bool gTrAnch = false;
+static double gTrLat0 = 0, gTrLon0 = 0, gTrKx = 1, gTrKy = 1;
+static uint32_t trSkips = 0;
+static void trailResetAnchor() {
+  gTrAnch = false;
+  tfix = LiveFix();
+}
+static void trailOnPvt() {  // every PVT while recording (cheap: a few float ops)
+  if (!logger.recording() || role.anchor()) return;
+  const GnssFix f = gnss.snapshot();
+  if (!f.valid || (f.accM > 0 && f.accM > 8.0)) {  // same quality gate as circuitOnPvt
+    tfix.valid = false;
+    return;
+  }
+  if (!gTrAnch) {
+    gTrLat0 = f.lat;
+    gTrLon0 = f.lng;
+    CircuitIndex::kxy(f.lat, gTrKx, gTrKy);
+    gTrAnch = true;
+  }
+  float x = (float)((f.lng - gTrLon0) * gTrKx), y = (float)((f.lat - gTrLat0) * gTrKy);
+  if (fabsf(x) > 2500.f || fabsf(y) > 2500.f) {
+    cview.bareShift(x, y);  // trail kept continuous in the new frame
+    gTrLat0 = f.lat;
+    gTrLon0 = f.lng;
+    CircuitIndex::kxy(f.lat, gTrKx, gTrKy);
+    x = y = 0;
+  }
+  const float v = f.speedMps > 0 ? (float)f.speedMps : 0.f;
+  tfix.x = x;
+  tfix.y = y;
+  tfix.kmh = v * 3.6f;
+  tfix.head = (float)f.heading;
+  tfix.tS = f.utcMs / 1000.0;
+  tfix.valid = true;
+}
+// 0.6.9b: y 0..41 = the home status bar (same drawing, icons refreshed on change); y 42..77 = speed row
+// (km/h, same rounding as home, right aligned, overwritten in place = no flicker); map from kTrailTop.
+static constexpr int kTrailTop = 78;
+static void trailHeader(bool force) {
+  const GnssFix f = gnss.snapshot();
+  char spd[8];
+  if (f.valid) snprintf(spd, sizeof spd, "%.0f", f.speedMps > 0 ? f.speedMps * 3.6 : 0.0);
+  else snprintf(spd, sizeof spd, "--");
+  static char last[8] = "";
+  auto& d = M5.Display;
+  if (force) {
+    drawHomeBar(ui);  // badge + icons + RIDER chip, exactly as the home screen
+    d.fillRect(0, 42, 320, kTrailTop - 42, C_BG);
+    last[0] = 0;
+  }
+  d.startWrite();
+  if (!force) drawHomeStatus(ui, false);  // only the icons whose state changed (ui filled by paint())
+  if (force || strcmp(spd, last) != 0) {
+    strcpy(last, spd);
+    d.setTextDatum(lgfx::textdatum_t::middle_right);
+    d.setTextSize(1);
+    d.setFont(&fonts::FreeSansBold18pt7b);
+    d.setTextColor(f.valid ? C_FG : C_LV_GRY, C_BG);
+    d.setTextPadding(104);  // overwrite the previous value (no clear -> no flicker)
+    d.drawString(spd, 270, 60);
+    d.setTextPadding(0);
+    if (force) {
+      d.setFont(&fonts::Font2);
+      d.setTextDatum(lgfx::textdatum_t::middle_left);
+      d.setTextColor(C_MUTED, C_BG);
+      d.drawString("km/h", 276, 64);
+    }
+  }
+  d.setFont(&fonts::Font0);
+  d.endWrite();
+}
+static void trailDrawStatic() {
+  trailHeader(true);
+  drawButtonBar(M5.Display, logger.recording() ? "STOP" : "REC", "VELOC.", logger.recording() ? "MARK" : " ");
+  cview.bareUpdate(tfix);
+}
+static bool trailOpen(const char* why) {
+  if (ui.page == UiPage::Trail && cview.bareActive()) return true;
+  if (role.anchor() || !logger.recording()) return false;
+  if (ui.page == UiPage::Circuit || cview.active()) return false;  // the circuit view has priority
+  if (upTask.busy() || wifiScanning) {
+    uiLine = "RASTRO: WiFi ocupado";
+    return false;
+  }
+  if (!cview.beginBare(kTrailTop)) {
+    uiLine = "RASTRO: poca RAM";  // home speedometer stays
+    const Mem8 m = mem8();
+    gDiag.logf("trail", "OPEN refused why=%s reason=heap free8=%lu big8=%lu", why, (unsigned long)m.free,
+               (unsigned long)m.big);
+    return false;
+  }
+  ui.page = UiPage::Trail;
+  const uint32_t t0 = millis();
+  trailDrawStatic();
+  const Mem8 m = mem8();
+  gDiag.logf("trail", "OPEN ok why=%s band=%d zoom=%.0f static_ms=%lu anchor=%d free8=%lu big8=%lu min8=%lu", why,
+             cview.followBand(), cview.followZoom(), (unsigned long)(millis() - t0), (int)gTrAnch,
+             (unsigned long)m.free, (unsigned long)m.big, (unsigned long)m.min);
+  return true;
+}
+static void trailClose(const char* why) {
+  if (!cview.bareActive() && ui.page != UiPage::Trail) return;
+  cview.endBare();
+  if (ui.page == UiPage::Trail) ui.page = UiPage::Home;
+  const Mem8 m = mem8();
+  gDiag.logf("trail", "CLOSE why=%s free8=%lu big8=%lu", why, (unsigned long)m.free, (unsigned long)m.big);
+}
+static void trailService(uint32_t nowMs) {
+  if (gTrailPending && (int32_t)(nowMs - gTrailAt) >= 0) {
+    gTrailPending = false;
+    if (logger.recording() && ui.page == UiPage::Home && gCircSel < 0) trailOpen("auto-session");
+  }
+  if (ui.page != UiPage::Trail) return;
+  if (!logger.recording() || !cview.bareActive()) {  // session over, or band freed (circuit/Wi-Fi release)
+    trailClose(logger.recording() ? "band-lost" : "stop");
+    paint(gnss.snapshot());
+    return;
+  }
+  // same cadence as FOLLOW: every new fix (10 Hz) or at least every 300 ms
+  static double trT = -1;
+  static uint32_t trMs = 0, trLogMs = 0;
+  if ((tfix.valid && tfix.tS != trT) || nowMs - trMs >= 300) {
+    trT = tfix.tS;
+    trMs = nowMs;
+    const Mem8 m = mem8();
+    if (m.free < 16000 || m.big < 8000) ++trSkips;  // same low-heap floor as the follow paint
+    else cview.bareUpdate(tfix);
+    trailHeader(false);
+  }
+  if (nowMs - trLogMs >= 10000) {
+    trLogMs = nowMs;
+    const Mem8 m = mem8();
+    gDiag.logf("trail", "fps=%.1f render_ms=%.1f max_ms=%.1f band=%d zoom=%.0f head=%.0f live=%d fix=%d skips=%lu "
+               "free8=%lu big8=%lu min8=%lu", cview.followFps(), cview.followMsAvg(), cview.followMsMax(),
+               cview.followBand(), cview.followZoom(), cview.followHead(), (int)cview.followHeadLive(),
+               (int)tfix.valid, (unsigned long)trSkips, (unsigned long)m.free, (unsigned long)m.big,
+               (unsigned long)m.min);
+  }
+}
+// ---- end 0.6.9-trail ----
+
+// ---------------- 0.6.8-ble: Bluetooth pairing mode ----------------
+static void bleHeap(const char* tag) {
+  gDiag.logf("ble", "%s heap=%lu free8=%lu big8=%lu min8=%lu", tag, (unsigned long)ESP.getFreeHeap(),
+             (unsigned long)heap_caps_get_free_size(MALLOC_CAP_8BIT),
+             (unsigned long)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT),
+             (unsigned long)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT));
+}
+static String bleName() {
+  uint8_t mac[6] = {};
+  esp_read_mac(mac, ESP_MAC_WIFI_STA);
+  char b[20];
+  snprintf(b, sizeof b, "Metrica-%02X%02X", mac[4], mac[5]);
+  return String(b);
+}
+static String bleJsonEsc(const String& v) {
+  String o;
+  for (size_t i = 0; i < v.length(); ++i) {
+    const char c = v[i];
+    if (c == '"' || c == '\\') { o += '\\'; o += c; }
+    else if ((uint8_t)c >= 0x20) o += c;
+  }
+  return o;
+}
+static String bleInfoJson() {
+  uint8_t mac[6] = {};
+  esp_read_mac(mac, ESP_MAC_WIFI_STA);
+  char hw[16];
+  snprintf(hw, sizeof hw, "%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  String s = String("{\"hw\":\"") + hw + "\",\"fw\":\"" + FIRMWARE_VERSION + "\",\"role\":\"" +
+             role.roleName() + "\",\"paired\":" + (uploader.paired() ? "true" : "false") +
+             ",\"device_id\":\"" + bleJsonEsc(uploader.paired() ? uploader.deviceIdMasked() : String("")) + "\",\"wifi\":" +
+             (uploader.wifiReady() ? "true" : "false") + ",\"authed\":" + (gBleAuthed ? "true" : "false") +
+             ",\"mtu\":" + String((int)ble.mtu()) + "}";
+  return s;
+}
+// minimal JSON string field reader: "key" : "value" (handles \" \\ \/ escapes). false = missing.
+static bool jsonStr(const char* js, const char* key, String& out) {
+  char pat[32];
+  snprintf(pat, sizeof pat, "\"%s\"", key);
+  const char* p = strstr(js, pat);
+  if (!p) return false;
+  p += strlen(pat);
+  while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') ++p;
+  if (*p != ':') return false;
+  ++p;
+  while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') ++p;
+  if (*p != '"') return false;
+  ++p;
+  out = "";
+  while (*p && *p != '"') {
+    if (*p == '\\') {
+      ++p;
+      if (!*p) return false;
+      if (*p != '"' && *p != '\\' && *p != '/') return false;
+    }
+    out += *p++;
+    if (out.length() > 300) return false;
+  }
+  return *p == '"';
+}
+static bool bleTokenOk(const String& v, size_t lo, size_t hi) {
+  if (v.length() < lo || v.length() > hi) return false;
+  for (size_t i = 0; i < v.length(); ++i) {
+    const char c = v[i];
+    if (!(isalnum((unsigned char)c) || c == '-' || c == '_' || c == '.')) return false;
+  }
+  return true;
+}
+static void bleStatus(bool ok, const char* what, const String& extra = "") {
+  String j = String("{\"ok\":") + (ok ? "true" : "false") + (ok ? ",\"msg\":\"" : ",\"err\":\"") + what + "\"" +
+             extra + "}";
+  ble.notify(j);
+  gBleLine = String(ok ? "" : "ERR ") + what;
+  gDiag.logf("ble", "STATUS %s", j.c_str());  // never carries a secret
+}
+static const char* bleRefuse() {
+  if (logger.recording()) return "grabando";
+  if (WiFi.getMode() != WIFI_OFF || wifiScanning || upTask.busy()) return "WiFi activo";
+  return nullptr;
+}
+static bool bleEnter(const char* why) {
+  if (ble.on()) return true;
+  if (const char* r = bleRefuse()) {
+    uiLine = String("BLE no: ") + r;
+    gDiag.logf("ble", "ENTER refused why=%s (%s)", why, r);
+    return false;
+  }
+  if (gBtMemFree) {  // controller memory was released at boot -> reboot into pairing mode
+    Preferences p;
+    if (p.begin("rl_ble", false)) {
+      p.putUChar("boot", strcmp(why, "serial") == 0 ? 2 : 1);
+      p.end();
+    }
+    gDiag.logf("ble", "ENTER why=%s -> restart into pairing mode", why);
+    Serial.println("BLE restart-to-pair");
+    auto& d = M5.Display;
+    d.fillScreen(C_BG);
+    d.setTextDatum(lgfx::textdatum_t::middle_center);
+    d.setFont(&fonts::Font4);
+    d.setTextColor(C_FG, C_BG);
+    d.drawString("EMPAREJAR...", 160, 120);
+    d.setFont(&fonts::Font0);
+    Serial.flush();
+    delay(300);
+    ESP.restart();
+    return false;
+  }
+  circuitRelease("ble");  // keep the heap for the BLE stack
+  bleHeap("pre");
+  const String nm = bleName();
+  snprintf(gBlePin, sizeof gBlePin, "%06lu", (unsigned long)(esp_random() % 1000000UL));
+  gBleBad = 0;
+  gBleAuthed = false;
+  gBleExitAt = 0;
+  gBleExitWhy = "done";
+  if (!ble.begin(nm.c_str())) {
+    uiLine = "BLE fallo init";
+    bleHeap("init-fail");
+    return false;
+  }
+  gBleT0 = millis();
+  ble.setInfo(bleInfoJson());
+  gBleLine = "Abre la app RiderLab";
+  snprintf(ui.bleName, sizeof ui.bleName, "%s", nm.c_str());
+  ui.page = UiPage::BlePair;
+  gDiag.logf("ble", "ON name=%s why=%s", nm.c_str(), why);
+  bleHeap("on");
+  return true;
+}
+static void bleExit(const char* why) {
+  if (!ble.on()) return;
+  bleHeap("before-off");
+  ble.end();
+  const esp_err_t rel = esp_bt_controller_mem_release(ESP_BT_MODE_BTDM);  // controller RAM back to heap
+  gBtMemFree = true;
+  gBleAuthed = false;
+  gBlePin[0] = 0;
+  gDiag.logf("ble", "OFF why=%s mem_release=%d", why, (int)rel);
+  bleHeap("off");
+  uiLine = String("BLE fin: ") + why;
+  // The NimBLE allocations split the big DRAM block (largest ~35 KB after deinit, TLS upload needs 40 KB),
+  // so when nothing is recording the mode ends with a clean restart (heap as a normal boot).
+  if (!logger.recording() && strcmp(why, "rec-start") != 0) {
+    Serial.printf("BLE off why=%s -> restart (clean heap)\n", why);
+    auto& d = M5.Display;
+    d.fillScreen(C_BG);
+    d.setTextDatum(lgfx::textdatum_t::middle_center);
+    d.setFont(&fonts::Font4);
+    d.setTextColor(strcmp(why, "paired") == 0 ? C_OK : C_FG, C_BG);
+    d.drawString(strcmp(why, "paired") == 0 ? "EMPAREJADO" : "BLE FIN", 160, 110);
+    d.setFont(&fonts::Font2);
+    d.setTextColor(C_MUTED, C_BG);
+    d.drawString(why, 160, 140);
+    d.setFont(&fonts::Font0);
+    Serial.flush();
+    delay(1200);
+    ESP.restart();
+  }
+  if (ui.page == UiPage::BlePair) ui.page = UiPage::Home;
+}
+static void bleService(uint32_t now) {
+  if (!ble.on()) return;
+  if (now - gBleT0 > riderlab::BlePair::kTimeoutMs) { bleExit("timeout"); return; }
+  if (gBleExitAt && (int32_t)(now - gBleExitAt) >= 0) { bleExit(gBleExitWhy); return; }
+  if (const char* r = bleRefuse()) { bleExit(r); return; }
+  if (ble.takeDisconnect()) {
+    if (gBleAuthed) gDiag.logf("ble", "disconnect (auth reset)");
+    gBleAuthed = false;
+    ble.setInfo(bleInfoJson());
+  }
+  riderlab::BlePair::Msg m;
+  if (ble.take(m)) {
+    const String v(m.data);
+    if (m.kind == riderlab::BlePair::K_AUTH) {
+      String pin = v;
+      pin.trim();
+      if (gBleAuthed) bleStatus(true, "auth_ok");
+      else if (pin == gBlePin) {
+        gBleAuthed = true;
+        bleStatus(true, "auth_ok");
+      } else {
+        ++gBleBad;
+        const int left = riderlab::BlePair::kMaxBadPin - gBleBad;
+        bleStatus(false, "bad_pin", String(",\"left\":") + left);
+        if (left <= 0) { gBleExitAt = now + 600; gBleExitWhy = "bad-pin"; }
+      }
+      ble.setInfo(bleInfoJson());
+    } else if (!gBleAuthed) {
+      bleStatus(false, "auth_required");
+    } else if (m.kind == riderlab::BlePair::K_PAIR) {
+      String id, sec, url;
+      if (v.indexOf('{') < 0 || v.indexOf('}') < 0) bleStatus(false, "bad_json");
+      else if (!jsonStr(m.data, "device_id", id) ||
+               (!jsonStr(m.data, "secret", sec) && !jsonStr(m.data, "device_secret", sec)) ||
+               !jsonStr(m.data, "ingest_url", url))
+        bleStatus(false, "missing_fields");
+      else if (!bleTokenOk(id, 3, 64) || !bleTokenOk(sec, 16, 128) || !url.startsWith("https://") ||
+               url.length() > 200)
+        bleStatus(false, "bad_fields");
+      else {
+        uploader.saveCredentials(id, sec, url);  // same store as serial PAIR
+        uiLine = "Paired";
+        gDiag.logf("ble", "PAIR saved device_id=%s url_len=%d", uploader.deviceIdMasked().c_str(), (int)url.length());
+        ble.setInfo(bleInfoJson());
+        bleStatus(true, "paired");
+        gBleExitWhy = "paired";
+        gBleExitAt = now + 3000;  // let the app read STATUS / INFO, then finish
+      }
+    } else if (m.kind == riderlab::BlePair::K_WIFI) {
+      String ssid, pass;
+      if (v.indexOf('{') < 0) bleStatus(false, "bad_json");
+      else if (!jsonStr(m.data, "ssid", ssid) || !jsonStr(m.data, "pass", pass)) bleStatus(false, "missing_fields");
+      else if (!ssid.length() || ssid.length() > 32 || pass.length() > 64) bleStatus(false, "bad_fields");
+      else {
+        if (!gWifiSnap.ok) gWifiSnap = uploader.snapshotWifi();
+        uploader.setActiveKeepOld(ssid, pass);  // same as serial WIFISET
+        gDiag.logf("ble", "WIFI saved ssid=%s pass=%s", ssid.c_str(), WifiUploader::mask(pass).c_str());
+        ble.setInfo(bleInfoJson());
+        bleStatus(true, "wifi_saved");
+      }
+    }
+  }
+  const uint32_t left = (riderlab::BlePair::kTimeoutMs - (now - gBleT0)) / 1000;
+  ui.bleLeftS = (int)left;
+  ui.bleConn = ble.connected();
+  ui.bleAuthed = gBleAuthed;
+  snprintf(ui.blePin, sizeof ui.blePin, "%s", gBlePin);
+  snprintf(ui.bleLine, sizeof ui.bleLine, "%s", gBleLine.c_str());
+}
 
 static void tryWifiNow() {
   if (logger.recording()) {
@@ -1397,8 +1992,14 @@ static void printHelp() {
       "  AUTO START <kmh> <s> | AUTO STOP <kmh> <s> | AUTO FIXLOSS <s> | AUTO HACC <m>\n"
       "  AUTO IDLEHZ <1..10> | AUTO DEFAULTS   GNSS rate while armed (default 1)\n"
       "  SIMSPD <kmh> | SIMSPD OFF          bench: fake speed for the auto logic only\n"
-      "  SIMPOS ON|OFF|?                    bench: positions from serial (P lines), sessions not uploaded\n"
+      "  SIMPOS ON|OFF|?                    bench: positions from serial (P lines); sessions upload like real ones (0.6.9b)\n"
       "  P <utc_ms> <lat_e7> <lon_e7> <hmsl_mm> <gspeed_mm_s> <head_e5> <hacc_mm> <nsv>   (SIMPOS, no echo)\n"
+      "  VIEW | VIEW FOLLOW|MAP|TOGGLE      circuit view; FOLLOW = rider-centred track-up (hold C on the page)\n"
+      "  VIEW TRAIL | VIEW SPEED        0.6.9: no-circuit session view: fading trail + speed / home speedometer (hold B on home)\n"
+      "  CIRCUITS? | CIRCUIT SELECT <n|AUTO> | AUTOOPEN ON|OFF|?  (0.6.7 circuit index / auto detect / auto open)\n"
+      "  BLE PAIR | BLE OFF | BLE?  (0.6.8 pairing mode, bench) | WIFIUNDO (undo BLE WIFI of this boot)\n"
+  "  CIRCUIT TESTWRITE | CIRCUIT TESTDEL | CIRCUIT REINDEX     bench: Bugambilias test circuit (one fixed file)\n"
+  "  FOLLOW ZOOM <m> | FOLLOW FADE <s>  follow width m (150) / trail fade s (25), NVS | SHOT = screen dump\n"
       "  DIM ON|OFF | DIM <s> <pct> | DIM?  standby dim (default ON 30 s 12 pct)\n"
       "  GNSS | GNSSCFG | PINSCAN | IMU | BARO\n"
       "  WIFI ssid|pass  PAIR id|secret|url  AZURE key|url  WIFISCAN\n"
@@ -1558,9 +2159,154 @@ static bool simPosSerial(const String& line) {
   return true;
 }
 
+// ===================================================================================================
+// 0.6.6-follow: rider-centred track-up circuit view (CircuitView Follow) + bench screenshot.
+//   VIEW | VIEW? | VIEW FOLLOW | VIEW MAP | VIEW TOGGLE      (opens the circuit page if needed)
+//   FOLLOW ZOOM <m> | FOLLOW ZOOM?                            metres across the screen (20..400, NVS)
+//   SHOT                                                      LCD readback -> serial (RLE565 + base64)
+// Button: on the circuit page HOLD C (1 s) toggles Follow <-> previous view (A = rec/stop, B = exit,
+// C click = cycle views stay as in 0.6.4; hold C was unused on that page).
+static void viewLoad() {
+  Preferences p;
+  if (!p.begin("rl_view", false)) return;
+  // 02:00: default zoom 60 -> 100 m; 0.6.9c: 100 -> 150 m. A zoom saved before the change (fzv < 2) is
+  // dropped once, so every device takes the new default.
+  if (p.getUChar("fzv", 0) < 2) {
+    p.remove("fz");
+    p.putUChar("fzv", 2);
+  }
+  cview.setFollowZoom(p.getFloat("fz", CircuitView::kZoomDefault));
+  cview.setFollowFade(p.getFloat("ff", 25.f));
+  gLastFollow = p.getUChar("lv", 1) != 0;  // 0.6.7
+  gAutoOpen = p.getUChar("ao", 1) != 0;    // 0.6.7
+  p.end();
+}
+// 0.6.7: remember FOLLOW vs MAP (any other view counts as MAP) for the next open
+static void viewRemember() {
+  if (!cview.active()) return;
+  const bool f = cview.following();
+  if (f == gLastFollow) return;
+  gLastFollow = f;
+  Preferences p;
+  if (p.begin("rl_view", false)) {
+    p.putUChar("lv", f ? 1 : 0);
+    p.end();
+  }
+  gDiag.logf("circuit", "LASTVIEW %s saved", f ? "follow" : "map");
+}
+static void viewSave() {
+  Preferences p;
+  if (!p.begin("rl_view", false)) return;
+  p.putFloat("fz", cview.followZoom());
+  p.putFloat("ff", cview.followFade());
+  p.end();
+}
+static void viewPrint() {
+  const Mem8 m = mem8();
+  Serial.printf("VIEW page=%s mode=%s follow=%d zoom_m=%.0f fade_s=%.0f band_rows=%d fps=%.1f render_ms=%.1f max_ms=%.1f "
+                "frames=%lu head=%.1f head_live=%d free8=%lu big8=%lu min8=%lu\n",
+                pageName(), cview.active() ? cview.modeName() : (cview.bareActive() ? "trail" : "closed"), (int)cview.following(),
+                cview.followZoom(), cview.followFade(), cview.followBand(), cview.followFps(), cview.followMsAvg(),
+                cview.followMsMax(), (unsigned long)cview.followFrames(), cview.followHead(),
+                (int)cview.followHeadLive(), (unsigned long)m.free, (unsigned long)m.big, (unsigned long)m.min);
+}
+static bool viewFollow(bool on, const char* why) {
+  if (on && ui.page != UiPage::Circuit && !circuitOpen(why)) return false;
+  if (!cview.active()) return false;
+  const bool ok = cview.setFollow(on);
+  cview.drawStatic(logger.recording());
+  gDiag.logf("circuit", "VIEW %s why=%s ok=%d band=%d zoom=%.0f", cview.modeName(), why, (int)ok,
+             cview.followBand(), cview.followZoom());
+  if (!ok) uiLine = "SEGUIR: poca RAM";
+  viewRemember();  // 0.6.7
+  return ok;
+}
+static void b64row(const uint8_t* in, size_t n, char* out) {
+  static const char* T = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  size_t o = 0;
+  for (size_t i = 0; i < n; i += 3) {
+    const uint32_t v = (uint32_t)in[i] << 16 | (i + 1 < n ? (uint32_t)in[i + 1] << 8 : 0) | (i + 2 < n ? in[i + 2] : 0);
+    out[o++] = T[(v >> 18) & 63];
+    out[o++] = T[(v >> 12) & 63];
+    out[o++] = i + 1 < n ? T[(v >> 6) & 63] : '=';
+    out[o++] = i + 2 < n ? T[v & 63] : '=';
+  }
+  out[o] = 0;
+}
+static void screenShot() {  // bench only: blocks the loop ~1-3 s
+  // 0.6.8: buffers on the heap only while a shot runs (static DRAM went to the BLE controller)
+  uint8_t* mem = (uint8_t*)malloc(2 * 320 + 3 * 320 + 4 * 320 + 8);
+  if (!mem) { Serial.println("SHOT ERR heap"); return; }
+  uint16_t* row = (uint16_t*)mem;
+  uint8_t* rle = mem + 2 * 320;
+  char* b64 = (char*)(mem + 5 * 320);
+  auto& d = M5.Display;
+  const int w = d.width(), h = d.height();
+  const uint32_t t0 = millis();
+  Serial.printf("SHOT BEGIN w=%d h=%d fmt=rle565b64 page=%s mode=%s\n", w, h, pageName(),
+                cview.active() ? cview.modeName() : "-");
+  for (int y = 0; y < h; ++y) {
+    d.readRect(0, y, w, 1, row);
+    size_t n = 0;
+    for (int x = 0; x < w;) {
+      int r = 1;
+      while (x + r < w && r < 256 && row[x + r] == row[x]) ++r;
+      rle[n++] = (uint8_t)(r - 1);
+      rle[n++] = (uint8_t)(row[x] & 0xFF);
+      rle[n++] = (uint8_t)(row[x] >> 8);
+      x += r;
+    }
+    b64row(rle, n, b64);
+    Serial.printf("R %d %s\n", y, b64);
+    wdtFeed();
+  }
+  Serial.printf("SHOT END ms=%lu\n", (unsigned long)(millis() - t0));
+  free(mem);
+}
+static bool viewSerial(const String& line) {
+  float f1;
+  if (line == "VIEW" || line == "VIEW?") {
+  } else if (line == "VIEW FOLLOW") {
+    viewFollow(true, "serial");
+  } else if (line == "VIEW MAP") {
+    if (ui.page != UiPage::Circuit) circuitOpen("serial");
+    if (cview.active()) {
+      cview.setMode(CircuitMode::Map);
+      cview.drawStatic(logger.recording());
+      viewRemember();  // 0.6.7
+    }
+  } else if (line == "VIEW TRAIL") {  // 0.6.9: needs a session and no circuit page
+    if (!trailOpen("serial")) Serial.println("VIEW TRAIL refused (no session / circuit open / heap)");
+  } else if (line == "VIEW SPEED") {  // 0.6.9: home speedometer
+    if (ui.page == UiPage::Trail) {
+      trailClose("serial-speed");
+      paint(gnss.snapshot());
+    }
+  } else if (line == "VIEW TOGGLE") {
+    viewFollow(!cview.following(), "serial");
+  } else if (line == "FOLLOW ZOOM?" || line == "FOLLOW ZOOM") {
+  } else if (sscanf(line.c_str(), "FOLLOW ZOOM %f", &f1) == 1) {
+    cview.setFollowZoom(f1);
+    viewSave();
+    if (cview.following()) cview.drawStatic(logger.recording());
+  } else if (sscanf(line.c_str(), "FOLLOW FADE %f", &f1) == 1) {
+    cview.setFollowFade(f1);
+    viewSave();
+  } else if (line == "SHOT") {
+    screenShot();
+    return true;
+  } else {
+    return false;
+  }
+  viewPrint();
+  return true;
+}
+
 static void handleSerialLine(String line) {
   if (simPosSerial(line)) {
     // 0.6.5-simpos: SIMPOS / P lines
+  } else if (viewSerial(line)) {
+    // 0.6.6-follow: VIEW / FOLLOW ZOOM / SHOT
   } else if (autoSerial(line)) {
     // 0.6.3-auto: AUTO / SIMSPD / DIM
   } else if (line == "HELP" || line == "?") {
@@ -1665,6 +2411,78 @@ static void handleSerialLine(String line) {
   } else if (line == "COLOC END") {
     coloc = false;
     mark("coloc_end", 0, "serial");
+  } else if (line == "BLE PAIR" || line == "BLE OFF" || line == "BLE?") {  // 0.6.8 bench
+    if (line == "BLE PAIR") {
+      if (bleEnter("serial")) Serial.printf("BLE PIN %s\n", gBlePin);  // USB already allows PAIR directly
+    } else if (line == "BLE OFF") {
+      bleExit("serial");
+    }
+    Serial.printf("BLE on=%d btmem_free=%d conn=%d authed=%d bad=%d mtu=%d conns=%lu left_s=%ld heap=%lu big8=%lu min8=%lu\n",
+                  (int)ble.on(), (int)gBtMemFree, (int)ble.connected(), (int)gBleAuthed, gBleBad, (int)ble.mtu(),
+                  (unsigned long)ble.connects(),
+                  ble.on() ? (long)((riderlab::BlePair::kTimeoutMs - (millis() - gBleT0)) / 1000) : 0L,
+                  (unsigned long)ESP.getFreeHeap(),
+                  (unsigned long)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT),
+                  (unsigned long)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT));
+  } else if (line == "WIFIUNDO") {  // 0.6.8: undo the BLE WIFI write(s) of this boot
+    if (gWifiSnap.ok) {
+      uploader.restoreWifi(gWifiSnap);
+      gWifiSnap = WifiUploader::WifiSnap();
+      Serial.println("WIFIUNDO restored");
+    } else {
+      Serial.println("WIFIUNDO nothing");
+    }
+    uploader.printSlots();
+  } else if (line == "UPLOAD HOLD" || line == "UPLOAD RESUME" || line == "UPLOAD?") {  // 0.6.7
+    if (line != "UPLOAD?") {
+      gUpHold = line == "UPLOAD HOLD";
+      Preferences p;
+      if (p.begin("rl_up", false)) {
+        p.putUChar("hold", gUpHold ? 1 : 0);
+        p.end();
+      }
+      if (gUpHold) cancelUpload("hold");
+      gDiag.logf("upload", "HOLD %d (serial)", (int)gUpHold);
+    }
+    Serial.printf("UPLOAD hold=%d pending=%d recovering=%d\n", (int)gUpHold, rides.pendingCount(),
+                  (int)rides.recovering());
+  } else if (line == "CIRCUITS?" || line == "CIRCUITS") {  // 0.6.7-autocircuit
+    circuitsPrint();
+  } else if (line.startsWith("CIRCUIT SELECT ")) {
+    const String a = line.substring(15);
+    if (a == "AUTO") circSelectAuto("serial");
+    else if (a.length() && isDigit(a[0]) && a.toInt() < cidx.n) circSelectManual(a.toInt(), "serial");
+    else Serial.println("CIRCUIT SELECT ERR (n|AUTO)");
+    circuitsPrint();
+  } else if (line == "AUTOOPEN ON" || line == "AUTOOPEN OFF") {
+    gAutoOpen = line == "AUTOOPEN ON";
+    Preferences p;
+    if (p.begin("rl_view", false)) {
+      p.putUChar("ao", gAutoOpen ? 1 : 0);
+      p.end();
+    }
+    Serial.printf("AUTOOPEN %s\n", gAutoOpen ? "ON" : "OFF");
+  } else if (line == "AUTOOPEN?" || line == "AUTOOPEN") {
+    Serial.printf("AUTOOPEN %s\n", gAutoOpen ? "ON" : "OFF");
+  } else if (line == "CIRCUIT TESTWRITE" || line == "CIRCUIT TESTDEL") {  // bench only, one fixed file
+    if (logger.recording() || !logger.sdOk()) {
+      Serial.println("CIRCUIT TEST refused (recording or no SD)");
+    } else if (line == "CIRCUIT TESTWRITE") {
+      String why;
+      const size_t n = CircuitIndex::writeTest(why);
+      Serial.printf("CIRCUIT TESTWRITE %s bytes=%u path=%s\n", why.c_str(), (unsigned)n, CircuitIndex::kTestPath);
+      gDiag.logf("circuit", "TESTWRITE %s bytes=%u path=%s", why.c_str(), (unsigned)n, CircuitIndex::kTestPath);
+      if (n) circIndexBuild("testwrite");
+    } else {
+      const bool ok = CircuitIndex::deleteTest();
+      Serial.printf("CIRCUIT TESTDEL %s path=%s\n", ok ? "ok" : "absent/fail", CircuitIndex::kTestPath);
+      gDiag.logf("circuit", "TESTDEL %s path=%s", ok ? "ok" : "absent/fail", CircuitIndex::kTestPath);
+      circIndexBuild("testdel");
+    }
+    circuitsPrint();
+  } else if (line == "CIRCUIT REINDEX") {
+    if (!logger.recording()) circIndexBuild("serial");
+    circuitsPrint();
   } else if (line == "CIRCUIT" || line == "CIRCUIT?") {  // 0.6.0
     circuitStatus();
   } else if (line == "CIRCUIT OPEN") {
@@ -1682,6 +2500,7 @@ static void handleSerialLine(String line) {
       cview.drawStatic(logger.recording());
       gDiag.logf("circuit", "MODE %s elev=%d static_ms=%lu", cview.modeName(), (int)cview.elevOk(),
                  (unsigned long)(millis() - t0));
+      viewRemember();  // 0.6.7
       paint(gnss.snapshot());
     }
     circuitStatus();
@@ -1917,11 +2736,24 @@ void setup() {
   M5.begin(cfg);
   Serial.begin(115200);
   delay(50);
+  // 0.6.8-ble: only BLE is ever used -> Classic-BT controller memory back to the heap now; the BLE part
+  // too unless this boot was requested for pairing.
+  {
+    Preferences p;
+    if (p.begin("rl_ble", false)) {
+      gBlePairBoot = p.getUChar("boot", 0);
+      if (gBlePairBoot) p.putUChar("boot", 0);  // one shot
+      p.end();
+    }
+  }
+  esp_bt_controller_mem_release(gBlePairBoot ? ESP_BT_MODE_CLASSIC_BT : ESP_BT_MODE_BTDM);
+  gBtMemFree = !gBlePairBoot;
   bootMs = millis();
   resetName = EventLog::resetName(esp_reset_reason());
 
   role.load();
   autoLoad();  // 0.6.3-auto
+  viewLoad();  // 0.6.6-follow
   ast = acfg.on ? AutoSt::Armed : AutoSt::Off;
   cview.autoTag = ui.autoShort;
   themeEraseLegacy();  // 0.6.2-circuit.6
@@ -1992,11 +2824,16 @@ void setup() {
 
   drawBootStatus("SD…");
   wdtFeed();
+  bootStep("pre-sd");
   if (!logger.beginSd()) {
+    bootStep("beginSd-FAIL");
     gLog.logf(LogLvl::Error, "sd", "%s", logger.err().c_str());
   } else {
+    bootStep("beginSd");
     gLog.beginSd();
+    bootStep("eventlog");
     rides.begin();
+    bootStep("rides-index");
     uploader.setIndex(&rides);
     const Mem8 m = mem8();
     gLog.logf(LogLvl::Info, "sd", "ok rides=%d max_files=%d free8=%lu big8=%lu", rides.count(),
@@ -2024,7 +2861,9 @@ void setup() {
   Serial.printf("SIMPOS ready serial_rxbuf=%u\n", (unsigned)serRxBuf);
   gDiag.logf("boot", "gnss link=%s cfg=%s path=%s hz=%u", gnss.linkTag(), gnss.cfgStatus(),
              gnss.pathTag(), (unsigned)gnss.hz());
+  bootStep("prefs+boot-log");
   gDiag.service(millis(), logger.sdOk(), true);
+  bootStep("diag");
   if (role.anchor()) {
     radioOff();
     const RefPoint& r = role.ref();
@@ -2051,7 +2890,21 @@ void setup() {
       gLog.logf(LogLvl::Info, "azure", "boot pending=%d", rides.pendingCount());
     }
   }
+  bootStep("pre-circuits");
+  circIndexBuild("boot");  // 0.6.7-autocircuit: light index (SD mounted above)
+  bootStep("circuits");
+  {
+    Preferences p;
+    if (p.begin("rl_up", true)) {
+      gUpHold = p.getUChar("hold", 0) != 0;
+      p.end();
+    }
+  }
+  Serial.printf("BOOT ready_ms=%lu uphold=%d ble_boot=%d\n", (unsigned long)millis(), (int)gUpHold,
+                (int)gBlePairBoot);
   lastInputMs = millis();
+  if (gBlePairBoot && bleEnter(gBlePairBoot == 2 ? "serial" : "menu") && gBlePairBoot == 2)
+    Serial.printf("BLE PIN %s\n", gBlePin);
   paint(gnss.snapshot());
 }
 
@@ -2061,6 +2914,8 @@ static void processPvtEvent(uint32_t nowMs) {
   const UbxPvt& p = gnss.pvt();
   if (!gnss.simOn()) gclock.onPvt(p, pps);  // simulated: the clock follows the real receiver
   if (crt) circuitOnPvt();  // 0.6.0 lap/sector timer (10 Hz)
+  trailOnPvt();             // 0.6.9-trail: local frame for the no-circuit trail
+  circDetect(nowMs);        // 0.6.7-autocircuit (<= 1 Hz, good 3D fix only)
   autoOnPvt(p, nowMs);      // 0.6.3-auto: evaluated on EVERY PVT (1 Hz idle, 10 Hz otherwise)
   if (logger.recording()) logger.logPvt(p, pps.seq());
   if (role.anchor()) {
@@ -2587,6 +3442,8 @@ static void serviceUpload(uint32_t nowMs) {
     if (WiFi.getMode() != WIFI_OFF && (logger.recording() || ui.page != UiPage::Wifi)) radioOff();
   }
   if (logger.recording() || !upTaskOk) return;
+  if (ble.on()) return;                  // 0.6.8: no Wi-Fi while pairing
+  if (gUpHold && !wifiScanning) return;  // 0.6.7: UPLOAD HOLD
   if (wifiScanning) {
     const int sr = uploader.scanPoll();
     if (sr == WIFI_SCAN_RUNNING && nowMs - wifiScanT0 < 8000) return;
@@ -2755,15 +3612,53 @@ void loop() {
           ui.rideSel = 0;
           break;
         case 3:
-          if (!circuitOpen("menu")) ui.page = UiPage::Home;  // uiLine says why
+          circMenuOpen();  // 0.6.7: list when > 1 circuit (uiLine says why on failure)
           break;
         case 4:
+          bleEnter("menu");  // 0.6.8: EMPAREJAR (uiLine says why if refused)
+          break;
+        case 5:
           ui.page = UiPage::About;
           break;
         default:
           ui.page = UiPage::Home;
           break;
       }
+    }
+  } else if (ui.page == UiPage::BlePair) {  // 0.6.8: B = SALIR
+    if (M5.BtnB.wasClicked()) bleExit("button");
+  } else if (ui.page == UiPage::CircuitList) {  // 0.6.7: A up, C down, B choose (AUTOMATICO = detection)
+    if (M5.BtnA.wasClicked() && ui.circN > 0) ui.circSel = (ui.circSel + ui.circN - 1) % ui.circN;
+    if (M5.BtnC.wasClicked() && ui.circN > 0) ui.circSel = (ui.circSel + 1) % ui.circN;
+    if (M5.BtnB.wasClicked()) {
+      const int i = gListIdx[ui.circSel < 0 ? 0 : (ui.circSel > 4 ? 4 : ui.circSel)];
+      if (i < 0) {
+        circSelectAuto("menu");
+        uiLine = "Circuito: automatico";
+        ui.page = UiPage::Home;
+      } else {
+        circSelectManual(i, "menu");
+        if (!circuitOpen("menu-list")) ui.page = UiPage::Home;
+      }
+    }
+  } else if (ui.page == UiPage::Trail) {  // 0.6.9: A rec/stop, B speedometer (home), C MARK / hold COLOC (as home)
+    if (M5.BtnA.wasClicked()) {
+      if (!logger.recording()) {
+        userStopped = false;
+        startRec("button-trail");
+      } else {
+        userStopped = true;
+        stopRec();  // closes the trail page
+      }
+    }
+    if (M5.BtnB.wasClicked()) trailClose("button-speed");
+    if (M5.BtnC.wasHold() && logger.recording()) {
+      coloc = !coloc;
+      mark(coloc ? "coloc_start" : "coloc_end", 0, "button");
+      uiLine = coloc ? "COLOC: junto al ancla" : "COLOC fin";
+    } else if (M5.BtnC.wasClicked() && logger.recording()) {
+      mark("cp", ++markNo, "button");
+      uiLine = String("MARK ") + markNo;
     }
   } else if (ui.page == UiPage::Circuit) {  // 0.6.0: A rec/stop (as Home), B exit, C cycles views
     if (M5.BtnA.wasClicked()) {
@@ -2777,10 +3672,12 @@ void loop() {
       if (ui.page == UiPage::Circuit) cview.drawStatic(logger.recording());
     }
     if (M5.BtnB.wasClicked()) circuitClose("button");
+    if (M5.BtnC.wasHold() && cview.active()) viewFollow(!cview.following(), "button-holdC");  // 0.6.6
     if (M5.BtnC.wasClicked() && cview.active()) {  // 0.6.1: Map -> S1 .. Sn -> table -> Map
       cview.nextMode();
       cview.drawStatic(logger.recording());
       gDiag.logf("circuit", "MODE %s elev=%d", cview.modeName(), (int)cview.elevOk());
+      viewRemember();  // 0.6.7
     }
   } else {
     if (M5.BtnA.wasClicked()) {
@@ -2796,6 +3693,7 @@ void loop() {
       ui.page = UiPage::Menu;
       ui.menuIdx = 0;
     }
+    if (M5.BtnB.wasHold() && logger.recording() && !role.anchor()) trailOpen("button-holdB");  // 0.6.9: back to the trail
     if (role.anchor()) {
       if (M5.BtnC.wasClicked()) ancUi.page = (ancUi.page + 1) % 2;
     } else {
@@ -2821,6 +3719,11 @@ void loop() {
   }
   secMark(S_BTN);
 
+  circAutoOpenService(nowMs);  // 0.6.7-autocircuit
+  trailService(nowMs);         // 0.6.9-trail
+  bleService(nowMs);           // 0.6.8-ble
+  circScanService();           // 0.6.7: incremental circuit directory scan
+  if (rides.recovering() && !logger.recording() && !upTask.busy()) rides.recoverStep(5);  // 0.6.7: ~5 ms/loop
   if (!role.anchor()) serviceUpload(nowMs);
   // 0.6.0 safety net: the circuit never holds heap while the radio/uploader is in use.
   if ((crt || cview.active()) && (upTask.busy() || wifiScanning || WiFi.getMode() != WIFI_OFF))
@@ -2843,6 +3746,24 @@ void loop() {
   }
   secMark(S_SER);
 
+  // 0.6.6-follow: render on every new fix (10 Hz) or at least every 300 ms; header included.
+  if (ui.page == UiPage::Circuit && cview.following()) {
+    static double folT = -1;
+    static uint32_t folMs = 0, folLogMs = 0;
+    if ((cfix.valid && cfix.tS != folT) || nowMs - folMs >= 300) {
+      folT = cfix.tS;
+      folMs = nowMs;
+      circuitPaint();
+    }
+    if (nowMs - folLogMs >= 10000) {
+      folLogMs = nowMs;
+      const Mem8 m = mem8();
+      gDiag.logf("circuit", "FOLLOW fps=%.1f render_ms=%.1f max_ms=%.1f band=%d zoom=%.0f head=%.0f live=%d "
+                 "free8=%lu big8=%lu min8=%lu", cview.followFps(), cview.followMsAvg(), cview.followMsMax(),
+                 cview.followBand(), cview.followZoom(), cview.followHead(), (int)cview.followHeadLive(),
+                 (unsigned long)m.free, (unsigned long)m.big, (unsigned long)m.min);
+    }
+  }
   uint32_t uiPeriod = 1000 / HEALTH_UI_HZ;
   if (role.anchor()) uiPeriod = dimmed ? 2000 : 500;
   else if (dimmed) uiPeriod = 1000;  // 0.6.3-auto: standby dim -> 1 Hz redraw

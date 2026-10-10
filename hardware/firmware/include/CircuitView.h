@@ -34,6 +34,21 @@
 // crossed, a short white tick (black casing) is drawn across the trace (max 8 per lap, .bss).
 // Header: live delta chip (+0.42 / -0.18) in the same colour, right of the sector timer.
 // Layout: y 0..33 header sprite | y 34..211 map / sector+profile / table | y 212..239 button bar.
+// 0.6.6-follow (redesign 02:00): zoom 100 m default; circuit back as a thin dark-orange SILHOUETTE (outer +
+// inner edge lines only, 1.5 px, no fill, no sector marks) under a brighter, thicker fading rider trail.
+// 0.6.6-follow (redesign 01:44): the follow view draws NO circuit at all, only the rider's path as an orange
+// trail fading with age (FOLLOW FADE <s>, default 25 s, NVS), rider arrow fixed at the centre, track-up.
+// 0.6.6-follow: NEW view CircuitMode::Follow (the Map/Sector/Sectors views are unchanged). The rider dot stays
+// fixed at the centre of the map area, track-up (map rotated by the smoothed heading of motion, frozen
+// below 5 km/h), zoom = metres across the 320 px width (default 60 m, FOLLOW ZOOM <m>, NVS). Same style:
+// dark field, thick orange stroke without edges, white sector marks, 3 px trace with black casing in
+// purple/yellow by live delta, same header. Flicker-free: every frame is drawn into an 8-bit (RGB332)
+// M5Canvas band (320 x bandH, bandH = 178/89/60/45/30 picked from the free heap; 60 rows = 19.2 KB) and
+// pushed band by band; the band is allocated only while the view is shown.
+// 0.6.9-trail: "bare" follow = the same follow renderer (band, fading trail, centred arrow, track-up rotation,
+// zoom, north arrow, scale) WITHOUT a circuit: no silhouette, plain field. Used by main's Trail page during a
+// session with no circuit detected; positions come in metres from a session anchor (first good fix).
+// Heap = only the follow band + fading-trail ring (same as follow); no header sprite, no circuit caches.
 #pragma once
 #include <M5Unified.h>
 #include <esp_heap_caps.h>
@@ -46,10 +61,11 @@
 
 namespace riderlab {
 
-enum class CircuitMode : uint8_t { Map, Sector, Sectors };
+enum class CircuitMode : uint8_t { Map, Sector, Sectors, Follow };  // 0.6.6: Follow
 
 struct LiveFix {
   float x = 0, y = 0, kmh = 0;
+  float head = -1;  // 0.6.6-follow: heading of motion (deg, compass), -1 = unknown
   double tS = 0;
   bool valid = false;
 };
@@ -107,13 +123,15 @@ class CircuitView {
     return true;
   }
   void end() {
+    followFree();
+    if (mode_ == CircuitMode::Follow) mode_ = prevMode_;
     free(scr_); scr_ = nullptr;
     free(sdm_); sdm_ = nullptr;
     free(sec_); sec_ = nullptr;
     free(nrm_); nrm_ = nullptr;
     free(trail_); trail_ = nullptr;
     if (hdr_) { hdr_->deleteSprite(); delete hdr_; hdr_ = nullptr; }
-    c_ = nullptr; trailN_ = trailHead_ = 0; dotX_ = -100; markX_ = -100;
+    c_ = nullptr; bare_ = false; fTop_ = HDR; trailN_ = trailHead_ = 0; dotX_ = -100; markX_ = -100;
     nTick_ = 0; lapSeen_ = -1; crossSeen_ = 0xFFFFFFFFUL;
   }
   bool active() const { return hdr_ != nullptr && c_ != nullptr; }
@@ -128,13 +146,16 @@ class CircuitView {
   int nShown() const { return c_ ? (c_->nSec > 4 ? 4 : (c_->nSec < 1 ? 1 : c_->nSec)) : 0; }
   bool elevOk() const { return elevOk_; }
   void setMode(CircuitMode m, int k = 0) {
+    if (m == CircuitMode::Follow) { setFollow(true); return; }
+    if (mode_ == CircuitMode::Follow) followFree();
     mode_ = m;
     secK_ = (m == CircuitMode::Sector && active()) ? (k < 0 ? 0 : (k >= nShown() ? nShown() - 1 : k)) : 0;
     if (active()) project();
   }
   // Button C: Map -> S1 .. Sn -> Sectors table -> Map
   void nextMode() {
-    if (mode_ == CircuitMode::Map) setMode(CircuitMode::Sector, 0);
+    if (mode_ == CircuitMode::Follow) setMode(prevMode_ == CircuitMode::Follow ? CircuitMode::Map : prevMode_);  // 0.6.6
+    else if (mode_ == CircuitMode::Map) setMode(CircuitMode::Sector, 0);
     else if (mode_ == CircuitMode::Sector) {
       if (secK_ + 1 < nShown()) setMode(CircuitMode::Sector, secK_ + 1);
       else setMode(CircuitMode::Sectors);
@@ -142,13 +163,89 @@ class CircuitView {
   }
   const char* modeName() const {
     static const char* s[4] = {"s1", "s2", "s3", "s4"};
+    if (mode_ == CircuitMode::Follow) return "follow";
     return mode_ == CircuitMode::Map ? "map" : (mode_ == CircuitMode::Sectors ? "sectors" : s[secK_ & 3]);
+  }
+
+  // ---- 0.6.6-follow ----
+  static constexpr float kHeadMinKmh = 5.f, kHeadAlpha = 0.3f, kZoomMin = 20.f, kZoomMax = 400.f;
+  static constexpr float kZoomDefault = 150.f;  // 0.6.9c: was 100 m (02:00: was 60 m); saved zoom dropped once in viewLoad
+  static constexpr uint32_t kFollowKeepFree8 = 26000;  // checked at open (idle); while recording 60 rows leave ~48 KB (> 40 KB paint guard)
+  bool following() const { return mode_ == CircuitMode::Follow; }
+  // On: allocate the band and switch (false = not enough heap, previous view kept). Off: back to the previous view.
+  bool setFollow(bool on) {
+    if (!active()) return false;
+    if (!on) {
+      if (mode_ == CircuitMode::Follow) setMode(prevMode_ == CircuitMode::Follow ? CircuitMode::Map : prevMode_, secK_);
+      return true;
+    }
+    if (mode_ == CircuitMode::Follow) return true;
+    if (!followAlloc()) return false;
+    prevMode_ = mode_;
+    mode_ = CircuitMode::Follow;
+    mapY1_ = Y1;
+    dotX_ = -100;
+    fpsT0_ = millis(); fpsN_ = 0; fpsUs_ = 0; fpsMaxUs_ = 0;
+    return true;
+  }
+  void setFollowFade(float sec) { fadeS_ = sec < 3.f ? 3.f : (sec > 40.f ? 40.f : sec); }
+  float followFade() const { return fadeS_; }
+  void setFollowZoom(float m) { zoomM_ = m < kZoomMin ? kZoomMin : (m > kZoomMax ? kZoomMax : m); }
+  float followZoom() const { return zoomM_; }
+  int followBand() const { return bandH_; }
+  float followFps() const { return fps_; }
+  float followMsAvg() const { return msAvg_; }
+  float followMsMax() const { return msMax_; }
+  float followHead() const { return headDeg_; }
+  bool followHeadLive() const { return headLive_; }
+  uint32_t followFrames() const { return framesTotal_; }
+
+  // ---- 0.6.9-trail: bare follow (no circuit) ----
+  // Refused while the circuit view is open. false = not enough heap (same rule as follow).
+  // 0.6.9b: top = first map row (the trail page keeps the home status bar + speed row above it)
+  bool beginBare(int top = HDR) {
+    if (active()) return false;
+    end();
+    if (!followAlloc()) return false;
+    bare_ = true;
+    fTop_ = top < HDR ? HDR : (top > Y1 - 40 ? Y1 - 40 : top);
+    haveHead_ = false; headLive_ = false; haveFx_ = false; lastT_ = -1; fixMs_ = 0;
+    fpsT0_ = millis(); fpsN_ = 0; fpsUs_ = 0; fpsMaxUs_ = 0;
+    return true;
+  }
+  void endBare() {
+    if (!bare_) return;
+    followFree();
+    bare_ = false;
+  }
+  bool bareActive() const { return bare_ && fol_ != nullptr; }
+  void bareUpdate(const LiveFix& f) {
+    if (!bareActive()) return;
+    followTrack(f, nullptr, 0);
+    renderFollow();
+  }
+  // the caller moved its local origin by (dx, dy) m (old frame): keep the fading trail continuous
+  void bareShift(float dxM, float dyM) {
+    const int32_t dx = lroundf(dxM * 10.f), dy = lroundf(dyM * 10.f);
+    for (int i = 0; i < ftrN_ && ftr_; ++i) {
+      FP& p = ftr_[(ftrHead_ + FTR_MAX - 1 - i) % FTR_MAX];
+      const int32_t nx = p.x - dx, ny = p.y - dy;
+      if (nx < -32000 || nx > 32000 || ny < -32000 || ny > 32000) { ftrN_ = i; break; }  // older ones dropped
+      p.x = (int16_t)nx; p.y = (int16_t)ny;
+    }
+    fx_ -= dxM; fy_ -= dyM;
   }
 
   // Full redraw of the body + button bar (page open, mode change, REC toggle). ~25-70 ms.
   void drawStatic(bool recording) {
     if (!active()) return;
     auto& d = M5.Display;
+    if (mode_ == CircuitMode::Follow) {  // 0.6.6-follow: whole body comes from the band renderer
+      drawButtonBar(d, recording ? "STOP" : "REC", "SALIR", "MAPA");
+      renderFollow();
+      dotX_ = -100;
+      return;
+    }
     d.startWrite();
     if (mode_ != CircuitMode::Sectors) {
       d.fillRect(0, HDR, W, mapY1_ - HDR, bg());
@@ -189,6 +286,7 @@ class CircuitView {
     }
     const uint16_t tcol = ld.behind() ? kYel : kPur;
     drawHeader(f, lt, ld, recording);
+    if (mode_ == CircuitMode::Follow) { followUpdate(f, ld, tcol); return; }  // 0.6.6-follow
     if (mode_ == CircuitMode::Sectors) {
       if (timesChanged || sectorsDirty_) drawSectorPanel(lt);
       sectorsDirty_ = false;
@@ -271,8 +369,231 @@ class CircuitView {
   }
 
  private:
-  struct TP { int16_t x, y; uint16_t col; };  // trail point in decimetres (anchor frame), live colour
+  struct TP { int16_t x, y; uint16_t col; };
+  struct FP { int16_t x, y; uint32_t ms; bool gap; };  // 0.6.6-follow fading trail point (dm, fix time ms)
+  static constexpr int FTR_MAX = 400;                     // 40 s at 10 Hz, 4.8 KB while the view is open  // trail point in decimetres (anchor frame), live colour
   struct TK { int16_t x, y; int8_t nx, ny; };  // sector tick: crossing point (dm) + normal to travel (world, /127)
+
+
+  // ================= 0.6.6-follow: rider-centred, track-up view =================
+  // 8-bit (RGB332) band: drawWideLine is anti-aliased (reads pixels back), which crashes on palette sprites.
+  static constexpr float kSilR = 0.75f;  // 02:00 silhouette line radius (~1.5 px)
+  static constexpr uint16_t P_BG = C_BG, P_TRACK = C_TRACK, P_WHITE = 0xFFFF, P_BLACK = 0x0000, P_PUR = kPur,
+                            P_YEL = kYel, P_RED = 0xF800, P_CYAN = 0x07FF, P_GREEN = 0x07E0, P_MAG = 0xF81F,
+                            P_SUB = 0xC618, P_DARK = 0x2104;
+  static uint16_t secPal(int k) { static constexpr uint16_t c[4] = {P_RED, P_CYAN, P_GREEN, P_MAG}; return c[k & 3]; }
+  static uint16_t secInkPal(int k) { return (k & 3) == 0 ? P_WHITE : P_BLACK; }
+  static uint32_t rgb888(uint16_t c) {
+    const uint32_t r = (c >> 11) & 0x1F, g = (c >> 5) & 0x3F, b = c & 0x1F;
+    return ((r * 255 / 31) << 16) | ((g * 255 / 63) << 8) | (b * 255 / 31);
+  }
+  bool followAlloc() {
+    if (fol_) return true;
+    static constexpr int kRows[3] = {60, 45, 30};  // sized for the recording heap (~67 KB free8)
+    const uint32_t free8 = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    const uint32_t big8 = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+    for (int i = 0; i < 3; ++i) {
+      const uint32_t need = (uint32_t)W * kRows[i] + 64;
+      if (need + kFollowKeepFree8 > free8 || need + 4096 > big8) continue;
+      fol_ = new (std::nothrow) M5Canvas(&M5.Display);
+      if (!fol_) return false;
+      ftr_ = (FP*)malloc(sizeof(FP) * FTR_MAX);
+      if (!ftr_) { delete fol_; fol_ = nullptr; return false; }
+      ftrN_ = ftrHead_ = 0;
+      fol_->setColorDepth(8);
+      fol_->setPsram(false);
+      if (!fol_->createSprite(W, kRows[i])) { delete fol_; fol_ = nullptr; free(ftr_); ftr_ = nullptr; continue; }
+      bandH_ = kRows[i];
+      return true;
+    }
+    return false;
+  }
+  void followFree() {
+    if (fol_) { fol_->deleteSprite(); delete fol_; fol_ = nullptr; }
+    free(ftr_); ftr_ = nullptr; ftrN_ = ftrHead_ = 0;
+    bandH_ = 0;
+  }
+  void followUpdate(const LiveFix& f, const LiveDelta& ld, uint16_t tcol) {
+    followTrack(f, &ld, tcol);
+    renderFollow();
+  }
+  // 0.6.9-trail: per-fix state shared by follow and bare follow (heading smoothing, fading trail); the
+  // circuit lap trace + sector ticks only with a circuit (ld != nullptr).
+  void followTrack(const LiveFix& f, const LiveDelta* ldp, uint16_t tcol) {
+    if (f.valid) {
+      if (f.tS != lastT_) {  // smoothing once per new fix
+        lastT_ = f.tS;
+        if (f.kmh > kHeadMinKmh && f.head >= 0) {
+          if (!haveHead_) { headDeg_ = f.head; haveHead_ = true; }
+          else {
+            const float dh = fmodf(f.head - headDeg_ + 540.f, 360.f) - 180.f;
+            headDeg_ = fmodf(headDeg_ + kHeadAlpha * dh + 360.f, 360.f);
+          }
+          headLive_ = true;
+        } else headLive_ = false;  // frozen below 5 km/h
+        if (ldp && trail_) {
+        const LiveDelta& ld = *ldp;
+        // trace: same storage rule as the map view (>= 2 m or colour change, >60 m jump = gap)
+        const TP np = {(int16_t)lroundf(f.x * 10.f), (int16_t)lroundf(f.y * 10.f), tcol};
+        bool store = trailN_ == 0;
+        if (trailN_) {
+          const TP& l = trail_[(trailHead_ + TRAIL_MAX - 1) % TRAIL_MAX];
+          const float dd = hypotf((float)(np.x - l.x), (float)(np.y - l.y));
+          store = dd >= kMinStepDm || l.col != tcol || dd > 600;
+        }
+        if (store) {
+          trail_[trailHead_] = np;
+          trailHead_ = (trailHead_ + 1) % TRAIL_MAX;
+          if (trailN_ < TRAIL_MAX) ++trailN_;
+        }
+        if (crossSeen_ == 0xFFFFFFFFUL) crossSeen_ = ld.crossings();
+        if (ld.crossings() != crossSeen_) {
+          crossSeen_ = ld.crossings();
+          if (ld.crossSector() > 0 && nTick_ < TICK_MAX && trailN_ > 1) {
+            const TP& b = trail_[(trailHead_ + TRAIL_MAX - 1) % TRAIL_MAX];
+            const TP& a = trail_[(trailHead_ + TRAIL_MAX - 2) % TRAIL_MAX];
+            const float dx = (float)(b.x - a.x), dy = (float)(b.y - a.y);
+            const float l = hypotf(dx, dy) + 1e-3f;
+            ticks_[nTick_++] = {(int16_t)lroundf(ld.crossX() * 10.f), (int16_t)lroundf(ld.crossY() * 10.f),
+                                (int8_t)lroundf(-dy / l * 127.f), (int8_t)lroundf(dx / l * 127.f)};
+          }
+        }
+        }  // ldp && trail_
+      }
+      if (ftr_) {  // fading trail: every fix that moved >= 0.3 m (or 1 s still), gap after a >60 m jump
+        const FP np = {(int16_t)lroundf(f.x * 10.f), (int16_t)lroundf(f.y * 10.f), fixMs_ = (uint32_t)(f.tS * 1000.0), false};
+        bool add = ftrN_ == 0;
+        if (ftrN_) {
+          FP& l = ftr_[(ftrHead_ + FTR_MAX - 1) % FTR_MAX];
+          const float dd = hypotf((float)(np.x - l.x), (float)(np.y - l.y));
+          add = dd >= 3 || np.ms - l.ms >= 1000;
+          if (dd > 600) { add = true; ftr_[ftrHead_] = np; ftr_[ftrHead_].gap = true; ftrHead_ = (ftrHead_ + 1) % FTR_MAX;
+                          if (ftrN_ < FTR_MAX) ++ftrN_; add = false; }
+        }
+        if (add) {
+          ftr_[ftrHead_] = np;
+          ftrHead_ = (ftrHead_ + 1) % FTR_MAX;
+          if (ftrN_ < FTR_MAX) ++ftrN_;
+        }
+      }
+      fx_ = f.x; fy_ = f.y; haveFx_ = true;
+    }
+  }
+  // world (m) -> absolute screen px with the follow transform (set in renderFollow)
+  void renderFollow() {
+    if (!fol_ || (!c_ && !bare_)) return;
+    const int64_t t0 = esp_timer_get_time();
+    if (!haveHead_) headDeg_ = c_ ? c_->head0 : 0.f;  // before the first move: S/F heading (bare: north up)
+    const float hr = headDeg_ * (float)(M_PI / 180);
+    cr_ = cosf(hr); sr_ = sinf(hr);
+    k_ = W / zoomM_;
+    const float cx = W / 2.f, cy = fTop_ + (Y1 - fTop_) / 2.f;
+    const float xr = haveFx_ ? fx_ : 0.f, yr = haveFx_ ? fy_ : 0.f;
+    ax_ = cx - k_ * (cr_ * xr - sr_ * yr);
+    ay_ = cy + k_ * (sr_ * xr + cr_ * yr);
+    if (c_ && scr_) {  // 02:00 silhouette: project outer + inner edge points once per frame (scr_ unused by follow otherwise)
+      const float u = c_->unit;
+      int j = 0;
+      for (int i = 0; i < c_->nO; ++i, j += 2) toPx(c_->outer[i].x * u, c_->outer[i].y * u, scr_[j], scr_[j + 1]);
+      for (int i = 0; i < c_->nI; ++i, j += 2) toPx(c_->inner[i].x * u, c_->inner[i].y * u, scr_[j], scr_[j + 1]);
+    }
+    auto& d = M5.Display;
+    d.startWrite();
+    d.setClipRect(0, fTop_, W, Y1 - fTop_);  // a partial last band never touches the button bar
+    for (int top = fTop_; top < Y1; top += bandH_) {
+      oy_ = top;
+      renderBand();
+      fol_->pushSprite(&d, 0, top);
+    }
+    d.clearClipRect();
+    d.endWrite();
+    const uint32_t us = (uint32_t)(esp_timer_get_time() - t0);
+    ++framesTotal_; ++fpsN_; fpsUs_ += us;
+    if (us > fpsMaxUs_) fpsMaxUs_ = us;
+    const uint32_t now = millis();
+    if (now - fpsT0_ >= 2000) {
+      fps_ = fpsN_ * 1000.f / (now - fpsT0_);
+      msAvg_ = fpsN_ ? fpsUs_ / 1000.f / fpsN_ : 0.f;
+      msMax_ = fpsMaxUs_ / 1000.f;
+      fpsT0_ = now; fpsN_ = 0; fpsUs_ = 0; fpsMaxUs_ = 0;
+    }
+  }
+  bool inBand(int x0, int y0, int x1, int y1, int m) const {  // absolute screen coords, segment bbox
+    const int bt = oy_ - m, bb = oy_ + bandH_ + m;
+    return !((x0 < -m && x1 < -m) || (x0 > W + m && x1 > W + m) || (y0 < bt && y1 < bt) || (y0 > bb && y1 > bb));
+  }
+  void renderBand() {
+    auto& s = *fol_;
+    const int oy = oy_;
+    s.fillSprite(P_BG);
+    // 02:00 silhouette: outer + inner edges only, thin dark orange, no fill / sector marks (0.6.9: none when bare)
+    if (c_ && scr_) {
+      const uint16_t sil = (uint16_t)lgfx::color565(150, 70, 0);
+      auto edge = [&](const int16_t* p, int n) {
+        for (int i = 0; i < n; ++i) {
+          const int j = (i + 1) % n;
+          const int x0 = p[2 * i], y0 = p[2 * i + 1], x1 = p[2 * j], y1 = p[2 * j + 1];
+          if (!inBand(x0, y0, x1, y1, 2)) continue;
+          if (abs(x1 - x0) > 2000 || abs(y1 - y0) > 2000) continue;  // clamped far points
+          s.drawWideLine(x0, y0 - oy, x1, y1 - oy, kSilR, sil);
+        }
+      };
+      edge(scr_, c_->nO);
+      edge(scr_ + 2 * c_->nO, c_->nI);
+    }
+    // rider trail on top (brighter + thicker than the silhouette). Previously (01:44): NO circuit/map here. Only the rider's own path as an orange trail
+    // that fades with age: newest = bright orange, 4 px radius; oldest (fadeS_) = dark, 0.8 px -> gone.
+    const uint32_t now = fixMs_;  // age in GNSS fix time: no fading while no fix arrives (and bench pauses)
+    const float win = fadeS_ * 1000.f;
+    for (int i = ftrN_ - 1; i >= 1; --i) {  // oldest first, newest drawn on top
+      const FP& p0 = ftr_[(ftrHead_ + FTR_MAX - i - 1) % FTR_MAX];
+      const FP& p1 = ftr_[(ftrHead_ + FTR_MAX - i) % FTR_MAX];
+      if (p1.gap) continue;
+      const float age = (float)(now - p1.ms);
+      if (age >= win) continue;
+      int16_t ax, ay, bx, by;
+      toPxDm({p0.x, p0.y, 0}, ax, ay); toPxDm({p1.x, p1.y, 0}, bx, by);
+      if (!inBand(ax, ay, bx, by, 6)) continue;
+      const float f = 1.f - age / win;  // 1 = new, 0 = old
+      // 02:00: bright orange-yellow (255,180,40) -> fades to the background; radius 1.2 -> 4 px (silhouette 0.75)
+      const uint8_t r = (uint8_t)(255 * f), g = (uint8_t)(180 * f), b = (uint8_t)(40 * f);
+      s.drawWideLine(ax, ay - oy, bx, by - oy, 1.2f + 2.8f * f, (uint16_t)lgfx::color565(r, g, b));
+    }
+    // 6) rider: fixed at the centre, arrow pointing up (= direction of travel), white rim
+    const int cx = W / 2, cy = fTop_ + (Y1 - fTop_) / 2 - oy;
+    if (cy > -16 && cy < bandH_ + 16) {
+      auto arrow = [&](float sc, uint16_t col) {
+        const int tx = cx, ty = cy - (int)lroundf(11 * sc), lx = cx - (int)lroundf(8 * sc), rx = cx + (int)lroundf(8 * sc),
+                  by = cy + (int)lroundf(8 * sc), ny = cy + (int)lroundf(3 * sc);
+        s.fillTriangle(tx, ty, lx, by, cx, ny, col);
+        s.fillTriangle(tx, ty, cx, ny, rx, by, col);
+      };
+      arrow(1.45f, P_WHITE);
+      arrow(1.0f, P_RED);
+    }
+    // 7) corner overlays: north arrow (map rotates) top-right, scale bottom-left
+    const int nx = W - 14, ny = fTop_ + 14 - oy;
+    if (ny > -14 && ny < bandH_ + 14) {
+      const float ux = -sr_, uy = -cr_;  // screen direction of world north
+      s.fillCircle(nx, ny, 11, P_DARK);
+      s.fillTriangle(nx + ux * 9, ny + uy * 9, nx - uy * 4 - ux * 4, ny + ux * 4 - uy * 4, nx + uy * 4 - ux * 4,
+                     ny - ux * 4 - uy * 4, P_WHITE);
+      s.setTextColor(P_RED);
+      s.drawString("N", nx - ux * 5, ny - uy * 5);
+    }
+    const int sy = Y1 - 8 - oy;
+    if (sy > -8 && sy < bandH_ + 8) {
+      const int px10 = (int)lroundf(10.f * k_);  // 10 m bar
+      s.fillRect(6, sy - 1, px10, 3, P_WHITE);
+      s.fillRect(6, sy - 4, 2, 9, P_WHITE);
+      s.fillRect(6 + px10 - 2, sy - 4, 2, 9, P_WHITE);
+      char buf[24];
+      snprintf(buf, sizeof buf, "10 m  (ancho %.0f m)", zoomM_);
+      s.setTextDatum(lgfx::textdatum_t::middle_left);
+      s.setTextColor(P_SUB);
+      s.drawString(buf, 12 + px10, sy);
+    }
+  }
 
   // 0.6.2-circuit.7-rastro: last n trace segments (clip already set): black casing pass, colour pass, ticks.
   void drawTrace(int n) {
@@ -377,6 +698,7 @@ class CircuitView {
   // Choose the transform for the current mode and project the edge cache.
   void project() {
     mapY1_ = mode_ == CircuitMode::Sector ? PY0 : Y1;
+    if (mode_ == CircuitMode::Follow) { dotX_ = -100; return; }  // 0.6.6: per-frame transform in renderFollow()
     const float rot = (mode_ == CircuitMode::Sector && elevOk_) ? secRotDeg(secK_) * (float)(M_PI / 180) : 0.f;
     cr_ = cosf(rot); sr_ = sinf(rot);
     float x0 = 1e9f, x1 = -1e9f, y0 = 1e9f, y1 = -1e9f;
@@ -871,6 +1193,21 @@ class CircuitView {
   uint8_t nTick_ = 0;
   int lapSeen_ = -1;
   uint32_t crossSeen_ = 0xFFFFFFFFUL;
+  // 0.6.6-follow
+  CircuitMode prevMode_ = CircuitMode::Map;
+  M5Canvas* fol_ = nullptr;
+  FP* ftr_ = nullptr;
+  uint32_t fixMs_ = 0;
+  int ftrN_ = 0, ftrHead_ = 0;
+  float fadeS_ = 25.f;
+  int bandH_ = 0, oy_ = 0;
+  float zoomM_ = kZoomDefault, headDeg_ = 0, fx_ = 0, fy_ = 0;
+  bool haveHead_ = false, headLive_ = false, haveFx_ = false;
+  bool bare_ = false;  // 0.6.9-trail
+  int fTop_ = HDR;     // 0.6.9b: first row of the follow map area (HDR for the circuit FOLLOW view)
+  double lastT_ = -1;
+  uint32_t fpsT0_ = 0, fpsN_ = 0, fpsUs_ = 0, fpsMaxUs_ = 0, framesTotal_ = 0;
+  float fps_ = 0, msAvg_ = 0, msMax_ = 0;
 };
 
 }  // namespace riderlab
