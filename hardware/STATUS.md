@@ -1,6 +1,7 @@
 # STATUS — hardware
 
-> Archivo vivo. Última actualización: 2026-10-03 (cloud 15 rides)
+> Archivo vivo. El agente lo actualiza al pausar o al cerrar una decisión.  
+> Última actualización: 2026-10-10
 
 ## Fase
 
@@ -17,6 +18,7 @@ ESP32 Basic = **solo 2.4 GHz**.
 - REC start/stop, Wi‑Fi join, HTTPS warm/POST, fallos de índice/SD.
 - Heartbeat 60 s. Duplicados iguales no se reescriben en SD cada 20 s.
 - GNSS 1 Hz sigue solo por Serial (no llena el log).
+- App (2026-10-10): emparejado BLE alineado con el firmware 0.6.8-ble. Servicio `6f8a0001-5c3e-4b8e-9a51-4d4554524943`, fragmentos `0x1E`, MTU 247, STATUS `msg`/`err`/`left`. El Wi-Fi se escribe antes del PAIR. El secreto no se muestra ni se escribe en logs. El `PAIR` por USB sigue en la misma pantalla.
 
 ## Nube
 
@@ -26,6 +28,7 @@ ESP32 Basic = **solo 2.4 GHz**.
 
 1. Flash 0.4.9. USB 115200: al arrancar deben salir líneas `{"t":…,"lvl":"I"…}`.
 2. Tras un fallo de Azure, `LOG` debe mostrar el `https` E.
+3. Probar emparejado BLE desde la app (Settings → M5 Logger) con firmware 0.6.8-ble.
 
 ## Preguntas abiertas
 

@@ -1758,5 +1758,101 @@
   "mappingMedian": "median",
   "mappingPoints": "Points out / in / center",
   "settingsModeSound": "Sound when switching ON / OFF",
-  "settingsModeSoundHelp": "Two-stroke when entering OFF, track bike when returning to ON. Follows silent mode."
+  "settingsModeSoundHelp": "Two-stroke when entering OFF, track bike when returning to ON. Follows silent mode.",
+  "metricaBlePair": "Pair over Bluetooth",
+  "metricaBlePairHelp": "Looks for a Metrica-XXXX logger, reads its version, and links it to your account with the 6-digit PIN on its screen. The secret is never shown.",
+  "metricaBleScanning": "Looking for Métrica…",
+  "metricaBleDevices": "Nearby loggers",
+  "metricaBleRssi": "Signal {rssi} dBm",
+  "@metricaBleRssi": {
+    "placeholders": {
+      "rssi": {"type": "int"}
+    }
+  },
+  "metricaBleConnecting": "Connecting to {name}…",
+  "@metricaBleConnecting": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "metricaBleReading": "Reading the logger…",
+  "metricaBleFirmware": "Version {version}.",
+  "@metricaBleFirmware": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "metricaBleFirmwareUnknown": "Unknown version.",
+  "metricaBlePairedYes": "Already paired.",
+  "metricaBlePairedNo": "Not paired yet.",
+  "metricaBlePairedUnknown": "It did not say whether it is paired.",
+  "metricaBleDeviceId": "ID {id}.",
+  "@metricaBleDeviceId": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "metricaBleDeviceIdEmpty": "No ID.",
+  "metricaBleWifiPresent": "Wi-Fi saved.",
+  "metricaBleWifiAbsent": "No Wi-Fi.",
+  "metricaBleWifiUnknown": "Wi-Fi unknown.",
+  "metricaBleAuthedYes": "PIN accepted.",
+  "metricaBleAuthedNo": "PIN pending.",
+  "metricaBleAuthedUnknown": "PIN unknown.",
+  "metricaBleMtu": "MTU {mtu}.",
+  "@metricaBleMtu": {
+    "placeholders": {
+      "mtu": {"type": "int"}
+    }
+  },
+  "metricaBleMtuUnknown": "MTU unknown.",
+  "metricaBlePairingOff": "It is not in pairing mode. The PIN is on its screen only in that mode. After 5 wrong PINs the logger leaves that mode.",
+  "metricaBlePinTitle": "Métrica PIN",
+  "metricaBlePinBody": "Enter the 6 digits on the logger. Without the PIN it rejects pairing. After 5 failures it leaves pairing mode.",
+  "metricaBlePinLabel": "6-digit PIN",
+  "metricaBlePinFormat": "The PIN must be 6 digits.",
+  "metricaBleCheckingPin": "Checking the PIN…",
+  "metricaBleWrongPin": "Wrong PIN.",
+  "metricaBleWrongPinLeft": "Wrong PIN. {left} attempts left.",
+  "@metricaBleWrongPinLeft": {
+    "placeholders": {
+      "left": {"type": "int"}
+    }
+  },
+  "metricaBlePinLocked": "Wrong PIN. No attempts left: the logger closed pairing mode. Turn pairing mode on again on Métrica.",
+  "metricaBleMinting": "Creating the pairing on your account…",
+  "metricaBleWriting": "Sending the pairing to the logger…",
+  "metricaBleTimeout": "The logger did not respond in time.",
+  "metricaBleNoSession": "Sign in to pair Métrica.",
+  "metricaBleNotFound": "No logger found. Power on Métrica, open pairing mode, and bring it close to the phone.",
+  "metricaBlePermissionDenied": "Bluetooth scan and connect permission is missing. Enable it to pair.",
+  "metricaBleLocationDenied": "This Android version needs location permission to scan for the logger.",
+  "metricaBleBluetoothOff": "Turn on the phone's Bluetooth.",
+  "metricaBleUnsupported": "This phone does not have Bluetooth LE.",
+  "metricaBleConnectFailed": "Could not connect to the logger.",
+  "metricaBleFailed": "Could not pair.",
+  "metricaBleFailedDetail": "Could not pair. {detail}",
+  "@metricaBleFailedDetail": {
+    "placeholders": {
+      "detail": {"type": "String"}
+    }
+  },
+  "metricaBleSuccess": "Métrica paired ({deviceId}).",
+  "@metricaBleSuccess": {
+    "placeholders": {
+      "deviceId": {"type": "String"}
+    }
+  },
+  "metricaBleRetry": "Try again",
+  "metricaBleContinue": "Continue",
+  "metricaBleWifiTitle": "Paddock Wi‑Fi (optional)",
+  "metricaBleWifiHelp": "Optionally send the network now. Do it before pairing: once the logger confirms pairing, it closes the mode a few seconds later.",
+  "metricaBleWifiSsid": "Network name",
+  "metricaBleWifiPassword": "Password",
+  "metricaBleWifiSend": "Send Wi‑Fi",
+  "metricaBleWifiSkip": "Not now",
+  "metricaBleWifiSending": "Sending Wi‑Fi…",
+  "metricaBleWifiSaved": "Wi‑Fi saved on the logger.",
+  "metricaBleWifiFailed": "Could not save Wi‑Fi.",
+  "metricaBleWifiNeedSsid": "Enter the network name."
 }

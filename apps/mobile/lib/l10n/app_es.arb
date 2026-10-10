@@ -1850,5 +1850,101 @@
   "mappingMedian": "mediana",
   "mappingPoints": "Puntos ext / int / eje",
   "settingsModeSound": "Sonido al cambiar ON / OFF",
-  "settingsModeSoundHelp": "Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio."
+  "settingsModeSoundHelp": "Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio.",
+  "metricaBlePair": "Emparejar por Bluetooth",
+  "metricaBlePairHelp": "Busca un equipo Metrica-XXXX, lee su versión y, con el PIN de 6 dígitos de su pantalla, lo vincula a tu cuenta. El secreto no se muestra.",
+  "metricaBleScanning": "Buscando Métrica…",
+  "metricaBleDevices": "Equipos cerca",
+  "metricaBleRssi": "Señal {rssi} dBm",
+  "@metricaBleRssi": {
+    "placeholders": {
+      "rssi": {"type": "int"}
+    }
+  },
+  "metricaBleConnecting": "Conectando a {name}…",
+  "@metricaBleConnecting": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "metricaBleReading": "Leyendo el equipo…",
+  "metricaBleFirmware": "Versión {version}.",
+  "@metricaBleFirmware": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "metricaBleFirmwareUnknown": "Versión desconocida.",
+  "metricaBlePairedYes": "Ya está emparejado.",
+  "metricaBlePairedNo": "Aún no está emparejado.",
+  "metricaBlePairedUnknown": "No dice si ya está emparejado.",
+  "metricaBleDeviceId": "ID {id}.",
+  "@metricaBleDeviceId": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "metricaBleDeviceIdEmpty": "Sin ID.",
+  "metricaBleWifiPresent": "Wi-Fi guardado.",
+  "metricaBleWifiAbsent": "Sin Wi-Fi.",
+  "metricaBleWifiUnknown": "Wi-Fi sin dato.",
+  "metricaBleAuthedYes": "PIN aceptado.",
+  "metricaBleAuthedNo": "PIN pendiente.",
+  "metricaBleAuthedUnknown": "PIN sin dato.",
+  "metricaBleMtu": "MTU {mtu}.",
+  "@metricaBleMtu": {
+    "placeholders": {
+      "mtu": {"type": "int"}
+    }
+  },
+  "metricaBleMtuUnknown": "MTU desconocido.",
+  "metricaBlePairingOff": "No está en modo de emparejado. El PIN solo aparece en su pantalla en ese modo. Tras 5 PIN incorrectos, el equipo sale de ese modo.",
+  "metricaBlePinTitle": "PIN de Métrica",
+  "metricaBlePinBody": "Escribe los 6 dígitos que muestra el equipo. Sin el PIN, rechaza el emparejado. Tras 5 fallos sale del modo de emparejado.",
+  "metricaBlePinLabel": "PIN de 6 dígitos",
+  "metricaBlePinFormat": "El PIN debe tener 6 dígitos.",
+  "metricaBleCheckingPin": "Comprobando el PIN…",
+  "metricaBleWrongPin": "PIN incorrecto.",
+  "metricaBleWrongPinLeft": "PIN incorrecto. Quedan {left} intentos.",
+  "@metricaBleWrongPinLeft": {
+    "placeholders": {
+      "left": {"type": "int"}
+    }
+  },
+  "metricaBlePinLocked": "PIN incorrecto. No quedan intentos: el equipo cerró el modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.",
+  "metricaBleMinting": "Creando el emparejado en tu cuenta…",
+  "metricaBleWriting": "Enviando el emparejado al equipo…",
+  "metricaBleTimeout": "El equipo no respondió a tiempo.",
+  "metricaBleNoSession": "Inicia sesión para emparejar Métrica.",
+  "metricaBleNotFound": "No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.",
+  "metricaBlePermissionDenied": "Faltan permisos de Bluetooth (búsqueda y conexión). Actívalos para emparejar.",
+  "metricaBleLocationDenied": "En esta versión de Android hace falta el permiso de ubicación para buscar el equipo.",
+  "metricaBleBluetoothOff": "Activa el Bluetooth del teléfono.",
+  "metricaBleUnsupported": "Este teléfono no tiene Bluetooth LE.",
+  "metricaBleConnectFailed": "No se pudo conectar con el equipo.",
+  "metricaBleFailed": "No se pudo emparejar.",
+  "metricaBleFailedDetail": "No se pudo emparejar. {detail}",
+  "@metricaBleFailedDetail": {
+    "placeholders": {
+      "detail": {"type": "String"}
+    }
+  },
+  "metricaBleSuccess": "Métrica emparejada ({deviceId}).",
+  "@metricaBleSuccess": {
+    "placeholders": {
+      "deviceId": {"type": "String"}
+    }
+  },
+  "metricaBleRetry": "Reintentar",
+  "metricaBleContinue": "Continuar",
+  "metricaBleWifiTitle": "Wi‑Fi del paddock (opcional)",
+  "metricaBleWifiHelp": "Si quieres, envía la red ahora. Hay que hacerlo antes de emparejar: cuando el equipo confirma el emparejado, cierra el modo a los pocos segundos.",
+  "metricaBleWifiSsid": "Nombre de la red",
+  "metricaBleWifiPassword": "Contraseña",
+  "metricaBleWifiSend": "Enviar Wi‑Fi",
+  "metricaBleWifiSkip": "Ahora no",
+  "metricaBleWifiSending": "Enviando Wi‑Fi…",
+  "metricaBleWifiSaved": "Wi‑Fi guardado en el equipo.",
+  "metricaBleWifiFailed": "No se pudo guardar el Wi‑Fi.",
+  "metricaBleWifiNeedSsid": "Escribe el nombre de la red."
 }

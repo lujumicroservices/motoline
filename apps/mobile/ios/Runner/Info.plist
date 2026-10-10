@@ -50,9 +50,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>RiderLab uses Bluetooth to start and stop an optional adventure camera (GoPro) with your ride.</string>
+	<string>RiderLab uses Bluetooth to pair a Métrica logger and, optionally, to start and stop an adventure camera (GoPro) during a ride.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>RiderLab uses Bluetooth to start and stop an optional adventure camera (GoPro) with your ride.</string>
+	<string>RiderLab uses Bluetooth to pair a Métrica logger and, optionally, to start and stop an adventure camera (GoPro) during a ride.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>RiderLab uses the camera so you can snap photos during a rodada and pin them to the route.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

@@ -3938,4 +3938,196 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsModeSoundHelp =>
       'Two-stroke when entering OFF, track bike when returning to ON. Follows silent mode.';
+
+  @override
+  String get metricaBlePair => 'Pair over Bluetooth';
+
+  @override
+  String get metricaBlePairHelp =>
+      'Looks for a Metrica-XXXX logger, reads its version, and links it to your account with the 6-digit PIN on its screen. The secret is never shown.';
+
+  @override
+  String get metricaBleScanning => 'Looking for Métrica…';
+
+  @override
+  String get metricaBleDevices => 'Nearby loggers';
+
+  @override
+  String metricaBleRssi(int rssi) {
+    return 'Signal $rssi dBm';
+  }
+
+  @override
+  String metricaBleConnecting(String name) {
+    return 'Connecting to $name…';
+  }
+
+  @override
+  String get metricaBleReading => 'Reading the logger…';
+
+  @override
+  String metricaBleFirmware(String version) {
+    return 'Version $version.';
+  }
+
+  @override
+  String get metricaBleFirmwareUnknown => 'Unknown version.';
+
+  @override
+  String get metricaBlePairedYes => 'Already paired.';
+
+  @override
+  String get metricaBlePairedNo => 'Not paired yet.';
+
+  @override
+  String get metricaBlePairedUnknown => 'It did not say whether it is paired.';
+
+  @override
+  String metricaBleDeviceId(String id) {
+    return 'ID $id.';
+  }
+
+  @override
+  String get metricaBleDeviceIdEmpty => 'No ID.';
+
+  @override
+  String get metricaBleWifiPresent => 'Wi-Fi saved.';
+
+  @override
+  String get metricaBleWifiAbsent => 'No Wi-Fi.';
+
+  @override
+  String get metricaBleWifiUnknown => 'Wi-Fi unknown.';
+
+  @override
+  String get metricaBleAuthedYes => 'PIN accepted.';
+
+  @override
+  String get metricaBleAuthedNo => 'PIN pending.';
+
+  @override
+  String get metricaBleAuthedUnknown => 'PIN unknown.';
+
+  @override
+  String metricaBleMtu(int mtu) {
+    return 'MTU $mtu.';
+  }
+
+  @override
+  String get metricaBleMtuUnknown => 'MTU unknown.';
+
+  @override
+  String get metricaBlePairingOff =>
+      'It is not in pairing mode. The PIN is on its screen only in that mode. After 5 wrong PINs the logger leaves that mode.';
+
+  @override
+  String get metricaBlePinTitle => 'Métrica PIN';
+
+  @override
+  String get metricaBlePinBody =>
+      'Enter the 6 digits on the logger. Without the PIN it rejects pairing. After 5 failures it leaves pairing mode.';
+
+  @override
+  String get metricaBlePinLabel => '6-digit PIN';
+
+  @override
+  String get metricaBlePinFormat => 'The PIN must be 6 digits.';
+
+  @override
+  String get metricaBleCheckingPin => 'Checking the PIN…';
+
+  @override
+  String get metricaBleWrongPin => 'Wrong PIN.';
+
+  @override
+  String metricaBleWrongPinLeft(int left) {
+    return 'Wrong PIN. $left attempts left.';
+  }
+
+  @override
+  String get metricaBlePinLocked =>
+      'Wrong PIN. No attempts left: the logger closed pairing mode. Turn pairing mode on again on Métrica.';
+
+  @override
+  String get metricaBleMinting => 'Creating the pairing on your account…';
+
+  @override
+  String get metricaBleWriting => 'Sending the pairing to the logger…';
+
+  @override
+  String get metricaBleTimeout => 'The logger did not respond in time.';
+
+  @override
+  String get metricaBleNoSession => 'Sign in to pair Métrica.';
+
+  @override
+  String get metricaBleNotFound =>
+      'No logger found. Power on Métrica, open pairing mode, and bring it close to the phone.';
+
+  @override
+  String get metricaBlePermissionDenied =>
+      'Bluetooth scan and connect permission is missing. Enable it to pair.';
+
+  @override
+  String get metricaBleLocationDenied =>
+      'This Android version needs location permission to scan for the logger.';
+
+  @override
+  String get metricaBleBluetoothOff => 'Turn on the phone\'s Bluetooth.';
+
+  @override
+  String get metricaBleUnsupported => 'This phone does not have Bluetooth LE.';
+
+  @override
+  String get metricaBleConnectFailed => 'Could not connect to the logger.';
+
+  @override
+  String get metricaBleFailed => 'Could not pair.';
+
+  @override
+  String metricaBleFailedDetail(String detail) {
+    return 'Could not pair. $detail';
+  }
+
+  @override
+  String metricaBleSuccess(String deviceId) {
+    return 'Métrica paired ($deviceId).';
+  }
+
+  @override
+  String get metricaBleRetry => 'Try again';
+
+  @override
+  String get metricaBleContinue => 'Continue';
+
+  @override
+  String get metricaBleWifiTitle => 'Paddock Wi‑Fi (optional)';
+
+  @override
+  String get metricaBleWifiHelp =>
+      'Optionally send the network now. Do it before pairing: once the logger confirms pairing, it closes the mode a few seconds later.';
+
+  @override
+  String get metricaBleWifiSsid => 'Network name';
+
+  @override
+  String get metricaBleWifiPassword => 'Password';
+
+  @override
+  String get metricaBleWifiSend => 'Send Wi‑Fi';
+
+  @override
+  String get metricaBleWifiSkip => 'Not now';
+
+  @override
+  String get metricaBleWifiSending => 'Sending Wi‑Fi…';
+
+  @override
+  String get metricaBleWifiSaved => 'Wi‑Fi saved on the logger.';
+
+  @override
+  String get metricaBleWifiFailed => 'Could not save Wi‑Fi.';
+
+  @override
+  String get metricaBleWifiNeedSsid => 'Enter the network name.';
 }
