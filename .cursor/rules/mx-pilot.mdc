@@ -1,0 +1,14 @@
+---
+description: Contexto de la lane de piloto MX (8 Horas / variantes dirt de RiderLab). Aplicar al tocar archivos en mx-pilot/.
+globs: mx-pilot/**
+alwaysApply: false
+---
+
+# MX Pilot lane
+
+Al trabajar archivos en `mx-pilot/`:
+
+1. Leer `mx-pilot/STATUS.md` antes de proponer cambios.
+2. No reabrir decisiones de `mx-pilot/DECISIONS.md` salvo que el usuario lo pida.
+3. No inventar el layout de 8 Horas. Sectores sin nombre en CIRCUIT = TBD.
+4. Al cerrar trabajo, actualizar `mx-pilot/STATUS.md`.
