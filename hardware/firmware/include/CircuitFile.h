@@ -84,7 +84,7 @@ struct Circuit {
   float tangentDeg(int i) const {
     int j = (i + 1) % nC; return fmodf(atan2f(center[j].x - center[i].x, center[j].y - center[i].y) * 57.29578f + 360, 360);
   }
- private:
+ public:  // 0.6.7: crc32 used by CircuitIndex (test circuit writer)
   template <class T> static T rd(const uint8_t* p) { T v; memcpy(&v, p, sizeof v); return v; }
   static uint32_t crc32(const uint8_t* d, size_t n) {
     uint32_t c = 0xFFFFFFFFu;
