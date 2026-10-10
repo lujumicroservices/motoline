@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
@@ -118,7 +117,7 @@ class _SessionMotionCueState extends State<SessionMotionCue>
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                     color: AppTheme.mist,
@@ -127,7 +126,7 @@ class _SessionMotionCueState extends State<SessionMotionCue>
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 13,
                     height: 1.25,

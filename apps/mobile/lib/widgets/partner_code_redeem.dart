@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../core/pro/pro_entitlement.dart';
 import '../l10n/l10n_ext.dart';
@@ -95,12 +94,12 @@ class _PartnerCodeRedeemFieldState
         if (!widget.compact) ...[
           Text(
             l10n.partnerProCode,
-            style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
+            style: AppFonts.body(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
             l10n.partnerProCodeHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 12,
               height: 1.35,

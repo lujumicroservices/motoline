@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/lean_lab/upright_freeze_controller.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -53,7 +52,7 @@ class UprightFreezePanel extends StatelessWidget {
           Text(
             status,
             textAlign: TextAlign.center,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               color: c.phase == UprightFreezePhase.failed
                   ? AppTheme.signal
                   : AppTheme.line,
@@ -67,7 +66,7 @@ class UprightFreezePanel extends StatelessWidget {
             Text(
               '${c.countdownLeft}',
               textAlign: TextAlign.center,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 color: AppTheme.mist,
                 fontWeight: FontWeight.w800,
                 fontSize: compact ? 40 : 52,

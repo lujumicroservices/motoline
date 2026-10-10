@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/share_visibility.dart';
 import '../../theme/app_theme.dart';
@@ -29,7 +28,7 @@ class VisibilitySelector extends StatelessWidget {
                 value: v,
                 label: Text(
                   dense ? _short(v) : v.label,
-                  style: GoogleFonts.exo2(fontSize: dense ? 11 : 12),
+                  style: AppFonts.display(fontSize: dense ? 11 : 12),
                 ),
                 tooltip: v.help,
               ),
@@ -49,7 +48,7 @@ class VisibilitySelector extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             value.help,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 12,
             ),

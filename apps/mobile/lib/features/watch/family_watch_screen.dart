@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
@@ -92,7 +91,7 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
       appBar: AppBar(
         title: Text(
           l10n.familyWatchScreenTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: ListView(
@@ -100,7 +99,7 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
         children: [
           Text(
             l10n.familyWatchScreenHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 15,
               height: 1.4,
@@ -109,7 +108,7 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
           const SizedBox(height: 8),
           Text(
             l10n.familyNotEmergency,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
@@ -126,7 +125,7 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
               Expanded(
                 child: Text(
                   active ? l10n.familyWatchActive : l10n.familyWatchInactive,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                     color: active ? null : AppTheme.steel,
@@ -139,7 +138,7 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
             const SizedBox(height: 8),
             Text(
               l10n.familyLastPing(lastLabel),
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.line,
                 fontSize: 14,
               ),
@@ -192,7 +191,7 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
             const SizedBox(height: 12),
             Text(
               l10n.familyWatchQuickHint,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 13,
                 height: 1.35,
@@ -203,7 +202,7 @@ class _FamilyWatchScreenState extends ConsumerState<FamilyWatchScreen> {
             const SizedBox(height: 20),
             Text(
               l10n.familyShareAgainHint,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 13,
                 height: 1.35,
@@ -275,7 +274,7 @@ class _StatusAction extends StatelessWidget {
                 Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
                     color: paint,

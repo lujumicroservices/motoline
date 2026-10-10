@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/analytics/brake_detection.dart';
 import '../../core/analytics/corner_skill.dart';
@@ -40,7 +39,7 @@ class SkillLabScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           l10n.skillLabTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: ListView(
@@ -50,7 +49,7 @@ class SkillLabScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             l10n.skillLabFocusTitle,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),
@@ -58,7 +57,7 @@ class SkillLabScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             l10n.skillLabFocusHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
@@ -68,7 +67,7 @@ class SkillLabScreen extends StatelessWidget {
           if (corners.isEmpty)
             Text(
               l10n.skillTipText(const SkillTip(SkillTipId.noCurvasDetected)),
-              style: GoogleFonts.rajdhani(color: AppTheme.steel),
+              style: AppFonts.body(color: AppTheme.steel),
             )
           else
             for (var i = 0; i < corners.length; i++) ...[
@@ -136,14 +135,14 @@ class _SessionHeader extends StatelessWidget {
               children: [
                 Text(
                   l10n.skillCoach,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
                 ),
                 Text(
                   l10n.skillCurvasRated(summary.curvaCount),
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 13,
                   ),
@@ -153,15 +152,15 @@ class _SessionHeader extends StatelessWidget {
           ),
           Text(
             '$score',
-            style: GoogleFonts.exo2(
+            style: AppFonts.metric(
               fontWeight: FontWeight.w800,
-              fontSize: 36,
+              fontSize: 40,
               color: color,
             ),
           ),
           Text(
             ' /100',
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 14),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 14),
           ),
         ],
       ),
@@ -214,7 +213,7 @@ class _CornerMistakeCard extends StatelessWidget {
                       '$rideOrder · ${corner.label}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                         color: AppTheme.mist,
@@ -236,7 +235,7 @@ class _CornerMistakeCard extends StatelessWidget {
                     ),
                     child: Text(
                       '$score',
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                         color: color,

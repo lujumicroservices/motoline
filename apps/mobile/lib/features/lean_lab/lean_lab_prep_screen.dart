@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/lean_lab/lean_imu_math.dart';
 import '../../core/lean_lab/lean_lab_circuit.dart';
@@ -112,7 +111,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
       appBar: AppBar(
         title: Text(
           l10n.leanLabPrepTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: ListView(
@@ -120,7 +119,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
         children: [
           Text(
             l10n.leanLabPrepHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.4,
@@ -128,7 +127,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
           ),
           const SizedBox(height: 16),
           Text(l10n.leanLabDirectionQ,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
+              style: AppFonts.display(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -153,11 +152,11 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
           ),
           const SizedBox(height: 20),
           Text(l10n.leanLabCalibTitle,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
+              style: AppFonts.display(fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Text(
             l10n.leanLabCalibHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
@@ -177,12 +176,12 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
             snap == null
                 ? '…'
                 : '${l10n.leanLabRawNeutral}: ${snap.vectorLean.toStringAsFixed(1)}°',
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 12),
           ),
           if (_frozenG0 != null)
             Text(
               '${l10n.leanLabFrozenNeutral}: ${_frozenG0!.toString()} · ${snap?.pose.label ?? ''}',
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 color: AppTheme.line,
                 fontWeight: FontWeight.w700,
               ),
@@ -223,7 +222,7 @@ class _PoseBanner extends StatelessWidget {
           Text(
             '${pose.label} · ${snap.winningChannel}  ·  ${snap.upAxis}'
             '${snap.trackerConfidence > 0 ? '  ·  conf ${snap.trackerConfidence.toStringAsFixed(2)}' : ''}',
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               color: AppTheme.mist,
               fontWeight: FontWeight.w700,
               fontSize: 14,
@@ -232,7 +231,7 @@ class _PoseBanner extends StatelessWidget {
           if (warn)
             Text(
               context.l10n.leanLabFreezeRedo(snap.tilt.toStringAsFixed(0)),
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.signal,
                 fontSize: 12,
               ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/legal/legal_urls.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
-import '../../core/legal/legal_urls.dart';
+import '../../theme/brand_mark.dart';
 import 'sign_in_form.dart';
 
 /// Full-screen gate: nothing in RiderLab works until a real account exists.
@@ -19,29 +19,17 @@ class SignInScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
           children: [
-            Text(
-              l10n.appTitle,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.barlowCondensed(
-                fontSize: 40,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-                color: AppTheme.mist,
-              ),
-            ),
+            const Center(child: RiderLabMark(size: BrandMarkSize.hero)),
             const SizedBox(height: 8),
             Text(
               l10n.tagline,
               textAlign: TextAlign.center,
-              style: GoogleFonts.rajdhani(
-                fontSize: 16,
-                color: AppTheme.steel,
-              ),
+              style: AppFonts.body(fontSize: 16, color: AppTheme.steel),
             ),
             const SizedBox(height: 36),
             Text(
               l10n.authGateTitle,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -49,7 +37,7 @@ class SignInScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               l10n.authGateBody,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 fontSize: 15,
                 height: 1.45,
                 color: AppTheme.steel,
@@ -61,7 +49,7 @@ class SignInScreen extends StatelessWidget {
             Text(
               l10n.authLegalFooter,
               textAlign: TextAlign.center,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 fontSize: 13,
                 height: 1.35,
                 color: AppTheme.steel,

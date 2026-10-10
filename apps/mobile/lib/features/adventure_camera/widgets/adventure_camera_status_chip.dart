@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../theme/app_theme.dart';
 import '../models/adventure_camera_status.dart';
@@ -70,7 +69,7 @@ class AdventureCameraStatusChip extends ConsumerWidget {
             const SizedBox(width: 5),
             Text(
               label,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 color: color,
                 fontWeight: FontWeight.w800,
                 fontSize: 11,

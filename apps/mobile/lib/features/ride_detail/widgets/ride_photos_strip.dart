@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/models/ride_photo.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -33,7 +32,7 @@ class RidePhotosStrip extends ConsumerWidget {
             children: [
               Text(
                 l10n.ridePhotosTitle,
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),

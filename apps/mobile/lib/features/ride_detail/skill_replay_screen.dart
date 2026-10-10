@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/brake_detection.dart';
@@ -83,7 +82,7 @@ class _SkillReplayScreenState extends State<SkillReplayScreen> {
       appBar: AppBar(
         title: Text(
           '${_index + 1} · ${current.label}',
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
         actions: [
           if (total > 1)
@@ -92,7 +91,7 @@ class _SkillReplayScreenState extends State<SkillReplayScreen> {
                 padding: const EdgeInsets.only(right: 12),
                 child: Text(
                   '${_index + 1} / $total',
-                  style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                  style: AppFonts.body(color: AppTheme.steel),
                 ),
               ),
             ),
@@ -105,7 +104,7 @@ class _SkillReplayScreenState extends State<SkillReplayScreen> {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Text(
                 l10n.curvaSwipeHint,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -367,7 +366,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                 comparing
                     ? l10n.skillReplayCompareHelp
                     : l10n.skillReplayHelp,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 13,
                   height: 1.35,
@@ -377,7 +376,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                 const SizedBox(height: 12),
                 Text(
                   l10n.skillReplayCompareWith,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
@@ -393,7 +392,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                     if (peers.isEmpty) {
                       return Text(
                         l10n.compareEmpty,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.steel,
                           fontSize: 12,
                         ),
@@ -430,7 +429,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                   const SizedBox(height: 8),
                   Text(
                     _peerError!,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.lineHot,
                       fontSize: 12,
                     ),
@@ -539,7 +538,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                       child: Text(
                         l10n.compareYou,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: RideVizPalette.leanLeft,
                           fontSize: 12,
                         ),
@@ -549,7 +548,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                       child: Text(
                         _peer?.riderLabel ?? '',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: RideVizPalette.leanRight,
                           fontSize: 12,
                         ),
@@ -642,7 +641,7 @@ class _SkillReplayPageState extends ConsumerState<_SkillReplayPage>
                         '${l10n.skillReplaySameSection}'
                     : '${formatDuration(Duration(milliseconds: (yp.timestamp.difference(_youSlice.first.timestamp).inMilliseconds).clamp(0, 1 << 30)))}'
                         ' · ${yi + 1}/${_youSlice.length}',
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -709,7 +708,7 @@ class _CornerCoachPanel extends StatelessWidget {
             Expanded(
               child: Text(
                 corner.label,
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                 ),
@@ -717,15 +716,15 @@ class _CornerCoachPanel extends StatelessWidget {
             ),
             Text(
               '$score',
-              style: GoogleFonts.exo2(
+              style: AppFonts.metric(
                 fontWeight: FontWeight.w800,
-                fontSize: 28,
+                fontSize: 36,
                 color: color,
               ),
             ),
             Text(
               ' /100',
-              style: GoogleFonts.rajdhani(color: AppTheme.steel),
+              style: AppFonts.body(color: AppTheme.steel),
             ),
           ],
         ),
@@ -749,7 +748,7 @@ class _CornerCoachPanel extends StatelessWidget {
                     : l10n.skillApexGapNear(
                         a.apexGapAlongM!.abs().toStringAsFixed(0),
                       ),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
             ),
@@ -773,7 +772,7 @@ class _CornerCoachPanel extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l10n.skillTipText(tip),
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       fontSize: 13,
                       height: 1.35,
                       color: AppTheme.mist,
@@ -815,7 +814,7 @@ class _LiveMetric extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               fontSize: 11,
               letterSpacing: 0.8,
               color: AppTheme.steel,
@@ -825,7 +824,7 @@ class _LiveMetric extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: accent,
@@ -926,7 +925,7 @@ class _TransportBar extends StatelessWidget {
                     onSelected: (_) => onRate(r),
                     visualDensity: VisualDensity.compact,
                     selectedColor: AppTheme.line.withValues(alpha: 0.25),
-                    labelStyle: GoogleFonts.exo2(
+                    labelStyle: AppFonts.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),

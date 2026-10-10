@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/email_password.dart';
 import '../../l10n/l10n_ext.dart';
@@ -75,7 +74,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
           children: [
             Text(
               l10n.authSetPasswordBody,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 15,
                 height: 1.4,
@@ -85,7 +84,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
             if (_done)
               Text(
                 l10n.authPasswordUpdated,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.line,
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
@@ -101,7 +100,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                   filled: true,
                   fillColor: AppTheme.asphaltElevated,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.field),
                     borderSide: BorderSide.none,
                   ),
                   suffixIcon: IconButton(
@@ -125,7 +124,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                   filled: true,
                   fillColor: AppTheme.asphaltElevated,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.field),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -145,7 +144,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
                 const SizedBox(height: 12),
                 Text(
                   _error!,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.signal,
                     fontSize: 13,
                   ),

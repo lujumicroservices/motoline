@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -87,7 +86,7 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
       appBar: AppBar(
         title: Text(
           l10n.leanImuLabTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: s == null
@@ -97,7 +96,7 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
               children: [
                 Text(
                   l10n.leanImuLabIntro,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 14,
                     height: 1.4,
@@ -141,7 +140,7 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                   const SizedBox(height: 8),
                   Text(
                     l10n.leanImuLabFrozenHint,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.line,
                       fontSize: 12,
                     ),
@@ -194,7 +193,7 @@ class _LeanImuLabScreenState extends State<LeanImuLabScreen> {
                   const SizedBox(height: 6),
                   Text(
                     l10n.leanImuLabRecordingHint(_lab.history.length),
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: Colors.redAccent,
                       fontSize: 12,
                     ),
@@ -267,7 +266,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+      style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
     );
   }
 }
@@ -280,7 +279,7 @@ class _Note extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.rajdhani(
+      style: AppFonts.body(
         color: AppTheme.steel,
         fontSize: 13,
         height: 1.35,
@@ -317,7 +316,7 @@ class _AttitudeBoard extends StatelessWidget {
             frozen
                 ? 'Vector lean from freeze  ·  up ${sample.upAxis}'
                 : 'Bubble = gravity on phone face  ·  up ${sample.upAxis}',
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 12),
           ),
         ],
       ),
@@ -356,7 +355,7 @@ class _PoseEngineBanner extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: GoogleFonts.exo2(
+        style: AppFonts.display(
           color: frozen ? AppTheme.line : AppTheme.mist,
           fontWeight: FontWeight.w700,
           fontSize: 14,
@@ -515,20 +514,19 @@ class _MetricTile extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 12),
           ),
           Text(
             '${value.toStringAsFixed(1)}$unit',
-            style: GoogleFonts.exo2(
+            style: AppFonts.metric(
               color: color,
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              height: 1.1,
+              fontSize: 32,
+              height: 1.05,
             ),
           ),
           Text(
             hint,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 11),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 11),
           ),
         ],
       ),
@@ -591,7 +589,7 @@ class _HistoryChart extends StatelessWidget {
                 interval: 35,
                 getTitlesWidget: (v, _) => Text(
                   v.toStringAsFixed(0),
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 10,
                   ),
@@ -638,7 +636,7 @@ class _Legend extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           t,
-          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 11),
+          style: AppFonts.body(color: AppTheme.steel, fontSize: 11),
         ),
       ],
     );
@@ -687,14 +685,14 @@ class _VectorCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
               ),
             ),
             Text(
               hint,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 11),
+              style: AppFonts.body(color: AppTheme.steel, fontSize: 11),
             ),
             const SizedBox(height: 8),
             _AxisBar(label: 'X', value: v.x, max: expected ?? 20),
@@ -704,7 +702,7 @@ class _VectorCard extends StatelessWidget {
             Text(
               '|v| ${mag.toStringAsFixed(2)} $unit'
               '${expected != null ? '   (g≈${expected!.toStringAsFixed(1)})' : ''}',
-              style: GoogleFonts.rajdhani(color: AppTheme.mist, fontSize: 12),
+              style: AppFonts.body(color: AppTheme.mist, fontSize: 12),
             ),
           ],
         ),
@@ -731,7 +729,7 @@ class _AxisBar extends StatelessWidget {
             width: 14,
             child: Text(
               label,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
+              style: AppFonts.body(color: AppTheme.steel, fontSize: 12),
             ),
           ),
           Expanded(
@@ -778,7 +776,7 @@ class _AxisBar extends StatelessWidget {
             child: Text(
               value.toStringAsFixed(2),
               textAlign: TextAlign.right,
-              style: GoogleFonts.rajdhani(fontSize: 12),
+              style: AppFonts.body(fontSize: 12),
             ),
           ),
         ],
@@ -808,19 +806,19 @@ class _RatesCard extends StatelessWidget {
         children: [
           Text(
             'Capture rates',
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 13),
           ),
           const SizedBox(height: 6),
           Text(
             'Accel ${hz(sample.accelHz)}   ·   Gyro ${hz(sample.gyroHz)}   ·   '
             'Mag ${hz(sample.magHz)}   ·   Baro ${hz(sample.baroHz)}',
-            style: GoogleFonts.rajdhani(fontSize: 13),
+            style: AppFonts.body(fontSize: 13),
           ),
           const SizedBox(height: 6),
           Text(
             'Heading ${heading == null ? '—' : '${heading.toStringAsFixed(0)}° mag'}'
             '   ·   Pressure ${baro == null ? '—' : '${baro.toStringAsFixed(1)} hPa'}',
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 12),
           ),
         ],
       ),

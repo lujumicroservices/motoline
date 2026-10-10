@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
@@ -27,12 +26,12 @@ Future<bool?> showUgcGuidelinesDialog(
         backgroundColor: AppTheme.asphaltElevated,
         title: Text(
           l10n.ugcGuidelinesTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
         content: SingleChildScrollView(
           child: Text(
             l10n.ugcGuidelinesBody,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.mist,
               fontSize: 15,
               height: 1.4,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/telemetry/labels/ride_engine_label.dart';
@@ -94,7 +93,7 @@ class _RideEngineLabelScreenState extends ConsumerState<RideEngineLabelScreen> {
         children: [
           Text(
             l10n.engineLabelIntro,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 15,
               height: 1.4,
@@ -186,7 +185,7 @@ class _QuestionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+      style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
     );
   }
 }
@@ -215,7 +214,7 @@ class _ChoiceWrap extends StatelessWidget {
             onSelected: (_) => onChanged(id),
             selectedColor: AppTheme.line.withValues(alpha: 0.28),
             backgroundColor: AppTheme.asphaltElevated,
-            labelStyle: GoogleFonts.rajdhani(
+            labelStyle: AppFonts.body(
               fontWeight: FontWeight.w600,
               fontSize: 13,
               color: AppTheme.mist,

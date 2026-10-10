@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/brake_detection.dart';
@@ -451,7 +450,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
                                 '${speed == null ? "--" : "${speed.toStringAsFixed(0)} ${l10n.kmh}"}'
                                 '  ·  ${lean.abs().toStringAsFixed(0)}° $leanSide'
                                 '  ·  ${_scrubIndex + 1}/${points.length}',
-                                style: GoogleFonts.rajdhani(
+                                style: AppFonts.body(
                                   color: AppTheme.mist,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -474,7 +473,7 @@ class _FullscreenMapScreenState extends State<FullscreenMapScreen>
                           child: _layers.showRoadKindContrast
                               ? Text(
                                   '${l10n.recta} · ${l10n.curva}',
-                                  style: GoogleFonts.rajdhani(
+                                  style: AppFonts.body(
                                     color: AppTheme.steel,
                                     fontSize: 12,
                                   ),
@@ -695,7 +694,7 @@ class _TopBar extends StatelessWidget {
             ),
             child: Text(
               selecting ? l10n.selectAreaHint : title,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
               ),
@@ -805,7 +804,7 @@ class _BottomPanel extends StatelessWidget {
                 : (hasSelection
                       ? l10n.areaReady(selection!.end - selection!.start + 1)
                       : l10n.fullscreenMapHelp),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,

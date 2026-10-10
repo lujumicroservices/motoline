@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/route_circuit.dart';
 import '../../core/models/share_visibility.dart';
@@ -26,7 +25,7 @@ class RoutesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.routesTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
         actions: [
           const Padding(
@@ -63,7 +62,7 @@ class RoutesScreen extends ConsumerWidget {
                 children: [
                   Text(
                     l10n.routesHowTitle,
-                    style: GoogleFonts.exo2(
+                    style: AppFonts.display(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -71,7 +70,7 @@ class RoutesScreen extends ConsumerWidget {
                   const SizedBox(height: 10),
                   Text(
                     l10n.routesHowBody,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.steel,
                       fontSize: 14,
                       height: 1.45,
@@ -83,7 +82,7 @@ class RoutesScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               l10n.myRoutes,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -113,7 +112,7 @@ class RoutesScreen extends ConsumerWidget {
                           ),
                           child: Text(
                             info,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 12,
                               height: 1.35,
@@ -130,7 +129,7 @@ class RoutesScreen extends ConsumerWidget {
                           ),
                           child: Text(
                             '${l10n.cloudUnavailable}: $err',
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.mist,
                               fontSize: 13,
                               height: 1.35,
@@ -165,7 +164,7 @@ class RoutesScreen extends ConsumerWidget {
             const SizedBox(height: 28),
             Text(
               l10n.friendRoutes,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -192,7 +191,7 @@ class RoutesScreen extends ConsumerWidget {
                         leading: const Icon(Icons.route, color: AppTheme.line),
                         title: Text(
                           r.name,
-                          style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+                          style: AppFonts.display(fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
                           r.description?.isNotEmpty == true
@@ -246,7 +245,7 @@ class RoutesScreen extends ConsumerWidget {
               backgroundColor: AppTheme.asphaltElevated,
               title: Text(
                 l10n.createRoute,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -361,7 +360,7 @@ class _MyRouteTile extends ConsumerWidget {
             Expanded(
               child: Text(
                 route.name,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+                style: AppFonts.display(fontWeight: FontWeight.w600),
               ),
             ),
             if (route.isLoopReady)

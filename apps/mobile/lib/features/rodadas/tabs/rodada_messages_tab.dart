@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/notifications/push_diagnostics.dart';
@@ -184,7 +183,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                                   child: Text(
                                     '${m.displayName ?? l10n.riderFallback} · $time'
                                     '${m.isSafety ? ' · ${l10n.safetyTag}' : ''}',
-                                    style: GoogleFonts.exo2(
+                                    style: AppFonts.display(
                                       fontSize: 12,
                                       color: m.isSafety
                                           ? AppTheme.signal
@@ -212,7 +211,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
                             const SizedBox(height: 4),
                             Text(
                               m.body,
-                              style: GoogleFonts.rajdhani(fontSize: 15),
+                              style: AppFonts.body(fontSize: 15),
                             ),
                           ],
                         ),

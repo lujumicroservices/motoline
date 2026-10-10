@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
@@ -85,7 +84,7 @@ class _ImpersonateScreenState extends ConsumerState<ImpersonateScreen> {
       appBar: AppBar(
         title: Text(
           l10n.impersonateTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: ListView(
@@ -93,7 +92,7 @@ class _ImpersonateScreenState extends ConsumerState<ImpersonateScreen> {
         children: [
           Text(
             l10n.impersonateHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.4,
@@ -120,7 +119,7 @@ class _ImpersonateScreenState extends ConsumerState<ImpersonateScreen> {
             const SizedBox(height: 12),
             Text(
               _searchError!,
-              style: GoogleFonts.rajdhani(color: AppTheme.signal),
+              style: AppFonts.body(color: AppTheme.signal),
             ),
           ],
           const SizedBox(height: 12),
@@ -134,7 +133,7 @@ class _ImpersonateScreenState extends ConsumerState<ImpersonateScreen> {
                   if (hit.email != null && hit.email!.isNotEmpty) hit.email,
                   hit.id.substring(0, hit.id.length.clamp(0, 8)),
                 ].join(' · '),
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -145,7 +144,7 @@ class _ImpersonateScreenState extends ConsumerState<ImpersonateScreen> {
           if (!_searching && _hits.isEmpty && _q.text.trim().length >= 2)
             Text(
               l10n.impersonateEmpty,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel),
+              style: AppFonts.body(color: AppTheme.steel),
             ),
         ],
       ),

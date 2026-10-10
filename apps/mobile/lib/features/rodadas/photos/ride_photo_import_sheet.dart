@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
@@ -91,7 +90,7 @@ class _RidePhotoImportSheetState extends ConsumerState<RidePhotoImportSheet> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: Text(
               l10n.photoImportHelp,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 14,
                 height: 1.35,

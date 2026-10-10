@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/models/cloud_models.dart';
@@ -75,7 +74,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
       appBar: AppBar(
         title: Text(
           l10n.friends,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: RefreshIndicator(
@@ -88,7 +87,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
           children: [
             Text(
               l10n.friendsHelp,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 14,
                 height: 1.4,
@@ -100,7 +99,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
               leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
               title: Text(
                 l10n.familyCircleTitle,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
               subtitle: Text(l10n.familyCircleHomeTile),
               trailing: const Icon(Icons.chevron_right),
@@ -115,7 +114,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             const SizedBox(height: 12),
             Text(
               l10n.yourName,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -131,7 +130,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                       filled: true,
                       fillColor: AppTheme.asphaltElevated,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppRadius.field),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -147,7 +146,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             const SizedBox(height: 24),
             Text(
               l10n.findRiders,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -161,7 +160,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                 filled: true,
                 fillColor: AppTheme.asphaltElevated,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.field),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -178,7 +177,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                   if (hits.isEmpty) {
                     return Text(
                       l10n.noRidersFound,
-                      style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                      style: AppFonts.body(color: AppTheme.steel),
                     );
                   }
                   return Column(
@@ -221,7 +220,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                   children: [
                     Text(
                       l10n.friendRequests,
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
@@ -281,7 +280,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                   children: [
                     Text(
                       l10n.pendingSent,
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
@@ -311,7 +310,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             ),
             Text(
               l10n.yourFriends,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -336,7 +335,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                         anonymousOff
                             ? l10n.cloudAnonymousOff
                             : l10n.cloudUnavailable,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.steel,
                           height: 1.4,
                         ),
@@ -357,7 +356,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                     child: Text(
                       l10n.noFriendsYet,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         height: 1.4,
                       ),
@@ -414,12 +413,12 @@ class _FriendTile extends ConsumerWidget {
           backgroundColor: AppTheme.line.withValues(alpha: 0.25),
           child: Text(
             friend.label.isNotEmpty ? friend.label[0].toUpperCase() : '?',
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            style: AppFonts.display(fontWeight: FontWeight.w700),
           ),
         ),
         title: Text(
           friend.label,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+          style: AppFonts.display(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           l10n.friendRides,
@@ -512,7 +511,7 @@ class FriendRidesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           friend.label,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: ridesAsync.when(
@@ -546,7 +545,7 @@ class FriendRidesScreen extends ConsumerWidget {
                   DateFormat(
                     'EEE · MMM d · HH:mm',
                   ).format(ride.startedAt.toLocal()),
-                  style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+                  style: AppFonts.display(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   '${ride.distanceKm.toStringAsFixed(1)} km · '
@@ -586,7 +585,7 @@ class _FriendRideSheet extends StatelessWidget {
         children: [
           Text(
             ride.riderLabel,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 20),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 20),
           ),
           const SizedBox(height: 4),
           Text(

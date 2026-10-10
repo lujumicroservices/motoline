@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
@@ -30,7 +29,7 @@ class CornerSpeedBars extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 fontSize: 11,
                 color: AppTheme.steel,
               ),
@@ -48,7 +47,7 @@ class CornerSpeedBars extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               '${v.toStringAsFixed(0)} ${l10n.kmh}',
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),

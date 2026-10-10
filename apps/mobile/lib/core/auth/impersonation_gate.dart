@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
@@ -34,7 +33,7 @@ class ImpersonationGate extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       l10n.impersonateBanner(name),
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
@@ -47,7 +46,7 @@ class ImpersonationGate extends ConsumerWidget {
                         : () => ref.read(impersonationProvider.notifier).exit(),
                     child: Text(
                       l10n.impersonateExit,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.mist,
                         fontWeight: FontWeight.w700,
                       ),

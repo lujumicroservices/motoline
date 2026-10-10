@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../l10n/l10n_ext.dart';
 import '../providers/pro_entitlement_provider.dart';
@@ -15,7 +14,9 @@ Future<void> showProUpsellSheet(BuildContext context, WidgetRef ref) {
     isScrollControlled: true,
     backgroundColor: AppTheme.asphaltElevated,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(AppRadius.sheet),
+      ),
     ),
     builder: (ctx) => const _ProUpsellSheet(),
   );
@@ -52,7 +53,7 @@ class _ProUpsellSheet extends ConsumerWidget {
               const SizedBox(height: 20),
               Text(
                 l10n.proUnlock,
-                style: GoogleFonts.barlowCondensed(
+                style: AppFonts.display(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                 ),
@@ -60,7 +61,7 @@ class _ProUpsellSheet extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 l10n.proUnlockBody,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 15,
                   height: 1.4,
@@ -70,7 +71,7 @@ class _ProUpsellSheet extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Text(
                   remaining,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: RideVizPalette.leanLeft,
                     fontWeight: FontWeight.w700,
                   ),
@@ -80,7 +81,7 @@ class _ProUpsellSheet extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Text(
                   l10n.proExpiredKeepLab,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.signal,
                     fontSize: 14,
                     height: 1.35,
@@ -98,7 +99,7 @@ class _ProUpsellSheet extends ConsumerWidget {
                 Text(
                   remaining ?? l10n.proUnlocked,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: RideVizPalette.leanLeft,
                     fontWeight: FontWeight.w700,
                   ),
@@ -121,7 +122,7 @@ class _ProUpsellSheet extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text(
                   l10n.havePartnerCode,
-                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
+                  style: AppFonts.body(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 const PartnerCodeRedeemField(compact: true),
@@ -129,10 +130,7 @@ class _ProUpsellSheet extends ConsumerWidget {
                 Text(
                   l10n.startTrialHelp,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.rajdhani(
-                    color: AppTheme.steel,
-                    fontSize: 12,
-                  ),
+                  style: AppFonts.body(color: AppTheme.steel, fontSize: 12),
                 ),
               ],
             ],
@@ -156,10 +154,7 @@ class _FeatureRow extends StatelessWidget {
         Icon(Icons.check_circle, size: 20, color: RideVizPalette.leanLeft),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.rajdhani(fontSize: 14, height: 1.35),
-          ),
+          child: Text(text, style: AppFonts.body(fontSize: 14, height: 1.35)),
         ),
       ],
     );
@@ -184,7 +179,7 @@ class ProBadge extends StatelessWidget {
       ),
       child: Text(
         l10n.pro,
-        style: GoogleFonts.rajdhani(
+        style: AppFonts.body(
           fontSize: 10,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,

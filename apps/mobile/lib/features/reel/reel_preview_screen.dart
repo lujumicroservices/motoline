@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
@@ -201,7 +200,7 @@ class _ReelPreviewScreenState extends ConsumerState<ReelPreviewScreen> {
                             riderCount: _result!.highlights.riderCount,
                             cta: l10n.reelCta,
                           ),
-                          style: GoogleFonts.rajdhani(
+                          style: AppFonts.body(
                             color: AppTheme.steel,
                             fontSize: 13,
                             height: 1.35,
@@ -256,7 +255,7 @@ class _Building extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               label,
-              style: GoogleFonts.exo2(color: AppTheme.mist),
+              style: AppFonts.display(color: AppTheme.mist),
             ),
           ],
         ),

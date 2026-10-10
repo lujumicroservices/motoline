@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/location_service.dart';
 import '../../l10n/l10n_ext.dart';
@@ -71,7 +70,7 @@ class LocationPermissionGate {
             Expanded(
               child: Text(
                 title,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w800),
+                style: AppFonts.display(fontWeight: FontWeight.w800),
               ),
             ),
           ],
@@ -79,7 +78,7 @@ class LocationPermissionGate {
         content: SingleChildScrollView(
           child: Text(
             body,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               fontSize: 15,
               height: 1.45,
               color: AppTheme.mist,

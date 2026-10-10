@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
@@ -32,8 +31,8 @@ class MotorcycleLeanGauge extends StatelessWidget {
     final side = leanDegrees < -1
         ? l10n.leftShort
         : leanDegrees > 1
-            ? l10n.rightShort
-            : '·';
+        ? l10n.rightShort
+        : '·';
 
     return Container(
       width: double.infinity,
@@ -45,7 +44,9 @@ class MotorcycleLeanGauge extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [Color(0xFF2A3036), Color(0xFF171A1D)],
         ),
-        border: Border.all(color: RideVizPalette.leanLeft.withValues(alpha: 0.22)),
+        border: Border.all(
+          color: RideVizPalette.leanLeft.withValues(alpha: 0.22),
+        ),
       ),
       child: Column(
         children: [
@@ -53,7 +54,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
             children: [
               Text(
                 l10n.bikeLean.toUpperCase(),
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontSize: 11,
                   letterSpacing: 1.4,
                   fontWeight: FontWeight.w600,
@@ -64,10 +65,7 @@ class MotorcycleLeanGauge extends StatelessWidget {
               if (neutralLabel != null)
                 Text(
                   neutralLabel!,
-                  style: GoogleFonts.rajdhani(
-                    fontSize: 11,
-                    color: AppTheme.steel,
-                  ),
+                  style: AppFonts.body(fontSize: 11, color: AppTheme.steel),
                 ),
             ],
           ),
@@ -86,9 +84,8 @@ class MotorcycleLeanGauge extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '${absLean.toStringAsFixed(0)}° $side',
-            style: GoogleFonts.exo2(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
+            style: AppFonts.metric(
+              fontSize: 40,
               color: RideVizPalette.leanColor(leanDegrees),
             ),
           ),
@@ -97,7 +94,8 @@ class MotorcycleLeanGauge extends StatelessWidget {
             children: [
               Expanded(
                 child: _SidePeak(
-                  label: '${l10n.maxLean.toUpperCase()} ${l10n.leftShort.toUpperCase()}',
+                  label:
+                      '${l10n.maxLean.toUpperCase()} ${l10n.leftShort.toUpperCase()}',
                   value: '${maxLeftDegrees.toStringAsFixed(0)}°',
                   color: RideVizPalette.leanLeft,
                   alignEnd: false,
@@ -105,7 +103,8 @@ class MotorcycleLeanGauge extends StatelessWidget {
               ),
               Expanded(
                 child: _SidePeak(
-                  label: '${l10n.maxLean.toUpperCase()} ${l10n.rightShort.toUpperCase()}',
+                  label:
+                      '${l10n.maxLean.toUpperCase()} ${l10n.rightShort.toUpperCase()}',
                   value: '${maxRightDegrees.toStringAsFixed(0)}°',
                   color: RideVizPalette.leanRight,
                   alignEnd: true,
@@ -135,26 +134,20 @@ class _SidePeak extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: GoogleFonts.rajdhani(
+          style: AppFonts.body(
             fontSize: 10,
             letterSpacing: 1.0,
             color: AppTheme.steel,
             fontWeight: FontWeight.w600,
           ),
         ),
-        Text(
-          value,
-          style: GoogleFonts.exo2(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: color,
-          ),
-        ),
+        Text(value, style: AppFonts.metric(fontSize: 24, color: color)),
       ],
     );
   }
@@ -281,11 +274,7 @@ class _LeanGaugePainter extends CustomPainter {
       Offset(center.dx + radius * 0.85, center.dy - radius * 0.15),
       RideVizPalette.leanRight,
     );
-    label(
-      '0°',
-      Offset(center.dx, center.dy - radius - 8),
-      AppTheme.steel,
-    );
+    label('0°', Offset(center.dx, center.dy - radius - 8), AppTheme.steel);
   }
 
   @override

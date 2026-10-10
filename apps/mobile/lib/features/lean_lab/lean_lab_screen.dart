@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -105,7 +104,7 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
       appBar: AppBar(
         title: Text(
           l10n.leanLabTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: RefreshIndicator(
@@ -116,7 +115,7 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
         children: [
           Text(
             l10n.leanLabIntro,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.4,
@@ -147,13 +146,13 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
                         children: [
                           Text(
                             l10n.leanImuLabTitle,
-                            style: GoogleFonts.exo2(
+                            style: AppFonts.display(
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           Text(
                             l10n.leanImuLabSettingsHelp,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 12,
                               height: 1.3,
@@ -187,13 +186,13 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
                         children: [
                           Text(
                             l10n.leanLabCircuitName,
-                            style: GoogleFonts.exo2(
+                            style: AppFonts.display(
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           Text(
                             l10n.leanLabCircuitHelp,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 12,
                               height: 1.3,
@@ -211,12 +210,12 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
           const SizedBox(height: 16),
           Text(
             l10n.leanLabProgress(labeled, _sessions.length),
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 13),
           ),
           const SizedBox(height: 14),
           Text(
             l10n.leanLabProtocols,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
           ),
           const SizedBox(height: 8),
           _ProtocolCard(
@@ -245,7 +244,7 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
               Text(
                 l10n.leanLabNeedsLabels,
                 style:
-                    GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+                    AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
               ),
               const SizedBox(height: 8),
               for (final s in pending.take(8))
@@ -263,7 +262,7 @@ class _LeanLabScreenState extends ConsumerState<LeanLabScreen> {
               Text(
                 l10n.leanLabPastSessions,
                 style:
-                    GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+                    AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
               ),
               const SizedBox(height: 8),
               for (final s in _sessions.take(20))
@@ -318,7 +317,7 @@ class _SessionTile extends StatelessWidget {
       leading: Icon(badgeIcon, color: badgeColor),
       title: Text(
         '$title · $direction',
-        style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+        style: AppFonts.display(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         [
@@ -330,7 +329,7 @@ class _SessionTile extends StatelessWidget {
           if (session.corners.isNotEmpty)
             l10n.leanLabLabeledCount(session.corners.length),
         ].join(' · '),
-        style: GoogleFonts.rajdhani(
+        style: AppFonts.body(
           color: AppTheme.steel,
           fontSize: 12,
         ),
@@ -367,12 +366,12 @@ class _ProtocolCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 13,
                   height: 1.35,

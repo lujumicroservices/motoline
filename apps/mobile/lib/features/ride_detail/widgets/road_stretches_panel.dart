@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/analytics/road_kind_detection.dart';
 import '../../../core/utils/geo_utils.dart';
@@ -31,7 +30,7 @@ class RoadStretchesPanel extends StatelessWidget {
     if (curvas.isEmpty) {
       return Text(
         l10n.roadStretchesEmpty,
-        style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+        style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
       );
     }
 
@@ -40,7 +39,7 @@ class RoadStretchesPanel extends StatelessWidget {
       children: [
         Text(
           l10n.roadStretchesHelp(curvas.length),
-          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+          style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 12),
         for (var c = 0; c < curvas.length; c++) ...[
@@ -107,7 +106,7 @@ class _StretchCard extends StatelessWidget {
                   children: [
                     Text(
                       '${l10n.curvaTitle(curvaNumber)} · ${_label(context)}',
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                         color: color,
@@ -120,7 +119,7 @@ class _StretchCard extends StatelessWidget {
                       ' · Δh ${stretch.headingChangeDeg.abs().toStringAsFixed(0)}°'
                       '${stretch.avgAbsLeanDeg > 0 ? ' · lean ${stretch.avgAbsLeanDeg.toStringAsFixed(0)}°' : ''}'
                       ' · ${l10n.openDetail}',
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         fontSize: 12,
                       ),

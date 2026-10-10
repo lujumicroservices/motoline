@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/demo_ids.dart';
@@ -28,7 +27,7 @@ class RodadasScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.rodadasTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -81,7 +80,7 @@ class RodadasScreen extends ConsumerWidget {
                         const SizedBox(height: 40),
                         Text(
                           l10n.groupRidesTitle,
-                          style: GoogleFonts.exo2(
+                          style: AppFonts.display(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                           ),
@@ -89,7 +88,7 @@ class RodadasScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Text(
                           l10n.groupRidesBody,
-                          style: GoogleFonts.rajdhani(
+                          style: AppFonts.body(
                             color: AppTheme.steel,
                             fontSize: 15,
                             height: 1.4,
@@ -240,7 +239,7 @@ class _RodadaCard extends StatelessWidget {
                     children: [
                       Text(
                         rodada.title,
-                        style: GoogleFonts.exo2(
+                        style: AppFonts.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 17,
                         ),
@@ -254,7 +253,7 @@ class _RodadaCard extends StatelessWidget {
                           dateLabel,
                           l10n.rodadaRidersCount(rodada.memberCount),
                         ].join(' · '),
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.steel,
                           fontSize: 14,
                         ),
@@ -269,7 +268,7 @@ class _RodadaCard extends StatelessWidget {
                       label: Text(l10n.rodadaInviteChip),
                       visualDensity: VisualDensity.compact,
                       backgroundColor: AppTheme.asphalt,
-                      labelStyle: GoogleFonts.exo2(
+                      labelStyle: AppFonts.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.lineHot,
@@ -279,7 +278,7 @@ class _RodadaCard extends StatelessWidget {
                 else
                   Text(
                     rodada.status.toUpperCase(),
-                    style: GoogleFonts.exo2(
+                    style: AppFonts.display(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: statusColor,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/models/track_point.dart';
@@ -237,7 +236,7 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen>
                           ),
                           child: Text(
                             hint,
-                            style: GoogleFonts.exo2(
+                            style: AppFonts.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
@@ -286,7 +285,7 @@ class _LoopMarkMapScreenState extends State<LoopMarkMapScreen>
                       children: [
                         Text(
                           l10n.loopMarkMapHelp,
-                          style: GoogleFonts.rajdhani(
+                          style: AppFonts.body(
                             color: AppTheme.steel,
                             fontSize: 13,
                             height: 1.35,
@@ -368,7 +367,7 @@ class _AbMarker extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.exo2(
+        style: AppFonts.display(
           fontWeight: FontWeight.w800,
           color: AppTheme.asphalt,
           fontSize: 16,

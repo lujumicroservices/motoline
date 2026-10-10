@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/ride.dart';
@@ -160,7 +159,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
       children: [
         Text(
           l10n.rideLoopHelp,
-          style: GoogleFonts.rajdhani(
+          style: AppFonts.body(
             color: AppTheme.steel,
             fontSize: 13,
             height: 1.4,
@@ -203,7 +202,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
         const SizedBox(height: 16),
         Text(
           l10n.routeLoopSavedTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 14),
+          style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 14),
         ),
         const SizedBox(height: 8),
         loopsAsync.when(
@@ -237,7 +236,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
                         Expanded(
                           child: Text(
                             loop.name,
-                            style: GoogleFonts.exo2(
+                            style: AppFonts.display(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -245,7 +244,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
                         if (loop.isPrimary)
                           Text(
                             l10n.routeLoopPrimary,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: RideVizPalette.leanLeft,
@@ -262,7 +261,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
           const SizedBox(height: 16),
           Text(
             l10n.routeLoopDetectedTitle,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 14),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 14),
           ),
           const SizedBox(height: 8),
           if (_detected!.isEmpty)
@@ -279,7 +278,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
                   title: Text(
                     '${(c.pathMeters / 1000).toStringAsFixed(2)} km · '
                     '${formatDuration(c.duration)}',
-                    style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+                    style: AppFonts.display(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
                     l10n.routeLoopDetectedHint,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/analytics/track_segment_align.dart';
@@ -77,7 +76,7 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
       appBar: AppBar(
         title: Text(
           l10n.compareTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: rideAsync.when(
@@ -97,7 +96,7 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
                 children: [
                   Text(
                     l10n.comparePickPeer,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.steel,
                       fontSize: 14,
                     ),
@@ -118,7 +117,7 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Text(
                             l10n.compareEmpty,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               height: 1.4,
                             ),
@@ -152,7 +151,7 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
                       if (_peerPoints!.length < 2)
                         Text(
                           l10n.compareTrackUnavailable,
-                          style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                          style: AppFonts.body(color: AppTheme.steel),
                         )
                       else
                         DualPolylineMap.fromTrackPoints(
@@ -220,7 +219,7 @@ class _PeerPickTile extends StatelessWidget {
                     children: [
                       Text(
                         peer.riderLabel,
-                        style: GoogleFonts.exo2(
+                        style: AppFonts.display(
                           fontWeight: FontWeight.w600,
                         ),
                       ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/utils/geo_utils.dart';
@@ -234,7 +233,7 @@ class _Circuit8hPassViewScreenState extends State<Circuit8hPassViewScreen> {
                         dist,
                         durLabel,
                       ),
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.mist,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,

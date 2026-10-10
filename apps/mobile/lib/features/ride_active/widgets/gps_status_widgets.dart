@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/services/location_service.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -67,7 +66,7 @@ class GpsWarmupPanel extends StatelessWidget {
           Text(
             ready ? l10n.gpsReady : l10n.startingRide,
             textAlign: TextAlign.center,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               fontSize: 28,
               fontWeight: FontWeight.w700,
             ),
@@ -76,7 +75,7 @@ class GpsWarmupPanel extends StatelessWidget {
           Text(
             l10n.gpsWarmupStatusText(status),
             textAlign: TextAlign.center,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 16,
               height: 1.4,
@@ -94,7 +93,7 @@ class GpsWarmupPanel extends StatelessWidget {
           Text(
             l10n.gpsWarmHelp(meters),
             textAlign: TextAlign.center,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel.withValues(alpha: 0.85),
               fontSize: 13,
               height: 1.4,
@@ -137,7 +136,7 @@ class _AccuracyMeter extends StatelessWidget {
             children: [
               Text(
                 l10n.horizontalAccuracy,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontSize: 11,
                   letterSpacing: 1.1,
                   fontWeight: FontWeight.w600,
@@ -147,9 +146,8 @@ class _AccuracyMeter extends StatelessWidget {
               const Spacer(),
               Text(
                 '±${accuracyMeters.toStringAsFixed(1)} m',
-                style: GoogleFonts.exo2(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                style: AppFonts.metric(
+                  fontSize: 22,
                   color: accent,
                 ),
               ),
@@ -168,7 +166,7 @@ class _AccuracyMeter extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             l10n.lowerBetter(meters),
-            style: GoogleFonts.rajdhani(fontSize: 12, color: AppTheme.steel),
+            style: AppFonts.body(fontSize: 12, color: AppTheme.steel),
           ),
         ],
       ),
@@ -236,7 +234,7 @@ class GpsLockBadge extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 color: color,
                 fontWeight: FontWeight.w700,
                 fontSize: 12,

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/analytics/lean_neutral.dart';
 import '../../core/analytics/ride_analytics.dart';
@@ -366,7 +365,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
             child: Text(
               _emptyReason(l10n),
               textAlign: TextAlign.center,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 16),
+              style: AppFonts.body(color: AppTheme.steel, fontSize: 16),
             ),
           ),
         ),
@@ -391,7 +390,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
       appBar: AppBar(
         title: Text(
           l10n.leanLabReviewTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: AnimatedBuilder(
@@ -412,7 +411,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
             children: [
               Text(
                 l10n.leanLabReviewHelpMax,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 13,
                   height: 1.35,
@@ -423,7 +422,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                 Text(
                   '${session.direction.id} · ${session.phoneMount} · '
                   '${l10n.leanLabElevationSummary(session.totalClimbM.toStringAsFixed(0), session.totalDescentM.toStringAsFixed(0))}',
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.mist,
                     fontSize: 12,
                   ),
@@ -440,7 +439,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                     child: Text(
                       '${i + 1}/${candidates.length} · ${c.label}',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                      style: AppFonts.display(fontWeight: FontWeight.w700),
                     ),
                   ),
                   IconButton(
@@ -468,7 +467,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                   children: [
                     Text(
                       l10n.leanLabMaxLean.toUpperCase(),
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         fontSize: 12,
                         letterSpacing: 1.2,
                         color: AppTheme.steel,
@@ -477,16 +476,16 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                     ),
                     Text(
                       '${hit.absLeanDeg.toStringAsFixed(0)}°',
-                      style: GoogleFonts.exo2(
-                        fontSize: 44,
+                      style: AppFonts.metric(
+                        fontSize: 48,
                         fontWeight: FontWeight.w800,
                         color: RideVizPalette.leanColor(hit.signedLeanDeg),
-                        height: 1.05,
+                        height: 1.0,
                       ),
                     ),
                     Text(
                       sideLabel,
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.mist,
@@ -550,7 +549,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
               const SizedBox(height: 8),
               Text(
                 l10n.leanLabMaxLeanGps,
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),
@@ -561,7 +560,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                   hit.fromPoint.latitude.toStringAsFixed(6),
                   hit.fromPoint.longitude.toStringAsFixed(6),
                 ),
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -571,7 +570,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                   hit.toPoint.latitude.toStringAsFixed(6),
                   hit.toPoint.longitude.toStringAsFixed(6),
                 ),
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -590,7 +589,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                     child: Text(
                       '${l10n.leanLabLiveLean}: ${liveLean.abs().toStringAsFixed(0)}°'
                       '${atMax ? ' · ${l10n.leanLabAtPeak}' : ''}',
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w700,
                         color: atMax
                             ? RideVizPalette.leanColor(hit.signedLeanDeg)
@@ -600,7 +599,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
                   ),
                   Text(
                     '${liveSpeed.toStringAsFixed(0)} ${l10n.kmh}',
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.steel,
                       fontSize: 13,
                     ),
@@ -611,7 +610,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
               Text(
                 '${l10n.leanLabGrade}: ${avgGrade.toStringAsFixed(1)}%'
                 ' · ${_trendLabel(l10n, trend)}',
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -646,7 +645,7 @@ class _LeanLabReviewScreenState extends ConsumerState<LeanLabReviewScreen>
               const SizedBox(height: 14),
               Text(
                 l10n.leanLabBiasQ,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -793,7 +792,7 @@ class _TransportBar extends StatelessWidget {
                     onSelected: (_) => onRate(r),
                     visualDensity: VisualDensity.compact,
                     selectedColor: AppTheme.line.withValues(alpha: 0.25),
-                    labelStyle: GoogleFonts.exo2(
+                    labelStyle: AppFonts.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),

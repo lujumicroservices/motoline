@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
@@ -35,17 +34,17 @@ class SpeedColorLegend extends StatelessWidget {
           children: [
             Text(
               '0',
-              style: GoogleFonts.rajdhani(fontSize: 10, color: AppTheme.steel),
+              style: AppFonts.body(fontSize: 10, color: AppTheme.steel),
             ),
             const Spacer(),
             Text(
               l10n.speedLegendScale,
-              style: GoogleFonts.rajdhani(fontSize: 9, color: AppTheme.steel),
+              style: AppFonts.body(fontSize: 9, color: AppTheme.steel),
             ),
             const Spacer(),
             Text(
               RideVizPalette.speedCapKmh.toStringAsFixed(0),
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 fontSize: 10,
                 color: AppTheme.mist,
                 fontWeight: FontWeight.w600,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/app_build_info.dart';
@@ -312,7 +311,7 @@ class _GpsTrackPointsLabScreenState
                         ),
                         child: Text(
                           info.fullLine,
-                          style: GoogleFonts.rajdhani(
+                          style: AppFonts.body(
                             color: AppTheme.mist,
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
@@ -329,7 +328,7 @@ class _GpsTrackPointsLabScreenState
                       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                       child: Text(
                         _statusLine(l10n),
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.mist,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -391,7 +390,7 @@ class _GpsTrackPointsLabScreenState
                       _recording
                           ? l10n.gpsTrackPointsLabStopPerimeter
                           : l10n.gpsTrackPointsLabStartPerimeter,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                       ),

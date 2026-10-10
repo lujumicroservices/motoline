@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/analytics/brake_detection.dart';
 import '../../../core/utils/geo_utils.dart';
@@ -55,7 +54,7 @@ class BrakeEventsPanel extends StatelessWidget {
     if (events.isEmpty) {
       return Text(
         zoomed ? l10n.brakesEmptyZoom : l10n.brakesEmpty,
-        style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+        style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
       );
     }
 
@@ -75,7 +74,7 @@ class BrakeEventsPanel extends StatelessWidget {
       children: [
         Text(
           zoomed ? l10n.brakesHelpZoom : l10n.brakesHelp,
-          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+          style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
         ),
         const SizedBox(height: 12),
         for (var i = 0; i < visibleCount; i++) ...[
@@ -117,7 +116,7 @@ class BrakeEventsPanel extends StatelessWidget {
                     Expanded(
                       child: Text(
                         l10n.brakesProTeaser(visibleCount, rideTotal),
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           fontSize: 13,
                           height: 1.35,
                         ),
@@ -140,7 +139,7 @@ class BrakeEventsPanel extends StatelessWidget {
             zoomed
                 ? l10n.brakesMoreInStretch(densityHiddenCount)
                 : l10n.brakesMoreOverview(densityHiddenCount),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
@@ -182,7 +181,7 @@ class _ObfuscatedBrakeCard extends StatelessWidget {
                       children: [
                         Text(
                           '••:••.•••',
-                          style: GoogleFonts.exo2(
+                          style: AppFonts.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                             color: AppTheme.steel,
@@ -192,7 +191,7 @@ class _ObfuscatedBrakeCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             '#$index · •••••',
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               fontSize: 11,
                               letterSpacing: 1.0,
                               fontWeight: FontWeight.w700,
@@ -210,7 +209,7 @@ class _ObfuscatedBrakeCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '••• → ••• · −•• · peak •.•',
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         fontSize: 13,
                       ),
@@ -293,7 +292,7 @@ class _BrakeCard extends StatelessWidget {
                 children: [
                   Text(
                     formatDurationPrecise(event.duration),
-                    style: GoogleFonts.exo2(
+                    style: AppFonts.display(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
@@ -302,7 +301,7 @@ class _BrakeCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       '#$index · ${_hardnessLabel(context).toUpperCase()}',
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         fontSize: 11,
                         letterSpacing: 1.0,
                         fontWeight: FontWeight.w700,
@@ -323,7 +322,7 @@ class _BrakeCard extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 l10n.brakeAtTime(formatElapsedPrecise(atSeconds)),
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -334,7 +333,7 @@ class _BrakeCard extends StatelessWidget {
                 '${event.endSpeedKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
                 '−${event.speedDropKmh.toStringAsFixed(0)} ${l10n.kmh}  ·  '
                 '${l10n.brakePeakDecel(event.peakDecelMps2.toStringAsFixed(1))}',
-                style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+                style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
               ),
               const SizedBox(height: 8),
               ClipRRect(

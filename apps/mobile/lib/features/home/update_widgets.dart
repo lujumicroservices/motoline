@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/app_update_service.dart';
 import '../../providers/update_providers.dart';
@@ -45,7 +44,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
                 ),
                 child: Text(
                   l10n.newVersionBadge,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     color: AppTheme.asphalt,
@@ -57,7 +56,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
               Expanded(
                 child: Text(
                   l10n.updateAvailable,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -74,7 +73,7 @@ class UpdateAvailableBanner extends ConsumerWidget {
             const SizedBox(height: 10),
             Text(
               l10n.whatsNew,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 fontWeight: FontWeight.w700,
                 fontSize: 12,
                 color: AppTheme.lineHot,
@@ -186,7 +185,7 @@ Future<void> confirmUpdateWithChangelog(
           children: [
             Text(
               'RiderLab ${update.version}',
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+              style: AppFonts.display(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
             Text(
@@ -210,7 +209,7 @@ Future<void> confirmUpdateWithChangelog(
                 children: [
                   Text(
                     l10n.whatsNew,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       fontWeight: FontWeight.w700,
                       color: AppTheme.lineHot,
                       fontSize: 14,
@@ -313,7 +312,7 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
       backgroundColor: AppTheme.asphaltElevated,
       title: Text(
         _error == null ? l10n.downloadingUpdate : l10n.updateFailed,
-        style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+        style: AppFonts.display(fontWeight: FontWeight.w700),
       ),
       content: _error != null
           ? Text(_error!, style: const TextStyle(color: AppTheme.steel))

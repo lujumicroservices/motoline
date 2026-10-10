@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/bikes/bike_catalog.dart';
 import '../../l10n/l10n_ext.dart';
@@ -78,11 +77,11 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.asphaltElevated,
-        title: Text(l10n.bikeCustomModel, style: GoogleFonts.exo2()),
+        title: Text(l10n.bikeCustomModel, style: AppFonts.display()),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: GoogleFonts.exo2(),
+          style: AppFonts.display(),
           decoration: InputDecoration(hintText: l10n.bikeCustomModelHint),
           textCapitalization: TextCapitalization.words,
           onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
@@ -129,7 +128,7 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
         appBar: AppBar(
           title: Text(
             title,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            style: AppFonts.display(fontWeight: FontWeight.w700),
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -147,7 +146,7 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
                 children: [
                   Text(
                     l10n.bikePickerHelp,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.steel,
                       fontSize: 14,
                       height: 1.4,
@@ -175,7 +174,7 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
                   TextField(
                     controller: _search,
                     onChanged: (v) => setState(() => _query = v),
-                    style: GoogleFonts.exo2(),
+                    style: AppFonts.display(),
                     keyboardType: _step == _BikePickStep.year
                         ? TextInputType.number
                         : TextInputType.text,
@@ -185,7 +184,7 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
                       filled: true,
                       fillColor: AppTheme.asphaltElevated,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppRadius.field),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -204,11 +203,11 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
                           ),
                           title: Text(
                             selected.label,
-                            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                            style: AppFonts.display(fontWeight: FontWeight.w700),
                           ),
                           subtitle: Text(
                             selected.subtitle,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 12,
                             ),
@@ -309,7 +308,7 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
                 Expanded(
                   child: Text(
                     label,
-                    style: GoogleFonts.exo2(
+                    style: AppFonts.display(
                       fontWeight: FontWeight.w600,
                       color: muted ? AppTheme.steel : AppTheme.mist,
                     ),
@@ -335,7 +334,7 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8, top: 4),
       child: Text(
         label,
-        style: GoogleFonts.exo2(
+        style: AppFonts.display(
           fontWeight: FontWeight.w700,
           fontSize: 13,
           color: AppTheme.mist,
@@ -353,7 +352,7 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionChip(
-      label: Text(label, style: GoogleFonts.exo2(fontWeight: FontWeight.w600)),
+      label: Text(label, style: AppFonts.display(fontWeight: FontWeight.w600)),
       onPressed: onTap,
       backgroundColor: AppTheme.asphaltElevated,
       side: const BorderSide(color: AppTheme.line),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../l10n/l10n_ext.dart';
 import '../providers/pro_entitlement_provider.dart';
@@ -56,7 +55,7 @@ class FreeAdBanner extends ConsumerWidget {
                 ),
                 child: Text(
                   l10n.adPlaceholder,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.6,
@@ -68,7 +67,7 @@ class FreeAdBanner extends ConsumerWidget {
               Expanded(
                 child: Text(
                   l10n.removeAdsWithPro,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     fontSize: 13,
                     color: AppTheme.mist,
                   ),
@@ -78,7 +77,7 @@ class FreeAdBanner extends ConsumerWidget {
               ),
               Text(
                 l10n.upgradeToPro,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: RideVizPalette.leanLeft,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/lean_lab/lean_imu_math.dart';
 import '../../../core/lean_lab/upright_freeze_controller.dart';
@@ -137,7 +136,7 @@ class _UprightFreezeSheetState extends State<_UprightFreezeSheet> {
           children: [
             Text(
               widget.title,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w800,
                 fontSize: 20,
               ),
@@ -145,7 +144,7 @@ class _UprightFreezeSheetState extends State<_UprightFreezeSheet> {
             const SizedBox(height: 8),
             Text(
               widget.help,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 14,
                 height: 1.35,

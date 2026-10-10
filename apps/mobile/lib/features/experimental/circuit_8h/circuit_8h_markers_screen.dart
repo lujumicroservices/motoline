@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/services/location_service.dart';
@@ -238,7 +237,7 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
                               children: [
                                 Text(
                                   l10n.circuit8hMarkersHint,
-                                  style: GoogleFonts.rajdhani(
+                                  style: AppFonts.body(
                                     color: AppTheme.mist,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
@@ -297,7 +296,7 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
                                                 .round(),
                                           )
                                         : l10n.circuit8hPlaceAtGps,
-                                    style: GoogleFonts.rajdhani(
+                                    style: AppFonts.body(
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -351,7 +350,7 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
                                   l10n.circuit8hCheckpointCount(
                                     _project.checkpointCount,
                                   ),
-                                  style: GoogleFonts.rajdhani(
+                                  style: AppFonts.body(
                                     color: AppTheme.mist,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
@@ -365,7 +364,7 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
                                         dense: true,
                                         title: Text(
                                           cp.label ?? cp.id,
-                                          style: GoogleFonts.rajdhani(
+                                          style: AppFonts.body(
                                             color: AppTheme.mist,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 13,
@@ -458,7 +457,7 @@ class _KindChip extends StatelessWidget {
       selected: selected,
       label: Text(
         label,
-        style: GoogleFonts.rajdhani(
+        style: AppFonts.body(
           fontWeight: FontWeight.w700,
           color: selected ? AppTheme.asphalt : AppTheme.mist,
         ),
@@ -493,7 +492,7 @@ class _StatusRow extends StatelessWidget {
       dense: true,
       title: Text(
         label,
-        style: GoogleFonts.rajdhani(
+        style: AppFonts.body(
           color: AppTheme.mist,
           fontWeight: FontWeight.w700,
           fontSize: 14,
@@ -501,7 +500,7 @@ class _StatusRow extends StatelessWidget {
       ),
       subtitle: Text(
         value,
-        style: GoogleFonts.rajdhani(
+        style: AppFonts.body(
           color: set
               ? AppTheme.line
               : AppTheme.mist.withValues(alpha: 0.65),

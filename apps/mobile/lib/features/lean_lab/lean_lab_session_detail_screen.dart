@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/lean_lab/lean_lab_circuit.dart';
@@ -106,7 +105,7 @@ class _LeanLabSessionDetailScreenState
         body: Center(
           child: Text(
             l10n.leanLabSessionMissing,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel),
+            style: AppFonts.body(color: AppTheme.steel),
           ),
         ),
       );
@@ -124,7 +123,7 @@ class _LeanLabSessionDetailScreenState
       appBar: AppBar(
         title: Text(
           l10n.leanLabSessionDetailTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -145,14 +144,14 @@ class _LeanLabSessionDetailScreenState
         children: [
           Text(
             dateLabel,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 4),
           Text(
             session.needsCornerLabels
                 ? l10n.leanLabNeedsLabels
                 : l10n.leanLabLabeledCount(session.corners.length),
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               fontWeight: FontWeight.w700,
               color: session.needsCornerLabels
                   ? AppTheme.lineHot
@@ -162,7 +161,7 @@ class _LeanLabSessionDetailScreenState
           const SizedBox(height: 16),
           Text(
             l10n.leanLabMeasuresTitle,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
           ),
           const SizedBox(height: 8),
           _MeasureGrid(
@@ -189,7 +188,7 @@ class _LeanLabSessionDetailScreenState
             const SizedBox(height: 16),
             Text(
               l10n.leanLabCornerMeasures,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
               ),
@@ -201,12 +200,12 @@ class _LeanLabSessionDetailScreenState
           const SizedBox(height: 20),
           Text(
             l10n.leanLabEditConfigTitle,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
           ),
           const SizedBox(height: 4),
           Text(
             l10n.leanLabEditConfigHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
@@ -215,7 +214,7 @@ class _LeanLabSessionDetailScreenState
           const SizedBox(height: 12),
           Text(
             l10n.leanLabProtocols,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            style: AppFonts.display(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -245,7 +244,7 @@ class _LeanLabSessionDetailScreenState
           const SizedBox(height: 14),
           Text(
             l10n.leanLabDirectionQ,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            style: AppFonts.display(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -326,14 +325,14 @@ class _MeasureGrid extends StatelessWidget {
               children: [
                 Text(
                   item.$1,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
                   ),
                 ),
                 Text(
                   item.$2,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 12,
                   ),
@@ -377,7 +376,7 @@ class _CornerMeasureTile extends StatelessWidget {
             children: [
               Text(
                 '#$index',
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontWeight: FontWeight.w700,
                   color: AppTheme.steel,
                 ),
@@ -389,7 +388,7 @@ class _CornerMeasureTile extends StatelessWidget {
                   children: [
                     Text(
                       '${corner.appLeanDeg.abs().toStringAsFixed(0)}° $side',
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w800,
                         color: leanColor,
                         fontSize: 16,
@@ -398,7 +397,7 @@ class _CornerMeasureTile extends StatelessWidget {
                     Text(
                       '${l10n.leanLabGrade}: ${corner.avgGradePct.toStringAsFixed(1)}%'
                       ' · $bias',
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         fontSize: 12,
                       ),

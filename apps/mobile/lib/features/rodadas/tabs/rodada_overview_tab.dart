@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -68,7 +67,7 @@ class RodadaOverviewTab extends ConsumerWidget {
               if (rodada.notes != null && rodada.notes!.trim().isNotEmpty) ...[
                 Text(
                   rodada.notes!,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.mist,
                     fontSize: 15,
                     height: 1.35,
@@ -184,7 +183,7 @@ class RodadaOverviewTab extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 l10n.rodadaRiders,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               members.when(
@@ -371,7 +370,7 @@ class _ItineraryMap extends StatelessWidget {
       children: [
         Text(
           l10n.rodadaItinerary,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
         if (km != null && km > 0 && eta != null) ...[
           const SizedBox(height: 4),
@@ -380,7 +379,7 @@ class _ItineraryMap extends StatelessWidget {
               formatRouteDistance(km),
               formatRouteEta(eta),
             ),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -460,7 +459,7 @@ class _PendingInviteBanner extends ConsumerWidget {
           children: [
             Text(
               l10n.rodadaInviteBanner(rodada.title),
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -469,7 +468,7 @@ class _PendingInviteBanner extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 bits.join(' · '),
-                style: GoogleFonts.rajdhani(color: AppTheme.mist, fontSize: 14),
+                style: AppFonts.body(color: AppTheme.mist, fontSize: 14),
               ),
             ],
             const SizedBox(height: 12),

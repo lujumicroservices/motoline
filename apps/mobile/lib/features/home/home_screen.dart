@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/analytics/ride_analytics.dart';
@@ -94,7 +93,7 @@ class HomeScreen extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               l10n.tagline,
-                              style: GoogleFonts.rajdhani(
+                              style: AppFonts.body(
                                 fontSize: 14,
                                 color: AppTheme.steel,
                                 height: 1.2,
@@ -186,7 +185,7 @@ class HomeScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           l10n.yourRides,
-                          style: GoogleFonts.exo2(
+                          style: AppFonts.display(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -311,7 +310,7 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                                 child: Text(
                                   row.label,
-                                  style: GoogleFonts.exo2(
+                                  style: AppFonts.display(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 0.6,
@@ -374,7 +373,7 @@ class HomeScreen extends ConsumerWidget {
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                           child: Text(
                             remaining ?? l10n.proExpiredKeepLab,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: remaining != null
@@ -530,8 +529,13 @@ class _HomeActionDock extends StatelessWidget {
       ),
       minimumSize: const WidgetStatePropertyAll(Size(0, 72)),
       tapTargetSize: MaterialTapTargetSize.padded,
+      shape: const WidgetStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.button)),
+        ),
+      ),
       textStyle: WidgetStatePropertyAll(
-        GoogleFonts.exo2(fontWeight: FontWeight.w800, fontSize: 18),
+        AppFonts.display(fontWeight: FontWeight.w800, fontSize: 18),
       ),
     );
 
@@ -621,7 +625,7 @@ class _RodadaHomeCard extends ConsumerWidget {
                         children: [
                           Text(
                             highlight.title,
-                            style: GoogleFonts.exo2(
+                            style: AppFonts.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                             ),
@@ -629,7 +633,7 @@ class _RodadaHomeCard extends ConsumerWidget {
                           Text(
                             '${highlight.isPendingInvite ? l10n.rodadaInviteChip : highlight.status.toUpperCase()} · ${l10n.rodadaRidersCount(highlight.memberCount)}'
                             '${highlight.destination != null ? ' · ${highlight.destination}' : ''}',
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 13,
                             ),
@@ -657,8 +661,7 @@ class _ArmedBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final recording = ref.watch(rideRecorderProvider).isRecording;
-    final paused =
-        ref.watch(activeRideProvider).valueOrNull?.isPaused ?? false;
+    final paused = ref.watch(activeRideProvider).valueOrNull?.isPaused ?? false;
     final held = ref.watch(motionDetectionHeldProvider);
     final title = !recording
         ? l10n.sessionPhaseArmed
@@ -701,7 +704,7 @@ class _ArmedBanner extends ConsumerWidget {
                     children: [
                       Text(
                         title,
-                        style: GoogleFonts.exo2(
+                        style: AppFonts.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
@@ -719,7 +722,7 @@ class _ArmedBanner extends ConsumerWidget {
                 ),
                 Text(
                   l10n.armedSessionOpen,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     color: AppTheme.line,
                   ),
@@ -754,7 +757,7 @@ class _RecoveryBanner extends ConsumerWidget {
         children: [
           Text(
             l10n.unfinishedRide,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 16),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 16),
           ),
           const SizedBox(height: 4),
           Text(
@@ -897,7 +900,7 @@ class _RideTile extends ConsumerWidget {
                           : ride.displayTitle(
                               dateFormat: (_) => l10n.rideUntitledHint,
                             ),
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -906,7 +909,7 @@ class _RideTile extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         l10n.garageRodadaBadge,
-                        style: GoogleFonts.exo2(
+                        style: AppFonts.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 11,
                           letterSpacing: 0.6,
@@ -977,7 +980,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             context.l10n.emptyRidesTitle,
-            style: GoogleFonts.exo2(fontSize: 20, fontWeight: FontWeight.w600),
+            style: AppFonts.display(fontSize: 20, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1020,7 +1023,7 @@ class _SeasonStrip extends StatelessWidget {
         children: [
           Text(
             l10n.performanceLabel,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               fontSize: 11,
               letterSpacing: 1.6,
               fontWeight: FontWeight.w700,
@@ -1077,14 +1080,11 @@ class _GarageStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.rajdhani(fontSize: 11, color: AppTheme.steel),
-        ),
+        Text(label, style: AppFonts.body(fontSize: 11, color: AppTheme.steel)),
         const SizedBox(height: 2),
         Text(
           value,
-          style: GoogleFonts.exo2(
+          style: AppFonts.display(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: AppTheme.mist,

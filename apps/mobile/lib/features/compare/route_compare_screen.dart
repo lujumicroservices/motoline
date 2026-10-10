@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../core/analytics/ride_analytics.dart';
 import '../../core/models/ride.dart';
@@ -64,7 +63,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
           widget.routeName?.isNotEmpty == true
               ? l10n.compareRouteTitle(widget.routeName!)
               : l10n.compareLocalTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       body: ridesAsync.when(
@@ -79,7 +78,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
                 child: Text(
                   l10n.compareLocalEmpty,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     height: 1.4,
                     fontSize: 15,
@@ -98,7 +97,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
             children: [
               Text(
                 l10n.compareLocalHelp,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 14,
                   height: 1.4,
@@ -107,7 +106,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
               const SizedBox(height: 16),
               Text(
                 l10n.compareBaseline,
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                   color: RideVizPalette.leanLeft,
@@ -132,7 +131,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
               const SizedBox(height: 16),
               Text(
                 l10n.compareChallenger,
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                   color: RideVizPalette.leanRight,
@@ -203,7 +202,7 @@ class _LocalPickTile extends StatelessWidget {
                     children: [
                       Text(
                         DateFormat.MMMd().add_jm().format(ride.startedAt),
-                        style: GoogleFonts.exo2(
+                        style: AppFonts.display(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -290,7 +289,7 @@ class _LocalPairCompare extends ConsumerWidget {
           child: Text(
             deltaLabel,
             textAlign: TextAlign.center,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),

@@ -150,7 +150,7 @@ class _AppToastCard extends StatelessWidget {
       direction: DismissDirection.up,
       onDismissed: (_) => onClose(),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
           child: Material(
@@ -159,7 +159,7 @@ class _AppToastCard extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 520),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                   border: Border.all(
                     color: AppTheme.mist.withValues(alpha: 0.14),
                   ),

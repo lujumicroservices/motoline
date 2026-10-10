@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/lean_lab/lean_imu_math.dart';
@@ -370,8 +369,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
                           setState(() => _keepRidingDismissed = true),
                       onEnd: () =>
                           _isLoop ? _endLoopSession(context) : _stop(context),
-                      endLabel:
-                          widget.allowMinimize
+                      endLabel: widget.allowMinimize
                           ? l10n.endSession
                           : shouldUseRodadaPauseAction(
                               ref.read(rideRecorderProvider).activeRodadaId,
@@ -445,7 +443,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     final l10n = context.l10n;
     final recorder = ref.watch(rideRecorderProvider);
     final isPaused =
-        ref.watch(activeRideProvider).valueOrNull?.isPaused ?? recorder.isPaused;
+        ref.watch(activeRideProvider).valueOrNull?.isPaused ??
+        recorder.isPaused;
     final detectionHeld = ref.watch(motionDetectionHeldProvider);
     final isArmed = ref.watch(armedStateProvider);
     final isRecording = recorder.isRecording;
@@ -487,8 +486,8 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
     }
     final frozen = _heldHud;
     final liveClock = duration - _holdAccrued;
-    final showDuration = frozen?.duration ??
-        (liveClock.isNegative ? Duration.zero : liveClock);
+    final showDuration =
+        frozen?.duration ?? (liveClock.isNegative ? Duration.zero : liveClock);
     final showDistanceKm = frozen?.distanceKm ?? distanceKm;
     final showPointCount = frozen?.pointCount ?? pointCount;
     final showSpeedKmh = frozen?.speedKmh ?? speedKmh;
@@ -922,7 +921,7 @@ class _RideDeckBodyState extends State<_RideDeckBody> {
           children: [
             Text(
               l10n.rideDeckHelp,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 15,
                 height: 1.35,
@@ -940,10 +939,7 @@ class _RideDeckBodyState extends State<_RideDeckBody> {
 }
 
 class _MotionDetectionHoldRow extends StatelessWidget {
-  const _MotionDetectionHoldRow({
-    required this.held,
-    required this.onToggle,
-  });
+  const _MotionDetectionHoldRow({required this.held, required this.onToggle});
 
   final bool held;
   final VoidCallback onToggle;
@@ -960,9 +956,7 @@ class _MotionDetectionHoldRow extends StatelessWidget {
           label: Text(
             held ? l10n.resumeMotionDetection : l10n.pauseMotionDetection,
           ),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-          ),
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
         ),
         if (held) ...[
           const SizedBox(height: 6),
@@ -1016,7 +1010,7 @@ class _SuggestEndBanner extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.suggestEndTitle,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                   ),
@@ -1106,7 +1100,7 @@ class _LoopHud extends StatelessWidget {
                 children: [
                   Text(
                     l10n.loopArmed,
-                    style: GoogleFonts.exo2(
+                    style: AppFonts.display(
                       color: AppTheme.line,
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
@@ -1115,10 +1109,7 @@ class _LoopHud extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     l10n.lapCountLabel(lapCount),
-                    style: GoogleFonts.exo2(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppFonts.metric(fontSize: 32),
                   ),
                 ],
               ),
@@ -1140,13 +1131,13 @@ class _LoopHud extends StatelessWidget {
               icon: const Icon(Icons.map_outlined),
               label: Text(
                 l10n.loopOpenMarkMap,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.loopMarkMapHint,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 12,
                 height: 1.3,
@@ -1226,13 +1217,13 @@ class _StartErrorBody extends StatelessWidget {
           Text(
             l10n.couldNotStart,
             textAlign: TextAlign.center,
-            style: GoogleFonts.exo2(fontSize: 24, fontWeight: FontWeight.w700),
+            style: AppFonts.display(fontSize: 24, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
           Text(
             error,
             textAlign: TextAlign.center,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 15),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 15),
           ),
           const Spacer(),
           FilledButton(onPressed: onRetry, child: Text(l10n.tryAgain)),
@@ -1266,14 +1257,14 @@ class _StatCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppTheme.asphaltElevated,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label.toUpperCase(),
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 11,
                 letterSpacing: 1.1,
@@ -1284,13 +1275,14 @@ class _StatCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  value,
-                  style: GoogleFonts.exo2(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                    color: valueColor,
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: AppFonts.metric(fontSize: 34, color: valueColor),
+                    ),
                   ),
                 ),
                 if (unit.isNotEmpty) ...[
@@ -1299,9 +1291,10 @@ class _StatCard extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 2),
                     child: Text(
                       unit,
-                      style: const TextStyle(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

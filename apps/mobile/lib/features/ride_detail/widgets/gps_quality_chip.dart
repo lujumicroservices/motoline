@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/analytics/ride_analytics.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -57,7 +56,7 @@ class GpsQualityChip extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               'GPS',
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: color,
@@ -68,7 +67,7 @@ class GpsQualityChip extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 l10n.gpsRateHz(analytics.sampleRateHz!.toStringAsFixed(1)),
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: color,
@@ -79,7 +78,7 @@ class GpsQualityChip extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 '±${analytics.avgGpsAccuracyM!.toStringAsFixed(0)} m',
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: color,
@@ -92,7 +91,7 @@ class GpsQualityChip extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             message,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 12,
               height: 1.3,
