@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../supabase/supabase_bootstrap.dart';
 
 class LoggerPairResult {
@@ -14,12 +12,18 @@ class LoggerPairResult {
   final String ingestUrl;
 
   /// Serial command to paste into the Basic USB monitor.
-  String get serialPairCommand =>
-      'PAIR $deviceId|$deviceSecret|$ingestUrl';
+  String get serialPairCommand => 'PAIR $deviceId|$deviceSecret|$ingestUrl';
 }
 
 /// Mints / claims pairing codes via Edge Function `pair-logger-device`.
-class LoggerPairingService {
+abstract class LoggerPairingApi {
+  Future<String> mintPairCode();
+
+  Future<LoggerPairResult> claimCode(String code, {String label = 'M5 Logger'});
+}
+
+class LoggerPairingService implements LoggerPairingApi {
+  @override
   Future<String> mintPairCode() async {
     if (!SupabaseBootstrap.isReady) {
       throw StateError('Supabase not ready');
@@ -39,7 +43,11 @@ class LoggerPairingService {
   }
 
   /// Claim a code from a helper/device (returns secrets for serial PAIR).
-  Future<LoggerPairResult> claimCode(String code, {String label = 'M5 Logger'}) async {
+  @override
+  Future<LoggerPairResult> claimCode(
+    String code, {
+    String label = 'M5 Logger',
+  }) async {
     if (!SupabaseBootstrap.isReady) {
       throw StateError('Supabase not ready');
     }
@@ -53,8 +61,9 @@ class LoggerPairingService {
     );
     final data = res.data;
     if (data is! Map || data['ok'] != true) {
-      debugPrint('claim failed: $data');
-      throw StateError('claim failed: $data');
+      // The body can contain device_secret. Do not log it or put it on the
+      // exception string (the BLE flow must never show or print it).
+      throw StateError('claim failed');
     }
     return LoggerPairResult(
       deviceId: data['device_id'] as String,

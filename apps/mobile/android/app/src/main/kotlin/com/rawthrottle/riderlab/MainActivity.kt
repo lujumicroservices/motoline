@@ -40,6 +40,15 @@ class MainActivity : FlutterActivity() {
       flutterEngine.dartExecutor.binaryMessenger,
       REEL_CHANNEL,
     ).setMethodCallHandler(reelEncoder)
+    MethodChannel(
+      flutterEngine.dartExecutor.binaryMessenger,
+      PLATFORM_CHANNEL,
+    ).setMethodCallHandler { call, result ->
+      when (call.method) {
+        "sdkInt" -> result.success(Build.VERSION.SDK_INT)
+        else -> result.notImplemented()
+      }
+    }
   }
 
   override fun onDestroy() {
@@ -148,5 +157,6 @@ class MainActivity : FlutterActivity() {
   companion object {
     private const val CHANNEL = "com.rawthrottle.riderlab/lock_cue"
     private const val REEL_CHANNEL = "com.rawthrottle.riderlab/reel_encoder"
+    private const val PLATFORM_CHANNEL = "com.rawthrottle.riderlab/platform"
   }
 }

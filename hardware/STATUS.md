@@ -1,7 +1,7 @@
 # STATUS — hardware
 
 > Archivo vivo. El agente lo actualiza al pausar o al cerrar una decisión.  
-> Última actualización: 2026-09-19
+> Última actualización: 2026-10-10
 
 ## Fase
 
@@ -18,12 +18,13 @@
 - Decisión de compra: **1 unidad** para primer prototipo, no 10.
 - Power: Battery 13.2 **o** USB 5 V de moto **o** buck 12→5 V (no los tres a la vez).
 - Cotización qty 1 en curso (M5Stack shop + SparkFun + local buck/caja).
+- App (2026-10-10): emparejado BLE del teléfono en `apps/mobile/lib/core/services/metrica_ble_protocol.dart`. UUIDs y códigos STATUS provisionales hasta el firmware 0.6.8-ble. El secreto no se muestra ni se escribe en logs. El `PAIR` por USB sigue en la misma pantalla.
 
 ## Siguiente paso (cuando se retome)
 
 1. Confirmar y pedir el carrito qty 1 (núcleo M5Stack: Basic + M135 + Battery 13.2).
 2. Al recibir: firmware mínimo en Basic (GPS lock, speed, lean crudo, log microSD).
-3. Definir entrada al stack RiderLab (archivo / BLE) después.
+3. Firmware 0.6.8-ble: implementar el GATT descrito en `metrica_ble_protocol.dart` (INFO/AUTH/PAIR/WIFI/STATUS) y confirmar UUIDs.
 
 ## Preguntas abiertas
 

@@ -7007,6 +7007,276 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio.'**
   String get settingsModeSoundHelp;
+
+  /// No description provided for @metricaBlePair.
+  ///
+  /// In es, this message translates to:
+  /// **'Emparejar por Bluetooth'**
+  String get metricaBlePair;
+
+  /// No description provided for @metricaBlePairHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca un equipo Metrica-XXXX, lee su versión y, con el PIN de 6 dígitos de su pantalla, lo vincula a tu cuenta. El secreto no se muestra.'**
+  String get metricaBlePairHelp;
+
+  /// No description provided for @metricaBleScanning.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando Métrica…'**
+  String get metricaBleScanning;
+
+  /// No description provided for @metricaBleDevices.
+  ///
+  /// In es, this message translates to:
+  /// **'Equipos cerca'**
+  String get metricaBleDevices;
+
+  /// No description provided for @metricaBleRssi.
+  ///
+  /// In es, this message translates to:
+  /// **'Señal {rssi} dBm'**
+  String metricaBleRssi(int rssi);
+
+  /// No description provided for @metricaBleConnecting.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectando a {name}…'**
+  String metricaBleConnecting(String name);
+
+  /// No description provided for @metricaBleReading.
+  ///
+  /// In es, this message translates to:
+  /// **'Leyendo el equipo…'**
+  String get metricaBleReading;
+
+  /// No description provided for @metricaBleFirmware.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version}.'**
+  String metricaBleFirmware(String version);
+
+  /// No description provided for @metricaBleFirmwareUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión desconocida.'**
+  String get metricaBleFirmwareUnknown;
+
+  /// No description provided for @metricaBlePairedYes.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya está emparejado.'**
+  String get metricaBlePairedYes;
+
+  /// No description provided for @metricaBlePairedNo.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no está emparejado.'**
+  String get metricaBlePairedNo;
+
+  /// No description provided for @metricaBlePairedUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'No dice si ya está emparejado.'**
+  String get metricaBlePairedUnknown;
+
+  /// No description provided for @metricaBlePairingOff.
+  ///
+  /// In es, this message translates to:
+  /// **'No está en modo de emparejado. El PIN solo aparece en su pantalla en ese modo. Tras 5 PIN incorrectos, el equipo sale de ese modo.'**
+  String get metricaBlePairingOff;
+
+  /// No description provided for @metricaBlePinTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN de Métrica'**
+  String get metricaBlePinTitle;
+
+  /// No description provided for @metricaBlePinBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe los 6 dígitos que muestra el equipo. Sin el PIN, rechaza el emparejado. Tras 5 fallos sale del modo de emparejado.'**
+  String get metricaBlePinBody;
+
+  /// No description provided for @metricaBlePinLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN de 6 dígitos'**
+  String get metricaBlePinLabel;
+
+  /// No description provided for @metricaBlePinFormat.
+  ///
+  /// In es, this message translates to:
+  /// **'El PIN debe tener 6 dígitos.'**
+  String get metricaBlePinFormat;
+
+  /// No description provided for @metricaBleCheckingPin.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprobando el PIN…'**
+  String get metricaBleCheckingPin;
+
+  /// No description provided for @metricaBleWrongPin.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN incorrecto.'**
+  String get metricaBleWrongPin;
+
+  /// No description provided for @metricaBlePinLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Demasiados intentos. El equipo salió del modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.'**
+  String get metricaBlePinLocked;
+
+  /// No description provided for @metricaBleMinting.
+  ///
+  /// In es, this message translates to:
+  /// **'Creando el emparejado en tu cuenta…'**
+  String get metricaBleMinting;
+
+  /// No description provided for @metricaBleWriting.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando el emparejado al equipo…'**
+  String get metricaBleWriting;
+
+  /// No description provided for @metricaBleTimeout.
+  ///
+  /// In es, this message translates to:
+  /// **'El equipo no respondió a tiempo.'**
+  String get metricaBleTimeout;
+
+  /// No description provided for @metricaBleNoSession.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para emparejar Métrica.'**
+  String get metricaBleNoSession;
+
+  /// No description provided for @metricaBleNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.'**
+  String get metricaBleNotFound;
+
+  /// No description provided for @metricaBlePermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltan permisos de Bluetooth (búsqueda y conexión). Actívalos para emparejar.'**
+  String get metricaBlePermissionDenied;
+
+  /// No description provided for @metricaBleLocationDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'En esta versión de Android hace falta el permiso de ubicación para buscar el equipo.'**
+  String get metricaBleLocationDenied;
+
+  /// No description provided for @metricaBleBluetoothOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa el Bluetooth del teléfono.'**
+  String get metricaBleBluetoothOff;
+
+  /// No description provided for @metricaBleUnsupported.
+  ///
+  /// In es, this message translates to:
+  /// **'Este teléfono no tiene Bluetooth LE.'**
+  String get metricaBleUnsupported;
+
+  /// No description provided for @metricaBleConnectFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo conectar con el equipo.'**
+  String get metricaBleConnectFailed;
+
+  /// No description provided for @metricaBleFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo emparejar.'**
+  String get metricaBleFailed;
+
+  /// No description provided for @metricaBleFailedDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo emparejar. {detail}'**
+  String metricaBleFailedDetail(String detail);
+
+  /// No description provided for @metricaBleSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Métrica emparejada ({deviceId}).'**
+  String metricaBleSuccess(String deviceId);
+
+  /// No description provided for @metricaBleRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get metricaBleRetry;
+
+  /// No description provided for @metricaBleContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get metricaBleContinue;
+
+  /// No description provided for @metricaBleWifiTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi‑Fi del paddock (opcional)'**
+  String get metricaBleWifiTitle;
+
+  /// No description provided for @metricaBleWifiHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Si quieres, envía la red al equipo para que suba las sesiones.'**
+  String get metricaBleWifiHelp;
+
+  /// No description provided for @metricaBleWifiSsid.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de la red'**
+  String get metricaBleWifiSsid;
+
+  /// No description provided for @metricaBleWifiPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña'**
+  String get metricaBleWifiPassword;
+
+  /// No description provided for @metricaBleWifiSend.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar Wi‑Fi'**
+  String get metricaBleWifiSend;
+
+  /// No description provided for @metricaBleWifiSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get metricaBleWifiSkip;
+
+  /// No description provided for @metricaBleWifiSending.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando Wi‑Fi…'**
+  String get metricaBleWifiSending;
+
+  /// No description provided for @metricaBleWifiSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi‑Fi guardado en el equipo.'**
+  String get metricaBleWifiSaved;
+
+  /// No description provided for @metricaBleWifiFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar el Wi‑Fi.'**
+  String get metricaBleWifiFailed;
+
+  /// No description provided for @metricaBleWifiNeedSsid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre de la red.'**
+  String get metricaBleWifiNeedSsid;
 }
 
 class _AppLocalizationsDelegate

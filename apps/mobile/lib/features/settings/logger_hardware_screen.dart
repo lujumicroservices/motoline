@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/logger_pairing_service.dart';
 import '../../core/services/logger_session_importer.dart';
+import 'metrica_ble_pair_section.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_snack.dart';
@@ -129,6 +130,8 @@ class _LoggerHardwareScreenState extends ConsumerState<LoggerHardwareScreen> {
           SettingsGroup(
             title: 'Emparejar',
             children: [
+              const MetricaBlePairSection(),
+              const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: _busy ? null : _mint,
                 icon: const Icon(Icons.qr_code_2),

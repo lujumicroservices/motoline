@@ -3955,4 +3955,157 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settingsModeSoundHelp =>
       'Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio.';
+
+  @override
+  String get metricaBlePair => 'Emparejar por Bluetooth';
+
+  @override
+  String get metricaBlePairHelp =>
+      'Busca un equipo Metrica-XXXX, lee su versión y, con el PIN de 6 dígitos de su pantalla, lo vincula a tu cuenta. El secreto no se muestra.';
+
+  @override
+  String get metricaBleScanning => 'Buscando Métrica…';
+
+  @override
+  String get metricaBleDevices => 'Equipos cerca';
+
+  @override
+  String metricaBleRssi(int rssi) {
+    return 'Señal $rssi dBm';
+  }
+
+  @override
+  String metricaBleConnecting(String name) {
+    return 'Conectando a $name…';
+  }
+
+  @override
+  String get metricaBleReading => 'Leyendo el equipo…';
+
+  @override
+  String metricaBleFirmware(String version) {
+    return 'Versión $version.';
+  }
+
+  @override
+  String get metricaBleFirmwareUnknown => 'Versión desconocida.';
+
+  @override
+  String get metricaBlePairedYes => 'Ya está emparejado.';
+
+  @override
+  String get metricaBlePairedNo => 'Aún no está emparejado.';
+
+  @override
+  String get metricaBlePairedUnknown => 'No dice si ya está emparejado.';
+
+  @override
+  String get metricaBlePairingOff =>
+      'No está en modo de emparejado. El PIN solo aparece en su pantalla en ese modo. Tras 5 PIN incorrectos, el equipo sale de ese modo.';
+
+  @override
+  String get metricaBlePinTitle => 'PIN de Métrica';
+
+  @override
+  String get metricaBlePinBody =>
+      'Escribe los 6 dígitos que muestra el equipo. Sin el PIN, rechaza el emparejado. Tras 5 fallos sale del modo de emparejado.';
+
+  @override
+  String get metricaBlePinLabel => 'PIN de 6 dígitos';
+
+  @override
+  String get metricaBlePinFormat => 'El PIN debe tener 6 dígitos.';
+
+  @override
+  String get metricaBleCheckingPin => 'Comprobando el PIN…';
+
+  @override
+  String get metricaBleWrongPin => 'PIN incorrecto.';
+
+  @override
+  String get metricaBlePinLocked =>
+      'Demasiados intentos. El equipo salió del modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.';
+
+  @override
+  String get metricaBleMinting => 'Creando el emparejado en tu cuenta…';
+
+  @override
+  String get metricaBleWriting => 'Enviando el emparejado al equipo…';
+
+  @override
+  String get metricaBleTimeout => 'El equipo no respondió a tiempo.';
+
+  @override
+  String get metricaBleNoSession => 'Inicia sesión para emparejar Métrica.';
+
+  @override
+  String get metricaBleNotFound =>
+      'No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.';
+
+  @override
+  String get metricaBlePermissionDenied =>
+      'Faltan permisos de Bluetooth (búsqueda y conexión). Actívalos para emparejar.';
+
+  @override
+  String get metricaBleLocationDenied =>
+      'En esta versión de Android hace falta el permiso de ubicación para buscar el equipo.';
+
+  @override
+  String get metricaBleBluetoothOff => 'Activa el Bluetooth del teléfono.';
+
+  @override
+  String get metricaBleUnsupported => 'Este teléfono no tiene Bluetooth LE.';
+
+  @override
+  String get metricaBleConnectFailed => 'No se pudo conectar con el equipo.';
+
+  @override
+  String get metricaBleFailed => 'No se pudo emparejar.';
+
+  @override
+  String metricaBleFailedDetail(String detail) {
+    return 'No se pudo emparejar. $detail';
+  }
+
+  @override
+  String metricaBleSuccess(String deviceId) {
+    return 'Métrica emparejada ($deviceId).';
+  }
+
+  @override
+  String get metricaBleRetry => 'Reintentar';
+
+  @override
+  String get metricaBleContinue => 'Continuar';
+
+  @override
+  String get metricaBleWifiTitle => 'Wi‑Fi del paddock (opcional)';
+
+  @override
+  String get metricaBleWifiHelp =>
+      'Si quieres, envía la red al equipo para que suba las sesiones.';
+
+  @override
+  String get metricaBleWifiSsid => 'Nombre de la red';
+
+  @override
+  String get metricaBleWifiPassword => 'Contraseña';
+
+  @override
+  String get metricaBleWifiSend => 'Enviar Wi‑Fi';
+
+  @override
+  String get metricaBleWifiSkip => 'Ahora no';
+
+  @override
+  String get metricaBleWifiSending => 'Enviando Wi‑Fi…';
+
+  @override
+  String get metricaBleWifiSaved => 'Wi‑Fi guardado en el equipo.';
+
+  @override
+  String get metricaBleWifiFailed => 'No se pudo guardar el Wi‑Fi.';
+
+  @override
+  String get metricaBleWifiNeedSsid => 'Escribe el nombre de la red.';
 }
