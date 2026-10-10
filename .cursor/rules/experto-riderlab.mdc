@@ -1,0 +1,15 @@
+﻿---
+description: Trabajo hecho con Experto RiderLab (Grok Bot) — hardware, ancla GNSS, mapeo 8 Horas, RTK barato. Leer antes de tocar hardware/firmware o mapeo de circuitos.
+alwaysApply: false
+---
+# Bitácora Experto RiderLab
+
+- 2026-10-08: segundo M5 + M135 flasheado como **ancla** con el firmware del logger de este repo. Procedimiento: `hardware/firmware/ANCHOR.md`.
+- Barómetro: BMP280 está en el M135 (no en el Basic). ±1 m relativo; hasta ~167 Hz; el viento distorsiona. Saltos mejor con BMI270 (≈0 g en el aire).
+- Plano de tierra: disco de acero 10–15 cm centrado DEBAJO de la antena; unos mm de plástico entre ambos no importan.
+- RTK barato: Quectel LC29HEA (L1/L5, 10 Hz, ~US$120/unidad) + base UM980 (~US$200). ZED-F9P del BOM Pro (~US$495 + US$443 base) queda caro.
+- Circuito 8 Horas: vuelta 1.33–1.6 km, ancho ~7 m (mapeos 24–25 sep). Datos en `8horas/` y `docs/www/_dist/simm/circuit8h_*`.
+- Bot hermano: "Experto Electrónica RiderLab".
+- 2026-10-08 (firmware 0.5.0-anchor): rol persistente RIDER/ANCHOR en un solo firmware; el firmware viejo **nunca configuraba el receptor** (quedaba 1 Hz NMEA de fábrica). Ahora ambos roles: VALSET RAM, 10 Hz GPS+GLO+GAL+BDS+QZSS+SBAS, automotive, máscara 10°, UBX PVT/SAT/DOP, UART 115200. Requiere ruta de comandos (DDC 0x42, que el M135 no expone, o pin TX hacia NEO_RXD). Ancla tras ajustar DIP: NMEA en G35@38400 + PPS OK, pero sin ruta TX → falta banco TXD del DIP en G17/G15/G12. BMI270 necesitaba el config de 8 KB (0.4.9 leía |a|=0); corregido.
+- Barometría diferencial: BMP280 propio (P×4, IIR16, 50 Hz → log 10 Hz con `tow` por PPS). Co-location 2–3 min al inicio y fin (`COLOC`, C 1 s en la moto); el tool corrige la diferencia de altura entre sensores. Post-proceso: `tools/anchor_correct.py` (+12 tests sintéticos).
+- Subida Wi‑Fi del logger borra la sesión tras mandar solo ~24 KB de gnss: usar `KEEPSD ON` en la moto (en ancla forzado). Partición 16 MB (`default_16MB.csv`).

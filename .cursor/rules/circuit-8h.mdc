@@ -1,0 +1,14 @@
+---
+description: Contexto del lab Circuito 8 horas (pasadas A/B, marcadores, precisión GPS). Aplicar al tocar esos archivos.
+globs: apps/mobile/lib/features/experimental/circuit_8h/**,apps/mobile/test/circuit_8h_precision_test.dart
+alwaysApply: false
+---
+
+# Circuito 8 horas
+
+Al trabajar estos archivos:
+
+1. Leer `.cursor/skills/circuit-8h/CONTEXT.md` antes de cambiar el modelo o la compuerta GPS.
+2. La compuerta de este lab es ±4 m. La de rodada (40 m) no se copia aquí.
+3. A y B son cubetas de encuesta. No inventar qué layout físico es cada una.
+4. Al cerrar un hecho nuevo del circuito (pasadas, marcadores, significado de A/B), actualizar `CONTEXT.md`.
