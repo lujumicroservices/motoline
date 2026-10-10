@@ -132,7 +132,9 @@ class LocationService {
   /// Yields live accuracy so the UI can show lock progress instead of freezing.
   Stream<GnssWarmupStatus> warmUpGnss({
     Duration timeout = const Duration(seconds: 8),
+    double? targetAccuracyMeters,
   }) async* {
+    final target = targetAccuracyMeters ?? warmTargetAccuracyMeters;
     yield const GnssWarmupStatus(phase: GpsWarmupPhase.searching);
 
     final deadline = DateTime.now().add(timeout);
@@ -144,7 +146,7 @@ class LocationService {
         );
         best = position;
         final acc = position.accuracy;
-        if (acc > 0 && acc <= warmTargetAccuracyMeters) {
+        if (acc > 0 && acc <= target) {
           yield GnssWarmupStatus(
             phase: GpsWarmupPhase.ready,
             accuracyMeters: acc,

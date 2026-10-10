@@ -583,6 +583,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLayerGpsGaps => 'GPS gaps';
 
   @override
+  String get mapLayerTrackPoints => 'GPS points';
+
+  @override
   String get friends => 'Friends';
 
   @override
@@ -3074,6 +3077,278 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leanLabSaveLabels => 'Save corner labels';
 
   @override
+  String get appVersionTitle => 'Installed version';
+
+  @override
+  String get appVersionUnavailable => 'Could not read version';
+
+  @override
+  String get appVersionCopy => 'Copy version';
+
+  @override
+  String get appVersionCopied => 'Version copied';
+
+  @override
+  String get gpsTrackPointsLabTile => '8-hour circuit · A / B';
+
+  @override
+  String get gpsTrackPointsLabHelp =>
+      'Route type A and type B · record N passes of each';
+
+  @override
+  String get gpsTrackPointsLabTitle => 'Record GPS perimeter';
+
+  @override
+  String get circuit8hTitle => '8-hour circuit';
+
+  @override
+  String get circuit8hIntro =>
+      'Pick route type A or type B and record as many passes as you need. Each pass stores every GPS fix for later calibration.';
+
+  @override
+  String get circuit8hRouteA => 'Route type A';
+
+  @override
+  String get circuit8hRouteB => 'Route type B';
+
+  @override
+  String circuit8hRoutePasses(int count) {
+    return '$count passes saved';
+  }
+
+  @override
+  String get circuit8hNoPassesYet => 'No passes yet. Record the first one.';
+
+  @override
+  String get circuit8hRecordPass => 'Record another pass';
+
+  @override
+  String get circuit8hDeletePass => 'Delete pass';
+
+  @override
+  String circuit8hPassTitle(int index, String time) {
+    return 'Pass $index · $time';
+  }
+
+  @override
+  String circuit8hPassMeta(int points, String duration) {
+    return '$points points · $duration';
+  }
+
+  @override
+  String circuit8hRecordTitle(String route, int pass) {
+    return 'Type $route · pass $pass';
+  }
+
+  @override
+  String circuit8hRecordIdle(String route, int pass) {
+    return 'Type $route, pass $pass. Tap Start pass and ride the route — only tight GPS fixes are stored.';
+  }
+
+  @override
+  String get circuit8hStartPass => 'Start pass';
+
+  @override
+  String get circuit8hStopSave => 'Stop and save';
+
+  @override
+  String get circuit8hSaving => 'Saving…';
+
+  @override
+  String get circuit8hNeedMorePoints =>
+      'Need at least 3 GPS points to save the pass.';
+
+  @override
+  String circuit8hRecordingStats(int points, String distance, String accuracy) {
+    return 'Recording · $points pts · $distance · $accuracy';
+  }
+
+  @override
+  String circuit8hRejected(int count) {
+    return 'Dropped (loose fix or jump): $count';
+  }
+
+  @override
+  String circuit8hPrecisionNote(int meters) {
+    return 'Only fixes within ±$meters m are stored.';
+  }
+
+  @override
+  String circuit8hWarming(String accuracy) {
+    return 'Tightening GPS · now $accuracy';
+  }
+
+  @override
+  String get circuit8hRecordNow => 'Record now';
+
+  @override
+  String get circuit8hCancelWait => 'Cancel wait';
+
+  @override
+  String get circuit8hEdgePick => 'Track edge';
+
+  @override
+  String get circuit8hEdgeInner => 'Inside';
+
+  @override
+  String get circuit8hEdgeOuter => 'Outside';
+
+  @override
+  String get circuit8hEdgeRequired =>
+      'Choose the inside or outside edge before starting.';
+
+  @override
+  String circuit8hLooseNote(int meters) {
+    return 'Recording anyway. Fixes up to ±$meters m are stored.';
+  }
+
+  @override
+  String circuit8hAccuracyGate(int meters) {
+    return 'This fix is wider than ±$meters m. Wait outside for a tighter lock.';
+  }
+
+  @override
+  String circuit8hHoldStill(int count, int meters) {
+    return 'Hold still. Need $count fixes within ±$meters m at the same spot.';
+  }
+
+  @override
+  String get circuit8hMarkersTitle => 'Start · Finish · Checkpoints';
+
+  @override
+  String get circuit8hMarkersOpen => 'Mark start, finish, and checkpoints';
+
+  @override
+  String circuit8hMarkersSummary(String start, String finish, int count) {
+    return 'Start: $start · Finish: $finish · Checkpoints: $count';
+  }
+
+  @override
+  String get circuit8hMarkersHint =>
+      'Pick what to mark, then tap the map or use your current GPS.';
+
+  @override
+  String get circuit8hMarkStart => 'Start';
+
+  @override
+  String get circuit8hMarkFinish => 'Finish';
+
+  @override
+  String get circuit8hMarkCheckpoint => 'Checkpoint';
+
+  @override
+  String get circuit8hPlaceAtGps => 'Place at my GPS';
+
+  @override
+  String get circuit8hNeedGps => 'No GPS fix. Go outside or tap the map.';
+
+  @override
+  String get circuit8hMarkerSet => 'Set';
+
+  @override
+  String get circuit8hMarkerMissing => 'Not set';
+
+  @override
+  String get circuit8hClearMarker => 'Clear';
+
+  @override
+  String get circuit8hFitMarkers => 'Fit all markers';
+
+  @override
+  String circuit8hCheckpointCount(int count) {
+    return '$count checkpoints';
+  }
+
+  @override
+  String get circuit8hYes => 'yes';
+
+  @override
+  String get circuit8hNo => 'no';
+
+  @override
+  String get circuit8hPassMarkersHint =>
+      'Mark at your current GPS: Start, Checkpoint N, or Finish. Use X to undo a mistake.';
+
+  @override
+  String circuit8hCheckpointN(int n) {
+    return 'CP$n';
+  }
+
+  @override
+  String get circuit8hOpenPass => 'View track';
+
+  @override
+  String circuit8hPassViewTitle(String route, int pass) {
+    return 'Type $route · pass $pass';
+  }
+
+  @override
+  String circuit8hPassViewStats(int points, String distance, String duration) {
+    return '$points GPS points · $distance · $duration';
+  }
+
+  @override
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  ) {
+    return 'Alt $alt m · ↑$climb ↓$descent · $minAlt–$maxAlt m';
+  }
+
+  @override
+  String get circuit8hReliefNote =>
+      'Phone GPS altitude (relative relief; vertical error is usually worse than horizontal).';
+
+  @override
+  String get circuit8hTogglePoints => 'Show/hide GPS points';
+
+  @override
+  String get circuit8hUploadCloud => 'Upload to cloud for analysis';
+
+  @override
+  String get circuit8hUploading => 'Uploading…';
+
+  @override
+  String circuit8hUploadOk(int count) {
+    return 'Uploaded $count passes to the cloud';
+  }
+
+  @override
+  String circuit8hLastUpload(String when) {
+    return 'Last upload: $when';
+  }
+
+  @override
+  String get gpsTrackPointsLabIdleHint =>
+      'Map at your GPS. Tap Record perimeter and walk or ride the outline — each fix shows as a dot.';
+
+  @override
+  String get gpsTrackPointsLabStartPerimeter => 'Record perimeter';
+
+  @override
+  String get gpsTrackPointsLabStopPerimeter => 'Stop recording';
+
+  @override
+  String get gpsTrackPointsLabClear => 'Clear points';
+
+  @override
+  String gpsTrackPointsLabRecordingStats(
+    int points,
+    String hz,
+    String distance,
+  ) {
+    return 'Recording · $points points · ~$hz Hz · $distance';
+  }
+
+  @override
+  String gpsTrackPointsLabStoppedStats(int points, String hz, String distance) {
+    return 'Done · $points points · ~$hz Hz · $distance';
+  }
+
+  @override
   String get leanLabSettingsTile => 'Lean lab (test)';
 
   @override
@@ -3521,4 +3796,499 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsAcceptDecline => 'Not now';
+
+  @override
+  String get modeToggleSemantics =>
+      'Switch between street (ON) and off-road (OFF) mode';
+
+  @override
+  String get offroadBrandTag => 'OFF-ROAD';
+
+  @override
+  String get offroadHomeTitle => 'My circuits';
+
+  @override
+  String get offroadHomeSubtitle => 'Tracks mapped with Métrica';
+
+  @override
+  String get circuitStatLap => 'Lap';
+
+  @override
+  String get circuitStatSectors => 'Sectors';
+
+  @override
+  String get circuitStatDrop => 'Elevation range';
+
+  @override
+  String get circuitStatWidth => 'Width';
+
+  @override
+  String get circuitStatClimb => 'Total climb';
+
+  @override
+  String get circuitStatElevMin => 'Lowest';
+
+  @override
+  String get circuitStatElevMax => 'Highest';
+
+  @override
+  String circuitMappedOn(String date) {
+    return 'Mapped $date';
+  }
+
+  @override
+  String get circuitDirectionCcw => 'Counter-clockwise';
+
+  @override
+  String get circuitDirectionCw => 'Clockwise';
+
+  @override
+  String get circuitTabMap => 'Map';
+
+  @override
+  String get circuitTabRelief => 'Relief';
+
+  @override
+  String get circuitTabSectors => 'Sectors';
+
+  @override
+  String get circuitTabMapping => 'Mapping';
+
+  @override
+  String get circuitLayerSatellite => 'Satellite';
+
+  @override
+  String get circuitLayerRelief => 'Relief';
+
+  @override
+  String get circuitLayerTopo => 'Topographic';
+
+  @override
+  String get circuitElevationTitle => 'Elevation profile by sector';
+
+  @override
+  String circuitElevationNote(String source) {
+    return 'Median GNSS altitude of 5 passes, checked against a 30 m terrain model ($source). It shows the hill the track sits on; it cannot see berms or jumps.';
+  }
+
+  @override
+  String get sectorLength => 'Length';
+
+  @override
+  String sectorWidth(String median) {
+    return 'Width (median $median m)';
+  }
+
+  @override
+  String get mappingSurvey => 'Survey';
+
+  @override
+  String get mappingDate => 'Date';
+
+  @override
+  String get mappingLogger => 'Logger';
+
+  @override
+  String get mappingEdgeOuter => 'Outer edge';
+
+  @override
+  String get mappingEdgeInner => 'Inner edge';
+
+  @override
+  String get mappingReceiver => 'Receiver';
+
+  @override
+  String get mappingAnchor => 'Anchor (finish line)';
+
+  @override
+  String get mappingDirection => 'Direction';
+
+  @override
+  String get mappingSmoothing => 'Smoothing';
+
+  @override
+  String mappingSmoothingMethod(String outlier, String resample) {
+    return 'Outliers ±$outlier m, resampled every $resample m, periodic Gaussian with twicing.';
+  }
+
+  @override
+  String get mappingMaxDev => 'Max deviation vs raw (out / in)';
+
+  @override
+  String get mappingRms => 'RMS vs raw (out / in)';
+
+  @override
+  String get mappingSelfIntersections => 'Self-intersections';
+
+  @override
+  String get mappingInnerInside => 'Inner inside outer';
+
+  @override
+  String get mappingGeometry => 'Geometry';
+
+  @override
+  String get mappingMedian => 'median';
+
+  @override
+  String get mappingPoints => 'Points out / in / center';
+
+  @override
+  String get settingsModeSound => 'Sound when switching ON / OFF';
+
+  @override
+  String get settingsModeSoundHelp =>
+      'Two-stroke when entering OFF, track bike when returning to ON. Follows silent mode.';
+
+  @override
+  String get metricaBlePair => 'Pair over Bluetooth';
+
+  @override
+  String get metricaBlePairHelp =>
+      'Looks for a Metrica-XXXX logger, reads its version, and links it to your account with the 6-digit PIN on its screen. The secret is never shown.';
+
+  @override
+  String get metricaBleScanning => 'Looking for Métrica…';
+
+  @override
+  String get metricaBleDevices => 'Nearby loggers';
+
+  @override
+  String metricaBleRssi(int rssi) {
+    return 'Signal $rssi dBm';
+  }
+
+  @override
+  String metricaBleConnecting(String name) {
+    return 'Connecting to $name…';
+  }
+
+  @override
+  String get metricaBleReading => 'Reading the logger…';
+
+  @override
+  String metricaBleFirmware(String version) {
+    return 'Version $version.';
+  }
+
+  @override
+  String get metricaBleFirmwareUnknown => 'Unknown version.';
+
+  @override
+  String get metricaBlePairedYes => 'Already paired.';
+
+  @override
+  String get metricaBlePairedNo => 'Not paired yet.';
+
+  @override
+  String get metricaBlePairedUnknown => 'It did not say whether it is paired.';
+
+  @override
+  String metricaBleDeviceId(String id) {
+    return 'ID $id.';
+  }
+
+  @override
+  String get metricaBleDeviceIdEmpty => 'No ID.';
+
+  @override
+  String get metricaBleWifiPresent => 'Wi-Fi saved.';
+
+  @override
+  String get metricaBleWifiAbsent => 'No Wi-Fi.';
+
+  @override
+  String get metricaBleWifiUnknown => 'Wi-Fi unknown.';
+
+  @override
+  String get metricaBleAuthedYes => 'PIN accepted.';
+
+  @override
+  String get metricaBleAuthedNo => 'PIN pending.';
+
+  @override
+  String get metricaBleAuthedUnknown => 'PIN unknown.';
+
+  @override
+  String metricaBleMtu(int mtu) {
+    return 'MTU $mtu.';
+  }
+
+  @override
+  String get metricaBleMtuUnknown => 'MTU unknown.';
+
+  @override
+  String get metricaBlePairingOff =>
+      'It is not in pairing mode. The PIN is on its screen only in that mode. After 5 wrong PINs the logger leaves that mode.';
+
+  @override
+  String get metricaBlePinTitle => 'Métrica PIN';
+
+  @override
+  String get metricaBlePinBody =>
+      'Enter the 6 digits on the logger. Without the PIN it rejects pairing. After 5 failures it leaves pairing mode.';
+
+  @override
+  String get metricaBlePinLabel => '6-digit PIN';
+
+  @override
+  String get metricaBlePinFormat => 'The PIN must be 6 digits.';
+
+  @override
+  String get metricaBleCheckingPin => 'Checking the PIN…';
+
+  @override
+  String get metricaBleWrongPin => 'Wrong PIN.';
+
+  @override
+  String metricaBleWrongPinLeft(int left) {
+    return 'Wrong PIN. $left attempts left.';
+  }
+
+  @override
+  String get metricaBlePinLocked =>
+      'Wrong PIN. No attempts left: the logger closed pairing mode. Turn pairing mode on again on Métrica.';
+
+  @override
+  String get metricaBleMinting => 'Creating the pairing on your account…';
+
+  @override
+  String get metricaBleWriting => 'Sending the pairing to the logger…';
+
+  @override
+  String get metricaBleTimeout => 'The logger did not respond in time.';
+
+  @override
+  String get metricaBleNoSession => 'Sign in to pair Métrica.';
+
+  @override
+  String get metricaBleNotFound =>
+      'No logger found. Power on Métrica, open pairing mode, and bring it close to the phone.';
+
+  @override
+  String get metricaBlePermissionDenied =>
+      'Bluetooth scan and connect permission is missing. Enable it to pair.';
+
+  @override
+  String get metricaBleLocationDenied =>
+      'This Android version needs location permission to scan for the logger.';
+
+  @override
+  String get metricaBleBluetoothOff => 'Turn on the phone\'s Bluetooth.';
+
+  @override
+  String get metricaBleUnsupported => 'This phone does not have Bluetooth LE.';
+
+  @override
+  String get metricaBleConnectFailed => 'Could not connect to the logger.';
+
+  @override
+  String get metricaBleFailed => 'Could not pair.';
+
+  @override
+  String metricaBleFailedDetail(String detail) {
+    return 'Could not pair. $detail';
+  }
+
+  @override
+  String metricaBleSuccess(String deviceId) {
+    return 'Métrica paired ($deviceId).';
+  }
+
+  @override
+  String get metricaBleRetry => 'Try again';
+
+  @override
+  String get metricaBleContinue => 'Continue';
+
+  @override
+  String get metricaBleWifiTitle => 'Paddock Wi‑Fi (optional)';
+
+  @override
+  String get metricaBleWifiHelp =>
+      'Optionally send the network now. Do it before pairing: once the logger confirms pairing, it closes the mode a few seconds later.';
+
+  @override
+  String get metricaBleWifiSsid => 'Network name';
+
+  @override
+  String get metricaBleWifiPassword => 'Password';
+
+  @override
+  String get metricaBleWifiSend => 'Send Wi‑Fi';
+
+  @override
+  String get metricaBleWifiSkip => 'Not now';
+
+  @override
+  String get metricaBleWifiSending => 'Sending Wi‑Fi…';
+
+  @override
+  String get metricaBleWifiSaved => 'Wi‑Fi saved on the logger.';
+
+  @override
+  String get metricaBleWifiFailed => 'Could not save Wi‑Fi.';
+
+  @override
+  String get metricaBleWifiNeedSsid => 'Enter the network name.';
+
+  @override
+  String get offroadTagline => 'Train the line. Beat your last pass.';
+
+  @override
+  String get offroadCircuitsTitle => 'Circuits';
+
+  @override
+  String get offroadCircuitsSubtitle => 'Mapped tracks ready for training';
+
+  @override
+  String get offroadSessionsTitle => 'Sessions';
+
+  @override
+  String get offroadSessionsSubtitle => 'Training days with your passes';
+
+  @override
+  String get offroadSessionsEmpty => 'No training sessions yet.';
+
+  @override
+  String get offroadStatSessions => 'Sessions';
+
+  @override
+  String get offroadPasses => 'Passes';
+
+  @override
+  String get offroadPass => 'Pass';
+
+  @override
+  String get offroadTabCoaching => 'Coaching';
+
+  @override
+  String get offroadTabPasses => 'Passes';
+
+  @override
+  String get offroadTabSummary => 'Summary';
+
+  @override
+  String get offroadWhatWentWell => 'What went well';
+
+  @override
+  String get offroadWhatToImprove => 'What to improve';
+
+  @override
+  String offroadInsightCountGood(int count) {
+    return '$count strong points';
+  }
+
+  @override
+  String offroadInsightCountBad(int count) {
+    return '$count to work on';
+  }
+
+  @override
+  String get offroadDuration => 'Duration';
+
+  @override
+  String get offroadAvgSpeed => 'Avg speed';
+
+  @override
+  String get offroadInsideTrack => 'Inside track';
+
+  @override
+  String get offroadSectors => 'Sectors';
+
+  @override
+  String get offroadSectorsVsBest => 'Sectors vs best';
+
+  @override
+  String get offroadSectorsVsBestHelp =>
+      'Green = faster than your best pass in that sector.';
+
+  @override
+  String get offroadWhyPace => 'Why this pace';
+
+  @override
+  String get offroadBrakingZones => 'Braking zones';
+
+  @override
+  String get offroadFastest => 'Fastest';
+
+  @override
+  String offroadSlowerBy(String delta) {
+    return '$delta s slower';
+  }
+
+  @override
+  String offroadFasterBy(String delta) {
+    return '$delta s faster';
+  }
+
+  @override
+  String get offroadReferencePass => 'Reference pass';
+
+  @override
+  String offroadVsPass(String id) {
+    return 'vs $id';
+  }
+
+  @override
+  String get offroadNotComparable => 'Not comparable';
+
+  @override
+  String get offroadBestMark => 'Best';
+
+  @override
+  String get offroadBestShort => 'Best';
+
+  @override
+  String get offroadSessionTotals => 'Session totals';
+
+  @override
+  String get offroadBestPass => 'Best pass';
+
+  @override
+  String get offroadBestS2 => 'Best S2';
+
+  @override
+  String get offroadBestS3 => 'Best S3';
+
+  @override
+  String get offroadTheoreticalPartial => 'Theoretical partial';
+
+  @override
+  String get offroadFlyingLaps => 'Flying laps';
+
+  @override
+  String get offroadBestLine => 'Best line';
+
+  @override
+  String get offroadMappingUsed => 'Mapping used';
+
+  @override
+  String get offroadTapPassDetail => 'Tap a pass for sector detail';
+
+  @override
+  String get metricaBleWifiHelpPhone =>
+      'The phone is on this network. Android never shares the Wi‑Fi password with apps — type it once; RiderLab remembers it for this SSID and sends it automatically next time.';
+
+  @override
+  String get metricaBleWifiFromPhone => 'From this phone';
+
+  @override
+  String get metricaBleWifiPasswordOnce =>
+      'Saved on this phone after you send it';
+
+  @override
+  String metricaBleWifiUsingPhone(String ssid) {
+    return 'Sending phone Wi‑Fi ($ssid)…';
+  }
+
+  @override
+  String get metricaBleWifiPickTitle => 'Wi‑Fi for Métrica';
+
+  @override
+  String get metricaBleWifiPickHelp =>
+      'Pick which network to send to the logger over Bluetooth.';
+
+  @override
+  String get metricaBleWifiBandNote =>
+      'Métrica only joins 2.4 GHz (not 5 GHz-only networks).';
 }

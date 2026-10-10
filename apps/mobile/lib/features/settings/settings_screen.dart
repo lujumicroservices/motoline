@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/app_mode.dart';
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/auth/impersonation_controller.dart';
 import '../../core/legal/legal_urls.dart';
@@ -23,6 +24,8 @@ import '../../widgets/partner_code_redeem.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
 import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
+import '../experimental/circuit_8h/circuit_8h_hub_screen.dart';
+import 'widgets/app_version_tile.dart';
 import '../home/home_nav_icons.dart';
 import '../lean_lab/lean_imu_lab_screen.dart';
 import '../lean_lab/lean_lab_screen.dart';
@@ -32,6 +35,7 @@ import '../ride_active/location_permission_gate.dart';
 import '../rodadas/rodada_providers.dart';
 import '../watch/family_circle_screen.dart';
 import 'impersonate_screen.dart';
+import 'logger_hardware_screen.dart';
 import 'settings_group.dart';
 import '../../widgets/app_snack.dart';
 
@@ -126,6 +130,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          secondary: const Icon(Icons.volume_up_rounded, color: AppTheme.mist),
+          title: Text(l10n.settingsModeSound, style: _tileTitle),
+          subtitle: Text(l10n.settingsModeSoundHelp, style: _tileSub),
+          value: ref.watch(modeSoundEnabledProvider),
+          activeThumbColor: RideVizPalette.leanLeft,
+          onChanged: (v) => ref.read(modeSoundEnabledProvider.notifier).set(v),
+        ),
         const AccountAuthSection(),
       ],
     );
@@ -151,6 +164,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           const Align(alignment: Alignment.centerLeft, child: RiderAliasChip()),
+          const SizedBox(height: 8),
+          const AppVersionTile(),
+          const SizedBox(height: 12),
+          Material(
+            color: AppTheme.lineHot.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(12),
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),
+              title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
+              subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
+              trailing: const Icon(Icons.chevron_right, color: AppTheme.lineHot),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const Circuit8hHubScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
           if (!signedIn) accountGroup,
           SettingsGroup(
             title: l10n.settingsShareSection,
@@ -354,6 +389,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: l10n.labsSectionTitle,
             help: l10n.labsSectionHelp,
             children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.memory, color: AppTheme.lineHot),
+                title: Text('M5 Logger', style: _tileTitle),
+                subtitle: Text(
+                  'Emparejar hardware / importar sesión SD',
+                  style: _tileSub,
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LoggerHardwareScreen(),
+                    ),
+                  );
+                },
+              ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.showForceStartArmed, style: _tileTitle),
@@ -363,6 +415,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: (v) => ref
                     .read(forceStartArmedVisibleProvider.notifier)
                     .setVisible(v),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),
+                title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
+                subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const Circuit8hHubScreen(),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,

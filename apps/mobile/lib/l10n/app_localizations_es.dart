@@ -584,6 +584,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mapLayerGpsGaps => 'Huecos GPS';
 
   @override
+  String get mapLayerTrackPoints => 'Puntos GPS';
+
+  @override
   String get friends => 'Amigos';
 
   @override
@@ -3089,6 +3092,278 @@ class AppLocalizationsEs extends AppLocalizations {
   String get leanLabSaveLabels => 'Guardar marcas de curvas';
 
   @override
+  String get appVersionTitle => 'Versión instalada';
+
+  @override
+  String get appVersionUnavailable => 'No se pudo leer la versión';
+
+  @override
+  String get appVersionCopy => 'Copiar versión';
+
+  @override
+  String get appVersionCopied => 'Versión copiada';
+
+  @override
+  String get gpsTrackPointsLabTile => 'Circuito 8 horas · A / B';
+
+  @override
+  String get gpsTrackPointsLabHelp =>
+      'Recorrido tipo A y tipo B · grabar N pasadas de cada uno';
+
+  @override
+  String get gpsTrackPointsLabTitle => 'Grabar perímetro GPS';
+
+  @override
+  String get circuit8hTitle => 'Circuito 8 horas';
+
+  @override
+  String get circuit8hIntro =>
+      'Elige recorrido tipo A o tipo B y graba tantas pasadas como necesites. Cada pasada guarda todos los fixes GPS para calibrar después.';
+
+  @override
+  String get circuit8hRouteA => 'Recorrido tipo A';
+
+  @override
+  String get circuit8hRouteB => 'Recorrido tipo B';
+
+  @override
+  String circuit8hRoutePasses(int count) {
+    return '$count pasadas guardadas';
+  }
+
+  @override
+  String get circuit8hNoPassesYet => 'Aún no hay pasadas. Graba la primera.';
+
+  @override
+  String get circuit8hRecordPass => 'Grabar otra pasada';
+
+  @override
+  String get circuit8hDeletePass => 'Borrar pasada';
+
+  @override
+  String circuit8hPassTitle(int index, String time) {
+    return 'Pasada $index · $time';
+  }
+
+  @override
+  String circuit8hPassMeta(int points, String duration) {
+    return '$points puntos · $duration';
+  }
+
+  @override
+  String circuit8hRecordTitle(String route, int pass) {
+    return 'Tipo $route · pasada $pass';
+  }
+
+  @override
+  String circuit8hRecordIdle(String route, int pass) {
+    return 'Tipo $route, pasada $pass. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.';
+  }
+
+  @override
+  String get circuit8hStartPass => 'Iniciar pasada';
+
+  @override
+  String get circuit8hStopSave => 'Detener y guardar';
+
+  @override
+  String get circuit8hSaving => 'Guardando…';
+
+  @override
+  String get circuit8hNeedMorePoints =>
+      'Necesitas al menos 3 puntos GPS para guardar la pasada.';
+
+  @override
+  String circuit8hRecordingStats(int points, String distance, String accuracy) {
+    return 'Grabando · $points pts · $distance · $accuracy';
+  }
+
+  @override
+  String circuit8hRejected(int count) {
+    return 'Rechazados (precisión o salto): $count';
+  }
+
+  @override
+  String circuit8hPrecisionNote(int meters) {
+    return 'Solo se guardan fixes de ±$meters m o mejores.';
+  }
+
+  @override
+  String circuit8hWarming(String accuracy) {
+    return 'Afinando GPS · ahora $accuracy';
+  }
+
+  @override
+  String get circuit8hRecordNow => 'Grabar ahora';
+
+  @override
+  String get circuit8hCancelWait => 'Cancelar espera';
+
+  @override
+  String get circuit8hEdgePick => 'Extremo del trazado';
+
+  @override
+  String get circuit8hEdgeInner => 'Interno';
+
+  @override
+  String get circuit8hEdgeOuter => 'Externo';
+
+  @override
+  String get circuit8hEdgeRequired =>
+      'Elige extremo interno o externo antes de iniciar.';
+
+  @override
+  String circuit8hLooseNote(int meters) {
+    return 'Grabando igual. Se guardan fixes de hasta ±$meters m.';
+  }
+
+  @override
+  String circuit8hAccuracyGate(int meters) {
+    return 'Este punto es peor que ±$meters m. Espera afuera a una fijación más precisa.';
+  }
+
+  @override
+  String circuit8hHoldStill(int count, int meters) {
+    return 'Quédate quieto. Hacen falta $count fixes de ±$meters m en el mismo punto.';
+  }
+
+  @override
+  String get circuit8hMarkersTitle => 'Inicio · Meta · Checkpoints';
+
+  @override
+  String get circuit8hMarkersOpen => 'Marcar inicio, meta y checkpoints';
+
+  @override
+  String circuit8hMarkersSummary(String start, String finish, int count) {
+    return 'Inicio: $start · Meta: $finish · Checkpoints: $count';
+  }
+
+  @override
+  String get circuit8hMarkersHint =>
+      'Elige qué marcar, luego toca el mapa o usa tu GPS actual.';
+
+  @override
+  String get circuit8hMarkStart => 'Inicio';
+
+  @override
+  String get circuit8hMarkFinish => 'Meta';
+
+  @override
+  String get circuit8hMarkCheckpoint => 'Checkpoint';
+
+  @override
+  String get circuit8hPlaceAtGps => 'Colocar en mi GPS';
+
+  @override
+  String get circuit8hNeedGps => 'Sin fix GPS. Sal al aire o toca el mapa.';
+
+  @override
+  String get circuit8hMarkerSet => 'Marcado';
+
+  @override
+  String get circuit8hMarkerMissing => 'Sin marcar';
+
+  @override
+  String get circuit8hClearMarker => 'Quitar';
+
+  @override
+  String get circuit8hFitMarkers => 'Ver todas las marcas';
+
+  @override
+  String circuit8hCheckpointCount(int count) {
+    return '$count checkpoints';
+  }
+
+  @override
+  String get circuit8hYes => 'sí';
+
+  @override
+  String get circuit8hNo => 'no';
+
+  @override
+  String get circuit8hPassMarkersHint =>
+      'Marca en tu GPS actual: Inicio, Checkpoint N o Meta. La X borra si te equivocas.';
+
+  @override
+  String circuit8hCheckpointN(int n) {
+    return 'CP$n';
+  }
+
+  @override
+  String get circuit8hOpenPass => 'Ver trazada';
+
+  @override
+  String circuit8hPassViewTitle(String route, int pass) {
+    return 'Tipo $route · pasada $pass';
+  }
+
+  @override
+  String circuit8hPassViewStats(int points, String distance, String duration) {
+    return '$points puntos GPS · $distance · $duration';
+  }
+
+  @override
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  ) {
+    return 'Alt $alt m · ↑$climb ↓$descent · $minAlt–$maxAlt m';
+  }
+
+  @override
+  String get circuit8hReliefNote =>
+      'Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).';
+
+  @override
+  String get circuit8hTogglePoints => 'Mostrar/ocultar puntos GPS';
+
+  @override
+  String get circuit8hUploadCloud => 'Subir a la nube para análisis';
+
+  @override
+  String get circuit8hUploading => 'Subiendo…';
+
+  @override
+  String circuit8hUploadOk(int count) {
+    return 'Subidas $count pasadas a la nube';
+  }
+
+  @override
+  String circuit8hLastUpload(String when) {
+    return 'Última subida: $when';
+  }
+
+  @override
+  String get gpsTrackPointsLabIdleHint =>
+      'Mapa en tu GPS. Toca Grabar perímetro y camina o rueda el contorno — cada fix aparece como punto.';
+
+  @override
+  String get gpsTrackPointsLabStartPerimeter => 'Grabar perímetro';
+
+  @override
+  String get gpsTrackPointsLabStopPerimeter => 'Detener grabación';
+
+  @override
+  String get gpsTrackPointsLabClear => 'Borrar puntos';
+
+  @override
+  String gpsTrackPointsLabRecordingStats(
+    int points,
+    String hz,
+    String distance,
+  ) {
+    return 'Grabando · $points puntos · ~$hz Hz · $distance';
+  }
+
+  @override
+  String gpsTrackPointsLabStoppedStats(int points, String hz, String distance) {
+    return 'Listo · $points puntos · ~$hz Hz · $distance';
+  }
+
+  @override
   String get leanLabSettingsTile => 'Lab de inclinación (pruebas)';
 
   @override
@@ -3538,4 +3813,500 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsAcceptDecline => 'Ahora no';
+
+  @override
+  String get modeToggleSemantics =>
+      'Cambiar entre modo calle (ON) y off-road (OFF)';
+
+  @override
+  String get offroadBrandTag => 'OFF-ROAD';
+
+  @override
+  String get offroadHomeTitle => 'Mis circuitos';
+
+  @override
+  String get offroadHomeSubtitle => 'Pistas mapeadas con Métrica';
+
+  @override
+  String get circuitStatLap => 'Vuelta';
+
+  @override
+  String get circuitStatSectors => 'Sectores';
+
+  @override
+  String get circuitStatDrop => 'Desnivel';
+
+  @override
+  String get circuitStatWidth => 'Ancho';
+
+  @override
+  String get circuitStatClimb => 'Subida total';
+
+  @override
+  String get circuitStatElevMin => 'Mínima';
+
+  @override
+  String get circuitStatElevMax => 'Máxima';
+
+  @override
+  String circuitMappedOn(String date) {
+    return 'Mapeado el $date';
+  }
+
+  @override
+  String get circuitDirectionCcw => 'Antihorario';
+
+  @override
+  String get circuitDirectionCw => 'Horario';
+
+  @override
+  String get circuitTabMap => 'Mapa';
+
+  @override
+  String get circuitTabRelief => 'Relieve';
+
+  @override
+  String get circuitTabSectors => 'Sectores';
+
+  @override
+  String get circuitTabMapping => 'Mapeo';
+
+  @override
+  String get circuitLayerSatellite => 'Satélite';
+
+  @override
+  String get circuitLayerRelief => 'Relieve';
+
+  @override
+  String get circuitLayerTopo => 'Topográfico';
+
+  @override
+  String get circuitElevationTitle => 'Perfil de elevación por sector';
+
+  @override
+  String circuitElevationNote(String source) {
+    return 'Altitud GNSS mediana de 5 pasadas, revisada contra un modelo de terreno de 30 m ($source). Muestra la loma del predio; no ve bermas ni saltos.';
+  }
+
+  @override
+  String get sectorLength => 'Largo';
+
+  @override
+  String sectorWidth(String median) {
+    return 'Ancho (mediana $median m)';
+  }
+
+  @override
+  String get mappingSurvey => 'Levantamiento';
+
+  @override
+  String get mappingDate => 'Fecha';
+
+  @override
+  String get mappingLogger => 'Logger';
+
+  @override
+  String get mappingEdgeOuter => 'Borde exterior';
+
+  @override
+  String get mappingEdgeInner => 'Borde interior';
+
+  @override
+  String get mappingReceiver => 'Receptor';
+
+  @override
+  String get mappingAnchor => 'Ancla (meta)';
+
+  @override
+  String get mappingDirection => 'Sentido';
+
+  @override
+  String get mappingSmoothing => 'Suavizado';
+
+  @override
+  String mappingSmoothingMethod(String outlier, String resample) {
+    return 'Outliers ±$outlier m, remuestreo cada $resample m, Gauss periódico con twicing.';
+  }
+
+  @override
+  String get mappingMaxDev => 'Desviación máx. vs crudo (ext / int)';
+
+  @override
+  String get mappingRms => 'RMS vs crudo (ext / int)';
+
+  @override
+  String get mappingSelfIntersections => 'Autocruces';
+
+  @override
+  String get mappingInnerInside => 'Interior dentro del exterior';
+
+  @override
+  String get mappingGeometry => 'Geometría';
+
+  @override
+  String get mappingMedian => 'mediana';
+
+  @override
+  String get mappingPoints => 'Puntos ext / int / eje';
+
+  @override
+  String get settingsModeSound => 'Sonido al cambiar ON / OFF';
+
+  @override
+  String get settingsModeSoundHelp =>
+      'Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio.';
+
+  @override
+  String get metricaBlePair => 'Emparejar por Bluetooth';
+
+  @override
+  String get metricaBlePairHelp =>
+      'Busca un equipo Metrica-XXXX, lee su versión y, con el PIN de 6 dígitos de su pantalla, lo vincula a tu cuenta. El secreto no se muestra.';
+
+  @override
+  String get metricaBleScanning => 'Buscando Métrica…';
+
+  @override
+  String get metricaBleDevices => 'Equipos cerca';
+
+  @override
+  String metricaBleRssi(int rssi) {
+    return 'Señal $rssi dBm';
+  }
+
+  @override
+  String metricaBleConnecting(String name) {
+    return 'Conectando a $name…';
+  }
+
+  @override
+  String get metricaBleReading => 'Leyendo el equipo…';
+
+  @override
+  String metricaBleFirmware(String version) {
+    return 'Versión $version.';
+  }
+
+  @override
+  String get metricaBleFirmwareUnknown => 'Versión desconocida.';
+
+  @override
+  String get metricaBlePairedYes => 'Ya está emparejado.';
+
+  @override
+  String get metricaBlePairedNo => 'Aún no está emparejado.';
+
+  @override
+  String get metricaBlePairedUnknown => 'No dice si ya está emparejado.';
+
+  @override
+  String metricaBleDeviceId(String id) {
+    return 'ID $id.';
+  }
+
+  @override
+  String get metricaBleDeviceIdEmpty => 'Sin ID.';
+
+  @override
+  String get metricaBleWifiPresent => 'Wi-Fi guardado.';
+
+  @override
+  String get metricaBleWifiAbsent => 'Sin Wi-Fi.';
+
+  @override
+  String get metricaBleWifiUnknown => 'Wi-Fi sin dato.';
+
+  @override
+  String get metricaBleAuthedYes => 'PIN aceptado.';
+
+  @override
+  String get metricaBleAuthedNo => 'PIN pendiente.';
+
+  @override
+  String get metricaBleAuthedUnknown => 'PIN sin dato.';
+
+  @override
+  String metricaBleMtu(int mtu) {
+    return 'MTU $mtu.';
+  }
+
+  @override
+  String get metricaBleMtuUnknown => 'MTU desconocido.';
+
+  @override
+  String get metricaBlePairingOff =>
+      'No está en modo de emparejado. El PIN solo aparece en su pantalla en ese modo. Tras 5 PIN incorrectos, el equipo sale de ese modo.';
+
+  @override
+  String get metricaBlePinTitle => 'PIN de Métrica';
+
+  @override
+  String get metricaBlePinBody =>
+      'Escribe los 6 dígitos que muestra el equipo. Sin el PIN, rechaza el emparejado. Tras 5 fallos sale del modo de emparejado.';
+
+  @override
+  String get metricaBlePinLabel => 'PIN de 6 dígitos';
+
+  @override
+  String get metricaBlePinFormat => 'El PIN debe tener 6 dígitos.';
+
+  @override
+  String get metricaBleCheckingPin => 'Comprobando el PIN…';
+
+  @override
+  String get metricaBleWrongPin => 'PIN incorrecto.';
+
+  @override
+  String metricaBleWrongPinLeft(int left) {
+    return 'PIN incorrecto. Quedan $left intentos.';
+  }
+
+  @override
+  String get metricaBlePinLocked =>
+      'PIN incorrecto. No quedan intentos: el equipo cerró el modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.';
+
+  @override
+  String get metricaBleMinting => 'Creando el emparejado en tu cuenta…';
+
+  @override
+  String get metricaBleWriting => 'Enviando el emparejado al equipo…';
+
+  @override
+  String get metricaBleTimeout => 'El equipo no respondió a tiempo.';
+
+  @override
+  String get metricaBleNoSession => 'Inicia sesión para emparejar Métrica.';
+
+  @override
+  String get metricaBleNotFound =>
+      'No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.';
+
+  @override
+  String get metricaBlePermissionDenied =>
+      'Faltan permisos de Bluetooth (búsqueda y conexión). Actívalos para emparejar.';
+
+  @override
+  String get metricaBleLocationDenied =>
+      'En esta versión de Android hace falta el permiso de ubicación para buscar el equipo.';
+
+  @override
+  String get metricaBleBluetoothOff => 'Activa el Bluetooth del teléfono.';
+
+  @override
+  String get metricaBleUnsupported => 'Este teléfono no tiene Bluetooth LE.';
+
+  @override
+  String get metricaBleConnectFailed => 'No se pudo conectar con el equipo.';
+
+  @override
+  String get metricaBleFailed => 'No se pudo emparejar.';
+
+  @override
+  String metricaBleFailedDetail(String detail) {
+    return 'No se pudo emparejar. $detail';
+  }
+
+  @override
+  String metricaBleSuccess(String deviceId) {
+    return 'Métrica emparejada ($deviceId).';
+  }
+
+  @override
+  String get metricaBleRetry => 'Reintentar';
+
+  @override
+  String get metricaBleContinue => 'Continuar';
+
+  @override
+  String get metricaBleWifiTitle => 'Wi‑Fi del paddock (opcional)';
+
+  @override
+  String get metricaBleWifiHelp =>
+      'Si quieres, envía la red ahora. Hay que hacerlo antes de emparejar: cuando el equipo confirma el emparejado, cierra el modo a los pocos segundos.';
+
+  @override
+  String get metricaBleWifiSsid => 'Nombre de la red';
+
+  @override
+  String get metricaBleWifiPassword => 'Contraseña';
+
+  @override
+  String get metricaBleWifiSend => 'Enviar Wi‑Fi';
+
+  @override
+  String get metricaBleWifiSkip => 'Ahora no';
+
+  @override
+  String get metricaBleWifiSending => 'Enviando Wi‑Fi…';
+
+  @override
+  String get metricaBleWifiSaved => 'Wi‑Fi guardado en el equipo.';
+
+  @override
+  String get metricaBleWifiFailed => 'No se pudo guardar el Wi‑Fi.';
+
+  @override
+  String get metricaBleWifiNeedSsid => 'Escribe el nombre de la red.';
+
+  @override
+  String get offroadTagline => 'Entrena la línea. Mejora tu última pasada.';
+
+  @override
+  String get offroadCircuitsTitle => 'Circuitos';
+
+  @override
+  String get offroadCircuitsSubtitle => 'Pistas mapeadas listas para entrenar';
+
+  @override
+  String get offroadSessionsTitle => 'Sesiones';
+
+  @override
+  String get offroadSessionsSubtitle => 'Días de entrenamiento con tus pasadas';
+
+  @override
+  String get offroadSessionsEmpty => 'Aún no hay sesiones de entrenamiento.';
+
+  @override
+  String get offroadStatSessions => 'Sesiones';
+
+  @override
+  String get offroadPasses => 'Pasadas';
+
+  @override
+  String get offroadPass => 'Pasada';
+
+  @override
+  String get offroadTabCoaching => 'Coaching';
+
+  @override
+  String get offroadTabPasses => 'Pasadas';
+
+  @override
+  String get offroadTabSummary => 'Resumen';
+
+  @override
+  String get offroadWhatWentWell => 'Qué salió bien';
+
+  @override
+  String get offroadWhatToImprove => 'Qué mejorar';
+
+  @override
+  String offroadInsightCountGood(int count) {
+    return '$count puntos fuertes';
+  }
+
+  @override
+  String offroadInsightCountBad(int count) {
+    return '$count por trabajar';
+  }
+
+  @override
+  String get offroadDuration => 'Duración';
+
+  @override
+  String get offroadAvgSpeed => 'Vel. media';
+
+  @override
+  String get offroadInsideTrack => 'Dentro de pista';
+
+  @override
+  String get offroadSectors => 'Sectores';
+
+  @override
+  String get offroadSectorsVsBest => 'Sectores vs mejor';
+
+  @override
+  String get offroadSectorsVsBestHelp =>
+      'Verde = más rápido que tu mejor pasada en ese sector.';
+
+  @override
+  String get offroadWhyPace => 'Por qué este ritmo';
+
+  @override
+  String get offroadBrakingZones => 'Zonas de frenada';
+
+  @override
+  String get offroadFastest => 'Más rápida';
+
+  @override
+  String offroadSlowerBy(String delta) {
+    return '$delta s más lento';
+  }
+
+  @override
+  String offroadFasterBy(String delta) {
+    return '$delta s más rápido';
+  }
+
+  @override
+  String get offroadReferencePass => 'Pasada de referencia';
+
+  @override
+  String offroadVsPass(String id) {
+    return 'vs $id';
+  }
+
+  @override
+  String get offroadNotComparable => 'No comparable';
+
+  @override
+  String get offroadBestMark => 'Mejor';
+
+  @override
+  String get offroadBestShort => 'Mejor';
+
+  @override
+  String get offroadSessionTotals => 'Totales de sesión';
+
+  @override
+  String get offroadBestPass => 'Mejor pasada';
+
+  @override
+  String get offroadBestS2 => 'Mejor S2';
+
+  @override
+  String get offroadBestS3 => 'Mejor S3';
+
+  @override
+  String get offroadTheoreticalPartial => 'Parcial teórico';
+
+  @override
+  String get offroadFlyingLaps => 'Vueltas voladoras';
+
+  @override
+  String get offroadBestLine => 'Mejor línea';
+
+  @override
+  String get offroadMappingUsed => 'Mapeo usado';
+
+  @override
+  String get offroadTapPassDetail =>
+      'Toca una pasada para el detalle por sector';
+
+  @override
+  String get metricaBleWifiHelpPhone =>
+      'El teléfono está en esta red. Android no comparte la contraseña Wi‑Fi con las apps: escríbela una vez; RiderLab la guarda para este SSID y la envía sola la próxima vez.';
+
+  @override
+  String get metricaBleWifiFromPhone => 'Del teléfono';
+
+  @override
+  String get metricaBleWifiPasswordOnce =>
+      'Se guarda en este teléfono al enviarla';
+
+  @override
+  String metricaBleWifiUsingPhone(String ssid) {
+    return 'Enviando Wi‑Fi del teléfono ($ssid)…';
+  }
+
+  @override
+  String get metricaBleWifiPickTitle => 'Wi‑Fi para Métrica';
+
+  @override
+  String get metricaBleWifiPickHelp =>
+      'Elige qué red enviar al logger por Bluetooth.';
+
+  @override
+  String get metricaBleWifiBandNote =>
+      'Métrica solo entra a 2.4 GHz (no redes solo 5 GHz).';
 }

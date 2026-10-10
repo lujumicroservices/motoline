@@ -16,3 +16,5 @@ No hace falta reabrir el chat viejo. El chat de origen está citado en `STATUS.m
 | [CONTEXT.md](CONTEXT.md) | Tesis del producto, métricas, restricciones |
 | [BOM.md](BOM.md) | Lista de partes recomendada (10 unidades) |
 | [DECISIONS.md](DECISIONS.md) | Decisiones ya cerradas (no reabrir sin pedirlo) |
+| [firmware/](firmware/) | Bench / logger PlatformIO (Basic + M135) |
+| [TRACK_COMPARE.md](TRACK_COMPARE.md) | Protocolo teléfono vs logger en pista |

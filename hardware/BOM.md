@@ -19,7 +19,7 @@
 
 **Qué va en pantalla (firmware, no existe aún):** speed, lean, lap/Δt, estado GPS.
 
-**Montaje:** antena en punto alto despejado + ground plane; stack Basic **arriba** / Battery + M135 debajo; caja project-box, no CNC.
+**Montaje:** antena en punto alto despejado + ground plane; stack **Basic → M135 → Battery 13.2 → Bottom Base (switch 0)**; caja project-box, no CNC.
 
 ## Qué no está en este BOM
 

@@ -1,36 +1,40 @@
 # STATUS — hardware
 
 > Archivo vivo. El agente lo actualiza al pausar o al cerrar una decisión.  
-> Última actualización: 2026-09-19
+> Última actualización: 2026-10-10
 
 ## Fase
 
-**Compra de 1 set de prototipo** (no el lote de 10). Diseño/BOM sigue siendo el de 10 unidades como referencia de costo.
+**0.4.9-log** — log de eventos/errores en SD + Serial (`/riderlab/events.ndjson`). USB: `LOG` y `LOGCLR`.
 
-## Chat de origen
+## Stack
 
-[Hardware logger BOM](c349b6a7-8f93-4815-a7e1-a518e71cc66c) — 18 Sep 2026.
+Basic → M135 → Battery 13.2 → Bottom Base (`switch=0`).
+ESP32 Basic = **solo 2.4 GHz**.
 
-## Dónde nos quedamos
+## Hecho en código
 
-- BOM: **M135 + Basic v2.7 + Battery 13.2 (1500 mAh) + antena mag + buck + IP65 + ground plane**.
-- Confirmado: M9N es L1 (no doble banda). F10 L1/L5 no vale la pena en circuito abierto; RTK queda como escalón posterior.
-- Decisión de compra: **1 unidad** para primer prototipo, no 10.
-- Power: Battery 13.2 **o** USB 5 V de moto **o** buck 12→5 V (no los tres a la vez).
-- Cotización qty 1 en curso (M5Stack shop + SparkFun + local buck/caja).
+- Boot: reset reason, heap, GNSS/IMU/BARO/SD, cola Azure.
+- REC start/stop, Wi‑Fi join, HTTPS warm/POST, fallos de índice/SD.
+- Heartbeat 60 s. Duplicados iguales no se reescriben en SD cada 20 s.
+- GNSS 1 Hz sigue solo por Serial (no llena el log).
+- App (2026-10-10): emparejado BLE alineado con el firmware 0.6.8-ble. Servicio `6f8a0001-5c3e-4b8e-9a51-4d4554524943`, fragmentos `0x1E`, MTU 247, STATUS `msg`/`err`/`left`. El Wi-Fi se escribe antes del PAIR. El secreto no se muestra ni se escribe en logs. El `PAIR` por USB sigue en la misma pantalla.
 
-## Siguiente paso (cuando se retome)
+## Nube
 
-1. Confirmar y pedir el carrito qty 1 (núcleo M5Stack: Basic + M135 + Battery 13.2).
-2. Al recibir: firmware mínimo en Basic (GPS lock, speed, lean crudo, log microSD).
-3. Definir entrada al stack RiderLab (archivo / BLE) después.
+15 sesiones en `logger-sessions/unpaired` (3 oct). Mapa: `captures/cloud_rides.html`. Dos recortadas al tope 24 kB del POST.
+
+## Siguiente paso
+
+1. Flash 0.4.9. USB 115200: al arrancar deben salir líneas `{"t":…,"lvl":"I"…}`.
+2. Tras un fallo de Azure, `LOG` debe mostrar el `https` E.
+3. Probar emparejado BLE desde la app (Settings → M5 Logger) con firmware 0.6.8-ble.
 
 ## Preguntas abiertas
 
-- ¿Pedir ya antena SparkFun + ground plate, o primero solo stack M5Stack con la antena de 1 m incluida?
-- ¿Shipping a México vía M5Stack + SparkFun, o un solo reseller (DigiKey / Amazon)?
-- ¿RTK más adelante para el mismo circuito, o primero validar M9N en pista?
+- Antena SparkFun vs incluida.
+- BLE live (fuera de este plan).
 
-## Fuera de alcance de este chat
+## Fuera de alcance
 
-Shop RawThrottle, landing RiderLab, Play Console, APK.
+Shop / landing / Play.

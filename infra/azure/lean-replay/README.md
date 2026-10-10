@@ -7,6 +7,7 @@ Dedicated Azure resources for lean IMU dumps. **Do not** put these in `rg-nkmoto
 | Resource group | `rg-riderlab` (never `rg-nkmoto`) |
 | Storage account | `riderlabimu` (southcentralus) |
 | Container | `lean-replay` (private) |
+| Container | `logger-sessions` (private; M5 GNSS/IMU NDJSON) |
 | Function | `riderlabimusas` (eastus consumption) |
 
 The phone never gets the storage account key. It asks the Function for a 15-minute write SAS after validating the Supabase JWT.
@@ -39,4 +40,17 @@ Then set `AZURE_LEAN_SAS_URL` in `apps/mobile/.env`:
 
 ```
 AZURE_LEAN_SAS_URL=https://riderlabimusas.azurewebsites.net/api/lean-replay-sas
+```
+
+M5 logger ingest (after STOP):
+
+```
+https://riderlabimusas.azurewebsites.net/api/logger-ingest
+```
+
+Set `LOGGER_INGEST_KEY` on the Function App. On the device (USB, no DTR/RTS):
+
+```
+WIFI TuRed|TuPassword
+AZURE <LOGGER_INGEST_KEY>
 ```

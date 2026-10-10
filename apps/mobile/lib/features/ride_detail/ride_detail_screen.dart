@@ -530,7 +530,28 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                           ),
                         ),
                         const SizedBox(height: 4),
-                        GpsQualityChip(analytics: full),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            GpsQualityChip(analytics: full),
+                            if (ride.source == 'm5_logger' ||
+                                ride.source == 'import')
+                              Chip(
+                                avatar: const Icon(Icons.memory, size: 16),
+                                label: Text(
+                                  ride.source == 'm5_logger'
+                                      ? 'Logger M5'
+                                      : 'Import',
+                                  style: GoogleFonts.rajdhani(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                          ],
+                        ),
                         ImuAzureChip(rideId: ride.id),
                         RidePhotosStrip(rideId: ride.id),
                         const SizedBox(height: 12),

@@ -15,9 +15,9 @@ Competidor de referencia: **AiM Solo 2 / Solo 2 DL** (no el teléfono).
 | Sensor | Uso en RiderLab | ¿Va en el hardware? |
 |--------|-----------------|---------------------|
 | GNSS (lat/lng, speed Doppler, heading, accuracy) | Mapa, distancia, curvas, frenos, tramos | **Sí — núcleo** |
-| IMU 6 ejes accel+gyro ~50 Hz | Lean L/R, max lean, skill/replay | **Sí — núcleo** |
-| Barómetro | Se guarda; no es el producto | No |
-| Magnetómetro | Solo Lean Lab | No |
+| IMU 6 ejes accel+gyro ~50 Hz | Lean L/R, max lean, skill/replay | **Sí — núcleo** (≥100 Hz en logger) |
+| Barómetro | Se guarda; no es el producto | **Sí — raw** (BMP280 en M135) |
+| Magnetómetro | Solo Lean Lab | **Sí — raw si aux** (BMM150 vía BMI270) |
 | Cámara / live share | Otro producto | No |
 
 ## Qué define una buena trazada (en este orden)
@@ -39,5 +39,6 @@ El prototipo es **stack maker M5Stack** (Basic 54×54 mm + módulo GNSS), no un 
 ## Relación con el repo de software
 
 - App: `apps/mobile` — lean IMU, GPS denso, RideRecorder.
-- Este folder: diseño, BOM, firmware futuro, montaje.
+- Este folder: diseño, BOM, **firmware** (`firmware/`), montaje.
+- Pines y DIP: `firmware/include/HardwareConfig.h` + `DECISIONS.md`.
 - No mezclar deploys de shop/landing/Play en chats de hardware salvo que el usuario lo pida.

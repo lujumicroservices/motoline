@@ -1,0 +1,384 @@
+{
+  "schema": "riderlab.offroad.session.v1",
+  "id": "2026-10-09_8horas",
+  "owner": "lujumicroservices",
+  "circuit_id": "8horas",
+  "circuit_name": "8 Horas Raceway",
+  "date": "2026-10-09",
+  "title": "Entrenamiento 8 Horas — 9 oct 2026",
+  "subtitle": "3 pasadas de piloto sobre el circuito mapeado el mismo día",
+  "summary": {
+    "passes": 3,
+    "distance_km": 4.2,
+    "best_duration_s": 244.2,
+    "vmax_kmh": 36.6,
+    "best_outside_pct": 4.8,
+    "best_s2_s": 73.04,
+    "best_s3_s": 66.84,
+    "theoretical_partial_s": 139.88,
+    "flying_laps": 0
+  },
+  "mapping": {
+    "date": "2026-10-09",
+    "outer_logger": "3876",
+    "inner_logger": "a057",
+    "length_m": 1370.3,
+    "width_median_m": 6.8,
+    "geometry": "embedded-20261009-suave"
+  },
+  "passes": [
+    {
+      "id": "a169",
+      "session_id": "3876d0c9-a169-1a06-c92d-d0c92df4a9a2",
+      "start_local": "15:41:55",
+      "end_local": "15:45:59",
+      "duration_s": 244.2,
+      "moving_s": 219.1,
+      "distance_m": 1376,
+      "vmax_kmh": 36.6,
+      "vavg_kmh": 22.6,
+      "lean_max_r": 16.6,
+      "lean_max_l": 17.8,
+      "brake_peak_g": 0.31,
+      "accel_peak_g": 0.23,
+      "braking_zones": 6,
+      "pct_outside": 4.8,
+      "outside_max_m": 1.56,
+      "median_dist_outer_m": 4.01,
+      "median_dist_inner_m": 3.14,
+      "maxlean_sector": "S2",
+      "hardest_brake_sector": "S3",
+      "braking_zones_per_sector": "3/0/3",
+      "sectors": [
+        {
+          "name": "S1",
+          "partial": true,
+          "time_s": 57.69,
+          "note": "standing start (rider moved off mid-S1); not a flying sector"
+        },
+        {
+          "name": "S2",
+          "partial": false,
+          "time_s": 82.09,
+          "note": null
+        },
+        {
+          "name": "S3",
+          "partial": false,
+          "time_s": 66.84,
+          "note": null
+        }
+      ],
+      "brakes": [
+        {
+          "sector": "S1",
+          "lap_m": 369.3,
+          "v_in": 29.0,
+          "v_out": 20.0,
+          "peak_g": 0.25,
+          "duration_s": 1.1
+        },
+        {
+          "sector": "S1",
+          "lap_m": 451.2,
+          "v_in": 28.9,
+          "v_out": 20.0,
+          "peak_g": 0.21,
+          "duration_s": 1.2
+        },
+        {
+          "sector": "S3",
+          "lap_m": 972.4,
+          "v_in": 29.2,
+          "v_out": 25.0,
+          "peak_g": 0.18,
+          "duration_s": 0.7
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1088.6,
+          "v_in": 29.7,
+          "v_out": 23.8,
+          "peak_g": 0.18,
+          "duration_s": 0.9
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1370.1,
+          "v_in": 35.3,
+          "v_out": 23.6,
+          "peak_g": 0.31,
+          "duration_s": 1.1
+        },
+        {
+          "sector": "S1",
+          "lap_m": 69.8,
+          "v_in": 9.9,
+          "v_out": 2.2,
+          "peak_g": 0.2,
+          "duration_s": 1.1
+        }
+      ]
+    },
+    {
+      "id": "b029",
+      "session_id": "3876d0c9-b029-28d6-c92d-d0c92df47466",
+      "start_local": "15:46:04",
+      "end_local": "15:50:25",
+      "duration_s": 261.7,
+      "moving_s": 242.7,
+      "distance_m": 1401,
+      "vmax_kmh": 32.1,
+      "vavg_kmh": 23.2,
+      "lean_max_r": 16.6,
+      "lean_max_l": 15.9,
+      "brake_peak_g": 0.35,
+      "accel_peak_g": 0.19,
+      "braking_zones": 7,
+      "pct_outside": 5.3,
+      "outside_max_m": 1.64,
+      "median_dist_outer_m": 3.66,
+      "median_dist_inner_m": 3.34,
+      "maxlean_sector": "S2",
+      "hardest_brake_sector": "S1",
+      "braking_zones_per_sector": "2/1/4",
+      "sectors": [
+        {
+          "name": "S1",
+          "partial": true,
+          "time_s": 56.72,
+          "note": "standing start (rider moved off mid-S1); not a flying sector"
+        },
+        {
+          "name": "S2",
+          "partial": false,
+          "time_s": 73.04,
+          "note": null
+        },
+        {
+          "name": "S3",
+          "partial": false,
+          "time_s": 71.43,
+          "note": null
+        }
+      ],
+      "brakes": [
+        {
+          "sector": "S2",
+          "lap_m": 730.4,
+          "v_in": 27.1,
+          "v_out": 21.9,
+          "peak_g": 0.2,
+          "duration_s": 0.5
+        },
+        {
+          "sector": "S3",
+          "lap_m": 971.8,
+          "v_in": 25.3,
+          "v_out": 21.8,
+          "peak_g": 0.18,
+          "duration_s": 0.5
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1116.3,
+          "v_in": 25.4,
+          "v_out": 19.1,
+          "peak_g": 0.19,
+          "duration_s": 0.9
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1179.8,
+          "v_in": 19.3,
+          "v_out": 15.1,
+          "peak_g": 0.18,
+          "duration_s": 0.6
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1308.0,
+          "v_in": 29.7,
+          "v_out": 25.8,
+          "peak_g": 0.18,
+          "duration_s": 0.6
+        },
+        {
+          "sector": "S1",
+          "lap_m": 0.4,
+          "v_in": 26.1,
+          "v_out": 3.4,
+          "peak_g": 0.35,
+          "duration_s": 2.5
+        },
+        {
+          "sector": "S1",
+          "lap_m": 62.6,
+          "v_in": 11.3,
+          "v_out": 3.3,
+          "peak_g": 0.16,
+          "duration_s": 1.4
+        }
+      ]
+    },
+    {
+      "id": "a7e7",
+      "session_id": "3876d0c9-a7e7-38bf-c92d-d0c92df48714",
+      "start_local": "15:50:30",
+      "end_local": "15:55:50",
+      "duration_s": 319.5,
+      "moving_s": 298.2,
+      "distance_m": 1420,
+      "vmax_kmh": 32.5,
+      "vavg_kmh": 20.5,
+      "lean_max_r": 14.2,
+      "lean_max_l": 16.1,
+      "brake_peak_g": 0.31,
+      "accel_peak_g": 0.27,
+      "braking_zones": 7,
+      "pct_outside": 7.7,
+      "outside_max_m": 1.18,
+      "median_dist_outer_m": 3.15,
+      "median_dist_inner_m": 3.78,
+      "maxlean_sector": "S1",
+      "hardest_brake_sector": "S3",
+      "braking_zones_per_sector": "0/1/6",
+      "sectors": [
+        {
+          "name": "S1",
+          "partial": true,
+          "time_s": 66.32,
+          "note": "standing start (rider moved off mid-S1); not a flying sector"
+        },
+        {
+          "name": "S2",
+          "partial": false,
+          "time_s": 82.46,
+          "note": null
+        },
+        {
+          "name": "S3",
+          "partial": false,
+          "time_s": 133.55,
+          "note": "stopped >3 s inside sector; excluded from best"
+        }
+      ],
+      "brakes": [
+        {
+          "sector": "S2",
+          "lap_m": 732.0,
+          "v_in": 26.1,
+          "v_out": 21.1,
+          "peak_g": 0.21,
+          "duration_s": 0.6
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1037.2,
+          "v_in": 29.0,
+          "v_out": 21.5,
+          "peak_g": 0.23,
+          "duration_s": 0.9
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1088.4,
+          "v_in": 29.5,
+          "v_out": 20.3,
+          "peak_g": 0.23,
+          "duration_s": 1.1
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1114.7,
+          "v_in": 24.8,
+          "v_out": 19.8,
+          "peak_g": 0.18,
+          "duration_s": 0.7
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1181.4,
+          "v_in": 13.1,
+          "v_out": 1.4,
+          "peak_g": 0.22,
+          "duration_s": 1.6
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1183.1,
+          "v_in": 13.4,
+          "v_out": 1.8,
+          "peak_g": 0.31,
+          "duration_s": 0.8
+        },
+        {
+          "sector": "S3",
+          "lap_m": 1370.1,
+          "v_in": 26.9,
+          "v_out": 19.7,
+          "peak_g": 0.21,
+          "duration_s": 0.9
+        }
+      ]
+    }
+  ],
+  "insights": [
+    {
+      "kind": "good",
+      "title": "Línea limpia",
+      "body": "La pasada a169 se quedó dentro del corredor el 95.2 % del tiempo (máx. fuera 1.6 m). El mapeo de 6.8 m de ancho medio aguanta la rodada a ~23 km/h.",
+      "pass_id": "a169",
+      "sector": null
+    },
+    {
+      "kind": "good",
+      "title": "Mejor S2",
+      "body": "b029 hizo S2 en 73.04 s — el mejor sector del día. Inclinación punta en S2 (17° estimada).",
+      "pass_id": "b029",
+      "sector": "S2"
+    },
+    {
+      "kind": "good",
+      "title": "Mejor S3",
+      "body": "a169 cerró S3 en 66.84 s sin parar. Vuelta teórica parcial S2+S3 = 139.88 s.",
+      "pass_id": "a169",
+      "sector": "S3"
+    },
+    {
+      "kind": "good",
+      "title": "Ritmo más alto",
+      "body": "a169 fue la pasada más rápida del día (4.1 min, 37 km/h punta, 23 km/h media).",
+      "pass_id": "a169",
+      "sector": null
+    },
+    {
+      "kind": "bad",
+      "title": "Sin vuelta lanzada",
+      "body": "Las tres pasadas arrancaron paradas a mitad de S1. Ninguna cruzó la meta lanzada, así que no hay tiempo de vuelta completo ni S1 válido. Próxima sesión: cruzar S/F ya en marcha.",
+      "pass_id": null,
+      "sector": "S1"
+    },
+    {
+      "kind": "bad",
+      "title": "Parada en S3 (a7e7)",
+      "body": "a7e7 se detuvo más de 3 s dentro de S3 (133.6 s). Ese sector no cuenta para el mejor. Revisar ritmo en la zona de 1180–1300 m de arco.",
+      "pass_id": "a7e7",
+      "sector": "S3"
+    },
+    {
+      "kind": "bad",
+      "title": "Salidas del corredor",
+      "body": "Aunque el % fuera es bajo, las tres pasadas rozaron 1.2–1.6 m fuera del borde suave. Con el M9N eso puede ser ruido, pero en bermas conviene revisar el mapa por pasada.",
+      "pass_id": null,
+      "sector": null
+    },
+    {
+      "kind": "bad",
+      "title": "Frenada dura al final de S3",
+      "body": "a169 frenó 0.31 g a 1370 m (meta) bajando de 35 a 24 km/h. b029 hizo 0.35 g justo después de S/F. Apunta a llegada tarde a la siguiente curva: soltar antes o alinear antes.",
+      "pass_id": "a169",
+      "sector": "S3"
+    }
+  ]
+}

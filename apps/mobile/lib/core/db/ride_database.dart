@@ -30,7 +30,7 @@ class RideDatabase {
     final path = p.join(dir.path, 'motoline.db');
     return openDatabase(
       path,
-      version: 21,
+      version: 22,
       onConfigure: (db) async {
         // Outdoor-grade durability: survive kills mid-batch flush.
         // Android requires rawQuery for PRAGMAs that return a row
@@ -62,7 +62,8 @@ class RideDatabase {
             lean_sign_flip INTEGER NOT NULL DEFAULT 1,
             lean_freeze_at_ms INTEGER,
             lean_mount_mode TEXT,
-            rodada_id TEXT
+            rodada_id TEXT,
+            source TEXT NOT NULL DEFAULT 'phone'
           )
         ''');
         await db.execute('''
@@ -169,8 +170,21 @@ class RideDatabase {
         if (oldVersion < 21) {
           await _addRideRodadaIdColumnIfMissing(db);
         }
+        if (oldVersion < 22) {
+          await _addRideSourceColumnIfMissing(db);
+        }
       },
     );
+  }
+
+  Future<void> _addRideSourceColumnIfMissing(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info(rides)');
+    final existing = columns.map((c) => c['name'] as String).toSet();
+    if (!existing.contains('source')) {
+      await db.execute(
+        "ALTER TABLE rides ADD COLUMN source TEXT NOT NULL DEFAULT 'phone'",
+      );
+    }
   }
 
   Future<void> _createLeanSamplesTable(Database db) async {

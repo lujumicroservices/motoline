@@ -1136,6 +1136,12 @@ abstract class AppLocalizations {
   /// **'Huecos GPS'**
   String get mapLayerGpsGaps;
 
+  /// No description provided for @mapLayerTrackPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos GPS'**
+  String get mapLayerTrackPoints;
+
   /// No description provided for @friends.
   ///
   /// In es, this message translates to:
@@ -5510,6 +5516,436 @@ abstract class AppLocalizations {
   /// **'Guardar marcas de curvas'**
   String get leanLabSaveLabels;
 
+  /// No description provided for @appVersionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión instalada'**
+  String get appVersionTitle;
+
+  /// No description provided for @appVersionUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo leer la versión'**
+  String get appVersionUnavailable;
+
+  /// No description provided for @appVersionCopy.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar versión'**
+  String get appVersionCopy;
+
+  /// No description provided for @appVersionCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión copiada'**
+  String get appVersionCopied;
+
+  /// No description provided for @gpsTrackPointsLabTile.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuito 8 horas · A / B'**
+  String get gpsTrackPointsLabTile;
+
+  /// No description provided for @gpsTrackPointsLabHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido tipo A y tipo B · grabar N pasadas de cada uno'**
+  String get gpsTrackPointsLabHelp;
+
+  /// No description provided for @gpsTrackPointsLabTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar perímetro GPS'**
+  String get gpsTrackPointsLabTitle;
+
+  /// No description provided for @circuit8hTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuito 8 horas'**
+  String get circuit8hTitle;
+
+  /// No description provided for @circuit8hIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige recorrido tipo A o tipo B y graba tantas pasadas como necesites. Cada pasada guarda todos los fixes GPS para calibrar después.'**
+  String get circuit8hIntro;
+
+  /// No description provided for @circuit8hRouteA.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido tipo A'**
+  String get circuit8hRouteA;
+
+  /// No description provided for @circuit8hRouteB.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido tipo B'**
+  String get circuit8hRouteB;
+
+  /// No description provided for @circuit8hRoutePasses.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} pasadas guardadas'**
+  String circuit8hRoutePasses(int count);
+
+  /// No description provided for @circuit8hNoPassesYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay pasadas. Graba la primera.'**
+  String get circuit8hNoPassesYet;
+
+  /// No description provided for @circuit8hRecordPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar otra pasada'**
+  String get circuit8hRecordPass;
+
+  /// No description provided for @circuit8hDeletePass.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar pasada'**
+  String get circuit8hDeletePass;
+
+  /// No description provided for @circuit8hPassTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasada {index} · {time}'**
+  String circuit8hPassTitle(int index, String time);
+
+  /// No description provided for @circuit8hPassMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'{points} puntos · {duration}'**
+  String circuit8hPassMeta(int points, String duration);
+
+  /// No description provided for @circuit8hRecordTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo {route} · pasada {pass}'**
+  String circuit8hRecordTitle(String route, int pass);
+
+  /// No description provided for @circuit8hRecordIdle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo {route}, pasada {pass}. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.'**
+  String circuit8hRecordIdle(String route, int pass);
+
+  /// No description provided for @circuit8hStartPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar pasada'**
+  String get circuit8hStartPass;
+
+  /// No description provided for @circuit8hStopSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Detener y guardar'**
+  String get circuit8hStopSave;
+
+  /// No description provided for @circuit8hSaving.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardando…'**
+  String get circuit8hSaving;
+
+  /// No description provided for @circuit8hNeedMorePoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitas al menos 3 puntos GPS para guardar la pasada.'**
+  String get circuit8hNeedMorePoints;
+
+  /// No description provided for @circuit8hRecordingStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando · {points} pts · {distance} · {accuracy}'**
+  String circuit8hRecordingStats(int points, String distance, String accuracy);
+
+  /// No description provided for @circuit8hRejected.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazados (precisión o salto): {count}'**
+  String circuit8hRejected(int count);
+
+  /// No description provided for @circuit8hPrecisionNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo se guardan fixes de ±{meters} m o mejores.'**
+  String circuit8hPrecisionNote(int meters);
+
+  /// No description provided for @circuit8hWarming.
+  ///
+  /// In es, this message translates to:
+  /// **'Afinando GPS · ahora {accuracy}'**
+  String circuit8hWarming(String accuracy);
+
+  /// No description provided for @circuit8hRecordNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar ahora'**
+  String get circuit8hRecordNow;
+
+  /// No description provided for @circuit8hCancelWait.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar espera'**
+  String get circuit8hCancelWait;
+
+  /// No description provided for @circuit8hEdgePick.
+  ///
+  /// In es, this message translates to:
+  /// **'Extremo del trazado'**
+  String get circuit8hEdgePick;
+
+  /// No description provided for @circuit8hEdgeInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Interno'**
+  String get circuit8hEdgeInner;
+
+  /// No description provided for @circuit8hEdgeOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Externo'**
+  String get circuit8hEdgeOuter;
+
+  /// No description provided for @circuit8hEdgeRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige extremo interno o externo antes de iniciar.'**
+  String get circuit8hEdgeRequired;
+
+  /// No description provided for @circuit8hLooseNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando igual. Se guardan fixes de hasta ±{meters} m.'**
+  String circuit8hLooseNote(int meters);
+
+  /// No description provided for @circuit8hAccuracyGate.
+  ///
+  /// In es, this message translates to:
+  /// **'Este punto es peor que ±{meters} m. Espera afuera a una fijación más precisa.'**
+  String circuit8hAccuracyGate(int meters);
+
+  /// No description provided for @circuit8hHoldStill.
+  ///
+  /// In es, this message translates to:
+  /// **'Quédate quieto. Hacen falta {count} fixes de ±{meters} m en el mismo punto.'**
+  String circuit8hHoldStill(int count, int meters);
+
+  /// No description provided for @circuit8hMarkersTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio · Meta · Checkpoints'**
+  String get circuit8hMarkersTitle;
+
+  /// No description provided for @circuit8hMarkersOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar inicio, meta y checkpoints'**
+  String get circuit8hMarkersOpen;
+
+  /// No description provided for @circuit8hMarkersSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio: {start} · Meta: {finish} · Checkpoints: {count}'**
+  String circuit8hMarkersSummary(String start, String finish, int count);
+
+  /// No description provided for @circuit8hMarkersHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige qué marcar, luego toca el mapa o usa tu GPS actual.'**
+  String get circuit8hMarkersHint;
+
+  /// No description provided for @circuit8hMarkStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
+  String get circuit8hMarkStart;
+
+  /// No description provided for @circuit8hMarkFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Meta'**
+  String get circuit8hMarkFinish;
+
+  /// No description provided for @circuit8hMarkCheckpoint.
+  ///
+  /// In es, this message translates to:
+  /// **'Checkpoint'**
+  String get circuit8hMarkCheckpoint;
+
+  /// No description provided for @circuit8hPlaceAtGps.
+  ///
+  /// In es, this message translates to:
+  /// **'Colocar en mi GPS'**
+  String get circuit8hPlaceAtGps;
+
+  /// No description provided for @circuit8hNeedGps.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin fix GPS. Sal al aire o toca el mapa.'**
+  String get circuit8hNeedGps;
+
+  /// No description provided for @circuit8hMarkerSet.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcado'**
+  String get circuit8hMarkerSet;
+
+  /// No description provided for @circuit8hMarkerMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin marcar'**
+  String get circuit8hMarkerMissing;
+
+  /// No description provided for @circuit8hClearMarker.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
+  String get circuit8hClearMarker;
+
+  /// No description provided for @circuit8hFitMarkers.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver todas las marcas'**
+  String get circuit8hFitMarkers;
+
+  /// No description provided for @circuit8hCheckpointCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} checkpoints'**
+  String circuit8hCheckpointCount(int count);
+
+  /// No description provided for @circuit8hYes.
+  ///
+  /// In es, this message translates to:
+  /// **'sí'**
+  String get circuit8hYes;
+
+  /// No description provided for @circuit8hNo.
+  ///
+  /// In es, this message translates to:
+  /// **'no'**
+  String get circuit8hNo;
+
+  /// No description provided for @circuit8hPassMarkersHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca en tu GPS actual: Inicio, Checkpoint N o Meta. La X borra si te equivocas.'**
+  String get circuit8hPassMarkersHint;
+
+  /// No description provided for @circuit8hCheckpointN.
+  ///
+  /// In es, this message translates to:
+  /// **'CP{n}'**
+  String circuit8hCheckpointN(int n);
+
+  /// No description provided for @circuit8hOpenPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver trazada'**
+  String get circuit8hOpenPass;
+
+  /// No description provided for @circuit8hPassViewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo {route} · pasada {pass}'**
+  String circuit8hPassViewTitle(String route, int pass);
+
+  /// No description provided for @circuit8hPassViewStats.
+  ///
+  /// In es, this message translates to:
+  /// **'{points} puntos GPS · {distance} · {duration}'**
+  String circuit8hPassViewStats(int points, String distance, String duration);
+
+  /// No description provided for @circuit8hReliefStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Alt {alt} m · ↑{climb} ↓{descent} · {minAlt}–{maxAlt} m'**
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  );
+
+  /// No description provided for @circuit8hReliefNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).'**
+  String get circuit8hReliefNote;
+
+  /// No description provided for @circuit8hTogglePoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrar/ocultar puntos GPS'**
+  String get circuit8hTogglePoints;
+
+  /// No description provided for @circuit8hUploadCloud.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir a la nube para análisis'**
+  String get circuit8hUploadCloud;
+
+  /// No description provided for @circuit8hUploading.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiendo…'**
+  String get circuit8hUploading;
+
+  /// No description provided for @circuit8hUploadOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Subidas {count} pasadas a la nube'**
+  String circuit8hUploadOk(int count);
+
+  /// No description provided for @circuit8hLastUpload.
+  ///
+  /// In es, this message translates to:
+  /// **'Última subida: {when}'**
+  String circuit8hLastUpload(String when);
+
+  /// No description provided for @gpsTrackPointsLabIdleHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa en tu GPS. Toca Grabar perímetro y camina o rueda el contorno — cada fix aparece como punto.'**
+  String get gpsTrackPointsLabIdleHint;
+
+  /// No description provided for @gpsTrackPointsLabStartPerimeter.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabar perímetro'**
+  String get gpsTrackPointsLabStartPerimeter;
+
+  /// No description provided for @gpsTrackPointsLabStopPerimeter.
+  ///
+  /// In es, this message translates to:
+  /// **'Detener grabación'**
+  String get gpsTrackPointsLabStopPerimeter;
+
+  /// No description provided for @gpsTrackPointsLabClear.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar puntos'**
+  String get gpsTrackPointsLabClear;
+
+  /// No description provided for @gpsTrackPointsLabRecordingStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando · {points} puntos · ~{hz} Hz · {distance}'**
+  String gpsTrackPointsLabRecordingStats(
+    int points,
+    String hz,
+    String distance,
+  );
+
+  /// No description provided for @gpsTrackPointsLabStoppedStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo · {points} puntos · ~{hz} Hz · {distance}'**
+  String gpsTrackPointsLabStoppedStats(int points, String hz, String distance);
+
   /// No description provided for @leanLabSettingsTile.
   ///
   /// In es, this message translates to:
@@ -6307,6 +6743,894 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ahora no'**
   String get termsAcceptDecline;
+
+  /// No description provided for @modeToggleSemantics.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar entre modo calle (ON) y off-road (OFF)'**
+  String get modeToggleSemantics;
+
+  /// No description provided for @offroadBrandTag.
+  ///
+  /// In es, this message translates to:
+  /// **'OFF-ROAD'**
+  String get offroadBrandTag;
+
+  /// No description provided for @offroadHomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis circuitos'**
+  String get offroadHomeTitle;
+
+  /// No description provided for @offroadHomeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pistas mapeadas con Métrica'**
+  String get offroadHomeSubtitle;
+
+  /// No description provided for @circuitStatLap.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelta'**
+  String get circuitStatLap;
+
+  /// No description provided for @circuitStatSectors.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores'**
+  String get circuitStatSectors;
+
+  /// No description provided for @circuitStatDrop.
+  ///
+  /// In es, this message translates to:
+  /// **'Desnivel'**
+  String get circuitStatDrop;
+
+  /// No description provided for @circuitStatWidth.
+  ///
+  /// In es, this message translates to:
+  /// **'Ancho'**
+  String get circuitStatWidth;
+
+  /// No description provided for @circuitStatClimb.
+  ///
+  /// In es, this message translates to:
+  /// **'Subida total'**
+  String get circuitStatClimb;
+
+  /// No description provided for @circuitStatElevMin.
+  ///
+  /// In es, this message translates to:
+  /// **'Mínima'**
+  String get circuitStatElevMin;
+
+  /// No description provided for @circuitStatElevMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Máxima'**
+  String get circuitStatElevMax;
+
+  /// No description provided for @circuitMappedOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapeado el {date}'**
+  String circuitMappedOn(String date);
+
+  /// No description provided for @circuitDirectionCcw.
+  ///
+  /// In es, this message translates to:
+  /// **'Antihorario'**
+  String get circuitDirectionCcw;
+
+  /// No description provided for @circuitDirectionCw.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario'**
+  String get circuitDirectionCw;
+
+  /// No description provided for @circuitTabMap.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa'**
+  String get circuitTabMap;
+
+  /// No description provided for @circuitTabRelief.
+  ///
+  /// In es, this message translates to:
+  /// **'Relieve'**
+  String get circuitTabRelief;
+
+  /// No description provided for @circuitTabSectors.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores'**
+  String get circuitTabSectors;
+
+  /// No description provided for @circuitTabMapping.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapeo'**
+  String get circuitTabMapping;
+
+  /// No description provided for @circuitLayerSatellite.
+  ///
+  /// In es, this message translates to:
+  /// **'Satélite'**
+  String get circuitLayerSatellite;
+
+  /// No description provided for @circuitLayerRelief.
+  ///
+  /// In es, this message translates to:
+  /// **'Relieve'**
+  String get circuitLayerRelief;
+
+  /// No description provided for @circuitLayerTopo.
+  ///
+  /// In es, this message translates to:
+  /// **'Topográfico'**
+  String get circuitLayerTopo;
+
+  /// No description provided for @circuitElevationTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil de elevación por sector'**
+  String get circuitElevationTitle;
+
+  /// No description provided for @circuitElevationNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Altitud GNSS mediana de 5 pasadas, revisada contra un modelo de terreno de 30 m ({source}). Muestra la loma del predio; no ve bermas ni saltos.'**
+  String circuitElevationNote(String source);
+
+  /// No description provided for @sectorLength.
+  ///
+  /// In es, this message translates to:
+  /// **'Largo'**
+  String get sectorLength;
+
+  /// No description provided for @sectorWidth.
+  ///
+  /// In es, this message translates to:
+  /// **'Ancho (mediana {median} m)'**
+  String sectorWidth(String median);
+
+  /// No description provided for @mappingSurvey.
+  ///
+  /// In es, this message translates to:
+  /// **'Levantamiento'**
+  String get mappingSurvey;
+
+  /// No description provided for @mappingDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha'**
+  String get mappingDate;
+
+  /// No description provided for @mappingLogger.
+  ///
+  /// In es, this message translates to:
+  /// **'Logger'**
+  String get mappingLogger;
+
+  /// No description provided for @mappingEdgeOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Borde exterior'**
+  String get mappingEdgeOuter;
+
+  /// No description provided for @mappingEdgeInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Borde interior'**
+  String get mappingEdgeInner;
+
+  /// No description provided for @mappingReceiver.
+  ///
+  /// In es, this message translates to:
+  /// **'Receptor'**
+  String get mappingReceiver;
+
+  /// No description provided for @mappingAnchor.
+  ///
+  /// In es, this message translates to:
+  /// **'Ancla (meta)'**
+  String get mappingAnchor;
+
+  /// No description provided for @mappingDirection.
+  ///
+  /// In es, this message translates to:
+  /// **'Sentido'**
+  String get mappingDirection;
+
+  /// No description provided for @mappingSmoothing.
+  ///
+  /// In es, this message translates to:
+  /// **'Suavizado'**
+  String get mappingSmoothing;
+
+  /// No description provided for @mappingSmoothingMethod.
+  ///
+  /// In es, this message translates to:
+  /// **'Outliers ±{outlier} m, remuestreo cada {resample} m, Gauss periódico con twicing.'**
+  String mappingSmoothingMethod(String outlier, String resample);
+
+  /// No description provided for @mappingMaxDev.
+  ///
+  /// In es, this message translates to:
+  /// **'Desviación máx. vs crudo (ext / int)'**
+  String get mappingMaxDev;
+
+  /// No description provided for @mappingRms.
+  ///
+  /// In es, this message translates to:
+  /// **'RMS vs crudo (ext / int)'**
+  String get mappingRms;
+
+  /// No description provided for @mappingSelfIntersections.
+  ///
+  /// In es, this message translates to:
+  /// **'Autocruces'**
+  String get mappingSelfIntersections;
+
+  /// No description provided for @mappingInnerInside.
+  ///
+  /// In es, this message translates to:
+  /// **'Interior dentro del exterior'**
+  String get mappingInnerInside;
+
+  /// No description provided for @mappingGeometry.
+  ///
+  /// In es, this message translates to:
+  /// **'Geometría'**
+  String get mappingGeometry;
+
+  /// No description provided for @mappingMedian.
+  ///
+  /// In es, this message translates to:
+  /// **'mediana'**
+  String get mappingMedian;
+
+  /// No description provided for @mappingPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos ext / int / eje'**
+  String get mappingPoints;
+
+  /// No description provided for @settingsModeSound.
+  ///
+  /// In es, this message translates to:
+  /// **'Sonido al cambiar ON / OFF'**
+  String get settingsModeSound;
+
+  /// No description provided for @settingsModeSoundHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio.'**
+  String get settingsModeSoundHelp;
+
+  /// No description provided for @metricaBlePair.
+  ///
+  /// In es, this message translates to:
+  /// **'Emparejar por Bluetooth'**
+  String get metricaBlePair;
+
+  /// No description provided for @metricaBlePairHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca un equipo Metrica-XXXX, lee su versión y, con el PIN de 6 dígitos de su pantalla, lo vincula a tu cuenta. El secreto no se muestra.'**
+  String get metricaBlePairHelp;
+
+  /// No description provided for @metricaBleScanning.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando Métrica…'**
+  String get metricaBleScanning;
+
+  /// No description provided for @metricaBleDevices.
+  ///
+  /// In es, this message translates to:
+  /// **'Equipos cerca'**
+  String get metricaBleDevices;
+
+  /// No description provided for @metricaBleRssi.
+  ///
+  /// In es, this message translates to:
+  /// **'Señal {rssi} dBm'**
+  String metricaBleRssi(int rssi);
+
+  /// No description provided for @metricaBleConnecting.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectando a {name}…'**
+  String metricaBleConnecting(String name);
+
+  /// No description provided for @metricaBleReading.
+  ///
+  /// In es, this message translates to:
+  /// **'Leyendo el equipo…'**
+  String get metricaBleReading;
+
+  /// No description provided for @metricaBleFirmware.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version}.'**
+  String metricaBleFirmware(String version);
+
+  /// No description provided for @metricaBleFirmwareUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión desconocida.'**
+  String get metricaBleFirmwareUnknown;
+
+  /// No description provided for @metricaBlePairedYes.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya está emparejado.'**
+  String get metricaBlePairedYes;
+
+  /// No description provided for @metricaBlePairedNo.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no está emparejado.'**
+  String get metricaBlePairedNo;
+
+  /// No description provided for @metricaBlePairedUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'No dice si ya está emparejado.'**
+  String get metricaBlePairedUnknown;
+
+  /// No description provided for @metricaBleDeviceId.
+  ///
+  /// In es, this message translates to:
+  /// **'ID {id}.'**
+  String metricaBleDeviceId(String id);
+
+  /// No description provided for @metricaBleDeviceIdEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin ID.'**
+  String get metricaBleDeviceIdEmpty;
+
+  /// No description provided for @metricaBleWifiPresent.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi-Fi guardado.'**
+  String get metricaBleWifiPresent;
+
+  /// No description provided for @metricaBleWifiAbsent.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin Wi-Fi.'**
+  String get metricaBleWifiAbsent;
+
+  /// No description provided for @metricaBleWifiUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi-Fi sin dato.'**
+  String get metricaBleWifiUnknown;
+
+  /// No description provided for @metricaBleAuthedYes.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN aceptado.'**
+  String get metricaBleAuthedYes;
+
+  /// No description provided for @metricaBleAuthedNo.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN pendiente.'**
+  String get metricaBleAuthedNo;
+
+  /// No description provided for @metricaBleAuthedUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN sin dato.'**
+  String get metricaBleAuthedUnknown;
+
+  /// No description provided for @metricaBleMtu.
+  ///
+  /// In es, this message translates to:
+  /// **'MTU {mtu}.'**
+  String metricaBleMtu(int mtu);
+
+  /// No description provided for @metricaBleMtuUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'MTU desconocido.'**
+  String get metricaBleMtuUnknown;
+
+  /// No description provided for @metricaBlePairingOff.
+  ///
+  /// In es, this message translates to:
+  /// **'No está en modo de emparejado. El PIN solo aparece en su pantalla en ese modo. Tras 5 PIN incorrectos, el equipo sale de ese modo.'**
+  String get metricaBlePairingOff;
+
+  /// No description provided for @metricaBlePinTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN de Métrica'**
+  String get metricaBlePinTitle;
+
+  /// No description provided for @metricaBlePinBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe los 6 dígitos que muestra el equipo. Sin el PIN, rechaza el emparejado. Tras 5 fallos sale del modo de emparejado.'**
+  String get metricaBlePinBody;
+
+  /// No description provided for @metricaBlePinLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN de 6 dígitos'**
+  String get metricaBlePinLabel;
+
+  /// No description provided for @metricaBlePinFormat.
+  ///
+  /// In es, this message translates to:
+  /// **'El PIN debe tener 6 dígitos.'**
+  String get metricaBlePinFormat;
+
+  /// No description provided for @metricaBleCheckingPin.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprobando el PIN…'**
+  String get metricaBleCheckingPin;
+
+  /// No description provided for @metricaBleWrongPin.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN incorrecto.'**
+  String get metricaBleWrongPin;
+
+  /// No description provided for @metricaBleWrongPinLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN incorrecto. Quedan {left} intentos.'**
+  String metricaBleWrongPinLeft(int left);
+
+  /// No description provided for @metricaBlePinLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN incorrecto. No quedan intentos: el equipo cerró el modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.'**
+  String get metricaBlePinLocked;
+
+  /// No description provided for @metricaBleMinting.
+  ///
+  /// In es, this message translates to:
+  /// **'Creando el emparejado en tu cuenta…'**
+  String get metricaBleMinting;
+
+  /// No description provided for @metricaBleWriting.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando el emparejado al equipo…'**
+  String get metricaBleWriting;
+
+  /// No description provided for @metricaBleTimeout.
+  ///
+  /// In es, this message translates to:
+  /// **'El equipo no respondió a tiempo.'**
+  String get metricaBleTimeout;
+
+  /// No description provided for @metricaBleNoSession.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para emparejar Métrica.'**
+  String get metricaBleNoSession;
+
+  /// No description provided for @metricaBleNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.'**
+  String get metricaBleNotFound;
+
+  /// No description provided for @metricaBlePermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltan permisos de Bluetooth (búsqueda y conexión). Actívalos para emparejar.'**
+  String get metricaBlePermissionDenied;
+
+  /// No description provided for @metricaBleLocationDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'En esta versión de Android hace falta el permiso de ubicación para buscar el equipo.'**
+  String get metricaBleLocationDenied;
+
+  /// No description provided for @metricaBleBluetoothOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa el Bluetooth del teléfono.'**
+  String get metricaBleBluetoothOff;
+
+  /// No description provided for @metricaBleUnsupported.
+  ///
+  /// In es, this message translates to:
+  /// **'Este teléfono no tiene Bluetooth LE.'**
+  String get metricaBleUnsupported;
+
+  /// No description provided for @metricaBleConnectFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo conectar con el equipo.'**
+  String get metricaBleConnectFailed;
+
+  /// No description provided for @metricaBleFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo emparejar.'**
+  String get metricaBleFailed;
+
+  /// No description provided for @metricaBleFailedDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo emparejar. {detail}'**
+  String metricaBleFailedDetail(String detail);
+
+  /// No description provided for @metricaBleSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Métrica emparejada ({deviceId}).'**
+  String metricaBleSuccess(String deviceId);
+
+  /// No description provided for @metricaBleRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get metricaBleRetry;
+
+  /// No description provided for @metricaBleContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get metricaBleContinue;
+
+  /// No description provided for @metricaBleWifiTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi‑Fi del paddock (opcional)'**
+  String get metricaBleWifiTitle;
+
+  /// No description provided for @metricaBleWifiHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Si quieres, envía la red ahora. Hay que hacerlo antes de emparejar: cuando el equipo confirma el emparejado, cierra el modo a los pocos segundos.'**
+  String get metricaBleWifiHelp;
+
+  /// No description provided for @metricaBleWifiSsid.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de la red'**
+  String get metricaBleWifiSsid;
+
+  /// No description provided for @metricaBleWifiPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña'**
+  String get metricaBleWifiPassword;
+
+  /// No description provided for @metricaBleWifiSend.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar Wi‑Fi'**
+  String get metricaBleWifiSend;
+
+  /// No description provided for @metricaBleWifiSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get metricaBleWifiSkip;
+
+  /// No description provided for @metricaBleWifiSending.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando Wi‑Fi…'**
+  String get metricaBleWifiSending;
+
+  /// No description provided for @metricaBleWifiSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi‑Fi guardado en el equipo.'**
+  String get metricaBleWifiSaved;
+
+  /// No description provided for @metricaBleWifiFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar el Wi‑Fi.'**
+  String get metricaBleWifiFailed;
+
+  /// No description provided for @metricaBleWifiNeedSsid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre de la red.'**
+  String get metricaBleWifiNeedSsid;
+
+  /// No description provided for @offroadTagline.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrena la línea. Mejora tu última pasada.'**
+  String get offroadTagline;
+
+  /// No description provided for @offroadCircuitsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuitos'**
+  String get offroadCircuitsTitle;
+
+  /// No description provided for @offroadCircuitsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pistas mapeadas listas para entrenar'**
+  String get offroadCircuitsSubtitle;
+
+  /// No description provided for @offroadSessionsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesiones'**
+  String get offroadSessionsTitle;
+
+  /// No description provided for @offroadSessionsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Días de entrenamiento con tus pasadas'**
+  String get offroadSessionsSubtitle;
+
+  /// No description provided for @offroadSessionsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay sesiones de entrenamiento.'**
+  String get offroadSessionsEmpty;
+
+  /// No description provided for @offroadStatSessions.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesiones'**
+  String get offroadStatSessions;
+
+  /// No description provided for @offroadPasses.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasadas'**
+  String get offroadPasses;
+
+  /// No description provided for @offroadPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasada'**
+  String get offroadPass;
+
+  /// No description provided for @offroadTabCoaching.
+  ///
+  /// In es, this message translates to:
+  /// **'Coaching'**
+  String get offroadTabCoaching;
+
+  /// No description provided for @offroadTabPasses.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasadas'**
+  String get offroadTabPasses;
+
+  /// No description provided for @offroadTabSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen'**
+  String get offroadTabSummary;
+
+  /// No description provided for @offroadWhatWentWell.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué salió bien'**
+  String get offroadWhatWentWell;
+
+  /// No description provided for @offroadWhatToImprove.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué mejorar'**
+  String get offroadWhatToImprove;
+
+  /// No description provided for @offroadInsightCountGood.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} puntos fuertes'**
+  String offroadInsightCountGood(int count);
+
+  /// No description provided for @offroadInsightCountBad.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} por trabajar'**
+  String offroadInsightCountBad(int count);
+
+  /// No description provided for @offroadDuration.
+  ///
+  /// In es, this message translates to:
+  /// **'Duración'**
+  String get offroadDuration;
+
+  /// No description provided for @offroadAvgSpeed.
+  ///
+  /// In es, this message translates to:
+  /// **'Vel. media'**
+  String get offroadAvgSpeed;
+
+  /// No description provided for @offroadInsideTrack.
+  ///
+  /// In es, this message translates to:
+  /// **'Dentro de pista'**
+  String get offroadInsideTrack;
+
+  /// No description provided for @offroadSectors.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores'**
+  String get offroadSectors;
+
+  /// No description provided for @offroadSectorsVsBest.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores vs mejor'**
+  String get offroadSectorsVsBest;
+
+  /// No description provided for @offroadSectorsVsBestHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Verde = más rápido que tu mejor pasada en ese sector.'**
+  String get offroadSectorsVsBestHelp;
+
+  /// No description provided for @offroadWhyPace.
+  ///
+  /// In es, this message translates to:
+  /// **'Por qué este ritmo'**
+  String get offroadWhyPace;
+
+  /// No description provided for @offroadBrakingZones.
+  ///
+  /// In es, this message translates to:
+  /// **'Zonas de frenada'**
+  String get offroadBrakingZones;
+
+  /// No description provided for @offroadFastest.
+  ///
+  /// In es, this message translates to:
+  /// **'Más rápida'**
+  String get offroadFastest;
+
+  /// No description provided for @offroadSlowerBy.
+  ///
+  /// In es, this message translates to:
+  /// **'{delta} s más lento'**
+  String offroadSlowerBy(String delta);
+
+  /// No description provided for @offroadFasterBy.
+  ///
+  /// In es, this message translates to:
+  /// **'{delta} s más rápido'**
+  String offroadFasterBy(String delta);
+
+  /// No description provided for @offroadReferencePass.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasada de referencia'**
+  String get offroadReferencePass;
+
+  /// No description provided for @offroadVsPass.
+  ///
+  /// In es, this message translates to:
+  /// **'vs {id}'**
+  String offroadVsPass(String id);
+
+  /// No description provided for @offroadNotComparable.
+  ///
+  /// In es, this message translates to:
+  /// **'No comparable'**
+  String get offroadNotComparable;
+
+  /// No description provided for @offroadBestMark.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor'**
+  String get offroadBestMark;
+
+  /// No description provided for @offroadBestShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor'**
+  String get offroadBestShort;
+
+  /// No description provided for @offroadSessionTotals.
+  ///
+  /// In es, this message translates to:
+  /// **'Totales de sesión'**
+  String get offroadSessionTotals;
+
+  /// No description provided for @offroadBestPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor pasada'**
+  String get offroadBestPass;
+
+  /// No description provided for @offroadBestS2.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor S2'**
+  String get offroadBestS2;
+
+  /// No description provided for @offroadBestS3.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor S3'**
+  String get offroadBestS3;
+
+  /// No description provided for @offroadTheoreticalPartial.
+  ///
+  /// In es, this message translates to:
+  /// **'Parcial teórico'**
+  String get offroadTheoreticalPartial;
+
+  /// No description provided for @offroadFlyingLaps.
+  ///
+  /// In es, this message translates to:
+  /// **'Vueltas voladoras'**
+  String get offroadFlyingLaps;
+
+  /// No description provided for @offroadBestLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor línea'**
+  String get offroadBestLine;
+
+  /// No description provided for @offroadMappingUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapeo usado'**
+  String get offroadMappingUsed;
+
+  /// No description provided for @offroadTapPassDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca una pasada para el detalle por sector'**
+  String get offroadTapPassDetail;
+
+  /// No description provided for @metricaBleWifiHelpPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'El teléfono está en esta red. Android no comparte la contraseña Wi‑Fi con las apps: escríbela una vez; RiderLab la guarda para este SSID y la envía sola la próxima vez.'**
+  String get metricaBleWifiHelpPhone;
+
+  /// No description provided for @metricaBleWifiFromPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'Del teléfono'**
+  String get metricaBleWifiFromPhone;
+
+  /// No description provided for @metricaBleWifiPasswordOnce.
+  ///
+  /// In es, this message translates to:
+  /// **'Se guarda en este teléfono al enviarla'**
+  String get metricaBleWifiPasswordOnce;
+
+  /// No description provided for @metricaBleWifiUsingPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando Wi‑Fi del teléfono ({ssid})…'**
+  String metricaBleWifiUsingPhone(String ssid);
+
+  /// No description provided for @metricaBleWifiPickTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi‑Fi para Métrica'**
+  String get metricaBleWifiPickTitle;
+
+  /// No description provided for @metricaBleWifiPickHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige qué red enviar al logger por Bluetooth.'**
+  String get metricaBleWifiPickHelp;
+
+  /// No description provided for @metricaBleWifiBandNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Métrica solo entra a 2.4 GHz (no redes solo 5 GHz).'**
+  String get metricaBleWifiBandNote;
 }
 
 class _AppLocalizationsDelegate
