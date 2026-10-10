@@ -119,6 +119,7 @@ flutter:
     - assets/icons/ic_routes.png
     - assets/bikes/catalog.json
     - assets/circuits/
+    - assets/offroad/sessions/
     - assets/sounds/
     - assets/branding/metrica_wheelie_96.png
 

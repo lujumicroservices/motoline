@@ -71,6 +71,12 @@ az storage container create `
   --account-key $key `
   --public-access off `
   --output none
+az storage container create `
+  --name logger-sessions `
+  --account-name $Account `
+  --account-key $key `
+  --public-access off `
+  --output none
 
 Write-Host "Creating Function App $Func..."
 az functionapp create `
@@ -95,6 +101,7 @@ az role assignment create --assignee $principal --role "Storage Blob Delegator" 
 az functionapp config appsettings set --name $Func --resource-group $Rg --settings `
   "BLOB_ACCOUNT=$Account" `
   "BLOB_CONTAINER=$Container" `
+  "BLOB_LOGGER_CONTAINER=logger-sessions" `
   "SUPABASE_URL=$SupabaseUrl" `
   "SUPABASE_ANON_KEY=$SupabaseAnon" `
   --output none

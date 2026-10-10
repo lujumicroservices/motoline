@@ -11,11 +11,14 @@ class ModeSwitchSound {
   static final AudioPlayer _player = AudioPlayer(playerId: 'mode_switch')
     ..setReleaseMode(ReleaseMode.stop);
 
+  // Media stream: fuller volume and clearer mids than sonification cues.
+  // Ambient / ducking still yields to music and respects silent mode on iOS.
   static final AudioContext _context = AudioContext(
     android: const AudioContextAndroid(
-      usageType: AndroidUsageType.assistanceSonification,
-      contentType: AndroidContentType.sonification,
+      usageType: AndroidUsageType.media,
+      contentType: AndroidContentType.music,
       audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+      isSpeakerphoneOn: false,
     ),
     iOS: AudioContextIOS(category: AVAudioSessionCategory.ambient),
   );
@@ -26,7 +29,8 @@ class ModeSwitchSound {
         : 'sounds/mode_on_track.wav';
     try {
       await _player.stop();
-      await _player.play(AssetSource(asset), ctx: _context, volume: 0.9);
+      await _player.setPlaybackRate(1.0);
+      await _player.play(AssetSource(asset), ctx: _context, volume: 1.0);
     } catch (e) {
       debugPrint('mode switch sound failed: $e');
     }

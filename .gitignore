@@ -48,7 +48,10 @@ coverage/
 # Local release artifacts (upload via GitHub Releases)
 dist/
 *.apk
-!docs/**
+!docs/**/*.apk
+# Re-apply after the docs exception (order matters)
+docs/www/_dist/
+docs/www/simm/config.js
 
 # Android upload signing (never commit)
 apps/mobile/android/key.properties
@@ -64,3 +67,12 @@ apps/mobile/android/upload-keystore.jks
 .ironbee/codex-threads.json
 .ironbee/vcs-cache.json
 .claude/settings.local.json
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local scratch / ride data (public repo)
+supabase/scripts/_tmp_*
+8horas/
+hardware/captures/

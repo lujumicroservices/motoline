@@ -1,138 +1,198 @@
-"""Synthesize the ON/OFF mode-switch engine sounds (no third-party audio).
+"""Build high-quality ON/OFF mode-switch cues from CC0 motorcycle recordings.
+
+Sources (BigSoundBank / La Sonothèque, CC0 public domain — Denis Chardonnet):
+  0603  75 cm³ motorcycle acceleration   -> OFF (2T / dirt character)
+  0884  Ducati Granturismo start + pull  -> ON  (track / road roar)
+  0281  motorcycle start + accelerations -> fallback / extra punch
 
   python tool/build_mode_sounds.py
 
-Writes assets/sounds/mode_off_2t.wav (two-stroke dirt bike blip) and
-assets/sounds/mode_on_track.wav (four-cylinder track bike roar). Each firing is
-a short damped pulse placed on an rpm curve, then shaped by resonant filters
-(exhaust / airbox) and soft-clipped. Replace with real recordings when available.
+Writes 48 kHz mono WAV (loud, faded, lightly EQ'd) under assets/sounds/.
 """
 
-import math
+from __future__ import annotations
+
 import pathlib
+import struct
 import wave
+import zipfile
 
 import numpy as np
 
-SR = 22050
+SR_OUT = 48000
 OUT = pathlib.Path(__file__).resolve().parents[1] / "assets" / "sounds"
-rng = np.random.default_rng(7)
+SRC = pathlib.Path.home() / "AppData" / "Local" / "Temp" / "rl_sounds"
+# Also accept a local cache next to this script.
+LOCAL = pathlib.Path(__file__).resolve().parent / "sound_src"
 
 
-def rpm_curve(points, dur):
-    """Piecewise-smooth rpm over time from (t, rpm) keyframes."""
-    t = np.arange(int(dur * SR)) / SR
-    ks = np.array([p[0] for p in points])
-    vs = np.array([p[1] for p in points])
-    raw = np.interp(t, ks, vs)
-    k = int(0.04 * SR)
-    return np.convolve(np.pad(raw, (k, k), mode="edge"), np.ones(2 * k + 1) / (2 * k + 1), "valid")
+def read_wav(path: pathlib.Path):
+    with wave.open(str(path), "rb") as w:
+        ch, width, rate, n, _, _ = w.getparams()
+        raw = w.readframes(n)
+    if width == 2:
+        data = np.frombuffer(raw, dtype="<i2").astype(np.float64) / 32768.0
+    elif width == 3:
+        # 24-bit packed little-endian
+        b = np.frombuffer(raw, dtype=np.uint8).reshape(-1, 3)
+        vals = b[:, 0].astype(np.int32) | (b[:, 1].astype(np.int32) << 8) | (
+            b[:, 2].astype(np.int32) << 16
+        )
+        vals = np.where(vals >= 0x800000, vals - 0x1000000, vals)
+        data = vals.astype(np.float64) / 8388608.0
+    elif width == 4:
+        data = np.frombuffer(raw, dtype="<i4").astype(np.float64) / 2147483648.0
+    else:
+        raise SystemExit(f"unsupported width {width} in {path}")
+    if ch > 1:
+        data = data.reshape(-1, ch).mean(axis=1)
+    return data, rate
 
 
-def firings(rpm, fires_per_rev, jitter):
-    """Sample indices of each combustion event."""
-    phase, out = 0.0, []
-    for i, r in enumerate(rpm):
-        phase += r / 60.0 * fires_per_rev / SR
-        if phase >= 1.0:
-            phase -= 1.0
-            out.append(i + int(rng.normal(0, jitter * SR / max(r, 1) * 60)))
-    return [i for i in out if 0 <= i < len(rpm)]
+def resample(x: np.ndarray, sr_in: int, sr_out: int = SR_OUT) -> np.ndarray:
+    if sr_in == sr_out:
+        return x
+    n_out = int(round(len(x) * sr_out / sr_in))
+    t_in = np.linspace(0, 1, len(x), endpoint=False)
+    t_out = np.linspace(0, 1, n_out, endpoint=False)
+    return np.interp(t_out, t_in, x)
 
 
-def pulse(n, freqs, decay, noise):
-    t = np.arange(n) / SR
-    body = sum(a * np.sin(2 * math.pi * f * t) for f, a in freqs)
-    body = body + noise * rng.normal(0, 1, n)
-    return body * np.exp(-t * decay)
-
-
-def biquad_bandpass(x, f0, q):
-    w = 2 * math.pi * f0 / SR
-    alpha = math.sin(w) / (2 * q)
-    b0, b2 = alpha, -alpha
-    a0, a1, a2 = 1 + alpha, -2 * math.cos(w), 1 - alpha
-    b0, b2, a1, a2 = b0 / a0, b2 / a0, a1 / a0, a2 / a0
+def biquad_peak(x, sr, f0, gain_db, q=1.2):
+    """One-pole peaking EQ (RBJ)."""
+    A = 10 ** (gain_db / 40)
+    w0 = 2 * np.pi * f0 / sr
+    alpha = np.sin(w0) / (2 * q)
+    b0 = 1 + alpha * A
+    b1 = -2 * np.cos(w0)
+    b2 = 1 - alpha * A
+    a0 = 1 + alpha / A
+    a1 = -2 * np.cos(w0)
+    a2 = 1 - alpha / A
+    b0, b1, b2, a1, a2 = b0 / a0, b1 / a0, b2 / a0, a1 / a0, a2 / a0
     y = np.zeros_like(x)
     x1 = x2 = y1 = y2 = 0.0
     for i, xi in enumerate(x):
-        yi = b0 * xi + b2 * x2 - a1 * y1 - a2 * y2
+        yi = b0 * xi + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
         x2, x1, y2, y1 = x1, xi, y1, yi
         y[i] = yi
     return y
 
 
-def lowpass(x, fc):
-    a = math.exp(-2 * math.pi * fc / SR)
+def highpass(x, sr, fc=80.0):
+    """Simple 1-pole high-pass to remove rumble."""
+    rc = 1 / (2 * np.pi * fc)
+    dt = 1 / sr
+    a = rc / (rc + dt)
     y = np.zeros_like(x)
-    acc = 0.0
+    prev_x = prev_y = 0.0
     for i, xi in enumerate(x):
-        acc = (1 - a) * xi + a * acc
-        y[i] = acc
+        yi = a * (prev_y + xi - prev_x)
+        prev_x, prev_y = xi, yi
+        y[i] = yi
     return y
 
 
-def finish(x, drive, fade_in=0.03, fade_out=0.35):
-    x = np.tanh(drive * x / (np.max(np.abs(x)) + 1e-9))
-    n_in, n_out = int(fade_in * SR), int(fade_out * SR)
-    x[:n_in] *= np.linspace(0, 1, n_in)
-    x[-n_out:] *= np.linspace(1, 0, n_out) ** 1.5
-    return 0.89 * x / (np.max(np.abs(x)) + 1e-9)
+def soft_clip(x, drive=1.15):
+    return np.tanh(drive * x)
 
 
-def write(name, x):
+def normalize(x, peak=0.92):
+    m = np.max(np.abs(x)) + 1e-12
+    return x * (peak / m)
+
+
+def fade(x, sr, fade_in=0.04, fade_out=0.22):
+    n_in = int(fade_in * sr)
+    n_out = int(fade_out * sr)
+    x = x.copy()
+    if n_in > 0:
+        x[:n_in] *= np.linspace(0, 1, n_in) ** 1.2
+    if n_out > 0:
+        x[-n_out:] *= np.linspace(1, 0, n_out) ** 1.6
+    return x
+
+
+def best_window(x, sr, dur, hop=0.05, prefer_bright=True):
+    """Pick the loudest (and optionally brightest) window of length `dur`."""
+    win = int(dur * sr)
+    step = int(hop * sr)
+    if len(x) <= win:
+        return x
+    best_i, best_score = 0, -1.0
+    # Pre-emphasis for brightness score
+    diff = np.diff(x, prepend=x[0])
+    for i in range(0, len(x) - win, step):
+        seg = x[i : i + win]
+        rms = float(np.sqrt(np.mean(seg * seg)))
+        bright = float(np.sqrt(np.mean(diff[i : i + win] ** 2)))
+        score = rms * (1.35 if prefer_bright else 1.0) + 0.45 * bright
+        # Prefer later revs over cold idle at the start
+        score *= 0.85 + 0.30 * (i / max(1, len(x) - win))
+        if score > best_score:
+            best_score, best_i = score, i
+    return x[best_i : best_i + win]
+
+
+def find_src(name: str) -> pathlib.Path:
+    for base in (SRC, LOCAL):
+        p = base / name
+        if p.exists() and p.stat().st_size > 100_000:
+            return p
+    raise SystemExit(f"missing source {name} in {SRC} or {LOCAL}")
+
+
+def process(src_name: str, out_name: str, dur: float, eq_mid: float, eq_presence: float):
+    path = find_src(src_name)
+    x, sr = read_wav(path)
+    x = resample(x, sr, SR_OUT)
+    x = best_window(x, SR_OUT, dur, hop=0.04, prefer_bright=True)
+    x = highpass(x, SR_OUT, 70)
+    x = biquad_peak(x, SR_OUT, 180, 2.5, q=0.9)  # body
+    x = biquad_peak(x, SR_OUT, eq_mid, 4.0, q=1.1)  # bark / mid
+    x = biquad_peak(x, SR_OUT, eq_presence, 3.5, q=1.4)  # clarity
+    x = soft_clip(x, drive=1.25)
+    x = normalize(x, peak=0.94)
+    x = fade(x, SR_OUT, fade_in=0.035, fade_out=0.28)
+    # Tiny silence pad so the player doesn't click on start
+    pad = np.zeros(int(0.015 * SR_OUT))
+    x = np.concatenate([pad, x, pad * 0])
     OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / name
-    with wave.open(str(path), "wb") as w:
+    dest = OUT / out_name
+    with wave.open(str(dest), "wb") as w:
         w.setnchannels(1)
         w.setsampwidth(2)
-        w.setframerate(SR)
-        w.writeframes((x * 32767).astype("<i2").tobytes())
-    print(path, path.stat().st_size, "bytes", round(len(x) / SR, 2), "s")
+        w.setframerate(SR_OUT)
+        w.writeframes((np.clip(x, -1, 1) * 32767).astype("<i2").tobytes())
+    print(
+        f"{out_name}: {dest.stat().st_size} B, {len(x)/SR_OUT:.2f}s, "
+        f"peak={np.max(np.abs(x)):.2f}, from {path.name}"
+    )
 
 
-def two_stroke():
-    """Single-cylinder 2T: one fire per rev, raspy expansion-chamber 'ring-ding' blip."""
-    dur = 2.2
-    rpm = rpm_curve([(0, 2200), (0.18, 2400), (0.32, 9800), (0.62, 11500), (0.78, 7000),
-                     (0.95, 10800), (1.25, 11200), (1.5, 4200), (2.2, 2300)], dur)
-    x = np.zeros(len(rpm) + SR // 10)
-    for i in firings(rpm, 1, 0.012):
-        r = rpm[i]
-        p = pulse(int(0.03 * SR), [(170 + r * 0.02, 1.0), (780 + r * 0.05, 0.7), (1650, 0.35)],
-                  decay=220 + r * 0.02, noise=0.55)
-        x[i:i + len(p)] += p
-    x = x[:len(rpm)]
-    rasp = biquad_bandpass(x, 1250, 2.2) * 0.9 + biquad_bandpass(x, 2900, 3.5) * 0.45
-    body = biquad_bandpass(x, 330, 1.4) * 0.6
-    return finish(rasp + body + 0.12 * x, drive=2.8)
+def write_license():
+    (OUT / "SOURCES.md").write_text(
+        """# Mode-switch engine sounds
 
+Built from CC0 (public domain) recordings on BigSoundBank / La Sonothèque
+by Denis Chardonnet — free for commercial use, attribution not required.
 
-def track_four():
-    """Inline-4 track bike: two fires per rev, deep airbox roar rising to a scream."""
-    dur = 2.4
-    rpm = rpm_curve([(0, 3200), (0.15, 3400), (0.35, 9000), (0.9, 13800), (1.15, 14200),
-                     (1.35, 8200), (1.6, 6000), (2.4, 3300)], dur)
-    x = np.zeros(len(rpm) + SR // 10)
-    for i in firings(rpm, 2, 0.004):
-        r = rpm[i]
-        p = pulse(int(0.025 * SR), [(95 + r * 0.008, 1.0), (240 + r * 0.02, 0.8), (520, 0.4)],
-                  decay=160 + r * 0.012, noise=0.25)
-        x[i:i + len(p)] += p
-    x = x[:len(rpm)]
-    roar = lowpass(x, 900) * 1.2
-    intake = biquad_bandpass(rng.normal(0, 1, len(x)) * (rpm / 14200) ** 2, 1500, 0.9) * 0.25
-    scream = biquad_bandpass(x, 1900, 2.5) * 0.35 * (rpm / 14200) ** 2
-    # Over-run pops on the closed-throttle drop.
-    for t0 in (1.42, 1.55, 1.71):
-        j = int(t0 * SR)
-        pop = pulse(int(0.05 * SR), [(140, 1.0), (420, 0.6)], decay=70, noise=1.2)
-        x2 = np.zeros(len(x))
-        x2[j:j + len(pop)] = pop[:len(x) - j]
-        roar += 0.9 * x2
-    return finish(roar + intake + scream, drive=2.2)
+| File | Source |
+|---|---|
+| `mode_off_2t.wav` | [75 cm³ motorcycle acceleration](https://bigsoundbank.com/75-cm3-motorcycle-acceleration-s0603.html) (s0603) |
+| `mode_on_track.wav` | [Starting a motorcycle (Ducati)](https://bigsoundbank.com/starting-a-motorcycle-s0884.html) (s0884) |
+
+Clips are trimmed to the loudest rev window, EQ'd for phone speakers, and
+normalized. Regenerate with `python tool/build_mode_sounds.py` after placing
+the source WAVs in `%TEMP%/rl_sounds/` or `tool/sound_src/`.
+""",
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":
-    write("mode_off_2t.wav", two_stroke())
-    write("mode_on_track.wav", track_four())
+    # OFF: small-displacement accel — sharper, more 2T / dirt character
+    process("0603.wav", "mode_off_2t.wav", dur=2.15, eq_mid=950, eq_presence=2800)
+    # ON: Ducati start + pull-away — deeper, track / street roar
+    process("0884.wav", "mode_on_track.wav", dur=2.45, eq_mid=420, eq_presence=2200)
+    write_license()

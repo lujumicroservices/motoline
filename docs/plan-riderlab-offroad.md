@@ -17,6 +17,62 @@ Este documento no cambia código. Describe qué ya está en el repo, qué vive f
 
 Las figuras de referencia (antes/después del suavizado, y el crop del sector S1 sobre fondo negro) se generaron en ese mismo trabajo fuera del repo. No están en el árbol.
 
+## 0. Definición de producto — 2026-10-10
+
+Esta sección manda sobre el resto del documento donde choquen (tema de la sección 7, flavor aparte en preguntas abiertas).
+
+### Una app, dos modos: ON y OFF
+
+- **ON** = RiderLab de calle tal como está hoy. No cambia.
+- **OFF** = experiencia off-road completa dentro de la misma app y el mismo APK: tema, home, navegación e iconos propios. No es un flavor con `applicationId` aparte.
+- Selector **ON / OFF** visible en el home de ambos modos. El modo elegido se guarda en el teléfono y la app reabre en él.
+- Cuenta, garage, sync y rodadas guardadas son los mismos en los dos modos; lo que cambia es la experiencia.
+
+### Sonido al cambiar de modo
+
+| Cambio | Sonido | Duración |
+|---|---|---|
+| ON → **OFF** | Moto 2 tiempos en tierra: arranque/acelerón agudo, "ring-ding" | 1.5–2.5 s |
+| OFF → **ON** | Moto de pista rugiendo: cuatro tiempos, acelerón grave y lleno | 1.5–2.5 s |
+
+- Suena solo al cambiar de modo, no al abrir la app ni en cada pantalla.
+- Va acompañado de vibración corta (`HapticFeedback`) y la transición de tema dura lo mismo que el sonido.
+- Respeta el modo silencio del teléfono, se puede apagar en Ajustes y nunca suena con una rodada grabando.
+- Audio: dos archivos `.ogg` en `assets/sounds/` (`mode_off_2t.ogg`, `mode_on_track.ogg`), < 150 KB cada uno, normalizados al mismo volumen. Grabación propia o librería con licencia CC0 / comercial; nada de audio sin licencia clara. Hoy la app no tiene paquete de audio: se agrega uno (`audioplayers` o `just_audio`).
+
+### Tema OFF: el de Métrica
+
+El tema OFF toma la identidad del hardware Métrica 0.6.2-circuit.4, para que el teléfono y el M5 se vean como un solo producto. Reemplaza al "sol de frente" con pista gris de la sección 7; los principios de legibilidad al sol (tipo grande, alto contraste, sin selector de tema dentro de OFF) se conservan.
+
+| Token | Valor |
+|---|---|
+| Fondo | Oscuro, como el tema Oscuro de Métrica |
+| Pista / corredor | Naranja brillante `#FF8C00` (relleno 0xFC60 del firmware) |
+| Sectores | S1 rojo, S2 cyan, S3 verde, S4 magenta; contorno oscuro en líneas de sector y puertas |
+| Flechas de sentido | Oscuras sobre el naranja, como en el M5 |
+| Icono del modo | Wheelie de Métrica |
+| Iconos de navegación | Un solo set de trazo consistente, propio de OFF; no se mezclan con los PNG de calle |
+
+### Home OFF: "Mis circuitos"
+
+- Lista de tarjetas, una por circuito. Hoy: **8 Horas Raceway**, con silueta naranja, 1370 m, 3 sectores, ~16 m de desnivel y fecha de mapeo (9 oct 2026).
+- Después: circuitos descargados de la nube y circuitos que el usuario mapee con sus loggers.
+
+### Dentro del circuito: explorar el mapeo
+
+1. **Mapa 2D**: satélite, corredor suave, sectores, meta, flechas de sentido; trazo crudo como capa opcional.
+2. **Vista 3D**: pista sobre el relieve, órbita / zoom / inclinación con el dedo. Primera versión en WebView con el relieve del bbox empaquetado; la malla nativa (sección 6) queda para Pro.
+3. **Relieve**: perfil de elevación por vuelta y por sector, más hillshade de contexto etiquetado "30 m" (no ve bermas).
+4. **Sectores**: ficha por sector con largo, ancho mín./máx./mediana, puertas con coordenadas y el crop rotado como en el M5.
+5. **Datos del mapeo**: fecha, logger por borde (3876 exterior, a057 interior), precisión y la tabla de QA del suavizado.
+6. **Mis rodadas** en el circuito (vueltas, tiempos por sector, línea vs corredor): segunda entrega.
+
+### Primera entrega
+
+Selector ON/OFF con sonido y vibración, tema OFF de Métrica, home "Mis circuitos" con 8 Horas, mapa 2D + perfil de elevación + fichas de sector + datos del mapeo. La vista 3D va en la entrega siguiente.
+
+Requisito previo: exportar la geometría suave (`CircuitEmbedded_suave.h`, fuera del repo) a un archivo que la app empaquete; en git hoy solo están los bordes crudos.
+
 ## 1. Geometría de referencia: el circuito suave
 
 ### Política
@@ -423,7 +479,8 @@ Riesgos: el fijo se cae bajo árboles y en la cara de un salto; 915 MHz del PR #
 Fecha de las dos primeras: **2026-10-09**, día del pase y del tag `embedded-20261009-suave`.
 
 1. **Geometría única.** Todo lo que depende del dibujo de la pista usa el suave 0.6.2-circuit.2. El crudo es capa de auditoría «trazo crudo».
-2. **Tema de la variante Android.** Sol de frente, fondo negro, alto contraste, sin selector. Distinto del Claro/Oscuro de Métrica 0.6.2. `AppTheme` de la app de calle no es esta paleta.
+2. **Tema de la variante Android.** ~~Sol de frente, pista gris~~ → **2026-10-10:** tema de Métrica (oscuro, pista naranja `#FF8C00`, sectores rojo/cyan/verde/magenta, icono wheelie), alto contraste, sin selector dentro de OFF. `AppTheme` de la app de calle no es esta paleta.
+7. **2026-10-10 — Una app, modos ON/OFF.** OFF es un modo de RiderLab con experiencia propia, no un flavor aparte. Cambiar de modo suena: 2 tiempos de tierra al entrar a OFF, moto de pista rugiendo al volver a ON (sección 0).
 3. **Dos perímetros** son el método de referencia. Centerline + ancho constante es borrador.
 4. **El DEM de 30 m y cualquier capa «mejorado con IA» no son medición.** La medición de planta es el GNSS suave; la de superficie, un DSM de drone; la de tiempo, el cruce de gates.
 5. **RTK no sale del Galaxy S25 Ultra** (no hay fase de portadora). Hace falta receptor externo. Cuál, sigue abierto entre el UM980 de la operación reciente y el ZED-F9P del draft #6.
@@ -432,7 +489,8 @@ Fecha de las dos primeras: **2026-10-09**, día del pase y del tag `embedded-202
 ## 10. Preguntas abiertas
 
 - ¿Se flashea 0.6.2-circuit.2 en los dos M5 antes de la próxima visita, o el RLC1 entra primero a la app por archivo?
-- ¿La variante es un flavor al estilo Circuito 8h (`applicationId` aparte) o un modo dentro de RiderLab? El PR #4 ya separó el paquete para no pisar el APK de testers.
+- ~~¿Flavor aparte o modo dentro de RiderLab?~~ Cerrada el 2026-10-10: modo OFF dentro de RiderLab (sección 0).
+- ¿Los sonidos de modo se graban con motos reales (2T del piloto, moto de pista) o se licencian de una librería?
 - ¿UM980 o ZED-F9P? Hace falta una línea en `hardware/` cuando se cierre. Hasta entonces no hay carrito Pro.
 - ¿El piloto ya tiene nombres para los tres sectores, o siguen S1 S2 S3? `mx-pilot` (PR #1) deja la tabla vacía a propósito.
 - ¿INEGI LiDAR u ortofoto cubren este predio, o el primer relieve fino es el drone?
