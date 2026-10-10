@@ -27,14 +27,20 @@
   "namingRidesProgress": "Nombrando {done} de {total}…",
   "@namingRidesProgress": {
     "placeholders": {
-      "done": { "type": "int" },
-      "total": { "type": "int" }
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "namedRidesDone": "Se nombraron {count} recorridos.",
   "@namedRidesDone": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "rideUntitledHint": "Inicio - fin aún sin nombre",
@@ -48,7 +54,9 @@
   "rideNamed": "Nombrado: {title}",
   "@rideNamed": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "renameRide": "Renombrar",
@@ -59,7 +67,9 @@
   "unfinishedRideBody": "Empezó {when}. Termínalo para guardar la línea, o bórralo.",
   "@unfinishedRideBody": {
     "placeholders": {
-      "when": { "type": "String" }
+      "when": {
+        "type": "String"
+      }
     }
   },
   "discard": "Descartar",
@@ -68,8 +78,12 @@
   "updateReady": "RiderLab {version} está lista (tienes {current}).",
   "@updateReady": {
     "placeholders": {
-      "version": { "type": "String" },
-      "current": { "type": "String" }
+      "version": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
     }
   },
   "whatsNew": "Novedades",
@@ -85,14 +99,18 @@
   "updatePrompt": "Hay una versión nueva (tienes {current}). ¿Descargar e instalar ahora?",
   "@updatePrompt": {
     "placeholders": {
-      "current": { "type": "String" }
+      "current": {
+        "type": "String"
+      }
     }
   },
   "notNow": "Ahora no",
   "updateCheckFailed": "Error al buscar actualización: {error}",
   "@updateCheckFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "rideLab": "Lab del recorrido",
@@ -151,14 +169,18 @@
   "gpsWarmHelp": "Quédate afuera con cielo abierto. La grabación empieza cuando el GPS esté suficientemente bien (cerca de ±{meters} m).",
   "@gpsWarmHelp": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "horizontalAccuracy": "PRECISIÓN GPS",
   "lowerBetter": "Menor es mejor · listo a ±{meters} m",
   "@lowerBetter": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "couldNotStart": "No se pudo iniciar el recorrido",
@@ -168,7 +190,9 @@
   "curvaTitle": "Curva #{number}",
   "@curvaTitle": {
     "placeholders": {
-      "number": { "type": "int" }
+      "number": {
+        "type": "int"
+      }
     }
   },
   "curveLine": "Línea de la curva",
@@ -186,7 +210,9 @@
   "roadStretchesHelp": "Curvas según el giro y la inclinación. {curvas} curvas. Toca una para ver entrada, centro y salida — desliza para la siguiente.",
   "@roadStretchesHelp": {
     "placeholders": {
-      "curvas": { "type": "int" }
+      "curvas": {
+        "type": "int"
+      }
     }
   },
   "roadStretchesEmpty": "Aún no hay suficiente giro en el GPS para detectar curvas.",
@@ -198,13 +224,17 @@
   "brakesMoreOverview": "{count} más en este recorrido. Acerca el mapa para ver el resto de un tramo.",
   "@brakesMoreOverview": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "brakesMoreInStretch": "{count} más en este tramo.",
   "@brakesMoreInStretch": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "brakeLight": "Suave",
@@ -213,7 +243,9 @@
   "brakeAtTime": "En {time}",
   "@brakeAtTime": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "brakeZoomMap": "Zoom del mapa al freno",
@@ -234,7 +266,9 @@
   "areaReady": "Área lista · {points} puntos GPS. Carga los números para ver este tramo en el lab.",
   "@areaReady": {
     "placeholders": {
-      "points": { "type": "int" }
+      "points": {
+        "type": "int"
+      }
     }
   },
   "zoomIn": "Acercar",
@@ -267,7 +301,9 @@
   "compareRouteTitle": "Comparar · {name}",
   "@compareRouteTitle": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "compareLocalHelp": "Elige una primera vuelta y una segunda para comparar tiempos y líneas en el mismo circuito.",
@@ -277,19 +313,25 @@
   "compareLocal": "Comparar vueltas ({count})",
   "@compareLocal": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "compareDeltaFaster": "La segunda vuelta es más rápida por {delta}",
   "@compareDeltaFaster": {
     "placeholders": {
-      "delta": { "type": "String" }
+      "delta": {
+        "type": "String"
+      }
     }
   },
   "compareDeltaSlower": "La segunda vuelta es más lenta por {delta}",
   "@compareDeltaSlower": {
     "placeholders": {
-      "delta": { "type": "String" }
+      "delta": {
+        "type": "String"
+      }
     }
   },
   "compareDeltaTie": "Mismo tiempo",
@@ -371,7 +413,9 @@
   "lapCountLabel": "Vuelta {count}",
   "@lapCountLabel": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "endSession": "Terminar sesión",
@@ -391,13 +435,17 @@
   "proTrialDaysLeft": "Prueba Pro · {days} días restantes",
   "@proTrialDaysLeft": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "proPartnerDaysLeft": "Pro de socio · {days} días restantes",
   "@proPartnerDaysLeft": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "proExpiredKeepLab": "Se acabó tu Pro — conserva el zoom de segmento y el detalle de curvas.",
@@ -418,7 +466,9 @@
   "partnerCodeCopied": "Copiado {code}",
   "@partnerCodeCopied": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "startTrialHelp": "Toda cuenta con sesión inicia 30 días de Pro. Después, el detalle de Ride Lab es de pago. Un código de socio suma 90 días.",
@@ -426,8 +476,12 @@
   "brakesProTeaser": "Mostrando {shown} de {total}. Desbloquea Pro para el historial completo de frenadas.",
   "@brakesProTeaser": {
     "placeholders": {
-      "shown": { "type": "int" },
-      "total": { "type": "int" }
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "segmentProLocked": "Elegir un tramo del recorrido es una función Pro.",
@@ -474,7 +528,9 @@
   "signInWith": "Entrar con {provider}",
   "@signInWith": {
     "placeholders": {
-      "provider": { "type": "String" }
+      "provider": {
+        "type": "String"
+      }
     }
   },
   "signOut": "Cerrar sesión",
@@ -515,14 +571,18 @@
   "impersonateBanner": "Viendo como {name}",
   "@impersonateBanner": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "impersonateConfirmTitle": "¿Cambiar la sesión en la nube?",
   "impersonateConfirmBody": "Este teléfono actuará como {name} en la nube hasta que salgas. El Garage local y el GPS siguen siendo tuyos y quedan bloqueados.",
   "@impersonateConfirmBody": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "impersonateFailed": "No se pudo cambiar de cuenta.",
@@ -540,15 +600,23 @@
   "syncCloudRidesDone": "Subida: {ok} ok, {fail} fallaron",
   "@syncCloudRidesDone": {
     "placeholders": {
-      "ok": { "type": "int" },
-      "fail": { "type": "int" }
+      "ok": {
+        "type": "int"
+      },
+      "fail": {
+        "type": "int"
+      }
     }
   },
   "syncCloudRidesPulled": "Descargados {rides} recorridos, {lean} Lab de inclinación",
   "@syncCloudRidesPulled": {
     "placeholders": {
-      "rides": { "type": "int" },
-      "lean": { "type": "int" }
+      "rides": {
+        "type": "int"
+      },
+      "lean": {
+        "type": "int"
+      }
     }
   },
   "playStoreUpdatesOnly": "En esta versión las actualizaciones llegan por Google Play.",
@@ -584,7 +652,9 @@
   "labAdventureCameraZonesCount": "{count} zonas en el mapa",
   "@labAdventureCameraZonesCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "labAdventureCameraZonesTitle": "Zonas de cámara",
@@ -624,13 +694,17 @@
   "armAutoRouteArmedNamed": "Listo para «{name}» — el recorrido se guarda en esa ruta",
   "@armAutoRouteArmedNamed": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "couldNotLoadRides": "No se pudieron cargar recorridos: {error}",
   "@couldNotLoadRides": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "rodadasTitle": "Rodadas",
@@ -653,7 +727,9 @@
   "familyLastPing": "Último aviso: {label}",
   "@familyLastPing": {
     "placeholders": {
-      "label": { "type": "String" }
+      "label": {
+        "type": "String"
+      }
     }
   },
   "showForceStartArmed": "Mostrar forzar grabación",
@@ -696,19 +772,25 @@
   "familyShareMessage": "Estoy en una salida. Abre este link para ver mi última ubicación (no es 911):\n{url}",
   "@familyShareMessage": {
     "placeholders": {
-      "url": {"type": "String"}
+      "url": {
+        "type": "String"
+      }
     }
   },
   "familyLastSeen": "Última señal {when}",
   "@familyLastSeen": {
     "placeholders": {
-      "when": {"type": "String"}
+      "when": {
+        "type": "String"
+      }
     }
   },
   "familyNoSignalSince": "Sin señal · última a las {when}",
   "@familyNoSignalSince": {
     "placeholders": {
-      "when": {"type": "String"}
+      "when": {
+        "type": "String"
+      }
     }
   },
   "familyWatchReconnect": "Sin señal. Reintentando…",
@@ -718,7 +800,9 @@
   "friendRequestSent": "Solicitud enviada a {name}",
   "@friendRequestSent": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "addFriend": "Añadir",
@@ -737,13 +821,17 @@
   "friendInvited": "{name} invitado",
   "@friendInvited": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "scoreLabel": "Puntaje {score}",
   "@scoreLabel": {
     "placeholders": {
-      "score": { "type": "int" }
+      "score": {
+        "type": "int"
+      }
     }
   },
   "joinWithCodeTooltip": "Unirse con código",
@@ -752,7 +840,9 @@
   "couldNotLoadRodadas": "No se pudieron cargar rodadas.\n{error}",
   "@couldNotLoadRodadas": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "groupRidesTitle": "Rodadas en grupo",
@@ -766,14 +856,18 @@
   "joinFailed": "No se pudo unir: {error}",
   "@joinFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "timeTbd": "Hora por definir",
   "rodadaRidersCount": "{count} riders",
   "@rodadaRidersCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "newRodada": "Nueva rodada",
@@ -798,7 +892,9 @@
   "rodadaStopN": "Parada {n}",
   "@rodadaStopN": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "rodadaItineraryHelp": "Busca un lugar: los resultados salen como puntos en el mapa. Toca uno para elegirlo. GPS en vivo y fotos quedan apagados hasta que cada rider lo active.",
@@ -820,8 +916,12 @@
   "routeSummaryKmEta": "{distance} · {eta}",
   "@routeSummaryKmEta": {
     "placeholders": {
-      "distance": { "type": "String" },
-      "eta": { "type": "String" }
+      "distance": {
+        "type": "String"
+      },
+      "eta": {
+        "type": "String"
+      }
     }
   },
   "routeFailedFallback": "No se pudo seguir las carreteras — se muestra línea recta.",
@@ -833,7 +933,9 @@
   "locationFailed": "Falló la ubicación: {error}",
   "@locationFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "rodadaFallback": "Rodada",
@@ -843,83 +945,115 @@
   "rodadaInviteShareSubject": "Rodada: {title}",
   "@rodadaInviteShareSubject": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareWhen": "Cuándo: {when}",
   "@rodadaInviteShareWhen": {
     "placeholders": {
-      "when": { "type": "String" }
+      "when": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareWhere": "Dónde: {place}",
   "@rodadaInviteShareWhere": {
     "placeholders": {
-      "place": { "type": "String" }
+      "place": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareRoute": "Ruta: {summary}",
   "@rodadaInviteShareRoute": {
     "placeholders": {
-      "summary": { "type": "String" }
+      "summary": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareHost": "Anfitrión: {name}",
   "@rodadaInviteShareHost": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareRiders": "Riders ({count}): {names}",
   "@rodadaInviteShareRiders": {
     "placeholders": {
-      "count": { "type": "int" },
-      "names": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareRidersMore": "Riders ({count}): {names} +{extra}",
   "@rodadaInviteShareRidersMore": {
     "placeholders": {
-      "count": { "type": "int" },
-      "names": { "type": "String" },
-      "extra": { "type": "int" }
+      "count": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      },
+      "extra": {
+        "type": "int"
+      }
     }
   },
   "rodadaInviteShareStops": "Paradas: {names}",
   "@rodadaInviteShareStops": {
     "placeholders": {
-      "names": { "type": "String" }
+      "names": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareNotes": "Notas: {notes}",
   "@rodadaInviteShareNotes": {
     "placeholders": {
-      "notes": { "type": "String" }
+      "notes": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareMeetup": "Punto de encuentro: {url}",
   "@rodadaInviteShareMeetup": {
     "placeholders": {
-      "url": { "type": "String" }
+      "url": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareFinish": "Meta: {url}",
   "@rodadaInviteShareFinish": {
     "placeholders": {
-      "url": { "type": "String" }
+      "url": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareCode": "Entra en RiderLab con el código {code}",
   "@rodadaInviteShareCode": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "rodadaInviteShareHow": "Rodadas → Unirse con código",
   "inviteCodeCopied": "Código {code} copiado",
   "@inviteCodeCopied": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "markAsLive": "Marcar EN VIVO",
@@ -947,7 +1081,9 @@
   "rodadaStatusChanged": "Estado → {status}",
   "@rodadaStatusChanged": {
     "placeholders": {
-      "status": { "type": "String" }
+      "status": {
+        "type": "String"
+      }
     }
   },
   "noFriendsToInvite": "Aún no hay amigos para invitar.",
@@ -956,7 +1092,9 @@
   "rodadaInviteBanner": "Te invitaron a {title}",
   "@rodadaInviteBanner": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "rsvpPending": "pendiente",
@@ -968,27 +1106,39 @@
   "inviteSentPushFailed": "Invitado en la app, pero la notificación falló: {reason}",
   "@inviteSentPushFailed": {
     "placeholders": {
-      "reason": { "type": "String" }
+      "reason": {
+        "type": "String"
+      }
     }
   },
   "invitePushAllOk": "{count} notificaciones enviadas",
   "@invitePushAllOk": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "invitePushSummary": "Invitados en la app. Notificaciones: {ok} enviadas, {failed} fallidas ({reason})",
   "@invitePushSummary": {
     "placeholders": {
-      "ok": { "type": "int" },
-      "failed": { "type": "int" },
-      "reason": { "type": "String" }
+      "ok": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
     }
   },
   "rodadaCodeBanner": "código {code}",
   "@rodadaCodeBanner": {
     "placeholders": {
-      "code": { "type": "String" }
+      "code": {
+        "type": "String"
+      }
     }
   },
   "meetup": "Encuentro",
@@ -1012,22 +1162,32 @@
   "liveRiderLastSeen": "{name} · {when}",
   "@liveRiderLastSeen": {
     "placeholders": {
-      "name": {"type": "String"},
-      "when": {"type": "String"}
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
     }
   },
   "liveRiderNoSignal": "{name} · Sin señal · {when}",
   "@liveRiderNoSignal": {
     "placeholders": {
-      "name": {"type": "String"},
-      "when": {"type": "String"}
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
     }
   },
   "liveSeenJustNow": "ahora",
   "liveSeenMinutesAgo": "hace {minutes} min",
   "@liveSeenMinutesAgo": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "addStop": "Añadir parada",
@@ -1059,7 +1219,9 @@
   "photosUploaded": "{count} fotos subidas",
   "@photosUploaded": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "photoTitle": "Foto",
@@ -1077,7 +1239,9 @@
   "photoImportConfirm": "Ligar {count} fotos",
   "@photoImportConfirm": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "reelTitle": "Reel de la rodada",
@@ -1099,20 +1263,28 @@
   "reelLengthSeconds": "{seconds} s",
   "@reelLengthSeconds": {
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "reelLengthCap": "Hasta {pauses} paradas · {photos} fotos",
   "@reelLengthCap": {
     "placeholders": {
-      "pauses": { "type": "int" },
-      "photos": { "type": "int" }
+      "pauses": {
+        "type": "int"
+      },
+      "photos": {
+        "type": "int"
+      }
     }
   },
   "reelStopLabel": "Parada {n}",
   "@reelStopLabel": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "reelOnRoute": "En ruta",
@@ -1120,7 +1292,9 @@
   "reelPhotoCount": "{count} fotos",
   "@reelPhotoCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "reelAddToStop": "Agregar foto",
@@ -1128,7 +1302,9 @@
   "skillCurvasRated": "{count} curvas calificadas · sirve para comparar con amigos",
   "@skillCurvasRated": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "improveNextRide": "Mejorar el próximo recorrido",
@@ -1137,8 +1313,12 @@
   "skillTipEntryHot": "Entraste rápido ({entry}→{apex} km/h). Frena antes de inclinar.",
   "@skillTipEntryHot": {
     "placeholders": {
-      "entry": { "type": "String" },
-      "apex": { "type": "String" }
+      "entry": {
+        "type": "String"
+      },
+      "apex": {
+        "type": "String"
+      }
     }
   },
   "skillTipModerateSpeedDrop": "Bajaste bien de velocidad al centro — frena un poco más al inclinar.",
@@ -1148,13 +1328,17 @@
   "skillTipApexLate": "Tu máximo lean fue {gap} m después del codo de la calle — llega inclinado más pronto.",
   "@skillTipApexLate": {
     "placeholders": {
-      "gap": { "type": "String" }
+      "gap": {
+        "type": "String"
+      }
     }
   },
   "skillTipApexEarly": "Tu máximo lean fue {gap} m antes del codo de la calle — espera un poco más para el ápice.",
   "@skillTipApexEarly": {
     "placeholders": {
-      "gap": { "type": "String" }
+      "gap": {
+        "type": "String"
+      }
     }
   },
   "skillTipLowLeanBigHeading": "Mucho giro con poca inclinación — checa que el teléfono esté bien sujeto, o inclínate más.",
@@ -1162,38 +1346,52 @@
   "skillApexGapBefore": "Ápice piloto {gap} m antes del codo",
   "@skillApexGapBefore": {
     "placeholders": {
-      "gap": { "type": "String" }
+      "gap": {
+        "type": "String"
+      }
     }
   },
   "skillApexGapAfter": "Ápice piloto {gap} m después del codo",
   "@skillApexGapAfter": {
     "placeholders": {
-      "gap": { "type": "String" }
+      "gap": {
+        "type": "String"
+      }
     }
   },
   "skillApexGapNear": "Ápice piloto cerca del codo ({gap} m)",
   "@skillApexGapNear": {
     "placeholders": {
-      "gap": { "type": "String" }
+      "gap": {
+        "type": "String"
+      }
     }
   },
   "skillHighlightBest": "Mejor: {label} · {score}/100",
   "@skillHighlightBest": {
     "placeholders": {
-      "label": { "type": "String" },
-      "score": { "type": "int" }
+      "label": {
+        "type": "String"
+      },
+      "score": {
+        "type": "int"
+      }
     }
   },
   "skillHighlightMedian": "Puntaje mediano de curvas {score}/100",
   "@skillHighlightMedian": {
     "placeholders": {
-      "score": { "type": "int" }
+      "score": {
+        "type": "int"
+      }
     }
   },
   "skillTipDrillRepeat": "Práctica: repite una {label} similar y frena 10–15 m antes.",
   "@skillTipDrillRepeat": {
     "placeholders": {
-      "label": { "type": "String" }
+      "label": {
+        "type": "String"
+      }
     }
   },
   "performanceLabel": "RENDIMIENTO",
@@ -1206,19 +1404,25 @@
   "gpsQualityFairTip": "GPS ~{meters} m — la línea sirve, pero un poco suave.",
   "@gpsQualityFairTip": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "gpsQualityWeakTip": "GPS débil (~{meters} m) — fija mejor el teléfono y rueda al aire libre.",
   "@gpsQualityWeakTip": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "gpsRateHz": "{hz} Hz",
   "@gpsRateHz": {
     "placeholders": {
-      "hz": { "type": "String" }
+      "hz": {
+        "type": "String"
+      }
     }
   },
   "imuAzurePending": "IMU pendiente de subir",
@@ -1289,8 +1493,12 @@
   "leanLabProgress": "{labeled} de {total} sesiones etiquetadas",
   "@leanLabProgress": {
     "placeholders": {
-      "labeled": { "type": "int" },
-      "total": { "type": "int" }
+      "labeled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "leanLabProtocols": "Protocolos",
@@ -1307,8 +1515,12 @@
   "leanLabElevationSummary": "↑{climb} m · ↓{descent} m",
   "@leanLabElevationSummary": {
     "placeholders": {
-      "climb": { "type": "String" },
-      "descent": { "type": "String" }
+      "climb": {
+        "type": "String"
+      },
+      "descent": {
+        "type": "String"
+      }
     }
   },
   "leanLabPrepTitle": "Preparar Lab de inclinación",
@@ -1327,7 +1539,9 @@
   "leanLabCalibHoldCountdown": "Quédate quieto · {n}s",
   "@leanLabCalibHoldCountdown": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "leanLabCalibPocket": "Guardar en el bolsillo",
@@ -1335,7 +1549,9 @@
   "leanLabCalibPocketCountdown": "Mételo ahora · {n}s",
   "@leanLabCalibPocketCountdown": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "leanLabCalibPocketSettle": "Quédate quieto…",
@@ -1344,7 +1560,9 @@
   "leanLabFreezeRedo": "El teléfono ya va {n}° de derecho. Vuelve a guardar el 0° con la moto bien parada.",
   "@leanLabFreezeRedo": {
     "placeholders": {
-      "n": { "type": "String" }
+      "n": {
+        "type": "String"
+      }
     }
   },
   "leanLabRawNeutral": "Ángulo del teléfono",
@@ -1361,15 +1579,23 @@
   "leanLabMaxLeanGpsA": "A · {lat}, {lng}",
   "@leanLabMaxLeanGpsA": {
     "placeholders": {
-      "lat": { "type": "String" },
-      "lng": { "type": "String" }
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      }
     }
   },
   "leanLabMaxLeanGpsB": "B · {lat}, {lng}",
   "@leanLabMaxLeanGpsB": {
     "placeholders": {
-      "lat": { "type": "String" },
-      "lng": { "type": "String" }
+      "lat": {
+        "type": "String"
+      },
+      "lng": {
+        "type": "String"
+      }
     }
   },
   "leanLabSideLeft": "izquierda",
@@ -1402,7 +1628,9 @@
   "circuit8hRoutePasses": "{count} pasadas guardadas",
   "@circuit8hRoutePasses": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "circuit8hNoPassesYet": "Aún no hay pasadas. Graba la primera.",
@@ -1411,29 +1639,45 @@
   "circuit8hPassTitle": "Pasada {index} · {time}",
   "@circuit8hPassTitle": {
     "placeholders": {
-      "index": {"type": "int"},
-      "time": {"type": "String"}
+      "index": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
     }
   },
   "circuit8hPassMeta": "{points} puntos · {duration}",
   "@circuit8hPassMeta": {
     "placeholders": {
-      "points": {"type": "int"},
-      "duration": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
     }
   },
   "circuit8hRecordTitle": "Tipo {route} · pasada {pass}",
   "@circuit8hRecordTitle": {
     "placeholders": {
-      "route": {"type": "String"},
-      "pass": {"type": "int"}
+      "route": {
+        "type": "String"
+      },
+      "pass": {
+        "type": "int"
+      }
     }
   },
   "circuit8hRecordIdle": "Tipo {route}, pasada {pass}. Toca Iniciar pasada y rueda el recorrido — solo se guardan los fixes GPS precisos.",
   "@circuit8hRecordIdle": {
     "placeholders": {
-      "route": {"type": "String"},
-      "pass": {"type": "int"}
+      "route": {
+        "type": "String"
+      },
+      "pass": {
+        "type": "int"
+      }
     }
   },
   "circuit8hStartPass": "Iniciar pasada",
@@ -1443,21 +1687,31 @@
   "circuit8hRecordingStats": "Grabando · {points} pts · {distance} · {accuracy}",
   "@circuit8hRecordingStats": {
     "placeholders": {
-      "points": {"type": "int"},
-      "distance": {"type": "String"},
-      "accuracy": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "accuracy": {
+        "type": "String"
+      }
     }
   },
   "circuit8hRejected": "Rechazados (precisión o salto): {count}",
   "@circuit8hPrecisionNote": {
     "placeholders": {
-      "meters": {"type": "int"}
+      "meters": {
+        "type": "int"
+      }
     }
   },
   "circuit8hPrecisionNote": "Solo se guardan fixes de ±{meters} m o mejores.",
   "@circuit8hWarming": {
     "placeholders": {
-      "accuracy": {"type": "String"}
+      "accuracy": {
+        "type": "String"
+      }
     }
   },
   "circuit8hWarming": "Afinando GPS · ahora {accuracy}",
@@ -1469,26 +1723,36 @@
   "circuit8hEdgeRequired": "Elige extremo interno o externo antes de iniciar.",
   "@circuit8hLooseNote": {
     "placeholders": {
-      "meters": {"type": "int"}
+      "meters": {
+        "type": "int"
+      }
     }
   },
   "circuit8hLooseNote": "Grabando igual. Se guardan fixes de hasta ±{meters} m.",
   "@circuit8hAccuracyGate": {
     "placeholders": {
-      "meters": {"type": "int"}
+      "meters": {
+        "type": "int"
+      }
     }
   },
   "circuit8hAccuracyGate": "Este punto es peor que ±{meters} m. Espera afuera a una fijación más precisa.",
   "@circuit8hHoldStill": {
     "placeholders": {
-      "count": {"type": "int"},
-      "meters": {"type": "int"}
+      "count": {
+        "type": "int"
+      },
+      "meters": {
+        "type": "int"
+      }
     }
   },
   "circuit8hHoldStill": "Quédate quieto. Hacen falta {count} fixes de ±{meters} m en el mismo punto.",
   "@circuit8hRejected": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "circuit8hMarkersTitle": "Inicio · Meta · Checkpoints",
@@ -1496,9 +1760,15 @@
   "circuit8hMarkersSummary": "Inicio: {start} · Meta: {finish} · Checkpoints: {count}",
   "@circuit8hMarkersSummary": {
     "placeholders": {
-      "start": {"type": "String"},
-      "finish": {"type": "String"},
-      "count": {"type": "int"}
+      "start": {
+        "type": "String"
+      },
+      "finish": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "circuit8hMarkersHint": "Elige qué marcar, luego toca el mapa o usa tu GPS actual.",
@@ -1514,7 +1784,9 @@
   "circuit8hCheckpointCount": "{count} checkpoints",
   "@circuit8hCheckpointCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "circuit8hYes": "sí",
@@ -1523,33 +1795,55 @@
   "circuit8hCheckpointN": "CP{n}",
   "@circuit8hCheckpointN": {
     "placeholders": {
-      "n": {"type": "int"}
+      "n": {
+        "type": "int"
+      }
     }
   },
   "circuit8hOpenPass": "Ver trazada",
   "circuit8hPassViewTitle": "Tipo {route} · pasada {pass}",
   "@circuit8hPassViewTitle": {
     "placeholders": {
-      "route": {"type": "String"},
-      "pass": {"type": "int"}
+      "route": {
+        "type": "String"
+      },
+      "pass": {
+        "type": "int"
+      }
     }
   },
   "circuit8hPassViewStats": "{points} puntos GPS · {distance} · {duration}",
   "@circuit8hPassViewStats": {
     "placeholders": {
-      "points": {"type": "int"},
-      "distance": {"type": "String"},
-      "duration": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
     }
   },
   "circuit8hReliefStats": "Alt {alt} m · ↑{climb} ↓{descent} · {minAlt}–{maxAlt} m",
   "@circuit8hReliefStats": {
     "placeholders": {
-      "alt": {"type": "String"},
-      "climb": {"type": "String"},
-      "descent": {"type": "String"},
-      "minAlt": {"type": "String"},
-      "maxAlt": {"type": "String"}
+      "alt": {
+        "type": "String"
+      },
+      "climb": {
+        "type": "String"
+      },
+      "descent": {
+        "type": "String"
+      },
+      "minAlt": {
+        "type": "String"
+      },
+      "maxAlt": {
+        "type": "String"
+      }
     }
   },
   "circuit8hReliefNote": "Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).",
@@ -1559,13 +1853,17 @@
   "circuit8hUploadOk": "Subidas {count} pasadas a la nube",
   "@circuit8hUploadOk": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "circuit8hLastUpload": "Última subida: {when}",
   "@circuit8hLastUpload": {
     "placeholders": {
-      "when": {"type": "String"}
+      "when": {
+        "type": "String"
+      }
     }
   },
   "gpsTrackPointsLabIdleHint": "Mapa en tu GPS. Toca Grabar perímetro y camina o rueda el contorno — cada fix aparece como punto.",
@@ -1575,17 +1873,29 @@
   "gpsTrackPointsLabRecordingStats": "Grabando · {points} puntos · ~{hz} Hz · {distance}",
   "@gpsTrackPointsLabRecordingStats": {
     "placeholders": {
-      "points": {"type": "int"},
-      "hz": {"type": "String"},
-      "distance": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "hz": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      }
     }
   },
   "gpsTrackPointsLabStoppedStats": "Listo · {points} puntos · ~{hz} Hz · {distance}",
   "@gpsTrackPointsLabStoppedStats": {
     "placeholders": {
-      "points": {"type": "int"},
-      "hz": {"type": "String"},
-      "distance": {"type": "String"}
+      "points": {
+        "type": "int"
+      },
+      "hz": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      }
     }
   },
   "leanLabSettingsTile": "Lab de inclinación (pruebas)",
@@ -1606,13 +1916,17 @@
   "leanImuLabRecordingHint": "Grabando… {count} muestras (envíame el CSV tras Exportar)",
   "@leanImuLabRecordingHint": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "leanImuLabExportDone": "Menú de compartir abierto para {path} — elige Drive, WhatsApp o Archivos",
   "@leanImuLabExportDone": {
     "placeholders": {
-      "path": {"type": "String"}
+      "path": {
+        "type": "String"
+      }
     }
   },
   "leanImuLabVectorsTitle": "Capacidades crudas",
@@ -1628,7 +1942,9 @@
   "leanLabLabeledCount": "{count} curvas etiquetadas",
   "@leanLabLabeledCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "leanLabEditConfigTitle": "Corregir configuración",
@@ -1686,19 +2002,25 @@
   "gpsWarmingAcc": "Esperando GPS (±{meters} m)…",
   "@gpsWarmingAcc": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "gpsReadyAcc": "GPS listo (±{meters} m)",
   "@gpsReadyAcc": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "gpsStartWithAcc": "Arrancando con ±{meters} m — mantén el cielo abierto",
   "@gpsStartWithAcc": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "gpsStartKeepSky": "Arrancando — mantén el cielo abierto para mejor señal",
@@ -1714,21 +2036,31 @@
   "leanAtPlayhead": "En el marcador · desfase de 0° {degrees}°",
   "@leanAtPlayhead": {
     "placeholders": {
-      "degrees": { "type": "String" }
+      "degrees": {
+        "type": "String"
+      }
     }
   },
   "scrubPointMeta": "Punto {index}/{total}  ·  {speed}  ·  incl. ",
   "@scrubPointMeta": {
     "placeholders": {
-      "index": { "type": "int" },
-      "total": { "type": "int" },
-      "speed": { "type": "String" }
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "speed": {
+        "type": "String"
+      }
     }
   },
   "scrubGpsMeta": "  ·  GPS {meters} m",
   "@scrubGpsMeta": {
     "placeholders": {
-      "meters": { "type": "String" }
+      "meters": {
+        "type": "String"
+      }
     }
   },
   "shareVisibilityHelp": "Elige quién puede ver este recorrido. Los amigos deben aceptar tu solicitud primero.",
@@ -1736,14 +2068,20 @@
   "brakePeakDecel": "pico {value} m/s²",
   "@brakePeakDecel": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "curvaMetaTurnLean": "giro {turn}° · incl. {lean}°",
   "@curvaMetaTurnLean": {
     "placeholders": {
-      "turn": { "type": "String" },
-      "lean": { "type": "String" }
+      "turn": {
+        "type": "String"
+      },
+      "lean": {
+        "type": "String"
+      }
     }
   },
   "ugcGuidelinesTitle": "Reglas de la rodada",
@@ -1767,9 +2105,15 @@
   "ugcStaffTarget": "{target} · reportó {reporter} · {when}",
   "@ugcStaffTarget": {
     "placeholders": {
-      "target": { "type": "String" },
-      "reporter": { "type": "String" },
-      "when": { "type": "String" }
+      "target": {
+        "type": "String"
+      },
+      "reporter": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
     }
   },
   "ugcStaffAlreadyBanned": "Este rider ya está baneado.",
@@ -1800,7 +2144,9 @@
   "circuitMappedOn": "Mapeado el {date}",
   "@circuitMappedOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "circuitDirectionCcw": "Antihorario",
@@ -1816,14 +2162,18 @@
   "circuitElevationNote": "Altitud GNSS mediana de 5 pasadas, revisada contra un modelo de terreno de 30 m ({source}). Muestra la loma del predio; no ve bermas ni saltos.",
   "@circuitElevationNote": {
     "placeholders": {
-      "source": {"type": "String"}
+      "source": {
+        "type": "String"
+      }
     }
   },
   "sectorLength": "Largo",
   "sectorWidth": "Ancho (mediana {median} m)",
   "@sectorWidth": {
     "placeholders": {
-      "median": {"type": "String"}
+      "median": {
+        "type": "String"
+      }
     }
   },
   "mappingSurvey": "Levantamiento",
@@ -1838,8 +2188,12 @@
   "mappingSmoothingMethod": "Outliers ±{outlier} m, remuestreo cada {resample} m, Gauss periódico con twicing.",
   "@mappingSmoothingMethod": {
     "placeholders": {
-      "outlier": {"type": "String"},
-      "resample": {"type": "String"}
+      "outlier": {
+        "type": "String"
+      },
+      "resample": {
+        "type": "String"
+      }
     }
   },
   "mappingMaxDev": "Desviación máx. vs crudo (ext / int)",
@@ -1858,20 +2212,26 @@
   "metricaBleRssi": "Señal {rssi} dBm",
   "@metricaBleRssi": {
     "placeholders": {
-      "rssi": {"type": "int"}
+      "rssi": {
+        "type": "int"
+      }
     }
   },
   "metricaBleConnecting": "Conectando a {name}…",
   "@metricaBleConnecting": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "metricaBleReading": "Leyendo el equipo…",
   "metricaBleFirmware": "Versión {version}.",
   "@metricaBleFirmware": {
     "placeholders": {
-      "version": {"type": "String"}
+      "version": {
+        "type": "String"
+      }
     }
   },
   "metricaBleFirmwareUnknown": "Versión desconocida.",
@@ -1881,7 +2241,9 @@
   "metricaBleDeviceId": "ID {id}.",
   "@metricaBleDeviceId": {
     "placeholders": {
-      "id": {"type": "String"}
+      "id": {
+        "type": "String"
+      }
     }
   },
   "metricaBleDeviceIdEmpty": "Sin ID.",
@@ -1894,7 +2256,9 @@
   "metricaBleMtu": "MTU {mtu}.",
   "@metricaBleMtu": {
     "placeholders": {
-      "mtu": {"type": "int"}
+      "mtu": {
+        "type": "int"
+      }
     }
   },
   "metricaBleMtuUnknown": "MTU desconocido.",
@@ -1908,7 +2272,9 @@
   "metricaBleWrongPinLeft": "PIN incorrecto. Quedan {left} intentos.",
   "@metricaBleWrongPinLeft": {
     "placeholders": {
-      "left": {"type": "int"}
+      "left": {
+        "type": "int"
+      }
     }
   },
   "metricaBlePinLocked": "PIN incorrecto. No quedan intentos: el equipo cerró el modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.",
@@ -1926,13 +2292,17 @@
   "metricaBleFailedDetail": "No se pudo emparejar. {detail}",
   "@metricaBleFailedDetail": {
     "placeholders": {
-      "detail": {"type": "String"}
+      "detail": {
+        "type": "String"
+      }
     }
   },
   "metricaBleSuccess": "Métrica emparejada ({deviceId}).",
   "@metricaBleSuccess": {
     "placeholders": {
-      "deviceId": {"type": "String"}
+      "deviceId": {
+        "type": "String"
+      }
     }
   },
   "metricaBleRetry": "Reintentar",
@@ -1946,5 +2316,95 @@
   "metricaBleWifiSending": "Enviando Wi‑Fi…",
   "metricaBleWifiSaved": "Wi‑Fi guardado en el equipo.",
   "metricaBleWifiFailed": "No se pudo guardar el Wi‑Fi.",
-  "metricaBleWifiNeedSsid": "Escribe el nombre de la red."
+  "metricaBleWifiNeedSsid": "Escribe el nombre de la red.",
+  "offroadTagline": "Entrena la línea. Mejora tu última pasada.",
+  "offroadCircuitsTitle": "Circuitos",
+  "offroadCircuitsSubtitle": "Pistas mapeadas listas para entrenar",
+  "offroadSessionsTitle": "Sesiones",
+  "offroadSessionsSubtitle": "Días de entrenamiento con tus pasadas",
+  "offroadSessionsEmpty": "Aún no hay sesiones de entrenamiento.",
+  "offroadStatSessions": "Sesiones",
+  "offroadPasses": "Pasadas",
+  "offroadPass": "Pasada",
+  "offroadTabCoaching": "Coaching",
+  "offroadTabPasses": "Pasadas",
+  "offroadTabSummary": "Resumen",
+  "offroadWhatWentWell": "Qué salió bien",
+  "offroadWhatToImprove": "Qué mejorar",
+  "offroadInsightCountGood": "{count} puntos fuertes",
+  "@offroadInsightCountGood": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "offroadInsightCountBad": "{count} por trabajar",
+  "@offroadInsightCountBad": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "offroadDuration": "Duración",
+  "offroadAvgSpeed": "Vel. media",
+  "offroadInsideTrack": "Dentro de pista",
+  "offroadSectors": "Sectores",
+  "offroadSectorsVsBest": "Sectores vs mejor",
+  "offroadSectorsVsBestHelp": "Verde = más rápido que tu mejor pasada en ese sector.",
+  "offroadWhyPace": "Por qué este ritmo",
+  "offroadBrakingZones": "Zonas de frenada",
+  "offroadFastest": "Más rápida",
+  "offroadSlowerBy": "{delta} s más lento",
+  "@offroadSlowerBy": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "offroadFasterBy": "{delta} s más rápido",
+  "@offroadFasterBy": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "offroadReferencePass": "Pasada de referencia",
+  "offroadVsPass": "vs {id}",
+  "@offroadVsPass": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "offroadNotComparable": "No comparable",
+  "offroadBestMark": "Mejor",
+  "offroadBestShort": "Mejor",
+  "offroadSessionTotals": "Totales de sesión",
+  "offroadBestPass": "Mejor pasada",
+  "offroadBestS2": "Mejor S2",
+  "offroadBestS3": "Mejor S3",
+  "offroadTheoreticalPartial": "Parcial teórico",
+  "offroadFlyingLaps": "Vueltas voladoras",
+  "offroadBestLine": "Mejor línea",
+  "offroadMappingUsed": "Mapeo usado",
+  "offroadTapPassDetail": "Toca una pasada para el detalle por sector",
+  "metricaBleWifiHelpPhone": "El teléfono está en esta red. Android no comparte la contraseña Wi‑Fi con las apps: escríbela una vez; RiderLab la guarda para este SSID y la envía sola la próxima vez.",
+  "metricaBleWifiFromPhone": "Del teléfono",
+  "metricaBleWifiPasswordOnce": "Se guarda en este teléfono al enviarla",
+  "metricaBleWifiUsingPhone": "Enviando Wi‑Fi del teléfono ({ssid})…",
+  "@metricaBleWifiUsingPhone": {
+    "placeholders": {
+      "ssid": {
+        "type": "String"
+      }
+    }
+  },
+  "metricaBleWifiPickTitle": "Wi‑Fi para Métrica",
+  "metricaBleWifiPickHelp": "Elige qué red enviar al logger por Bluetooth.",
+  "metricaBleWifiBandNote": "Métrica solo entra a 2.4 GHz (no redes solo 5 GHz)."
 }

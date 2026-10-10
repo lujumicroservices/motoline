@@ -20,7 +20,7 @@ void main() {
     expect(MetricaBleProtocol.fragmentDataLength(23), 17);
   });
 
-  test('advertisement requires Metrica-XXXX and the service UUID', () {
+  test('advertisement accepts Metrica-XXXX name or the service UUID', () {
     expect(
       MetricaBleProtocol.matchesAdvertisement(
         name: 'Metrica-7638',
@@ -28,37 +28,46 @@ void main() {
       ),
       isTrue,
     );
+    // Name alone (UUID arrives later / other packet).
     expect(
       MetricaBleProtocol.matchesAdvertisement(
         name: 'Metrica-7638',
         serviceUuidStrings: const ['0000fea6-0000-1000-8000-00805f9b34fb'],
       ),
-      isFalse,
+      isTrue,
+    );
+    expect(
+      MetricaBleProtocol.matchesAdvertisement(
+        name: 'metrica-763a',
+        serviceUuidStrings: const [],
+      ),
+      isTrue,
+    );
+    // UUID alone (name in scan response not merged yet).
+    expect(
+      MetricaBleProtocol.matchesAdvertisement(
+        name: '',
+        serviceUuidStrings: [MetricaBleProtocol.serviceUuid],
+      ),
+      isTrue,
     );
     expect(
       MetricaBleProtocol.matchesAdvertisement(
         name: 'GoPro-7638',
-        serviceUuidStrings: [MetricaBleProtocol.serviceUuid],
-      ),
-      isFalse,
-    );
-    expect(
-      MetricaBleProtocol.matchesAdvertisement(
-        name: 'Metrica-763a',
-        serviceUuidStrings: [MetricaBleProtocol.serviceUuid],
+        serviceUuidStrings: const [],
       ),
       isFalse,
     );
     expect(
       MetricaBleProtocol.matchesAdvertisement(
         name: 'Metrica-763G',
-        serviceUuidStrings: [MetricaBleProtocol.serviceUuid],
+        serviceUuidStrings: const [],
       ),
       isFalse,
     );
     expect(
       MetricaBleProtocol.bestAdvertisedName(
-        advName: 'Metrica-7638',
+        advName: 'metrica-7638',
         platformName: 'something',
       ),
       'Metrica-7638',

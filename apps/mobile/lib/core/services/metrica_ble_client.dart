@@ -36,44 +36,80 @@ class MetricaBleClient implements MetricaBleTransport {
   Future<List<MetricaScanHit>> scan({required Duration timeout}) async {
     final access = _access ?? await _readyAccess();
     await FlutterBluePlus.stopScan();
-    final byId = <String, MetricaScanHit>{};
+    // Merge ADV + scan-response fields across callbacks for the same device.
+    final names = <String, String>{};
+    final uuids = <String, Set<String>>{};
+    final rssi = <String, int>{};
     final sub = FlutterBluePlus.onScanResults.listen((results) {
       for (final result in results) {
+        final id = result.device.remoteId.str;
+        _seen[id] = result.device;
+        rssi[id] = result.rssi;
         final name = MetricaBleProtocol.bestAdvertisedName(
           advName: result.advertisementData.advName,
           platformName: result.device.platformName,
         );
-        final uuids = <String>[
-          for (final guid in result.advertisementData.serviceUuids) guid.str128,
-          for (final guid in result.advertisementData.serviceData.keys)
-            guid.str128,
-        ];
-        if (!MetricaBleProtocol.matchesAdvertisement(
-          name: name,
-          serviceUuidStrings: uuids,
-        )) {
-          continue;
+        if (name.isNotEmpty) {
+          final prev = names[id];
+          if (prev == null ||
+              MetricaBleProtocol.canonicalizeAdvertisedName(name) != null) {
+            names[id] = name;
+          }
         }
-        final id = result.device.remoteId.str;
-        _seen[id] = result.device;
-        byId[id] = MetricaScanHit(remoteId: id, name: name, rssi: result.rssi);
+        final found = uuids.putIfAbsent(id, () => <String>{});
+        for (final guid in result.advertisementData.serviceUuids) {
+          found.add(guid.str128);
+        }
+        for (final guid in result.advertisementData.serviceData.keys) {
+          found.add(guid.str128);
+        }
       }
     });
     try {
+      // No withServices filter: Android ScanFilter often misses a 128-bit UUID
+      // that only appears in the scan response. Filter in software after merge.
+      //
+      // Important: `startScan` completes when the scan *starts*, not when the
+      // timeout ends. Waiting here is required; stopping in `finally` without
+      // a delay aborts the scan in ~0–1 s (empty hits every time).
       await FlutterBluePlus.startScan(
         timeout: timeout,
+        continuousUpdates: true,
         androidUsesFineLocation: access.usesFineLocation,
         androidCheckLocationServices: access.usesFineLocation,
-        withServices: [Guid(MetricaBleProtocol.serviceUuid)],
       );
+      await Future.any([
+        FlutterBluePlus.isScanning.where((scanning) => !scanning).first,
+        Future<void>.delayed(timeout + const Duration(milliseconds: 400)),
+      ]);
     } catch (error) {
       throw _mapBleError(error);
     } finally {
       await FlutterBluePlus.stopScan();
       await sub.cancel();
     }
-    final hits = byId.values.toList()..sort((a, b) => b.rssi.compareTo(a.rssi));
-    debugPrint('metrica_ble: scan hits=${hits.length}');
+    final hits = <MetricaScanHit>[];
+    for (final id in rssi.keys) {
+      final name = names[id] ?? '';
+      final serviceUuids = uuids[id] ?? const <String>{};
+      if (!MetricaBleProtocol.matchesAdvertisement(
+        name: name,
+        serviceUuidStrings: serviceUuids,
+      )) {
+        continue;
+      }
+      final label =
+          MetricaBleProtocol.canonicalizeAdvertisedName(name) ??
+          (name.isNotEmpty ? name : 'Metrica');
+      hits.add(
+        MetricaScanHit(remoteId: id, name: label, rssi: rssi[id] ?? -100),
+      );
+    }
+    hits.sort((a, b) => b.rssi.compareTo(a.rssi));
+    debugPrint(
+      'metrica_ble: scan seen=${rssi.length} hits=${hits.length} '
+      'names=${names.values.where((n) => n.isNotEmpty).take(8).join(",")}',
+    );
     return hits;
   }
 

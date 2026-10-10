@@ -4130,4 +4130,165 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get metricaBleWifiNeedSsid => 'Enter the network name.';
+
+  @override
+  String get offroadTagline => 'Train the line. Beat your last pass.';
+
+  @override
+  String get offroadCircuitsTitle => 'Circuits';
+
+  @override
+  String get offroadCircuitsSubtitle => 'Mapped tracks ready for training';
+
+  @override
+  String get offroadSessionsTitle => 'Sessions';
+
+  @override
+  String get offroadSessionsSubtitle => 'Training days with your passes';
+
+  @override
+  String get offroadSessionsEmpty => 'No training sessions yet.';
+
+  @override
+  String get offroadStatSessions => 'Sessions';
+
+  @override
+  String get offroadPasses => 'Passes';
+
+  @override
+  String get offroadPass => 'Pass';
+
+  @override
+  String get offroadTabCoaching => 'Coaching';
+
+  @override
+  String get offroadTabPasses => 'Passes';
+
+  @override
+  String get offroadTabSummary => 'Summary';
+
+  @override
+  String get offroadWhatWentWell => 'What went well';
+
+  @override
+  String get offroadWhatToImprove => 'What to improve';
+
+  @override
+  String offroadInsightCountGood(int count) {
+    return '$count strong points';
+  }
+
+  @override
+  String offroadInsightCountBad(int count) {
+    return '$count to work on';
+  }
+
+  @override
+  String get offroadDuration => 'Duration';
+
+  @override
+  String get offroadAvgSpeed => 'Avg speed';
+
+  @override
+  String get offroadInsideTrack => 'Inside track';
+
+  @override
+  String get offroadSectors => 'Sectors';
+
+  @override
+  String get offroadSectorsVsBest => 'Sectors vs best';
+
+  @override
+  String get offroadSectorsVsBestHelp =>
+      'Green = faster than your best pass in that sector.';
+
+  @override
+  String get offroadWhyPace => 'Why this pace';
+
+  @override
+  String get offroadBrakingZones => 'Braking zones';
+
+  @override
+  String get offroadFastest => 'Fastest';
+
+  @override
+  String offroadSlowerBy(String delta) {
+    return '$delta s slower';
+  }
+
+  @override
+  String offroadFasterBy(String delta) {
+    return '$delta s faster';
+  }
+
+  @override
+  String get offroadReferencePass => 'Reference pass';
+
+  @override
+  String offroadVsPass(String id) {
+    return 'vs $id';
+  }
+
+  @override
+  String get offroadNotComparable => 'Not comparable';
+
+  @override
+  String get offroadBestMark => 'Best';
+
+  @override
+  String get offroadBestShort => 'Best';
+
+  @override
+  String get offroadSessionTotals => 'Session totals';
+
+  @override
+  String get offroadBestPass => 'Best pass';
+
+  @override
+  String get offroadBestS2 => 'Best S2';
+
+  @override
+  String get offroadBestS3 => 'Best S3';
+
+  @override
+  String get offroadTheoreticalPartial => 'Theoretical partial';
+
+  @override
+  String get offroadFlyingLaps => 'Flying laps';
+
+  @override
+  String get offroadBestLine => 'Best line';
+
+  @override
+  String get offroadMappingUsed => 'Mapping used';
+
+  @override
+  String get offroadTapPassDetail => 'Tap a pass for sector detail';
+
+  @override
+  String get metricaBleWifiHelpPhone =>
+      'The phone is on this network. Android never shares the Wi‑Fi password with apps — type it once; RiderLab remembers it for this SSID and sends it automatically next time.';
+
+  @override
+  String get metricaBleWifiFromPhone => 'From this phone';
+
+  @override
+  String get metricaBleWifiPasswordOnce =>
+      'Saved on this phone after you send it';
+
+  @override
+  String metricaBleWifiUsingPhone(String ssid) {
+    return 'Sending phone Wi‑Fi ($ssid)…';
+  }
+
+  @override
+  String get metricaBleWifiPickTitle => 'Wi‑Fi for Métrica';
+
+  @override
+  String get metricaBleWifiPickHelp =>
+      'Pick which network to send to the logger over Bluetooth.';
+
+  @override
+  String get metricaBleWifiBandNote =>
+      'Métrica only joins 2.4 GHz (not 5 GHz-only networks).';
 }

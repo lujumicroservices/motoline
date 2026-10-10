@@ -7343,6 +7343,294 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Escribe el nombre de la red.'**
   String get metricaBleWifiNeedSsid;
+
+  /// No description provided for @offroadTagline.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrena la línea. Mejora tu última pasada.'**
+  String get offroadTagline;
+
+  /// No description provided for @offroadCircuitsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuitos'**
+  String get offroadCircuitsTitle;
+
+  /// No description provided for @offroadCircuitsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pistas mapeadas listas para entrenar'**
+  String get offroadCircuitsSubtitle;
+
+  /// No description provided for @offroadSessionsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesiones'**
+  String get offroadSessionsTitle;
+
+  /// No description provided for @offroadSessionsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Días de entrenamiento con tus pasadas'**
+  String get offroadSessionsSubtitle;
+
+  /// No description provided for @offroadSessionsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay sesiones de entrenamiento.'**
+  String get offroadSessionsEmpty;
+
+  /// No description provided for @offroadStatSessions.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesiones'**
+  String get offroadStatSessions;
+
+  /// No description provided for @offroadPasses.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasadas'**
+  String get offroadPasses;
+
+  /// No description provided for @offroadPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasada'**
+  String get offroadPass;
+
+  /// No description provided for @offroadTabCoaching.
+  ///
+  /// In es, this message translates to:
+  /// **'Coaching'**
+  String get offroadTabCoaching;
+
+  /// No description provided for @offroadTabPasses.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasadas'**
+  String get offroadTabPasses;
+
+  /// No description provided for @offroadTabSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen'**
+  String get offroadTabSummary;
+
+  /// No description provided for @offroadWhatWentWell.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué salió bien'**
+  String get offroadWhatWentWell;
+
+  /// No description provided for @offroadWhatToImprove.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué mejorar'**
+  String get offroadWhatToImprove;
+
+  /// No description provided for @offroadInsightCountGood.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} puntos fuertes'**
+  String offroadInsightCountGood(int count);
+
+  /// No description provided for @offroadInsightCountBad.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} por trabajar'**
+  String offroadInsightCountBad(int count);
+
+  /// No description provided for @offroadDuration.
+  ///
+  /// In es, this message translates to:
+  /// **'Duración'**
+  String get offroadDuration;
+
+  /// No description provided for @offroadAvgSpeed.
+  ///
+  /// In es, this message translates to:
+  /// **'Vel. media'**
+  String get offroadAvgSpeed;
+
+  /// No description provided for @offroadInsideTrack.
+  ///
+  /// In es, this message translates to:
+  /// **'Dentro de pista'**
+  String get offroadInsideTrack;
+
+  /// No description provided for @offroadSectors.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores'**
+  String get offroadSectors;
+
+  /// No description provided for @offroadSectorsVsBest.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores vs mejor'**
+  String get offroadSectorsVsBest;
+
+  /// No description provided for @offroadSectorsVsBestHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Verde = más rápido que tu mejor pasada en ese sector.'**
+  String get offroadSectorsVsBestHelp;
+
+  /// No description provided for @offroadWhyPace.
+  ///
+  /// In es, this message translates to:
+  /// **'Por qué este ritmo'**
+  String get offroadWhyPace;
+
+  /// No description provided for @offroadBrakingZones.
+  ///
+  /// In es, this message translates to:
+  /// **'Zonas de frenada'**
+  String get offroadBrakingZones;
+
+  /// No description provided for @offroadFastest.
+  ///
+  /// In es, this message translates to:
+  /// **'Más rápida'**
+  String get offroadFastest;
+
+  /// No description provided for @offroadSlowerBy.
+  ///
+  /// In es, this message translates to:
+  /// **'{delta} s más lento'**
+  String offroadSlowerBy(String delta);
+
+  /// No description provided for @offroadFasterBy.
+  ///
+  /// In es, this message translates to:
+  /// **'{delta} s más rápido'**
+  String offroadFasterBy(String delta);
+
+  /// No description provided for @offroadReferencePass.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasada de referencia'**
+  String get offroadReferencePass;
+
+  /// No description provided for @offroadVsPass.
+  ///
+  /// In es, this message translates to:
+  /// **'vs {id}'**
+  String offroadVsPass(String id);
+
+  /// No description provided for @offroadNotComparable.
+  ///
+  /// In es, this message translates to:
+  /// **'No comparable'**
+  String get offroadNotComparable;
+
+  /// No description provided for @offroadBestMark.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor'**
+  String get offroadBestMark;
+
+  /// No description provided for @offroadBestShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor'**
+  String get offroadBestShort;
+
+  /// No description provided for @offroadSessionTotals.
+  ///
+  /// In es, this message translates to:
+  /// **'Totales de sesión'**
+  String get offroadSessionTotals;
+
+  /// No description provided for @offroadBestPass.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor pasada'**
+  String get offroadBestPass;
+
+  /// No description provided for @offroadBestS2.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor S2'**
+  String get offroadBestS2;
+
+  /// No description provided for @offroadBestS3.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor S3'**
+  String get offroadBestS3;
+
+  /// No description provided for @offroadTheoreticalPartial.
+  ///
+  /// In es, this message translates to:
+  /// **'Parcial teórico'**
+  String get offroadTheoreticalPartial;
+
+  /// No description provided for @offroadFlyingLaps.
+  ///
+  /// In es, this message translates to:
+  /// **'Vueltas voladoras'**
+  String get offroadFlyingLaps;
+
+  /// No description provided for @offroadBestLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor línea'**
+  String get offroadBestLine;
+
+  /// No description provided for @offroadMappingUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapeo usado'**
+  String get offroadMappingUsed;
+
+  /// No description provided for @offroadTapPassDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca una pasada para el detalle por sector'**
+  String get offroadTapPassDetail;
+
+  /// No description provided for @metricaBleWifiHelpPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'El teléfono está en esta red. Android no comparte la contraseña Wi‑Fi con las apps: escríbela una vez; RiderLab la guarda para este SSID y la envía sola la próxima vez.'**
+  String get metricaBleWifiHelpPhone;
+
+  /// No description provided for @metricaBleWifiFromPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'Del teléfono'**
+  String get metricaBleWifiFromPhone;
+
+  /// No description provided for @metricaBleWifiPasswordOnce.
+  ///
+  /// In es, this message translates to:
+  /// **'Se guarda en este teléfono al enviarla'**
+  String get metricaBleWifiPasswordOnce;
+
+  /// No description provided for @metricaBleWifiUsingPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando Wi‑Fi del teléfono ({ssid})…'**
+  String metricaBleWifiUsingPhone(String ssid);
+
+  /// No description provided for @metricaBleWifiPickTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi‑Fi para Métrica'**
+  String get metricaBleWifiPickTitle;
+
+  /// No description provided for @metricaBleWifiPickHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige qué red enviar al logger por Bluetooth.'**
+  String get metricaBleWifiPickHelp;
+
+  /// No description provided for @metricaBleWifiBandNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Métrica solo entra a 2.4 GHz (no redes solo 5 GHz).'**
+  String get metricaBleWifiBandNote;
 }
 
 class _AppLocalizationsDelegate

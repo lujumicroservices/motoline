@@ -5,7 +5,8 @@ import 'dart:convert';
 /// Advertising name `Metrica-XXXX`: XXXX is the last two bytes of the Wi-Fi
 /// STA MAC in uppercase hex (for example `76:38` → `Metrica-7638`). The BLE
 /// address is the base MAC + 2; do not derive the name from it. The service
-/// UUID is in the advertisement; the name is in the scan response.
+/// UUID is often in the advertisement and the name in the scan response —
+/// match either field; do not require both on one callback.
 ///
 /// Characteristics (suffix `5c3e-4b8e-9a51-4d4554524943`):
 /// - [infoUuid] read. JSON `fw`, `paired`, `device_id`, `wifi`, `authed`, `mtu`.
@@ -52,7 +53,11 @@ abstract final class MetricaBleProtocol {
   static const connectTimeout = Duration(seconds: 15);
 
   /// Canonical advertisement name, e.g. `Metrica-7638`.
-  static final advertisedName = RegExp(r'^Metrica-[0-9A-F]{4}$');
+  /// Case-insensitive: some stacks lower-case the ADV / scan-response name.
+  static final advertisedName = RegExp(
+    r'^Metrica-[0-9A-Fa-f]{4}$',
+    caseSensitive: false,
+  );
 
   static final pinPattern = RegExp(r'^\d{6}$');
 
@@ -91,22 +96,43 @@ abstract final class MetricaBleProtocol {
     return norm(a) == norm(b);
   }
 
+  /// Prefer a `Metrica-XXXX` name; normalize hex to uppercase.
   static String bestAdvertisedName({
     required String advName,
     required String platformName,
   }) {
-    final adv = advName.trim();
-    if (advertisedName.hasMatch(adv)) return adv;
-    return platformName.trim();
+    final adv = canonicalizeAdvertisedName(advName);
+    if (adv != null) return adv;
+    final platform = canonicalizeAdvertisedName(platformName);
+    if (platform != null) return platform;
+    final fallback = platformName.trim();
+    return fallback.isNotEmpty ? fallback : advName.trim();
   }
 
-  /// Both the `Metrica-XXXX` name and the service UUID are required.
+  static String? canonicalizeAdvertisedName(String raw) {
+    final trimmed = raw.trim();
+    if (!advertisedName.hasMatch(trimmed)) return null;
+    final dash = trimmed.indexOf('-');
+    if (dash < 0 || dash + 5 > trimmed.length) return null;
+    return 'Metrica-${trimmed.substring(dash + 1).toUpperCase()}';
+  }
+
+  static bool hasServiceUuid(Iterable<String> serviceUuidStrings) {
+    return serviceUuidStrings.any((uuid) => sameUuid(uuid, serviceUuid));
+  }
+
+  /// Accept name **or** service UUID.
+  ///
+  /// Android often delivers the 128-bit UUID in the ADV packet and the
+  /// `Metrica-XXXX` name in the scan response (or the reverse). Requiring both
+  /// on a single callback drops every hit.
   static bool matchesAdvertisement({
     required String name,
     required Iterable<String> serviceUuidStrings,
   }) {
-    if (!advertisedName.hasMatch(name.trim())) return false;
-    return serviceUuidStrings.any((uuid) => sameUuid(uuid, serviceUuid));
+    final named = advertisedName.hasMatch(name.trim());
+    final uuid = hasServiceUuid(serviceUuidStrings);
+    return named || uuid;
   }
 
   static void validatePin(String pin) {

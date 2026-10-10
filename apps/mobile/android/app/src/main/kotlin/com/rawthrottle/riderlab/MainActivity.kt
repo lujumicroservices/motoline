@@ -3,6 +3,9 @@ package com.rawthrottle.riderlab
 import android.content.Context
 import android.media.AudioManager
 import android.media.ToneGenerator
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -46,9 +49,30 @@ class MainActivity : FlutterActivity() {
     ).setMethodCallHandler { call, result ->
       when (call.method) {
         "sdkInt" -> result.success(Build.VERSION.SDK_INT)
+        "currentWifiSsid" -> result.success(currentWifiSsid())
         else -> result.notImplemented()
       }
     }
+  }
+
+  /** SSID of the active Wi‑Fi STA, or null. Never returns the password. */
+  private fun currentWifiSsid(): String? {
+    val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = cm.activeNetwork ?: return null
+    val caps = cm.getNetworkCapabilities(network) ?: return null
+    if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) return null
+
+    val wifi = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    @Suppress("DEPRECATION")
+    val info = wifi.connectionInfo ?: return null
+    @Suppress("DEPRECATION")
+    var ssid = info.ssid ?: return null
+    ssid = ssid.trim()
+    if (ssid.startsWith("\"") && ssid.endsWith("\"") && ssid.length >= 2) {
+      ssid = ssid.substring(1, ssid.length - 1)
+    }
+    if (ssid.isEmpty() || ssid == "<unknown ssid>" || ssid == "0x") return null
+    return ssid
   }
 
   override fun onDestroy() {
