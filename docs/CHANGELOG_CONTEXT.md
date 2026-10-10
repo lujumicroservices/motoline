@@ -2,7 +2,7 @@
 
 Resumen factual de lo trabajado entre el 4 y el 9 de octubre de 2026, para usar como contexto en Cursor. Varias piezas viven fuera de este repo (indicado en cada caso). Horas en CST (America/Mexico_City).
 
-## 1. Hardware y firmware de Métrica (M5) (en backlog, fuera de alcance)
+## 1. Hardware y firmware de Métrica (M5)
 
 "Métrica" es el nombre actual del dispositivo M5 de RiderLab: M5Stack Basic/Core v2.7 + módulo GNSS M135 (u-blox NEO-M9N, UART RX G16 / TX G12, 115200), IMU BMI270, barómetro BMP280 (BMM150 presente pero inactivo).
 
@@ -70,6 +70,6 @@ Resultado: RMS 0.08/0.12 m, máx ~0.9 m; jitter 4.02→1.29 y 5.84→1.31 °/m (
 
 Decisión del 9 oct 2026: estos tres ítems pasan a backlog, quedan fuera de alcance y no son trabajo activo.
 
-1. Prototipo M5Stack base (BOM Standard): GPS NEO-M9N, ~US$128 en partes, precisión esperada 1–2.5 m. En este repositorio no hay firmware versionado para ese prototipo; el trabajo de firmware descrito en la sección 1 vive sin versionar en la PC de Juan.
+1. Prototipo M5Stack base (BOM Standard): GPS NEO-M9N, ~US$128 en partes, precisión esperada 1–2.5 m. En este repositorio no hay firmware versionado para ese prototipo; el trabajo de firmware descrito en la sección 1 vive sin versionar en la PC de Juan. El firmware activo de Métrica (0.6.x-circuit) no forma parte de este backlog.
 2. Mapeador de circuitos off-road por ambos perímetros — PR #3 (borrador).
 3. BOM Pro con GPS RTK (u-blox ZED-F9P) — PR #6 (borrador).
