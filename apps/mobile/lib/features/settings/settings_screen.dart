@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/auth/impersonation_controller.dart';
@@ -98,10 +97,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   TextStyle get _tileTitle =>
-      GoogleFonts.rajdhani(fontWeight: FontWeight.w600);
+      AppFonts.body(fontWeight: FontWeight.w600);
 
   TextStyle get _tileSub =>
-      GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12);
+      AppFonts.body(color: AppTheme.steel, fontSize: 12);
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +275,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               Text(
                 l10n.proUnlockBody,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 14,
                   height: 1.4,
@@ -286,7 +285,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 8),
                 Text(
                   proRemainingLabel(l10n, pro)!,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: RideVizPalette.leanLeft,
                     fontWeight: FontWeight.w700,
                   ),
@@ -296,7 +295,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 8),
                 Text(
                   l10n.proExpiredKeepLab,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.signal,
                     fontSize: 13,
                     height: 1.35,
@@ -345,7 +344,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Expanded(
                       child: Text(
                         proRemainingLabel(l10n, pro) ?? l10n.proUnlocked,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: RideVizPalette.leanLeft,
                           fontWeight: FontWeight.w600,
                         ),
@@ -583,12 +582,12 @@ class _StaffPartnerCodeTileState extends ConsumerState<_StaffPartnerCodeTile> {
       children: [
         Text(
           l10n.createPartnerCode,
-          style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
+          style: AppFonts.body(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 4),
         Text(
           l10n.createPartnerCodeHelp,
-          style: GoogleFonts.rajdhani(
+          style: AppFonts.body(
             color: AppTheme.steel,
             fontSize: 12,
             height: 1.35,
@@ -611,7 +610,7 @@ class _StaffPartnerCodeTileState extends ConsumerState<_StaffPartnerCodeTile> {
           const SizedBox(height: 8),
           SelectableText(
             _lastCode!,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            style: AppFonts.display(fontWeight: FontWeight.w700),
           ),
         ],
       ],

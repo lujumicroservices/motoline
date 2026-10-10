@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/models/cloud_models.dart';
 import '../../l10n/l10n_ext.dart';
@@ -30,7 +29,7 @@ class FamilyCircleScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.familyCircleTitle,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -48,7 +47,7 @@ class FamilyCircleScreen extends ConsumerWidget {
           children: [
             Text(
               l10n.familyCircleHelp,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 14,
                 height: 1.4,
@@ -64,12 +63,12 @@ class FamilyCircleScreen extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.familyHowToShareTitle,
-                      style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                      style: AppFonts.display(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.familyHowToShareSteps,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.mist,
                         fontSize: 14,
                         height: 1.4,
@@ -108,7 +107,7 @@ class FamilyCircleScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               l10n.familyWatchingNow,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),
@@ -154,7 +153,7 @@ class FamilyCircleScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               l10n.familyMyCircle,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),

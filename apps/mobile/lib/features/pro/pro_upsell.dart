@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../providers/pro_entitlement_provider.dart';
@@ -70,7 +69,7 @@ class ProUpsellBanner extends ConsumerWidget {
                   ),
                   child: Text(
                     l10n.pro,
-                    style: GoogleFonts.exo2(
+                    style: AppFonts.display(
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
                       color: AppTheme.asphalt,
@@ -89,7 +88,7 @@ class ProUpsellBanner extends ConsumerWidget {
             SizedBox(height: compact ? 8 : 12),
             Text(
               title,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: compact ? 16 : 18,
               ),
@@ -97,7 +96,7 @@ class ProUpsellBanner extends ConsumerWidget {
             const SizedBox(height: 6),
             Text(
               body,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 13,
                 height: 1.35,
@@ -122,7 +121,7 @@ class ProUpsellBanner extends ConsumerWidget {
               ),
               child: Text(
                 l10n.upgradeToPro,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
             ),
           ],

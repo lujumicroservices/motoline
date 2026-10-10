@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/analytics/brake_detection.dart';
@@ -454,7 +453,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                 ),
                 title: Text(
                   _zoomed ? l10n.rideLabSegment : l10n.rideLab,
-                  style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                  style: AppFonts.display(fontWeight: FontWeight.w700),
                 ),
                 actions: [
                   IconButton(
@@ -489,7 +488,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                               l10n.localeName,
                             ).format(d),
                           ),
-                          style: GoogleFonts.exo2(
+                          style: AppFonts.display(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
                             height: 1.15,
@@ -503,7 +502,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                               'EEE · MMM d · HH:mm',
                               l10n.localeName,
                             ).format(ride.startedAt),
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 15,
                             ),
@@ -512,7 +511,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                         const SizedBox(height: 6),
                         Text(
                           _zoomed ? l10n.segmentZoomHint : l10n.collapseHint,
-                          style: GoogleFonts.rajdhani(
+                          style: AppFonts.body(
                             color: AppTheme.steel,
                             fontSize: 15,
                           ),
@@ -605,7 +604,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                 const SizedBox(height: 10),
                                 Text(
                                   l10n.leanHelp,
-                                  style: GoogleFonts.rajdhani(
+                                  style: AppFonts.body(
                                     color: AppTheme.steel,
                                     fontSize: 13,
                                     height: 1.35,
@@ -614,7 +613,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                 const SizedBox(height: 8),
                                 Text(
                                   l10n.leanPhoneDisclaimer,
-                                  style: GoogleFonts.rajdhani(
+                                  style: AppFonts.body(
                                     color: AppTheme.mist.withValues(
                                       alpha: 0.85,
                                     ),
@@ -639,7 +638,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
                                   Expanded(
                                     child: Text(
                                       _zoomed ? l10n.mapHintZoom : l10n.mapHint,
-                                      style: GoogleFonts.rajdhani(
+                                      style: AppFonts.body(
                                         color: AppTheme.steel,
                                         fontSize: 13,
                                       ),
@@ -923,7 +922,7 @@ class _TimeScrubber extends StatelessWidget {
             children: [
               Text(
                 l10n.playhead,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontSize: 11,
                   letterSpacing: 1.3,
                   fontWeight: FontWeight.w600,
@@ -933,7 +932,7 @@ class _TimeScrubber extends StatelessWidget {
               const Spacer(),
               Text(
                 _fmt(seconds),
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
@@ -943,7 +942,7 @@ class _TimeScrubber extends StatelessWidget {
           const SizedBox(height: 6),
           Text.rich(
             TextSpan(
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+              style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
               children: [
                 TextSpan(
                   text: l10n.scrubPointMeta(index + 1, totalPoints, speedLabel),
@@ -1075,7 +1074,7 @@ class _BigStat extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
       decoration: BoxDecoration(
         color: AppTheme.asphaltElevated,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border(left: BorderSide(color: accent, width: 3)),
       ),
       child: Column(
@@ -1083,7 +1082,7 @@ class _BigStat extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               fontSize: 11,
               letterSpacing: 1.1,
               fontWeight: FontWeight.w600,
@@ -1095,13 +1094,10 @@ class _BigStat extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Flexible(
-                child: Text(
-                  value,
-                  style: GoogleFonts.exo2(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                  ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(value, style: AppFonts.metric(fontSize: 34)),
                 ),
               ),
               if (unit.isNotEmpty) ...[
@@ -1110,7 +1106,11 @@ class _BigStat extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 2),
                   child: Text(
                     unit,
-                    style: const TextStyle(color: AppTheme.steel, fontSize: 13),
+                    style: AppFonts.body(
+                      color: AppTheme.steel,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -1174,7 +1174,7 @@ class _MiniPill extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               fontSize: 10,
               letterSpacing: 0.9,
               color: AppTheme.steel,
@@ -1183,7 +1183,7 @@ class _MiniPill extends StatelessWidget {
           ),
           Text(
             value,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 15),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 15),
           ),
         ],
       ),

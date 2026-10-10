@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
@@ -55,7 +54,7 @@ class LabSection extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 title,
-                                style: GoogleFonts.exo2(
+                                style: AppFonts.display(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -75,7 +74,7 @@ class LabSection extends StatelessWidget {
                                 ),
                                 child: Text(
                                   badge!,
-                                  style: GoogleFonts.rajdhani(
+                                  style: AppFonts.body(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                     color: RideVizPalette.leanLeft,
@@ -91,7 +90,7 @@ class LabSection extends StatelessWidget {
                             subtitle!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 12,
                             ),

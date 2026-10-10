@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/routing/route_prefs.dart';
@@ -472,7 +471,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
       appBar: AppBar(
         title: Text(
           l10n.newRodada,
-          style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          style: AppFonts.display(fontWeight: FontWeight.w700),
         ),
         actions: [
           TextButton(
@@ -497,7 +496,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
               children: [
                 Text(
                   _modePrompt(l10n),
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 20,
                   ),
@@ -505,7 +504,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                 const SizedBox(height: 8),
                 Text(
                   l10n.rodadaItineraryHelp,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 13,
                   ),
@@ -637,7 +636,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                 if (_routing)
                   Text(
                     l10n.routeRouting,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.steel,
                       fontSize: 13,
                     ),
@@ -648,7 +647,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                       formatRouteDistance(_route!.distanceM),
                       formatRouteEta(_route!.durationS),
                     ),
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.mist,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -657,7 +656,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                 else if (_routeFailed)
                   Text(
                     l10n.routeFailedFallback,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.signal,
                       fontSize: 13,
                     ),
@@ -676,7 +675,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                     title: Text(l10n.rodadaRoundTrip),
                     subtitle: Text(
                       l10n.rodadaRoundTripHelp,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         fontSize: 13,
                       ),
@@ -776,7 +775,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                 const SizedBox(height: 16),
                 Text(
                   l10n.inviteFriends,
-                  style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
+                  style: AppFonts.display(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 friendsAsync.when(
@@ -786,7 +785,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                     if (friends.isEmpty) {
                       return Text(
                         l10n.noFriendsToInvite,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.steel,
                           fontSize: 13,
                         ),

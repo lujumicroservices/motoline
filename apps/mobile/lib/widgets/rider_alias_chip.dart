@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../core/demo_ids.dart';
 import '../features/friends/friends_screen.dart';
@@ -52,7 +51,7 @@ class RiderAliasChip extends ConsumerWidget {
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w700,
                     fontSize: compact ? 12 : 13,
                     color: alias.isEmpty ? AppTheme.steel : AppTheme.mist,
@@ -119,7 +118,7 @@ class RiderProfileButton extends ConsumerWidget {
                     )
                   : Text(
                       initial,
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                         color: AppTheme.mist,

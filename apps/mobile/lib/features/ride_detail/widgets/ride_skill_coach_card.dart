@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/analytics/corner_skill.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -42,7 +41,7 @@ class RideSkillCoachCard extends StatelessWidget {
                   children: [
                     Text(
                       l10n.skillCoach,
-                      style: GoogleFonts.exo2(
+                      style: AppFonts.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
@@ -51,7 +50,7 @@ class RideSkillCoachCard extends StatelessWidget {
                       summary.curvaCount == 0
                           ? l10n.skillLabTapHintEmpty
                           : l10n.skillLabTapHint,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         fontSize: 12,
                       ),
@@ -61,15 +60,15 @@ class RideSkillCoachCard extends StatelessWidget {
               ),
               Text(
                 '$score',
-                style: GoogleFonts.exo2(
+                style: AppFonts.metric(
                   fontWeight: FontWeight.w800,
-                  fontSize: 28,
+                  fontSize: 36,
                   color: color,
                 ),
               ),
               Text(
                 ' /100',
-                style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                style: AppFonts.body(color: AppTheme.steel),
               ),
               const SizedBox(width: 6),
               const Icon(Icons.chevron_right, color: AppTheme.steel),

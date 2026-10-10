@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
@@ -83,7 +82,7 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
           children: [
             Text(
               l10n.ugcReportTitle,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
               ),
@@ -91,7 +90,7 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
             const SizedBox(height: 6),
             Text(
               l10n.ugcReportHelp,
-              style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+              style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
             ),
             const SizedBox(height: 12),
             for (final r in ugcReportReasons)

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../theme/app_theme.dart';
 
@@ -99,7 +98,7 @@ class _RecordingRecBadgeState extends State<RecordingRecBadge>
           SizedBox(width: widget.compact ? 6 : 8),
           Text(
             widget.label,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               color: AppTheme.signal,
               fontWeight: FontWeight.w800,
               fontSize: widget.compact ? 12 : 13,

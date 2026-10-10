@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
@@ -71,7 +70,7 @@ class RodadaCaptureBar extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               l10n.rodadaCaptureHeldHint,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 13,
                 height: 1.35,

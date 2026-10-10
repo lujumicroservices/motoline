@@ -4,7 +4,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/models/track_point.dart';
@@ -221,7 +220,7 @@ class _ReelComposeScreenState extends ConsumerState<ReelComposeScreen> {
                         children: [
                           Text(
                             l10n.reelLengthHint,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 14,
                             ),
@@ -254,7 +253,7 @@ class _ReelComposeScreenState extends ConsumerState<ReelComposeScreen> {
                           const SizedBox(height: 8),
                           Text(
                             _labelFor(l10n, _length),
-                            style: GoogleFonts.exo2(
+                            style: AppFonts.display(
                               color: AppTheme.mist,
                               fontWeight: FontWeight.w700,
                             ),
@@ -265,7 +264,7 @@ class _ReelComposeScreenState extends ConsumerState<ReelComposeScreen> {
                               _length.maxPauseChapters,
                               _length.maxPhotos,
                             ),
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 13,
                             ),
@@ -287,7 +286,7 @@ class _ReelComposeScreenState extends ConsumerState<ReelComposeScreen> {
                           if (_capped.isEmpty)
                             Text(
                               l10n.reelNoStops,
-                              style: GoogleFonts.rajdhani(
+                              style: AppFonts.body(
                                 color: AppTheme.steel,
                                 fontSize: 14,
                               ),
@@ -379,7 +378,7 @@ class _StopSection extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     color: AppTheme.mist,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
@@ -388,7 +387,7 @@ class _StopSection extends StatelessWidget {
               ),
               Text(
                 countLabel(photos.length),
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 13,
                 ),
@@ -501,7 +500,7 @@ class _AddTile extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 11,
                 ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/app_build_info.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -16,8 +15,8 @@ class AppVersionTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final infoAsync = ref.watch(appBuildInfoProvider);
-    final titleStyle = GoogleFonts.rajdhani(fontWeight: FontWeight.w600);
-    final subStyle = GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12);
+    final titleStyle = AppFonts.body(fontWeight: FontWeight.w600);
+    final subStyle = AppFonts.body(color: AppTheme.steel, fontSize: 12);
 
     return infoAsync.when(
       loading: () => ListTile(

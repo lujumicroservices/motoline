@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/app_theme.dart';
 
@@ -23,7 +22,7 @@ class SettingsGroup extends StatelessWidget {
         const SizedBox(height: 28),
         Text(
           title,
-          style: GoogleFonts.barlowCondensed(
+          style: AppFonts.display(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -32,7 +31,7 @@ class SettingsGroup extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             help!,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,

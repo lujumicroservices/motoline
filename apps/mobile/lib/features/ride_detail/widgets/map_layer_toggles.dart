@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
@@ -125,7 +124,7 @@ class MapLayerToggles extends StatelessWidget {
       child: FilterChip(
         label: Text(
           label,
-          style: GoogleFonts.rajdhani(
+          style: AppFonts.body(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: selected ? AppTheme.asphalt : AppTheme.mist,

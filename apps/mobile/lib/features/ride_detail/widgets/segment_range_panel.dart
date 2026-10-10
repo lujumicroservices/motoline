@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/utils/geo_utils.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -64,7 +63,7 @@ class SegmentRangePanel extends StatelessWidget {
             children: [
               Text(
                 zoomed ? l10n.segmentZoom : l10n.segment,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontSize: 11,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w600,
@@ -78,7 +77,7 @@ class SegmentRangePanel extends StatelessWidget {
               const Spacer(),
               Text(
                 '${_fmt(startSeconds)} → ${_fmt(endSeconds)}',
-                style: GoogleFonts.exo2(
+                style: AppFonts.display(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: isPro ? null : AppTheme.steel,
@@ -91,7 +90,7 @@ class SegmentRangePanel extends StatelessWidget {
             isPro
                 ? (zoomed ? l10n.segmentHintZoomed : l10n.segmentHint)
                 : l10n.segmentProLocked,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 8),
           IgnorePointer(
@@ -129,7 +128,7 @@ class SegmentRangePanel extends StatelessWidget {
             children: [
               Text(
                 'pts ${startIndex + 1}–${endIndex + 1} / $totalPoints',
-                style: GoogleFonts.rajdhani(fontSize: 12, color: AppTheme.steel),
+                style: AppFonts.body(fontSize: 12, color: AppTheme.steel),
               ),
               const Spacer(),
               if (!isPro)

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/services/location_service.dart';
@@ -473,7 +472,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                     ),
                     child: Text(
                       badge,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.asphalt,
                         fontWeight: FontWeight.w800,
                         fontSize: 10,
@@ -530,7 +529,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
           children: [
             Text(
               l10n.circuit8hEdgePick,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.mist,
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
@@ -572,7 +571,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                 icon: const Icon(Icons.play_arrow),
                 label: Text(
                   l10n.circuit8hRecordNow,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -589,7 +588,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                 onPressed: _stopAndSave,
                 child: Text(
                   l10n.circuit8hCancelWait,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -613,7 +612,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                   _saving
                       ? l10n.circuit8hSaving                      : (_recording
                           ? l10n.circuit8hStopSave                          : l10n.circuit8hStartPass),
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -732,7 +731,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                       child: Text(
                         status,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.mist,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -748,7 +747,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                             circuit8hMaxAcceptAccuracyMeters.round(),
                           ),
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.mist.withValues(alpha: 0.75),
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
@@ -759,7 +758,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                     Text(
                       l10n.circuit8hRejected(_rejectedAccuracy),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.signal,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
@@ -777,7 +776,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                         children: [
                           Text(
                             l10n.circuit8hPassMarkersHint,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.mist.withValues(alpha: 0.8),
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
@@ -841,7 +840,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                                   InputChip(
                                     label: Text(
                                       cp.label ?? 'CP',
-                                      style: GoogleFonts.rajdhani(
+                                      style: AppFonts.body(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 12,
                                       ),
@@ -958,7 +957,7 @@ class _MarkerAction extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.rajdhani(
+          style: AppFonts.body(
             color: AppTheme.mist,
             fontWeight: FontWeight.w700,
             fontSize: 11,
@@ -1003,7 +1002,7 @@ class _EdgeChoice extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.mist,
               fontWeight: FontWeight.w700,
               fontSize: 14,

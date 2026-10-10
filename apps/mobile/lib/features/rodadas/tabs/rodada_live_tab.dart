@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -256,7 +255,7 @@ class _RodadaLiveLocationDisclosure extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               l10n.locationRodadaLiveDisclosureTitle,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
               ),
@@ -266,7 +265,7 @@ class _RodadaLiveLocationDisclosure extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Text(
                   l10n.locationRodadaLiveDisclosureBody,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     fontSize: 16,
                     height: 1.45,
                     color: AppTheme.mist,
@@ -357,7 +356,7 @@ class _RodadaLiveMapHost extends ConsumerWidget {
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   context.l10n.noLiveRidersYet,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 14,
                   ),
@@ -408,7 +407,7 @@ Future<void> _addStop(
         children: [
           Text(
             l10n.addStopHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 14,
               height: 1.35,
@@ -722,7 +721,7 @@ class _RodadaLiveMapState extends State<_RodadaLiveMap> with LiveGpsMapMixin {
                     Expanded(
                       child: Text(
                         context.l10n.offRouteBanner,
-                        style: GoogleFonts.exo2(
+                        style: AppFonts.display(
                           color: AppTheme.mist,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,

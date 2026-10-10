@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/features.dart';
 import '../../../core/models/ride.dart';
@@ -36,7 +35,7 @@ class RideSharePanel extends ConsumerWidget {
         children: [
           Text(
             l10n.shareRideTitle,
-            style: GoogleFonts.exo2(
+            style: AppFonts.display(
               fontWeight: FontWeight.w700,
               fontSize: 16,
             ),
@@ -44,7 +43,7 @@ class RideSharePanel extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             l10n.shareVisibilityHelp,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 13,
               height: 1.35,
@@ -59,7 +58,7 @@ class RideSharePanel extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               l10n.assignRoute,
-              style: GoogleFonts.exo2(
+              style: AppFonts.display(
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -79,7 +78,7 @@ class RideSharePanel extends ConsumerWidget {
                     filled: true,
                     fillColor: AppTheme.asphalt,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.field),
                       borderSide: BorderSide.none,
                     ),
                   ),

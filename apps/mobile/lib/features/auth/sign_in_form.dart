@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_provider_kind.dart';
 import '../../core/auth/email_password.dart';
@@ -162,7 +161,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           const SizedBox(height: 10),
           Text(
             _localizeAuthError(l10n, error),
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.signal,
               fontSize: 13,
               height: 1.35,
@@ -179,7 +178,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       filled: true,
       fillColor: AppTheme.asphalt,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.field),
         borderSide: BorderSide.none,
       ),
     );
@@ -193,7 +192,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             l10n.authOrEmail,
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 12),
           ),
         ),
         const Expanded(child: Divider()),

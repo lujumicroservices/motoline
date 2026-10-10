@@ -20,7 +20,7 @@ class MapControlChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppTheme.asphaltElevated.withValues(alpha: 0.92),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppRadius.button),
       child: IconButton(
         onPressed: onPressed,
         icon: Icon(icon),

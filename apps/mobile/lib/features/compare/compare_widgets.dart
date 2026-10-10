@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/analytics/ride_analytics.dart';
@@ -91,7 +90,7 @@ class CompareMetricsTable extends StatelessWidget {
                 child: Text(
                   leftLabel,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                  style: AppFonts.display(fontWeight: FontWeight.w700),
                 ),
               ),
               const SizedBox(width: 8),
@@ -99,7 +98,7 @@ class CompareMetricsTable extends StatelessWidget {
                 child: Text(
                   rightLabel,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                  style: AppFonts.display(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -153,12 +152,7 @@ class CompareMetricsTable extends StatelessWidget {
     );
   }
 
-  Widget _row(
-    String label,
-    String leftText,
-    String rightText, {
-    int? winner,
-  }) {
+  Widget _row(String label, String leftText, String rightText, {int? winner}) {
     final leftWin = highlightBest && winner == 0;
     final rightWin = highlightBest && winner == 1;
     return Padding(
@@ -169,7 +163,8 @@ class CompareMetricsTable extends StatelessWidget {
             child: Text(
               leftText,
               textAlign: TextAlign.center,
-              style: GoogleFonts.exo2(
+              style: AppFonts.metric(
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: leftWin ? RideVizPalette.leanLeft : null,
               ),
@@ -187,7 +182,8 @@ class CompareMetricsTable extends StatelessWidget {
             child: Text(
               rightText,
               textAlign: TextAlign.center,
-              style: GoogleFonts.exo2(
+              style: AppFonts.metric(
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: rightWin ? RideVizPalette.leanRight : null,
               ),
@@ -278,18 +274,13 @@ class DualPolylineMap extends StatelessWidget {
   Widget build(BuildContext context) {
     final drawLeft = left.length >= 2 ? _offsetPath(left, -3.5) : left;
     final drawRight = right.length >= 2 ? _offsetPath(right, 3.5) : right;
-    final all = [
-      ...drawLeft,
-      ...drawRight,
-      ?leftPlayhead,
-      ?rightPlayhead,
-    ];
+    final all = [...drawLeft, ...drawRight, ?leftPlayhead, ?rightPlayhead];
     if (all.length < 2) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Text(
           context.l10n.compareTrackUnavailable,
-          style: GoogleFonts.rajdhani(color: AppTheme.steel),
+          style: AppFonts.body(color: AppTheme.steel),
         ),
       );
     }
@@ -310,7 +301,7 @@ class DualPolylineMap extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             caption!,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 12,
               height: 1.3,
@@ -321,10 +312,7 @@ class DualPolylineMap extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             context.l10n.compareOneTrackOnly,
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.lineHot,
-              fontSize: 12,
-            ),
+            style: AppFonts.body(color: AppTheme.lineHot, fontSize: 12),
           ),
         ],
         const SizedBox(height: 8),
@@ -423,12 +411,13 @@ class DualPolylineMap extends StatelessWidget {
                 ? null
                 : Border.all(color: color.withValues(alpha: 0.3)),
           ),
-          child: solid
-              ? null
-              : CustomPaint(painter: _DashLegendPainter(color)),
+          child: solid ? null : CustomPaint(painter: _DashLegendPainter(color)),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(color: AppTheme.steel, fontSize: 12)),
+        Text(
+          label,
+          style: const TextStyle(color: AppTheme.steel, fontSize: 12),
+        ),
       ],
     );
   }
@@ -444,7 +433,11 @@ class _DashLegendPainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset(0, size.height / 2), Offset(7, size.height / 2), paint);
+    canvas.drawLine(
+      Offset(0, size.height / 2),
+      Offset(7, size.height / 2),
+      paint,
+    );
     canvas.drawLine(
       Offset(11, size.height / 2),
       Offset(size.width, size.height / 2),
@@ -469,7 +462,8 @@ List<LatLng> _offsetPath(List<LatLng> pts, double meters) {
     final lat2 = next.latitude * math.pi / 180;
     final dLon = (next.longitude - prev.longitude) * math.pi / 180;
     final y = math.sin(dLon) * math.cos(lat2);
-    final x = math.cos(lat1) * math.sin(lat2) -
+    final x =
+        math.cos(lat1) * math.sin(lat2) -
         math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
     final bearing = math.atan2(y, x) + math.pi / 2;
     final lat = pts[i].latitude * math.pi / 180;
@@ -479,7 +473,8 @@ List<LatLng> _offsetPath(List<LatLng> pts, double meters) {
       math.sin(lat) * math.cos(ang) +
           math.cos(lat) * math.sin(ang) * math.cos(bearing),
     );
-    final nLon = lon +
+    final nLon =
+        lon +
         math.atan2(
           math.sin(bearing) * math.sin(ang) * math.cos(lat),
           math.cos(ang) - math.sin(lat) * math.sin(nLat),
@@ -488,4 +483,3 @@ List<LatLng> _offsetPath(List<LatLng> pts, double meters) {
   }
   return out;
 }
-

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/models/ride.dart';
@@ -37,7 +36,7 @@ class RodadaPhotosTab extends ConsumerWidget {
             children: [
               Text(
                 l10n.photosAlbumHelp,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 13,
                 ),

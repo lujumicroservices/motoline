@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
 
@@ -289,7 +288,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                       Expanded(
                         child: Text(
                           l10n.labAdventureCameraZonesTitle,
-                          style: GoogleFonts.barlowCondensed(
+                          style: AppFonts.display(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                           ),
@@ -318,7 +317,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                         children: [
                           Text(
                             l10n.labAdventureCameraZonesHelp,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 13,
                               height: 1.35,
@@ -327,7 +326,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                           const SizedBox(height: 10),
                           Text(
                             nextHint,
-                            style: GoogleFonts.exo2(
+                            style: AppFonts.display(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
                               color: _pendingStartId == null
@@ -339,7 +338,7 @@ class _CameraZonesMapScreenState extends State<CameraZonesMapScreen>
                           Text(
                             '${l10n.labAdventureCameraZonesPairs}: $pairs'
                             '  ·  ${l10n.labAdventureCameraZoneStart}: $starts',
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.mist,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,

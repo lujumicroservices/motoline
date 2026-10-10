@@ -24,11 +24,11 @@ class SessionActionBar extends StatelessWidget {
       children: [
         Material(
           color: AppTheme.asphalt,
-          borderRadius: BorderRadius.circular(16),
-          child: Ink(
-            height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppRadius.button),
+      child: Ink(
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadius.button),
               border: Border.all(color: AppTheme.mist.withValues(alpha: 0.18)),
             ),
             child: Row(

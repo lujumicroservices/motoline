@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
@@ -114,7 +113,7 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
                       Expanded(
                         child: Text(
                           statusLabel,
-                          style: GoogleFonts.exo2(
+                          style: AppFonts.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                           ),
@@ -135,7 +134,7 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
                       '${ride.distanceKm.toStringAsFixed(2)} km  ·  '
                       '${formatDuration(DateTime.now().difference(ride.startedAt))}  ·  '
                       '${ride.pointCount}',
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.mist,

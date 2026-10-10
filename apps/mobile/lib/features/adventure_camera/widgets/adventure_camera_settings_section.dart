@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/models/track_point.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -78,7 +77,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
             backgroundColor: AppTheme.asphaltElevated,
             title: Text(
               l10n.labAdventureCameraGroupPick,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+              style: AppFonts.display(fontWeight: FontWeight.w700),
             ),
             content: SizedBox(
               width: double.maxFinite,
@@ -145,7 +144,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
           children: [
             Text(
               l10n.labSection,
-              style: GoogleFonts.barlowCondensed(
+              style: AppFonts.display(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -153,7 +152,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               l10n.labAdventureCameraHelp,
-              style: GoogleFonts.rajdhani(
+              style: AppFonts.body(
                 color: AppTheme.steel,
                 fontSize: 14,
                 height: 1.4,
@@ -164,11 +163,11 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               title: Text(
                 l10n.labAdventureCameraEnable,
-                style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                style: AppFonts.body(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
                 l10n.labAdventureCameraEnableHelp,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                 ),
@@ -185,7 +184,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 l10n.labAdventureCameraScenariosTitle,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -215,11 +214,11 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   l10n.labAdventureCameraSyncRide,
-                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                  style: AppFonts.body(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   l10n.labAdventureCameraSyncRideHelp,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 12,
                   ),
@@ -235,11 +234,11 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   l10n.labAdventureCameraSyncPause,
-                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                  style: AppFonts.body(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   l10n.labAdventureCameraSyncPauseHelp,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 12,
                   ),
@@ -255,11 +254,11 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   l10n.labAdventureCameraZonesEnable,
-                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                  style: AppFonts.body(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   l10n.labAdventureCameraZonesEnableHelp,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 12,
                   ),
@@ -276,13 +275,13 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     l10n.labAdventureCameraZonesEdit,
-                    style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                    style: AppFonts.body(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
                     zoneCount == 0
                         ? l10n.labAdventureCameraZonesEmpty
                         : l10n.labAdventureCameraZonesCount(zoneCount),
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.steel,
                       fontSize: 12,
                     ),
@@ -295,11 +294,11 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   l10n.labAdventureCameraAggressive,
-                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                  style: AppFonts.body(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   l10n.labAdventureCameraAggressiveHelp,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 12,
                   ),
@@ -314,7 +313,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               const SizedBox(height: 14),
               Text(
                 l10n.labAdventureCameraGroup,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -322,7 +321,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 l10n.labAdventureCameraGroupHelp,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                   height: 1.35,
@@ -332,7 +331,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               if (hub.cameraGroup.isEmpty)
                 Text(
                   l10n.labAdventureCameraGroupEmpty,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.steel,
                     fontSize: 12,
                   ),
@@ -351,13 +350,13 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                     ),
                     title: Text(
                       member.displayName,
-                      style: GoogleFonts.rajdhani(fontWeight: FontWeight.w600),
+                      style: AppFonts.body(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
                       member.remoteId,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.steel,
                         fontSize: 11,
                       ),
@@ -388,7 +387,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                   initiallyExpanded: false,
                   title: Text(
                     l10n.labAdventureCameraGroupSetupHelp,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
                       color: AppTheme.mist,
@@ -412,7 +411,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
                       ),
                       child: Text(
                         l10n.labAdventureCameraGroupSetupBody,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.steel,
                           fontSize: 13,
                           height: 1.45,
@@ -425,7 +424,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 l10n.labAdventureCameraBackend,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -481,7 +480,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 l10n.labAdventureCameraTestHelp,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   color: AppTheme.steel,
                   fontSize: 12,
                   height: 1.35,
@@ -560,12 +559,12 @@ class _ScenarioCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 13),
           ),
           const SizedBox(height: 6),
           Text(
             body,
-            style: GoogleFonts.rajdhani(
+            style: AppFonts.body(
               color: AppTheme.steel,
               fontSize: 12,
               height: 1.35,
@@ -618,7 +617,7 @@ class _StatusLine extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 13),
+            style: AppFonts.display(fontWeight: FontWeight.w700, fontSize: 13),
           ),
           if (status.deviceName != null) ...[
             const SizedBox(height: 2),

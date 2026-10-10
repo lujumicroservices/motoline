@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/app_build_info.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -124,7 +123,7 @@ class _Circuit8hHubScreenState extends ConsumerState<Circuit8hHubScreen> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
                       info.fullLine,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.mist,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
@@ -134,7 +133,7 @@ class _Circuit8hHubScreenState extends ConsumerState<Circuit8hHubScreen> {
                 ),
                 Text(
                   l10n.circuit8hIntro,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.mist,
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
@@ -160,7 +159,7 @@ class _Circuit8hHubScreenState extends ConsumerState<Circuit8hHubScreen> {
                     _uploading
                         ? l10n.circuit8hUploading
                         : l10n.circuit8hUploadCloud,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
@@ -170,7 +169,7 @@ class _Circuit8hHubScreenState extends ConsumerState<Circuit8hHubScreen> {
                   const SizedBox(height: 6),
                   Text(
                     l10n.circuit8hLastUpload(_lastUploadAt!),
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: AppTheme.mist.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
@@ -192,7 +191,7 @@ class _Circuit8hHubScreenState extends ConsumerState<Circuit8hHubScreen> {
                     ),
                     title: Text(
                       l10n.circuit8hMarkersOpen,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.mist,
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -206,7 +205,7 @@ class _Circuit8hHubScreenState extends ConsumerState<Circuit8hHubScreen> {
                             : l10n.circuit8hNo,
                         _project.checkpointCount,
                       ),
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.mist.withValues(alpha: 0.75),
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
@@ -316,7 +315,7 @@ class _RouteCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.mist,
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
@@ -324,7 +323,7 @@ class _RouteCard extends StatelessWidget {
                       ),
                       Text(
                         subtitle,
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.mist.withValues(alpha: 0.75),
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
@@ -346,7 +345,7 @@ class _RouteCard extends StatelessWidget {
               icon: const Icon(Icons.radio_button_checked),
               label: Text(
                 recordLabel,
-                style: GoogleFonts.rajdhani(
+                style: AppFonts.body(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                 ),
@@ -358,7 +357,7 @@ class _RouteCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
                   emptyHint,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     color: AppTheme.mist.withValues(alpha: 0.65),
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -440,7 +439,7 @@ class _PassTile extends StatelessWidget {
       leading: const Icon(Icons.map_outlined, color: AppTheme.lineHot),
       title: Text(
         title,
-        style: GoogleFonts.rajdhani(
+        style: AppFonts.body(
           color: AppTheme.mist,
           fontWeight: FontWeight.w700,
           fontSize: 14,
@@ -448,7 +447,7 @@ class _PassTile extends StatelessWidget {
       ),
       subtitle: Text(
         meta,
-        style: GoogleFonts.rajdhani(
+        style: AppFonts.body(
           color: AppTheme.mist.withValues(alpha: 0.7),
           fontWeight: FontWeight.w600,
           fontSize: 12,

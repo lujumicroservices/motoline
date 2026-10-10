@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/legal/legal_urls.dart';
 import '../../l10n/l10n_ext.dart';
@@ -58,7 +57,7 @@ class _TermsAcceptScreenState extends ConsumerState<TermsAcceptScreen> {
               children: [
                 Text(
                   l10n.termsAcceptTitle,
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                   ),
@@ -68,7 +67,7 @@ class _TermsAcceptScreenState extends ConsumerState<TermsAcceptScreen> {
                   child: SingleChildScrollView(
                     child: Text(
                       l10n.termsAcceptBody,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         fontSize: 16,
                         height: 1.45,
                         color: AppTheme.mist,

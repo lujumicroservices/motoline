@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../features/auth/sign_in_form.dart';
 import '../l10n/l10n_ext.dart';
@@ -27,7 +26,7 @@ class AccountAuthSection extends ConsumerWidget {
       children: [
         Text(
           permanent ? l10n.accountSignedInBody : l10n.authGateBody,
-          style: GoogleFonts.rajdhani(
+          style: AppFonts.body(
             color: AppTheme.steel,
             fontSize: 14,
             height: 1.4,
@@ -64,7 +63,7 @@ class AccountAuthSection extends ConsumerWidget {
                           permanent
                               ? (label ?? l10n.accountSignedIn)
                               : l10n.authGateTitle,
-                          style: GoogleFonts.exo2(
+                          style: AppFonts.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                           ),
@@ -72,7 +71,7 @@ class AccountAuthSection extends ConsumerWidget {
                         if (permanent && email != null && email.isNotEmpty)
                           Text(
                             email,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.steel,
                               fontSize: 12,
                             ),

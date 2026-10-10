@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/l10n_ext.dart';
@@ -53,12 +52,12 @@ class StaffReportsScreen extends ConsumerWidget {
                     children: [
                       Text(
                         '${r.kind} · ${r.reason} · ${r.status}',
-                        style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                        style: AppFonts.display(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         l10n.ugcStaffTarget(r.targetName, r.reporterName, when),
-                        style: GoogleFonts.rajdhani(
+                        style: AppFonts.body(
                           color: AppTheme.steel,
                           fontSize: 13,
                         ),
@@ -68,7 +67,7 @@ class StaffReportsScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Text(
                           r.messageBody!,
-                          style: GoogleFonts.rajdhani(fontSize: 15),
+                          style: AppFonts.body(fontSize: 15),
                         ),
                       ],
                       if (r.photoPath != null && r.photoPath!.isNotEmpty) ...[
@@ -80,7 +79,7 @@ class StaffReportsScreen extends ConsumerWidget {
                           padding: const EdgeInsets.only(top: 6),
                           child: Text(
                             l10n.ugcStaffAlreadyBanned,
-                            style: GoogleFonts.rajdhani(
+                            style: AppFonts.body(
                               color: AppTheme.signal,
                               fontSize: 12,
                             ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/models/imu_upload.dart';
 import '../../../core/services/imu_blob_upload_service.dart';
@@ -59,7 +58,7 @@ class ImuAzureChip extends ConsumerWidget {
                 const SizedBox(width: 6),
                 Text(
                   retry ? l10n.imuAzureRetry : label,
-                  style: GoogleFonts.rajdhani(
+                  style: AppFonts.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: color,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
@@ -45,7 +44,7 @@ class AdventureCameraRideControls extends ConsumerWidget {
               children: [
                 Text(
                   'CAM · $label',
-                  style: GoogleFonts.exo2(
+                  style: AppFonts.display(
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
                   ),
@@ -54,7 +53,7 @@ class AdventureCameraRideControls extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     status.message!,
-                    style: GoogleFonts.rajdhani(
+                    style: AppFonts.body(
                       color: status.phase == AdventureCameraPhase.error
                           ? AppTheme.signal
                           : AppTheme.steel,
@@ -70,7 +69,7 @@ class AdventureCameraRideControls extends ConsumerWidget {
                       child: FilledButton.tonal(
                         style: FilledButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          textStyle: GoogleFonts.exo2(
+                          textStyle: AppFonts.display(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
                           ),
@@ -84,7 +83,7 @@ class AdventureCameraRideControls extends ConsumerWidget {
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          textStyle: GoogleFonts.exo2(
+                          textStyle: AppFonts.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
@@ -104,7 +103,7 @@ class AdventureCameraRideControls extends ConsumerWidget {
                           backgroundColor: AppTheme.line,
                           foregroundColor: AppTheme.asphalt,
                           minimumSize: const Size.fromHeight(56),
-                          textStyle: GoogleFonts.exo2(
+                          textStyle: AppFonts.display(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
                           ),
@@ -119,7 +118,7 @@ class AdventureCameraRideControls extends ConsumerWidget {
                         style: FilledButton.styleFrom(
                           backgroundColor: AppTheme.signal,
                           minimumSize: const Size.fromHeight(56),
-                          textStyle: GoogleFonts.exo2(
+                          textStyle: AppFonts.display(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
                           ),

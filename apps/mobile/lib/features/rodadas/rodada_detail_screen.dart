@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/models/cloud_models.dart';
@@ -118,7 +117,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
         title: overview.when(
           data: (r) => Text(
             r?.title ?? l10n.rodadaFallback,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+            style: AppFonts.display(fontWeight: FontWeight.w700),
           ),
           loading: () => Text(l10n.rodadaFallback),
           error: (_, __) => Text(l10n.rodadaFallback),
@@ -350,7 +349,7 @@ class _InviteFriendsSheetState extends State<_InviteFriendsSheet> {
               alignment: Alignment.centerLeft,
               child: Text(
                 l10n.inviteFriend,
-                style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                style: AppFonts.display(fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -419,7 +418,7 @@ class _StatusBanner extends ConsumerWidget {
               if (when != null) when,
               l10n.rodadaCodeBanner(r.inviteCode),
             ].join(' · '),
-            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
+            style: AppFonts.body(color: AppTheme.steel, fontSize: 13),
           ),
         );
       },

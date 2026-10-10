@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -79,7 +78,7 @@ class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen>
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
       appBar: AppBar(
-        title: Text(name, style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
+        title: Text(name, style: AppFonts.display(fontWeight: FontWeight.w700)),
         actions: [
           IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
         ],
@@ -93,7 +92,7 @@ class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen>
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: Text(
                       _transientError!,
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: AppTheme.lineHot,
                         fontSize: 14,
                       ),
@@ -110,7 +109,7 @@ class _WatchViewerScreenState extends ConsumerState<WatchViewerScreen>
                           : l10n.familyLastSeen(
                               DateFormat.Hm().format(pos.updatedAt.toLocal()),
                             ),
-                      style: GoogleFonts.rajdhani(
+                      style: AppFonts.body(
                         color: pos.isStale ? AppTheme.steel : AppTheme.line,
                         fontSize: 15,
                       ),

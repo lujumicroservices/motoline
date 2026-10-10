@@ -1,64 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_theme.dart';
-
-/// Shared type styles — motorsport / telemetry feel.
-class AppFonts {
-  AppFonts._();
-
-  /// Wordmark + timing-board display (condensed, aggressive).
-  static TextStyle brand({
-    double fontSize = 34,
-    FontWeight fontWeight = FontWeight.w800,
-    double letterSpacing = 0.8,
-    double height = 1.0,
-    Color? color,
-  }) =>
-      GoogleFonts.barlowCondensed(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        letterSpacing: letterSpacing,
-        height: height,
-        color: color,
-      );
-
-  /// Titles, HUD numbers, buttons.
-  static TextStyle display({
-    double? fontSize,
-    FontWeight fontWeight = FontWeight.w700,
-    double? letterSpacing,
-    double? height,
-    Color? color,
-  }) =>
-      GoogleFonts.exo2(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        letterSpacing: letterSpacing ?? 0.2,
-        height: height,
-        color: color,
-      );
-
-  /// Body, captions, secondary chrome.
-  static TextStyle body({
-    double? fontSize,
-    FontWeight fontWeight = FontWeight.w500,
-    double? letterSpacing,
-    double? height,
-    Color? color,
-  }) =>
-      GoogleFonts.rajdhani(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        letterSpacing: letterSpacing,
-        height: height,
-        color: color,
-      );
-}
 
 enum BrandMarkSize { hero, title, eyebrow }
 
 /// RiderLab wordmark — condensed race lockup (`RIDER` + `LAB`).
+///
+/// Drawn as text in bundled Barlow Condensed, not an SVG or bitmap. Stroke
+/// weight is the font weight: every size is one step heavier than the previous
+/// cut (title/eyebrow RIDER 700→800, hero RIDER and all LAB 800→900).
 class RiderLabMark extends StatelessWidget {
   const RiderLabMark({
     super.key,
@@ -107,10 +57,11 @@ class RiderLabMark extends StatelessWidget {
       BrandMarkSize.title => 2.0,
       BrandMarkSize.eyebrow => 2.2,
     };
+    // One step heavier than the previous lockup, clamped at Black (900).
     final weight = switch (size) {
-      BrandMarkSize.hero => FontWeight.w800,
-      BrandMarkSize.title => FontWeight.w700,
-      BrandMarkSize.eyebrow => FontWeight.w700,
+      BrandMarkSize.hero => FontWeight.w900,
+      BrandMarkSize.title => FontWeight.w800,
+      BrandMarkSize.eyebrow => FontWeight.w800,
     };
 
     final riderStyle = AppFonts.brand(
@@ -121,7 +72,7 @@ class RiderLabMark extends StatelessWidget {
     );
     final labStyle = AppFonts.brand(
       fontSize: labSize,
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w900,
       letterSpacing: labTracking,
       color: lab,
     );
