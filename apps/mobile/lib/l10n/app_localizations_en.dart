@@ -3983,6 +3983,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get metricaBlePairedUnknown => 'It did not say whether it is paired.';
 
   @override
+  String metricaBleDeviceId(String id) {
+    return 'ID $id.';
+  }
+
+  @override
+  String get metricaBleDeviceIdEmpty => 'No ID.';
+
+  @override
+  String get metricaBleWifiPresent => 'Wi-Fi saved.';
+
+  @override
+  String get metricaBleWifiAbsent => 'No Wi-Fi.';
+
+  @override
+  String get metricaBleWifiUnknown => 'Wi-Fi unknown.';
+
+  @override
+  String get metricaBleAuthedYes => 'PIN accepted.';
+
+  @override
+  String get metricaBleAuthedNo => 'PIN pending.';
+
+  @override
+  String get metricaBleAuthedUnknown => 'PIN unknown.';
+
+  @override
+  String metricaBleMtu(int mtu) {
+    return 'MTU $mtu.';
+  }
+
+  @override
+  String get metricaBleMtuUnknown => 'MTU unknown.';
+
+  @override
   String get metricaBlePairingOff =>
       'It is not in pairing mode. The PIN is on its screen only in that mode. After 5 wrong PINs the logger leaves that mode.';
 
@@ -4006,8 +4040,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get metricaBleWrongPin => 'Wrong PIN.';
 
   @override
+  String metricaBleWrongPinLeft(int left) {
+    return 'Wrong PIN. $left attempts left.';
+  }
+
+  @override
   String get metricaBlePinLocked =>
-      'Too many attempts. The logger left pairing mode. Turn pairing mode on again on Métrica.';
+      'Wrong PIN. No attempts left: the logger closed pairing mode. Turn pairing mode on again on Métrica.';
 
   @override
   String get metricaBleMinting => 'Creating the pairing on your account…';
@@ -4066,7 +4105,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get metricaBleWifiHelp =>
-      'Optionally send the network so the logger can upload sessions.';
+      'Optionally send the network now. Do it before pairing: once the logger confirms pairing, it closes the mode a few seconds later.';
 
   @override
   String get metricaBleWifiSsid => 'Network name';

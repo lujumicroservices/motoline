@@ -5,63 +5,102 @@ import 'package:motoline/core/services/metrica_ble_permissions.dart';
 import 'package:motoline/core/services/metrica_ble_protocol.dart';
 
 void main() {
+  test('UUIDs match firmware 0.6.8-ble', () {
+    const suffix = '5c3e-4b8e-9a51-4d4554524943';
+    expect(MetricaBleProtocol.serviceUuid, '6f8a0001-$suffix');
+    expect(MetricaBleProtocol.infoUuid, '6f8a0002-$suffix');
+    expect(MetricaBleProtocol.authUuid, '6f8a0003-$suffix');
+    expect(MetricaBleProtocol.pairUuid, '6f8a0004-$suffix');
+    expect(MetricaBleProtocol.wifiUuid, '6f8a0005-$suffix');
+    expect(MetricaBleProtocol.statusUuid, '6f8a0006-$suffix');
+    expect(MetricaBleProtocol.fragmentMagic, 0x1E);
+    expect(MetricaBleProtocol.requestedMtu, 247);
+    expect(MetricaBleProtocol.maxWriteLength(247), 244);
+    expect(MetricaBleProtocol.fragmentDataLength(247), 241);
+    expect(MetricaBleProtocol.fragmentDataLength(23), 17);
+  });
+
   test('advertisement requires Metrica-XXXX and the service UUID', () {
     expect(
       MetricaBleProtocol.matchesAdvertisement(
-        name: 'Metrica-A1B2',
+        name: 'Metrica-7638',
         serviceUuidStrings: [MetricaBleProtocol.serviceUuid.toUpperCase()],
       ),
       isTrue,
     );
     expect(
       MetricaBleProtocol.matchesAdvertisement(
-        name: 'Metrica-A1B2',
+        name: 'Metrica-7638',
         serviceUuidStrings: const ['0000fea6-0000-1000-8000-00805f9b34fb'],
       ),
       isFalse,
     );
     expect(
       MetricaBleProtocol.matchesAdvertisement(
-        name: 'GoPro-A1B2',
+        name: 'GoPro-7638',
         serviceUuidStrings: [MetricaBleProtocol.serviceUuid],
       ),
       isFalse,
     );
     expect(
       MetricaBleProtocol.matchesAdvertisement(
-        name: 'Metrica-ABCDE',
+        name: 'Metrica-763a',
+        serviceUuidStrings: [MetricaBleProtocol.serviceUuid],
+      ),
+      isFalse,
+    );
+    expect(
+      MetricaBleProtocol.matchesAdvertisement(
+        name: 'Metrica-763G',
         serviceUuidStrings: [MetricaBleProtocol.serviceUuid],
       ),
       isFalse,
     );
     expect(
       MetricaBleProtocol.bestAdvertisedName(
-        advName: 'Metrica-00ff',
+        advName: 'Metrica-7638',
         platformName: 'something',
       ),
-      'Metrica-00ff',
+      'Metrica-7638',
     );
   });
 
   test('INFO and STATUS JSON parse the firmware fields', () {
     final info = MetricaBleProtocol.parseInfo(
-      utf8.encode('{"fw":"0.6.8-ble","paired":false,"pairing":true}'),
+      utf8.encode(
+        '{"hw":"f42dc9d07638","fw":"0.6.8-ble","role":"rider",'
+        '"paired":false,"device_id":"","wifi":true,"authed":false,"mtu":247}',
+      ),
     );
+    expect(info.hw, 'f42dc9d07638');
     expect(info.firmware, '0.6.8-ble');
+    expect(info.role, 'rider');
     expect(info.paired, isFalse);
-    expect(info.pairingMode, isTrue);
+    expect(info.deviceId, isEmpty);
+    expect(info.wifi, isTrue);
+    expect(info.authed, isFalse);
+    expect(info.mtu, 247);
 
     final status = MetricaBleProtocol.parseStatus(
-      utf8.encode('{"ok":false,"code":"pin_invalid","msg":"PIN incorrecto"}'),
+      utf8.encode('{"ok":false,"code":"pin_invalid","err":"bad_pin","left":3}'),
     );
     expect(status.ok, isFalse);
-    expect(status.code, 'pin_invalid');
-    expect(status.message, 'PIN incorrecto');
+    expect(status.err, 'bad_pin');
+    expect(status.left, 3);
+    expect(status.msg, isEmpty);
     expect(
       MetricaBleProtocol.statusLogLine(status),
-      'ok=false code=pin_invalid',
+      'ok=false err=bad_pin left=3',
     );
-    expect(MetricaBleProtocol.statusLogLine(status), isNot(contains('PIN')));
+
+    final sneaky = MetricaBleProtocol.parseStatus(
+      utf8.encode('{"ok":true,"msg":"super-secret-value"}'),
+    );
+    expect(MetricaBleProtocol.statusLogLine(sneaky), 'ok=true msg=unlisted');
+    expect(
+      MetricaBleProtocol.statusLogLine(sneaky),
+      isNot(contains('super-secret')),
+    );
   });
 
   test('PAIR and WIFI JSON use the firmware keys', () {
@@ -92,90 +131,146 @@ void main() {
     expect(wifi, {'ssid': 'paddock', 'pass': 'clave-wifi'});
   });
 
-  test('writes that fit stay raw and larger ones round-trip', () {
+  test('writes that fit stay raw and larger ones use 0x1E chunks of mtu-6', () {
     final small = utf8.encode('{"ok":true}');
     final one = MetricaBleProtocol.encodeWrite(small, maxChunk: 20);
     expect(one, [small]);
 
+    const mtu = 247;
+    final maxChunk = MetricaBleProtocol.maxWriteLength(mtu);
+    final payload = List<int>.filled(245, 0x41);
+    final wide = MetricaBleProtocol.encodeWrite(payload, maxChunk: maxChunk);
+    expect(wide, hasLength(2));
+    expect(wide[0].first, 0x1E);
+    expect(wide[0][1], 0);
+    expect(wide[0][2], 2);
+    expect(wide[0].sublist(3), hasLength(241));
+    expect(wide[0], hasLength(244));
+    expect(wide[1][1], 1);
+    expect(wide[1].sublist(3), hasLength(4));
+
     final secret = 'super-secret-value';
-    final payload = MetricaBleProtocol.pairPayload(
+    final pair = MetricaBleProtocol.pairPayload(
       deviceId: 'dev-1',
       secret: secret,
       ingestUrl: 'https://example.test/ingest',
     );
-    final frames = MetricaBleProtocol.encodeWrite(payload, maxChunk: 20);
+    final frames = MetricaBleProtocol.encodeWrite(pair, maxChunk: 20);
     expect(frames.length, greaterThan(1));
     for (final frame in frames) {
       expect(frame.length, lessThanOrEqualTo(20));
-      expect(frame.first, MetricaBleProtocol.fragmentMagic);
+      expect(frame.first, 0x1E);
+      expect(frame.length - 3, lessThanOrEqualTo(17));
     }
     final box = MetricaReassembler();
     List<int>? rebuilt;
     for (final frame in frames) {
       rebuilt = box.add(frame);
     }
-    expect(rebuilt, payload);
+    expect(rebuilt, pair);
     expect(utf8.decode(rebuilt!), contains(secret));
   });
 
-  test('STATUS codes classify PIN, lock, and timeout', () {
+  test('index 0 restarts reassembly and an out-of-order index drops it', () {
+    final box = MetricaReassembler();
+    expect(box.add([0x1E, 1, 2, 1]), isNull);
+    expect(box.add([0x1E, 0, 2, 9]), isNull);
+    expect(box.add([0x1E, 0, 2, 7]), isNull);
+    expect(box.add([0x1E, 1, 2, 8]), [7, 8]);
+  });
+
+  test('STATUS err and left classify PIN, lock, and protocol errors', () {
     expect(
-      () => MetricaBleProtocol.requireAccepted(
-        const MetricaStatus(ok: true, code: 'paired', message: 'ok'),
+      () => MetricaBleProtocol.requireMsg(
+        const MetricaStatus(ok: true, msg: 'paired'),
+        'paired',
       ),
       returnsNormally,
     );
     expect(
       () => MetricaBleProtocol.requireAccepted(
-        const MetricaStatus(ok: false, code: 'wrong_pin', message: 'no'),
+        MetricaBleProtocol.parseStatus(
+          utf8.encode('{"ok":false,"err":"bad_pin","left":3}'),
+        ),
       ),
       throwsA(
-        isA<MetricaBleException>().having(
-          (error) => error.failure,
-          'failure',
-          MetricaBleFailure.wrongPin,
-        ),
+        isA<MetricaBleException>()
+            .having(
+              (error) => error.failure,
+              'failure',
+              MetricaBleFailure.wrongPin,
+            )
+            .having((error) => error.attemptsLeft, 'left', 3),
       ),
     );
     expect(
       () => MetricaBleProtocol.requireAccepted(
-        const MetricaStatus(ok: false, code: 'pin_locked', message: 'out'),
+        MetricaBleProtocol.parseStatus(
+          utf8.encode('{"ok":false,"err":"bad_pin","left":0}'),
+        ),
       ),
       throwsA(
-        isA<MetricaBleException>().having(
-          (error) => error.failure,
-          'failure',
-          MetricaBleFailure.pinLocked,
-        ),
+        isA<MetricaBleException>()
+            .having(
+              (error) => error.failure,
+              'failure',
+              MetricaBleFailure.pinLocked,
+            )
+            .having((error) => error.attemptsLeft, 'left', 0),
       ),
     );
     expect(
       () => MetricaBleProtocol.requireAccepted(
-        const MetricaStatus(ok: false, code: 'timeout', message: ''),
+        MetricaBleProtocol.parseStatus(
+          utf8.encode('{"ok":false,"code":"pin_invalid"}'),
+        ),
       ),
       throwsA(
         isA<MetricaBleException>().having(
           (error) => error.failure,
           'failure',
-          MetricaBleFailure.timeout,
+          MetricaBleFailure.protocol,
         ),
       ),
     );
+    for (final err in [
+      'auth_required',
+      'bad_json',
+      'missing_fields',
+      'bad_fields',
+    ]) {
+      expect(
+        () => MetricaBleProtocol.requireAccepted(
+          MetricaBleProtocol.parseStatus(
+            utf8.encode('{"ok":false,"err":"$err"}'),
+          ),
+        ),
+        throwsA(
+          isA<MetricaBleException>()
+              .having(
+                (error) => error.failure,
+                'failure',
+                MetricaBleFailure.protocol,
+              )
+              .having((error) => error.detail, 'detail', err),
+        ),
+        reason: err,
+      );
+    }
   });
 
   test('redact strips the secret and toString does not keep it', () {
     const secret = 'super-secret-value';
     final status = const MetricaStatus(
       ok: true,
-      code: 'paired',
-      message: 'guardado super-secret-value',
+      msg: 'paired super-secret-value',
     ).redact(const [secret]);
-    expect(status.message, 'guardado ***');
-    expect(status.message, isNot(contains(secret)));
+    expect(status.msg, 'paired ***');
+    expect(status.msg, isNot(contains(secret)));
 
     const success = MetricaPairSuccess(
       deviceId: 'dev-1',
-      status: MetricaStatus(ok: true, code: 'paired', message: 'ok'),
+      status: MetricaStatus(ok: true, msg: 'paired'),
     );
     expect(success.toString(), isNot(contains(secret)));
     expect(

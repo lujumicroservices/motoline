@@ -64,17 +64,14 @@ void main() {
     await tester.tap(find.byKey(const Key('metrica-ble-pair')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(
-      find.text('Versión 0.6.8-ble. Aún no está emparejado.'),
-      findsNothing,
-    );
+    expect(find.textContaining('Versión 0.6.8-ble'), findsNothing);
     await tester.tap(find.text('Metrica-A1B2'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(
-      find.text('Versión 0.6.8-ble. Aún no está emparejado.'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('Versión 0.6.8-ble'), findsOneWidget);
+    expect(find.textContaining('Aún no está emparejado'), findsOneWidget);
+    expect(find.textContaining('Sin ID'), findsOneWidget);
+    expect(find.textContaining('MTU 247'), findsOneWidget);
     expect(find.text('PIN de Métrica'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('metrica-ble-pin')), '123456');
@@ -90,6 +87,38 @@ void main() {
     expect(find.text('Métrica emparejada (dev-1).'), findsOneWidget);
     expect(find.textContaining(secret), findsNothing);
     expect(link.disconnected, isTrue);
+    expect(link.ops, ['pair']);
+  });
+
+  testWidgets('a wrong PIN shows the attempts left', (tester) async {
+    final link = _ScriptedLink()
+      ..authStatus = const MetricaStatus(ok: false, err: 'bad_pin', left: 3);
+    final transport = _FakeTransport()
+      ..hits = [
+        const MetricaScanHit(remoteId: 'aa', name: 'Metrica-7638', rssi: -40),
+      ]
+      ..link = link;
+    await tester.pumpWidget(
+      _app(
+        MetricaBlePairSection(
+          transport: transport,
+          pairing: MetricaBlePairing(api: _Api('super-secret-value')),
+          hasSession: () async => true,
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('metrica-ble-pair')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.text('Metrica-7638'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.enterText(find.byKey(const Key('metrica-ble-pin')), '123456');
+    await tester.tap(find.text('Continuar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('PIN incorrecto. Quedan 3 intentos.'), findsWidgets);
+    expect(find.text('PIN de Métrica'), findsOneWidget);
   });
 }
 
@@ -142,32 +171,37 @@ class _FakeTransport implements MetricaBleTransport {
 
 class _ScriptedLink implements MetricaGattLink {
   bool disconnected = false;
+  MetricaStatus authStatus = const MetricaStatus(ok: true, msg: 'auth_ok');
+  final ops = <String>[];
 
   @override
-  int get maxWriteLength => 185;
+  int get maxWriteLength => 244;
 
   @override
   Future<MetricaDeviceInfo> readInfo() async {
     return const MetricaDeviceInfo(
       firmware: '0.6.8-ble',
       paired: false,
-      pairingMode: true,
+      deviceId: '',
+      wifi: true,
+      authed: false,
+      mtu: 247,
     );
   }
 
   @override
-  Future<MetricaStatus> writeAuth(List<int> pinBytes) async {
-    return const MetricaStatus(ok: true, code: 'auth_ok', message: 'ok');
-  }
+  Future<MetricaStatus> writeAuth(List<int> pinBytes) async => authStatus;
 
   @override
   Future<MetricaStatus> writePair(List<int> payload) async {
-    return const MetricaStatus(ok: true, code: 'paired', message: 'listo');
+    ops.add('pair');
+    return const MetricaStatus(ok: true, msg: 'paired');
   }
 
   @override
   Future<MetricaStatus> writeWifi(List<int> payload) async {
-    return const MetricaStatus(ok: true, code: 'wifi_saved', message: 'wifi');
+    ops.add('wifi');
+    return const MetricaStatus(ok: true, msg: 'wifi_saved');
   }
 
   @override

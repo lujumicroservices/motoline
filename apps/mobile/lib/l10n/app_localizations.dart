@@ -7080,6 +7080,66 @@ abstract class AppLocalizations {
   /// **'No dice si ya está emparejado.'**
   String get metricaBlePairedUnknown;
 
+  /// No description provided for @metricaBleDeviceId.
+  ///
+  /// In es, this message translates to:
+  /// **'ID {id}.'**
+  String metricaBleDeviceId(String id);
+
+  /// No description provided for @metricaBleDeviceIdEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin ID.'**
+  String get metricaBleDeviceIdEmpty;
+
+  /// No description provided for @metricaBleWifiPresent.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi-Fi guardado.'**
+  String get metricaBleWifiPresent;
+
+  /// No description provided for @metricaBleWifiAbsent.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin Wi-Fi.'**
+  String get metricaBleWifiAbsent;
+
+  /// No description provided for @metricaBleWifiUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Wi-Fi sin dato.'**
+  String get metricaBleWifiUnknown;
+
+  /// No description provided for @metricaBleAuthedYes.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN aceptado.'**
+  String get metricaBleAuthedYes;
+
+  /// No description provided for @metricaBleAuthedNo.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN pendiente.'**
+  String get metricaBleAuthedNo;
+
+  /// No description provided for @metricaBleAuthedUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN sin dato.'**
+  String get metricaBleAuthedUnknown;
+
+  /// No description provided for @metricaBleMtu.
+  ///
+  /// In es, this message translates to:
+  /// **'MTU {mtu}.'**
+  String metricaBleMtu(int mtu);
+
+  /// No description provided for @metricaBleMtuUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'MTU desconocido.'**
+  String get metricaBleMtuUnknown;
+
   /// No description provided for @metricaBlePairingOff.
   ///
   /// In es, this message translates to:
@@ -7122,10 +7182,16 @@ abstract class AppLocalizations {
   /// **'PIN incorrecto.'**
   String get metricaBleWrongPin;
 
+  /// No description provided for @metricaBleWrongPinLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'PIN incorrecto. Quedan {left} intentos.'**
+  String metricaBleWrongPinLeft(int left);
+
   /// No description provided for @metricaBlePinLocked.
   ///
   /// In es, this message translates to:
-  /// **'Demasiados intentos. El equipo salió del modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.'**
+  /// **'PIN incorrecto. No quedan intentos: el equipo cerró el modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.'**
   String get metricaBlePinLocked;
 
   /// No description provided for @metricaBleMinting.
@@ -7227,7 +7293,7 @@ abstract class AppLocalizations {
   /// No description provided for @metricaBleWifiHelp.
   ///
   /// In es, this message translates to:
-  /// **'Si quieres, envía la red al equipo para que suba las sesiones.'**
+  /// **'Si quieres, envía la red ahora. Hay que hacerlo antes de emparejar: cuando el equipo confirma el emparejado, cierra el modo a los pocos segundos.'**
   String get metricaBleWifiHelp;
 
   /// No description provided for @metricaBleWifiSsid.

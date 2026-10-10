@@ -18,13 +18,13 @@
 - Decisión de compra: **1 unidad** para primer prototipo, no 10.
 - Power: Battery 13.2 **o** USB 5 V de moto **o** buck 12→5 V (no los tres a la vez).
 - Cotización qty 1 en curso (M5Stack shop + SparkFun + local buck/caja).
-- App (2026-10-10): emparejado BLE del teléfono en `apps/mobile/lib/core/services/metrica_ble_protocol.dart`. UUIDs y códigos STATUS provisionales hasta el firmware 0.6.8-ble. El secreto no se muestra ni se escribe en logs. El `PAIR` por USB sigue en la misma pantalla.
+- App (2026-10-10): emparejado BLE alineado con el firmware 0.6.8-ble ya flasheado. Servicio `6f8a0001-5c3e-4b8e-9a51-4d4554524943`, fragmentos `0x1E`, MTU 247, STATUS `msg`/`err`/`left`. El Wi-Fi se escribe antes del PAIR. El secreto no se muestra ni se escribe en logs. El `PAIR` por USB sigue en la misma pantalla. `claim_code` no está en este repo: la app reenvía `ingest_url` tal cual.
 
 ## Siguiente paso (cuando se retome)
 
 1. Confirmar y pedir el carrito qty 1 (núcleo M5Stack: Basic + M135 + Battery 13.2).
 2. Al recibir: firmware mínimo en Basic (GPS lock, speed, lean crudo, log microSD).
-3. Firmware 0.6.8-ble: implementar el GATT descrito en `metrica_ble_protocol.dart` (INFO/AUTH/PAIR/WIFI/STATUS) y confirmar UUIDs.
+3. Confirmar en el despliegue de `pair-logger-device` que `ingest_url` es Azure `logger-ingest` (el firmware sube con `X-Logger-Key`). La función no está en `supabase/functions`.
 
 ## Preguntas abiertas
 

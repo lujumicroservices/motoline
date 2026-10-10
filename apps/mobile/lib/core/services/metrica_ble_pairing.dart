@@ -18,6 +18,7 @@ class MetricaBlePairing {
     required void Function(MetricaStatus status) onStatus,
     void Function(MetricaPairPhase phase)? onPhase,
     String label = 'M5 Logger',
+    Future<MetricaWifiCredentials?> Function()? requestWifi,
   }) async {
     MetricaBleProtocol.validatePin(pin);
     if (!await hasSession()) {
@@ -30,7 +31,21 @@ class MetricaBlePairing {
       MetricaBleProtocol.authBytes(pin),
     )).redact(secrets);
     onStatus(auth);
-    MetricaBleProtocol.requireAccepted(auth);
+    MetricaBleProtocol.requireMsg(auth, 'auth_ok');
+
+    // WIFI before PAIR. After `paired` the logger closes the mode in ~3 s.
+    if (requestWifi != null) {
+      final creds = await requestWifi();
+      if (creds != null) {
+        await sendWifi(
+          link: link,
+          ssid: creds.ssid,
+          password: creds.password,
+          onStatus: onStatus,
+          onPhase: onPhase,
+        );
+      }
+    }
 
     if (!await hasSession()) {
       throw const MetricaBleException(MetricaBleFailure.noSession);
@@ -56,7 +71,7 @@ class MetricaBlePairing {
       ),
     )).redact(secrets);
     onStatus(paired);
-    MetricaBleProtocol.requireAccepted(paired);
+    MetricaBleProtocol.requireMsg(paired, 'paired');
     return MetricaPairSuccess(deviceId: claimed.deviceId, status: paired);
   }
 
@@ -77,10 +92,11 @@ class MetricaBlePairing {
       MetricaBleProtocol.wifiPayload(ssid: name, pass: password),
     )).redact(secrets);
     onStatus(status);
-    if (!status.ok) {
+    if (!status.ok || status.msg != 'wifi_saved') {
+      final err = status.err.trim();
       throw MetricaBleException(
         MetricaBleFailure.wifiRejected,
-        detail: status.message,
+        detail: MetricaBleProtocol.errorCodes.contains(err) ? err : null,
       );
     }
     return status;

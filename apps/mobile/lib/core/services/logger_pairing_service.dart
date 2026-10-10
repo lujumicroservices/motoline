@@ -9,6 +9,13 @@ class LoggerPairResult {
 
   final String deviceId;
   final String deviceSecret;
+
+  /// `ingest_url` from `claim_code`, forwarded unchanged into PAIR.
+  ///
+  /// `pair-logger-device` is not in this repo, so the client cannot tell
+  /// whether this is Azure `logger-ingest` or Supabase `ingest-logger-session`.
+  /// The logger uploads to whatever https URL is stored here, with the key
+  /// in the `X-Logger-Key` header. Do not rewrite the URL in the app.
   final String ingestUrl;
 
   /// Serial command to paste into the Basic USB monitor.

@@ -172,6 +172,7 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
           hasSession: _hasSession,
           onPhase: _onPhase,
           onStatus: _onStatus,
+          requestWifi: _requestWifi,
         );
         if (!mounted) return;
         final result = context.l10n.metricaBleSuccess(success.deviceId);
@@ -181,7 +182,6 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
           _error = null;
         });
         showAppSnack(context, result, tone: AppToastTone.success);
-        await _offerWifi(link);
         await _dropLink();
         if (!mounted) return;
         setState(() {
@@ -225,42 +225,25 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
 
   void _onStatus(MetricaStatus status) {
     if (!mounted) return;
-    final line = status.message.trim().isEmpty
-        ? status.code.trim()
-        : status.message.trim();
-    if (line.isEmpty) return;
-    setState(() => _notes.add(line));
-  }
-
-  Future<void> _offerWifi(MetricaGattLink link) async {
-    final creds = await _askWifi();
-    if (creds == null || !mounted) return;
-    setState(() => _status = context.l10n.metricaBleWifiSending);
-    try {
-      await _pairing.sendWifi(
-        link: link,
-        ssid: creds.ssid,
-        password: creds.password,
-        onPhase: _onPhase,
-        onStatus: _onStatus,
-      );
-      if (!mounted) return;
+    if (status.ok && status.msg == 'wifi_saved') {
       final saved = context.l10n.metricaBleWifiSaved;
       setState(() => _notes.add(saved));
       showAppSnack(context, saved, tone: AppToastTone.success);
-    } on MetricaBleException catch (error) {
-      if (!mounted) return;
-      final message = error.failure == MetricaBleFailure.timeout
-          ? context.l10n.metricaBleTimeout
-          : context.l10n.metricaBleWifiFailed;
-      setState(() => _notes.add(message));
-      showAppSnackError(context, message);
-    } catch (_) {
-      if (!mounted) return;
-      final message = context.l10n.metricaBleWifiFailed;
-      setState(() => _notes.add(message));
-      showAppSnackError(context, message);
+      return;
     }
+    if (!status.ok && status.err == 'bad_pin') {
+      final left = status.left;
+      final line = left != null && left > 0
+          ? context.l10n.metricaBleWrongPinLeft(left)
+          : context.l10n.metricaBlePinLocked;
+      setState(() => _notes.add(line));
+    }
+  }
+
+  Future<MetricaWifiCredentials?> _requestWifi() async {
+    final creds = await _askWifi();
+    if (creds == null) return null;
+    return MetricaWifiCredentials(ssid: creds.ssid, password: creds.password);
   }
 
   Future<void> _dropLink() async {
@@ -286,6 +269,10 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
       case MetricaBleFailure.notFound:
         return l10n.metricaBleNotFound;
       case MetricaBleFailure.wrongPin:
+        final left = error.attemptsLeft;
+        if (left != null && left > 0) {
+          return l10n.metricaBleWrongPinLeft(left);
+        }
         return l10n.metricaBleWrongPin;
       case MetricaBleFailure.pinFormat:
         return l10n.metricaBlePinFormat;
@@ -369,13 +356,6 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
         if (_info != null) ...[
           const SizedBox(height: 12),
           Text(_infoLine(l10n, _info!)),
-          if (_info!.pairingMode == false) ...[
-            const SizedBox(height: 6),
-            Text(
-              l10n.metricaBlePairingOff,
-              style: const TextStyle(color: AppTheme.lineHot, height: 1.35),
-            ),
-          ],
         ],
         if (_phase == _Phase.picking) ...[
           const SizedBox(height: 12),
@@ -425,7 +405,23 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
       false => l10n.metricaBlePairedNo,
       null => l10n.metricaBlePairedUnknown,
     };
-    return '$firmware $paired';
+    final id = info.deviceId.trim().isEmpty
+        ? l10n.metricaBleDeviceIdEmpty
+        : l10n.metricaBleDeviceId(info.deviceId);
+    final wifi = switch (info.wifi) {
+      true => l10n.metricaBleWifiPresent,
+      false => l10n.metricaBleWifiAbsent,
+      null => l10n.metricaBleWifiUnknown,
+    };
+    final authed = switch (info.authed) {
+      true => l10n.metricaBleAuthedYes,
+      false => l10n.metricaBleAuthedNo,
+      null => l10n.metricaBleAuthedUnknown,
+    };
+    final mtu = info.mtu == null
+        ? l10n.metricaBleMtuUnknown
+        : l10n.metricaBleMtu(info.mtu!);
+    return '$firmware $paired $id $wifi $authed $mtu';
   }
 }
 

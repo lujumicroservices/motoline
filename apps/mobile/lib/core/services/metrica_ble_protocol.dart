@@ -2,56 +2,47 @@ import 'dart:convert';
 
 /// GATT contract for pairing a Métrica logger (firmware 0.6.8-ble).
 ///
-/// UUIDs and the STATUS `code` strings below are the single place the app
-/// knows them. They are provisional until that firmware build publishes the
-/// final values — replace this block, not the call sites.
+/// Advertising name `Metrica-XXXX`: XXXX is the last two bytes of the Wi-Fi
+/// STA MAC in uppercase hex (for example `76:38` → `Metrica-7638`). The BLE
+/// address is the base MAC + 2; do not derive the name from it. The service
+/// UUID is in the advertisement; the name is in the scan response.
 ///
-/// Advertisement:
-/// - Complete local name `Metrica-XXXX` (exactly four alphanumeric characters).
-/// - This service UUID is also advertised.
+/// Characteristics (suffix `5c3e-4b8e-9a51-4d4554524943`):
+/// - [infoUuid] read. JSON `fw`, `paired`, `device_id`, `wifi`, `authed`, `mtu`.
+/// - [authUuid] write with response. Six ASCII digits. Per connection.
+/// - [pairUuid] write with response, max 600 B.
+///   JSON `{"device_id","secret","ingest_url"}`.
+/// - [wifiUuid] write with response, max 600 B. JSON `{"ssid","pass"}`.
+///   Send this before PAIR: after `paired` the logger closes the mode in ~3 s.
+/// - [statusUuid] read + notify. One answer per write.
+///   `{"ok":true,"msg":"ready|auth_ok|paired|wifi_saved"}` or
+///   `{"ok":false,"err":"bad_pin","left":N}` and
+///   `auth_required|bad_json|missing_fields|bad_fields`.
+///   `bad_pin` with `left` 0 closes pairing mode.
 ///
-/// Characteristics:
-/// - [infoUuid] read. JSON. Version (`fw`, `v`, `version`, or `firmware`),
-///   paired (`paired` or `is_paired`), pairing mode (`pairing`,
-///   `pairing_mode`, or `in_pairing`).
-/// - [authUuid] write. The 6-digit PIN as UTF-8 text, not JSON.
-///   Without a successful AUTH the logger rejects every other write.
-///   After 5 failed PINs it leaves pairing mode.
-/// - [pairUuid] write. JSON `{"device_id","secret","ingest_url"}`.
-/// - [wifiUuid] write. JSON `{"ssid","pass"}`. Optional.
-/// - [statusUuid] notify. JSON `{"ok":bool,"code":str,"msg":str}`.
-///
-/// The phone requests ATT MTU 517. A write that fits in `MTU - 3` is sent
-/// raw (JSON starts with `{`, a PIN with a digit). Otherwise it is split:
-///
-/// ```text
-/// byte 0: 0xF1
-/// byte 1: seq   (uint8, 0-based)
-/// byte 2: count (uint8, >= 2)
-/// byte 3..: slice
-/// ```
-///
-/// The logger concatenates slices in `seq` order and parses the payload once
-/// every index `0 .. count-1` has arrived. A STATUS notification may use the
-/// same frame. A value that does not start with `0xF1` is a complete message.
+/// Subscribe to STATUS before any write. Write, wait for that STATUS, then
+/// write the next value. The phone requests ATT MTU 247. A payload that fits
+/// in `mtu - 3` is written raw. Otherwise each fragment is
+/// `[0x1E][index][total][bytes]` and carries `mtu - 6` payload bytes.
 ///
 /// `secret` and the Wi-Fi password are never put in logs or in [toString].
 abstract final class MetricaBleProtocol {
-  /// Provisional primary service. Firmware 0.6.8-ble owns the real value.
-  static const serviceUuid = '8f3a1c20-6b4e-4d91-9c17-5e2b7a4d6f10';
+  static const _uuidSuffix = '5c3e-4b8e-9a51-4d4554524943';
 
-  static const infoUuid = '8f3a1c21-6b4e-4d91-9c17-5e2b7a4d6f10';
-  static const authUuid = '8f3a1c22-6b4e-4d91-9c17-5e2b7a4d6f10';
-  static const pairUuid = '8f3a1c23-6b4e-4d91-9c17-5e2b7a4d6f10';
-  static const wifiUuid = '8f3a1c24-6b4e-4d91-9c17-5e2b7a4d6f10';
-  static const statusUuid = '8f3a1c25-6b4e-4d91-9c17-5e2b7a4d6f10';
+  static const serviceUuid = '6f8a0001-$_uuidSuffix';
+  static const infoUuid = '6f8a0002-$_uuidSuffix';
+  static const authUuid = '6f8a0003-$_uuidSuffix';
+  static const pairUuid = '6f8a0004-$_uuidSuffix';
+  static const wifiUuid = '6f8a0005-$_uuidSuffix';
+  static const statusUuid = '6f8a0006-$_uuidSuffix';
 
-  /// Leading byte of a fragmented write or notification. Never a JSON or PIN.
-  static const fragmentMagic = 0xF1;
+  /// Leading byte of a fragmented write or notification.
+  static const fragmentMagic = 0x1E;
 
   static const fragmentHeaderLength = 3;
 
-  static const requestedMtu = 517;
+  /// ATT MTU the app requests. Android usually negotiates 185–247.
+  static const requestedMtu = 247;
 
   /// How long the phone waits for one STATUS notification.
   static const statusTimeout = Duration(seconds: 8);
@@ -60,36 +51,39 @@ abstract final class MetricaBleProtocol {
 
   static const connectTimeout = Duration(seconds: 15);
 
-  /// Canonical advertisement name, e.g. `Metrica-A1B2`.
-  static final advertisedName = RegExp(r'^Metrica-[A-Za-z0-9]{4}$');
+  /// Canonical advertisement name, e.g. `Metrica-7638`.
+  static final advertisedName = RegExp(r'^Metrica-[0-9A-F]{4}$');
 
   static final pinPattern = RegExp(r'^\d{6}$');
 
-  /// STATUS `code` values treated as a rejected PIN.
-  ///
-  /// Provisional. Add the firmware's exact code here when it lands.
-  static const pinInvalidCodes = <String>{
-    'pin_invalid',
+  static const okMessages = <String>{
+    'ready',
+    'auth_ok',
+    'paired',
+    'wifi_saved',
+  };
+
+  static const errorCodes = <String>{
     'bad_pin',
-    'wrong_pin',
-    'auth_failed',
-    'pin_rejected',
+    'auth_required',
+    'bad_json',
+    'missing_fields',
+    'bad_fields',
   };
 
-  /// STATUS `code` values meaning pairing mode closed after too many PINs.
-  static const pinLockedCodes = <String>{
-    'pin_locked',
-    'locked',
-    'pairing_closed',
-    'too_many_pin',
-    'auth_locked',
-  };
-
-  static const timeoutCodes = <String>{'timeout', 'timed_out'};
-
+  /// ATT payload per write: MTU − 3.
   static int maxWriteLength(int mtu) {
     final att = mtu < 23 ? 23 : mtu;
     return att - 3;
+  }
+
+  /// JSON bytes inside one fragment: MTU − 6 (header is 3 bytes).
+  static int fragmentDataLength(int mtu) {
+    final room = maxWriteLength(mtu) - fragmentHeaderLength;
+    if (room < 1) {
+      throw const MetricaBleException(MetricaBleFailure.protocol);
+    }
+    return room;
   }
 
   static bool sameUuid(String a, String b) {
@@ -144,7 +138,9 @@ abstract final class MetricaBleProtocol {
     return utf8.encode(jsonEncode({'ssid': ssid, 'pass': pass}));
   }
 
-  /// One ATT write per frame. The first frame is raw when [payload] fits.
+  /// One ATT write per frame. The first frame is raw when [payload] fits
+  /// in [maxChunk] (`mtu - 3`). Otherwise each frame is
+  /// `[0x1E, index, total, ...slice]` and [slice] is `mtu - 6` bytes.
   static List<List<int>> encodeWrite(
     List<int> payload, {
     required int maxChunk,
@@ -181,9 +177,14 @@ abstract final class MetricaBleProtocol {
     }
     final map = decoded.map((key, value) => MapEntry(key.toString(), value));
     return MetricaDeviceInfo(
-      firmware: _string(map, const ['fw', 'v', 'version', 'firmware']),
-      paired: _bool(map, const ['paired', 'is_paired']),
-      pairingMode: _bool(map, const ['pairing', 'pairing_mode', 'in_pairing']),
+      hw: _string(map, 'hw'),
+      firmware: _string(map, 'fw'),
+      role: _string(map, 'role'),
+      paired: _bool(map, 'paired'),
+      deviceId: _string(map, 'device_id'),
+      wifi: _bool(map, 'wifi'),
+      authed: _bool(map, 'authed'),
+      mtu: _int(map, 'mtu'),
     );
   }
 
@@ -193,18 +194,25 @@ abstract final class MetricaBleProtocol {
       throw const FormatException('status');
     }
     final map = decoded.map((key, value) => MapEntry(key.toString(), value));
-    final message = _string(map, const ['msg', 'message']);
     return MetricaStatus(
       ok: map['ok'] == true,
-      code: _string(map, const ['code']),
-      message: message,
+      msg: _string(map, 'msg'),
+      err: _string(map, 'err'),
+      left: _int(map, 'left'),
     );
   }
 
-  /// Log line for a STATUS notification. The human [MetricaStatus.message]
-  /// is omitted so a firmware echo of `secret` cannot land in logcat.
-  static String statusLogLine(MetricaStatus status) =>
-      'ok=${status.ok} code=${status.code}';
+  /// Log line for a STATUS notification. Only the known short codes are
+  /// printed, so a firmware echo of `secret` cannot land in logcat.
+  static String statusLogLine(MetricaStatus status) {
+    if (status.ok) {
+      final msg = okMessages.contains(status.msg) ? status.msg : 'unlisted';
+      return 'ok=true msg=$msg';
+    }
+    final err = errorCodes.contains(status.err) ? status.err : 'unlisted';
+    final left = status.left == null ? '' : ' left=${status.left}';
+    return 'ok=false err=$err$left';
+  }
 
   static String redact(String text, Iterable<String> secrets) {
     var out = text;
@@ -216,95 +224,107 @@ abstract final class MetricaBleProtocol {
     return out;
   }
 
-  /// Accepts `ok: true`. Otherwise classifies PIN, lock, and timeout codes.
+  /// Accepts `ok: true`. `bad_pin` with no attempts left closes the mode.
   static void requireAccepted(MetricaStatus status) {
     if (status.ok) return;
-    final code = status.code.trim().toLowerCase();
-    if (pinLockedCodes.contains(code)) {
-      throw MetricaBleException(
-        MetricaBleFailure.pinLocked,
-        detail: status.message,
-      );
+    final err = status.err.trim();
+    if (err == 'bad_pin') {
+      final left = status.left;
+      if (left == null || left <= 0) {
+        throw MetricaBleException(
+          MetricaBleFailure.pinLocked,
+          attemptsLeft: left,
+        );
+      }
+      throw MetricaBleException(MetricaBleFailure.wrongPin, attemptsLeft: left);
     }
-    if (pinInvalidCodes.contains(code)) {
-      throw MetricaBleException(
-        MetricaBleFailure.wrongPin,
-        detail: status.message,
-      );
+    if (errorCodes.contains(err)) {
+      throw MetricaBleException(MetricaBleFailure.protocol, detail: err);
     }
-    if (timeoutCodes.contains(code)) {
-      throw const MetricaBleException(MetricaBleFailure.timeout);
-    }
-    final detail = status.message.trim().isEmpty
-        ? status.code.trim()
-        : status.message.trim();
-    throw MetricaBleException(
-      MetricaBleFailure.protocol,
-      detail: detail.isEmpty ? null : detail,
-    );
+    throw const MetricaBleException(MetricaBleFailure.protocol);
   }
 
-  static String _string(Map<String, Object?> map, List<String> keys) {
-    for (final key in keys) {
-      final value = map[key];
-      if (value is String) return value.trim();
-      if (value is num) return value.toString();
+  /// [requireAccepted], then the success `msg` the write was waiting for.
+  static void requireMsg(MetricaStatus status, String msg) {
+    requireAccepted(status);
+    if (status.msg != msg) {
+      throw const MetricaBleException(MetricaBleFailure.protocol);
     }
+  }
+
+  static String _string(Map<String, Object?> map, String key) {
+    final value = map[key];
+    if (value is String) return value.trim();
+    if (value is num) return value.toString();
     return '';
   }
 
-  static bool? _bool(Map<String, Object?> map, List<String> keys) {
-    for (final key in keys) {
-      final value = map[key];
-      if (value is bool) return value;
-      if (value is num) return value != 0;
-      if (value is String) {
-        final text = value.trim().toLowerCase();
-        if (text == 'true' || text == '1' || text == 'yes') return true;
-        if (text == 'false' || text == '0' || text == 'no') return false;
-      }
+  static bool? _bool(Map<String, Object?> map, String key) {
+    final value = map[key];
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final text = value.trim().toLowerCase();
+      if (text == 'true' || text == '1' || text == 'yes') return true;
+      if (text == 'false' || text == '0' || text == 'no') return false;
     }
+    return null;
+  }
+
+  static int? _int(Map<String, Object?> map, String key) {
+    final value = map[key];
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value.trim());
     return null;
   }
 }
 
-/// Reassembles fragmented STATUS notifications. A raw JSON value is returned
-/// immediately. See [MetricaBleProtocol.fragmentMagic].
+/// Reassembles fragmented STATUS notifications.
+///
+/// A value that does not start with [MetricaBleProtocol.fragmentMagic] is a
+/// complete message. Index 0 restarts reassembly. An out-of-order index
+/// drops the buffer and yields nothing (the firmware sends no STATUS).
 class MetricaReassembler {
-  int? _count;
-  final Map<int, List<int>> _parts = {};
+  int? _total;
+  int _next = 0;
+  final List<int> _buffer = [];
 
   List<int>? add(List<int> frame) {
     if (frame.isEmpty) return null;
     if (frame[0] != MetricaBleProtocol.fragmentMagic) {
-      _clear();
+      _reset();
       return List<int>.from(frame);
     }
     if (frame.length < MetricaBleProtocol.fragmentHeaderLength) return null;
-    final seq = frame[1];
-    final count = frame[2];
-    if (count < 2 || seq >= count) {
-      _clear();
+    final index = frame[1];
+    final total = frame[2];
+    if (total < 1 || index >= total) {
+      _reset();
       return null;
     }
-    if (_count != null && _count != count) _clear();
-    _count = count;
-    _parts[seq] = List<int>.from(frame.sublist(3));
-    if (_parts.length < count) return null;
-    for (var i = 0; i < count; i++) {
-      if (!_parts.containsKey(i)) return null;
+    if (index == 0) {
+      _reset();
+      _total = total;
+      _buffer.addAll(frame.sublist(3));
+      _next = 1;
+    } else if (_total != total || index != _next) {
+      _reset();
+      return null;
+    } else {
+      _buffer.addAll(frame.sublist(3));
+      _next = index + 1;
     }
-    final out = <int>[];
-    for (var i = 0; i < count; i++) {
-      out.addAll(_parts[i]!);
-    }
-    _clear();
+    if (_total == null || _next < _total!) return null;
+    final out = List<int>.from(_buffer);
+    _reset();
     return out;
   }
 
-  void _clear() {
-    _count = null;
-    _parts.clear();
+  void _reset() {
+    _total = null;
+    _next = 0;
+    _buffer.clear();
   }
 }
 
@@ -322,32 +342,45 @@ class MetricaScanHit {
 
 class MetricaDeviceInfo {
   const MetricaDeviceInfo({
-    required this.firmware,
-    required this.paired,
-    required this.pairingMode,
+    this.hw = '',
+    this.firmware = '',
+    this.role = '',
+    this.paired,
+    this.deviceId = '',
+    this.wifi,
+    this.authed,
+    this.mtu,
   });
 
+  final String hw;
   final String firmware;
+  final String role;
   final bool? paired;
-  final bool? pairingMode;
+  final String deviceId;
+  final bool? wifi;
+  final bool? authed;
+  final int? mtu;
 }
 
 class MetricaStatus {
   const MetricaStatus({
     required this.ok,
-    required this.code,
-    required this.message,
+    this.msg = '',
+    this.err = '',
+    this.left,
   });
 
   final bool ok;
-  final String code;
-  final String message;
+  final String msg;
+  final String err;
+  final int? left;
 
   MetricaStatus redact(Iterable<String> secrets) {
     return MetricaStatus(
       ok: ok,
-      code: code,
-      message: MetricaBleProtocol.redact(message, secrets),
+      msg: MetricaBleProtocol.redact(msg, secrets),
+      err: MetricaBleProtocol.redact(err, secrets),
+      left: left,
     );
   }
 }
@@ -370,12 +403,15 @@ enum MetricaBleFailure {
 }
 
 class MetricaBleException implements Exception {
-  const MetricaBleException(this.failure, {this.detail});
+  const MetricaBleException(this.failure, {this.detail, this.attemptsLeft});
 
   final MetricaBleFailure failure;
 
   /// Safe to show. Must already be redacted. Omitted from [toString].
   final String? detail;
+
+  /// Attempts still left after `bad_pin`. Zero means the mode closed.
+  final int? attemptsLeft;
 
   factory MetricaBleException.fromPairingService(StateError error) {
     final message = error.message.toLowerCase();
@@ -412,6 +448,13 @@ class MetricaPairSuccess {
 
   @override
   String toString() => 'MetricaPairSuccess($deviceId)';
+}
+
+class MetricaWifiCredentials {
+  const MetricaWifiCredentials({required this.ssid, required this.password});
+
+  final String ssid;
+  final String password;
 }
 
 enum MetricaPairPhase { auth, mint, write, wifi }

@@ -1878,6 +1878,26 @@
   "metricaBlePairedYes": "Ya está emparejado.",
   "metricaBlePairedNo": "Aún no está emparejado.",
   "metricaBlePairedUnknown": "No dice si ya está emparejado.",
+  "metricaBleDeviceId": "ID {id}.",
+  "@metricaBleDeviceId": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "metricaBleDeviceIdEmpty": "Sin ID.",
+  "metricaBleWifiPresent": "Wi-Fi guardado.",
+  "metricaBleWifiAbsent": "Sin Wi-Fi.",
+  "metricaBleWifiUnknown": "Wi-Fi sin dato.",
+  "metricaBleAuthedYes": "PIN aceptado.",
+  "metricaBleAuthedNo": "PIN pendiente.",
+  "metricaBleAuthedUnknown": "PIN sin dato.",
+  "metricaBleMtu": "MTU {mtu}.",
+  "@metricaBleMtu": {
+    "placeholders": {
+      "mtu": {"type": "int"}
+    }
+  },
+  "metricaBleMtuUnknown": "MTU desconocido.",
   "metricaBlePairingOff": "No está en modo de emparejado. El PIN solo aparece en su pantalla en ese modo. Tras 5 PIN incorrectos, el equipo sale de ese modo.",
   "metricaBlePinTitle": "PIN de Métrica",
   "metricaBlePinBody": "Escribe los 6 dígitos que muestra el equipo. Sin el PIN, rechaza el emparejado. Tras 5 fallos sale del modo de emparejado.",
@@ -1885,7 +1905,13 @@
   "metricaBlePinFormat": "El PIN debe tener 6 dígitos.",
   "metricaBleCheckingPin": "Comprobando el PIN…",
   "metricaBleWrongPin": "PIN incorrecto.",
-  "metricaBlePinLocked": "Demasiados intentos. El equipo salió del modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.",
+  "metricaBleWrongPinLeft": "PIN incorrecto. Quedan {left} intentos.",
+  "@metricaBleWrongPinLeft": {
+    "placeholders": {
+      "left": {"type": "int"}
+    }
+  },
+  "metricaBlePinLocked": "PIN incorrecto. No quedan intentos: el equipo cerró el modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.",
   "metricaBleMinting": "Creando el emparejado en tu cuenta…",
   "metricaBleWriting": "Enviando el emparejado al equipo…",
   "metricaBleTimeout": "El equipo no respondió a tiempo.",
@@ -1912,7 +1938,7 @@
   "metricaBleRetry": "Reintentar",
   "metricaBleContinue": "Continuar",
   "metricaBleWifiTitle": "Wi‑Fi del paddock (opcional)",
-  "metricaBleWifiHelp": "Si quieres, envía la red al equipo para que suba las sesiones.",
+  "metricaBleWifiHelp": "Si quieres, envía la red ahora. Hay que hacerlo antes de emparejar: cuando el equipo confirma el emparejado, cierra el modo a los pocos segundos.",
   "metricaBleWifiSsid": "Nombre de la red",
   "metricaBleWifiPassword": "Contraseña",
   "metricaBleWifiSend": "Enviar Wi‑Fi",

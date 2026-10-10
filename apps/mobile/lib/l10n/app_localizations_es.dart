@@ -4000,6 +4000,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String get metricaBlePairedUnknown => 'No dice si ya está emparejado.';
 
   @override
+  String metricaBleDeviceId(String id) {
+    return 'ID $id.';
+  }
+
+  @override
+  String get metricaBleDeviceIdEmpty => 'Sin ID.';
+
+  @override
+  String get metricaBleWifiPresent => 'Wi-Fi guardado.';
+
+  @override
+  String get metricaBleWifiAbsent => 'Sin Wi-Fi.';
+
+  @override
+  String get metricaBleWifiUnknown => 'Wi-Fi sin dato.';
+
+  @override
+  String get metricaBleAuthedYes => 'PIN aceptado.';
+
+  @override
+  String get metricaBleAuthedNo => 'PIN pendiente.';
+
+  @override
+  String get metricaBleAuthedUnknown => 'PIN sin dato.';
+
+  @override
+  String metricaBleMtu(int mtu) {
+    return 'MTU $mtu.';
+  }
+
+  @override
+  String get metricaBleMtuUnknown => 'MTU desconocido.';
+
+  @override
   String get metricaBlePairingOff =>
       'No está en modo de emparejado. El PIN solo aparece en su pantalla en ese modo. Tras 5 PIN incorrectos, el equipo sale de ese modo.';
 
@@ -4023,8 +4057,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get metricaBleWrongPin => 'PIN incorrecto.';
 
   @override
+  String metricaBleWrongPinLeft(int left) {
+    return 'PIN incorrecto. Quedan $left intentos.';
+  }
+
+  @override
   String get metricaBlePinLocked =>
-      'Demasiados intentos. El equipo salió del modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.';
+      'PIN incorrecto. No quedan intentos: el equipo cerró el modo de emparejado. Vuelve a activarlo en la pantalla de Métrica.';
 
   @override
   String get metricaBleMinting => 'Creando el emparejado en tu cuenta…';
@@ -4083,7 +4122,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get metricaBleWifiHelp =>
-      'Si quieres, envía la red al equipo para que suba las sesiones.';
+      'Si quieres, envía la red ahora. Hay que hacerlo antes de emparejar: cuando el equipo confirma el emparejado, cierra el modo a los pocos segundos.';
 
   @override
   String get metricaBleWifiSsid => 'Nombre de la red';

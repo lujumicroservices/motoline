@@ -1786,6 +1786,26 @@
   "metricaBlePairedYes": "Already paired.",
   "metricaBlePairedNo": "Not paired yet.",
   "metricaBlePairedUnknown": "It did not say whether it is paired.",
+  "metricaBleDeviceId": "ID {id}.",
+  "@metricaBleDeviceId": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "metricaBleDeviceIdEmpty": "No ID.",
+  "metricaBleWifiPresent": "Wi-Fi saved.",
+  "metricaBleWifiAbsent": "No Wi-Fi.",
+  "metricaBleWifiUnknown": "Wi-Fi unknown.",
+  "metricaBleAuthedYes": "PIN accepted.",
+  "metricaBleAuthedNo": "PIN pending.",
+  "metricaBleAuthedUnknown": "PIN unknown.",
+  "metricaBleMtu": "MTU {mtu}.",
+  "@metricaBleMtu": {
+    "placeholders": {
+      "mtu": {"type": "int"}
+    }
+  },
+  "metricaBleMtuUnknown": "MTU unknown.",
   "metricaBlePairingOff": "It is not in pairing mode. The PIN is on its screen only in that mode. After 5 wrong PINs the logger leaves that mode.",
   "metricaBlePinTitle": "Métrica PIN",
   "metricaBlePinBody": "Enter the 6 digits on the logger. Without the PIN it rejects pairing. After 5 failures it leaves pairing mode.",
@@ -1793,7 +1813,13 @@
   "metricaBlePinFormat": "The PIN must be 6 digits.",
   "metricaBleCheckingPin": "Checking the PIN…",
   "metricaBleWrongPin": "Wrong PIN.",
-  "metricaBlePinLocked": "Too many attempts. The logger left pairing mode. Turn pairing mode on again on Métrica.",
+  "metricaBleWrongPinLeft": "Wrong PIN. {left} attempts left.",
+  "@metricaBleWrongPinLeft": {
+    "placeholders": {
+      "left": {"type": "int"}
+    }
+  },
+  "metricaBlePinLocked": "Wrong PIN. No attempts left: the logger closed pairing mode. Turn pairing mode on again on Métrica.",
   "metricaBleMinting": "Creating the pairing on your account…",
   "metricaBleWriting": "Sending the pairing to the logger…",
   "metricaBleTimeout": "The logger did not respond in time.",
@@ -1820,7 +1846,7 @@
   "metricaBleRetry": "Try again",
   "metricaBleContinue": "Continue",
   "metricaBleWifiTitle": "Paddock Wi‑Fi (optional)",
-  "metricaBleWifiHelp": "Optionally send the network so the logger can upload sessions.",
+  "metricaBleWifiHelp": "Optionally send the network now. Do it before pairing: once the logger confirms pairing, it closes the mode a few seconds later.",
   "metricaBleWifiSsid": "Network name",
   "metricaBleWifiPassword": "Password",
   "metricaBleWifiSend": "Send Wi‑Fi",

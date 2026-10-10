@@ -86,6 +86,7 @@ class MetricaBleClient implements MetricaBleTransport {
       await remote.connect(
         autoConnect: false,
         timeout: MetricaBleProtocol.connectTimeout,
+        mtu: MetricaBleProtocol.requestedMtu,
       );
     } catch (error) {
       throw _mapBleError(error);
@@ -167,6 +168,8 @@ class MetricaBleClient implements MetricaBleTransport {
   }
 
   Future<int> _requestMtu(BluetoothDevice device) async {
+    final current = device.mtuNow;
+    if (current >= MetricaBleProtocol.requestedMtu) return current;
     try {
       final negotiated = await device.requestMtu(
         MetricaBleProtocol.requestedMtu,
@@ -175,8 +178,8 @@ class MetricaBleClient implements MetricaBleTransport {
     } catch (_) {
       debugPrint('metrica_ble: mtu request failed');
     }
-    final current = device.mtuNow;
-    return current >= 23 ? current : 23;
+    final after = device.mtuNow;
+    return after >= 23 ? after : 23;
   }
 
   BluetoothService? _service(List<BluetoothService> services, String uuid) {
@@ -229,6 +232,8 @@ class _MetricaBleLink implements MetricaGattLink {
   final _statuses = StreamController<MetricaStatus>.broadcast();
   StreamSubscription<List<int>>? _statusSub;
 
+  /// Must run before any write. The initial value is `{"ok":true,"msg":"ready"}`
+  /// and NimBLE notifies it on subscribe; [_nextStatus] ignores that `ready`.
   Future<void> subscribe() async {
     _statusSub = status.onValueReceived.listen(_onStatus);
     final notify = status.properties.notify || status.properties.indicate;
@@ -313,12 +318,25 @@ class _MetricaBleLink implements MetricaGattLink {
     }
   }
 
-  Future<MetricaStatus> _nextStatus() {
-    return _statuses.stream.first.timeout(
-      MetricaBleProtocol.statusTimeout,
-      onTimeout: () =>
-          throw const MetricaBleException(MetricaBleFailure.timeout),
-    );
+  Future<MetricaStatus> _nextStatus() async {
+    final deadline = DateTime.now().add(MetricaBleProtocol.statusTimeout);
+    while (true) {
+      final remaining = deadline.difference(DateTime.now());
+      if (remaining <= Duration.zero) {
+        throw const MetricaBleException(MetricaBleFailure.timeout);
+      }
+      final status = await _statuses.stream.first.timeout(
+        remaining,
+        onTimeout: () =>
+            throw const MetricaBleException(MetricaBleFailure.timeout),
+      );
+      // Initial notify on subscribe. A write never answers `ready`.
+      if (status.ok && status.msg == 'ready') {
+        debugPrint('metrica_ble: ignore initial ready');
+        continue;
+      }
+      return status;
+    }
   }
 
   @override

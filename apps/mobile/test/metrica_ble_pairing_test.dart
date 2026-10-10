@@ -34,11 +34,7 @@ void main() {
 
   test('wrong PIN does not mint', () async {
     final link = _FakeLink()
-      ..authStatus = const MetricaStatus(
-        ok: false,
-        code: 'pin_invalid',
-        message: 'no',
-      );
+      ..authStatus = const MetricaStatus(ok: false, err: 'bad_pin', left: 4);
     final api = _FakeApi();
     await expectLater(
       MetricaBlePairing(api: api).pair(
@@ -90,7 +86,7 @@ void main() {
       pin: '123456',
       label: 'Metrica-A1B2',
       hasSession: () async => true,
-      onStatus: (status) => seen.add(status.message),
+      onStatus: (status) => seen.add('${status.msg}${status.err}'),
     );
 
     expect(api.mints, 1);
@@ -104,22 +100,113 @@ void main() {
     expect(success.deviceId, 'dev-1');
     expect(success.toString(), isNot(contains(_secret)));
     expect(seen.join(' '), isNot(contains(_secret)));
-    expect(link.pairStatus.message, contains(_secret));
+    expect(link.pairStatus.msg, 'paired');
+    expect(link.ops, ['pair']);
+  });
+
+  test(
+    'a STATUS echo of the secret is redacted before the UI sees it',
+    () async {
+      final link = _FakeLink()
+        ..pairStatus = const MetricaStatus(
+          ok: true,
+          msg: 'paired super-secret-value',
+        );
+      final seen = <String>[];
+      await expectLater(
+        MetricaBlePairing(api: _FakeApi()).pair(
+          link: link,
+          pin: '123456',
+          hasSession: () async => true,
+          onStatus: (status) => seen.add(status.msg),
+        ),
+        throwsA(
+          isA<MetricaBleException>().having(
+            (error) => error.failure,
+            'failure',
+            MetricaBleFailure.protocol,
+          ),
+        ),
+      );
+      expect(seen.join(' '), isNot(contains(_secret)));
+      expect(seen.join(' '), contains('***'));
+    },
+  );
+
+  test('Wi-Fi is written and acknowledged before PAIR', () async {
+    final link = _FakeLink();
+    final api = _FakeApi();
+    await MetricaBlePairing(api: api).pair(
+      link: link,
+      pin: '123456',
+      hasSession: () async => true,
+      onStatus: (_) {},
+      requestWifi: () async =>
+          const MetricaWifiCredentials(ssid: 'paddock', password: 'clave-wifi'),
+    );
+    expect(link.ops, ['wifi', 'pair']);
+    expect(api.mints, 1);
+    final wifi =
+        jsonDecode(utf8.decode(link.wifiPayload!)) as Map<String, Object?>;
+    expect(wifi['ssid'], 'paddock');
+    expect(wifi['pass'], 'clave-wifi');
+  });
+
+  test('a failed Wi-Fi write does not mint or PAIR', () async {
+    final link = _FakeLink()
+      ..wifiStatus = const MetricaStatus(ok: false, err: 'bad_fields');
+    final api = _FakeApi();
+    await expectLater(
+      MetricaBlePairing(api: api).pair(
+        link: link,
+        pin: '123456',
+        hasSession: () async => true,
+        onStatus: (_) {},
+        requestWifi: () async => const MetricaWifiCredentials(
+          ssid: 'paddock',
+          password: 'clave-wifi',
+        ),
+      ),
+      throwsA(
+        isA<MetricaBleException>().having(
+          (error) => error.failure,
+          'failure',
+          MetricaBleFailure.wifiRejected,
+        ),
+      ),
+    );
+    expect(link.ops, ['wifi']);
+    expect(api.mints, 0);
+    expect(link.pairPayload, isNull);
   });
 
   test('Wi-Fi password is redacted from STATUS shown to the UI', () async {
-    final link = _FakeLink();
+    final link = _FakeLink()
+      ..wifiStatus = const MetricaStatus(
+        ok: true,
+        msg: 'wifi_saved clave-wifi',
+      );
     final seen = <String>[];
-    await MetricaBlePairing().sendWifi(
-      link: link,
-      ssid: 'paddock',
-      password: 'clave-wifi',
-      onStatus: (status) => seen.add(status.message),
+    await expectLater(
+      MetricaBlePairing().sendWifi(
+        link: link,
+        ssid: 'paddock',
+        password: 'clave-wifi',
+        onStatus: (status) => seen.add(status.msg),
+      ),
+      throwsA(
+        isA<MetricaBleException>().having(
+          (error) => error.failure,
+          'failure',
+          MetricaBleFailure.wifiRejected,
+        ),
+      ),
     );
     final wifi =
         jsonDecode(utf8.decode(link.wifiPayload!)) as Map<String, Object?>;
     expect(wifi['pass'], 'clave-wifi');
     expect(seen.single, isNot(contains('clave-wifi')));
+    expect(seen.single, contains('***'));
   });
 }
 
@@ -148,35 +235,27 @@ class _FakeApi implements LoggerPairingApi {
 }
 
 class _FakeLink implements MetricaGattLink {
-  MetricaStatus authStatus = const MetricaStatus(
-    ok: true,
-    code: 'auth_ok',
-    message: 'ok',
-  );
-  MetricaStatus pairStatus = const MetricaStatus(
-    ok: true,
-    code: 'paired',
-    message: 'emparejado super-secret-value',
-  );
-  MetricaStatus wifiStatus = const MetricaStatus(
-    ok: true,
-    code: 'wifi_saved',
-    message: 'red clave-wifi',
-  );
+  MetricaStatus authStatus = const MetricaStatus(ok: true, msg: 'auth_ok');
+  MetricaStatus pairStatus = const MetricaStatus(ok: true, msg: 'paired');
+  MetricaStatus wifiStatus = const MetricaStatus(ok: true, msg: 'wifi_saved');
   MetricaBleException? authError;
   List<int>? authBytes;
   List<int>? pairPayload;
   List<int>? wifiPayload;
+  final ops = <String>[];
 
   @override
-  int get maxWriteLength => 185;
+  int get maxWriteLength => 244;
 
   @override
   Future<MetricaDeviceInfo> readInfo() async {
     return const MetricaDeviceInfo(
       firmware: '0.6.8-ble',
       paired: false,
-      pairingMode: true,
+      deviceId: '',
+      wifi: true,
+      authed: false,
+      mtu: 247,
     );
   }
 
@@ -190,12 +269,14 @@ class _FakeLink implements MetricaGattLink {
 
   @override
   Future<MetricaStatus> writePair(List<int> payload) async {
+    ops.add('pair');
     pairPayload = payload;
     return pairStatus;
   }
 
   @override
   Future<MetricaStatus> writeWifi(List<int> payload) async {
+    ops.add('wifi');
     wifiPayload = payload;
     return wifiStatus;
   }
