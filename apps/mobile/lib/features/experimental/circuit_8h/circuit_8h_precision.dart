@@ -92,12 +92,14 @@ class Circuit8hSurveySample {
     required this.lng,
     required this.accuracyM,
     required this.tsMs,
+    this.altM,
   });
 
   final double lat;
   final double lng;
   final double accuracyM;
   final int tsMs;
+  final double? altM;
 }
 
 class Circuit8hMarkerFix {
@@ -106,12 +108,14 @@ class Circuit8hMarkerFix {
     required this.lng,
     required this.accuracyM,
     required this.tsMs,
+    this.altM,
   });
 
   final double lat;
   final double lng;
   final double accuracyM;
   final int tsMs;
+  final double? altM;
 }
 
 double _spanMeters(List<Circuit8hSurveySample> samples) {
@@ -159,12 +163,17 @@ Circuit8hMarkerFix? medianMarkerFix(
   final lats = [for (final s in cluster) s.lat]..sort();
   final lngs = [for (final s in cluster) s.lng]..sort();
   final accs = [for (final s in cluster) s.accuracyM]..sort();
+  final alts = [
+    for (final s in cluster)
+      if (s.altM != null && s.altM!.isFinite) s.altM!,
+  ]..sort();
   final mid = cluster.length ~/ 2;
   return Circuit8hMarkerFix(
     lat: lats[mid],
     lng: lngs[mid],
     accuracyM: accs[mid],
     tsMs: cluster.first.tsMs,
+    altM: alts.isEmpty ? null : alts[alts.length ~/ 2],
   );
 }
 

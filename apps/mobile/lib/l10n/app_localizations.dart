@@ -5858,6 +5858,24 @@ abstract class AppLocalizations {
   /// **'{points} puntos GPS · {distance} · {duration}'**
   String circuit8hPassViewStats(int points, String distance, String duration);
 
+  /// No description provided for @circuit8hReliefStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Alt {alt} m · ↑{climb} ↓{descent} · {minAlt}–{maxAlt} m'**
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  );
+
+  /// No description provided for @circuit8hReliefNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).'**
+  String get circuit8hReliefNote;
+
   /// No description provided for @circuit8hTogglePoints.
   ///
   /// In es, this message translates to:
@@ -6725,6 +6743,270 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ahora no'**
   String get termsAcceptDecline;
+
+  /// No description provided for @modeToggleSemantics.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar entre modo calle (ON) y off-road (OFF)'**
+  String get modeToggleSemantics;
+
+  /// No description provided for @offroadBrandTag.
+  ///
+  /// In es, this message translates to:
+  /// **'OFF-ROAD'**
+  String get offroadBrandTag;
+
+  /// No description provided for @offroadHomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis circuitos'**
+  String get offroadHomeTitle;
+
+  /// No description provided for @offroadHomeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pistas mapeadas con Métrica'**
+  String get offroadHomeSubtitle;
+
+  /// No description provided for @circuitStatLap.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelta'**
+  String get circuitStatLap;
+
+  /// No description provided for @circuitStatSectors.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores'**
+  String get circuitStatSectors;
+
+  /// No description provided for @circuitStatDrop.
+  ///
+  /// In es, this message translates to:
+  /// **'Desnivel'**
+  String get circuitStatDrop;
+
+  /// No description provided for @circuitStatWidth.
+  ///
+  /// In es, this message translates to:
+  /// **'Ancho'**
+  String get circuitStatWidth;
+
+  /// No description provided for @circuitStatClimb.
+  ///
+  /// In es, this message translates to:
+  /// **'Subida total'**
+  String get circuitStatClimb;
+
+  /// No description provided for @circuitStatElevMin.
+  ///
+  /// In es, this message translates to:
+  /// **'Mínima'**
+  String get circuitStatElevMin;
+
+  /// No description provided for @circuitStatElevMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Máxima'**
+  String get circuitStatElevMax;
+
+  /// No description provided for @circuitMappedOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapeado el {date}'**
+  String circuitMappedOn(String date);
+
+  /// No description provided for @circuitDirectionCcw.
+  ///
+  /// In es, this message translates to:
+  /// **'Antihorario'**
+  String get circuitDirectionCcw;
+
+  /// No description provided for @circuitDirectionCw.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario'**
+  String get circuitDirectionCw;
+
+  /// No description provided for @circuitTabMap.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa'**
+  String get circuitTabMap;
+
+  /// No description provided for @circuitTabRelief.
+  ///
+  /// In es, this message translates to:
+  /// **'Relieve'**
+  String get circuitTabRelief;
+
+  /// No description provided for @circuitTabSectors.
+  ///
+  /// In es, this message translates to:
+  /// **'Sectores'**
+  String get circuitTabSectors;
+
+  /// No description provided for @circuitTabMapping.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapeo'**
+  String get circuitTabMapping;
+
+  /// No description provided for @circuitLayerSatellite.
+  ///
+  /// In es, this message translates to:
+  /// **'Satélite'**
+  String get circuitLayerSatellite;
+
+  /// No description provided for @circuitLayerRelief.
+  ///
+  /// In es, this message translates to:
+  /// **'Relieve'**
+  String get circuitLayerRelief;
+
+  /// No description provided for @circuitLayerTopo.
+  ///
+  /// In es, this message translates to:
+  /// **'Topográfico'**
+  String get circuitLayerTopo;
+
+  /// No description provided for @circuitElevationTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil de elevación por sector'**
+  String get circuitElevationTitle;
+
+  /// No description provided for @circuitElevationNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Altitud GNSS mediana de 5 pasadas, revisada contra un modelo de terreno de 30 m ({source}). Muestra la loma del predio; no ve bermas ni saltos.'**
+  String circuitElevationNote(String source);
+
+  /// No description provided for @sectorLength.
+  ///
+  /// In es, this message translates to:
+  /// **'Largo'**
+  String get sectorLength;
+
+  /// No description provided for @sectorWidth.
+  ///
+  /// In es, this message translates to:
+  /// **'Ancho (mediana {median} m)'**
+  String sectorWidth(String median);
+
+  /// No description provided for @mappingSurvey.
+  ///
+  /// In es, this message translates to:
+  /// **'Levantamiento'**
+  String get mappingSurvey;
+
+  /// No description provided for @mappingDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha'**
+  String get mappingDate;
+
+  /// No description provided for @mappingLogger.
+  ///
+  /// In es, this message translates to:
+  /// **'Logger'**
+  String get mappingLogger;
+
+  /// No description provided for @mappingEdgeOuter.
+  ///
+  /// In es, this message translates to:
+  /// **'Borde exterior'**
+  String get mappingEdgeOuter;
+
+  /// No description provided for @mappingEdgeInner.
+  ///
+  /// In es, this message translates to:
+  /// **'Borde interior'**
+  String get mappingEdgeInner;
+
+  /// No description provided for @mappingReceiver.
+  ///
+  /// In es, this message translates to:
+  /// **'Receptor'**
+  String get mappingReceiver;
+
+  /// No description provided for @mappingAnchor.
+  ///
+  /// In es, this message translates to:
+  /// **'Ancla (meta)'**
+  String get mappingAnchor;
+
+  /// No description provided for @mappingDirection.
+  ///
+  /// In es, this message translates to:
+  /// **'Sentido'**
+  String get mappingDirection;
+
+  /// No description provided for @mappingSmoothing.
+  ///
+  /// In es, this message translates to:
+  /// **'Suavizado'**
+  String get mappingSmoothing;
+
+  /// No description provided for @mappingSmoothingMethod.
+  ///
+  /// In es, this message translates to:
+  /// **'Outliers ±{outlier} m, remuestreo cada {resample} m, Gauss periódico con twicing.'**
+  String mappingSmoothingMethod(String outlier, String resample);
+
+  /// No description provided for @mappingMaxDev.
+  ///
+  /// In es, this message translates to:
+  /// **'Desviación máx. vs crudo (ext / int)'**
+  String get mappingMaxDev;
+
+  /// No description provided for @mappingRms.
+  ///
+  /// In es, this message translates to:
+  /// **'RMS vs crudo (ext / int)'**
+  String get mappingRms;
+
+  /// No description provided for @mappingSelfIntersections.
+  ///
+  /// In es, this message translates to:
+  /// **'Autocruces'**
+  String get mappingSelfIntersections;
+
+  /// No description provided for @mappingInnerInside.
+  ///
+  /// In es, this message translates to:
+  /// **'Interior dentro del exterior'**
+  String get mappingInnerInside;
+
+  /// No description provided for @mappingGeometry.
+  ///
+  /// In es, this message translates to:
+  /// **'Geometría'**
+  String get mappingGeometry;
+
+  /// No description provided for @mappingMedian.
+  ///
+  /// In es, this message translates to:
+  /// **'mediana'**
+  String get mappingMedian;
+
+  /// No description provided for @mappingPoints.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos ext / int / eje'**
+  String get mappingPoints;
+
+  /// No description provided for @settingsModeSound.
+  ///
+  /// In es, this message translates to:
+  /// **'Sonido al cambiar ON / OFF'**
+  String get settingsModeSound;
+
+  /// No description provided for @settingsModeSoundHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio.'**
+  String get settingsModeSoundHelp;
 }
 
 class _AppLocalizationsDelegate

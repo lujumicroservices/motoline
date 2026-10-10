@@ -15,6 +15,7 @@ import '../../../widgets/app_snack.dart';
 import '../../maps/live_gps_map_mixin.dart';
 import '../../maps/map_control_chip.dart';
 import '../../ride_active/location_permission_gate.dart';
+import 'circuit_8h_elevation.dart';
 import 'circuit_8h_models.dart';
 import 'circuit_8h_precision.dart';
 import 'circuit_8h_store.dart';
@@ -107,11 +108,13 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
   Future<Circuit8hSurveySample?> _readSurveySample() async {
     final pos = await _location.currentPosition();
     if (pos == null || !pos.accuracy.isFinite) return null;
+    final alt = pos.altitude;
     return Circuit8hSurveySample(
       lat: pos.latitude,
       lng: pos.longitude,
       accuracyM: pos.accuracy,
       tsMs: pos.timestamp.millisecondsSinceEpoch,
+      altM: alt.isFinite ? alt : null,
     );
   }
 
@@ -153,6 +156,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
       lng: fix.lng,
       tsMs: fix.tsMs,
       accuracyM: fix.accuracyM,
+      altM: fix.altM,
       label: kind == Circuit8hMarkerKind.checkpoint ? 'CP$_nextCp' : null,
     );
     final next = switch (kind) {
@@ -185,6 +189,7 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
           lng: c.lng,
           tsMs: c.tsMs,
           accuracyM: c.accuracyM,
+          altM: c.altM,
           label: 'CP${i + 1}',
         ),
       );
@@ -282,12 +287,14 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
   void _rememberTight(Position pos) {
     if (!pos.accuracy.isFinite) return;
     final ts = pos.timestamp.millisecondsSinceEpoch;
+    final alt = pos.altitude;
     _tight.add(
       Circuit8hSurveySample(
         lat: pos.latitude,
         lng: pos.longitude,
         accuracyM: pos.accuracy,
         tsMs: ts,
+        altM: alt.isFinite ? alt : null,
       ),
     );
     final cutoff = ts - 4000;
@@ -296,12 +303,16 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
 
   void _storeFix(Position pos) {
     final acc = pos.accuracy;
+    final alt = pos.altitude;
+    final altAcc = pos.altitudeAccuracy;
     final ll = LatLng(pos.latitude, pos.longitude);
     final point = Circuit8hPoint(
       lat: pos.latitude,
       lng: pos.longitude,
       tsMs: pos.timestamp.millisecondsSinceEpoch,
       accuracyM: acc.isFinite ? acc : null,
+      altM: alt.isFinite ? alt : null,
+      altAccuracyM: altAcc.isFinite ? altAcc : null,
     );
     setState(() {
       _points.add(point);
@@ -650,6 +661,16 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                   widget.routeType.label,
                   widget.passNumber,
                 ));
+    final elev = circuit8hElevationStats(_points);
+    final relief = elev.hasAltitude
+        ? l10n.circuit8hReliefStats(
+            elev.lastAltM!.toStringAsFixed(0),
+            elev.climbM.toStringAsFixed(0),
+            elev.descentM.toStringAsFixed(0),
+            elev.minAltM!.toStringAsFixed(0),
+            elev.maxAltM!.toStringAsFixed(0),
+          )
+        : null;
 
     final latLngs = [
       for (final p in _points) LatLng(p.lat, p.lng),
@@ -730,13 +751,37 @@ class _Circuit8hRecordScreenState extends ConsumerState<Circuit8hRecordScreen>
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                      child: Text(
-                        status,
-                        style: GoogleFonts.rajdhani(
-                          color: AppTheme.mist,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            status,
+                            style: GoogleFonts.rajdhani(
+                              color: AppTheme.mist,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (relief != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              relief,
+                              style: GoogleFonts.rajdhani(
+                                color: AppTheme.line,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                            Text(
+                              l10n.circuit8hReliefNote,
+                              style: GoogleFonts.rajdhani(
+                                color: AppTheme.mist.withValues(alpha: 0.65),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/app_mode.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/offroad/offroad_home_screen.dart';
 import '../../features/legal/legal_acceptance.dart';
 import '../../features/legal/terms_accept_screen.dart';
 import '../../providers/auth_providers.dart';
@@ -56,7 +58,25 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       ),
       error: (_, _) => const TermsAcceptScreen(),
       data: (accepted) =>
-          accepted ? const HomeScreen() : const TermsAcceptScreen(),
+          accepted ? const _ModeHome() : const TermsAcceptScreen(),
+    );
+  }
+}
+
+/// Street home (ON) or circuits home (OFF), cross-faded on mode change.
+class _ModeHome extends ConsumerWidget {
+  const _ModeHome();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final off = ref.watch(appModeProvider) == AppMode.off;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 600),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: off
+          ? const OffroadHomeScreen(key: ValueKey('off'))
+          : const HomeScreen(key: ValueKey('on')),
     );
   }
 }

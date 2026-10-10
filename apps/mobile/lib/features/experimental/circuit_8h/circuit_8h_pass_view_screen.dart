@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/utils/geo_utils.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import 'circuit_8h_elevation.dart';
 import 'circuit_8h_models.dart';
 import 'circuit_8h_store.dart';
 
@@ -145,6 +146,16 @@ class _Circuit8hPassViewScreenState extends State<Circuit8hPassViewScreen> {
         ? '${dur.inSeconds}s'
         : '${dur.inMinutes}m ${(dur.inSeconds % 60).toString().padLeft(2, '0')}s';
     final center = pts.isNotEmpty ? pts.first : const LatLng(20.67, -103.35);
+    final elev = circuit8hElevationStats(widget.session.points);
+    final relief = elev.hasAltitude
+        ? l10n.circuit8hReliefStats(
+            elev.lastAltM!.toStringAsFixed(0),
+            elev.climbM.toStringAsFixed(0),
+            elev.descentM.toStringAsFixed(0),
+            elev.minAltM!.toStringAsFixed(0),
+            elev.maxAltM!.toStringAsFixed(0),
+          )
+        : null;
 
     return Scaffold(
       backgroundColor: AppTheme.asphalt,
@@ -228,17 +239,34 @@ class _Circuit8hPassViewScreenState extends State<Circuit8hPassViewScreen> {
                   borderRadius: BorderRadius.circular(12),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                    child: Text(
-                      l10n.circuit8hPassViewStats(
-                        widget.session.pointCount,
-                        dist,
-                        durLabel,
-                      ),
-                      style: GoogleFonts.rajdhani(
-                        color: AppTheme.mist,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.circuit8hPassViewStats(
+                            widget.session.pointCount,
+                            dist,
+                            durLabel,
+                          ),
+                          style: GoogleFonts.rajdhani(
+                            color: AppTheme.mist,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (relief != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            relief,
+                            style: GoogleFonts.rajdhani(
+                              color: AppTheme.line,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),

@@ -25,6 +25,7 @@ class Ride {
     this.leanFreezeAtMs,
     this.leanMountMode,
     this.rodadaId,
+    this.source = 'phone',
   });
 
   final String id;
@@ -62,6 +63,9 @@ class Ride {
 
   /// Local/cloud rodada this ride belongs to (group outing capture).
   final String? rodadaId;
+
+  /// `phone` | `m5_logger` | `import`
+  final String source;
 
   bool get hasLeanUprightFreeze =>
       leanUprightLocked || (leanG0X != null && leanG0Y != null && leanG0Z != null);
@@ -113,6 +117,7 @@ class Ride {
         'lean_freeze_at_ms': leanFreezeAtMs,
         'lean_mount_mode': leanMountMode,
         'rodada_id': rodadaId,
+        'source': source,
       };
 
   factory Ride.fromMap(Map<String, Object?> map) => Ride(
@@ -144,6 +149,7 @@ class Ride {
         leanFreezeAtMs: (map['lean_freeze_at_ms'] as num?)?.toInt(),
         leanMountMode: map['lean_mount_mode'] as String?,
         rodadaId: map['rodada_id'] as String?,
+        source: (map['source'] as String?) ?? 'phone',
       );
 
   Ride copyWith({
@@ -170,6 +176,7 @@ class Ride {
     String? leanMountMode,
     String? rodadaId,
     bool clearRodadaId = false,
+    String? source,
   }) {
     var nextVis = visibility ?? this.visibility;
     if (visibility == null && isShared != null) {
@@ -197,6 +204,7 @@ class Ride {
       leanFreezeAtMs: leanFreezeAtMs ?? this.leanFreezeAtMs,
       leanMountMode: leanMountMode ?? this.leanMountMode,
       rodadaId: clearRodadaId ? null : (rodadaId ?? this.rodadaId),
+      source: source ?? this.source,
     );
   }
 }

@@ -1542,6 +1542,17 @@
       "duration": {"type": "String"}
     }
   },
+  "circuit8hReliefStats": "Alt {alt} m · ↑{climb} ↓{descent} · {minAlt}–{maxAlt} m",
+  "@circuit8hReliefStats": {
+    "placeholders": {
+      "alt": {"type": "String"},
+      "climb": {"type": "String"},
+      "descent": {"type": "String"},
+      "minAlt": {"type": "String"},
+      "maxAlt": {"type": "String"}
+    }
+  },
+  "circuit8hReliefNote": "Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).",
   "circuit8hTogglePoints": "Mostrar/ocultar puntos GPS",
   "circuit8hUploadCloud": "Subir a la nube para análisis",
   "circuit8hUploading": "Subiendo…",
@@ -1774,5 +1785,70 @@
   "termsAcceptTitle": "Términos de uso",
   "termsAcceptBody": "Al usar RiderLab aceptas los Términos de uso y el Aviso de privacidad.\n\nNo uses el teléfono mientras conduces. El radio y las fotos son para ir con tu grupo. Contenido sexual, odio, acoso, spam o publicaciones ilegales pueden banearte.\n\nAbre los documentos completos abajo. Después los puedes leer otra vez en Ajustes.",
   "termsAcceptAgree": "Acepto",
-  "termsAcceptDecline": "Ahora no"
+  "termsAcceptDecline": "Ahora no",
+  "modeToggleSemantics": "Cambiar entre modo calle (ON) y off-road (OFF)",
+  "offroadBrandTag": "OFF-ROAD",
+  "offroadHomeTitle": "Mis circuitos",
+  "offroadHomeSubtitle": "Pistas mapeadas con Métrica",
+  "circuitStatLap": "Vuelta",
+  "circuitStatSectors": "Sectores",
+  "circuitStatDrop": "Desnivel",
+  "circuitStatWidth": "Ancho",
+  "circuitStatClimb": "Subida total",
+  "circuitStatElevMin": "Mínima",
+  "circuitStatElevMax": "Máxima",
+  "circuitMappedOn": "Mapeado el {date}",
+  "@circuitMappedOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "circuitDirectionCcw": "Antihorario",
+  "circuitDirectionCw": "Horario",
+  "circuitTabMap": "Mapa",
+  "circuitTabRelief": "Relieve",
+  "circuitTabSectors": "Sectores",
+  "circuitTabMapping": "Mapeo",
+  "circuitLayerSatellite": "Satélite",
+  "circuitLayerRelief": "Relieve",
+  "circuitLayerTopo": "Topográfico",
+  "circuitElevationTitle": "Perfil de elevación por sector",
+  "circuitElevationNote": "Altitud GNSS mediana de 5 pasadas, revisada contra un modelo de terreno de 30 m ({source}). Muestra la loma del predio; no ve bermas ni saltos.",
+  "@circuitElevationNote": {
+    "placeholders": {
+      "source": {"type": "String"}
+    }
+  },
+  "sectorLength": "Largo",
+  "sectorWidth": "Ancho (mediana {median} m)",
+  "@sectorWidth": {
+    "placeholders": {
+      "median": {"type": "String"}
+    }
+  },
+  "mappingSurvey": "Levantamiento",
+  "mappingDate": "Fecha",
+  "mappingLogger": "Logger",
+  "mappingEdgeOuter": "Borde exterior",
+  "mappingEdgeInner": "Borde interior",
+  "mappingReceiver": "Receptor",
+  "mappingAnchor": "Ancla (meta)",
+  "mappingDirection": "Sentido",
+  "mappingSmoothing": "Suavizado",
+  "mappingSmoothingMethod": "Outliers ±{outlier} m, remuestreo cada {resample} m, Gauss periódico con twicing.",
+  "@mappingSmoothingMethod": {
+    "placeholders": {
+      "outlier": {"type": "String"},
+      "resample": {"type": "String"}
+    }
+  },
+  "mappingMaxDev": "Desviación máx. vs crudo (ext / int)",
+  "mappingRms": "RMS vs crudo (ext / int)",
+  "mappingSelfIntersections": "Autocruces",
+  "mappingInnerInside": "Interior dentro del exterior",
+  "mappingGeometry": "Geometría",
+  "mappingMedian": "mediana",
+  "mappingPoints": "Puntos ext / int / eje",
+  "settingsModeSound": "Sonido al cambiar ON / OFF",
+  "settingsModeSoundHelp": "Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio."
 }

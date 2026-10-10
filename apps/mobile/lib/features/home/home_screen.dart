@@ -19,6 +19,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/brand_mark.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/app_snack.dart';
+import '../../widgets/mode_toggle.dart';
 import '../../widgets/partner_code_redeem.dart';
 import '../../widgets/pro_upsell.dart';
 import '../../widgets/rider_alias_chip.dart';
@@ -83,6 +84,11 @@ class HomeScreen extends ConsumerWidget {
                               showAttribution: true,
                               attribution: l10n.byRawThrottle,
                             ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6),
+                            child: ModeToggle(),
                           ),
                           const SizedBox(width: 8),
                           const RiderProfileButton(),

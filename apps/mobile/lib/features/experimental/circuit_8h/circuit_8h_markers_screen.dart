@@ -91,6 +91,7 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
             lng: pos.longitude,
             accuracyM: pos.accuracy,
             tsMs: pos.timestamp.millisecondsSinceEpoch,
+            altM: pos.altitude.isFinite ? pos.altitude : null,
           );
         },
         cancelled: () => !mounted,
@@ -110,10 +111,15 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
       );
       return;
     }
-    await _place(fix.lat, fix.lng, accuracyM: fix.accuracyM);
+    await _place(fix.lat, fix.lng, accuracyM: fix.accuracyM, altM: fix.altM);
   }
 
-  Future<void> _place(double lat, double lng, {double? accuracyM}) async {
+  Future<void> _place(
+    double lat,
+    double lng, {
+    double? accuracyM,
+    double? altM,
+  }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final id = 'mk_${_kind.id}_$now';
     final marker = Circuit8hMarker(
@@ -123,6 +129,7 @@ class _Circuit8hMarkersScreenState extends ConsumerState<Circuit8hMarkersScreen>
       lng: lng,
       tsMs: now,
       accuracyM: accuracyM,
+      altM: altM,
       label: _kind == Circuit8hMarkerKind.checkpoint
           ? 'CP${_project.checkpointCount + 1}'
           : null,

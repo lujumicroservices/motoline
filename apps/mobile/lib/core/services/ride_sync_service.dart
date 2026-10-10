@@ -167,6 +167,7 @@ class RideSyncService {
         'route_id': ride.routeId,
         'rodada_id': ride.rodadaId,
         'title': ride.title,
+        'source': ride.source,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
         if (bbox != null) ...bbox.toMap(),
       };
@@ -515,6 +516,7 @@ class RideSyncService {
       leanSignFlip: existing?.leanSignFlip ?? 1,
       leanFreezeAtMs: existing?.leanFreezeAtMs,
       leanMountMode: existing?.leanMountMode,
+      source: _str(map['source']) ?? existing?.source ?? 'phone',
     );
   }
 

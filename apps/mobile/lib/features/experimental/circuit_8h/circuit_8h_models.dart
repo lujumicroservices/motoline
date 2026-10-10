@@ -55,6 +55,8 @@ class Circuit8hPoint {
     required this.lng,
     required this.tsMs,
     this.accuracyM,
+    this.altM,
+    this.altAccuracyM,
   });
 
   final double lat;
@@ -62,11 +64,20 @@ class Circuit8hPoint {
   final int tsMs;
   final double? accuracyM;
 
+  /// WGS84 / MSL altitude from the phone (meters). Null if the OS omitted it.
+  /// Vertical error is usually worse than horizontal (~10–30 m).
+  final double? altM;
+
+  /// Vertical accuracy in meters when the platform reports it.
+  final double? altAccuracyM;
+
   Map<String, Object?> toJson() => {
         'lat': lat,
         'lng': lng,
         'tsMs': tsMs,
         if (accuracyM != null) 'accuracyM': accuracyM,
+        if (altM != null) 'altM': altM,
+        if (altAccuracyM != null) 'altAccuracyM': altAccuracyM,
       };
 
   factory Circuit8hPoint.fromJson(Map<String, dynamic> json) => Circuit8hPoint(
@@ -74,6 +85,8 @@ class Circuit8hPoint {
         lng: (json['lng'] as num).toDouble(),
         tsMs: (json['tsMs'] as num).toInt(),
         accuracyM: (json['accuracyM'] as num?)?.toDouble(),
+        altM: (json['altM'] as num?)?.toDouble(),
+        altAccuracyM: (json['altAccuracyM'] as num?)?.toDouble(),
       );
 }
 
@@ -86,6 +99,7 @@ class Circuit8hMarker {
     required this.tsMs,
     this.label,
     this.accuracyM,
+    this.altM,
   });
 
   final String id;
@@ -95,6 +109,7 @@ class Circuit8hMarker {
   final int tsMs;
   final String? label;
   final double? accuracyM;
+  final double? altM;
 
   Map<String, Object?> toJson() => {
         'id': id,
@@ -104,6 +119,7 @@ class Circuit8hMarker {
         'tsMs': tsMs,
         if (label != null) 'label': label,
         if (accuracyM != null) 'accuracyM': accuracyM,
+        if (altM != null) 'altM': altM,
       };
 
   factory Circuit8hMarker.fromJson(Map<String, dynamic> json) =>
@@ -116,6 +132,7 @@ class Circuit8hMarker {
         tsMs: (json['tsMs'] as num?)?.toInt() ?? 0,
         label: json['label'] as String?,
         accuracyM: (json['accuracyM'] as num?)?.toDouble(),
+        altM: (json['altM'] as num?)?.toDouble(),
       );
 }
 

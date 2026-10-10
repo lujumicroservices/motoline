@@ -3303,6 +3303,21 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  ) {
+    return 'Alt $alt m · ↑$climb ↓$descent · $minAlt–$maxAlt m';
+  }
+
+  @override
+  String get circuit8hReliefNote =>
+      'Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).';
+
+  @override
   String get circuit8hTogglePoints => 'Mostrar/ocultar puntos GPS';
 
   @override
@@ -3798,4 +3813,146 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsAcceptDecline => 'Ahora no';
+
+  @override
+  String get modeToggleSemantics =>
+      'Cambiar entre modo calle (ON) y off-road (OFF)';
+
+  @override
+  String get offroadBrandTag => 'OFF-ROAD';
+
+  @override
+  String get offroadHomeTitle => 'Mis circuitos';
+
+  @override
+  String get offroadHomeSubtitle => 'Pistas mapeadas con Métrica';
+
+  @override
+  String get circuitStatLap => 'Vuelta';
+
+  @override
+  String get circuitStatSectors => 'Sectores';
+
+  @override
+  String get circuitStatDrop => 'Desnivel';
+
+  @override
+  String get circuitStatWidth => 'Ancho';
+
+  @override
+  String get circuitStatClimb => 'Subida total';
+
+  @override
+  String get circuitStatElevMin => 'Mínima';
+
+  @override
+  String get circuitStatElevMax => 'Máxima';
+
+  @override
+  String circuitMappedOn(String date) {
+    return 'Mapeado el $date';
+  }
+
+  @override
+  String get circuitDirectionCcw => 'Antihorario';
+
+  @override
+  String get circuitDirectionCw => 'Horario';
+
+  @override
+  String get circuitTabMap => 'Mapa';
+
+  @override
+  String get circuitTabRelief => 'Relieve';
+
+  @override
+  String get circuitTabSectors => 'Sectores';
+
+  @override
+  String get circuitTabMapping => 'Mapeo';
+
+  @override
+  String get circuitLayerSatellite => 'Satélite';
+
+  @override
+  String get circuitLayerRelief => 'Relieve';
+
+  @override
+  String get circuitLayerTopo => 'Topográfico';
+
+  @override
+  String get circuitElevationTitle => 'Perfil de elevación por sector';
+
+  @override
+  String circuitElevationNote(String source) {
+    return 'Altitud GNSS mediana de 5 pasadas, revisada contra un modelo de terreno de 30 m ($source). Muestra la loma del predio; no ve bermas ni saltos.';
+  }
+
+  @override
+  String get sectorLength => 'Largo';
+
+  @override
+  String sectorWidth(String median) {
+    return 'Ancho (mediana $median m)';
+  }
+
+  @override
+  String get mappingSurvey => 'Levantamiento';
+
+  @override
+  String get mappingDate => 'Fecha';
+
+  @override
+  String get mappingLogger => 'Logger';
+
+  @override
+  String get mappingEdgeOuter => 'Borde exterior';
+
+  @override
+  String get mappingEdgeInner => 'Borde interior';
+
+  @override
+  String get mappingReceiver => 'Receptor';
+
+  @override
+  String get mappingAnchor => 'Ancla (meta)';
+
+  @override
+  String get mappingDirection => 'Sentido';
+
+  @override
+  String get mappingSmoothing => 'Suavizado';
+
+  @override
+  String mappingSmoothingMethod(String outlier, String resample) {
+    return 'Outliers ±$outlier m, remuestreo cada $resample m, Gauss periódico con twicing.';
+  }
+
+  @override
+  String get mappingMaxDev => 'Desviación máx. vs crudo (ext / int)';
+
+  @override
+  String get mappingRms => 'RMS vs crudo (ext / int)';
+
+  @override
+  String get mappingSelfIntersections => 'Autocruces';
+
+  @override
+  String get mappingInnerInside => 'Interior dentro del exterior';
+
+  @override
+  String get mappingGeometry => 'Geometría';
+
+  @override
+  String get mappingMedian => 'mediana';
+
+  @override
+  String get mappingPoints => 'Puntos ext / int / eje';
+
+  @override
+  String get settingsModeSound => 'Sonido al cambiar ON / OFF';
+
+  @override
+  String get settingsModeSoundHelp =>
+      'Moto 2 tiempos al entrar a OFF, moto de pista al volver a ON. Respeta el modo silencio.';
 }

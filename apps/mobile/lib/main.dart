@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/app_mode.dart';
 import 'core/auth/impersonation_gate.dart';
 import 'core/auth/impersonation_store.dart';
 import 'core/notifications/push_notification_service.dart';
@@ -12,6 +13,7 @@ import 'features/rodadas/photos/ride_photo_capture.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'theme/app_theme.dart';
+import 'theme/offroad_theme.dart';
 import 'widgets/app_toast.dart';
 
 Future<void> main() async {
@@ -30,6 +32,7 @@ class RiderLabApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
+    final mode = ref.watch(appModeProvider);
 
     return MaterialApp(
       title: const String.fromEnvironment(
@@ -38,7 +41,8 @@ class RiderLabApp extends ConsumerWidget {
       ),
       navigatorKey: appNavigatorKey,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark(),
+      theme: mode == AppMode.off ? OffroadTheme.theme() : AppTheme.dark(),
+      themeAnimationDuration: const Duration(milliseconds: 600),
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [

@@ -3288,6 +3288,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  ) {
+    return 'Alt $alt m · ↑$climb ↓$descent · $minAlt–$maxAlt m';
+  }
+
+  @override
+  String get circuit8hReliefNote =>
+      'Phone GPS altitude (relative relief; vertical error is usually worse than horizontal).';
+
+  @override
   String get circuit8hTogglePoints => 'Show/hide GPS points';
 
   @override
@@ -3781,4 +3796,146 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsAcceptDecline => 'Not now';
+
+  @override
+  String get modeToggleSemantics =>
+      'Switch between street (ON) and off-road (OFF) mode';
+
+  @override
+  String get offroadBrandTag => 'OFF-ROAD';
+
+  @override
+  String get offroadHomeTitle => 'My circuits';
+
+  @override
+  String get offroadHomeSubtitle => 'Tracks mapped with Métrica';
+
+  @override
+  String get circuitStatLap => 'Lap';
+
+  @override
+  String get circuitStatSectors => 'Sectors';
+
+  @override
+  String get circuitStatDrop => 'Elevation range';
+
+  @override
+  String get circuitStatWidth => 'Width';
+
+  @override
+  String get circuitStatClimb => 'Total climb';
+
+  @override
+  String get circuitStatElevMin => 'Lowest';
+
+  @override
+  String get circuitStatElevMax => 'Highest';
+
+  @override
+  String circuitMappedOn(String date) {
+    return 'Mapped $date';
+  }
+
+  @override
+  String get circuitDirectionCcw => 'Counter-clockwise';
+
+  @override
+  String get circuitDirectionCw => 'Clockwise';
+
+  @override
+  String get circuitTabMap => 'Map';
+
+  @override
+  String get circuitTabRelief => 'Relief';
+
+  @override
+  String get circuitTabSectors => 'Sectors';
+
+  @override
+  String get circuitTabMapping => 'Mapping';
+
+  @override
+  String get circuitLayerSatellite => 'Satellite';
+
+  @override
+  String get circuitLayerRelief => 'Relief';
+
+  @override
+  String get circuitLayerTopo => 'Topographic';
+
+  @override
+  String get circuitElevationTitle => 'Elevation profile by sector';
+
+  @override
+  String circuitElevationNote(String source) {
+    return 'Median GNSS altitude of 5 passes, checked against a 30 m terrain model ($source). It shows the hill the track sits on; it cannot see berms or jumps.';
+  }
+
+  @override
+  String get sectorLength => 'Length';
+
+  @override
+  String sectorWidth(String median) {
+    return 'Width (median $median m)';
+  }
+
+  @override
+  String get mappingSurvey => 'Survey';
+
+  @override
+  String get mappingDate => 'Date';
+
+  @override
+  String get mappingLogger => 'Logger';
+
+  @override
+  String get mappingEdgeOuter => 'Outer edge';
+
+  @override
+  String get mappingEdgeInner => 'Inner edge';
+
+  @override
+  String get mappingReceiver => 'Receiver';
+
+  @override
+  String get mappingAnchor => 'Anchor (finish line)';
+
+  @override
+  String get mappingDirection => 'Direction';
+
+  @override
+  String get mappingSmoothing => 'Smoothing';
+
+  @override
+  String mappingSmoothingMethod(String outlier, String resample) {
+    return 'Outliers ±$outlier m, resampled every $resample m, periodic Gaussian with twicing.';
+  }
+
+  @override
+  String get mappingMaxDev => 'Max deviation vs raw (out / in)';
+
+  @override
+  String get mappingRms => 'RMS vs raw (out / in)';
+
+  @override
+  String get mappingSelfIntersections => 'Self-intersections';
+
+  @override
+  String get mappingInnerInside => 'Inner inside outer';
+
+  @override
+  String get mappingGeometry => 'Geometry';
+
+  @override
+  String get mappingMedian => 'median';
+
+  @override
+  String get mappingPoints => 'Points out / in / center';
+
+  @override
+  String get settingsModeSound => 'Sound when switching ON / OFF';
+
+  @override
+  String get settingsModeSoundHelp =>
+      'Two-stroke when entering OFF, track bike when returning to ON. Follows silent mode.';
 }
