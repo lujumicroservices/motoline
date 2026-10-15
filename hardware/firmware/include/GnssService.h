@@ -477,6 +477,16 @@ class GnssService {
   const UbxPvt& realPvt() const { return parser_.pvt(); }
   bool realPvtActive() const { return lastRealPvtMs_ && (millis() - lastRealPvtMs_) < 2500; }
 
+  // 0.6.9g DORMIR: UBX-RXM-PMREQ v0 (infinite backup, forced), woken by any UART RX edge.
+  // RAM config is lost in backup; boot re-applies it like after a power cycle.
+  bool sleepBackup() {
+    if (path_ != Path::UartTx || !serial_ || txLive_ < 0) return false;
+    uint8_t p[16] = {};
+    p[8] = 0x06;   // flags: backup | force
+    p[12] = 0x08;  // wakeupSources: uartrx
+    return sendUbx(0x02, 0x41, p, sizeof p);
+  }
+
  private:
   // Injected fixes stopped > kSimStaleMs: the simulated fix becomes "no fix" (never freeze the last one).
   void simCheckStale() {

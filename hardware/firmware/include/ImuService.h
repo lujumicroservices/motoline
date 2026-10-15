@@ -82,6 +82,14 @@ class ImuService {
     return true;
   }
 
+  // 0.6.9g DORMIR: sensors off + advanced power save (~3.5 uA); begin() re-inits on boot.
+  void suspend() {
+    if (!wire_) return;
+    write8(0x7D, 0x00);  // PWR_CTRL: acc/gyr/temp off
+    write8(0x7C, 0x03);  // PWR_CONF: adv power save on
+    ready_ = false;
+  }
+
  private:
   bool uploadConfig() {
     // Arduino-ESP32 Wire buffer is 128 B: send in 64 B bursts, each preceded by the

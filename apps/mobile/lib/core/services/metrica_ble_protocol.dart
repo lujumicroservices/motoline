@@ -274,7 +274,11 @@ abstract final class MetricaBleProtocol {
   static void requireMsg(MetricaStatus status, String msg) {
     requireAccepted(status);
     if (status.msg != msg) {
-      throw const MetricaBleException(MetricaBleFailure.protocol);
+      final got = okMessages.contains(status.msg) ? status.msg : 'other';
+      throw MetricaBleException(
+        MetricaBleFailure.protocol,
+        detail: 'want $msg got $got',
+      );
     }
   }
 
@@ -446,19 +450,27 @@ class MetricaBleException implements Exception {
         message.contains('sign in')) {
       return const MetricaBleException(MetricaBleFailure.noSession);
     }
-    if (message.startsWith('mint failed')) {
-      return const MetricaBleException(
-        MetricaBleFailure.protocol,
-        detail: 'mint failed',
-      );
+    // Surface safe server hints (http status / step / short error). Never secrets.
+    final detail = _pairingDetail(error.message);
+    if (message.contains('mint failed') ||
+        message.contains('claim failed') ||
+        message.contains('create failed') ||
+        message.startsWith('http ')) {
+      return MetricaBleException(MetricaBleFailure.protocol, detail: detail);
     }
-    if (message.startsWith('claim failed')) {
-      return const MetricaBleException(
-        MetricaBleFailure.protocol,
-        detail: 'claim failed',
-      );
+    return MetricaBleException(MetricaBleFailure.protocol, detail: detail);
+  }
+
+  static String _pairingDetail(String message) {
+    final trimmed = message.trim();
+    if (trimmed.isEmpty) return 'server';
+    // Cap length; strip anything that looks like a secret blob.
+    if (trimmed.length > 80 || trimmed.toLowerCase().contains('secret')) {
+      final http = RegExp(r'http\s+(\d+)').firstMatch(trimmed);
+      if (http != null) return 'http ${http.group(1)}';
+      return 'server';
     }
-    return const MetricaBleException(MetricaBleFailure.protocol);
+    return trimmed;
   }
 
   /// Does not include [detail], which can carry a device STATUS message.

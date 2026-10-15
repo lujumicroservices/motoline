@@ -11,6 +11,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../theme/offroad_theme.dart';
 import 'circuit_model.dart';
 import 'offroad_home_screen.dart' show CircuitStat;
+import 'track_3d_screen.dart';
 import 'widgets/circuit_silhouette.dart';
 
 /// Explore what the mapping captured: 2D map, relief, sectors, mapping data.
@@ -183,6 +184,19 @@ class _MapTabState extends State<_MapTab> {
                   showCheckmark: false,
                 ),
             ],
+          ),
+        ),
+        Positioned(
+          right: 12,
+          bottom: 30,
+          child: FilledButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => Track3DScreen(circuit: c),
+              ),
+            ),
+            icon: const Icon(Icons.view_in_ar_rounded),
+            label: Text(l10n.pass3dOpen),
           ),
         ),
         Positioned(

@@ -29,7 +29,7 @@ inline uint16_t toneStatus(const char* t) {
   return C_OK;
 }
 
-static constexpr int kMenuItems = 7;  // 0.6.8-ble: + EMPAREJAR (4), ABOUT 5, BACK 6
+static constexpr int kMenuItems = 9;  // 0.6.8-ble: + EMPAREJAR (4), ABOUT 5; 0.6.9g: DORMIR 6, APAGAR 7, BACK 8
 enum class UiPage { Home, Menu, About, Wifi, Rides, Circuit, CircuitList, BlePair, Trail };  // 0.6.9: Trail  // 0.6.0: Circuit drawn by CircuitView
 
 struct RideRow {
@@ -54,6 +54,7 @@ struct UiState {
   AnchorUi* anc = nullptr;
   bool colocOn = false;
   int menuIdx = 0;
+  bool offArmed = false;  // 0.6.9f: APAGAR waits for a second OK
   int rideSel = 0;
   int rideCount = 0;
   RideRow rides[5];
@@ -524,18 +525,21 @@ inline void drawMenu(const UiState& s) {
   drawBadge(d, 8, 6, false);
   drawWordmark(d, 168, 8, 1.0f);
 
-  static const char* items[] = {"RECORD / STOP", "WIFI", "RIDES", "CIRCUITO", "EMPAREJAR", "ABOUT", "BACK"};
+  static const char* items[] = {"RECORD / STOP", "WIFI",   "RIDES",  "CIRCUITO", "EMPAREJAR",
+                                "ABOUT",         "DORMIR", "APAGAR", "BACK"};
   d.setTextSize(2);
   d.setTextDatum(lgfx::textdatum_t::middle_left);
-  for (int i = 0; i < kMenuItems; ++i) {  // 0.6.8: 7 items, 24 px pitch
-    const int y = 49 + i * 24;
+  for (int i = 0; i < kMenuItems; ++i) {  // 0.6.9g: 9 items, 19 px pitch (bar starts at y=212)
+    const int y = 45 + i * 19;
+    const bool confirm = i == 7 && s.offArmed;
+    const uint16_t bg = confirm ? C_REC : C_ORANGE;
     if (i == s.menuIdx) {
-      d.fillRect(8, y - 11, 304, 22, C_ORANGE);
-      d.setTextColor(C_FG, C_ORANGE);
+      d.fillRect(8, y - 9, 304, 18, bg);
+      d.setTextColor(C_FG, bg);
     } else {
       d.setTextColor(C_FG, C_BG);
     }
-    d.drawString(items[i], 20, y);
+    d.drawString(confirm ? "OK = APAGAR" : items[i], 20, y);
   }
   drawButtonBar(d, "UP", "OK", "DOWN");
   drawLiveBat(s);
@@ -761,13 +765,15 @@ inline void drawAboutLive(const UiState& s) {
 inline void drawUi(const UiState& s) {
   static UiPage lastPage = UiPage::Home;
   static int lastMenu = -1;
+  static bool lastOffArmed = false;
   static int lastRide = -1;
   static int lastCircSel = -1;  // 0.6.7
   static bool lastRec = false;
   static bool lastWifi = false;
   static bool inited = false;
   const bool chrome = !inited || s.page != lastPage ||
-                      (s.page == UiPage::Menu && s.menuIdx != lastMenu) ||
+                      (s.page == UiPage::Menu &&
+                       (s.menuIdx != lastMenu || s.offArmed != lastOffArmed)) ||
                       (s.page == UiPage::Rides && s.rideSel != lastRide) ||
                       (s.page == UiPage::CircuitList && s.circSel != lastCircSel) ||
                       (s.page == UiPage::Wifi && s.wifiOn != lastWifi) ||
@@ -776,6 +782,7 @@ inline void drawUi(const UiState& s) {
   inited = true;
   lastPage = s.page;
   lastMenu = s.menuIdx;
+  lastOffArmed = s.offArmed;
   lastRide = s.rideSel;
   lastCircSel = s.circSel;
   lastRec = s.recording;

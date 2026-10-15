@@ -9,7 +9,7 @@
 namespace riderlab {
 
 inline constexpr const char* FIRMWARE_NAME = "riderlab-logger";
-inline constexpr const char* FIRMWARE_VERSION = "0.6.9c-trail";
+inline constexpr const char* FIRMWARE_VERSION = "0.6.9j-asleep";
 
 // Azure Function in rg-riderlab / riderlabimusas. Key goes in NVS via serial AZURE.
 inline constexpr const char* AZURE_INGEST_URL =

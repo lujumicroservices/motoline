@@ -7221,7 +7221,7 @@ abstract class AppLocalizations {
   /// No description provided for @metricaBleNotFound.
   ///
   /// In es, this message translates to:
-  /// **'No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.'**
+  /// **'No se encontró el equipo. En el M5: Menú → EMPAREJAR (reinicia y muestra un PIN de 6 dígitos). Espera esa pantalla y entonces pulsa Emparejar en el teléfono.'**
   String get metricaBleNotFound;
 
   /// No description provided for @metricaBlePermissionDenied.
@@ -7631,6 +7631,270 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Métrica solo entra a 2.4 GHz (no redes solo 5 GHz).'**
   String get metricaBleWifiBandNote;
+
+  /// No description provided for @offroadMetricaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Métrica'**
+  String get offroadMetricaTitle;
+
+  /// No description provided for @offroadMetricaSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empareja el logger por Bluetooth y envía el Wi‑Fi del paddock'**
+  String get offroadMetricaSubtitle;
+
+  /// No description provided for @channelSpeed.
+  ///
+  /// In es, this message translates to:
+  /// **'Velocidad'**
+  String get channelSpeed;
+
+  /// No description provided for @channelLongG.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenada / gas'**
+  String get channelLongG;
+
+  /// No description provided for @channelLean.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación'**
+  String get channelLean;
+
+  /// No description provided for @channelLatG.
+  ///
+  /// In es, this message translates to:
+  /// **'G lateral'**
+  String get channelLatG;
+
+  /// No description provided for @channelElevation.
+  ///
+  /// In es, this message translates to:
+  /// **'Altitud'**
+  String get channelElevation;
+
+  /// No description provided for @channelOffLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuera de pista'**
+  String get channelOffLine;
+
+  /// No description provided for @channelEstimatedShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Estimado por GNSS'**
+  String get channelEstimatedShort;
+
+  /// No description provided for @channelEstimatedNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación y G lateral se estiman con GNSS (velocidad × giro), no las mide una IMU.'**
+  String get channelEstimatedNote;
+
+  /// No description provided for @passMapOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa completo'**
+  String get passMapOpen;
+
+  /// No description provided for @pass3dOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Vista 3D'**
+  String get pass3dOpen;
+
+  /// No description provided for @passMapBrakes.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenadas ({count})'**
+  String passMapBrakes(int count);
+
+  /// No description provided for @passMapPeaks.
+  ///
+  /// In es, this message translates to:
+  /// **'Picos'**
+  String get passMapPeaks;
+
+  /// No description provided for @passMapGhost.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejor: {id}'**
+  String passMapGhost(String id);
+
+  /// No description provided for @brakeZone.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenada {n}'**
+  String brakeZone(int n);
+
+  /// No description provided for @eventLeanRight.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación máx. a la derecha'**
+  String get eventLeanRight;
+
+  /// No description provided for @eventLeanLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación máx. a la izquierda'**
+  String get eventLeanLeft;
+
+  /// No description provided for @eventHardestBrake.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenada más fuerte'**
+  String get eventHardestBrake;
+
+  /// No description provided for @eventHardestAccel.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceleración más fuerte'**
+  String get eventHardestAccel;
+
+  /// No description provided for @eventPeakLatG.
+  ///
+  /// In es, this message translates to:
+  /// **'G lateral máximo'**
+  String get eventPeakLatG;
+
+  /// No description provided for @eventLeanLeftShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Incl. izq.'**
+  String get eventLeanLeftShort;
+
+  /// No description provided for @eventLeanRightShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Incl. der.'**
+  String get eventLeanRightShort;
+
+  /// No description provided for @eventHardestBrakeShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenada máx.'**
+  String get eventHardestBrakeShort;
+
+  /// No description provided for @eventHardestAccelShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Acel. máx.'**
+  String get eventHardestAccelShort;
+
+  /// No description provided for @hudLean.
+  ///
+  /// In es, this message translates to:
+  /// **'Inclinación'**
+  String get hudLean;
+
+  /// No description provided for @hudLongG.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenada / gas'**
+  String get hudLongG;
+
+  /// No description provided for @hudLatG.
+  ///
+  /// In es, this message translates to:
+  /// **'G lateral'**
+  String get hudLatG;
+
+  /// No description provided for @hudLeft.
+  ///
+  /// In es, this message translates to:
+  /// **'Izq.'**
+  String get hudLeft;
+
+  /// No description provided for @hudRight.
+  ///
+  /// In es, this message translates to:
+  /// **'Der.'**
+  String get hudRight;
+
+  /// No description provided for @hudBraking.
+  ///
+  /// In es, this message translates to:
+  /// **'FRENANDO'**
+  String get hudBraking;
+
+  /// No description provided for @passKeyMoments.
+  ///
+  /// In es, this message translates to:
+  /// **'Momentos clave'**
+  String get passKeyMoments;
+
+  /// No description provided for @passKeyMomentsHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca uno para verlo en el mapa.'**
+  String get passKeyMomentsHelp;
+
+  /// No description provided for @telemetryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Telemetría por distancia'**
+  String get telemetryTitle;
+
+  /// No description provided for @telemetryHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Desliza sobre la gráfica para leer cada punto. Las franjas rojas son frenadas.'**
+  String get telemetryHelp;
+
+  /// No description provided for @ggTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Círculo G'**
+  String get ggTitle;
+
+  /// No description provided for @ggHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada punto combina frenada/gas (vertical) y G lateral (horizontal). Una nube más llena y redonda = más agarre aprovechado.'**
+  String get ggHelp;
+
+  /// No description provided for @ggBrake.
+  ///
+  /// In es, this message translates to:
+  /// **'Frenada'**
+  String get ggBrake;
+
+  /// No description provided for @ggThrottle.
+  ///
+  /// In es, this message translates to:
+  /// **'Gas'**
+  String get ggThrottle;
+
+  /// No description provided for @track3dTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pista en 3D'**
+  String get track3dTitle;
+
+  /// No description provided for @track3dHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Arrastra para girar · pellizca para acercar · doble toque para reiniciar'**
+  String get track3dHelp;
+
+  /// No description provided for @track3dAutoRotate.
+  ///
+  /// In es, this message translates to:
+  /// **'Girar'**
+  String get track3dAutoRotate;
+
+  /// No description provided for @track3dExaggeration.
+  ///
+  /// In es, this message translates to:
+  /// **'Relieve ×{factor}'**
+  String track3dExaggeration(String factor);
+
+  /// No description provided for @track3dNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Altura del mapeo ({source}) exagerada ×{factor}. No muestra bermas ni saltos.'**
+  String track3dNote(String factor, String source);
 }
 
 class _AppLocalizationsDelegate

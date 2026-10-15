@@ -66,6 +66,35 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  async function createDeviceFor(ownerId: string, label: string) {
+    const deviceId = `m5-${randomSecret(6)}`;
+    const secret = randomSecret(24);
+    const secretHash = await sha256Hex(secret);
+
+    const { error: insErr } = await admin.from("logger_devices").insert({
+      device_id: deviceId,
+      user_id: ownerId,
+      secret_hash: secretHash,
+      label,
+    });
+    if (insErr) {
+      return {
+        ok: false as const,
+        status: 500,
+        error: insErr.message,
+        step: "insert_device",
+      };
+    }
+
+    return {
+      ok: true as const,
+      device_id: deviceId,
+      device_secret: secret,
+      ingest_url: `${supabaseUrl}/functions/v1/ingest-logger-session`,
+      user_id: ownerId,
+    };
+  }
+
   if (action === "mint_code") {
     const code = randomSecret(4).slice(0, 8).toUpperCase();
     const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString();
@@ -74,12 +103,28 @@ Deno.serve(async (req) => {
       user_id: userId,
       expires_at: expires,
     });
-    if (error) return json(500, { ok: false, error: error.message });
+    if (error) {
+      return json(500, { ok: false, error: error.message, step: "mint_code" });
+    }
     return json(200, { ok: true, code, expires_at: expires });
   }
 
+  // BLE / in-app: one hop for the signed-in rider (no short-lived code).
+  if (action === "create_device") {
+    const label = String(body.label ?? "M5 Logger").slice(0, 64);
+    const created = await createDeviceFor(userId, label);
+    if (!created.ok) {
+      return json(created.status, {
+        ok: false,
+        error: created.error,
+        step: created.step,
+      });
+    }
+    return json(200, created);
+  }
+
   if (action === "claim_code") {
-    // Device (or serial helper) claims a code → returns device_id + secret.
+    // USB helper: claim a code minted on the phone → device_id + secret.
     const code = String(body.code ?? "").trim().toUpperCase();
     const label = String(body.label ?? "M5 Logger").slice(0, 64);
     if (!code) return json(400, { ok: false, error: "missing_code" });
@@ -89,7 +134,9 @@ Deno.serve(async (req) => {
       .select("*")
       .eq("code", code)
       .maybeSingle();
-    if (error) return json(500, { ok: false, error: error.message });
+    if (error) {
+      return json(500, { ok: false, error: error.message, step: "lookup_code" });
+    }
     if (!row || row.consumed_at) {
       return json(400, { ok: false, error: "invalid_code" });
     }
@@ -97,31 +144,21 @@ Deno.serve(async (req) => {
       return json(400, { ok: false, error: "expired" });
     }
 
-    const deviceId = `m5-${randomSecret(6)}`;
-    const secret = randomSecret(24);
-    const secretHash = await sha256Hex(secret);
-
-    const { error: insErr } = await admin.from("logger_devices").insert({
-      device_id: deviceId,
-      user_id: row.user_id,
-      secret_hash: secretHash,
-      label,
-    });
-    if (insErr) return json(500, { ok: false, error: insErr.message });
+    const created = await createDeviceFor(String(row.user_id), label);
+    if (!created.ok) {
+      return json(created.status, {
+        ok: false,
+        error: created.error,
+        step: created.step,
+      });
+    }
 
     await admin
       .from("logger_pair_codes")
       .update({ consumed_at: new Date().toISOString() })
       .eq("code", code);
 
-    const ingestUrl = `${supabaseUrl}/functions/v1/ingest-logger-session`;
-    return json(200, {
-      ok: true,
-      device_id: deviceId,
-      device_secret: secret,
-      ingest_url: ingestUrl,
-      user_id: row.user_id,
-    });
+    return json(200, created);
   }
 
   return json(400, { ok: false, error: "unknown_action" });

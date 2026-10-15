@@ -53,6 +53,9 @@ struct UploadJob {
   uint32_t gnssRaw = 0;   // bytes of gnss.ndjson to send (whole file, last full line)
   uint32_t gnssFile = 0;  // 0.5.5: gnss.ndjson size at prepare time (SD)
   uint32_t gnssEsc = 0;   // escaped length of those bytes
+  char imuPath[96] = "";  // 0.6.9i: averaged 20 Hz copy; empty = GPS only
+  uint32_t imuRaw = 0;
+  uint32_t imuEsc = 0;
   uint32_t total = 0;     // Content-Length
   char prefix[2400] = ""; // {"device_id":..,"session_id":..,"manifest":{..},"gnss_ndjson":"
   uint16_t prefixLen = 0;
@@ -97,6 +100,8 @@ class UploadTask {
   // 0.5.5: was 24000 (silent cut => truncated blobs). Now only a sanity ceiling:
   // a file above it is NOT sent partially; the ride stays pending and is logged.
   static constexpr uint32_t kGnssMax = 16UL * 1024UL * 1024UL;
+  static constexpr uint32_t kImuMax = 4UL * 1024UL * 1024UL;  // 0.6.9i: 20 Hz body cap
+  static constexpr char kImuBridge[] = "\",\"imu_ndjson\":\"";
   // 0.5.4: mbedTLS (Arduino 2.0.16) needs 2 x ~16.7 KB record buffers + ~8-9 KB
   // for Azure's 3-cert chain. Below this largest block the handshake can't finish.
   static constexpr uint32_t kTlsNeedLargest = 40000;
@@ -158,7 +163,9 @@ class UploadTask {
     if (chunkState_ != 1) return;
     const uint32_t seq = reqSeq_, off = reqOff_, len = reqLen_;
     int32_t got = -1;
-    File f = SD.open(job_.gnssPath, FILE_READ);
+    const char* path = reqWhich_ == 1 ? job_.imuPath : job_.gnssPath;
+    File f;
+    if (path[0]) f = SD.open(path, FILE_READ);
     if (f) {
       if (f.seek(off)) got = f.read(chunk_, len);
       f.close();
@@ -283,7 +290,8 @@ class UploadTask {
   }
 
   // Ask loop() for a chunk; wait (cancellable) for it.
-  int32_t fetch(UploadResult& r, uint32_t off, uint32_t len) {
+  int32_t fetch(UploadResult& r, uint8_t which, uint32_t off, uint32_t len) {
+    reqWhich_ = which;
     reqOff_ = off;
     reqLen_ = len;
     reqSeq_ = reqSeq_ + 1;
@@ -305,6 +313,27 @@ class UploadTask {
         return -1;
       }
     }
+  }
+
+  bool streamRaw(WiFiClientSecure& cli, UploadResult& r, uint8_t which, uint32_t raw) {
+    uint32_t off = 0;
+    while (off < raw) {
+      const uint32_t want = (raw - off) > kChunk ? kChunk : (raw - off);
+      const int32_t got = fetch(r, which, off, want);
+      if (got == -2) return false;
+      if (got != (int32_t)want) {
+        snprintf(r.status, sizeof(r.status), "sd chunk fail which=%u off=%lu got=%ld",
+                 (unsigned)which, (unsigned long)off, (long)got);
+        return false;
+      }
+      const size_t n = escape(chunk_, (size_t)got, esc_);
+      if (!writeAll(cli, r, (const uint8_t*)esc_, n)) return false;
+      off += (uint32_t)got;
+      r.chunks++;
+      heapTick(r);
+      vTaskDelay(1);  // let IDLE0 run (task WDT)
+    }
+    return true;
   }
 
   bool writeAll(WiFiClientSecure& cli, UploadResult& r, const uint8_t* p, size_t n) {
@@ -428,31 +457,10 @@ class UploadTask {
               cli.write((const uint8_t*)hdr_, hl) == (size_t)hl;
     memset(hdr_, 0, sizeof(hdr_));  // header held the key
     if (ok) ok = writeAll(cli, r, (const uint8_t*)job_.prefix, job_.prefixLen);
-    uint32_t off = 0;
-    while (ok && off < job_.gnssRaw) {
-      const uint32_t want = (job_.gnssRaw - off) > kChunk ? kChunk : (job_.gnssRaw - off);
-      const int32_t got = fetch(r, off, want);
-      if (got == -2) {
-        ok = false;
-        break;
-      }
-      if (got != (int32_t)want) {
-        snprintf(r.status, sizeof(r.status), "sd chunk fail off=%lu got=%ld", (unsigned long)off,
-                 (long)got);
-        ok = false;
-        break;
-      }
-      const size_t n = escape(chunk_, (size_t)got, esc_);
-      ok = writeAll(cli, r, (const uint8_t*)esc_, n);
-      off += (uint32_t)got;
-      r.chunks++;
-      heapTick(r);
-      vTaskDelay(1);  // let IDLE0 run (task WDT)
-    }
-    if (ok && off != job_.gnssRaw) {  // 0.5.5: every gnss byte must have been sent
-      snprintf(r.status, sizeof(r.status), "gnss short %lu/%lu", (unsigned long)off,
-               (unsigned long)job_.gnssRaw);
-      ok = false;
+    if (ok) ok = streamRaw(cli, r, 0, job_.gnssRaw);
+    if (ok && job_.imuRaw > 0) {
+      ok = writeAll(cli, r, (const uint8_t*)kImuBridge, sizeof(kImuBridge) - 1);
+      if (ok) ok = streamRaw(cli, r, 1, job_.imuRaw);
     }
     if (ok) ok = writeAll(cli, r, (const uint8_t*)"\"}", 2);
     r.sendMs = millis() - ts;
@@ -531,6 +539,7 @@ class UploadTask {
   volatile uint32_t cancelAtMs_ = 0;
   volatile uint8_t phase_ = IDLE;
   volatile uint8_t chunkState_ = 0;  // 0 idle, 1 requested (task), 2 served (loop)
+  volatile uint8_t reqWhich_ = 0;  // 0 = gnss.ndjson, 1 = imu20.ndjson
   volatile uint32_t reqOff_ = 0, reqLen_ = 0, reqSeq_ = 0, gotSeq_ = 0;
   volatile int32_t gotLen_ = 0;
   uint32_t ioServed_ = 0;

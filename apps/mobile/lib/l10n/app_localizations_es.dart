@@ -4079,7 +4079,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get metricaBleNotFound =>
-      'No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.';
+      'No se encontró el equipo. En el M5: Menú → EMPAREJAR (reinicia y muestra un PIN de 6 dígitos). Espera esa pantalla y entonces pulsa Emparejar en el teléfono.';
 
   @override
   String get metricaBlePermissionDenied =>
@@ -4309,4 +4309,151 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get metricaBleWifiBandNote =>
       'Métrica solo entra a 2.4 GHz (no redes solo 5 GHz).';
+
+  @override
+  String get offroadMetricaTitle => 'Métrica';
+
+  @override
+  String get offroadMetricaSubtitle =>
+      'Empareja el logger por Bluetooth y envía el Wi‑Fi del paddock';
+
+  @override
+  String get channelSpeed => 'Velocidad';
+
+  @override
+  String get channelLongG => 'Frenada / gas';
+
+  @override
+  String get channelLean => 'Inclinación';
+
+  @override
+  String get channelLatG => 'G lateral';
+
+  @override
+  String get channelElevation => 'Altitud';
+
+  @override
+  String get channelOffLine => 'Fuera de pista';
+
+  @override
+  String get channelEstimatedShort => 'Estimado por GNSS';
+
+  @override
+  String get channelEstimatedNote =>
+      'Inclinación y G lateral se estiman con GNSS (velocidad × giro), no las mide una IMU.';
+
+  @override
+  String get passMapOpen => 'Mapa completo';
+
+  @override
+  String get pass3dOpen => 'Vista 3D';
+
+  @override
+  String passMapBrakes(int count) {
+    return 'Frenadas ($count)';
+  }
+
+  @override
+  String get passMapPeaks => 'Picos';
+
+  @override
+  String passMapGhost(String id) {
+    return 'Mejor: $id';
+  }
+
+  @override
+  String brakeZone(int n) {
+    return 'Frenada $n';
+  }
+
+  @override
+  String get eventLeanRight => 'Inclinación máx. a la derecha';
+
+  @override
+  String get eventLeanLeft => 'Inclinación máx. a la izquierda';
+
+  @override
+  String get eventHardestBrake => 'Frenada más fuerte';
+
+  @override
+  String get eventHardestAccel => 'Aceleración más fuerte';
+
+  @override
+  String get eventPeakLatG => 'G lateral máximo';
+
+  @override
+  String get eventLeanLeftShort => 'Incl. izq.';
+
+  @override
+  String get eventLeanRightShort => 'Incl. der.';
+
+  @override
+  String get eventHardestBrakeShort => 'Frenada máx.';
+
+  @override
+  String get eventHardestAccelShort => 'Acel. máx.';
+
+  @override
+  String get hudLean => 'Inclinación';
+
+  @override
+  String get hudLongG => 'Frenada / gas';
+
+  @override
+  String get hudLatG => 'G lateral';
+
+  @override
+  String get hudLeft => 'Izq.';
+
+  @override
+  String get hudRight => 'Der.';
+
+  @override
+  String get hudBraking => 'FRENANDO';
+
+  @override
+  String get passKeyMoments => 'Momentos clave';
+
+  @override
+  String get passKeyMomentsHelp => 'Toca uno para verlo en el mapa.';
+
+  @override
+  String get telemetryTitle => 'Telemetría por distancia';
+
+  @override
+  String get telemetryHelp =>
+      'Desliza sobre la gráfica para leer cada punto. Las franjas rojas son frenadas.';
+
+  @override
+  String get ggTitle => 'Círculo G';
+
+  @override
+  String get ggHelp =>
+      'Cada punto combina frenada/gas (vertical) y G lateral (horizontal). Una nube más llena y redonda = más agarre aprovechado.';
+
+  @override
+  String get ggBrake => 'Frenada';
+
+  @override
+  String get ggThrottle => 'Gas';
+
+  @override
+  String get track3dTitle => 'Pista en 3D';
+
+  @override
+  String get track3dHelp =>
+      'Arrastra para girar · pellizca para acercar · doble toque para reiniciar';
+
+  @override
+  String get track3dAutoRotate => 'Girar';
+
+  @override
+  String track3dExaggeration(String factor) {
+    return 'Relieve ×$factor';
+  }
+
+  @override
+  String track3dNote(String factor, String source) {
+    return 'Altura del mapeo ($source) exagerada ×$factor. No muestra bermas ni saltos.';
+  }
 }

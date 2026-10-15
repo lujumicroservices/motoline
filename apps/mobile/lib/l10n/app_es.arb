@@ -2282,7 +2282,7 @@
   "metricaBleWriting": "Enviando el emparejado al equipo…",
   "metricaBleTimeout": "El equipo no respondió a tiempo.",
   "metricaBleNoSession": "Inicia sesión para emparejar Métrica.",
-  "metricaBleNotFound": "No se encontró el equipo. Enciende Métrica, entra al modo de emparejado y acércala al teléfono.",
+  "metricaBleNotFound": "No se encontró el equipo. En el M5: Menú → EMPAREJAR (reinicia y muestra un PIN de 6 dígitos). Espera esa pantalla y entonces pulsa Emparejar en el teléfono.",
   "metricaBlePermissionDenied": "Faltan permisos de Bluetooth (búsqueda y conexión). Actívalos para emparejar.",
   "metricaBleLocationDenied": "En esta versión de Android hace falta el permiso de ubicación para buscar el equipo.",
   "metricaBleBluetoothOff": "Activa el Bluetooth del teléfono.",
@@ -2406,5 +2406,87 @@
   },
   "metricaBleWifiPickTitle": "Wi‑Fi para Métrica",
   "metricaBleWifiPickHelp": "Elige qué red enviar al logger por Bluetooth.",
-  "metricaBleWifiBandNote": "Métrica solo entra a 2.4 GHz (no redes solo 5 GHz)."
+  "metricaBleWifiBandNote": "Métrica solo entra a 2.4 GHz (no redes solo 5 GHz).",
+  "offroadMetricaTitle": "Métrica",
+  "offroadMetricaSubtitle": "Empareja el logger por Bluetooth y envía el Wi‑Fi del paddock",
+  "channelSpeed": "Velocidad",
+  "channelLongG": "Frenada / gas",
+  "channelLean": "Inclinación",
+  "channelLatG": "G lateral",
+  "channelElevation": "Altitud",
+  "channelOffLine": "Fuera de pista",
+  "channelEstimatedShort": "Estimado por GNSS",
+  "channelEstimatedNote": "Inclinación y G lateral se estiman con GNSS (velocidad × giro), no las mide una IMU.",
+  "passMapOpen": "Mapa completo",
+  "pass3dOpen": "Vista 3D",
+  "passMapBrakes": "Frenadas ({count})",
+  "@passMapBrakes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "passMapPeaks": "Picos",
+  "passMapGhost": "Mejor: {id}",
+  "@passMapGhost": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "brakeZone": "Frenada {n}",
+  "@brakeZone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "eventLeanRight": "Inclinación máx. a la derecha",
+  "eventLeanLeft": "Inclinación máx. a la izquierda",
+  "eventHardestBrake": "Frenada más fuerte",
+  "eventHardestAccel": "Aceleración más fuerte",
+  "eventPeakLatG": "G lateral máximo",
+  "eventLeanLeftShort": "Incl. izq.",
+  "eventLeanRightShort": "Incl. der.",
+  "eventHardestBrakeShort": "Frenada máx.",
+  "eventHardestAccelShort": "Acel. máx.",
+  "hudLean": "Inclinación",
+  "hudLongG": "Frenada / gas",
+  "hudLatG": "G lateral",
+  "hudLeft": "Izq.",
+  "hudRight": "Der.",
+  "hudBraking": "FRENANDO",
+  "passKeyMoments": "Momentos clave",
+  "passKeyMomentsHelp": "Toca uno para verlo en el mapa.",
+  "telemetryTitle": "Telemetría por distancia",
+  "telemetryHelp": "Desliza sobre la gráfica para leer cada punto. Las franjas rojas son frenadas.",
+  "ggTitle": "Círculo G",
+  "ggHelp": "Cada punto combina frenada/gas (vertical) y G lateral (horizontal). Una nube más llena y redonda = más agarre aprovechado.",
+  "ggBrake": "Frenada",
+  "ggThrottle": "Gas",
+  "track3dTitle": "Pista en 3D",
+  "track3dHelp": "Arrastra para girar · pellizca para acercar · doble toque para reiniciar",
+  "track3dAutoRotate": "Girar",
+  "track3dExaggeration": "Relieve ×{factor}",
+  "@track3dExaggeration": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      }
+    }
+  },
+  "track3dNote": "Altura del mapeo ({source}) exagerada ×{factor}. No muestra bermas ni saltos.",
+  "@track3dNote": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  }
 }

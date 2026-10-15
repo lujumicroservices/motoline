@@ -3,10 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:motoline/core/services/logger_pairing_service.dart';
 import 'package:motoline/core/services/metrica_ble_pairing.dart';
 import 'package:motoline/core/services/metrica_ble_protocol.dart';
+import 'package:motoline/core/services/metrica_paddock_wifi.dart';
 import 'package:motoline/features/settings/metrica_ble_pair_section.dart';
 import 'package:motoline/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('button is on the logger screen section', (tester) async {
     await tester.pumpWidget(_app(const MetricaBlePairSection()));
     expect(find.byKey(const Key('metrica-ble-pair')), findsOneWidget);
@@ -68,22 +74,27 @@ void main() {
     await tester.tap(find.text('Metrica-A1B2'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.textContaining('Versión 0.6.8-ble'), findsOneWidget);
-    expect(find.textContaining('Aún no está emparejado'), findsOneWidget);
-    expect(find.textContaining('Sin ID'), findsOneWidget);
-    expect(find.textContaining('MTU 247'), findsOneWidget);
+    // PIN + Wi-Fi are collected before GATT opens.
     expect(find.text('PIN de Métrica'), findsOneWidget);
+    expect(find.textContaining('Versión 0.6.8-ble'), findsNothing);
 
     await tester.enterText(find.byKey(const Key('metrica-ble-pin')), '123456');
     await tester.tap(find.text('Continuar'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    // Platform SSID lookup times out quickly in tests; wait for the picker.
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
 
-    expect(find.text('Ahora no'), findsOneWidget);
+    expect(find.text('Infinitum (casa)'), findsOneWidget);
+    expect(find.text('Hotspot Galaxy S25'), findsOneWidget);
     await tester.tap(find.text('Ahora no'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
+    expect(find.textContaining('Versión 0.6.8-ble'), findsOneWidget);
+    expect(find.textContaining('Aún no está emparejado'), findsOneWidget);
+    expect(find.textContaining('Sin ID'), findsOneWidget);
+    expect(find.textContaining('MTU 247'), findsOneWidget);
     expect(find.text('Métrica emparejada (dev-1).'), findsOneWidget);
     expect(find.textContaining(secret), findsNothing);
     expect(link.disconnected, isTrue);
@@ -116,6 +127,10 @@ void main() {
     await tester.enterText(find.byKey(const Key('metrica-ble-pin')), '123456');
     await tester.tap(find.text('Continuar'));
     await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    await tester.tap(find.text('Ahora no'));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('PIN incorrecto. Quedan 3 intentos.'), findsWidgets);
     expect(find.text('PIN de Métrica'), findsOneWidget);
@@ -143,6 +158,11 @@ class _Api implements LoggerPairingApi {
     String code, {
     String label = 'M5 Logger',
   }) async {
+    throw UnsupportedError('BLE uses createDevice');
+  }
+
+  @override
+  Future<LoggerPairResult> createDevice({String label = 'M5 Logger'}) async {
     return LoggerPairResult(
       deviceId: 'dev-1',
       deviceSecret: secret,

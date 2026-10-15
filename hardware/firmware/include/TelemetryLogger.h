@@ -34,6 +34,8 @@ class TelemetryLogger {
       delay(20);
       if (SD.begin(SD_CS_PIN, SPI, hz, "/sd", SD_MAX_FILES)) {  // 0.5.4: see HardwareConfig.h
         ok = true;
+        hz_ = hz;
+        slots_ = SD_MAX_FILES;
         break;
       }
     }
@@ -48,6 +50,35 @@ class TelemetryLogger {
     err_ = "ok";
     return true;
   }
+
+  // 0.6.9e: the FAT mount reserves 6.2 KB + slots x 4.14 KB in ONE block (~47 KB at 10).
+  // Uploading needs <= 2 files open at a time, so it remounts with few slots to give
+  // mbedTLS (2 x 16.7 KB records + handshake) ~29 KB back. Caller guarantees that no
+  // File is open. Tries slots down to minSlots (the heap after Wi-Fi may miss the full
+  // block by a few hundred bytes); below that falls back to the small mount -> false.
+  bool remountSd(uint8_t slots, uint8_t minSlots) {
+    if (!sdOk_ || recording_ || slots == slots_) return sdOk_;
+    if (minSlots > slots) minSlots = slots;
+    if (slots_ >= minSlots && slots_ <= slots) return true;
+    SD.end();
+    delay(5);
+    for (uint8_t s = slots; s >= minSlots && s > 0; --s) {
+      if (SD.begin(SD_CS_PIN, SPI, hz_, "/sd", s)) {
+        slots_ = s;
+        return true;
+      }
+    }
+    if (minSlots > kSmallSlots && SD.begin(SD_CS_PIN, SPI, hz_, "/sd", kSmallSlots)) {
+      slots_ = kSmallSlots;
+      return false;
+    }
+    sdOk_ = false;
+    slots_ = 0;
+    err_ = "SD remount failed";
+    return false;
+  }
+  static constexpr uint8_t kSmallSlots = 3;
+  uint8_t sdSlots() const { return slots_; }
 
   bool sdOk() const { return sdOk_; }
   const String& err() const { return err_; }
@@ -356,6 +387,8 @@ class TelemetryLogger {
 
  private:
   bool sdOk_ = false;
+  uint32_t hz_ = SD_SPI_HZ;
+  uint8_t slots_ = 0;
   bool recording_ = false;
   bool anchor_ = false;
   String err_ = "not started";

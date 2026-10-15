@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -106,9 +107,11 @@ class MetricaBleClient implements MetricaBleTransport {
       );
     }
     hits.sort((a, b) => b.rssi.compareTo(a.rssi));
-    debugPrint(
-      'metrica_ble: scan seen=${rssi.length} hits=${hits.length} '
+    // developer.log survives release builds (debugPrint is stripped).
+    developer.log(
+      'scan seen=${rssi.length} hits=${hits.length} '
       'names=${names.values.where((n) => n.isNotEmpty).take(8).join(",")}',
+      name: 'metrica_ble',
     );
     return hits;
   }
@@ -118,6 +121,7 @@ class MetricaBleClient implements MetricaBleTransport {
     await _ensureAdapterOn();
     final remote =
         _seen[device.remoteId] ?? BluetoothDevice.fromId(device.remoteId);
+    developer.log('connect ${device.name} id=${device.remoteId}', name: 'metrica_ble');
     try {
       await remote.connect(
         autoConnect: false,
@@ -125,25 +129,30 @@ class MetricaBleClient implements MetricaBleTransport {
         mtu: MetricaBleProtocol.requestedMtu,
       );
     } catch (error) {
+      developer.log('connect failed: $error', name: 'metrica_ble');
       throw _mapBleError(error);
     }
 
     final mtu = await _requestMtu(remote);
     final maxWrite = MetricaBleProtocol.maxWriteLength(mtu);
-    debugPrint('metrica_ble: connected mtu=$mtu maxWrite=$maxWrite');
+    developer.log('connected mtu=$mtu maxWrite=$maxWrite', name: 'metrica_ble');
 
     List<BluetoothService> services;
     try {
       services = await remote.discoverServices();
     } catch (error) {
       await _disconnectQuiet(remote);
+      developer.log('discover failed: $error', name: 'metrica_ble');
       throw _mapBleError(error);
     }
 
     final service = _service(services, MetricaBleProtocol.serviceUuid);
     if (service == null) {
       await _disconnectQuiet(remote);
-      throw const MetricaBleException(MetricaBleFailure.protocol);
+      throw const MetricaBleException(
+        MetricaBleFailure.protocol,
+        detail: 'service missing',
+      );
     }
     final info = _char(service, MetricaBleProtocol.infoUuid);
     final auth = _char(service, MetricaBleProtocol.authUuid);
@@ -156,8 +165,17 @@ class MetricaBleClient implements MetricaBleTransport {
         wifi == null ||
         status == null) {
       await _disconnectQuiet(remote);
-      throw const MetricaBleException(MetricaBleFailure.protocol);
+      throw const MetricaBleException(
+        MetricaBleFailure.protocol,
+        detail: 'characteristic missing',
+      );
     }
+    developer.log(
+      'chars info=${info.properties.read} authW=${auth.properties.write}/'
+      '${auth.properties.writeWithoutResponse} '
+      'statusN=${status.properties.notify}',
+      name: 'metrica_ble',
+    );
 
     final link = _MetricaBleLink(
       device: remote,
@@ -172,6 +190,7 @@ class MetricaBleClient implements MetricaBleTransport {
       await link.subscribe();
     } catch (error) {
       await link.disconnect();
+      developer.log('subscribe failed: $error', name: 'metrica_ble');
       throw _mapBleError(error);
     }
     return link;
@@ -274,9 +293,14 @@ class _MetricaBleLink implements MetricaGattLink {
     _statusSub = status.onValueReceived.listen(_onStatus);
     final notify = status.properties.notify || status.properties.indicate;
     if (!notify) {
-      throw const MetricaBleException(MetricaBleFailure.protocol);
+      throw const MetricaBleException(
+        MetricaBleFailure.protocol,
+        detail: 'status notify missing',
+      );
     }
     await status.setNotifyValue(true);
+    // Give the stack a beat after CCCD before the first read/write.
+    await Future<void>.delayed(const Duration(milliseconds: 200));
   }
 
   void _onStatus(List<int> value) {
@@ -284,10 +308,13 @@ class _MetricaBleLink implements MetricaGattLink {
     if (message == null) return;
     try {
       final parsed = MetricaBleProtocol.parseStatus(message);
-      debugPrint('metrica_ble: ${MetricaBleProtocol.statusLogLine(parsed)}');
+      developer.log(
+        MetricaBleProtocol.statusLogLine(parsed),
+        name: 'metrica_ble',
+      );
       if (!_statuses.isClosed) _statuses.add(parsed);
     } catch (_) {
-      debugPrint('metrica_ble: status parse failed');
+      developer.log('status parse failed len=${value.length}', name: 'metrica_ble');
     }
   }
 
@@ -295,12 +322,21 @@ class _MetricaBleLink implements MetricaGattLink {
   Future<MetricaDeviceInfo> readInfo() async {
     try {
       final bytes = await info.read();
-      return MetricaBleProtocol.parseInfo(bytes);
+      final parsed = MetricaBleProtocol.parseInfo(bytes);
+      developer.log(
+        'info fw=${parsed.firmware} paired=${parsed.paired} '
+        'authed=${parsed.authed} mtu=${parsed.mtu} bytes=${bytes.length}',
+        name: 'metrica_ble',
+      );
+      return parsed;
     } on MetricaBleException {
       rethrow;
     } catch (error) {
       if (error is FormatException) {
-        throw const MetricaBleException(MetricaBleFailure.protocol);
+        throw MetricaBleException(
+          MetricaBleFailure.protocol,
+          detail: 'info ${error.message}',
+        );
       }
       throw _mapBleError(error);
     }
@@ -330,14 +366,18 @@ class _MetricaBleLink implements MetricaGattLink {
       payload,
       maxChunk: maxWriteLength,
     );
-    debugPrint(
-      'metrica_ble: write $label bytes=${payload.length} frames=${frames.length}',
+    developer.log(
+      'write $label bytes=${payload.length} frames=${frames.length}',
+      name: 'metrica_ble',
     );
     final pending = _nextStatus();
     try {
       final withResponse = characteristic.properties.write;
       if (!withResponse && !characteristic.properties.writeWithoutResponse) {
-        throw const MetricaBleException(MetricaBleFailure.protocol);
+        throw const MetricaBleException(
+          MetricaBleFailure.protocol,
+          detail: 'write prop missing',
+        );
       }
       for (final frame in frames) {
         await characteristic.write(
@@ -346,11 +386,35 @@ class _MetricaBleLink implements MetricaGattLink {
           allowLongWrite: false,
         );
       }
-      return await pending;
+      try {
+        return await pending;
+      } on MetricaBleException catch (error) {
+        if (error.failure != MetricaBleFailure.timeout) rethrow;
+        // Some stacks drop the notify; STATUS is also readable.
+        final fallback = await _readStatusQuiet();
+        if (fallback != null) {
+          developer.log(
+            'status fallback ${MetricaBleProtocol.statusLogLine(fallback)}',
+            name: 'metrica_ble',
+          );
+          if (!(fallback.ok && fallback.msg == 'ready')) return fallback;
+        }
+        rethrow;
+      }
     } catch (error) {
       unawaited(pending.then((_) {}, onError: (_) {}));
       if (error is MetricaBleException) rethrow;
+      developer.log('write $label error: $error', name: 'metrica_ble');
       throw _mapBleError(error);
+    }
+  }
+
+  Future<MetricaStatus?> _readStatusQuiet() async {
+    try {
+      final bytes = await status.read();
+      return MetricaBleProtocol.parseStatus(bytes);
+    } catch (_) {
+      return null;
     }
   }
 
@@ -368,7 +432,7 @@ class _MetricaBleLink implements MetricaGattLink {
       );
       // Initial notify on subscribe. A write never answers `ready`.
       if (status.ok && status.msg == 'ready') {
-        debugPrint('metrica_ble: ignore initial ready');
+        developer.log('ignore initial ready', name: 'metrica_ble');
         continue;
       }
       return status;
@@ -401,5 +465,11 @@ MetricaBleException _mapBleError(Object error) {
   if (text.contains('off') || text.contains('adapter')) {
     return const MetricaBleException(MetricaBleFailure.bluetoothOff);
   }
-  return const MetricaBleException(MetricaBleFailure.connectFailed);
+  if (text.contains('disconnect') || text.contains('connection')) {
+    return const MetricaBleException(MetricaBleFailure.connectFailed);
+  }
+  return MetricaBleException(
+    MetricaBleFailure.connectFailed,
+    detail: error.runtimeType.toString(),
+  );
 }

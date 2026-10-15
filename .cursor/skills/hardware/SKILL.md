@@ -7,6 +7,8 @@ description: Resume and continue the RiderLab hardware/logger subproject (GNSS, 
 
 Work lives in `hardware/`. This is a **separate lane** from shop, landing, and Play.
 
+Firmware / app Métrica por módulo: skill índice **`metrica`** (y `metrica-*`). Este skill sigue siendo BOM, STATUS y decisiones de compra.
+
 ## Resume (every hardware turn)
 
 1. Read `hardware/STATUS.md`.

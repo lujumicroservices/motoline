@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../core/services/metrica_ble_client.dart';
 import '../../core/services/metrica_ble_pairing.dart';
 import '../../core/services/metrica_ble_protocol.dart';
+import '../../core/services/metrica_paddock_wifi.dart';
 import '../../core/supabase/supabase_bootstrap.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
@@ -20,11 +21,13 @@ class MetricaBlePairSection extends StatefulWidget {
     this.transport,
     this.pairing,
     this.hasSession,
+    this.paddockWifi,
   });
 
   final MetricaBleTransport? transport;
   final MetricaBlePairing? pairing;
   final Future<bool> Function()? hasSession;
+  final MetricaPaddockWifi? paddockWifi;
 
   @override
   State<MetricaBlePairSection> createState() => _MetricaBlePairSectionState();
@@ -51,6 +54,9 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
 
   MetricaBlePairing get _pairing =>
       widget.pairing ?? (_ownedPairing ??= MetricaBlePairing());
+
+  MetricaPaddockWifi get _paddockWifi =>
+      widget.paddockWifi ?? const MetricaPaddockWifi();
 
   Future<bool> _hasSession() {
     final injected = widget.hasSession;
@@ -112,9 +118,9 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
     } on MetricaBleException catch (error) {
       if (!mounted) return;
       _fail(_messageFor(error));
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
-      _fail(context.l10n.metricaBleFailed);
+      _fail(context.l10n.metricaBleFailedDetail(error.runtimeType.toString()));
     }
   }
 
@@ -124,8 +130,22 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
       _busy = true;
       _phase = _Phase.working;
       _error = null;
-      _status = context.l10n.metricaBleConnecting(hit.name);
+      _status = null;
     });
+    // Ask PIN + Wi-Fi *before* opening GATT. Samsung often drops idle links
+    // while a dialog is up; the logger then shows conns>=1 authed=0.
+    final pin = await _askPin();
+    if (!mounted) return;
+    if (pin == null) {
+      setState(() {
+        _busy = false;
+        _phase = _Phase.idle;
+      });
+      return;
+    }
+    final wifi = await _requestWifi();
+    if (!mounted) return;
+    setState(() => _status = context.l10n.metricaBleConnecting(hit.name));
     try {
       final link = await _transport.connect(hit);
       _link = link;
@@ -137,42 +157,38 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
       final info = await link.readInfo();
       if (!mounted) return;
       setState(() => _info = info);
-      await _runPair(link, hit.name);
+      await _runPair(link, hit.name, pin: pin, wifi: wifi);
     } on MetricaBleException catch (error) {
       await _dropLink();
       if (!mounted) return;
       _fail(_messageFor(error));
-    } catch (_) {
+    } catch (error) {
       await _dropLink();
       if (!mounted) return;
-      _fail(context.l10n.metricaBleFailed);
+      _fail(context.l10n.metricaBleFailedDetail(error.runtimeType.toString()));
     }
   }
 
-  Future<void> _runPair(MetricaGattLink link, String label) async {
+  Future<void> _runPair(
+    MetricaGattLink link,
+    String label, {
+    required String pin,
+    MetricaWifiCredentials? wifi,
+  }) async {
+    var active = link;
+    var nextPin = pin;
     while (mounted) {
-      final pin = await _askPin();
-      if (!mounted) return;
-      if (pin == null) {
-        await _dropLink();
-        if (!mounted) return;
-        setState(() {
-          _busy = false;
-          _phase = _Phase.idle;
-          _status = null;
-        });
-        return;
-      }
       setState(() => _status = context.l10n.metricaBleCheckingPin);
       try {
         final success = await _pairing.pair(
-          link: link,
-          pin: pin,
+          link: active,
+          pin: nextPin,
           label: label,
           hasSession: _hasSession,
           onPhase: _onPhase,
           onStatus: _onStatus,
-          requestWifi: _requestWifi,
+          // Creds already chosen with the link down — no dialog on air.
+          requestWifi: wifi == null ? null : () async => wifi,
         );
         if (!mounted) return;
         final result = context.l10n.metricaBleSuccess(success.deviceId);
@@ -196,16 +212,40 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
           final message = _messageFor(error);
           setState(() => _error = message);
           showAppSnackError(context, message);
+          // Drop the link before another dialog so Android does not idle-kill it.
+          await _dropLink();
+          if (!mounted) return;
+          final retry = await _askPin();
+          if (!mounted) return;
+          if (retry == null) {
+            setState(() {
+              _busy = false;
+              _phase = _Phase.idle;
+              _status = null;
+            });
+            return;
+          }
+          nextPin = retry;
+          setState(() => _status = context.l10n.metricaBleConnecting(label));
+          final hit = _hits.firstWhere(
+            (h) => h.name == label,
+            orElse: () => _hits.first,
+          );
+          active = await _transport.connect(hit);
+          _link = active;
+          final info = await active.readInfo();
+          if (!mounted) return;
+          setState(() => _info = info);
           continue;
         }
         await _dropLink();
         if (!mounted) return;
         _fail(_messageFor(error));
         return;
-      } catch (_) {
+      } catch (error) {
         await _dropLink();
         if (!mounted) return;
-        _fail(context.l10n.metricaBleFailed);
+        _fail(context.l10n.metricaBleFailedDetail(error.runtimeType.toString()));
         return;
       }
     }
@@ -241,9 +281,21 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
   }
 
   Future<MetricaWifiCredentials?> _requestWifi() async {
-    final creds = await _askWifi();
-    if (creds == null) return null;
-    return MetricaWifiCredentials(ssid: creds.ssid, password: creds.password);
+    final networks = await _paddockWifi.networks();
+    final phoneSsid = await _paddockWifi.currentSsid();
+    if (!mounted) return null;
+    final picked = await _askWifiNetwork(
+      networks: networks,
+      phoneSsid: phoneSsid,
+    );
+    if (picked == null) return null;
+    await _paddockWifi.remember(ssid: picked.ssid, password: picked.password);
+    if (mounted) {
+      setState(
+        () => _status = context.l10n.metricaBleWifiUsingPhone(picked.ssid),
+      );
+    }
+    return MetricaWifiCredentials(ssid: picked.ssid, password: picked.password);
   }
 
   Future<void> _dropLink() async {
@@ -298,7 +350,9 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
         return '';
       case MetricaBleFailure.protocol:
         final detail = error.detail?.trim() ?? '';
-        if (detail.isEmpty) return l10n.metricaBleFailed;
+        if (detail.isEmpty) {
+          return l10n.metricaBleFailedDetail(error.failure.name);
+        }
         return l10n.metricaBleFailedDetail(detail);
     }
   }
@@ -311,10 +365,16 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
     );
   }
 
-  Future<_WifiCreds?> _askWifi() {
+  Future<_WifiCreds?> _askWifiNetwork({
+    required List<MetricaPaddockNetwork> networks,
+    String? phoneSsid,
+  }) {
     return showDialog<_WifiCreds>(
       context: context,
-      builder: (context) => const _WifiDialog(),
+      builder: (context) => _WifiNetworkPicker(
+        networks: networks,
+        phoneSsid: phoneSsid,
+      ),
     );
   }
 
@@ -501,54 +561,56 @@ class _PinDialogState extends State<_PinDialog> {
   }
 }
 
-class _WifiDialog extends StatefulWidget {
-  const _WifiDialog();
+class _WifiNetworkPicker extends StatelessWidget {
+  const _WifiNetworkPicker({
+    required this.networks,
+    this.phoneSsid,
+  });
 
-  @override
-  State<_WifiDialog> createState() => _WifiDialogState();
-}
-
-class _WifiDialogState extends State<_WifiDialog> {
-  final _ssid = TextEditingController();
-  final _pass = TextEditingController();
-  var _error = '';
-
-  @override
-  void dispose() {
-    _ssid.dispose();
-    _pass.dispose();
-    super.dispose();
-  }
+  final List<MetricaPaddockNetwork> networks;
+  final String? phoneSsid;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return AlertDialog(
-      title: Text(l10n.metricaBleWifiTitle),
+      title: Text(l10n.metricaBleWifiPickTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.metricaBleWifiHelp),
+            Text(l10n.metricaBleWifiPickHelp),
+            const SizedBox(height: 8),
+            Text(
+              l10n.metricaBleWifiBandNote,
+              style: const TextStyle(color: AppTheme.steel, fontSize: 12),
+            ),
             const SizedBox(height: 12),
-            TextField(
-              key: const Key('metrica-ble-ssid'),
-              controller: _ssid,
-              decoration: InputDecoration(labelText: l10n.metricaBleWifiSsid),
-            ),
-            TextField(
-              key: const Key('metrica-ble-wifi-pass'),
-              controller: _pass,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: l10n.metricaBleWifiPassword,
+            for (final network in networks)
+              Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  key: Key('metrica-ble-wifi-${network.id}'),
+                  leading: Icon(
+                    network.ssid == phoneSsid
+                        ? Icons.phone_android
+                        : Icons.wifi,
+                    color: AppTheme.line,
+                  ),
+                  title: Text(network.label),
+                  subtitle: Text(
+                    network.ssid == phoneSsid
+                        ? '${network.ssid}\n${l10n.metricaBleWifiFromPhone}'
+                        : network.ssid,
+                  ),
+                  isThreeLine: network.ssid == phoneSsid,
+                  onTap: () => Navigator.pop(
+                    context,
+                    _WifiCreds(ssid: network.ssid, password: network.password),
+                  ),
+                ),
               ),
-            ),
-            if (_error.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(_error, style: const TextStyle(color: AppTheme.signal)),
-            ],
           ],
         ),
       ),
@@ -556,20 +618,6 @@ class _WifiDialogState extends State<_WifiDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(l10n.metricaBleWifiSkip),
-        ),
-        FilledButton(
-          onPressed: () {
-            final name = _ssid.text.trim();
-            if (name.isEmpty) {
-              setState(() => _error = l10n.metricaBleWifiNeedSsid);
-              return;
-            }
-            Navigator.pop(
-              context,
-              _WifiCreds(ssid: name, password: _pass.text),
-            );
-          },
-          child: Text(l10n.metricaBleWifiSend),
         ),
       ],
     );

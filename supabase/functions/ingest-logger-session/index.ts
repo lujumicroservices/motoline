@@ -80,9 +80,13 @@ Deno.serve(async (req) => {
     return json(400, { ok: false, error: "bad_json" });
   }
 
-  const deviceId = String(body.device_id ?? "");
-  const deviceSecret = String(body.device_secret ?? "");
-  const sessionId = String(body.session_id ?? "");
+  // Firmware UploadTask sends X-Logger-Key + X-Device-Id (Azure contract).
+  // Body device_secret remains for older helpers / tests.
+  const headerKey = (req.headers.get("X-Logger-Key") ?? "").trim();
+  const headerDev = (req.headers.get("X-Device-Id") ?? "").trim();
+  const deviceId = String(body.device_id ?? headerDev ?? "").trim();
+  const deviceSecret = String(body.device_secret ?? headerKey ?? "").trim();
+  const sessionId = String(body.session_id ?? "").trim();
   if (!deviceId || !deviceSecret || !sessionId) {
     return json(400, { ok: false, error: "missing_fields" });
   }
@@ -114,6 +118,7 @@ Deno.serve(async (req) => {
       ? (body.manifest as Record<string, unknown>)
       : {};
   const gnssRaw = String(body.gnss_ndjson ?? "");
+  const imuRaw = String(body.imu_ndjson ?? "");
   const lines = parseNdjson(gnssRaw);
   if (lines.length === 0) {
     return json(400, { ok: false, error: "no_gnss_points" });
@@ -205,7 +210,21 @@ Deno.serve(async (req) => {
     if (ptErr) return json(500, { ok: false, error: ptErr.message });
   }
 
-  // Archive raw payload (best-effort).
+  // 0.6.9i: the 20 Hz IMU is the file the laptop downloads. A failed store must not
+  // return 200, or a KEEPSD-off device deletes the only copy.
+  if (imuRaw.length > 0) {
+    const imuPath = `logger-sessions/${device.user_id}/${sessionId}/imu20.ndjson`;
+    const { error: imuErr } = await admin.storage.from("logger-sessions").upload(
+      imuPath,
+      new Blob([imuRaw], { type: "application/x-ndjson" }),
+      { upsert: true, contentType: "application/x-ndjson" },
+    );
+    if (imuErr) {
+      return json(500, { ok: false, error: "imu_store_failed", detail: imuErr.message });
+    }
+  }
+
+  // Archive GNSS excerpt (best-effort). The IMU lives in imu20.ndjson, not here.
   try {
     const path = `logger-sessions/${device.user_id}/${sessionId}/payload.json`;
     await admin.storage.from("logger-sessions").upload(
@@ -213,12 +232,12 @@ Deno.serve(async (req) => {
       new Blob([JSON.stringify({
         manifest,
         gnss_ndjson: gnssRaw.slice(0, 500000),
-        imu_ndjson: String(body.imu_ndjson ?? "").slice(0, 200000),
+        imu_bytes: imuRaw.length,
       })], { type: "application/json" }),
       { upsert: true },
     );
   } catch {
-    // bucket may not exist yet — non-fatal
+    // bucket may not exist yet — non-fatal for the GNSS excerpt
   }
 
   return json(200, {
@@ -226,5 +245,6 @@ Deno.serve(async (req) => {
     ride_id: rideId,
     local_id: sessionId,
     point_count: points.length,
+    imu_bytes: imuRaw.length,
   });
 });

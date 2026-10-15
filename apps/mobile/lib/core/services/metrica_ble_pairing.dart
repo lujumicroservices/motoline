@@ -52,27 +52,33 @@ class MetricaBlePairing {
     }
 
     onPhase?.call(MetricaPairPhase.mint);
-    final String code;
-    final LoggerPairResult claimed;
+    final LoggerPairResult device;
     try {
-      code = await _api.mintPairCode();
-      claimed = await _api.claimCode(code, label: label);
+      // One-hop create — mint+claim is for the USB helper flow only.
+      device = await _api.createDevice(label: label);
     } on StateError catch (error) {
       throw MetricaBleException.fromPairingService(error);
+    } on MetricaBleException {
+      rethrow;
+    } catch (error) {
+      throw MetricaBleException(
+        MetricaBleFailure.protocol,
+        detail: 'claim ${error.runtimeType}',
+      );
     }
 
-    secrets.add(claimed.deviceSecret);
+    secrets.add(device.deviceSecret);
     onPhase?.call(MetricaPairPhase.write);
     final paired = (await link.writePair(
       MetricaBleProtocol.pairPayload(
-        deviceId: claimed.deviceId,
-        secret: claimed.deviceSecret,
-        ingestUrl: claimed.ingestUrl,
+        deviceId: device.deviceId,
+        secret: device.deviceSecret,
+        ingestUrl: device.ingestUrl,
       ),
     )).redact(secrets);
     onStatus(paired);
     MetricaBleProtocol.requireMsg(paired, 'paired');
-    return MetricaPairSuccess(deviceId: claimed.deviceId, status: paired);
+    return MetricaPairSuccess(deviceId: device.deviceId, status: paired);
   }
 
   Future<MetricaStatus> sendWifi({

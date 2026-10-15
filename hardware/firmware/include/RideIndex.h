@@ -209,6 +209,30 @@ class RideIndex {
     save();
   }
 
+  // Drop index rows + session folders with gnss==0 (empty / aborted recordings).
+  // Returns how many were removed. Does not touch rides that have points.
+  int purgeZero() {
+    int removed = 0;
+    int w = 0;
+    for (int i = 0; i < n_; ++i) {
+      if (recs_[i].gnss > 0) {
+        if (w != i) recs_[w] = recs_[i];
+        ++w;
+        continue;
+      }
+      if (recs_[i].id[0]) {
+        removeDir(String("/riderlab/sessions/") + recs_[i].id);
+        ++removed;
+      }
+      wdtFeed();
+    }
+    if (removed) {
+      n_ = w;
+      save();
+    }
+    return removed;
+  }
+
  private:
   int find(const char* id) const {
     for (int i = 0; i < n_; ++i) {

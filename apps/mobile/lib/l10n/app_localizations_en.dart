@@ -4062,7 +4062,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get metricaBleNotFound =>
-      'No logger found. Power on Métrica, open pairing mode, and bring it close to the phone.';
+      'No logger found. On the M5: Menu → EMPAREJAR (it reboots and shows a 6-digit PIN). Wait for that screen, then tap Pair on the phone.';
 
   @override
   String get metricaBlePermissionDenied =>
@@ -4291,4 +4291,151 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get metricaBleWifiBandNote =>
       'Métrica only joins 2.4 GHz (not 5 GHz-only networks).';
+
+  @override
+  String get offroadMetricaTitle => 'Métrica';
+
+  @override
+  String get offroadMetricaSubtitle =>
+      'Pair the logger over Bluetooth and send paddock Wi‑Fi';
+
+  @override
+  String get channelSpeed => 'Speed';
+
+  @override
+  String get channelLongG => 'Brake / throttle';
+
+  @override
+  String get channelLean => 'Lean';
+
+  @override
+  String get channelLatG => 'Lateral G';
+
+  @override
+  String get channelElevation => 'Elevation';
+
+  @override
+  String get channelOffLine => 'Off track';
+
+  @override
+  String get channelEstimatedShort => 'GNSS estimate';
+
+  @override
+  String get channelEstimatedNote =>
+      'Lean and lateral G are estimated from GNSS (speed × yaw rate), not measured by an IMU.';
+
+  @override
+  String get passMapOpen => 'Full-screen map';
+
+  @override
+  String get pass3dOpen => '3D view';
+
+  @override
+  String passMapBrakes(int count) {
+    return 'Brakes ($count)';
+  }
+
+  @override
+  String get passMapPeaks => 'Peaks';
+
+  @override
+  String passMapGhost(String id) {
+    return 'Best: $id';
+  }
+
+  @override
+  String brakeZone(int n) {
+    return 'Brake $n';
+  }
+
+  @override
+  String get eventLeanRight => 'Max lean right';
+
+  @override
+  String get eventLeanLeft => 'Max lean left';
+
+  @override
+  String get eventHardestBrake => 'Hardest brake';
+
+  @override
+  String get eventHardestAccel => 'Hardest acceleration';
+
+  @override
+  String get eventPeakLatG => 'Peak lateral G';
+
+  @override
+  String get eventLeanLeftShort => 'Lean L';
+
+  @override
+  String get eventLeanRightShort => 'Lean R';
+
+  @override
+  String get eventHardestBrakeShort => 'Max brake';
+
+  @override
+  String get eventHardestAccelShort => 'Max accel';
+
+  @override
+  String get hudLean => 'Lean';
+
+  @override
+  String get hudLongG => 'Brake / throttle';
+
+  @override
+  String get hudLatG => 'Lateral G';
+
+  @override
+  String get hudLeft => 'L';
+
+  @override
+  String get hudRight => 'R';
+
+  @override
+  String get hudBraking => 'BRAKING';
+
+  @override
+  String get passKeyMoments => 'Key moments';
+
+  @override
+  String get passKeyMomentsHelp => 'Tap one to see it on the map.';
+
+  @override
+  String get telemetryTitle => 'Telemetry by distance';
+
+  @override
+  String get telemetryHelp =>
+      'Slide over the chart to read each point. Red bands are braking zones.';
+
+  @override
+  String get ggTitle => 'G-G circle';
+
+  @override
+  String get ggHelp =>
+      'Each dot combines brake/throttle (vertical) and lateral G (horizontal). A fuller, rounder cloud = more grip used.';
+
+  @override
+  String get ggBrake => 'Brake';
+
+  @override
+  String get ggThrottle => 'Throttle';
+
+  @override
+  String get track3dTitle => 'Track in 3D';
+
+  @override
+  String get track3dHelp =>
+      'Drag to orbit · pinch to zoom · double-tap to reset';
+
+  @override
+  String get track3dAutoRotate => 'Spin';
+
+  @override
+  String track3dExaggeration(String factor) {
+    return 'Relief ×$factor';
+  }
+
+  @override
+  String track3dNote(String factor, String source) {
+    return 'Mapped elevation ($source) exaggerated ×$factor. Berms and jumps are not shown.';
+  }
 }

@@ -2150,7 +2150,7 @@
   "metricaBleWriting": "Sending the pairing to the logger…",
   "metricaBleTimeout": "The logger did not respond in time.",
   "metricaBleNoSession": "Sign in to pair Métrica.",
-  "metricaBleNotFound": "No logger found. Power on Métrica, open pairing mode, and bring it close to the phone.",
+  "metricaBleNotFound": "No logger found. On the M5: Menu → EMPAREJAR (it reboots and shows a 6-digit PIN). Wait for that screen, then tap Pair on the phone.",
   "metricaBlePermissionDenied": "Bluetooth scan and connect permission is missing. Enable it to pair.",
   "metricaBleLocationDenied": "This Android version needs location permission to scan for the logger.",
   "metricaBleBluetoothOff": "Turn on the phone's Bluetooth.",
@@ -2274,5 +2274,87 @@
   },
   "metricaBleWifiPickTitle": "Wi‑Fi for Métrica",
   "metricaBleWifiPickHelp": "Pick which network to send to the logger over Bluetooth.",
-  "metricaBleWifiBandNote": "Métrica only joins 2.4 GHz (not 5 GHz-only networks)."
+  "metricaBleWifiBandNote": "Métrica only joins 2.4 GHz (not 5 GHz-only networks).",
+  "offroadMetricaTitle": "Métrica",
+  "offroadMetricaSubtitle": "Pair the logger over Bluetooth and send paddock Wi‑Fi",
+  "channelSpeed": "Speed",
+  "channelLongG": "Brake / throttle",
+  "channelLean": "Lean",
+  "channelLatG": "Lateral G",
+  "channelElevation": "Elevation",
+  "channelOffLine": "Off track",
+  "channelEstimatedShort": "GNSS estimate",
+  "channelEstimatedNote": "Lean and lateral G are estimated from GNSS (speed × yaw rate), not measured by an IMU.",
+  "passMapOpen": "Full-screen map",
+  "pass3dOpen": "3D view",
+  "passMapBrakes": "Brakes ({count})",
+  "@passMapBrakes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "passMapPeaks": "Peaks",
+  "passMapGhost": "Best: {id}",
+  "@passMapGhost": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "brakeZone": "Brake {n}",
+  "@brakeZone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "eventLeanRight": "Max lean right",
+  "eventLeanLeft": "Max lean left",
+  "eventHardestBrake": "Hardest brake",
+  "eventHardestAccel": "Hardest acceleration",
+  "eventPeakLatG": "Peak lateral G",
+  "eventLeanLeftShort": "Lean L",
+  "eventLeanRightShort": "Lean R",
+  "eventHardestBrakeShort": "Max brake",
+  "eventHardestAccelShort": "Max accel",
+  "hudLean": "Lean",
+  "hudLongG": "Brake / throttle",
+  "hudLatG": "Lateral G",
+  "hudLeft": "L",
+  "hudRight": "R",
+  "hudBraking": "BRAKING",
+  "passKeyMoments": "Key moments",
+  "passKeyMomentsHelp": "Tap one to see it on the map.",
+  "telemetryTitle": "Telemetry by distance",
+  "telemetryHelp": "Slide over the chart to read each point. Red bands are braking zones.",
+  "ggTitle": "G-G circle",
+  "ggHelp": "Each dot combines brake/throttle (vertical) and lateral G (horizontal). A fuller, rounder cloud = more grip used.",
+  "ggBrake": "Brake",
+  "ggThrottle": "Throttle",
+  "track3dTitle": "Track in 3D",
+  "track3dHelp": "Drag to orbit · pinch to zoom · double-tap to reset",
+  "track3dAutoRotate": "Spin",
+  "track3dExaggeration": "Relief ×{factor}",
+  "@track3dExaggeration": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      }
+    }
+  },
+  "track3dNote": "Mapped elevation ({source}) exaggerated ×{factor}. Berms and jumps are not shown.",
+  "@track3dNote": {
+    "placeholders": {
+      "factor": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  }
 }

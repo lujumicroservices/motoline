@@ -59,6 +59,13 @@ class BaroService {
 
   bool ready() const { return ready_; }
 
+  // 0.6.9g DORMIR: sleep mode (~0.1 uA); begin() resets and reconfigures on boot.
+  void suspend() {
+    if (!ready_) return;
+    write8(0xF4, kCtrlMeas & ~0x03);
+    ready_ = false;
+  }
+
   // One raw read; accumulates into the current window. Call at BARO_SAMPLE_HZ.
   bool sample() {
     if (!ready_) return false;

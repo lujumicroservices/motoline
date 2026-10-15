@@ -39,6 +39,7 @@ class BlePair {
   bool connected() const { return conn_; }
   uint16_t mtu() const { return mtu_; }
   uint32_t connects() const { return nConn_; }
+  uint32_t writes() const { return nWrite_; }
 
   bool begin(const char* name) {
     if (on_) return true;
@@ -54,11 +55,15 @@ class BlePair {
     srv_->advertiseOnDisconnect(false);  // restarted by onDisconnect unless stopping
     stopping_ = false;
     NimBLEService* s = srv_->createService(kSvc);
-    info_ = s->createCharacteristic(kInfo, NIMBLE_PROPERTY::READ);
-    auto* a = s->createCharacteristic(kAuth, NIMBLE_PROPERTY::WRITE);
-    auto* p = s->createCharacteristic(kPair, NIMBLE_PROPERTY::WRITE, kMaxPayload);
-    auto* w = s->createCharacteristic(kWifi, NIMBLE_PROPERTY::WRITE, kMaxPayload);
-    status_ = s->createCharacteristic(kStatus, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+    // Explicit max lens: default can truncate INFO JSON on some NimBLE builds.
+    info_ = s->createCharacteristic(kInfo, NIMBLE_PROPERTY::READ, kMaxPayload);
+    // WRITE + WRITE_NR: some Android stacks prefer write-without-response.
+    constexpr uint32_t kWrite =
+        NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR;
+    auto* a = s->createCharacteristic(kAuth, kWrite, 32);
+    auto* p = s->createCharacteristic(kPair, kWrite, kMaxPayload);
+    auto* w = s->createCharacteristic(kWifi, kWrite, kMaxPayload);
+    status_ = s->createCharacteristic(kStatus, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY, 128);
     cbA_.kind = K_AUTH; cbP_.kind = K_PAIR; cbW_.kind = K_WIFI;
     a->setCallbacks(&cbA_); p->setCallbacks(&cbP_); w->setCallbacks(&cbW_);
     status_->setValue(std::string("{\"ok\":true,\"msg\":\"ready\"}"));
@@ -157,6 +162,7 @@ class BlePair {
       buf_->pend.len = (uint16_t)n;
       memcpy(buf_->pend.data, b, n);
       buf_->pend.data[n] = 0;
+      ++nWrite_;
     }
     portEXIT_CRITICAL(&mux_);
   }
@@ -165,6 +171,7 @@ class BlePair {
   volatile bool conn_ = false, discEv_ = false, stopping_ = false;
   volatile uint16_t mtu_ = 23;
   volatile uint32_t nConn_ = 0;
+  volatile uint32_t nWrite_ = 0;
   NimBLEServer* srv_ = nullptr;
   NimBLECharacteristic* info_ = nullptr;
   NimBLECharacteristic* status_ = nullptr;

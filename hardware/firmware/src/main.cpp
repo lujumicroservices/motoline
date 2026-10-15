@@ -184,9 +184,40 @@ static void bootStep(const char* what) {
   gBootStepMs = now;
 }
 static bool gUpHold = false;  // 0.6.7: UPLOAD HOLD (NVS rl_up/hold): no automatic uploads while ON
+// 0.6.9d: after BLE/Wi-Fi the heap fragments (big8 < TLS need). One reboot gives a clean
+// contiguous block; boot_up_n caps loops at 2 so a permanently tight heap just backs off.
+static bool gUploadBoot = false;
 static void circuitPaint();
 static bool circFollowing();  // 0.6.6-follow
 static void circuitRelease(const char* why);
+static bool sdSlots(uint8_t want, uint8_t minSlots, const char* why);
+static uint8_t sdFullMin();
+static bool scheduleUploadReboot(const char* why) {
+  Preferences p;
+  if (!p.begin("rl_up", false)) return false;
+  const uint8_t n = p.getUChar("boot_up_n", 0);
+  if (n >= 2) {  // stays capped until an upload succeeds or a non-software reset
+    p.end();
+    gDiag.logf("upload", "REBOOT skip (cap) why=%s", why);
+    return false;
+  }
+  p.putUChar("boot_up", 1);
+  p.putUChar("boot_up_n", (uint8_t)(n + 1));
+  p.end();
+  gDiag.logf("upload", "REBOOT for heap why=%s try=%u", why, (unsigned)(n + 1));
+  uiLine = "reinicio subida";
+  paint(gnss.snapshot());
+  Serial.flush();
+  delay(350);
+  ESP.restart();
+  return true;  // not reached
+}
+static void clearUploadBootTries() {
+  Preferences p;
+  if (!p.begin("rl_up", false)) return;
+  p.putUChar("boot_up_n", 0);
+  p.end();
+}
 
 // ---- 0.6.7-autocircuit state ----
 static CircuitIndex cidx;
@@ -510,6 +541,7 @@ static void autoWake(uint32_t now, const char* why) {
     dimmed = false;
     M5.Display.setBrightness(255);
     gDiag.logf("auto", "DIM off why=%s", why);
+    paint(gnss.snapshot());
   }
 }
 static void autoDimService(uint32_t now) {
@@ -521,7 +553,7 @@ static void autoDimService(uint32_t now) {
   if (want && !dimmed) {
     dimmed = true;
     M5.Display.setBrightness((uint8_t)(255 * acfg.dimPct / 100));
-    gDiag.logf("auto", "DIM on after_s=%u level=%u%% state=%s", (unsigned)acfg.dimS,
+    gDiag.logf("auto", "DIM on after_s=%u level=%u%% state=%s radios=off", (unsigned)acfg.dimS,
                (unsigned)acfg.dimPct, autoStName(ast));
   } else if (!want && dimmed) {
     autoWake(now, logger.recording() ? "session" : "config");
@@ -781,6 +813,31 @@ static void startRec(const char* why) {
   sinfo.candUs = gAutoStart ? candUs : 0;
   if (!role.anchor()) prerollRun(false);
   logger.setManifestExtra(manifestExtra());
+  if (logger.sdSlots() && logger.sdSlots() < sdFullMin()) {
+    // a recording keeps 8-9 files open: the full mount needs the uploader's TLS heap back
+    const uint32_t tw = millis();
+    while (upTask.busy() && millis() - tw < 3000) {
+      upTask.serviceIo();
+      wdtFeed();
+      delay(5);
+    }
+    if (!upTask.busy() && WiFi.getMode() != WIFI_OFF) {
+      pendingRadioOff = false;
+      radioOff();
+    }
+    if (!sdSlots(SD_MAX_FILES, sdFullMin(), "rec-start") && logger.sdOk()) {
+      // fragmented heap: only a clean boot mounts the full SD; that boot starts recording at once
+      Preferences p;
+      if (p.begin("rl_pw", false)) {
+        p.putUChar("rec_boot", gAutoStart ? 2 : 1);
+        p.end();
+      }
+      gDiag.logf("rec", "REBOOT sd-full why=%s slots=%u", why, (unsigned)logger.sdSlots());
+      Serial.flush();
+      delay(100);
+      ESP.restart();
+    }
+  }
   if (logger.startSession(did, role.anchor())) {
     if (!role.anchor()) {
       prerollRun(true);
@@ -888,6 +945,127 @@ static void stopRec() {
              id.c_str(), (unsigned long)(millis() - t0), (int)logger.recording(), (int)wantUpload,
              wantUpload ? 4000 : -1, (int)uploader.configured(), rides.pendingCount(),
              (int)role.keepSd());
+}
+
+// 0.6.9f: Menu > APAGAR / DORMIR (serial POWEROFF / SLEEP). Closes the session so the manifest
+// and ride index are complete; a pending ride stays queued on the SD for the next boot.
+static void powerPrep(const char* what, const char* why) {
+  gDiag.logf("power", "%s request why=%s rec=%d up=%d ble=%d", what, why, (int)logger.recording(),
+             (int)upTask.busy(), (int)ble.on());
+  if (logger.recording()) {
+    userStopped = true;
+    stopRec();
+  }
+  wantUpload = false;
+  cancelUpload("power-off");
+  const uint32_t tw = millis();
+  while (upTask.busy() && millis() - tw < 3000) {
+    upTask.serviceIo();
+    wdtFeed();
+    delay(5);
+  }
+  if (ble.on()) bleExit("power-off");
+  if (wifiScanning) {
+    WiFi.scanDelete();
+    wifiScanning = false;
+  }
+  if (WiFi.getMode() != WIFI_OFF) radioOff();
+}
+
+static void powerScreen(const char* l1, const char* l2) {
+  auto& d = M5.Display;
+  d.setBrightness(80);
+  d.fillScreen(TFT_BLACK);
+  d.setTextColor(TFT_WHITE, TFT_BLACK);
+  d.setTextDatum(lgfx::textdatum_t::middle_center);
+  d.setTextSize(2);
+  d.drawString(l1, 160, l2 ? 105 : 120);
+  if (l2) {
+    d.setTextSize(1);
+    d.drawString(l2, 160, 140);
+  }
+}
+
+// Front button B (GPIO38, external pull-up) wakes from deep sleep. The IP5306 boost must stay
+// on or it cuts the board at light load and only the red button could start it again.
+static constexpr gpio_num_t kWakePin = GPIO_NUM_38;
+static constexpr uint32_t kWakeHoldMs = 2000;
+
+[[noreturn]] static void deepSleepOnB() {
+  while (digitalRead(kWakePin) == LOW) delay(10);  // the OK press itself must not wake it
+  delay(50);
+  esp_sleep_enable_ext0_wakeup(kWakePin, 0);
+  esp_deep_sleep_start();
+}
+
+static void sleepNow(const char* why) {
+  powerPrep("SLEEP", why);
+  powerScreen("DURMIENDO...", "mantener B 2 s para despertar");
+  const bool gps = gnss.sleepBackup();
+  {
+    Preferences p;
+    if (p.begin("rl_pw", false)) {
+      p.putUChar("gps_bk", gps ? 1 : 0);
+      p.end();
+    }
+  }
+  imu.suspend();
+  baro.suspend();
+  gDiag.logf("power", "SLEEP now why=%s gps_backup=%d", why, (int)gps);
+  Serial.printf("SLEEP now gps_backup=%d\n", (int)gps);
+  Serial.flush();
+  delay(1200);
+  SD.end();
+  M5.Display.fillScreen(TFT_BLACK);
+  M5.Display.setBrightness(0);
+  M5.Display.sleep();
+  M5.Display.waitDisplay();
+  M5.Power.Ip5306.setPowerBoostKeepOn(true);
+  deepSleepOnB();
+}
+
+// Woken by B: keep booting only after a 2 s hold, else straight back to sleep (screen stays dark).
+static void wakeHoldGate() {
+  if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_EXT0) return;
+  pinMode(kWakePin, INPUT);
+  const uint32_t t0 = millis();
+  while (digitalRead(kWakePin) == LOW) {
+    if (millis() - t0 >= kWakeHoldMs) return;
+    delay(10);
+  }
+  deepSleepOnB();
+}
+
+// A receiver left in backup by DORMIR sends nothing until an RX edge, and beginAuto() detects the
+// link by listening: kick its RX first (any baud: the start bits are the edges).
+static void gnssWakeKick() {
+  Preferences p;
+  if (!p.begin("rl_pw", false)) return;
+  const bool bk = p.getUChar("gps_bk", 0) != 0;
+  if (bk) p.putUChar("gps_bk", 0);
+  p.end();
+  const int tx = role.gnssTx();
+  if (!bk || tx < 0) return;
+  Serial2.begin(9600, SERIAL_8N1, role.gnssRx(), tx);
+  for (int i = 0; i < 32; ++i) Serial2.write(0xFF);
+  Serial2.flush();
+  delay(300);
+  Serial2.end();
+  Serial.printf("POWER GNSS wake kick tx=%d\n", tx);
+}
+
+static void powerOffNow(const char* why) {
+  powerPrep("OFF", why);
+  powerScreen("APAGANDO...", nullptr);
+  auto& d = M5.Display;
+  gDiag.logf("power", "OFF now why=%s", why);
+  Serial.println("POWEROFF now");
+  Serial.flush();
+  delay(600);
+  SD.end();
+  d.fillScreen(TFT_BLACK);
+  d.setBrightness(0);
+  M5.Power.powerOff();
 }
 
 static const char* fixName(uint8_t f) {
@@ -1066,6 +1244,16 @@ static void paint(const GnssFix& fix) {
   ui.charging = M5.Power.isCharging() == m5::Power_Class::is_charging;
   if (ui.anchor) fillAnchorUi();
   fillRidesUi();
+  if (dimmed && !role.anchor()) {  // black screen, one mark so it still looks on
+    auto& d = M5.Display;
+    d.fillScreen(TFT_BLACK);
+    d.setTextDatum(lgfx::textdatum_t::middle_center);
+    d.setTextColor(C_ORANGE, TFT_BLACK);
+    d.setTextSize(2);
+    d.drawString("ON", 160, 132);
+    if ((millis() % 1600) < 420) d.fillCircle(160, 96, 7, C_ORANGE);
+    return;
+  }
   drawUi(ui);
   if (ui.page == UiPage::Circuit && !circFollowing()) circuitPaint();  // 0.6.6: follow has its own tick
 }
@@ -1671,6 +1859,11 @@ static const char* bleRefuse() {
 }
 static bool bleEnter(const char* why) {
   if (ble.on()) return true;
+  if (dimmed && !role.anchor()) {  // screen asleep: Bluetooth stays off until a button wakes it
+    uiLine = "pantalla dormida";
+    gDiag.logf("ble", "ENTER skipped why=%s (screen asleep)", why);
+    return false;
+  }
   if (const char* r = bleRefuse()) {
     uiLine = String("BLE no: ") + r;
     gDiag.logf("ble", "ENTER refused why=%s (%s)", why, r);
@@ -1762,6 +1955,7 @@ static void bleService(uint32_t now) {
   riderlab::BlePair::Msg m;
   if (ble.take(m)) {
     const String v(m.data);
+    gDiag.logf("ble", "RX kind=%u len=%u", (unsigned)m.kind, (unsigned)m.len);
     if (m.kind == riderlab::BlePair::K_AUTH) {
       String pin = v;
       pin.trim();
@@ -1769,10 +1963,12 @@ static void bleService(uint32_t now) {
       else if (pin == gBlePin) {
         gBleAuthed = true;
         bleStatus(true, "auth_ok");
+        gDiag.logf("ble", "AUTH ok");
       } else {
         ++gBleBad;
         const int left = riderlab::BlePair::kMaxBadPin - gBleBad;
         bleStatus(false, "bad_pin", String(",\"left\":") + left);
+        gDiag.logf("ble", "AUTH bad left=%d", left);
         if (left <= 0) { gBleExitAt = now + 600; gBleExitWhy = "bad-pin"; }
       }
       ble.setInfo(bleInfoJson());
@@ -2000,10 +2196,13 @@ static void printHelp() {
       "  BLE PAIR | BLE OFF | BLE?  (0.6.8 pairing mode, bench) | WIFIUNDO (undo BLE WIFI of this boot)\n"
   "  CIRCUIT TESTWRITE | CIRCUIT TESTDEL | CIRCUIT REINDEX     bench: Bugambilias test circuit (one fixed file)\n"
   "  FOLLOW ZOOM <m> | FOLLOW FADE <s>  follow width m (150) / trail fade s (25), NVS | SHOT = screen dump\n"
-      "  DIM ON|OFF | DIM <s> <pct> | DIM?  standby dim (default ON 30 s 12 pct)\n"
+      "  DIM ON|OFF | DIM <s> <pct> | DIM?  black screen + ON mark; Wi-Fi/BLE stay off (default 30 s 12 pct)\n"
       "  GNSS | GNSSCFG | PINSCAN | IMU | BARO\n"
       "  WIFI ssid|pass  PAIR id|secret|url  AZURE key|url  WIFISCAN\n"
       "  LIST | DUMP <session>/<file> | LOG | LOGCLR\n"
+      "  PRUNE                              delete rides with 0 GNSS points\n"
+      "  POWEROFF                           close session/upload and power off (Menu > APAGAR)\n"
+      "  SLEEP                              deep sleep, GPS backup; hold B 2 s to wake (Menu > DORMIR)\n"
       "  DIAG | DIAG ALL | DIAGCLR             field diag log (/riderlab/diag.log)\n"
       "  WIFISET ssid|pass (new active, old kept disabled) | WIFI?\n"
       "  UPCANCEL (cancel running upload, same path as a button) | UPSTAT\n"
@@ -2417,9 +2616,9 @@ static void handleSerialLine(String line) {
     } else if (line == "BLE OFF") {
       bleExit("serial");
     }
-    Serial.printf("BLE on=%d btmem_free=%d conn=%d authed=%d bad=%d mtu=%d conns=%lu left_s=%ld heap=%lu big8=%lu min8=%lu\n",
+    Serial.printf("BLE on=%d btmem_free=%d conn=%d authed=%d bad=%d mtu=%d conns=%lu writes=%lu left_s=%ld heap=%lu big8=%lu min8=%lu\n",
                   (int)ble.on(), (int)gBtMemFree, (int)ble.connected(), (int)gBleAuthed, gBleBad, (int)ble.mtu(),
-                  (unsigned long)ble.connects(),
+                  (unsigned long)ble.connects(), (unsigned long)ble.writes(),
                   ble.on() ? (long)((riderlab::BlePair::kTimeoutMs - (millis() - gBleT0)) / 1000) : 0L,
                   (unsigned long)ESP.getFreeHeap(),
                   (unsigned long)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT),
@@ -2602,6 +2801,10 @@ static void handleSerialLine(String line) {
     }
   } else if (line == "WIFISCAN") {
     if (!role.anchor() && !upTask.busy()) uploader.dumpScan();
+  } else if (line == "POWEROFF") {
+    powerOffNow("serial");
+  } else if (line == "SLEEP") {
+    sleepNow("serial");
   } else if (line.startsWith("AZURE ")) {
     String rest = line.substring(6);
     const int bar = rest.indexOf('|');
@@ -2615,6 +2818,13 @@ static void handleSerialLine(String line) {
                                rest, AZURE_INGEST_URL);
     }
     uiLine = "Azure saved";
+    } else if (line == "PRUNE") {
+      const int n = rides.purgeZero();
+      fillRidesUi();
+      Serial.printf("PRUNE removed=%d left=%d pending=%d\n", n, rides.count(),
+                    rides.pendingCount());
+      uiLine = String("prune ") + n;
+      gDiag.logf("index", "PRUNE removed=%d left=%d", n, rides.count());
     } else if (line == "LIST") {
       // Session inventory over USB, so the SD never has to leave the device.
       Serial.println("LIST BEGIN");
@@ -2729,6 +2939,7 @@ static void configureGnss() {
 }
 
 void setup() {
+  wakeHoldGate();  // 0.6.9g: before M5.begin so a short B press never lights the screen
   serRxBuf = Serial.setRxBufferSize(1024);  // 0.6.5-simpos: before Serial.begin (M5.begin)
   auto cfg = M5.config();
   cfg.serial_baudrate = 115200;
@@ -2790,6 +3001,7 @@ void setup() {
   if (M5.BtnB.isPressed()) scanGnssPins();  // hold BtnB at boot to diagnose pins
   M5.BtnC.setHoldThresh(1000);
 
+  gnssWakeKick();
   bootGnss();
   pps.begin(ppsPin());
   gnss.setAvoidRx(pps.pin());  // 0.5.2: runtime hunt never touches the PPS pin
@@ -2890,21 +3102,52 @@ void setup() {
       gLog.logf(LogLvl::Info, "azure", "boot pending=%d", rides.pendingCount());
     }
   }
-  bootStep("pre-circuits");
-  circIndexBuild("boot");  // 0.6.7-autocircuit: light index (SD mounted above)
-  bootStep("circuits");
   {
     Preferences p;
-    if (p.begin("rl_up", true)) {
+    if (p.begin("rl_up", false)) {
       gUpHold = p.getUChar("hold", 0) != 0;
+      gUploadBoot = p.getUChar("boot_up", 0) != 0;
+      if (gUploadBoot) p.putUChar("boot_up", 0);  // one-shot
+      if (esp_reset_reason() != ESP_RST_SW && p.getUChar("boot_up_n", 0)) p.putUChar("boot_up_n", 0);
       p.end();
     }
   }
-  Serial.printf("BOOT ready_ms=%lu uphold=%d ble_boot=%d\n", (unsigned long)millis(), (int)gUpHold,
-                (int)gBlePairBoot);
+  bootStep("pre-circuits");
+  // 0.6.9d: upload-reboot path skips circuit index so TLS keeps a large contiguous block.
+  if (!gUploadBoot) {
+    circIndexBuild("boot");  // 0.6.7-autocircuit: light index (SD mounted above)
+    bootStep("circuits");
+  } else {
+    bootStep("circuits-skip");
+    gDiag.logf("boot", "upload-boot skip circuits heap");
+  }
+  if (gUploadBoot && uploader.configured() && rides.hasLocalPending()) {
+    wantUpload = true;
+    uploadAfterMs = millis() + 2500;
+    uiLine = String("cola ") + rides.pendingCount();
+    gDiag.logf("boot", "upload-boot pending=%d", rides.pendingCount());
+  }
+  Serial.printf("BOOT ready_ms=%lu uphold=%d ble_boot=%d up_boot=%d\n", (unsigned long)millis(),
+                (int)gUpHold, (int)gBlePairBoot, (int)gUploadBoot);
   lastInputMs = millis();
   if (gBlePairBoot && bleEnter(gBlePairBoot == 2 ? "serial" : "menu") && gBlePairBoot == 2)
     Serial.printf("BLE PIN %s\n", gBlePin);
+  {
+    Preferences p;
+    uint8_t rb = 0;
+    if (p.begin("rl_pw", false)) {
+      rb = p.getUChar("rec_boot", 0);
+      if (rb) p.putUChar("rec_boot", 0);  // one shot
+      p.end();
+    }
+    if (rb && !role.anchor() && logger.sdOk()) {
+      userStopped = false;
+      gAutoStart = rb == 2;
+      startRec(rb == 2 ? "auto-reboot" : "manual-reboot");
+      gAutoStart = false;
+      if (rb == 2) autoSet(logger.recording() ? AutoSt::RecAuto : AutoSt::Armed, "rec-reboot");
+    }
+  }
   paint(gnss.snapshot());
 }
 
@@ -3202,6 +3445,136 @@ static bool appendRaw(char* dst, size_t cap, size_t& n, const char* s, size_t le
 
 // 0 = ready, 1 = skip this ride (marked no-upload), 2 = cannot upload now.
 // Reproduces the <=0.5.2 payload exactly, without holding it in RAM.
+// 0.6.9i: one line per 50 ms. Each line is the mean of the 100 Hz samples in that
+// window, so a bump does not become the lean sample. t_us is the window center.
+static bool writeImu20(const char* sid, char* outPath, size_t outPathN, uint32_t& bytes,
+                       uint32_t& lines, uint32_t& samples) {
+  bytes = lines = samples = 0;
+  char src[96];
+  snprintf(src, sizeof src, "/riderlab/sessions/%s/imu.ndjson", sid);
+  snprintf(outPath, outPathN, "/riderlab/sessions/%s/imu20.ndjson", sid);
+  if (!SD.exists(src)) return false;
+  File in = SD.open(src, FILE_READ);
+  if (!in) return false;
+  SD.remove(outPath);
+  File out = SD.open(outPath, FILE_WRITE);
+  if (!out) {
+    in.close();
+    return false;
+  }
+  struct Win {
+    int64_t t0 = 0;
+    double ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0, tow = 0;
+    int n = 0;
+    bool open = false;
+  } w;
+  auto num = [](const char* line, const char* key) -> double {
+    const char* q = strstr(line, key);
+    return q ? atof(q + strlen(key)) : 0;
+  };
+  auto flush = [&]() {
+    if (!w.n) return;
+    char oline[176];
+    const int m = snprintf(
+        oline, sizeof oline,
+        "{\"t_us\":%lld,\"n\":%d,\"ax\":%.5f,\"ay\":%.5f,\"az\":%.5f,\"gx\":%.6f,\"gy\":%.6f,\"gz\":%.6f,\"tow\":%.1f}\n",
+        (long long)(w.t0 + 25000), w.n, w.ax / w.n, w.ay / w.n, w.az / w.n, w.gx / w.n, w.gy / w.n,
+        w.gz / w.n, w.tow / w.n);
+    if (m > 0 && m < (int)sizeof(oline)) {
+      out.write((const uint8_t*)oline, (size_t)m);
+      bytes += (uint32_t)m;
+      lines++;
+      samples += (uint32_t)w.n;
+    }
+    w.n = 0;
+    w.ax = w.ay = w.az = w.gx = w.gy = w.gz = w.tow = 0;
+  };
+  char line[192];
+  bool tooBig = false;
+  while (in.available() && !tooBig) {
+    wdtFeed();
+    const int n = in.readBytesUntil('\n', line, sizeof(line) - 1);
+    if (n <= 0) break;
+    if (n >= (int)sizeof(line) - 1) {
+      while (in.available()) {
+        if (in.read() == '\n') break;
+      }
+      continue;
+    }
+    line[n] = 0;
+    const char* tp = strstr(line, "\"t_us\":");
+    if (!tp) continue;
+    const int64_t t = strtoll(tp + 7, nullptr, 10);
+    if (w.open && t >= w.t0 + 50000) {
+      flush();
+      const int64_t steps = (t - w.t0) / 50000;
+      w.t0 += steps * 50000;
+    }
+    if (!w.open) {
+      w.t0 = t;
+      w.open = true;
+    }
+    w.ax += num(line, "\"ax\":");
+    w.ay += num(line, "\"ay\":");
+    w.az += num(line, "\"az\":");
+    w.gx += num(line, "\"gx\":");
+    w.gy += num(line, "\"gy\":");
+    w.gz += num(line, "\"gz\":");
+    w.tow += num(line, "\"tow\":");
+    w.n++;
+    if (bytes > UploadTask::kImuMax) tooBig = true;
+  }
+  if (!tooBig) flush();
+  in.close();
+  out.close();
+  if (tooBig || bytes < 16 || bytes > UploadTask::kImuMax) {
+    SD.remove(outPath);
+    gDiag.logf("upload", "IMU20 skip sid=%.13s reason=%s bytes=%lu", sid,
+               tooBig || bytes > UploadTask::kImuMax ? "imu-too-big" : "empty",
+               (unsigned long)bytes);
+    bytes = lines = samples = 0;
+    outPath[0] = 0;
+    return false;
+  }
+  gDiag.logf("upload", "IMU20 sid=%.13s lines=%lu samples=%lu bytes=%lu avg_n=%lu", sid,
+             (unsigned long)lines, (unsigned long)samples, (unsigned long)bytes,
+             lines ? (unsigned long)(samples / lines) : 0);
+  return true;
+}
+
+static bool fileEscaped(const char* path, uint32_t& raw, uint32_t& esc) {
+  raw = esc = 0;
+  File g = SD.open(path, FILE_READ);
+  if (!g) return false;
+  const uint32_t size = g.size();
+  static uint8_t buf[UploadTask::kChunk];
+  uint32_t pos = 0, e = 0, eNl = 0;
+  int32_t lastNl = -1;
+  while (pos < size) {
+    const uint32_t want = (size - pos) > sizeof(buf) ? sizeof(buf) : (size - pos);
+    const int got = g.read(buf, want);
+    if (got <= 0) break;
+    for (int i = 0; i < got; ++i) {
+      e += UploadTask::escLen(buf[i]);
+      if (buf[i] == '\n') {
+        lastNl = (int32_t)(pos + i);
+        eNl = e;
+      }
+    }
+    pos += got;
+    wdtFeed();
+  }
+  g.close();
+  if (pos != size) return false;
+  raw = size;
+  esc = e;
+  if (size > 0 && lastNl > 16 && (uint32_t)lastNl + 1 < size) {
+    raw = (uint32_t)lastNl + 1;
+    esc = eNl;
+  }
+  return raw >= 16;
+}
+
 static int prepareJob(const char* sid) {
   UploadJob& j = upJob;
   snprintf(j.sid, sizeof(j.sid), "%s", sid);
@@ -3309,13 +3682,55 @@ static int prepareJob(const char* sid) {
     return 2;
   }
   j.prefixLen = (uint16_t)n;
+  j.imuPath[0] = 0;
+  j.imuRaw = j.imuEsc = 0;
+  uint32_t imuLines = 0, imuSamples = 0;
+  if (writeImu20(sid, j.imuPath, sizeof(j.imuPath), j.imuRaw, imuLines, imuSamples) &&
+      fileEscaped(j.imuPath, j.imuRaw, j.imuEsc)) {
+    (void)imuLines;
+    (void)imuSamples;
+  } else {
+    j.imuPath[0] = 0;
+    j.imuRaw = j.imuEsc = 0;
+  }
   j.total = (uint32_t)n + j.gnssEsc + 2;  // + closing "}
+  if (j.imuRaw) j.total += (uint32_t)(sizeof(UploadTask::kImuBridge) - 1) + j.imuEsc;
   return 0;
+}
+
+// rider records with 8 files + 1 transient, anchor with 9 + 1 (HardwareConfig.h)
+static uint8_t sdFullMin() { return role.anchor() ? SD_MAX_FILES : SD_MAX_FILES - 1; }
+
+static bool sdSlots(uint8_t want, uint8_t minSlots, const char* why) {
+  if (!logger.sdOk() || logger.recording()) return logger.sdOk();
+  if (logger.sdSlots() >= minSlots && logger.sdSlots() <= want) return true;
+  if (cidx.scanning() || rides.recovering()) return false;  // they hold a File across loops
+  const Mem8 a = mem8();
+  const uint8_t was = logger.sdSlots();
+  const bool ok = logger.remountSd(want, minSlots);
+  const Mem8 b = mem8();
+  gDiag.logf("sd", "SLOTS %u->%u ok=%d sd=%d why=%s free8 %lu->%lu big8 %lu->%lu", (unsigned)was,
+             (unsigned)logger.sdSlots(), (int)ok, (int)logger.sdOk(), why, (unsigned long)a.free,
+             (unsigned long)b.free, (unsigned long)a.big, (unsigned long)b.big);
+  return ok;
 }
 
 static bool startNextUpload(const char* why) {
   if (!upTaskOk || upTask.busy() || logger.recording() || ast == AutoSt::Cand) return false;
   circuitRelease("upload");  // 0.6.0: give the uploader its heap back BEFORE prepare/TLS
+  sdSlots(TelemetryLogger::kSmallSlots, TelemetryLogger::kSmallSlots, "upload");
+  {
+    const Mem8 m = mem8();
+    // Fragmented heap after BLE: free8 can look fine while big8 is under TLS need.
+    if (m.big < UploadTask::kTlsNeedLargest) {
+      gDiag.logf("upload", "PRECHECK lowmem big8=%lu need=%lu free8=%lu why=%s",
+                 (unsigned long)m.big, (unsigned long)UploadTask::kTlsNeedLargest,
+                 (unsigned long)m.free, why);
+      if (scheduleUploadReboot(why)) return false;
+      wifiBackoff("lowmem", millis());
+      return false;
+    }
+  }
   for (int guard = 0; guard <= RideIndex::kMax; ++guard) {
     const String sid = rides.pendingId();
     if (!sid.length()) return false;
@@ -3334,11 +3749,12 @@ static bool startNextUpload(const char* why) {
     tlsSamples = 0;
     const Mem8 m = mem8();
     gDiag.logf("upload",
-               "START sid=%.13s why=%s total=%lu gnss_file=%lu gnss_raw=%lu gnss_esc=%lu prefix=%u prep_ms=%lu "
+               "START sid=%.13s why=%s total=%lu gnss_file=%lu gnss_raw=%lu gnss_esc=%lu imu_raw=%lu imu_esc=%lu prefix=%u prep_ms=%lu "
                "heap=%u largest=%lu free8=%lu min8=%lu keepsd=%d pending=%d",
                upJob.sid, why, (unsigned long)upJob.total, (unsigned long)upJob.gnssFile,
                (unsigned long)upJob.gnssRaw,
-               (unsigned long)upJob.gnssEsc, (unsigned)upJob.prefixLen,
+               (unsigned long)upJob.gnssEsc, (unsigned long)upJob.imuRaw, (unsigned long)upJob.imuEsc,
+               (unsigned)upJob.prefixLen,
                (unsigned long)(upStartMs - tp), ESP.getFreeHeap(), (unsigned long)m.big,
                (unsigned long)m.free, (unsigned long)m.min, (int)role.keepSd(),
                rides.pendingCount());
@@ -3364,6 +3780,7 @@ static void onUploadResult(const UploadResult& r) {
     gDiag.logf("upload", "SKIP lowmem largest=%lu need=%lu free8=%lu min8=%lu sid=%.13s",
                (unsigned long)r.largestPreTls, (unsigned long)UploadTask::kTlsNeedLargest,
                (unsigned long)r.free8PreTls, (unsigned long)r.min8PreTls, r.sid);
+    if (scheduleUploadReboot("lowmem-tls")) return;
   } else if (r.tlsTried) {
     // min8 is boot-wide; a lower value after TLS means the low was hit during TLS.
     const bool newLow = r.min8PostTls < r.min8PreTls;
@@ -3400,6 +3817,7 @@ static void onUploadResult(const UploadResult& r) {
     }
     upPassOk++;
     upLastErr = false;  // 0.6.2-circuit.7-rastro
+    clearUploadBootTries();
     gLog.logf(LogLvl::Info, "https", "%d id=%s bytes=%lu", r.http, r.sid, (unsigned long)r.sent);
     if (rides.pendingCount() > 0 && !logger.recording()) {
       wifiBackoffReset("progress", millis(), 0);
@@ -3441,7 +3859,31 @@ static void serviceUpload(uint32_t nowMs) {
     pendingRadioOff = false;
     if (WiFi.getMode() != WIFI_OFF && (logger.recording() || ui.page != UiPage::Wifi)) radioOff();
   }
+  static uint32_t sdFullTryMs = 0;
+  if (logger.sdSlots() && logger.sdSlots() < sdFullMin() && WiFi.getMode() == WIFI_OFF &&
+      !wifiScanning && (!sdFullTryMs || nowMs - sdFullTryMs > 30000)) {
+    sdFullTryMs = nowMs;
+    if (sdSlots(SD_MAX_FILES, sdFullMin(), "radio-off")) {
+      sdFullTryMs = 0;
+    } else if (logger.sdOk() && logger.sdSlots() < sdFullMin() && !rides.pendingCount() &&
+               !logger.recording() && ast != AutoSt::Cand && !ble.on() && !cidx.scanning() &&
+               !rides.recovering()) {
+      // queue done but the heap is too fragmented for the full mount: a clean boot restores it
+      gDiag.logf("sd", "REBOOT sd-full idle slots=%u", (unsigned)logger.sdSlots());
+      Serial.flush();
+      delay(100);
+      ESP.restart();
+    }
+  }
   if (logger.recording() || !upTaskOk) return;
+  if (dimmed && !role.anchor()) {  // screen asleep: do not start Wi-Fi; drop an idle radio
+    if (wifiScanning) {
+      WiFi.scanDelete();
+      wifiScanning = false;
+    }
+    if (WiFi.getMode() != WIFI_OFF) radioOff();
+    return;
+  }
   if (ble.on()) return;                  // 0.6.8: no Wi-Fi while pairing
   if (gUpHold && !wifiScanning) return;  // 0.6.7: UPLOAD HOLD
   if (wifiScanning) {
@@ -3537,6 +3979,7 @@ void loop() {
       dimmed = false;
       M5.Display.setBrightness(255);
       if (!role.anchor()) gDiag.logf("auto", "DIM off why=button (press swallowed)");
+      paint(gnss.snapshot());
     }
     lastInputMs = nowMs;
     cancelUpload("button");  // 0.5.3: any press cancels a running upload (< 1 s)
@@ -3588,8 +4031,16 @@ void loop() {
     if (M5.BtnC.wasClicked() && vis > 0) ui.rideSel = (ui.rideSel + 1) % vis;
     if (M5.BtnB.wasClicked()) ui.page = UiPage::Menu;
   } else if (ui.page == UiPage::Menu) {
-    if (M5.BtnA.wasClicked()) ui.menuIdx = (ui.menuIdx + kMenuItems - 1) % kMenuItems;  // 6 items
-    if (M5.BtnC.wasClicked()) ui.menuIdx = (ui.menuIdx + 1) % kMenuItems;
+    static uint32_t offArmMs = 0;
+    if (ui.offArmed && millis() - offArmMs > 4000) ui.offArmed = false;
+    if (M5.BtnA.wasClicked()) {
+      ui.menuIdx = (ui.menuIdx + kMenuItems - 1) % kMenuItems;
+      ui.offArmed = false;
+    }
+    if (M5.BtnC.wasClicked()) {
+      ui.menuIdx = (ui.menuIdx + 1) % kMenuItems;
+      ui.offArmed = false;
+    }
     if (M5.BtnB.wasClicked()) {
       switch (ui.menuIdx) {
         case 0:
@@ -3619,6 +4070,18 @@ void loop() {
           break;
         case 5:
           ui.page = UiPage::About;
+          break;
+        case 6:  // DORMIR: front B held 2 s (or the red button) wakes it
+          sleepNow("menu");
+          break;
+        case 7:  // APAGAR: first OK arms, second OK within 4 s powers off
+          if (!ui.offArmed) {
+            ui.offArmed = true;
+            offArmMs = millis();
+          } else {
+            ui.offArmed = false;
+            powerOffNow("menu");
+          }
           break;
         default:
           ui.page = UiPage::Home;
@@ -3747,7 +4210,7 @@ void loop() {
   secMark(S_SER);
 
   // 0.6.6-follow: render on every new fix (10 Hz) or at least every 300 ms; header included.
-  if (ui.page == UiPage::Circuit && cview.following()) {
+  if (ui.page == UiPage::Circuit && cview.following() && !dimmed) {
     static double folT = -1;
     static uint32_t folMs = 0, folLogMs = 0;
     if ((cfix.valid && cfix.tS != folT) || nowMs - folMs >= 300) {
@@ -3766,7 +4229,7 @@ void loop() {
   }
   uint32_t uiPeriod = 1000 / HEALTH_UI_HZ;
   if (role.anchor()) uiPeriod = dimmed ? 2000 : 500;
-  else if (dimmed) uiPeriod = 1000;  // 0.6.3-auto: standby dim -> 1 Hz redraw
+  else if (dimmed) uiPeriod = 400;  // blink the ON mark without redrawing the whole UI
   if (nowMs - lastUiMs >= uiPeriod) {
     lastUiMs = nowMs;
     paint(gnss.snapshot());

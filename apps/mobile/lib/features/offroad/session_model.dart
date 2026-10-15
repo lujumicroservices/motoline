@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../providers/alias_provider.dart';
 import '../../providers/auth_providers.dart';
@@ -107,6 +108,8 @@ class PassBrake {
     required this.vOut,
     required this.peakG,
     required this.durationS,
+    this.i0,
+    this.i1,
   });
   final String sector;
   final double lapM;
@@ -114,6 +117,115 @@ class PassBrake {
   final double vOut;
   final double peakG;
   final double durationS;
+
+  /// First / last [PassTrace] row of the zone, when the asset carries a trace.
+  final int? i0;
+  final int? i1;
+}
+
+/// Peak moment of a pass, picked from the full 10 Hz data by the asset tool.
+class PassEvent {
+  const PassEvent({
+    required this.kind,
+    required this.index,
+    required this.point,
+    required this.lapM,
+    required this.kmh,
+    required this.value,
+  });
+
+  /// vmax | lean_r | lean_l | brake | accel | lat_g
+  final String kind;
+
+  /// Nearest [PassTrace] row.
+  final int index;
+  final LatLng point;
+  final double lapM;
+  final double kmh;
+
+  /// km/h for vmax, degrees for lean, g for the rest (always positive).
+  final double value;
+}
+
+/// Channel trace of one pass (5 Hz). Lean and lateral g are GNSS estimates
+/// (speed × yaw rate), not IMU measurements.
+class PassTrace {
+  PassTrace({
+    required this.hz,
+    required this.t,
+    required this.dist,
+    required this.points,
+    required this.lapM,
+    required this.sector,
+    required this.kmh,
+    required this.longG,
+    required this.braking,
+    required this.lean,
+    required this.latG,
+    required this.alt,
+    required this.outsideM,
+  });
+
+  factory PassTrace.fromJson(Map<String, dynamic> j) {
+    final cols = [for (final c in j['cols'] as List) c as String];
+    final rows = j['rows'] as List;
+    int col(String name) => cols.indexOf(name);
+    List<double> dbl(String name) {
+      final k = col(name);
+      return [for (final r in rows) ((r as List)[k] as num).toDouble()];
+    }
+
+    List<int> integer(String name) {
+      final k = col(name);
+      return [for (final r in rows) ((r as List)[k] as num).toInt()];
+    }
+
+    final lat = dbl('lat');
+    final lng = dbl('lng');
+    return PassTrace(
+      hz: (j['hz'] as num).toInt(),
+      t: dbl('t'),
+      dist: dbl('d'),
+      points: [for (var i = 0; i < lat.length; i++) LatLng(lat[i], lng[i])],
+      lapM: dbl('s'),
+      sector: integer('sec'),
+      kmh: dbl('v'),
+      longG: dbl('ax'),
+      braking: integer('brk'),
+      lean: dbl('lean'),
+      latG: dbl('ay'),
+      alt: dbl('alt'),
+      outsideM: dbl('out'),
+    );
+  }
+
+  final int hz;
+
+  /// Seconds since the first row.
+  final List<double> t;
+
+  /// Metres ridden since the first row (does not wrap at the line).
+  final List<double> dist;
+  final List<LatLng> points;
+
+  /// Metres along the circuit centerline (wraps at start/finish).
+  final List<double> lapM;
+
+  /// 0-based sector index.
+  final List<int> sector;
+  final List<double> kmh;
+
+  /// + accelerating, − braking.
+  final List<double> longG;
+  final List<int> braking;
+
+  /// + right, − left.
+  final List<double> lean;
+  final List<double> latG;
+  final List<double> alt;
+  final List<double> outsideM;
+
+  int get length => points.length;
 }
 
 class TrainingPass {
@@ -141,6 +253,8 @@ class TrainingPass {
     required this.brakingZonesPerSector,
     required this.sectors,
     required this.brakes,
+    this.events = const [],
+    this.trace,
   });
 
   final String id;
@@ -166,8 +280,17 @@ class TrainingPass {
   final String brakingZonesPerSector;
   final List<PassSector> sectors;
   final List<PassBrake> brakes;
+  final List<PassEvent> events;
+  final PassTrace? trace;
 
   double get leanMax => leanMaxL > leanMaxR ? leanMaxL : leanMaxR;
+
+  PassEvent? event(String kind) {
+    for (final e in events) {
+      if (e.kind == kind) return e;
+    }
+    return null;
+  }
 }
 
 class SessionSummary {
@@ -272,8 +395,27 @@ class TrainingSession {
                   vOut: (b['v_out'] as num).toDouble(),
                   peakG: (b['peak_g'] as num).toDouble(),
                   durationS: (b['duration_s'] as num).toDouble(),
+                  i0: (b['i0'] as num?)?.toInt(),
+                  i1: (b['i1'] as num?)?.toInt(),
                 ),
             ],
+            events: [
+              for (final e in p['events'] as List? ?? const [])
+                PassEvent(
+                  kind: e['kind'] as String,
+                  index: (e['i'] as num).toInt(),
+                  point: LatLng(
+                    (e['lat'] as num).toDouble(),
+                    (e['lng'] as num).toDouble(),
+                  ),
+                  lapM: (e['s'] as num).toDouble(),
+                  kmh: (e['v'] as num).toDouble(),
+                  value: (e['value'] as num).toDouble(),
+                ),
+            ],
+            trace: p['trace'] == null
+                ? null
+                : PassTrace.fromJson(p['trace'] as Map<String, dynamic>),
           ),
       ],
       insights: [

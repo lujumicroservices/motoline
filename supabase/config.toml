@@ -43,3 +43,10 @@ verify_jwt = true
 
 [functions.submit-event-lead]
 verify_jwt = false
+
+# M5 logger has no user JWT; the function authenticates X-Logger-Key against logger_devices.secret_hash.
+[functions.ingest-logger-session]
+verify_jwt = false
+
+[functions.pair-logger-device]
+verify_jwt = true

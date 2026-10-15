@@ -2,6 +2,10 @@
 
 Reads suave/analisis + sector times and writes
 assets/offroad/sessions/2026-10-09_8horas.json for the lujumicroservices account.
+
+Each pass also carries its channel trace (10 Hz canales CSV decimated to 5 Hz)
+plus peak events and brake-zone row ranges taken from the full 10 Hz data, so
+the app can draw the line, the brakes and the peaks without the raw export.
 """
 
 import csv
@@ -22,11 +26,91 @@ SESSION_IDS = {
 }
 
 
+TRACE_COLS = ["t", "d", "lat", "lng", "s", "sec", "v", "ax", "brk", "lean", "ay", "alt", "out"]
+DECIMATE = 2  # 10 Hz canales -> 5 Hz in the asset
+
+
 def brakes(key):
     p = EXPORT / f"suave/analisis/{key}_frenadas_suave.csv"
     if not p.exists():
         return []
     return list(csv.DictReader(p.open(encoding="utf-8")))
+
+
+def channels(key):
+    hits = sorted((EXPORT / "suave/analisis").glob(f"{key}_*_canales_suave.csv"))
+    if not hits:
+        raise SystemExit(f"missing canales CSV for {key}")
+    rows = list(csv.DictReader(hits[0].open(encoding="utf-8")))
+    t0 = int(rows[0]["utc_ms"])
+    out = []
+    for r in rows:
+        out.append({
+            "t": (int(r["utc_ms"]) - t0) / 1000.0,
+            "d": float(r["dist_m"]),
+            "lat": float(r["lat"]),
+            "lng": float(r["lng"]),
+            "s": float(r["lap_distance_m"]),
+            "sec": int(r["sector"].lstrip("S")) - 1,
+            "v": float(r["speed_kmh"]),
+            "ax": float(r["long_accel_g"]),
+            "brk": int(r["braking"]),
+            "lean": float(r["lean_deg_EST"]),
+            "ay": float(r["lat_accel_g_EST"]),
+            "alt": float(r["alt_gnss_m"]),
+            "out": float(r["outside_by_m"]),
+        })
+    return out
+
+
+def brake_runs(full):
+    runs, start = [], None
+    for i, r in enumerate(full):
+        if r["brk"] and start is None:
+            start = i
+        elif not r["brk"] and start is not None:
+            runs.append((start, i - 1))
+            start = None
+    if start is not None:
+        runs.append((start, len(full) - 1))
+    return runs
+
+
+def trace(full):
+    rows = []
+    for k in range(0, len(full), DECIMATE):
+        r = dict(full[k])
+        # A short brake must survive decimation.
+        r["brk"] = max(x["brk"] for x in full[k:k + DECIMATE])
+        rows.append([
+            round(r["t"], 1), round(r["d"], 1), round(r["lat"], 7), round(r["lng"], 7),
+            round(r["s"], 1), r["sec"], round(r["v"], 1), round(r["ax"], 3), r["brk"],
+            round(r["lean"], 1), round(r["ay"], 3), round(r["alt"], 1), round(r["out"], 2),
+        ])
+    return {"hz": 10 // DECIMATE, "cols": TRACE_COLS, "rows": rows}
+
+
+def events(full):
+    def ev(kind, i, value):
+        r = full[i]
+        return {"kind": kind, "i": i // DECIMATE, "lat": r["lat"], "lng": r["lng"],
+                "s": round(r["s"], 1), "v": round(r["v"], 1), "value": round(value, 3)}
+
+    idx = range(len(full))
+    vmax = max(idx, key=lambda i: full[i]["v"])
+    lean_r = max(idx, key=lambda i: full[i]["lean"])
+    lean_l = min(idx, key=lambda i: full[i]["lean"])
+    brake = min(idx, key=lambda i: full[i]["ax"])
+    accel = max(idx, key=lambda i: full[i]["ax"])
+    lat_g = max(idx, key=lambda i: abs(full[i]["ay"]))
+    return [
+        ev("vmax", vmax, full[vmax]["v"]),
+        ev("lean_r", lean_r, full[lean_r]["lean"]),
+        ev("lean_l", lean_l, abs(full[lean_l]["lean"])),
+        ev("brake", brake, abs(full[brake]["ax"])),
+        ev("accel", accel, full[accel]["ax"]),
+        ev("lat_g", lat_g, abs(full[lat_g]["ay"])),
+    ]
 
 
 passes = []
@@ -43,6 +127,10 @@ for key in PILOT:
             "note": row.get("nota") or None,
         })
     bz = brakes(key)
+    full = channels(key)
+    runs = brake_runs(full)
+    if len(runs) != len(bz):
+        raise SystemExit(f"{key}: {len(runs)} braking runs vs {len(bz)} frenadas rows")
     passes.append({
         "id": key,
         "session_id": SESSION_IDS[key],
@@ -73,7 +161,11 @@ for key in PILOT:
             "v_out": float(b["v_out_kmh"]),
             "peak_g": float(b["peak_decel_g"]),
             "duration_s": float(b["duration_s"]),
-        } for b in bz],
+            "i0": run[0] // DECIMATE,
+            "i1": run[1] // DECIMATE,
+        } for b, run in zip(bz, runs)],
+        "events": events(full),
+        "trace": trace(full),
     })
 
 best_s2 = min((p for p in passes if any(s["name"] == "S2" and not s["partial"] for s in p["sectors"])),
@@ -194,7 +286,28 @@ session = {
     "insights": insights,
 }
 
+def dump(doc):
+    """Indented JSON, but each trace row on one line so the file stays reviewable."""
+    rows = {}
+    for p in doc["passes"]:
+        token = f"@@rows-{p['id']}@@"
+        rows[token] = p["trace"]["rows"]
+        p["trace"]["rows"] = token
+    text = json.dumps(doc, ensure_ascii=False, indent=2)
+    for token, data in rows.items():
+        body = ",\n".join("          " + json.dumps(r, separators=(",", ":")) for r in data)
+        text = text.replace(f'"{token}"', "[\n" + body + "\n        ]")
+    for p in doc["passes"]:
+        p["trace"]["rows"] = rows[f"@@rows-{p['id']}@@"]
+    return text
+
+
 OUT.parent.mkdir(parents=True, exist_ok=True)
-OUT.write_text(json.dumps(session, ensure_ascii=False, indent=2), encoding="utf-8")
-print("wrote", OUT, "passes", len(passes), "insights", len(insights))
+OUT.write_text(dump(session), encoding="utf-8")
+print("wrote", OUT, "passes", len(passes), "insights", len(insights), f"{OUT.stat().st_size / 1024:.0f} KB")
+for p in passes:
+    ev = {e["kind"]: e["value"] for e in p["events"]}
+    print(f"  {p['id']}: {len(p['trace']['rows'])} rows, {len(p['brakes'])} brakes, "
+          f"vmax {ev['vmax']} (summary {p['vmax_kmh']}), lean R/L {ev['lean_r']}/{ev['lean_l']} "
+          f"(summary {p['lean_max_r']}/{p['lean_max_l']}), brake {ev['brake']} g (summary {p['brake_peak_g']})")
 print("best S2", best_s2["id"], t_s2, "best S3", best_s3["id"], t_s3)

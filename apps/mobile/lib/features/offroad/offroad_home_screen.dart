@@ -6,6 +6,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../theme/offroad_theme.dart';
 import '../../widgets/mode_toggle.dart';
 import '../../widgets/rider_alias_chip.dart';
+import '../settings/logger_hardware_screen.dart';
 import 'circuits_list_screen.dart';
 import 'session_model.dart';
 import 'sessions_list_screen.dart';
@@ -93,6 +94,17 @@ class OffroadHomeScreen extends ConsumerWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const SessionsListScreen(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _HomeAction(
+              icon: Icons.bluetooth_searching_rounded,
+              title: l10n.offroadMetricaTitle,
+              subtitle: l10n.offroadMetricaSubtitle,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const LoggerHardwareScreen(),
                 ),
               ),
             ),

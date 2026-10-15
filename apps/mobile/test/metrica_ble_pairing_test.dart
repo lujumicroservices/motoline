@@ -29,7 +29,7 @@ void main() {
       ),
     );
     expect(link.authBytes, isNull);
-    expect(api.mints, 0);
+    expect(api.creates, 0);
   });
 
   test('wrong PIN does not mint', () async {
@@ -51,7 +51,7 @@ void main() {
         ),
       ),
     );
-    expect(api.mints, 0);
+    expect(api.creates, 0);
     expect(link.pairPayload, isNull);
   });
 
@@ -74,7 +74,7 @@ void main() {
         ),
       ),
     );
-    expect(api.mints, 0);
+    expect(api.creates, 0);
   });
 
   test('success writes PAIR JSON and hides the secret', () async {
@@ -89,7 +89,7 @@ void main() {
       onStatus: (status) => seen.add('${status.msg}${status.err}'),
     );
 
-    expect(api.mints, 1);
+    expect(api.creates, 1);
     expect(api.labels, ['Metrica-A1B2']);
     expect(utf8.decode(link.authBytes!), '123456');
     final pair =
@@ -145,7 +145,7 @@ void main() {
           const MetricaWifiCredentials(ssid: 'paddock', password: 'clave-wifi'),
     );
     expect(link.ops, ['wifi', 'pair']);
-    expect(api.mints, 1);
+    expect(api.creates, 1);
     final wifi =
         jsonDecode(utf8.decode(link.wifiPayload!)) as Map<String, Object?>;
     expect(wifi['ssid'], 'paddock');
@@ -176,7 +176,7 @@ void main() {
       ),
     );
     expect(link.ops, ['wifi']);
-    expect(api.mints, 0);
+    expect(api.creates, 0);
     expect(link.pairPayload, isNull);
   });
 
@@ -211,20 +211,23 @@ void main() {
 }
 
 class _FakeApi implements LoggerPairingApi {
-  int mints = 0;
+  int creates = 0;
   final labels = <String>[];
 
   @override
-  Future<String> mintPairCode() async {
-    mints++;
-    return 'ABCD1234';
-  }
+  Future<String> mintPairCode() async => 'ABCD1234';
 
   @override
   Future<LoggerPairResult> claimCode(
     String code, {
     String label = 'M5 Logger',
   }) async {
+    throw UnsupportedError('BLE uses createDevice');
+  }
+
+  @override
+  Future<LoggerPairResult> createDevice({String label = 'M5 Logger'}) async {
+    creates++;
     labels.add(label);
     return const LoggerPairResult(
       deviceId: 'dev-1',
